@@ -1,0 +1,346 @@
+<!-- ПАРА 8 (аудиторно) для агрономів
+     Тема: ЕКОНОМІЧНИЙ ПОРОГ ШКОДОЧИННОСТІ (EIL) і ПОРОГ ДІЇ (ET) — мобільне обстеження, розрахунки, рішення
+     Фокус: телефони/ПК, локально; таблиця відбору проб, калькулятор EIL/ET, рекомендація «діяти/спостерігати», CSV.
+     Контраст: темні клітинки мають світлий текст (як просив викладач).
+     Готово для GitHub Pages / iFrame у Moodle. -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 8 — Економічний поріг шкодочинності (EIL) і поріг дії (ET)</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1080px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .muted{color:#93a3b5}
+  .small{font-size:12px; color:#9fb0c8}
+
+  .card{
+    background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0;
+    box-shadow:0 6px 24px rgba(0,0,0,.25)
+  }
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:980px){.g2,.g3{grid-template-columns:1fr}}
+
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)}
+  .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
+  .table td .tag{display:inline-block; padding:3px 8px; border-radius:999px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; font-size:12px}
+
+  input[type="text"], input[type="number"], input[type="date"], select, textarea{
+    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
+  }
+
+  .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+  html.embedded .box{background:#f8fafc; color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 8 · аудиторно · агрономи</span>
+    <h1>🪲 Економічний поріг шкодочинності (EIL) та поріг дії (ET): від відбору проб до рішення</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        За пару студенти виконують <b>польовий відбір проб</b> (імітаційно в аудиторії), розраховують
+        <b>EIL</b> (Economic Injury Level) і <b>ET</b> (Economic Threshold), порівнюють із фактичною щільністю шкідника
+        та формують <b>рекомендацію</b>: «обприскувати» чи «спостерігати». Результат — <b>CSV</b> для Sheets.
+      </p>
+      <p class="small">Спрощена навчальна модель: <span class="mono">EIL = C / (V × I × D × K)</span>, де C — вартість захисту (грн/га),
+        V — ціна врожаю (грн/т), I — інтенсивність ушкодження (од./рослину → частка втраченого потенціалу),
+        D — перетворення ушкодження в втрату врожаю (т/га на одиницю ушкодження), K — ефективність контролю (0..1).
+        Поріг дії ET = f(EIL); тут візьмемо <span class="mono">ET = 0.8 × EIL</span> (запас на зростання популяції).</p>
+    </div>
+
+    <!-- ВИХІДНІ ПАРАМЕТРИ ЕКОНОМІКИ І БІОЛОГІЇ -->
+    <div class="card">
+      <h2>⚙️ Параметри культури, економіки і контролю</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Культура та ціна</h3>
+          <div><label>Культура</label><input id="crop" type="text" value="Пшениця озима" /></div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Очікуваний врожай, т/га</label><input id="yield" type="number" step="0.1" value="5.5" /></div>
+            <div style="flex:1"><label>Ціна, грн/т</label><input id="price" type="number" step="1" value="7000" /></div>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Біологія шкодочинності</h3>
+          <div class="row">
+            <div style="flex:1"><label>I — ушкодж., од./росл.</label><input id="I" type="number" step="0.001" value="0.02" /></div>
+            <div style="flex:1"><label>D — втрати, т/га/1од.</label><input id="D" type="number" step="0.01" value="0.2" /></div>
+          </div>
+          <p class="small">Напр., «0.02» означає, що одна особина/рослину викликає 2% інтенсивності ушкодження у формулі.</p>
+        </div>
+
+        <div class="box">
+          <h3>Захист</h3>
+          <div class="row">
+            <div style="flex:1"><label>C — вартість, грн/га</label><input id="C" type="number" step="1" value="1200" /></div>
+            <div style="flex:1"><label>K — ефективність (0..1)</label><input id="K" type="number" step="0.05" value="0.8" /></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <button class="btn" type="button" onclick="recalcEIL()">🔁 Перерахувати EIL/ET</button>
+          </div>
+          <div class="box" style="margin-top:6px">
+            <div><b>EIL (економічний поріг), ос./росл.:</b> <span id="EIL">—</span></div>
+            <div><b>ET (поріг дії), ос./росл.:</b> <span id="ET">—</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="muted">Після обчислення EIL/ET виконай відбір проб нижче. Порівняй середню щільність із ET.</p>
+    </div>
+
+    <!-- ВІДБІР ПРОБ (Таблиця) -->
+    <div class="card">
+      <h2>🧪 Відбір проб (скан лінії/зигзаг, 10–20 точок)</h2>
+      <div class="row">
+        <button class="btn" type="button" onclick="addRow()">➕ Додати точку</button>
+        <button class="btn" type="button" onclick="recalcStats()">🔁 Перерахувати</button>
+        <button class="btn" type="button" onclick="preset()">🧪 Приклад</button>
+        <button class="btn" type="button" onclick="copyCSV()">📋 Скопіювати CSV</button>
+      </div>
+      <div style="overflow:auto; margin-top:8px">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Дата</th>
+              <th>Поле (код)</th>
+              <th>Культура</th>
+              <th>Рослин у підрахунку</th>
+              <th>Шкідників, шт</th>
+              <th class="dark">Ос./росл.</th>
+              <th>Примітка</th>
+            </tr>
+          </thead>
+          <tbody id="body"></tbody>
+          <tfoot>
+            <tr>
+              <th class="dark" colspan="5">Середнє (ос./росл.)</th>
+              <th class="dark" id="sumPests">—</th>
+              <th class="dark" id="meanPerPlant">—</th>
+              <th class="dark" id="nPoints">0 точок</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="grid g2" style="margin-top:12px">
+        <div class="box">
+          <h3>📊 Рішення</h3>
+          <p><b>СЕРЕДНЄ, ос./росл.:</b> <span id="avg" class="mono">—</span></p>
+          <p><b>ET, ос./росл.:</b> <span id="etShow" class="mono">—</span></p>
+          <p class="mono" id="decision">—</p>
+        </div>
+        <div class="box">
+          <h3>📄 Експорт у Sheets</h3>
+          <div id="csv" class="out">—</div>
+          <p class="small">Формат CSV: <span class="mono"># | Дата | Поле | Культура | Рослин_рах | Шкідників | Ос./росл. | Примітка</span></p>
+        </div>
+      </div>
+      <p class="small muted">Контраст для темних клітинок забезпечено: текст світлий, іконки/теги контрастні.</p>
+    </div>
+
+    <!-- ХІД РОБОТИ, ОЦІНЮВАННЯ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+      <ol>
+        <li>Заповни економічні/біологічні параметри (C, V=ціна, I, D, K) → <b>Перерахувати</b> EIL і ET.</li>
+        <li>Зроби 10–20 точок відбору (по 10 рослин на точку або інша стала кількість) → внеси в таблицю.</li>
+        <li>Натисни <b>Перерахувати</b> → отримаєш середню щільність і висновок (діяти/спостерігати).</li>
+        <li>Скопіюй CSV, встав у Google Sheets (аркуш <span class="mono">PestScout</span>) та побудуй графік «Ос./росл.».</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Коректний розрахунок EIL/ET (з адекватними параметрами)</td><td>3</td></tr>
+          <tr><td>Мінімум 10 точок відбору з осмисленими значеннями</td><td>3</td></tr>
+          <tr><td>Обґрунтоване рішення «обприсковувати/спостерігати»</td><td>2</td></tr>
+          <tr><td>CSV у Sheets + короткий висновок (3 речення)</td><td>2</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">🪲 EIL</p><p class="pill">⚠️ ET</p><p class="pill">📱 Скаутинг</p><p class="pill">📊 CSV → Sheets</p>
+    </div>
+  </div>
+
+<script>
+  // Режим «вбудовано»
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // Економічні розрахунки: EIL, ET
+  function recalcEIL(){
+    const C = num('C');              // грн/га
+    const V = num('price');          // грн/т
+    const I = num('I');              // ушкодження на одну особину
+    const D = num('D');              // втрати, т/га на 1 од. ушкодження
+    const K = num('K');              // ефективність (0..1)
+    if([C,V,I,D,K].some(x=>!(x>0))){
+      alert('Перевір C, V, I, D, K — всі мають бути > 0'); return;
+    }
+    // EIL = C / (V * I * D * K) — в одиницях "особини на рослину"
+    const EIL = C / (V * I * D * K);
+    const ET = EIL * 0.8; // консервативно
+    out('EIL', round(EIL,3));
+    out('ET', round(ET,3));
+    out('etShow', round(ET,3));
+    recalcStats(); // оновити рішення
+  }
+
+  // Таблиця відбору проб
+  const bodyEl = document.getElementById('body');
+  const csvEl  = document.getElementById('csv');
+
+  function addRow(sample){
+    const now = new Date();
+    const def = {
+      date: (new Date(now.getFullYear(), now.getMonth(), now.getDate())).toISOString().slice(0,10),
+      field:'F-01', crop: get('crop') || 'Пшениця озима',
+      plants: 10, pests: 3, note:''
+    };
+    const s = Object.assign(def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="date" value="${s.date}"/></td>
+      <td><input type="text" value="${s.field}"/></td>
+      <td><input type="text" value="${s.crop}"/></td>
+      <td><input type="number" step="1" value="${s.plants}"/></td>
+      <td><input type="number" step="1" value="${s.pests}"/></td>
+      <td class="dark dens">—</td>
+      <td><input type="text" value="${s.note}"/></td>
+    `;
+    bodyEl.appendChild(tr);
+    reindex();
+  }
+
+  function reindex(){
+    [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent = i+1);
+  }
+
+  function recalcStats(){
+    const rows = [...bodyEl.querySelectorAll('tr')];
+    if(!rows.length){ out('sumPests','—'); out('meanPerPlant','—'); out('nPoints','0 точок'); out('avg','—'); out('decision','—'); csvEl.textContent='—'; return; }
+
+    let sumPests=0, sumPlants=0;
+    rows.forEach(tr=>{
+      const plants = parseFloat(tr.children[4].querySelector('input').value||'0');
+      const pests  = parseFloat(tr.children[5].querySelector('input').value||'0');
+      const dens   = (plants>0) ? (pests/plants) : 0;
+      tr.querySelector('.dens').textContent = round(dens,3);
+      sumPests += pests;
+      sumPlants += plants;
+    });
+
+    const meanPerPlant = sumPlants>0 ? sumPests/sumPlants : 0;
+    out('sumPests', sumPests);
+    out('meanPerPlant', round(meanPerPlant,3));
+    out('nPoints', `${rows.length} точок`);
+    out('avg', round(meanPerPlant,3));
+
+    // Рішення
+    const ETtxt = document.getElementById('ET').textContent.trim();
+    const ET = ETtxt && ETtxt!=='—' ? parseFloat(ETtxt.replace(',','.')) : NaN;
+
+    if(!isNaN(ET)){
+      let msg='';
+      if(meanPerPlant >= ET){
+        msg = `✅ СЕРЕДНЄ = ${round(meanPerPlant,3)} ос./росл. ≥ ET = ${round(ET,3)} → РЕКОМЕНДАЦІЯ: Обприскувати (за сприятливої погоди і вибору ЗЗР).`;
+      }else if(meanPerPlant >= ET*0.8){
+        msg = `⚠️ СЕРЕДНЄ = ${round(meanPerPlant,3)} ос./росл. близько до ET (${round(ET,3)}). РЕКОМЕНДАЦІЯ: Посилити моніторинг (повторити завтра/через 2 дні).`;
+      }else{
+        msg = `ℹ️ СЕРЕДНЄ = ${round(meanPerPlant,3)} ос./росл. < ET = ${round(ET,3)}. РЕКОМЕНДАЦІЯ: Спостерігати.`;
+      }
+      const dec = document.getElementById('decision');
+      dec.textContent = msg;
+      dec.style.color = (meanPerPlant >= ET) ? '#10b981' : (meanPerPlant >= ET*0.8 ? '#f59e0b' : '');
+    }
+
+    buildCSV();
+  }
+
+  function buildCSV(){
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx = tr.querySelector('.idx').textContent.trim();
+      const date = tr.children[1].querySelector('input').value.trim();
+      const field = tr.children[2].querySelector('input').value.trim();
+      const crop  = tr.children[3].querySelector('input').value.trim();
+      const plants= tr.children[4].querySelector('input').value.trim();
+      const pests = tr.children[5].querySelector('input').value.trim();
+      const dens  = tr.querySelector('.dens').textContent.trim();
+      const note  = tr.children[7].querySelector('input').value.trim();
+      return [idx,date,field,crop,plants,pests,dens,note].join(' | ');
+    });
+    csvEl.textContent = lines.join('\n') || '—';
+  }
+
+  function copyCSV(){
+    const t = csvEl.textContent.trim();
+    if(!t || t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося скопіювати'));
+  }
+
+  function preset(){
+    // 10 точок × 10 рослин: умовна ситуація "на межі"
+    bodyEl.innerHTML = '';
+    const vals = [2,3,4,1,5,3,4,2,3,4]; // шкідники на 10 рослин
+    vals.forEach((p,i)=>addRow({pests:p, plants:10, field: 'F-0'+((i%3)+1)}));
+    recalcStats();
+  }
+
+  // Утиліти
+  function num(id){ return parseFloat((document.getElementById(id).value||'').replace(',','.'))||0; }
+  function out(id, v){ document.getElementById(id).textContent = v; }
+  function get(id){ return (document.getElementById(id).value||'').trim(); }
+  function round(n,d=3){ return Number((+n).toFixed(d)); }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // Ініціалізація
+  recalcEIL();
+  addRow(); addRow(); addRow(); // кілька рядків для старту
+  recalcStats();
+</script>
+</body>
+</html>
