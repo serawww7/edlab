@@ -1,0 +1,344 @@
+<!-- electric_para1.html
+     Пара 1 (Електрики, аудиторно): Наряд-допуск (короткий) · Етикетка електричного кола (QR) · Протокол інструменту
+     Повністю автономний файл для GitHub Pages та вбудовування в Moodle через <iframe>.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Електрики · Пара 1 — Наряд, Етикетка кола, Протокол інструменту</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  /* Тема (standalone) */
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1;
+    --accent:#22c55e; --accent-2:#60a5fa; --line:#1f2937;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:980px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted)}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .grid{display:grid; gap:12px}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:820px){.g3{grid-template-columns:1fr}}
+  .kpi{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px dashed #263042; border-radius:12px}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .footer{margin-top:18px; font-size:12px; color:#93a3b5}
+
+  /* Квитанція 58 мм */
+  .ticket-wrap{display:flex; gap:16px; flex-wrap:wrap}
+  .panel{flex:1 1 360px}
+  .field{display:flex; gap:8px; margin:6px 0}
+  .field label{min-width:140px; color:#cbd5e1}
+  .field input,.field select,.field textarea{
+    flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb
+  }
+  .field textarea{min-height:60px; resize:vertical}
+  .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px}
+
+  .ticket{
+    width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px;
+    box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace;
+  }
+  .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
+  .ticket p{margin:2px 0; font-size:12px}
+  .ticket .center{text-align:center}
+  .ticket .line{border-top:1px dashed #111; margin:6px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+
+  .no-print{display:block}
+
+  /* Вбудований режим (iframe/Moodle) */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+
+  @media print{
+    @page{ size:58mm auto; margin:4mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Електрики · Пара 1 · аудиторно</span>
+    <h1>⚡ Наряд-допуск · 🏷️ Етикетка кола · 🧰 Протокол інструменту (друк 58 мм)</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>Показати, як оформити мінімальні документи для безпечних робіт і маркування: <b>наряд-допуск (короткий)</b>, <b>етикетка електричного кола</b>, <b>протокол перевірки інструменту</b> — з миттєвим друком 58 мм.</p>
+      <div class="grid g3">
+        <div class="kpi"><span>🛡️</span><div><b>Безпека</b><br/>PPE, відповідальний, вид робіт</div></div>
+        <div class="kpi"><span>🏷️</span><div><b>Маркування</b><br/>щит/коло, автомат, навантаження</div></div>
+        <div class="kpi"><span>🧰</span><div><b>Інструмент</b><br/>інв. №, стан, PASS/FAIL</div></div>
+      </div>
+    </div>
+
+    <div class="card printable">
+      <h2>🧪 Практикум: заповни та надрукуй</h2>
+      <div class="ticket-wrap">
+        <!-- Ввідні дані -->
+        <div class="panel">
+          <h3>1) Вибір документа</h3>
+          <div class="field">
+            <label for="docType">Тип</label>
+            <select id="docType">
+              <option value="permit">Наряд-допуск (короткий)</option>
+              <option value="label">Етикетка електричного кола</option>
+              <option value="tool">Протокол перевірки інструменту</option>
+            </select>
+          </div>
+
+          <!-- Спільні поля -->
+          <h3>2) Поля</h3>
+          <div class="field">
+            <label for="responsible">Відповідальний</label>
+            <input id="responsible" type="text" value="ПІБ / група" />
+          </div>
+          <div class="field">
+            <label for="location">Локація/щит</label>
+            <input id="location" type="text" value="ЩО-1 / майстерня" />
+          </div>
+
+          <!-- Permit -->
+          <div class="field permit">
+            <label for="work">Вид робіт</label>
+            <input id="work" type="text" value="Заміна автомата 16 А" />
+          </div>
+          <div class="field permit">
+            <label for="ppe">Засоби захисту (PPE)</label>
+            <input id="ppe" type="text" value="Діелектр. рукавички, окуляри" />
+          </div>
+          <div class="field permit">
+            <label for="lockout">Блокування/попередження</label>
+            <input id="lockout" type="text" value="Вимкнено ввід, попереджувальна табличка" />
+          </div>
+
+          <!-- Label -->
+          <div class="field label">
+            <label for="circuit">Коло / № автомата</label>
+            <input id="circuit" type="text" value="Коло №5 / B16" />
+          </div>
+          <div class="field label">
+            <label for="load">Навантаження</label>
+            <input id="load" type="text" value="Розетки майстерні (до 3 кВт)" />
+          </div>
+          <div class="field label">
+            <label for="qr">QR-посилання (опц.)</label>
+            <input id="qr" type="text" placeholder="https://..." />
+          </div>
+
+          <!-- Tool -->
+          <div class="field tool">
+            <label for="toolname">Інструмент / інв. №</label>
+            <input id="toolname" type="text" value="Мультиметр DT-9205A / 001" />
+          </div>
+          <div class="field tool">
+            <label for="status">Стан</label>
+            <select id="status">
+              <option>PASS</option>
+              <option>FAIL</option>
+            </select>
+          </div>
+          <div class="field tool">
+            <label for="notes">Примітка</label>
+            <textarea id="notes" placeholder="Опис зауважень або умов використання"></textarea>
+          </div>
+
+          <div class="row no-print">
+            <button class="btn" type="button" id="buildBtn">🧩 Зібрати</button>
+            <button class="btn" type="button" id="printBtn">🖨️ Друк 58 мм</button>
+            <button class="btn" type="button" id="saveBtn">📥 TXT</button>
+          </div>
+          <p class="no-print" style="color:#9aa5b1; margin-top:6px">Підказка: якщо обрізає поля — у діалозі друку зменш масштаб до 90–95%.</p>
+        </div>
+
+        <!-- Попередній перегляд -->
+        <div class="panel">
+          <h3>3) Попередній перегляд (стрічка 58 мм)</h3>
+          <div id="ticket" class="ticket" aria-live="polite">
+            <h4>ЕЛЕКТРОМОНТАЖ · ДОКУМЕНТ</h4>
+            <p class="center"><small id="t-date">Дата: —</small></p>
+            <div class="line"></div>
+            <p><b id="t-title">Наряд-допуск (короткий)</b></p>
+
+            <!-- Permit -->
+            <div id="permitBlock">
+              <p>Локація/щит: <span id="t-location">—</span></p>
+              <p>Відповідальний: <span id="t-resp">—</span></p>
+              <p>Роботи: <span id="t-work">—</span></p>
+              <p>PPE: <span id="t-ppe">—</span></p>
+              <p>Lockout/Tagout: <span id="t-lock">—</span></p>
+            </div>
+
+            <!-- Label -->
+            <div id="labelBlock" style="display:none">
+              <p>Щит: <span id="t-location2">—</span></p>
+              <p>Коло/автомат: <span id="t-circuit">—</span></p>
+              <p>Навантаження: <span id="t-load">—</span></p>
+              <p class="qr" id="t-qr" style="display:none">QR: —</p>
+            </div>
+
+            <!-- Tool -->
+            <div id="toolBlock" style="display:none">
+              <p>Інструмент: <span id="t-toolname">—</span></p>
+              <p>Стан: <span id="t-status">—</span></p>
+              <p id="t-notes-wrap" style="display:none">Примітка: <span id="t-notes">—</span></p>
+              <p>Відповідальний: <span id="t-resp2">—</span></p>
+            </div>
+
+            <div class="line"></div>
+            <p class="center"><small>Підпис: ____________</small></p>
+            <div class="line"></div>
+            <p class="center"><small id="t-ref">Ref: ELC-0001</small></p>
+          </div>
+          <div class="row no-print" style="margin-top:8px">
+            <button class="btn" type="button" id="refreshBtn">🔄 Оновити</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🪜 Хід роботи (коротко)</h2>
+      <ol>
+        <li>Обери тип документа.</li>
+        <li>Заповни поля (мінімум — вид робіт/щит/відповідальний або коло/автомат/навантаження, або інструмент/інв. №/стан).</li>
+        <li>Натисни «🧩 Зібрати», перевір попередній перегляд.</li>
+        <li>Надрукуй «🖨️ Друк 58 мм» або збережи «📥 TXT».</li>
+      </ol>
+      <p class="footer">Після друку — зроби фото й додай у спільну папку групи: <span class="mono">ГРУПА_Прізвище_Наряд/Етикетка/Протокол.jpg</span></p>
+    </div>
+  </div>
+
+<script>
+  // Вбудовано у Moodle → «стриманий» вигляд
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const docType = document.getElementById('docType');
+
+  const fieldsPermit = document.querySelectorAll('.permit');
+  const fieldsLabel  = document.querySelectorAll('.label');
+  const fieldsTool   = document.querySelectorAll('.tool');
+
+  function toggleBlocks(){
+    const t = docType.value;
+    fieldsPermit.forEach(el=>el.style.display = (t==='permit') ? '' : 'none');
+    fieldsLabel.forEach(el=>el.style.display  = (t==='label')  ? '' : 'none');
+    fieldsTool.forEach(el=>el.style.display   = (t==='tool')   ? '' : 'none');
+
+    document.getElementById('permitBlock').style.display = (t==='permit') ? '' : 'none';
+    document.getElementById('labelBlock').style.display  = (t==='label')  ? '' : 'none';
+    document.getElementById('toolBlock').style.display   = (t==='tool')   ? '' : 'none';
+  }
+  docType.addEventListener('change', toggleBlocks);
+  toggleBlocks();
+
+  function buildTicket(){
+    const now = new Date(); const pad = n=>n.toString().padStart(2,'0');
+    const stamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    document.getElementById('t-date').textContent = `Дата: ${stamp}`;
+
+    const t = docType.value;
+    let title = 'Документ';
+    if(t==='permit') title = 'Наряд-допуск (короткий)';
+    if(t==='label')  title = 'Етикетка електричного кола';
+    if(t==='tool')   title = 'Протокол перевірки інструменту';
+    document.getElementById('t-title').textContent = title;
+
+    // Спільні
+    const resp = document.getElementById('responsible').value.trim() || '—';
+    const loc  = document.getElementById('location').value.trim() || '—';
+
+    // Permit
+    document.getElementById('t-location').textContent = loc;
+    document.getElementById('t-resp').textContent = resp;
+    document.getElementById('t-work').textContent = (document.getElementById('work').value.trim() || '—');
+    document.getElementById('t-ppe').textContent  = (document.getElementById('ppe').value.trim()  || '—');
+    document.getElementById('t-lock').textContent = (document.getElementById('lockout').value.trim() || '—');
+
+    // Label
+    document.getElementById('t-location2').textContent = loc;
+    document.getElementById('t-circuit').textContent = (document.getElementById('circuit').value.trim() || '—');
+    document.getElementById('t-load').textContent    = (document.getElementById('load').value.trim()    || '—');
+    const qr = document.getElementById('qr').value.trim();
+    const qrEl = document.getElementById('t-qr');
+    if(qr){ qrEl.style.display=''; qrEl.textContent = `QR: ${qr}`; } else { qrEl.style.display='none'; }
+
+    // Tool
+    document.getElementById('t-toolname').textContent = (document.getElementById('toolname').value.trim() || '—');
+    document.getElementById('t-status').textContent   = (document.getElementById('status').value || '—');
+    const notes = document.getElementById('notes').value.trim();
+    const notesWrap = document.getElementById('t-notes-wrap');
+    if(notes){ notesWrap.style.display=''; document.getElementById('t-notes').textContent = notes; } else { notesWrap.style.display='none'; }
+    document.getElementById('t-resp2').textContent = resp;
+
+    // Ref
+    const ref = 'ELC-' + Math.random().toString(36).slice(2,7).toUpperCase();
+    document.getElementById('t-ref').textContent = `Ref: ${ref}`;
+  }
+
+  function downloadTXT(){
+    const lines = [];
+    lines.push('ELECTRO DOC 58mm');
+    lines.push('-----------------');
+    lines.push(document.getElementById('t-title').textContent);
+    lines.push(document.getElementById('t-date').textContent);
+
+    const t = docType.value;
+    if(t==='permit'){
+      lines.push(`Локація/щит: ${document.getElementById('t-location').textContent}`);
+      lines.push(`Відповідальний: ${document.getElementById('t-resp').textContent}`);
+      lines.push(`Роботи: ${document.getElementById('t-work').textContent}`);
+      lines.push(`PPE: ${document.getElementById('t-ppe').textContent}`);
+      lines.push(`Lockout/Tagout: ${document.getElementById('t-lock').textContent}`);
+    } else if(t==='label'){
+      lines.push(`Щит: ${document.getElementById('t-location2').textContent}`);
+      lines.push(`Коло/автомат: ${document.getElementById('t-circuit').textContent}`);
+      lines.push(`Навантаження: ${document.getElementById('t-load').textContent}`);
+      const qrEl = document.getElementById('t-qr');
+      if(qrEl.style.display!=='none'){ lines.push(qrEl.textContent); }
+    } else {
+      lines.push(`Інструмент: ${document.getElementById('t-toolname').textContent}`);
+      lines.push(`Стан: ${document.getElementById('t-status').textContent}`);
+      const notesWrap = document.getElementById('t-notes-wrap');
+      if(notesWrap.style.display!=='none'){ lines.push(`Примітка: ${document.getElementById('t-notes').textContent}`); }
+      lines.push(`Відповідальний: ${document.getElementById('t-resp2').textContent}`);
+    }
+    lines.push('-----------------');
+    lines.push(document.getElementById('t-ref').textContent);
+    lines.push('Підпис: ____________');
+
+    const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'electro_doc_58mm.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  document.getElementById('buildBtn').addEventListener('click', buildTicket);
+  document.getElementById('refreshBtn').addEventListener('click', buildTicket);
+  document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+  document.getElementById('saveBtn').addEventListener('click', downloadTXT);
+
+  // Початковий приклад
+  buildTicket();
+</script>
+</body>
+</html>
