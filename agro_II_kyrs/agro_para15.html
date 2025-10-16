@@ -1,0 +1,512 @@
+<!-- agro_para15.html
+     ПАРА 15 (аудиторно) для агрономів
+     Тема: ПОЛЬОВЕ ОБСТЕЖЕННЯ (SCOUTING) — облік шкідників/хвороб, ЕПШ, рішення «обробляти/спостерігати»,
+           підбір бакової суміші (л/га, д.р.), перевірка «вікна погоди», ЗІЗ-чеклист, CSV.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; локально; контраст темних клітинок → світлий текст.
+
+     Що вміє:
+     • Таблиця точок обстеження: культура, фенфаза, площа огляду, кількість особин/уражень → щільність.
+     • Порівняння з ЕПШ (економічний поріг шкодочинності) для вибраного шкідника/хвороби.
+     • Рішення: «обробляти/спостерігати», коротка нотатка з обґрунтуванням.
+     • Розрахунок бакової суміші для обраного препарату: л/га, г/л д.р., норма, місткість бака, кількість заїздів.
+     • Перевірка «вікна погоди»: вітер, температура, відн. вологість, ризик дощу — підказка «так/ні».
+     • ЗІЗ-чеклист і службова записка (текст) + CSV.
+
+     Готово для GitHub Pages / iFrame у Moodle.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 15 — Scouting: ЕПШ → рішення → бакова суміш → вікно погоди → ЗІЗ, CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .small{font-size:12px; color:#9fb0c8}
+  .muted{color:#93a3b5}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)}
+  .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
+  .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+
+  input[type="text"], input[type="number"], select, textarea{
+    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
+  }
+
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+  html.embedded .box{background:#f8fafc; color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+
+  @media print{
+    @page{ margin:12mm }
+    .no-print{ display:none !important }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 15 · аудиторно · агрономи</span>
+    <h1>🔎 Scouting: ЕПШ → рішення → бакова суміш → вікно погоди → ЗІЗ</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        За пару студенти проведуть <b>польове обстеження</b>, розрахують <b>щільність/ураження</b>, порівняють із <b>ЕПШ</b>,
+        ухвалять <b>рішення</b> (обробляти/спостерігати) та розрахують <b>бакову суміш</b> і <b>кількість заїздів</b>.
+        Далі перевірять <b>«вікно погоди»</b> і пройдуть <b>ЗІЗ-чеклист</b>. Результат — <b>CSV</b> і службова записка.
+      </p>
+      <p class="small">Приклад ЕПШ (навчально): клоп-черепашка — 2–3 екз./м²; попелиці — 10–15 екз./росл.; борошниста роса — 1–2% листкової поверхні.</p>
+    </div>
+
+    <!-- ШКІДНИК/ХВОРОБА + ЕПШ -->
+    <div class="card">
+      <h2>🧰 Обʼєкт контролю та ЕПШ</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Обʼєкт</h3>
+          <div class="row">
+            <div style="flex:1">
+              <label>Тип</label>
+              <select id="objType">
+                <option value="pest" selected>Шкідник</option>
+                <option value="disease">Хвороба</option>
+              </select>
+            </div>
+            <div style="flex:1">
+              <label>Назва</label>
+              <input id="objName" type="text" value="Попелиця">
+            </div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Одиниця обліку</label>
+              <select id="unit">
+                <option value="perPlant" selected>екз./рослину</option>
+                <option value="perM2">екз./м²</option>
+                <option value="percent">% ураження</option>
+              </select>
+            </div>
+            <div style="flex:1"><label>ЕПШ (поріг)</label>
+              <input id="epsh" type="number" step="0.1" value="12">
+            </div>
+          </div>
+          <p class="small">Коригуй ЕПШ відповідно до культури/фази та економіки господарства.</p>
+        </div>
+
+        <div class="box">
+          <h3>Препарат/суміш</h3>
+          <div class="row">
+            <div style="flex:1"><label>Назва препарату</label><input id="prod" type="text" value="Інсектицид X 200 г/л"></div>
+            <div style="flex:1"><label>Норма, л/га</label><input id="dose" type="number" step="0.01" value="0.3"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Вміст д.р., г/л</label><input id="ai" type="number" step="1" value="200"></div>
+            <div style="flex:1"><label>Робочий розчин, л/га</label><input id="sprN" type="number" step="1" value="200"></div>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Опрыскувач</h3>
+          <div class="row">
+            <div style="flex:1"><label>Ширина захвату, м</label><input id="W" type="number" step="0.1" value="18"></div>
+            <div style="flex:1"><label>Місткість бака, л</label><input id="tank" type="number" step="1" value="3000"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Площа поля, га</label><input id="area" type="number" step="0.01" value="25"></div>
+            <div style="flex:1"><label>Код поля</label><input id="field" type="text" value="F-01"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ТАБЛИЦЯ ОБСТЕЖЕННЯ -->
+    <div class="card">
+      <h2>🧱 Точки обстеження</h2>
+      <div class="row">
+        <button class="btn" onclick="addRow()">➕ Додати точку</button>
+        <button class="btn" onclick="preset()">🧪 Приклад</button>
+        <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+        <button class="btn" onclick="copyCSV()">📋 CSV</button>
+      </div>
+      <div style="overflow:auto; margin-top:8px">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Дата</th>
+              <th>Культура/фаза</th>
+              <th>Методика</th>
+              <th>Площа огляду, м²</th>
+              <th>К-ть рослин</th>
+              <th>Випадків (екз./ураж.)</th>
+              <th class="dark">Щільн./% фактична</th>
+              <th class="dark">Порівняння з ЕПШ</th>
+              <th>Нотатка</th>
+            </tr>
+          </thead>
+          <tbody id="body"></tbody>
+          <tfoot>
+            <tr>
+              <th class="dark" colspan="7">Середня фактична</th>
+              <th class="dark" id="avgVal">—</th>
+              <th class="dark" id="avgDecision">—</th>
+              <th></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="csv" class="out" style="margin-top:8px">—</div>
+      <p class="small">CSV: <span class="mono"># | Дата | Культура | Методика | Площа_м2 | Рослин | Випадків | Факт | Порівн_ЕПШ | Нотатка</span></p>
+      <p class="small muted">Контраст забезпечено: темні клітинки (<span class="mono">.dark</span>) мають світлий текст.</p>
+    </div>
+
+    <!-- РІШЕННЯ + БАКОВА СУМІШ + ПОГОДА -->
+    <div class="card">
+      <h2>🧪 Рішення, бакова суміш та «вікно погоди»</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Рішення за середнім значенням</h3>
+          <p>Середня фактична щільність/ураження: <b><span id="avgShow">—</span></b></p>
+          <p>ЕПШ: <b><span id="epshShow">—</span></b></p>
+          <p>Рекомендація: <b><span id="dec" class="mono">—</span></b></p>
+          <textarea id="note" rows="3" placeholder="Коротке обґрунтування..."></textarea>
+        </div>
+
+        <div class="box">
+          <h3>Бакова суміш (на поле і на заїзд)</h3>
+          <p><b>Робочий розчин на поле</b>: <span id="sprField">—</span> л</p>
+          <p><b>Препарат на поле</b>: <span id="prodField">—</span> л · д.р.: <span id="aiField">—</span> кг</p>
+          <p><b>К-ть заїздів</b>: <span id="loads">—</span> · <b>на 1 заїзд</b>: <span id="sprPerLoad">—</span> л; препарат: <span id="prodPerLoad">—</span> л</p>
+          <div class="out" id="mixText">—</div>
+        </div>
+
+        <div class="box">
+          <h3>«Вікно погоди» для внесення</h3>
+          <div class="row">
+            <div style="flex:1"><label>Вітер, м/с</label><input id="wind" type="number" step="0.1" value="3.5"></div>
+            <div style="flex:1"><label>Вологість, %</label><input id="rh" type="number" step="1" value="65"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Температура, °C</label><input id="temp" type="number" step="0.1" value="18.0"></div>
+            <div style="flex:1"><label>Ризик дощу (0..1)</label><input id="rain" type="number" step="0.05" value="0.2"></div>
+          </div>
+          <p>Придатність: <b><span id="wxOk">—</span></b></p>
+          <p class="small">Навчальні критерії: вітер ≤ 5 м/с; RH 40–85%; t 8–25°C; ризик дощу &lt; 0.4 (у найближчі 4–6 год).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ЗІЗ та СЛУЖБОВА ЗАПИСКА -->
+    <div class="card">
+      <h2>🦺 ЗІЗ-чеклист та службова записка</h2>
+      <div class="grid g2">
+        <div class="box">
+          <h3>ЗІЗ (перед стартом)</h3>
+          <div class="row">
+            <label><input type="checkbox" class="ppe" checked> Комбінезон/куртка хімстійка</label>
+          </div>
+          <div class="row">
+            <label><input type="checkbox" class="ppe" checked> Рукавички нітрилові</label>
+          </div>
+          <div class="row">
+            <label><input type="checkbox" class="ppe" checked> Респіратор з фільтром</label>
+          </div>
+          <div class="row">
+            <label><input type="checkbox" class="ppe" checked> Захисні окуляри/щиток</label>
+          </div>
+          <div class="row">
+            <label><input type="checkbox" class="ppe" checked> Мийка/вода/нейтралізатор поруч</label>
+          </div>
+          <p>Статус: <b><span id="ppeStatus">—</span></b></p>
+        </div>
+        <div class="box">
+          <h3>Службова записка (зведення)</h3>
+          <div id="memo" class="out">—</div>
+          <div class="row" style="margin-top:6px">
+            <button class="btn" onclick="buildMemo()">📝 Зібрати</button>
+            <button class="btn" onclick="copyEl('memo')">📋 Копіювати</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ХІД РОБОТИ, ОЦІНЮВАННЯ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+      <ol>
+        <li>Задай обʼєкт, одиницю обліку та ЕПШ. Заповни 5–10 точок обстеження, натисни <b>Перерахувати</b>.</li>
+        <li>Обґрунтуй рішення (обробляти/спостерігати). За потреби — відкоригуй ЕПШ.</li>
+        <li>Розрахуй бакову суміш, кількість заїздів і перевір «вікно погоди».</li>
+        <li>Пройди ЗІЗ-чеклист і згенеруй службову записку. Скопіюй <b>CSV</b> у Google Sheets (<span class="mono">Scouting</span>).</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Коректні розрахунки щільності/ураження та порівняння з ЕПШ</td><td>4</td></tr>
+          <tr><td>Аргументоване рішення та розрахунок бакової суміші/заїздів</td><td>3</td></tr>
+          <tr><td>Перевірка «вікна погоди» і ЗІЗ-чеклист</td><td>2</td></tr>
+          <tr><td>CSV у Sheets + службова записка</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">🔎 Scouting</p><p class="pill">📈 ЕПШ</p><p class="pill">🧪 Бакова суміш</p><p class="pill">🌦️ Погодні умови</p><p class="pill">🦺 ЗІЗ</p>
+    </div>
+  </div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const bodyEl = document.getElementById('body');
+  const csvEl  = document.getElementById('csv');
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2) => Number((+n).toFixed(d));
+
+  function addRow(sample){
+    const today = new Date().toISOString().slice(0,10);
+    const def = { date: today, crop:'Пшениця, ВВСН 39', method:'Зигзаг 10 точок', a:10, plants:50, cases:520, note:'' };
+    const s = Object.assign(def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="date" value="${s.date}"></td>
+      <td><input type="text" value="${s.crop}"></td>
+      <td><input type="text" value="${s.method}"></td>
+      <td><input type="number" step="0.1" value="${s.a}"></td>
+      <td><input type="number" step="1" value="${s.plants}"></td>
+      <td><input type="number" step="1" value="${s.cases}"></td>
+      <td class="dark fact">—</td>
+      <td class="dark comp">—</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyEl.appendChild(tr);
+    reindex();
+  }
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  function preset(){
+    bodyEl.innerHTML='';
+    addRow({method:'5×по 1 м²', a:5, plants:0,   cases:65});   // для екз./м²
+    addRow({method:'10 рослин', a:0, plants:10,  cases:140});  // для екз./росл.
+    addRow({method:'Оцінка листка', a:0, plants:0, cases:180}); // для %
+    recalc();
+  }
+
+  function recalc(){
+    const unit = byId('unit').value;          // perPlant | perM2 | percent
+    const epsh = parseFloat(byId('epsh').value||'0');
+    let sum=0, n=0;
+
+    [...bodyEl.querySelectorAll('tr')].forEach(tr=>{
+      const a = parseFloat(tr.children[4].querySelector('input').value||'0');       // м²
+      const plants = parseFloat(tr.children[5].querySelector('input').value||'0');  // шт
+      const cases = parseFloat(tr.children[6].querySelector('input').value||'0');   // екз./%сумарно
+
+      let fact=0, comp='—';
+
+      if(unit==='perM2'){
+        const denom = a>0 ? a : 1;
+        fact = cases / denom;                      // екз./м²
+        comp = compare(fact, epsh, 'екз./м²');
+      } else if(unit==='perPlant'){
+        const denom = plants>0 ? plants : 1;
+        fact = cases / denom;                      // екз./росл.
+        comp = compare(fact, epsh, 'екз./росл.');
+      } else { // percent
+        fact = cases;                              // %
+        comp = compare(fact, epsh, '%');
+      }
+
+      tr.querySelector('.fact').textContent = rnd(fact,2);
+      tr.querySelector('.comp').textContent = comp;
+
+      sum += fact; n += 1;
+    });
+
+    const avg = n>0 ? (sum/n) : 0;
+    byId('avgVal').textContent = rnd(avg,2);
+    byId('avgShow').textContent= rnd(avg,2);
+    byId('epshShow').textContent = epsh;
+
+    const dec = avg > epsh ? '🟢 ОБРОБЛЯТИ (понад ЕПШ)' : (avg > epsh*0.8 ? '🟠 НАБЛИЖАЄТЬСЯ' : '🔵 СПОСТЕРІГАТИ');
+    byId('avgDecision').textContent = dec;
+    byId('dec').textContent = dec;
+
+    // Бакова суміш і заїзди
+    buildMix();
+
+    // Погода
+    checkWeather();
+
+    // ЗІЗ
+    ppeCheck();
+
+    // CSV
+    buildCSV();
+  }
+
+  function compare(fact, epsh, unit){
+    if(fact>epsh) return `>${epsh} ${unit} (понад поріг)`;
+    if(fact>epsh*0.8) return `≈ поріг (уважно)`;
+    return `< порогу`;
+  }
+
+  function buildMix(){
+    const area = parseFloat(byId('area').value||'0');
+    const sprN = parseFloat(byId('sprN').value||'0');      // л/га
+    const dose = parseFloat(byId('dose').value||'0');      // л/га
+    const ai   = parseFloat(byId('ai').value||'0');        // г/л
+    const tank = parseFloat(byId('tank').value||'0');      // л
+
+    const sprField = area*sprN;
+    const prodField = area*dose;
+    const aiFieldKg = (prodField * ai) / 1000;             // кг д.р.
+
+    let loads = 0, sprPerLoad=0, prodPerLoad=0;
+    if(tank>0 && sprN>0){
+      const areaPerLoad = tank / sprN;
+      loads = Math.max(1, Math.ceil(area / areaPerLoad));
+      sprPerLoad = tank;
+      prodPerLoad = dose * areaPerLoad;                    // л препарату на баки з повним зливом
+    }
+
+    byId('sprField').textContent  = rnd(sprField,0).toLocaleString('uk-UA');
+    byId('prodField').textContent = rnd(prodField,1);
+    byId('aiField').textContent   = rnd(aiFieldKg,2);
+    byId('loads').textContent     = loads || '—';
+    byId('sprPerLoad').textContent= loads? rnd(sprPerLoad,0) : '—';
+    byId('prodPerLoad').textContent= loads? rnd(prodPerLoad,2) : '—';
+
+    const txt = [
+      `Поле ${byId('field').value} (${area} га):`,
+      `Розчин: ${rnd(sprField,0)} л; Препарат: ${rnd(prodField,2)} л (д.р. ${rnd(aiFieldKg,2)} кг).`,
+      loads? `Заїздів: ${loads} × бак ${rnd(sprPerLoad,0)} л → на бак додати ≈ ${rnd(prodPerLoad,2)} л препарату.` : 'Заїзди: —'
+    ].join('\n');
+    byId('mixText').textContent = txt;
+  }
+
+  function checkWeather(){
+    const wind = parseFloat(byId('wind').value||'0');
+    const rh   = parseFloat(byId('rh').value||'0');
+    const t    = parseFloat(byId('temp').value||'0');
+    const rain = parseFloat(byId('rain').value||'0');
+
+    const okWind = wind<=5;
+    const okRh = rh>=40 && rh<=85;
+    const okT = t>=8 && t<=25;
+    const okRain = rain<0.4;
+
+    const ok = okWind && okRh && okT && okRain;
+    byId('wxOk').textContent = ok ? '✅ Підходить' : '⚠️ Ризиковано';
+    byId('wxOk').style.color = ok ? '#10b981' : '#f59e0b';
+  }
+
+  function ppeCheck(){
+    const all = [...document.querySelectorAll('.ppe')];
+    const ok = all.every(x=>x.checked);
+    byId('ppeStatus').textContent = ok ? '✅ Усі ЗІЗ відмічені' : '⚠️ Не всі ЗІЗ відмічені';
+    byId('ppeStatus').style.color = ok ? '#10b981' : '#f59e0b';
+  }
+
+  function buildMemo(){
+    const memo = [
+      `Поле: ${byId('field').value} · Площа: ${byId('area').value} га`,
+      `Обʼєкт: ${byId('objType').value==='pest'?'Шкідник':'Хвороба'} — ${byId('objName').value}`,
+      `Одиниця: ${unitLabel()} · ЕПШ: ${byId('epsh').value}`,
+      `Середня фактична: ${byId('avgShow').textContent} · Рішення: ${byId('dec').textContent}`,
+      `Препарат: ${byId('prod').value} · Норма: ${byId('dose').value} л/га · Розчин: ${byId('sprN').value} л/га`,
+      `Сумарно на поле: розчин ${byId('sprField').textContent} л; препарат ${byId('prodField').textContent} л (д.р. ${byId('aiField').textContent} кг)`,
+      `Заїздів: ${byId('loads').textContent}; на бак: ${byId('sprPerLoad').textContent} л розчину, препарат ~${byId('prodPerLoad').textContent} л`,
+      `Погода: ${byId('wxOk').textContent}; ЗІЗ: ${byId('ppeStatus').textContent}`,
+      `Примітка: ${byId('note').value||'—'}`
+    ].join('\n');
+    byId('memo').textContent = memo;
+  }
+
+  function unitLabel(){
+    const u = byId('unit').value;
+    if(u==='perPlant') return 'екз./росл.';
+    if(u==='perM2') return 'екз./м²';
+    return '% ураження';
+    }
+
+  function buildCSV(){
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx=tr.querySelector('.idx').textContent.trim();
+      const d  = tr.children[1].querySelector('input').value.trim();
+      const crop=tr.children[2].querySelector('input').value.trim();
+      const m  = tr.children[3].querySelector('input').value.trim();
+      const a  = tr.children[4].querySelector('input').value.trim();
+      const p  = tr.children[5].querySelector('input').value.trim();
+      const c  = tr.children[6].querySelector('input').value.trim();
+      const f  = tr.querySelector('.fact').textContent.trim();
+      const cmp= tr.querySelector('.comp').textContent.trim();
+      const nt = tr.children[9].querySelector('input').value.trim();
+      return [idx,d,crop,m,a,p,c,f,cmp,nt].join(' | ');
+    });
+    csvEl.textContent = lines.join('\n') || '—';
+  }
+
+  function copyCSV(){
+    const t = csvEl.textContent.trim();
+    if(!t || t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // Ініціалізація
+  (function init(){ addRow(); addRow(); recalc(); })();
+
+  // Слухачі
+  document.querySelectorAll('#objType,#objName,#unit,#epsh,#prod,#dose,#ai,#sprN,#W,#tank,#area,#field,#wind,#rh,#temp,#rain')
+    .forEach(el=>el.addEventListener('change', ()=>recalc()));
+  document.addEventListener('change', e=>{
+    if(e.target.classList.contains('ppe')) ppeCheck();
+  });
+</script>
+</body>
+</html>
