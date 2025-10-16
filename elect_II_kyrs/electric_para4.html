@@ -1,0 +1,414 @@
+<!-- electric_para4.html
+     Пара 4 (Електрики, аудиторно): Розрахунок лінії — струм, переріз кабелю, автомат, падіння напруги + друк 58 мм і експорт CSV/TXT
+     Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Електрики · Пара 4 — Розрахунок лінії: переріз, автомат, ΔU, друк 58 мм</title>
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
+  .wrap{max-width:1024px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted)}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  @media (max-width:900px){.g2{grid-template-columns:1fr}}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .small{font-size:12px; color:#93a3b5}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+
+  /* Форма */
+  .field{display:flex; gap:8px; margin:6px 0}
+  .field label{min-width:180px; color:#cbd5e1}
+  .field input,.field select{flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb}
+  .block{border:1px solid #223049; border-radius:12px; padding:10px}
+
+  /* Таблиця результатів */
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+
+  /* Квитанція 58 мм */
+  .ticket{width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
+  .ticket p{margin:2px 0; font-size:12px}
+  .ticket .center{text-align:center}
+  .ticket .line{border-top:1px dashed #111; margin:6px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+
+  /* Вбудований режим (iframe/Moodle) */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+
+  @media print{
+    @page{ size:58mm auto; margin:4mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Електрики · Пара 4 · аудиторно</span>
+    <h1>🔌 Розрахунок лінії: струм, переріз, автомат, падіння напруги + 🧾 друк 58 мм</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>Навчитися швидко розраховувати параметри лінії: робочий струм, переріз провідника (Cu/Al), номінал автомата, падіння напруги, а також сформувати «паспорт лінії» для друку 58 мм і збереження CSV/TXT.</p>
+      <div class="row">
+        <button class="btn" type="button" onclick="fillDemo()">🔄 Приклад даних</button>
+        <button class="btn" type="button" onclick="calcAll()">🧩 Розрахувати</button>
+        <button class="btn" type="button" onclick="exportCSV()">📤 Експорт CSV</button>
+      </div>
+      <p class="small">Після заняття завантаж CSV у спільну папку: <span class="mono">ГРУПА_Прізвище_Лінія.csv</span></p>
+    </div>
+
+    <div class="card">
+      <h2>🧮 Вхідні дані</h2>
+      <div class="grid g2">
+        <div class="block">
+          <div class="field">
+            <label for="lineName">Назва лінії</label>
+            <input id="lineName" type="text" value="Лінія Розетки/Майстерня" />
+          </div>
+          <div class="field">
+            <label for="phase">Схема</label>
+            <select id="phase">
+              <option value="1">1-фазна (Uл)</option>
+              <option value="3" selected>3-фазна (Uл = 400 В)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="U">Напруга U, В</label>
+            <input id="U" type="number" value="400" />
+          </div>
+          <div class="field">
+            <label for="P">Потужність P, кВт</label>
+            <input id="P" type="number" step="0.1" value="6.0" />
+          </div>
+          <div class="field">
+            <label for="cosfi">cos φ</label>
+            <input id="cosfi" type="number" step="0.01" value="0.95" />
+          </div>
+          <div class="field">
+            <label for="eta">ККД η</label>
+            <input id="eta" type="number" step="0.01" value="0.98" />
+          </div>
+        </div>
+        <div class="block">
+          <div class="field">
+            <label for="L">Довжина траси L, м</label>
+            <input id="L" type="number" value="35" />
+          </div>
+          <div class="field">
+            <label for="mat">Матеріал</label>
+            <select id="mat">
+              <option value="Cu" selected>Мідь (Cu)</option>
+              <option value="Al">Алюміній (Al)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dropMax">Допустима ΔU, %</label>
+            <input id="dropMax" type="number" step="0.1" value="5" />
+          </div>
+          <div class="field">
+            <label for="install">Спосіб прокладання</label>
+            <select id="install">
+              <option value="air" selected>В повітрі/кабель-канал</option>
+              <option value="pipe">В трубі/штробі</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="resp">Відповідальний</label>
+            <input id="resp" type="text" value="Студент ПІБ / група" />
+          </div>
+        </div>
+      </div>
+      <p class="small">Примітка: використовуємо довідкові опори провідників при 20 °C: ρ(Cu)=0.01851 Ω·мм²/м, ρ(Al)=0.02941 Ω·мм²/м (оцінка). Таблиця допустимих струмів — навчальна апроксимація для типових жил.</p>
+    </div>
+
+    <div class="card">
+      <h2>📊 Результати розрахунку</h2>
+      <table id="res">
+        <thead>
+          <tr>
+            <th>Параметр</th><th>Значення</th><th>Коментар</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p id="verdict" style="margin-top:8px"></p>
+    </div>
+
+    <div class="card printable">
+      <h2>🧾 Паспорт лінії — 58 мм</h2>
+      <div class="grid g2">
+        <div>
+          <div id="ticket" class="ticket" aria-live="polite">
+            <h4>ПАСПОРТ ЛІНІЇ</h4>
+            <p class="center"><small id="t-date">Дата: —</small></p>
+            <div class="line"></div>
+            <p><b id="t-name">Лінія: —</b></p>
+            <p>Схема/Напруга: <span id="t-phase">—</span></p>
+            <p>Потужність: <span id="t-P">—</span> кВт</p>
+            <p>Струм: <span id="t-I">—</span> А</p>
+            <p>Матеріал/переріз: <span id="t-S">—</span></p>
+            <p>Автомат: <span id="t-MCB">—</span></p>
+            <p>Довжина: <span id="t-L">—</span> м</p>
+            <p>ΔU: <span id="t-drop">—</span>% (≤ <span id="t-dropmax">—</span>%)</p>
+            <div class="line"></div>
+            <p class="qr"><small id="t-ref">Ref: LINE-0001</small></p>
+            <p class="center"><small>Відп.: <span id="t-resp">—</span></small></p>
+          </div>
+          <div class="row no-print" style="margin-top:8px">
+            <button class="btn" type="button" onclick="buildTicket()">🧩 Оновити</button>
+            <button class="btn" type="button" onclick="window.print()">🖨️ Друк 58 мм</button>
+            <button class="btn" type="button" onclick="downloadTXT()">📥 TXT</button>
+          </div>
+        </div>
+        <div>
+          <p class="small">Порада: зроби фото квитанції та додай у спільну папку: <span class="mono">ГРУПА_Прізвище_ЛініяПаспорт.jpg</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Вбудовано у Moodle → стримана тема
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // Довідник допустимих струмів (навчальна апроксимація)
+  const tableAmpacity = {
+    Cu: [
+      {S:1.5, A_air:19, A_pipe:16},
+      {S:2.5, A_air:27, A_pipe:21},
+      {S:4,   A_air:36, A_pipe:28},
+      {S:6,   A_air:46, A_pipe:36},
+      {S:10,  A_air:63, A_pipe:50},
+      {S:16,  A_air:85, A_pipe:68},
+      {S:25,  A_air:110, A_pipe:89},
+      {S:35,  A_air:135, A_pipe:110}
+    ],
+    Al: [
+      {S:2.5, A_air:21, A_pipe:17},
+      {S:4,   A_air:28, A_pipe:22},
+      {S:6,   A_air:36, A_pipe:29},
+      {S:10,  A_air:50, A_pipe:40},
+      {S:16,  A_air:65, A_pipe:52},
+      {S:25,  A_air:85, A_pipe:68},
+      {S:35,  A_air:105, A_pipe:84}
+    ]
+  };
+
+  // Номінали автоматів (типова лінійка)
+  const MCBs = [6,10,13,16,20,25,32,40,50,63,80,100];
+
+  // ρ (Ом*мм²/м)
+  const rho = { Cu: 0.01851, Al: 0.02941 };
+
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function nowStamp(){
+    const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function fillDemo(){
+    document.getElementById('lineName').value = 'Лінія Розетки/Майстерня';
+    document.getElementById('phase').value = '3';
+    document.getElementById('U').value = 400;
+    document.getElementById('P').value = 6.0;
+    document.getElementById('cosfi').value = 0.95;
+    document.getElementById('eta').value = 0.98;
+    document.getElementById('L').value = 35;
+    document.getElementById('mat').value = 'Cu';
+    document.getElementById('dropMax').value = 5;
+    document.getElementById('install').value = 'air';
+    document.getElementById('resp').value = 'Студент ПІБ / група';
+    calcAll();
+  }
+
+  function calcAll(){
+    const name = document.getElementById('lineName').value.trim();
+    const phase = parseInt(document.getElementById('phase').value,10);
+    const U = parseFloat(document.getElementById('U').value);
+    const PkW = parseFloat(document.getElementById('P').value);
+    const cosfi = parseFloat(document.getElementById('cosfi').value);
+    const eta = parseFloat(document.getElementById('eta').value);
+    const L = parseFloat(document.getElementById('L').value);
+    const mat = document.getElementById('mat').value;
+    const dropMax = parseFloat(document.getElementById('dropMax').value);
+    const install = document.getElementById('install').value;
+
+    if(!(U>0 && PkW>0 && cosfi>0 && eta>0 && L>=0)){ alert('Перевір вхідні дані'); return; }
+
+    const P = PkW * 1000;
+    const I = (phase===3) ? (P/(Math.sqrt(3)*U*cosfi*eta)) : (P/(U*cosfi*eta)); // А
+    const Iround = Math.round(I*100)/100;
+
+    // Підбір перерізу за допустимим струмом (навчальна таблиця)
+    const list = tableAmpacity[mat];
+    const key = (install==='air') ? 'A_air' : 'A_pipe';
+    let chosen = list.find(row => row[key] >= I);
+    if(!chosen) chosen = list[list.length-1];
+    const S = chosen.S;
+    const Iallow = chosen[key];
+
+    // Підбір автомата: перший номінал >= I, але не більший за Iallow
+    let mcb = MCBs.find(n => n >= I && n <= Iallow);
+    if(!mcb){
+      // якщо жоден не підходить у межах, візьмемо мінімальний > I, але покажемо попередження
+      mcb = MCBs.find(n=> n>=I) || MCBs[MCBs.length-1];
+    }
+
+    // Падіння напруги (оцінка): 1-фазна ΔU = 2·I·ρ·L/S ; 3-фазна ΔU = √3·I·ρ·L/S
+    const factor = (phase===3) ? Math.sqrt(3) : 2;
+    const dU = factor * I * rho[mat] * L / S; // у вольтах
+    const dUperc = (dU / U) * 100;
+    const dUpercRound = Math.round(dUperc*100)/100;
+
+    // Висновок
+    let verdict = '';
+    let ok = true;
+    if(I > Iallow){ ok=false; verdict += 'Переріз недостатній за струмом. '; }
+    if(dUperc > dropMax){ ok=false; verdict += 'Падіння напруги перевищує ліміт. '; }
+    if(mcb > Iallow){ ok=false; verdict += 'Номінал автомата перевищує допустимий для кабелю. '; }
+    if(ok) verdict = '✅ Розрахунок пройдено: вибраний переріз та автомат відповідають обмеженням.';
+
+    // Вивід у таблицю
+    const rows = [
+      ['Лінія', name || '—', 'Назва для паспорта'],
+      ['Схема/Напруга', (phase===3?'3-фазна':'1-фазна')+` / ${U} В`, 'U подано користувачем'],
+      ['P, кВт; cosφ; η', `${PkW} ; ${cosfi} ; ${eta}`, 'Початкові дані'],
+      ['Робочий струм I, А', Iround, 'Обчислено за формулою активного навантаження'],
+      ['Матеріал', (mat==='Cu'?'Мідь (Cu)':'Алюміній (Al)'), 'Впливає на ρ'],
+      ['Довжина L, м', L, 'Фізична довжина траси'],
+      ['Рекоменд. переріз S, мм²', S, `Допустимий струм ≈ ${Iallow} А (${install==='air'?'повітря/канал':'труба/штроба'})`],
+      ['Номінал автомата, А', mcb, 'Підібрано за I та Iallow'],
+      ['Падіння напруги ΔU, %', dUpercRound, `Ліміт ≤ ${dropMax}%`]
+    ];
+    renderTable(rows, ok ? 'ok' : (verdict? 'bad':'warn'), verdict);
+
+    // Оновити квитанцію
+    buildTicket({ name, phase, U, PkW, I: Iround, mat, S, mcb, L, dUperc: dUpercRound, dropMax });
+
+    // Зберегти результати у змінній для експорту
+    lastResult = { name, phase, U, PkW, cosfi, eta, I: Iround, mat, S, Iallow, mcb, L, dUperc: dUpercRound, dropMax, install };
+  }
+
+  function renderTable(items, state, verdict){
+    const tbody = document.querySelector('#res tbody');
+    tbody.innerHTML = '';
+    items.forEach(([k,v,c])=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `<td>${k}</td><td class="mono">${v}</td><td class="small">${c}</td>`;
+      tbody.appendChild(tr);
+    });
+    const v = document.getElementById('verdict');
+    v.className=''; v.textContent='';
+    if(state==='ok'){ v.classList.add('ok'); v.textContent = verdict; }
+    else if(state==='bad'){ v.classList.add('bad'); v.textContent = verdict; }
+    else { v.classList.add('warn'); v.textContent = verdict; }
+  }
+
+  let lastResult = null;
+
+  function buildTicket(dataOverride){
+    const d = dataOverride || lastResult;
+    const tNow = nowStamp();
+    document.getElementById('t-date').textContent = `Дата: ${tNow}`;
+    const resp = document.getElementById('resp').value.trim() || '—';
+
+    if(!d){
+      // Порожній стан
+      document.getElementById('t-name').textContent = 'Лінія: —';
+      document.getElementById('t-phase').textContent = '—';
+      document.getElementById('t-P').textContent = '—';
+      document.getElementById('t-I').textContent = '—';
+      document.getElementById('t-S').textContent = '—';
+      document.getElementById('t-MCB').textContent = '—';
+      document.getElementById('t-L').textContent = '—';
+      document.getElementById('t-drop').textContent = '—';
+      document.getElementById('t-dropmax').textContent = '—';
+      document.getElementById('t-resp').textContent = resp;
+      document.getElementById('t-ref').textContent = 'Ref: LINE-XXXX';
+      return;
+    }
+
+    document.getElementById('t-name').textContent = `Лінія: ${d.name}`;
+    document.getElementById('t-phase').textContent = `${d.phase===3?'3ф':'1ф'} / ${d.U} В`;
+    document.getElementById('t-P').textContent = d.PkW;
+    document.getElementById('t-I').textContent = d.I;
+    document.getElementById('t-S').textContent = `${d.mat} ${d.S} мм²`;
+    document.getElementById('t-MCB').textContent = `${d.mcb} А`;
+    document.getElementById('t-L').textContent = d.L;
+    document.getElementById('t-drop').textContent = d.dUperc;
+    document.getElementById('t-dropmax').textContent = d.dropMax;
+    document.getElementById('t-resp').textContent = resp;
+
+    const ref = 'LINE-' + Math.random().toString(36).slice(2,8).toUpperCase();
+    document.getElementById('t-ref').textContent = `Ref: ${ref}`;
+  }
+
+  function downloadTXT(){
+    const lines = [];
+    lines.push('LINE PASSPORT 58mm');
+    lines.push('-------------------');
+    lines.push(document.getElementById('t-date').textContent);
+    lines.push(document.getElementById('t-name').textContent);
+    lines.push(`Схема/Напруга: ${document.getElementById('t-phase').textContent}`);
+    lines.push(`Потужність: ${document.getElementById('t-P').textContent} кВт`);
+    lines.push(`Струм: ${document.getElementById('t-I').textContent} А`);
+    lines.push(`Матеріал/переріз: ${document.getElementById('t-S').textContent}`);
+    lines.push(`Автомат: ${document.getElementById('t-MCB').textContent}`);
+    lines.push(`Довжина: ${document.getElementById('t-L').textContent} м`);
+    lines.push(`ΔU: ${document.getElementById('t-drop').textContent}% (≤ ${document.getElementById('t-dropmax').textContent}%)`);
+    lines.push(document.getElementById('t-ref').textContent);
+    lines.push(`Відп.: ${document.getElementById('t-resp').textContent}`);
+    const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'line_passport_58mm.txt';
+    a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  function exportCSV(){
+    if(!lastResult){ alert('Спочатку розрахуй лінію'); return; }
+    const r = lastResult;
+    const headers = ['line_name','phase','U_V','P_kW','cos_phi','eta','I_A','material','section_mm2','ampacity_A','MCB_A','length_m','voltage_drop_pct','drop_limit_pct','install','responsible'];
+    const values = [
+      r.name, r.phase, r.U, r.PkW, r.cosfi, r.eta, r.I, r.mat, r.S, r.Iallow, r.mcb, r.L, r.dUperc, r.dropMax, r.install,
+      document.getElementById('resp').value.trim()
+    ];
+    const csv = headers.join(',') + '\n' + values.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'line_calc.csv';
+    a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // Авто-початковий приклад
+  fillDemo();
+</script>
+</body>
+</html>
