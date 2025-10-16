@@ -1,0 +1,475 @@
+<!-- mechanic_para6.html
+     ПАРА 6 (аудиторно) для механіків
+     Тема: ЕЛЕКТРИКА ТА ДІАГНОСТИКА — АКБ, пуск/заряд, падіння напруги, споживання у спокої, вибір дроту/запобіжника, чек 58 мм, NFC, CSV
+     Фокус: телефони/ПК; без зовнішніх бібліотек; працює на GitHub Pages / у Moodle (iframe).
+     Обладнання: телефони, 58 мм термопринтер (опц.), NFC-мітки (опц.), мультиметр (реальний/віртуальний ввід).
+
+     Що вміє:
+     • Тести АКБ/пуску/заряду: напруга спокою, “провал” при запуску, напруга заряджання, струм генератора → висновки.
+     • Падіння напруги ланцюгів (+ та −): Udrop = I·R або за довжиною/матеріалом, порівняння з нормою (≤3% живлення, ≤0.5 В на пуск).
+     • Споживання в спокої: Iquiescent × час → витрата ємності, оцінка “сяде за ___ діб”.
+     • Вибір дроту (перетин) та запобіжника: за струмом/довжиною/допустимим падінням; перевірка термічного запасу.
+     • Квиток 58 мм “Електротест” + NFC-текст; експорт CSV.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 6 (механіки) — Електрика: АКБ, пуск/заряд, падіння U, спокійний струм, дроти/запобіжники, чек 58 мм, NFC</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  .ok{color:#10b981}.warn{color:#f59e0b}.bad{color:#ef4444}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 6 · аудиторно · механіки</span>
+  <h1>🔋 Електрика: АКБ → пуск/заряд → падіння U → спокійний струм → дроти/запобіжники → чек 58 мм, NFC, CSV</h1>
+
+  <div class="card">
+    <h2>🎯 Мета</h2>
+    <p>
+      За пару студенти виконають віртуально-реалістичні <b>вимірювання</b> (введення даних з мультиметра),
+      отримають <b>висновок по системі пуск/заряд</b>, порахують <b>падіння напруги</b>, <b>споживання у спокої</b>,
+      підберуть <b>перетин дроту</b> і <b>запобіжник</b>, згенерують <b>квиток 58 мм</b>, <b>NFC</b>-текст і <b>CSV</b>.
+    </p>
+    <p class="small">Норми (орієнтовно): 12В АКБ — спокій 12.6–12.8 В; при пуску не нижче 9.6 В (10 с, +20°C). Заряд 13.8–14.6 В. Спокійний струм
+      <span class="mono">≤50 мА</span> (типово до 30 мА).</p>
+  </div>
+
+  <!-- АКБ / ПУСК / ЗАРЯД -->
+  <div class="card">
+    <h2>🧪 Тест АКБ / пуск / заряд</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Виміри</h3>
+        <div class="row">
+          <div style="flex:1"><label>U спокою, В</label><input id="uRest" type="number" step="0.01" value="12.55"></div>
+          <div style="flex:1"><label>U під час пуску (мін), В</label><input id="uCrank" type="number" step="0.01" value="9.9"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>U заряджання, В</label><input id="uCharge" type="number" step="0.01" value="14.2"></div>
+          <div style="flex:1"><label>I генератора, А (оцінка)</label><input id="iAlt" type="number" step="1" value="45"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Ємність АКБ, А·год</label><input id="capAh" type="number" step="1" value="90"></div>
+          <div style="flex:1"><label>Система</label>
+            <select id="sysV"><option value="12" selected>12 В</option><option value="24">24 В</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Підсумки</h3>
+        <p>Стан АКБ: <b><span id="batState">—</span></b></p>
+        <p>Пускова здатність: <b><span id="crankOK">—</span></b></p>
+        <p>Заряд/регулятор: <b><span id="chargeOK">—</span></b></p>
+        <p>Потужність генератора: <b><span id="altPower">—</span></b> кВт</p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcAll()">🔁 Перерахувати</button>
+          <button class="btn" onclick="preset()">🧪 Приклад</button>
+          <button class="btn" onclick="copyCSV('csv1')">📋 CSV (тест)</button>
+        </div>
+        <div id="csv1" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ПАДІННЯ НАПРУГИ -->
+  <div class="card">
+    <h2>⚡ Падіння напруги (ланцюги + та −)</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Вихідні</h3>
+        <div class="row">
+          <div style="flex:1"><label>Струм I, А</label><input id="vdI" type="number" step="0.1" value="120"></div>
+          <div style="flex:1"><label>Довжина туди-назад, м</label><input id="vdL" type="number" step="0.1" value="3.2"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Перетин S, мм²</label><input id="vdS" type="number" step="0.1" value="25"></div>
+          <div style="flex:1"><label>Допустиме падіння, % U</label><input id="vdPct" type="number" step="0.1" value="3"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Результат</h3>
+        <p>R провідника: <b><span id="vdR">—</span></b> Ом · Udrop: <b><span id="vdU">—</span></b> В</p>
+        <p>Відсоток від Uсист: <b><span id="vdUp">—</span></b> % · Статус: <b><span id="vdFlag">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Підбір перетину</h3>
+        <p>Список S (мм²):</p>
+        <input id="vdList" type="text" value="10,16,25,35,50,70">
+        <p>Рекомендовано S: <b><span id="vdRec">—</span></b> мм²</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- СПОКІЙНИЙ СТРУМ -->
+  <div class="card">
+    <h2>🌙 Споживання у спокої</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>Дані</h3>
+        <div class="row">
+          <div style="flex:1"><label>Iспок, мА</label><input id="iqmA" type="number" step="1" value="35"></div>
+          <div style="flex:1"><label>Час, год/добу</label><input id="iqH" type="number" step="0.5" value="24"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Оцінка</h3>
+        <p>Витрата за добу: <b><span id="iqDaily">—</span></b> А·год</p>
+        <p>Час до 50% ємності: <b><span id="iqDays">—</span></b> діб</p>
+        <p>Статус: <b><span id="iqFlag">—</span></b></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ДРОТИ / ЗАПОБІЖНИК -->
+  <div class="card">
+    <h2>🧵 Дріт і запобіжник</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Вихідні</h3>
+        <div class="row">
+          <div style="flex:1"><label>Робочий струм, А</label><input id="fwI" type="number" step="0.1" value="22"></div>
+          <div style="flex:1"><label>Довжина (двобічно), м</label><input id="fwL" type="number" step="0.1" value="4"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Доп. падіння, %</label><input id="fwPct" type="number" step="0.1" value="3"></div>
+          <div style="flex:1"><label>Темп. серед., °C</label><input id="fwT" type="number" step="1" value="25"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Підбір</h3>
+        <p>Мін. перетин S: <b><span id="fwS">—</span></b> мм²</p>
+        <p>Запобіжник: <b><span id="fwFuse">—</span></b> А (повільний/авто)</p>
+        <p>Запас по струму: <b><span id="fwHead">—</span></b> %</p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcAll()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csv2')">📋 CSV (провід/захист)</button>
+        </div>
+        <div id="csv2" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- КВИТОК + NFC -->
+  <div class="card">
+    <h2>🧾 Квиток 58 мм та NFC</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>NFC — “Electrical test”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток “Електротест”</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>ЕЛЕКТРОТЕСТ</h4>
+          <p id="tDate"><small>Дата: —</small></p>
+          <div class="line"></div>
+          <p><b>U спокою:</b> <span id="tUR">—</span> В · <b>U пуск:</b> <span id="tUC">—</span> В</p>
+          <p><b>U заряд:</b> <span id="tUCH">—</span> В · <b>P генератора:</b> <span id="tAP">—</span> кВт</p>
+          <div class="line"></div>
+          <p><b>Падіння U:</b> <span id="tVD">—</span> В ( <span id="tVDp">—</span> % )</p>
+          <p><b>Спок. струм:</b> <span id="tIQ">—</span> мА · <b>До 50%:</b> <span id="tIQd">—</span> діб</p>
+          <div class="line"></div>
+          <p><b>Дріт/запоб.:</b> <span id="tW">—</span></p>
+          <p><small id="tNote">Прим.: —</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв) та CSV</h2>
+    <ol>
+      <li>Введи виміри мультиметра: <b>U спокою, U під час пуску, U заряджання, I генератора</b>. Отримай висновок.</li>
+      <li>Прорахуй <b>падіння напруги</b> для конкретної довжини/перерізу/струму → звір із нормою.</li>
+      <li>Оціни <b>споживання у спокої</b> та час до 50% ємності АКБ.</li>
+      <li>Підбери <b>перетин дроту</b> і <b>запобіжник</b> під навантаження.</li>
+      <li>Згенеруй <b>NFC</b> і <b>квиток 58 мм</b>; скопіюй <b>CSV</b> у Sheets (<span class="mono">Electrics</span>).</li>
+    </ol>
+    <div class="row">
+      <button class="btn" onclick="copyCSV('csvAll')">📋 CSV (узагальнення)</button>
+    </div>
+    <div id="csvAll" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Тест АКБ/пуск/заряд виконано, висновки адекватні</td><td>3</td></tr>
+        <tr><td>Падіння напруги розраховано, норми витримано або запропоновано рішення</td><td>3</td></tr>
+        <tr><td>Спокійний струм та підбір дроту/запобіжника обґрунтовані</td><td>3</td></tr>
+        <tr><td>Квиток/NFC + CSV</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Режим вбудування для Moodle
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+
+  // ===== Тест АКБ/пуск/заряд =====
+  function batteryTest(){
+    const uRest = +byId('uRest').value||0;
+    const uCrank= +byId('uCrank').value||0;
+    const uCharge=+byId('uCharge').value||0;
+    const iAlt  = +byId('iAlt').value||0;
+    const sysV  = +byId('sysV').value||12;
+
+    let batState = 'норма';
+    if(uRest>=12.6 && uRest<=12.9) batState='норма';
+    else if(uRest>=12.3) batState='потребує підзаряду';
+    else batState='слабка/зношена';
+
+    let crankOK = (sysV===12? (uCrank>=9.6) : (uCrank>=19.2)) ? 'норма' : 'низько (перевірити АКБ/стартер/кабелі)';
+    let chargeOK= (uCharge>=13.8 && uCharge<=14.6) ? 'норма' : (uCharge<13.5? 'недозаряд (регулятор/генератор)':'перезаряд (регулятор)');
+    const altPower = rnd((uCharge>0?uCharge:(sysV))*iAlt/1000,2);
+
+    byId('batState').textContent = batState;
+    byId('crankOK').textContent = crankOK;
+    byId('chargeOK').textContent = chargeOK;
+    byId('altPower').textContent = altPower;
+
+    const csv = [
+      `TEST|Urest=${uRest}V|Ucrank=${uCrank}V|Ucharge=${uCharge}V|Ialt=${iAlt}A|AltPower=${altPower}kW|Sys=${sysV}V`,
+      `STATE|Battery=${batState}|Crank=${crankOK}|Charge=${chargeOK}`
+    ].join('\n');
+    byId('csv1').textContent = csv;
+
+    return {uRest,uCrank,uCharge,iAlt,sysV,altPower,batState,crankOK,chargeOK};
+  }
+
+  // ===== Падіння напруги =====
+  function voltageDrop(){
+    const I = +byId('vdI').value||0;
+    const L = +byId('vdL').value||0;     // туди-назад
+    const S = +byId('vdS').value||0;     // мм²
+    const sysV=+byId('sysV').value||12;
+    const rho = 0.0175; // мОм·мм²/м (мідь) → 0.0175 Ом·мм²/м / 1000? Ні: 0.0175 Ом·мм²/м це мΩ*? Приймаємо 0.0175 Ом·мм²/м
+
+    // R = ρ * L / S, де ρ (Ом*мм²/м)
+    const R = (S>0)? (rho*L/S) : 0; // Ом
+    const Ud = I * R;               // В
+    const UdPct = sysV>0? (Ud/sysV*100) : 0;
+
+    const limitPct = +byId('vdPct').value||3;
+    const flag = UdPct<=limitPct ? 'ок' : 'завелике (збільшити S або зменшити довжину)';
+
+    // Підбір перетину з переліку
+    const list = (byId('vdList').value||'').split(',').map(s=>+s.trim()).filter(x=>x>0).sort((a,b)=>a-b);
+    let rec='—';
+    for(const s of list){
+      const r2 = rho*L/s; const u2 = I*r2; const p2 = sysV>0? (u2/sysV*100):0;
+      if(p2<=limitPct){ rec = s; break; }
+    }
+
+    byId('vdR').textContent = rnd(R,4);
+    byId('vdU').textContent = rnd(Ud,3);
+    byId('vdUp').textContent= rnd(UdPct,2);
+    byId('vdFlag').textContent = flag;
+    byId('vdRec').textContent  = rec;
+
+    return {I,L,S,R,Ud,UdPct,flag,rec};
+  }
+
+  // ===== Спокійний струм =====
+  function quiescent(){
+    const iq = +byId('iqmA').value||0; // мА
+    const hours = +byId('iqH').value||24;
+    const capAh = +byId('capAh').value||60;
+
+    const daily = rnd((iq/1000)*hours,2); // А·год/добу
+    const daysTo50 = (capAh*0.5)/((iq/1000)*24 || 1e-9);
+    let flag = iq<=30? 'ок' : (iq<=50? 'на межі' : 'завелике (шукати витік)');
+
+    byId('iqDaily').textContent = daily;
+    byId('iqDays').textContent  = rnd(daysTo50,1);
+    byId('iqFlag').textContent  = flag;
+
+    return {iq,hours,capAh,daily,daysTo50,flag};
+  }
+
+  // ===== Дріт/запобіжник =====
+  function wireFuse(){
+    const I = +byId('fwI').value||0;
+    const L = +byId('fwL').value||0;
+    const pct = +byId('fwPct').value||3;
+    const sysV= +byId('sysV').value||12;
+    const rho = 0.0175; // Ом·мм²/м
+    // Мінімальний перетин за падінням U: I*ρ*L/S <= pct%*U  → S >= I*ρ*L / (pct%*U)
+    const Smin = (pct>0 && sysV>0) ? (I*rho*L)/((pct/100)*sysV) : 0;
+
+    // Типові допустимі струми (орієнтовно, авто): 1.5мм²~15А, 2.5мм²~21А, 4мм²~28А, 6мм²~36А, 10мм²~50А, 16мм²~70А, 25мм²~95А
+    const table = [{s:1.5,a:15},{s:2.5,a:21},{s:4,a:28},{s:6,a:36},{s:10,a:50},{s:16,a:70},{s:25,a:95},{s:35,a:120}];
+    let Srec = Math.max(Smin,1.5);
+    for(const t of table){ if(t.a>=I){ Srec = Math.max(Smin,t.s); break; } }
+
+    // Запобіжник: 125–150% від робочого струму, але ≤ допустимого для дроту
+    const fuseNom = Math.min(Math.ceil(I*1.25/5)*5, // округлити до найближчих 5А
+                             (table.find(t=>t.s>=Srec)||table[table.length-1]).a);
+    const headroom = rnd(( ( (table.find(t=>t.s>=Srec)||table[table.length-1]).a - I )/I )*100,0);
+
+    byId('fwS').textContent = rnd(Srec,1);
+    byId('fwFuse').textContent = fuseNom;
+    byId('fwHead').textContent = isFinite(headroom)? headroom : '—';
+
+    const csv = `WIRE|I=${I}A|L=${L}m|pct=${pct}%|Sys=${sysV}V|Smin=${rnd(Smin,2)}mm2|Srec=${rnd(Srec,1)}mm2|Fuse=${fuseNom}A|Headroom=${headroom}%`;
+    byId('csv2').textContent = csv;
+
+    return {I,L,pct,sysV,Smin,Srec,fuseNom,headroom};
+  }
+
+  // ===== Узагальнення, квиток, NFC, CSV =====
+  function calcAll(){
+    const t = batteryTest();
+    const v = voltageDrop();
+    const q = quiescent();
+    const w = wireFuse();
+
+    // Узагальнений CSV
+    const all = [
+      byId('csv1').textContent.trim(),
+      byId('csv2').textContent.trim(),
+      `VDROP|I=${v.I}A|L=${v.L}m|S=${v.S}mm2|Ud=${rnd(v.Ud,3)}V|UdPct=${rnd(v.UdPct,2)}%|RecS=${v.rec}`,
+      `QUIESCENT|Iq=${q.iq}mA|Daily=${q.daily}Ah|Days50=${rnd(q.daysTo50,1)}|Flag=${q.flag}`
+    ].join('\n');
+    byId('csvAll').textContent = all;
+  }
+
+  function buildTicket(){
+    const t = batteryTest(), v = voltageDrop(), q = quiescent(), w = wireFuse();
+    const d = new Date().toISOString().slice(0,10);
+    byId('tDate').innerHTML = `<small>Дата: ${d}</small>`;
+    byId('tUR').textContent = t.uRest;
+    byId('tUC').textContent = t.uCrank;
+    byId('tUCH').textContent= t.uCharge;
+    byId('tAP').textContent = t.altPower;
+    byId('tVD').textContent = rnd(v.Ud,3);
+    byId('tVDp').textContent= rnd(v.UdPct,2);
+    byId('tIQ').textContent = (+byId('iqmA').value||0);
+    byId('tIQd').textContent= rnd(q.daysTo50,1);
+    byId('tW').textContent  = `${rnd(w.Srec,1)} мм² / ${w.fuseNom} А`;
+    byId('tNote').textContent= `АКБ: ${t.batState}; Пуск: ${t.crankOK}; Заряд: ${t.chargeOK}`;
+  }
+
+  function buildNFC(){
+    const t = batteryTest(), v = voltageDrop(), q = quiescent(), w = wireFuse();
+    const text = [
+      `ELECTRIC_NFC`,
+      `MACHINE:${byId('nfcId').value}`,
+      `CONTACT:${byId('nfcPhone').value}`,
+      `Urest:${t.uRest}V; Ucrank:${t.uCrank}V; Ucharge:${t.uCharge}V; AltP:${t.altPower}kW`,
+      `VDROP:${rnd(v.Ud,3)}V(${rnd(v.UdPct,2)}%); RecS:${v.rec}mm2`,
+      `QUIET:${q.iq}mA; D50:${rnd(q.daysTo50,1)}d`,
+      `WIRE:${rnd(w.Srec,1)}mm2; FUSE:${w.fuseNom}A`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = text;
+  }
+
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  function preset(){
+    byId('uRest').value = 12.48;
+    byId('uCrank').value= 10.2;
+    byId('uCharge').value=14.1;
+    byId('iAlt').value  = 55;
+    byId('capAh').value = 100;
+    byId('vdI').value   = 160;
+    byId('vdL').value   = 4.0;
+    byId('vdS').value   = 35;
+    byId('iqmA').value  = 42;
+    byId('fwI').value   = 28;
+    byId('fwL').value   = 3.0;
+    byId('fwPct').value = 3;
+    calcAll();
+  }
+
+  // Ініціалізація
+  (function init(){ calcAll(); })();
+
+  // Перерахунок при зміні будь-яких полів
+  document.addEventListener('change', e=>{
+    if(e.target.matches('input,select,textarea')) calcAll();
+  });
+</script>
+</body>
+</html>
