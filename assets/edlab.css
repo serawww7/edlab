@@ -1,0 +1,106 @@
+/* assets/edlab.css — стилі EDLab для головної сторінки
+   Свідомо зроблено «легкими»: без фреймворків, з підтримкою темного/світлого.
+*/
+:root{
+  --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e5e7eb; --muted:#9aa5b1;
+  --accent:#22c55e; --accent2:#60a5fa; --line:#1f2937; --soft:#0b1324;
+  --footer-bg:#0c1222; --footer-line:#1e293b;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55; color:var(--text);
+  background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg));
+}
+.wrap{max-width:1100px; margin:0 auto; padding:28px 16px 80px}
+
+/* Header */
+header{display:flex; gap:16px; align-items:center; justify-content:space-between; margin-bottom:8px}
+.logo{display:flex; align-items:center; gap:10px}
+.logo b{font-size:20px; letter-spacing:.3px}
+.badge{padding:6px 10px; border:1px solid var(--line); border-radius:999px; font-size:12px; color:var(--muted)}
+.emoji{font-size:26px}
+h1{font-size:36px; margin:8px 0 10px; background:linear-gradient(90deg,var(--accent2),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+p{margin:8px 0}
+
+/* Навігація спеціальностей */
+.specs{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 18px}
+.spec{
+  display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:12px;
+  border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; font-size:14px
+}
+.spec:hover{background:#0f1f39}
+.spec .dot{width:9px; height:9px; border-radius:50%}
+.s1 .dot{background:#60a5fa}   /* Інформатика (ядро) */
+.s2 .dot{background:#22c55e}   /* Агрономи */
+.s3 .dot{background:#f59e0b}   /* Механіки */
+.s4 .dot{background:#a78bfa}   /* G19 */
+.s5 .dot{background:#ef4444}   /* Технологи тваринництва */
+.s6 .dot{background:#14b8a6}   /* Електрики */
+
+/* Layout */
+.grid{display:grid; gap:16px}
+.g2{grid-template-columns:1.2fr .8fr}
+@media (max-width:1000px){.g2{grid-template-columns:1fr}}
+
+.card{
+  background:linear-gradient(180deg,var(--card),var(--bg));
+  border:1px solid var(--line); border-radius:16px; padding:16px;
+  box-shadow:0 6px 24px rgba(0,0,0,.25)
+}
+.card h2{font-size:22px; margin:6px 0 8px}
+.muted{color:var(--muted); font-size:14px}
+.btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+.btn:hover{background:#0f1f39}
+.btn.secondary{background:#0b1324}
+.tag{display:inline-block; padding:4px 10px; border:1px solid var(--line); border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+.tags{margin-top:12px}
+
+/* Список уроків */
+.lesson{display:grid; gap:12px; grid-template-columns:120px 1fr; align-items:center}
+.lesson .thumb{height:90px; border-radius:12px; background:#0b1324; border:1px solid var(--line); display:grid; place-items:center; font-size:34px}
+.lesson .meta b{display:block; font-size:18px}
+.lesson .meta small{color:var(--muted)}
+.row{display:flex; gap:10px; flex-wrap:wrap}
+
+/* Генератор iFrame */
+label{display:block; font-size:13px; color:#cbd5e1; margin:8px 0 4px}
+input[type="text"], input[type="number"], textarea{
+  width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#e5e7eb;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+textarea{min-height:140px; resize:vertical}
+.inline{display:grid; grid-template-columns:1fr 180px; gap:10px}
+@media (max-width:720px){.inline{grid-template-columns:1fr}}
+
+/* Тестер iFrame */
+.tester{border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff}
+.tester iframe{width:100%; height:520px; border:0; display:block; background:#fff}
+
+/* Виразний футер */
+.site-footer{
+  background:linear-gradient(180deg,var(--footer-bg),#0a0f1d);
+  border-top:1px solid var(--footer-line);
+  color:#c7d2fe;
+}
+.footer-inner{
+  max-width:1100px; margin:0 auto; padding:22px 16px; display:grid; gap:16px; grid-template-columns:1.1fr 1fr 0.8fr;
+}
+.footer-inner .col{padding:6px 8px}
+.footer-inner .brand .brand-line{display:flex; align-items:center; gap:10px; font-size:18px; margin-bottom:6px}
+.footer-inner h3{margin:4px 0 6px; font-size:16px; color:#e2e8f0}
+.site-footer p{margin:6px 0}
+.site-footer a{color:#9ec5ff; text-decoration:none}
+.site-footer a:hover{opacity:.9; text-decoration:underline}
+.footer-inner ul{margin:6px 0; padding:0; list-style:none}
+.footer-inner li{margin:4px 0}
+.footer-bottom{
+  border-top:1px solid var(--footer-line);
+  text-align:center; padding:10px 16px; font-size:12px; color:#9fb0c8
+}
+
+/* Вбудовано в Moodle → спрощений вигляд */
+html.embedded body{background:#fff; color:#111}
+html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+html.embedded .spec{background:#fff; color:#111; border:1px solid #e5e7eb}
+html.embedded .spec:hover{background:#f8fafc}
