@@ -1,0 +1,386 @@
+<!-- electric_para5.html
+     Пара 5 (Електрики, аудиторно): План/Факт вимірювань U,I · журнал · PASS/FAIL · друк 58 мм · експорт CSV
+     Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Електрики · Пара 5 — План/Факт вимірювань, журнал, друк 58 мм</title>
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
+  .wrap{max-width:1024px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted)}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .small{font-size:12px; color:#93a3b5}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+
+  /* Таблиця */
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+
+  /* Форми */
+  .field{display:flex; gap:8px; margin:6px 0}
+  .field label{min-width:170px; color:#cbd5e1}
+  .field input,.field select{flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  @media (max-width:900px){.g2{grid-template-columns:1fr}}
+
+  /* Квитанція 58 мм */
+  .ticket{width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
+  .ticket p{margin:2px 0; font-size:12px}
+  .ticket .center{text-align:center}
+  .ticket .line{border-top:1px dashed #111; margin:6px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+
+  /* Вбудований режим (iframe/Moodle) */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+
+  @media print{
+    @page{ size:58mm auto; margin:4mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Електрики · Пара 5 · аудиторно</span>
+    <h1>📏 План/Факт вимірювань U,I · журнал · 🧾 «ПЕРЕВІРЕНО 58 мм»</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>Звірити розрахунок лінії з реальними вимірюваннями: імпорт <span class="mono">line_calc.csv</span> з Пара 4, виміряти U та I в точках, розрахувати відхилення, присвоїти PASS/FAIL, надрукувати «ПЕРЕВІРЕНО» та експортувати журнал у CSV.</p>
+      <div class="row">
+        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <button class="btn" type="button" onclick="pasteSample()">⬇️ Навчальний CSV</button>
+        <button class="btn" type="button" onclick="parseLine()">🔎 Імпорт плану</button>
+      </div>
+      <p class="small">Очікувані поля у CSV: <span class="mono">line_name,phase,U_V,P_kW,cos_phi,eta,I_A,material,section_mm2,ampacity_A,MCB_A,length_m,voltage_drop_pct,drop_limit_pct,install,responsible</span></p>
+    </div>
+
+    <div class="card">
+      <h2>⚙️ Налаштування допусків (навчальні)</h2>
+      <div class="grid g2">
+        <div class="field">
+          <label for="tolU">Допуск напруги, %</label>
+          <input id="tolU" type="number" step="0.1" value="10" />
+        </div>
+        <div class="field">
+          <label for="tolI">Допуск струму, %</label>
+          <input id="tolI" type="number" step="0.1" value="20" />
+        </div>
+      </div>
+      <p class="small">В реальній практиці допуски залежать від нормативів та типу об’єкта — тут спрощена навчальна модель.</p>
+    </div>
+
+    <div class="card">
+      <h2>➕ Додати точку вимірювання</h2>
+      <div class="grid g2">
+        <div>
+          <div class="field"><label for="ptName">Назва точки</label><input id="ptName" type="text" value="Щит / Ввід" /></div>
+          <div class="field"><label for="Umeas">U факт, В</label><input id="Umeas" type="number" step="0.1" /></div>
+          <div class="field"><label for="Imeas">I факт, А</label><input id="Imeas" type="number" step="0.01" /></div>
+          <div class="row">
+            <button class="btn" type="button" onclick="addPoint()">➕ Додати в журнал</button>
+            <button class="btn" type="button" onclick="seedPoints()">🔄 Приклад точок</button>
+          </div>
+        </div>
+        <div>
+          <p class="small">Порада: додай 2–3 точки (наприклад, «Щит/Ввід», «Розетка 1», «Розетка 2»). Запиши реальні вимірювання з мультиметра.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card printable">
+      <h2>📋 Журнал вимірювань (план/факт)</h2>
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>#</th><th>Точка</th><th>U план, В</th><th>U факт, В</th><th>ΔU, %</th>
+            <th>I план, А</th><th>I факт, А</th><th>ΔI, %</th><th>Статус</th><th>Дії</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="small">PASS — обидва відхилення в межах допусків. Інакше — FAIL.</p>
+    </div>
+
+    <div class="card">
+      <h2>🧾 Мітка «ПЕРЕВІРЕНО» (58 мм)</h2>
+      <div class="grid g2">
+        <div>
+          <div id="ticket" class="ticket" aria-live="polite">
+            <h4>ПЕРЕВІРЕНО · ЛІНІЯ</h4>
+            <p class="center"><small id="t-date">Дата: —</small></p>
+            <div class="line"></div>
+            <p><b id="t-line">Лінія: —</b></p>
+            <p>Точка: <span id="t-pt">—</span></p>
+            <p>U план/факт: <span id="t-Upair">—</span></p>
+            <p>I план/факт: <span id="t-Ipair">—</span></p>
+            <p>ΔU/ΔI: <span id="t-deltas">—</span></p>
+            <p>Статус: <span id="t-status">—</span></p>
+            <div class="line"></div>
+            <p class="center"><small>Відп.: <span id="t-resp">—</span></small></p>
+            <p class="qr"><small id="t-ref">Ref: MEAS-0001</small></p>
+          </div>
+          <div class="row no-print" style="margin-top:8px">
+            <button class="btn" type="button" onclick="buildTicket()">🧩 Зібрати</button>
+            <button class="btn" type="button" onclick="window.print()">🖨️ Друк 58 мм</button>
+            <button class="btn" type="button" onclick="downloadTXT()">📥 TXT</button>
+          </div>
+        </div>
+        <div>
+          <div class="field"><label for="resp">Відповідальний</label><input id="resp" type="text" value="Студент ПІБ / група" /></div>
+          <div class="field"><label for="stickPt">Точка для мітки</label>
+            <select id="stickPt"></select>
+          </div>
+          <div class="small">Оберіть точку з журналу — дані підтягнуться автоматично у квитанцію.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📤 Експорт журналу</h2>
+      <div class="row">
+        <button class="btn" type="button" onclick="exportCSV()">CSV</button>
+      </div>
+      <p class="small">Назва файлу: <span class="mono">ГРУПА_Прізвище_Вимірювання.csv</span></p>
+    </div>
+  </div>
+
+<script>
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // Стан
+  let plan = { name:'—', U:230, I:10 };
+  let points = []; // {id, name, Uplan, Ufact, dU, Iplan, Ifact, dI, status}
+  const tblBody = document.querySelector('#tbl tbody');
+  const stickSel = document.getElementById('stickPt');
+
+  // Імпорт плану з CSV (з Пара 4)
+  const fileInput = document.getElementById('file');
+  const csvSample = `line_name,phase,U_V,P_kW,cos_phi,eta,I_A,material,section_mm2,ampacity_A,MCB_A,length_m,voltage_drop_pct,drop_limit_pct,install,responsible
+Лінія Розетки/Майстерня,3,400,6.0,0.95,0.98,9.05,Cu,6,36,16,35,1.45,5,air,Студент ПІБ / група`;
+
+  function pasteSample(){
+    // Збережемо sample у файл-поле неможливо, просто розберемо рядок
+    parseCSVText(csvSample);
+  }
+
+  fileInput.addEventListener('change', async (e)=>{
+    const f = e.target.files[0]; if(!f) return;
+    const txt = await f.text();
+    parseCSVText(txt);
+  });
+
+  function parseCSVText(txt){
+    const lines = txt.trim().split(/\r?\n/);
+    if(lines.length<2){ alert('CSV порожній'); return; }
+    const headers = lines[0].split(',');
+    const vals = splitCSV(lines[1]);
+    const row = {};
+    headers.forEach((h,i)=> row[h.trim()] = (vals[i]||'').replace(/^"|"$/g,''));
+    // очікуємо U_V та I_A
+    const U = parseFloat(row['U_V']) || 230;
+    const I = parseFloat(row['I_A']) || 10;
+    const name = row['line_name'] || 'Лінія';
+    plan = { name, U, I, resp: row['responsible']||'' };
+    alert(`Імпортовано план: ${plan.name}, U=${plan.U} В, I=${plan.I} А`);
+    rebuildStickOptions();
+  }
+
+  function splitCSV(line){
+    const res=[]; let cur=''; let q=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){ if(q && line[i+1]==='"'){ cur+='"'; i++; } else { q=!q; } }
+      else if(ch===',' && !q){ res.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    res.push(cur); return res;
+  }
+
+  // Додавання точок
+  function addPoint(){
+    const name = document.getElementById('ptName').value.trim() || 'Точка';
+    const Ufact = parseFloat(document.getElementById('Umeas').value);
+    const Ifact = parseFloat(document.getElementById('Imeas').value);
+    if(!(Ufact>=0) || !(Ifact>=0)){ alert('Введи U факт та I факт'); return; }
+    const tolU = parseFloat(document.getElementById('tolU').value)||10;
+    const tolI = parseFloat(document.getElementById('tolI').value)||20;
+
+    const Uplan = plan.U;
+    const Iplan = plan.I;
+
+    const dU = (Ufact - Uplan)/Uplan*100;
+    const dI = (Ifact - Iplan)/Iplan*100;
+
+    const passU = Math.abs(dU) <= tolU;
+    const passI = Math.abs(dI) <= tolI;
+    const status = (passU && passI) ? 'PASS' : 'FAIL';
+
+    const rec = {
+      id: 'P' + Math.random().toString(36).slice(2,6).toUpperCase(),
+      name, Uplan, Ufact, dU: Math.round(dU*100)/100,
+      Iplan, Ifact, dI: Math.round(dI*100)/100, status
+    };
+    points.push(rec);
+    renderTable();
+    rebuildStickOptions();
+  }
+
+  function seedPoints(){
+    document.getElementById('ptName').value = 'Щит / Ввід';
+    document.getElementById('Umeas').value = plan.U * 0.98;
+    document.getElementById('Imeas').value = plan.I * 1.05;
+    addPoint();
+
+    document.getElementById('ptName').value = 'Розетка 1';
+    document.getElementById('Umeas').value = plan.U * 0.94;
+    document.getElementById('Imeas').value = plan.I * 1.12;
+    addPoint();
+  }
+
+  function renderTable(){
+    tblBody.innerHTML='';
+    points.forEach((p,idx)=>{
+      const tr = document.createElement('tr');
+      const badge = `<span class="mono" style="padding:2px 8px;border:1px solid #223049;border-radius:999px;background:#0d1a2e;color:${p.status==='PASS'?'#22c55e':'#ef4444'}">${p.status}</span>`;
+      tr.innerHTML = `
+        <td>${idx+1}</td>
+        <td>${escapeHTML(p.name)}</td>
+        <td class="mono">${p.Uplan}</td>
+        <td class="mono">${p.Ufact}</td>
+        <td class="mono">${p.dU}</td>
+        <td class="mono">${p.Iplan}</td>
+        <td class="mono">${p.Ifact}</td>
+        <td class="mono">${p.dI}</td>
+        <td>${badge}</td>
+        <td class="mono">
+          <button class="btn" data-act="choose" data-id="${p.id}">Мітка</button>
+          <button class="btn" data-act="del" data-id="${p.id}">✖</button>
+        </td>`;
+      tblBody.appendChild(tr);
+    });
+  }
+
+  tblBody.addEventListener('click', (e)=>{
+    const b = e.target.closest('button'); if(!b) return;
+    const id = b.getAttribute('data-id');
+    const act = b.getAttribute('data-act');
+    if(act==='del'){
+      points = points.filter(x=>x.id!==id);
+      renderTable(); rebuildStickOptions(); return;
+    }
+    if(act==='choose'){
+      stickSel.value = id;
+      buildTicket();
+      document.getElementById('ticket').scrollIntoView({behavior:'smooth'});
+    }
+  });
+
+  function rebuildStickOptions(){
+    stickSel.innerHTML='';
+    points.forEach(p=>{
+      const opt = document.createElement('option');
+      opt.value = p.id; opt.textContent = `${p.name} (${p.status})`;
+      stickSel.appendChild(opt);
+    });
+  }
+
+  function escapeHTML(s){ return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function nowStamp(){ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+
+  // Квитанція
+  function buildTicket(){
+    const id = stickSel.value;
+    const p = points.find(x=>x.id===id);
+    const resp = document.getElementById('resp').value.trim() || (plan.resp||'—');
+    document.getElementById('t-date').textContent = `Дата: ${nowStamp()}`;
+    document.getElementById('t-line').textContent = `Лінія: ${plan.name}`;
+    if(!p){
+      document.getElementById('t-pt').textContent = '—';
+      document.getElementById('t-Upair').textContent = '—';
+      document.getElementById('t-Ipair').textContent = '—';
+      document.getElementById('t-deltas').textContent = '—';
+      document.getElementById('t-status').textContent = '—';
+      document.getElementById('t-resp').textContent = resp;
+      document.getElementById('t-ref').textContent = 'Ref: MEAS-XXXX';
+      return;
+    }
+    document.getElementById('t-pt').textContent = p.name;
+    document.getElementById('t-Upair').textContent = `${p.Uplan} / ${p.Ufact}`;
+    document.getElementById('t-Ipair').textContent = `${p.Iplan} / ${p.Ifact}`;
+    document.getElementById('t-deltas').textContent = `${p.dU}% / ${p.dI}%`;
+    document.getElementById('t-status').textContent = p.status;
+    document.getElementById('t-resp').textContent = resp;
+    const ref = 'MEAS-' + Math.random().toString(36).slice(2,8).toUpperCase();
+    document.getElementById('t-ref').textContent = `Ref: ${ref}`;
+  }
+
+  function downloadTXT(){
+    const id = stickSel.value;
+    const p = points.find(x=>x.id===id);
+    const lines = [];
+    lines.push('MEAS VERIFIED 58mm');
+    lines.push('-------------------');
+    lines.push(document.getElementById('t-date').textContent);
+    lines.push(document.getElementById('t-line').textContent);
+    lines.push(`Точка: ${p ? p.name : '—'}`);
+    lines.push(`U план/факт: ${p ? (p.Uplan+' / '+p.Ufact) : '—'}`);
+    lines.push(`I план/факт: ${p ? (p.Iplan+' / '+p.Ifact) : '—'}`);
+    lines.push(`ΔU/ΔI: ${p ? (p.dU+'% / '+p.dI+'%') : '—'}`);
+    lines.push(`Статус: ${p ? p.status : '—'}`);
+    lines.push(`Відп.: ${document.getElementById('t-resp').textContent}`);
+    lines.push(document.getElementById('t-ref').textContent);
+    const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'meas_verified_58mm.txt';
+    a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  function exportCSV(){
+    const headers = ['point_id','point_name','U_plan_V','U_fact_V','dU_pct','I_plan_A','I_fact_A','dI_pct','status','line_name'];
+    const rows = points.map(p=>[p.id,p.name,p.Uplan,p.Ufact,p.dU,p.Iplan,p.Ifact,p.dI,p.status,plan.name]);
+    const csv = [headers.join(','), ...rows.map(a=>a.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'measurements_plan_fact.csv';
+    a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  function parseLine(){ alert('Якщо обрано файл — натисни OK для імпорту. Якщо ні — натисни «Навчальний CSV».'); }
+
+  // Авто: якщо сторінка відкрита вперше — згенерувати порожню опцію
+  rebuildStickOptions();
+</script>
+</body>
+</html>
