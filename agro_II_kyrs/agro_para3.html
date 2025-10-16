@@ -1,0 +1,394 @@
+<!-- ПАРА 3 (аудиторно) для агрономів
+     Тема: Польові треки зі смартфона — GPX → аналіз → план/факт у таблиці
+     Фокус: максимум телефону. Є локальний аналізатор GPX (без інтернету), підрахунок довжини, часу, швидкості, генерація рядка для Sheets.
+     Готово для GitHub Pages або вставки в Moodle через iFrame. Без сторонніх бібліотек.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 3 — Польові треки: GPX → аналіз → план/факт</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --good:#10b981; --line:#1f2937;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:980px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  ul,ol{margin:8px 0 12px 22px}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .grid{display:grid; gap:12px}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:900px){.g3{grid-template-columns:1fr}}
+  .kpi{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px dashed #263042; border-radius:12px}
+  .kpi b{font-size:14px}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:10px 12px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left}
+  .table tbody tr:nth-child(even){background:#0b1324}
+  .step{display:flex; gap:12px; align-items:flex-start; padding:10px 12px; border:1px solid #1f2937; border-radius:12px; background:#0b1324; margin:8px 0}
+  .step .n{min-width:30px; height:30px; border-radius:8px; background:#0e1a2e; display:grid; place-items:center; color:#a5b4fc; font-weight:700}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .muted{color:#93a3b5}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:#ef4444}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .field{display:flex; gap:8px; margin:6px 0; align-items:center}
+  .field label{min-width:160px; color:#cbd5e1}
+  .field input, .field select{
+    flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb
+  }
+  .out{background:#0b1324; border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:#0b1324}
+  .small{font-size:12px; color:#9fb0c8}
+  .success{border-color:#1f5135; background:#0f2a1c}
+  .danger{border-color:#5b2020; background:#2a0f0f}
+
+  /* Вбудовано (iframe) → стриманий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+
+  @media print{
+    @page{ margin:12mm }
+    .no-print{ display:none !important }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 3 · ЛПЗ · агрономи</span>
+    <h1>🗺️ Польові треки: запис GPX на смартфоні → аналіз → план/факт</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        Навчити студента записувати трек <b>GPX</b> зі смартфона, локально обробляти файл (довжина, час, швидкість),
+        та переносити підсумок у таблицю <b>Tracks</b> з полем <i>План/Факт</i>.
+      </p>
+      <div class="grid g3">
+        <div class="kpi"><span>📍</span><div><b>GPX</b><br/><span class="mono">&lt;trkpt lat lon time&gt;</span></div></div>
+        <div class="kpi"><span>⏱️</span><div><b>Час і відстань</b><br/>Haversine + ISO time</div></div>
+        <div class="kpi"><span>📊</span><div><b>План/Факт</b><br/>довжина, швидкість, відхилення</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🧰 Обладнання та ПЗ</h2>
+      <ul>
+        <li>Смартфон (Android/iOS) з будь-яким GPX-трекером <i>(Google Maps «Маршрут», Health/Fitness, або окремий трекер)</i>.</li>
+        <li>Ця сторінка (локальний аналізатор GPX) + Google Sheets/Excel для таблиці <span class="mono">Tracks</span>.</li>
+      </ul>
+      <p class="muted">💡 Якщо застосунок не вміє експортувати GPX — зроби скрін маршруту і внеси довжину/час вручну в калькулятор нижче.</p>
+    </div>
+
+    <!-- АНАЛІЗАТОР GPX -->
+    <div class="card">
+      <h2>🧪 Локальний аналізатор GPX (працює офлайн у браузері)</h2>
+      <div class="field">
+        <label for="gpxFile">Завантаж GPX-файл</label>
+        <input id="gpxFile" type="file" accept=".gpx,.xml" />
+      </div>
+      <div class="row">
+        <button class="btn" type="button" onclick="parseGPX()">📥 Обробити GPX</button>
+        <button class="btn" type="button" onclick="resetAll()">🧹 Очистити</button>
+      </div>
+
+      <div id="gpxSummary" class="box" style="margin-top:10px; display:none">
+        <h3>Підсумок треку</h3>
+        <p><b>Точок:</b> <span id="ptCount">0</span></p>
+        <p><b>Довжина:</b> <span id="distM">0</span> м (<span id="distKM">0</span> км)</p>
+        <p><b>Час руху:</b> <span id="durMin">0</span> хв (<span id="durHHMM">00:00</span>)</p>
+        <p><b>Середня швидкість:</b> <span id="avgKmh">0</span> км/год</p>
+        <p class="small">Обчислено за трекпоінтами <span class="mono">trkpt(lat, lon, time)</span> методом Haversine.</p>
+      </div>
+
+      <details class="box" style="margin-top:10px">
+        <summary>🔎 Переглянути перші 5 точок (lat, lon, time)</summary>
+        <pre id="firstPts" style="white-space:pre-wrap; margin:6px 0 0 0">—</pre>
+      </details>
+    </div>
+
+    <!-- КАЛЬКУЛЯТОР план/факт -->
+    <div class="card">
+      <h2>🧮 Калькулятор «План/Факт» і генератор рядка для Sheets</h2>
+
+      <div class="grid g3">
+        <div class="box">
+          <h3>Вхідні (з треку або вручну)</h3>
+          <div class="field"><label for="date">Дата</label><input id="date" type="date" /></div>
+          <div class="field"><label for="fieldCode">Код поля</label><input id="fieldCode" type="text" value="F-01" /></div>
+          <div class="field"><label for="crop">Культура</label><input id="crop" type="text" value="Пшениця оз." /></div>
+          <div class="field"><label for="op">Операція</label><input id="op" type="text" value="Огляд" /></div>
+          <div class="field"><label for="lenM">Довжина, м (факт)</label><input id="lenM" type="number" step="1" value="0" /></div>
+          <div class="field"><label for="timeMin">Час, хв (факт)</label><input id="timeMin" type="number" step="1" value="0" /></div>
+          <div class="row">
+            <button class="btn" type="button" onclick="takeFromGPX()">⬅️ Взяти з GPX-підсумку</button>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>План</h3>
+          <div class="field"><label for="planM">Планова довжина, м</label><input id="planM" type="number" step="1" value="1200" /></div>
+          <div class="field"><label for="comment">Коментар</label><input id="comment" type="text" value="Маршрут по межі поля" /></div>
+          <div class="box success" id="calcBox" style="margin-top:8px">
+            <div><b>Середня швидкість:</b> <span id="calcSpeed">0.0</span> км/год</div>
+            <div><b>Відхилення від плану:</b> <span id="calcDev">0</span> м</div>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" type="button" onclick="recalc()">🔁 Перерахувати</button>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Згенерований рядок для <span class="mono">Tracks</span></h3>
+          <p class="small">Порядок колонок: Дата | Поле | Культура | Операція | Довжина, м | Час, хв | Сер. швидк., км/год | План, м | Відхилення, м | Коментар</p>
+          <div id="csvOut" class="out">—</div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" type="button" onclick="genCSV()">📄 Згенерувати</button>
+            <button class="btn" type="button" onclick="copyCSV()">📋 Скопіювати</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- СТРУКТУРА ТАБЛИЦІ -->
+    <div class="card">
+      <h2>📋 Структура аркуша <span class="mono">Tracks</span> (у Google Sheets/Excel)</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Дата</th><th>Поле</th><th>Культура</th><th>Операція</th><th>Довжина, м</th><th>Час, хв</th><th>Сер. швидк., км/год</th><th>План, м</th><th>Відхилення, м</th><th>Коментар</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="hl">
+            <td>2025-10-16</td><td>F-01</td><td>Пшениця оз.</td><td>Огляд</td><td>1280</td><td>16</td><td>4.8</td><td>1200</td><td>+80</td><td>Додаткові обходи межі</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="muted">Формули: <span class="mono">Сер. швидк. (км/год) = (Довжина, м / 1000) / (Час, хв / 60)</span>; <span class="mono">Відхилення = Факт − План</span>.</p>
+    </div>
+
+    <!-- ХІД РОБОТИ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+
+      <div class="step"><div class="n">1</div><div>
+        <b>Запис треку на смартфоні (10–15 хв).</b> Запусти трекер, пройди/проїдь <b>≥ 300 м</b> рівним маршрутом (імітація проходу агрегату), зупини запис, <b>експортуй GPX</b>.
+      </div></div>
+
+      <div class="step"><div class="n">2</div><div>
+        <b>Завантаження GPX і аналіз (5–8 хв).</b> Завантаж файл у блок «Локальний аналізатор» → отримаєш довжину, час, швидкість.
+        Перевір перші 5 точок (lat, lon, time).
+      </div></div>
+
+      <div class="step"><div class="n">3</div><div>
+        <b>Калькуляція План/Факт (5 хв).</b> У блоці «Калькулятор» натисни «Взяти з GPX-підсумку», задай планову довжину, обчисли відхилення.
+      </div></div>
+
+      <div class="step"><div class="n">4</div><div>
+        <b>Генерація рядка для Sheets (2 хв).</b> Кнопка «Згенерувати» → «Скопіювати» → встав у рядок аркуша <span class="mono">Tracks</span>.
+      </div></div>
+
+      <div class="step"><div class="n">5</div><div>
+        <b>Візуалізація (5 хв).</b> Побудуй 2 діаграми: «План/Факт довжини» (стовпчикова) і «Середня швидкість» (лінійна).
+      </div></div>
+
+      <div class="step"><div class="n">6</div><div>
+        <b>Короткий висновок (2–3 речення).</b> Причини перевищення/нестачі довжини; рекомендації (корекція маршруту, швидкості тощо).
+      </div></div>
+    </div>
+
+    <!-- ОЦІНЮВАННЯ -->
+    <div class="card">
+      <h2>✅ Контроль якості та оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Коректний GPX (є точки з часом) та успішний аналіз</td><td>3</td></tr>
+          <tr><td>Калькуляція План/Факт (швидкість, відхилення) без помилок</td><td>3</td></tr>
+          <tr><td>Запис у <span class="mono">Tracks</span> + дві діаграми</td><td>3</td></tr>
+          <tr><td>Короткий висновок по суті</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">📱 Максимум телефону</p>
+      <p class="pill">🗺️ GPX-аналіз</p>
+      <p class="pill">📊 План/факт</p>
+    </div>
+
+    <div class="card">
+      <h2>🆘 Поради та типові помилки</h2>
+      <ul>
+        <li><b>Нульова довжина?</b> Перевір, чи у GPX є <span class="mono">trk/trkseg/trkpt</span> з <span class="mono">lat</span>, <span class="mono">lon</span> і <span class="mono">time</span>.</li>
+        <li><b>Дрібні «стрибки» координат:</b> це нормально. Haversine згладжує на відрізках; уникай стояння на місці з увімкненим записом.</li>
+        <li><b>Швидкість «космічна»:</b> перевір одиниці (м↔км, хв↔год) та коректність часу в GPX.</li>
+      </ul>
+    </div>
+  </div>
+
+<script>
+  // Стриманий вигляд у вбудуванні
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // Haversine distance між двома точками (в метрах)
+  function haversine(lat1, lon1, lat2, lon2){
+    const R = 6371000; // м
+    const toRad = d => d * Math.PI/180;
+    const dLat = toRad(lat2-lat1);
+    const dLon = toRad(lon2-lon1);
+    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  function parseGPX(){
+    const file = document.getElementById('gpxFile').files[0];
+    if(!file){ alert('Спочатку вибери GPX-файл.'); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const xml = new DOMParser().parseFromString(reader.result, 'application/xml');
+        const pts = Array.from(xml.getElementsByTagName('trkpt'));
+        if(!pts.length){ alert('У файлі немає трекпоінтів <trkpt>.'); return; }
+
+        let dist = 0;
+        let firstTime = null, lastTime = null;
+        const first5 = [];
+
+        for(let i=0;i<pts.length;i++){
+          const lat = parseFloat(pts[i].getAttribute('lat'));
+          const lon = parseFloat(pts[i].getAttribute('lon'));
+          const timeEl = pts[i].getElementsByTagName('time')[0];
+          const t = timeEl ? new Date(timeEl.textContent.trim()) : null;
+
+          if(i===0){ if(t) firstTime = t; first5.push({lat,lon,time: t? t.toISOString(): '-' }); }
+          if(i>0){
+            const prev = pts[i-1];
+            const lat2 = parseFloat(prev.getAttribute('lat'));
+            const lon2 = parseFloat(prev.getAttribute('lon'));
+            dist += haversine(lat, lon, lat2, lon2);
+          }
+          if(i<5 && i>0){
+            const timeEl2 = pts[i].getElementsByTagName('time')[0];
+            const t2 = timeEl2 ? new Date(timeEl2.textContent.trim()) : null;
+            first5.push({lat,lon,time: t2? t2.toISOString(): '-'});
+          }
+          if(i===pts.length-1){ if(t) lastTime = t; }
+        }
+
+        const durationSec = (firstTime && lastTime) ? Math.max(0, (lastTime - firstTime)/1000) : 0;
+        const durationMin = Math.round(durationSec/60);
+        const avgKmh = durationSec>0 ? (dist/1000) / (durationSec/3600) : 0;
+
+        // Відображення
+        document.getElementById('ptCount').textContent = pts.length.toString();
+        document.getElementById('distM').textContent = Math.round(dist).toString();
+        document.getElementById('distKM').textContent = (dist/1000).toFixed(3);
+        document.getElementById('durMin').textContent = durationMin.toString();
+        document.getElementById('durHHMM').textContent = hhmm(durationSec);
+        document.getElementById('avgKmh').textContent = avgKmh.toFixed(2);
+        document.getElementById('gpxSummary').style.display = '';
+
+        document.getElementById('firstPts').textContent = first5.map((p,i)=>`${i+1}. ${p.lat.toFixed(6)}, ${p.lon.toFixed(6)}  ${p.time}`).join('\n');
+
+      }catch(e){
+        alert('Помилка розбору GPX: ' + e.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function hhmm(sec){
+    const h = Math.floor(sec/3600);
+    const m = Math.round((sec%3600)/60);
+    const pad = n => n.toString().padStart(2,'0');
+    return `${pad(h)}:${pad(m)}`;
+  }
+
+  function resetAll(){
+    document.getElementById('gpxFile').value = '';
+    document.getElementById('gpxSummary').style.display = 'none';
+    document.getElementById('firstPts').textContent = '—';
+    // очищення калькулятора
+    document.getElementById('lenM').value = 0;
+    document.getElementById('timeMin').value = 0;
+    document.getElementById('csvOut').textContent = '—';
+    document.getElementById('calcSpeed').textContent = '0.0';
+    document.getElementById('calcDev').textContent = '0';
+  }
+
+  function takeFromGPX(){
+    const dist = parseFloat(document.getElementById('distM').textContent || '0');
+    const dur = parseFloat(document.getElementById('durMin').textContent || '0');
+    if(!dist || !dur){ alert('Спочатку оброби GPX.'); return; }
+    document.getElementById('lenM').value = Math.round(dist);
+    document.getElementById('timeMin').value = Math.max(1, Math.round(dur));
+    recalc();
+  }
+
+  function recalc(){
+    const lenM = parseFloat(document.getElementById('lenM').value||'0');
+    const timeMin = parseFloat(document.getElementById('timeMin').value||'0');
+    const planM = parseFloat(document.getElementById('planM').value||'0');
+    const speed = timeMin>0 ? ((lenM/1000)/(timeMin/60)) : 0;
+    const dev = Math.round(lenM - planM);
+    document.getElementById('calcSpeed').textContent = speed.toFixed(2);
+    document.getElementById('calcDev').textContent = (dev>0? '+' : '') + dev;
+    const box = document.getElementById('calcBox');
+    box.classList.remove('success','danger');
+    if(Math.abs(dev) <= planM*0.1){ box.classList.add('success'); } else { box.classList.add('danger'); }
+  }
+
+  function genCSV(){
+    const date = document.getElementById('date').value || new Date().toISOString().slice(0,10);
+    const fieldCode = (document.getElementById('fieldCode').value||'').trim();
+    const crop = (document.getElementById('crop').value||'').trim();
+    const op = (document.getElementById('op').value||'').trim();
+    const lenM = Math.round(parseFloat(document.getElementById('lenM').value||'0'));
+    const timeMin = Math.round(parseFloat(document.getElementById('timeMin').value||'0'));
+    const speed = parseFloat(document.getElementById('calcSpeed').textContent||'0').toFixed(2);
+    const planM = Math.round(parseFloat(document.getElementById('planM').value||'0'));
+    const dev = (lenM - planM);
+    const comment = (document.getElementById('comment').value||'').trim();
+
+    const fields = [date, fieldCode, crop, op, lenM, timeMin, speed, planM, (dev>0? '+' : '')+dev, comment];
+    const line = fields.map(csvEscape).join(' | ');
+    document.getElementById('csvOut').textContent = line;
+  }
+
+  function csvEscape(v){
+    const s = String(v);
+    if(/[|",\n]/.test(s)){ return '"' + s.replace(/"/g,'""') + '"'; }
+    return s;
+  }
+
+  function copyCSV(){
+    const t = document.getElementById('csvOut').textContent.trim();
+    if(!t || t==='—'){ alert('Спочатку згенеруй рядок.'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'), ()=>flash('Не вдалося скопіювати'));
+  }
+
+  function flash(msg){
+    const old = document.title;
+    document.title = msg;
+    setTimeout(()=>document.title = old, 900);
+  }
+</script>
+</body>
+</html>
