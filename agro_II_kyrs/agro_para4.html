@@ -1,0 +1,320 @@
+<!-- ПАРА 4 (дистанційно) для агрономів
+     Тема: Погода для агронома — сума активних температур (GDD), опади, «вікна робіт»
+     Фокус: максимум телефону. Учні вносять дані з будь-якого погодного застосунку вручну.
+     Усе локально, без інтернет-запитів. Готово для GitHub Pages / iFrame у Moodle. -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 4 — Погода: GDD, опади, вікна для робіт</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:980px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:900px){.g2,.g3{grid-template-columns:1fr}}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .field{display:flex; gap:8px; margin:6px 0; align-items:center}
+  .field label{min-width:160px; color:#cbd5e1}
+  .field input, .field select{
+    flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb
+  }
+  .small{font-size:12px; color:#9fb0c8}
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:#0b1324}
+  .good{border-color:#1f5135; background:#0f2a1c}
+  .badbox{border-color:#5b2020; background:#2a0f0f}
+  .out{background:#0b1324; border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .muted{color:#93a3b5}
+
+  /* Вбудовано (iframe) → стриманий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+
+  @media print{
+    @page{ margin:12mm }
+    .no-print{ display:none !important }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 4 · дистанційно · агрономи</span>
+    <h1>🌦️ Погода для агронома: GDD (сума активних температур), опади і «вікна робіт»</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        Навчити студентів з телефону швидко <b>знімати числа з погодного застосунку</b>, рахувати <b>GDD</b> (сума активних температур),
+        заносити опади/вітер і <b>визначати «вікна» для робіт</b> (обприскування, висів, внесення). Уся аналітика — локально в цій сторінці.
+      </p>
+      <div class="grid g3">
+        <div class="box"><b>📱 Джерело</b><br/>Будь-який погодний ап (дані вводимо вручну).</div>
+        <div class="box"><b>🧮 Розрахунок</b><br/>GDD за формулою <span class="small mono">(Tmax+Tmin)/2 − база</span>, не нижче нуля.</div>
+        <div class="box"><b>🪟 Рішення</b><br/>Авто-підсвітка днів, де погодні умови в нормі для робіт.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🧰 Що потрібно (зі смартфона)</h2>
+      <ul>
+        <li>Будь-який погодний додаток (наприклад: стандартний «Погода», Weather.com, Meteoblue, Windy тощо).</li>
+        <li>Цей калькулятор (сторінка відкривається у браузері, працює офлайн після завантаження).</li>
+        <li>Google Sheets/Excel (аркуш <span class="mono">WeatherPlan</span> — додаси під кінець).</li>
+      </ul>
+      <p class="muted">⚠️ Дані вносимо вручну — це тренує «увагу до цифр» і дозволяє працювати без API.</p>
+    </div>
+
+    <!-- КАЛЬКУЛЯТОР GDD + ВІКНА РОБІТ -->
+    <div class="card">
+      <h2>🧪 Калькулятор GDD і «вікон» (7 днів)</h2>
+
+      <div class="grid g2">
+        <div class="box">
+          <h3>Параметри</h3>
+          <div class="field"><label for="crop">Культура</label><input id="crop" type="text" value="Пшениця озима" /></div>
+          <div class="field"><label for="base">Базова t° (°C)</label><input id="base" type="number" step="0.1" value="5" /></div>
+          <div class="field"><label for="gddTarget">Мета GDD (етап)</label><input id="gddTarget" type="number" step="1" value="120" /></div>
+          <div class="field"><label for="rainMax">Макс. опади (мм/доба)</label><input id="rainMax" type="number" step="0.1" value="1.0" /></div>
+          <div class="field"><label for="windMax">Макс. вітер (м/с)</label><input id="windMax" type="number" step="0.1" value="4.5" /></div>
+          <div class="row"><button class="btn" type="button" onclick="recalcAll()">🔁 Перерахувати</button></div>
+          <p class="small">Рекомендація: база 5°C для озимих, 10°C для кукурудзи/соняшнику тощо.</p>
+        </div>
+
+        <div class="box">
+          <h3>Підсумок</h3>
+          <p>Сума GDD за 7 днів: <b><span id="sumGDD">0</span></b></p>
+          <p>Днів з умовами для робіт: <b><span id="okDays">0</span></b> / 7</p>
+          <p class="small">Етап досягнеться через ≈ <span id="etaDays">—</span> днів (оцінка за середнім GDD/день).</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top:12px">Ввід даних (зніми з погодного застосунку на 7 днів)</h3>
+      <div class="small">Для кожного дня внеси Tmin, Tmax, опади (мм), вітер (м/с). Якщо вітру нема — постав 0.</div>
+
+      <div class="table-wrap" style="overflow:auto; margin-top:8px">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th>День</th>
+              <th>Дата</th>
+              <th>Tmin</th>
+              <th>Tmax</th>
+              <th>Опади, мм</th>
+              <th>Вітер, м/с</th>
+              <th>GDD (день)</th>
+              <th>Роботи</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <!-- згенерується скриптом -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button class="btn" type="button" onclick="presetSample()">🧪 Приклад даних</button>
+        <button class="btn" type="button" onclick="copyPlan()">📋 Скопіювати підсумок (CSV)</button>
+      </div>
+
+      <div id="csvOut" class="out" style="margin-top:10px">—</div>
+      <p class="small">CSV-рядки у форматі: <span class="mono">Дата | Tmin | Tmax | GDD | Опади | Вітер | Роботи(так/ні)</span></p>
+    </div>
+
+    <!-- СТРУКТУРА АРКУША -->
+    <div class="card">
+      <h2>📋 Структура аркуша <span class="mono">WeatherPlan</span> (Sheets/Excel)</h2>
+      <table class="table">
+        <thead>
+          <tr><th>Культура</th><th>Період</th><th>Сума GDD</th><th>Днів «вікна»</th><th>Ціль GDD (етап)</th><th>Орієнт. дата досягнення</th><th>Коментар</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Пшениця оз.</td><td>16–22.10.2025</td><td>98</td><td>3</td><td>120</td><td>24.10.2025</td><td>Обприскування планувати на дні з вітром ≤4 м/с</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="muted">Формули: <span class="mono">ΣGDD = SUM(GDD_днів)</span>; <span class="mono">ETA ≈ (Ціль − накопичено)/середнє GDD_день</span>.</p>
+    </div>
+
+    <!-- ХІД, ДЗ, ОЦІНЮВАННЯ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (35–55 хв) + ДЗ</h2>
+      <ol>
+        <li><b>Обери культуру</b> і задай базову t° та цільовий GDD етапу (2 хв).</li>
+        <li><b>Зніми дані з телефона</b> на 7 днів: Tmin, Tmax, опади, вітер (10–15 хв).</li>
+        <li><b>Заповни таблицю</b> на цій сторінці та натисни «Перерахувати» (5 хв).</li>
+        <li><b>Проаналізуй вікна</b> (де опади ≤ ліміту і вітер ≤ ліміту) — ці клітинки підсвітяться (5 хв).</li>
+        <li><b>Скопіюй CSV підсумку</b> і встав у аркуш <span class="mono">WeatherPlan</span> (5 хв).</li>
+        <li><b>Короткий висновок</b>: 3 речення — коли краще виконати роботи і чому (5 хв).</li>
+      </ol>
+      <h3>🏠 Домашнє завдання (телефон)</h3>
+      <ul>
+        <li>На наступні 7 днів <b>онови дані</b> для тієї ж культури і перерахуй GDD.</li>
+        <li>Зроби скрін зі свого погодного застосунку (прогноз/деталі дня) та прикріпи в Moodle.</li>
+        <li>У коментарі вкажи: «чому саме ці дні вибрані як «вікна» (посилання на вітер/опади).</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Повні 7 днів даних (Tmin/Tmax/опади/вітер) + коректний GDD</td><td>4</td></tr>
+          <tr><td>Пояснений вибір «вікон» для робіт (логіка за лімітами)</td><td>3</td></tr>
+          <tr><td>CSV вставлено у <span class="mono">WeatherPlan</span> + короткий висновок</td><td>2</td></tr>
+          <tr><td>Скрін прогнозу з телефона додано в Moodle</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">🌡️ GDD</p><p class="pill">🌧️ Опади</p><p class="pill">💨 Вітер</p><p class="pill">🪟 Вікна робіт</p>
+    </div>
+  </div>
+
+<script>
+  // Стриманий вигляд у вбудуванні
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // Побудова таблиці на 7 днів з сьогодні
+  const rowsEl = document.getElementById('rows');
+  const fmtDate = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const today = new Date();
+  const days = Array.from({length:7},(_,i)=>{const t=new Date(today); t.setDate(today.getDate()+i); return t;});
+
+  function buildRows(){
+    rowsEl.innerHTML = '';
+    days.forEach((d,i)=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>День ${i+1}</td>
+        <td><input type="date" value="${fmtDate(d)}" /></td>
+        <td><input type="number" step="0.1" value="6" /></td>
+        <td><input type="number" step="0.1" value="16" /></td>
+        <td><input type="number" step="0.1" value="0.0" /></td>
+        <td><input type="number" step="0.1" value="3.0" /></td>
+        <td class="gdd mono">0.0</td>
+        <td class="okflag">—</td>
+      `;
+      rowsEl.appendChild(tr);
+    });
+  }
+  buildRows();
+
+  function dayGDD(tmin,tmax,base){
+    const g = ((tmax + tmin)/2) - base;
+    return Math.max(0, g);
+  }
+
+  function recalcAll(){
+    const base = parseFloat(document.getElementById('base').value||'0');
+    const rainMax = parseFloat(document.getElementById('rainMax').value||'0');
+    const windMax = parseFloat(document.getElementById('windMax').value||'0');
+    const gddTarget = parseFloat(document.getElementById('gddTarget').value||'0');
+
+    let sum = 0, okCnt = 0;
+    [...rowsEl.querySelectorAll('tr')].forEach(tr=>{
+      const tmin = parseFloat(tr.children[2].querySelector('input').value||'0');
+      const tmax = parseFloat(tr.children[3].querySelector('input').value||'0');
+      const rain = parseFloat(tr.children[4].querySelector('input').value||'0');
+      const wind = parseFloat(tr.children[5].querySelector('input').value||'0');
+
+      const gdd = dayGDD(tmin,tmax,base);
+      sum += gdd;
+
+      const gddCell = tr.querySelector('.gdd');
+      gddCell.textContent = gdd.toFixed(1);
+
+      const okCell = tr.querySelector('.okflag');
+      const ok = (rain <= rainMax && wind <= windMax);
+      okCell.textContent = ok ? '✅ так' : '⛔ ні';
+      okCell.style.color = ok ? '#10b981' : '#ef4444';
+      if(ok) okCnt++;
+    });
+
+    document.getElementById('sumGDD').textContent = Math.round(sum);
+    document.getElementById('okDays').textContent = okCnt;
+
+    const avgPerDay = sum / 7;
+    const remain = Math.max(0, gddTarget - sum);
+    const eta = avgPerDay>0 ? Math.ceil(remain / avgPerDay) : '∞';
+    document.getElementById('etaDays').textContent = (eta==='∞' ? 'н/д' : eta);
+    genCSV(); // оновити CSV внизу
+  }
+
+  function genCSV(){
+    const rows = [...rowsEl.querySelectorAll('tr')].map(tr=>{
+      const dt = tr.children[1].querySelector('input').value;
+      const tmin = parseFloat(tr.children[2].querySelector('input').value||'0');
+      const tmax = parseFloat(tr.children[3].querySelector('input').value||'0');
+      const rain = parseFloat(tr.children[4].querySelector('input').value||'0');
+      const wind = parseFloat(tr.children[5].querySelector('input').value||'0');
+      const gdd = tr.querySelector('.gdd').textContent;
+      const ok = tr.querySelector('.okflag').textContent.includes('так') ? 'так' : 'ні';
+      return [dt, tmin, tmax, gdd, rain, wind, ok].join(' | ');
+    });
+    document.getElementById('csvOut').textContent = rows.join('\n');
+  }
+
+  function copyPlan(){
+    const t = document.getElementById('csvOut').textContent.trim();
+    if(!t || t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'), ()=>flash('Не вдалося скопіювати'));
+  }
+
+  function presetSample(){
+    // Приклад реалістичних цифр для швидкого старту
+    const presets = [
+      {tmin:6,tmax:15,r:0.0,w:3.2},
+      {tmin:7,tmax:16,r:0.0,w:2.8},
+      {tmin:8,tmax:14,r:1.4,w:4.8},
+      {tmin:5,tmax:12,r:2.5,w:5.2},
+      {tmin:6,tmax:13,r:0.0,w:3.5},
+      {tmin:7,tmax:17,r:0.0,w:3.0},
+      {tmin:9,tmax:18,r:0.6,w:2.4},
+    ];
+    [...rowsEl.querySelectorAll('tr')].forEach((tr,i)=>{
+      tr.children[2].querySelector('input').value = presets[i].tmin;
+      tr.children[3].querySelector('input').value = presets[i].tmax;
+      tr.children[4].querySelector('input').value = presets[i].r;
+      tr.children[5].querySelector('input').value = presets[i].w;
+    });
+    recalcAll();
+  }
+
+  function flash(msg){
+    const old = document.title;
+    document.title = msg;
+    setTimeout(()=>document.title = old, 900);
+  }
+
+  // ініціалізація
+  recalcAll();
+</script>
+</body>
+</html>
