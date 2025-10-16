@@ -1,0 +1,416 @@
+<!-- electric_para6.html
+     Пара 6 (Електрики, аудиторно): СЕЛЕКТИВНІСТЬ ЗАХИСТІВ
+     Тема: MCB (B/C/D) та ПЗВ (RCD) — підбір, перевірка селективності, тестові сценарії, друк 58 мм, експорт CSV.
+     Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Електрики · Пара 6 — Селективність MCB/ПЗВ, тест, друк 58 мм</title>
+<meta name="color-scheme" content="light dark"/>
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
+  .wrap{max-width:1024px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted)}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .small{font-size:12px; color:#93a3b5}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+
+  /* Форми */
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  @media (max-width:900px){.g2{grid-template-columns:1fr}}
+  .field{display:flex; gap:8px; margin:6px 0}
+  .field label{min-width:180px; color:#cbd5e1}
+  .field input,.field select{flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb}
+
+  /* Таблиця сценаріїв */
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+
+  /* Квитанція 58 мм */
+  .ticket{width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
+  .ticket p{margin:2px 0; font-size:12px}
+  .ticket .center{text-align:center}
+  .ticket .line{border-top:1px dashed #111; margin:6px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+
+  /* Вбудований режим (iframe/Moodle) */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+
+  @media print{
+    @page{ size:58mm auto; margin:4mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Електрики · Пара 6 · аудиторно</span>
+    <h1>🛡️ Селективність захистів: MCB (B/C/D) та ПЗВ (RCD) · тестові сценарії · 🧾 друк 58 мм</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>Навчитися підбирати селективні пари «ввідний → відхідний» для <b>автоматичних вимикачів</b> (B/C/D) та <b>ПЗВ</b>, оцінювати селективність у <b>тепловій</b> і <b>миттєвій</b> зонах, а також для <b>ПЗВ з часовою затримкою (тип S)</b>. Згенерувати «карту селективності» (58 мм) та експорт CSV.</p>
+      <p class="small">Освітня спрощена модель: порівнюємо кратності та оціночні часи спрацювання, цього достатньо для навчального практикуму.</p>
+    </div>
+
+    <div class="card">
+      <h2>⚙️ Вхідні дані: верхній (UP) та нижній (DN) захист</h2>
+      <div class="grid g2">
+        <div>
+          <h3>🔼 Ввідний захист (UPSTREAM)</h3>
+          <div class="field"><label for="upType">Тип</label>
+            <select id="upType">
+              <option value="MCB" selected>MCB (автомат)</option>
+              <option value="RCD">ПЗВ (RCD)</option>
+            </select></div>
+          <div id="upMCB">
+            <div class="field"><label for="upIn">In, А</label><input id="upIn" type="number" value="40"/></div>
+            <div class="field"><label for="upCurve">Крива</label>
+              <select id="upCurve"><option>B</option><option selected>C</option><option>D</option></select></div>
+          </div>
+          <div id="upRCD" style="display:none">
+            <div class="field"><label for="upIdn">IΔn, мА</label><input id="upIdn" type="number" value="100"/></div>
+            <div class="field"><label for="upDelay">Затримка</label>
+              <select id="upDelay"><option value="0">миттєва</option><option value="S" selected>тип S (затримка)</option></select></div>
+          </div>
+        </div>
+
+        <div>
+          <h3>🔽 Відхідний захист (DOWNSTREAM)</h3>
+          <div class="field"><label for="dnType">Тип</label>
+            <select id="dnType">
+              <option value="MCB" selected>MCB (автомат)</option>
+              <option value="RCD">ПЗВ (RCD)</option>
+            </select></div>
+          <div id="dnMCB">
+            <div class="field"><label for="dnIn">In, А</label><input id="dnIn" type="number" value="16"/></div>
+            <div class="field"><label for="dnCurve">Крива</label>
+              <select id="dnCurve"><option selected>B</option><option>C</option><option>D</option></select></div>
+          </div>
+          <div id="dnRCD" style="display:none">
+            <div class="field"><label for="dnIdn">IΔn, мА</label><input id="dnIdn" type="number" value="30"/></div>
+            <div class="field"><label for="dnDelay">Затримка</label>
+              <select id="dnDelay"><option value="0" selected>миттєва</option><option value="S">тип S (затримка)</option></select></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-top:8px">
+        <div class="field"><label for="Ik">Очікуваний струм к.з. у точці DN, A</label><input id="Ik" type="number" value="2000"/></div>
+        <div class="field"><label for="resp">Відповідальний</label><input id="resp" type="text" value="Студент ПІБ / група"/></div>
+      </div>
+
+      <div class="row" style="margin-top:6px">
+        <button class="btn" type="button" onclick="demo()">🔄 Приклад</button>
+        <button class="btn" type="button" onclick="check()">🧩 Перевірити селективність</button>
+        <button class="btn" type="button" onclick="exportCSV()">📤 Експорт CSV</button>
+      </div>
+      <p class="small">Криві MCB: <span class="mono">B: 3–5·In</span>, <span class="mono">C: 5–10·In</span>, <span class="mono">D: 10–20·In</span> (зона миттєвого відсікання; навчальна оцінка).</p>
+    </div>
+
+    <div class="card">
+      <h2>📊 Результат перевірки</h2>
+      <div id="result" class="small">Натисни «Перевірити селективність»</div>
+      <table id="scenarios" style="margin-top:10px">
+        <thead>
+          <tr>
+            <th>#</th><th>Сценарій</th><th>Опис</th><th>Вердикт</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p id="verdict" style="margin-top:10px"></p>
+    </div>
+
+    <div class="card printable">
+      <h2>🧾 Квитанція 58 мм — Карта селективності</h2>
+      <div class="grid g2">
+        <div>
+          <div id="ticket" class="ticket" aria-live="polite">
+            <h4>КАРТА СЕЛЕКТИВНОСТІ</h4>
+            <p class="center"><small id="t-date">Дата: —</small></p>
+            <div class="line"></div>
+            <p><b id="t-pair">UP → DN: —</b></p>
+            <p>Ik(DN): <span id="t-ik">—</span> A</p>
+            <p>Зони: <span id="t-zones">—</span></p>
+            <p>Вердикт: <span id="t-status">—</span></p>
+            <div class="line"></div>
+            <p class="center"><small>Відп.: <span id="t-resp">—</span></small></p>
+            <p class="qr"><small id="t-ref">Ref: SEL-0001</small></p>
+          </div>
+          <div class="row no-print" style="margin-top:8px">
+            <button class="btn" type="button" onclick="buildTicket()">🧩 Зібрати</button>
+            <button class="btn" type="button" onclick="window.print()">🖨️ Друк 58 мм</button>
+            <button class="btn" type="button" onclick="downloadTXT()">📥 TXT</button>
+          </div>
+        </div>
+        <div>
+          <p class="small">Рекомендація: прикріпи «карту селективності» до відомості щита або на обкладинку журналу ППР.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Вбудовано у Moodle → стримана тема
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // Коефіцієнти миттєвого відсікання для кривих (нижня межа)
+  const instLow = { B:3, C:5, D:10 };
+  const instHigh= { B:5, C:10, D:20 };
+
+  // Оціночні теплові часи (навчальна модель): t ≈ 2s * (1.45/M)^2, для M<instLow; межі 0.1..5 c
+  function thermalTime(M){
+    let t = 2 * Math.pow(1.45/Math.max(M,0.1), 2);
+    if (t < 0.1) t = 0.1;
+    if (t > 5) t = 5;
+    return t;
+  }
+
+  function fmt(x){ return (typeof x==='number' ? (Math.round(x*100)/100) : x); }
+
+  function readInputs(){
+    const upType = document.getElementById('upType').value;
+    const dnType = document.getElementById('dnType').value;
+    const Ik = parseFloat(document.getElementById('Ik').value);
+    const resp = document.getElementById('resp').value.trim();
+
+    const up = { type: upType };
+    const dn = { type: dnType };
+
+    if(upType==='MCB'){
+      up.In = parseFloat(document.getElementById('upIn').value);
+      up.curve = document.getElementById('upCurve').value;
+    } else {
+      up.Idn = parseFloat(document.getElementById('upIdn').value);
+      up.delay = document.getElementById('upDelay').value; // '0' або 'S'
+    }
+    if(dnType==='MCB'){
+      dn.In = parseFloat(document.getElementById('dnIn').value);
+      dn.curve = document.getElementById('dnCurve').value;
+    } else {
+      dn.Idn = parseFloat(document.getElementById('dnIdn').value);
+      dn.delay = document.getElementById('dnDelay').value;
+    }
+    return { up, dn, Ik, resp };
+  }
+
+  // Логіка селективності (спрощена навчальна)
+  function evaluate(up, dn, Ik){
+    const scenarios = [];
+    let overall = 'MARGINAL';
+    let color = 'warn';
+    let zonesText = '—';
+
+    if(up.type==='MCB' && dn.type==='MCB'){
+      const Mup = Ik / up.In;
+      const Mdn = Ik / dn.In;
+      const Lup = instLow[up.curve], Ldn = instLow[dn.curve];
+
+      const upInst = Mup >= Lup;
+      const dnInst = Mdn >= Ldn;
+
+      if(dnInst && !upInst){
+        scenarios.push(['MCB-магнітна', 'DN у миттєвій зоні, UP — ще ні', 'PASS']);
+        overall = 'PASS'; color='ok';
+      } else if(dnInst && upInst){
+        scenarios.push(['MCB-магнітна', 'Обидва у миттєвій зоні → можливе вибивання UP', 'FAIL']);
+        overall = (overall==='PASS')?'MARGINAL':'FAIL'; color = (overall==='FAIL')?'bad':color;
+      } else {
+        const t_up = thermalTime(Mup);
+        const t_dn = thermalTime(Mdn);
+        const ratio = t_up / t_dn;
+        const verdict = (ratio>=3) ? 'PASS' : (ratio>=1.5 ? 'MARGINAL' : 'FAIL');
+        scenarios.push(['MCB-теплова', `tUP/tDN = ${fmt(ratio)} (${fmt(t_up)}s / ${fmt(t_dn)}s)`, verdict]);
+        if(verdict==='PASS'){ if(overall!=='FAIL'){ overall='PASS'; color='ok'; } }
+        else if(verdict==='MARGINAL'){ if(overall!=='FAIL'){ overall='MARGINAL'; color='warn'; } }
+        else { overall='FAIL'; color='bad'; }
+      }
+      zonesText = `MCB: Mdn=${fmt(Mdn)} (${dn.curve}), Mup=${fmt(Mup)} (${up.curve})`;
+    }
+    else if(up.type==='RCD' && dn.type==='RCD'){
+      // Правило: селективність за ПЗВ — коли UP має більшу чутливість та часову затримку
+      const sensOK = up.Idn >= 3*dn.Idn;  // навчальний критерій
+      const delayOK = (up.delay==='S') && (dn.delay!=='S');
+      const v = (sensOK && delayOK) ? 'PASS' : ( (up.Idn>dn.Idn || up.delay==='S') ? 'MARGINAL' : 'FAIL' );
+      scenarios.push(['RCD-сенс/затримка', `UP ${up.Idn}мА ${up.delay==='S'?'S-Delay':'Inst'}; DN ${dn.Idn}мА ${dn.delay==='S'?'S-Delay':'Inst'}`, v]);
+      if(v==='PASS'){ overall='PASS'; color='ok'; } else if(v==='MARGINAL'){ overall='MARGINAL'; color='warn'; } else { overall='FAIL'; color='bad'; }
+      zonesText = `RCD: ΔnUP=${up.Idn}мА, ΔnDN=${dn.Idn}мА`;
+    }
+    else {
+      // Різнорідні захисти (MCB vs RCD) — різні фізичні величини
+      scenarios.push(['Змішано (MCB/RCD)', 'Захисти діють по різним каналам (струм к.з. vs струм витоку). Координацію аналізувати окремо.', 'INFO']);
+      overall = 'PASS'; color='ok';
+      zonesText = 'MCB/RCD — незалежні канали';
+    }
+
+    // Рекомендації
+    const tips = [];
+    if(up.type==='MCB' && dn.type==='MCB'){
+      if(overall!=='PASS'){
+        tips.push('→ Зменшити миттєву чутливість UP: перейти з C на D АБО збільшити In UP (за умовою кабелю).');
+        tips.push('→ Зменшити In DN або обрати крутішу криву (B→C) лише якщо дозволяє навантаження.');
+        tips.push('→ Зменшити Ik в точці DN (довжина/імпеданс лінії, дроселі).');
+      } else {
+        tips.push('✔ DN має спрацювати раніше за UP. Перевірити на практиці за допомогою стенду.');
+      }
+    }
+    if(up.type==='RCD' && dn.type==='RCD'){
+      if(overall!=='PASS'){
+        tips.push('→ Обрати UP типу S (часова затримка) та IΔn щонайменше у 3 рази більше за DN.');
+      } else {
+        tips.push('✔ Використано часову селективність RCD: UP(S) > DN(instant).');
+      }
+    }
+
+    return { scenarios, overall, color, zonesText, tips };
+  }
+
+  function check(){
+    const {up,dn,Ik,resp} = readInputs();
+    const r = evaluate(up,dn,Ik);
+
+    // Таблиця сценаріїв
+    const tb = document.querySelector('#scenarios tbody');
+    tb.innerHTML = '';
+    r.scenarios.forEach((s,i)=>{
+      const tr = document.createElement('tr');
+      let cls = (s[2]==='PASS'?'ok':(s[2]==='FAIL'?'bad':'warn'));
+      tr.innerHTML = `<td>${i+1}</td><td>${s[0]}</td><td>${s[1]}</td><td class="${cls}"><b>${s[2]}</b></td>`;
+      tb.appendChild(tr);
+    });
+
+    // Загальний вердикт
+    const res = document.getElementById('verdict');
+    res.className=''; res.classList.add(r.color);
+    res.innerHTML = (r.overall==='PASS'
+      ? '✅ Селективність досягнута (за навчальною моделлю).'
+      : (r.overall==='FAIL' ? '❌ Селективність не гарантована.' : '⚠️ Сумнівна селективність: рекомендовано коригування.')
+    ) + (r.tips.length?('<br><span class="small">'+r.tips.join('<br>')+'</span>'):'');
+    document.getElementById('result').textContent = 'Готово. Переглянь сценарії вище.';
+
+    // Оновити квитанцію
+    lastTicket = {
+      up, dn, Ik, resp,
+      zones: r.zonesText,
+      status: r.overall
+    };
+    buildTicket();
+  }
+
+  function demo(){
+    document.getElementById('upType').value='MCB';
+    document.getElementById('dnType').value='MCB';
+    toggleType('up'); toggleType('dn');
+    document.getElementById('upIn').value=40;
+    document.getElementById('upCurve').value='C';
+    document.getElementById('dnIn').value=16;
+    document.getElementById('dnCurve').value='B';
+    document.getElementById('Ik').value=2000;
+    document.getElementById('resp').value='Студент ПІБ / група';
+    check();
+  }
+
+  function toggleType(which){
+    const type = document.getElementById(which+'Type').value;
+    document.getElementById(which+'MCB').style.display = (type==='MCB')?'':'none';
+    document.getElementById(which+'RCD').style.display = (type==='RCD')?'':'none';
+  }
+  document.getElementById('upType').addEventListener('change', ()=>toggleType('up'));
+  document.getElementById('dnType').addEventListener('change', ()=>toggleType('dn'));
+  toggleType('up'); toggleType('dn');
+
+  // Квитанція 58 мм
+  let lastTicket = null;
+  function buildTicket(){
+    const now = new Date(); const pad=n=>n.toString().padStart(2,'0');
+    const stamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    document.getElementById('t-date').textContent = `Дата: ${stamp}`;
+
+    const resp = document.getElementById('resp').value.trim() || '—';
+    document.getElementById('t-resp').textContent = resp;
+
+    if(!lastTicket){
+      document.getElementById('t-pair').textContent = 'UP → DN: —';
+      document.getElementById('t-ik').textContent = '—';
+      document.getElementById('t-zones').textContent = '—';
+      document.getElementById('t-status').textContent = '—';
+      document.getElementById('t-ref').textContent = 'Ref: SEL-XXXX';
+      return;
+    }
+    const {up,dn,Ik,zones,status} = lastTicket;
+    const upTxt = (up.type==='MCB') ? `MCB ${up.curve}${up.In}` : `RCD ${up.Idn}мА ${up.delay==='S'?'S':''}`;
+    const dnTxt = (dn.type==='MCB') ? `MCB ${dn.curve}${dn.In}` : `RCD ${dn.Idn}мА ${dn.delay==='S'?'S':''}`;
+    document.getElementById('t-pair').textContent = `UP(${upTxt}) → DN(${dnTxt})`;
+    document.getElementById('t-ik').textContent = Ik;
+    document.getElementById('t-zones').textContent = zones;
+    document.getElementById('t-status').textContent = status;
+    const ref = 'SEL-' + Math.random().toString(36).slice(2,8).toUpperCase();
+    document.getElementById('t-ref').textContent = `Ref: ${ref}`;
+  }
+
+  function downloadTXT(){
+    const lines = [];
+    lines.push('SELECTIVITY CARD 58mm');
+    lines.push('----------------------');
+    lines.push(document.getElementById('t-date').textContent);
+    lines.push(document.getElementById('t-pair').textContent);
+    lines.push(`Ik(DN): ${document.getElementById('t-ik').textContent} A`);
+    lines.push(`Зони: ${document.getElementById('t-zones').textContent}`);
+    lines.push(`Вердикт: ${document.getElementById('t-status').textContent}`);
+    lines.push(`Відп.: ${document.getElementById('t-resp').textContent}`);
+    lines.push(document.getElementById('t-ref').textContent);
+    const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'selectivity_card_58mm.txt';
+    a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // Експорт CSV
+  function exportCSV(){
+    const {up,dn,Ik,resp} = readInputs();
+    const r = evaluate(up,dn,Ik);
+    const headers = ['up_type','up_In','up_curve','up_Idn_mA','up_delay','dn_type','dn_In','dn_curve','dn_Idn_mA','dn_delay','Ik_A','overall','zones','tips','responsible'];
+    const tipText = r.tips.join(' | ');
+    const vals = [
+      up.type, up.In||'', up.curve||'', up.Idn||'', up.delay||'',
+      dn.type, dn.In||'', dn.curve||'', dn.Idn||'', dn.delay||'',
+      Ik, r.overall, r.zonesText, tipText, resp
+    ].map(v=>`"${String(v).replace(/"/g,'""')}"`);
+    const csv = headers.join(',')+'\n'+vals.join(',');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'selectivity_check.csv';
+    a.click(); URL.revokeObjectURL(a.href);
+  }
+</script>
+</body>
+</html>
