@@ -1,0 +1,630 @@
+<!-- tech_para14.html
+     ПАРА 14 (аудиторно) для технологів з переробки продукції тваринництва
+     Тема: ПРОСТЕЖУВАНІСТЬ & MOCK RECALL — «від лота сировини до клієнта»:
+           сировина (RM), виробничі партії (WIP/FG), мас-баланс, відвантаження,
+           звіт відкликання, квиток 58 мм, QR/NFC, CSV.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; (опц.) термопринтер 58 мм; NFC-мітки.
+
+     Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
+     УВАГА: навчальна модель. Реальні процедури простежуваності/відкликання — за HACCP/FSMS підприємства.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 14 (технологи) — Простежуваність & Mock Recall: RM→WIP/FG→Клієнт, звіт/квиток/QR/NFC/CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  textarea{min-height:84px}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано в Moodle (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 14 · аудиторно · технологи переробки</span>
+  <h1>🧭 Простежуваність & Mock Recall: RM→WIP/FG→Клієнт, звіт/квиток/QR/NFC/CSV</h1>
+
+  <div class="card">
+    <h2>🎯 Мета пари</h2>
+    <p>
+      За заняття студенти: (1) внесуть <b>сировину (RM)</b> з лотами, (2) зберуть <b>виробничі партії</b> з
+      прив’язкою RM та перевіркою <b>мас-балансу</b>, (3) сформують <b>відвантаження</b> клієнтам, (4) проведуть
+      <b>Mock Recall</b> від вибраного лота RM до <b>партій, готової продукції та клієнтів</b>, (5) оформлять <b>CSV</b>,
+      <b>QR/NFC</b> і <b>квиток 58 мм</b>.
+    </p>
+    <p class="small muted">Навчальна модель. На підприємстві — дотримуйтесь процедур ISO 22005/FSMS, GS1 та регламентів щодо відкликання.</p>
+  </div>
+
+  <!-- 1. СИРОВИНА (RM) -->
+  <div class="card">
+    <h2>🥩 Сировина (RM inbound)</h2>
+    <div class="row">
+      <button class="btn" onclick="addRM()">➕ Додати RM</button>
+      <button class="btn" onclick="presetRM()">🧪 Приклад RM</button>
+      <button class="btn" onclick="copyCSV('csvRM')">📋 CSV (rm)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblRM">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Назва</th>
+            <th class="dark">ЛОТ RM</th>
+            <th class="dark">Постачальник</th>
+            <th class="dark">EXP</th>
+            <th>Залишок, кг</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyRM"></tbody>
+      </table>
+    </div>
+    <div id="csvRM" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 2. ВИРОБНИЧІ ПАРТІЇ (WIP/FG) -->
+  <div class="card">
+    <h2>🏭 Виробнича партія (Batch → FG)</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Параметри партії</h3>
+        <div class="row">
+          <div style="flex:1"><label>ID партії</label><input id="bId" type="text" value="B-251017-01"></div>
+          <div style="flex:1"><label>Дата</label><input id="bDate" type="date"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>ЛОТ FG</label><input id="fgLot" type="text" value="FG-251017-A"></div>
+          <div style="flex:1"><label>Вихід FG, кг</label><input id="fgKg" type="number" step="0.1" value="380"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Склад партії (RM → кг)</h3>
+        <div class="row">
+          <div style="flex:1"><label>RM лот</label><select id="rmSel"></select></div>
+          <div style="flex:1"><label>Кількість, кг</label><input id="rmKg" type="number" step="0.1" value="100"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="addUse()">➕ Додати у склад</button>
+          <button class="btn" onclick="copyCSV('csvUse')">📋 CSV (batch.RM)</button>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Дії</h3>
+        <div class="row">
+          <button class="btn" onclick="saveBatch()">💾 Зберегти партію</button>
+          <button class="btn" onclick="presetBatch()">🧪 Приклад партії</button>
+        </div>
+        <div id="massOut" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblUse">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>RM лот</th>
+            <th class="dark">Назва RM</th>
+            <th class="dark">Використано, кг</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyUse"></tbody>
+      </table>
+    </div>
+    <div id="csvUse" class="out" style="margin-top:8px">—</div>
+
+    <h3 style="margin-top:12px">Збережені партії</h3>
+    <div style="overflow:auto;margin-top:6px">
+      <table class="table" id="tblBatch">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>ID партії</th>
+            <th class="dark">Дата</th>
+            <th class="dark">FG лот</th>
+            <th>FG, кг</th>
+            <th>RM (лот:кг; …)</th>
+            <th>Втрати, %</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyBatch"></tbody>
+      </table>
+    </div>
+    <div id="csvBatch" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 3. ВІДВАНТАЖЕННЯ -->
+  <div class="card">
+    <h2>🚚 Відвантаження клієнтам</h2>
+    <div class="row">
+      <div style="flex:1"><label>Клієнт</label><input id="shClient" type="text" value="ТОВ «Рітейл-Маркет»"></div>
+      <div style="flex:1"><label>FG лот</label><select id="shFg"></select></div>
+      <div style="flex:1"><label>Кількість, кг</label><input id="shKg" type="number" step="0.1" value="120"></div>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="btn" onclick="addShip()">➕ Додати відвантаження</button>
+      <button class="btn" onclick="copyCSV('csvShip')">📋 CSV (ship)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblShip">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Клієнт</th>
+            <th class="dark">FG лот</th>
+            <th class="dark">Дата</th>
+            <th>Кілограми</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyShip"></tbody>
+      </table>
+    </div>
+    <div id="csvShip" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 4. MOCK RECALL -->
+  <div class="card">
+    <h2>🚨 Mock Recall (від RM лота)</h2>
+    <div class="row">
+      <div style="flex:1"><label>RM лот для відкликання</label><select id="recRM"></select></div>
+      <div style="flex:1"><label>Причина</label><input id="recReason" type="text" value="Підозра на мікробне забруднення"></div>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="btn" onclick="runRecall()">🧮 Побудувати зв’язки</button>
+      <button class="btn" onclick="copyCSV('csvRecall')">📋 CSV (recall)</button>
+    </div>
+
+    <div class="grid g3" style="margin-top:8px">
+      <div class="box">
+        <h3>Задіяні партії</h3>
+        <div id="recBatches" class="out">—</div>
+      </div>
+      <div class="box">
+        <h3>Постраждалі FG лоти</h3>
+        <div id="recFG" class="out">—</div>
+      </div>
+      <div class="box">
+        <h3>Клієнти/відвантаження</h3>
+        <div id="recClients" class="out">—</div>
+      </div>
+    </div>
+    <div id="csvRecall" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 5. ЖУРНАЛ / КВИТОК / QR / NFC -->
+  <div class="card">
+    <h2>📒 Журнал & Квиток 58 мм / QR / NFC</h2>
+    <div class="row">
+      <button class="btn" onclick="addLog()">➕ Додати у журнал</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblLog">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>RM лот</th>
+            <th class="dark">Партії</th>
+            <th class="dark">FG лоти</th>
+            <th>Клієнти (к-ть)</th>
+            <th>Статус</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyLog"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+
+    <div class="grid g2" style="margin-top:12px">
+      <div class="box">
+        <h3>QR-payload</h3>
+        <div class="row">
+          <button class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
+          <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
+        </div>
+        <div id="qrOut" class="out">—</div>
+
+        <h3 style="margin-top:12px">NFC — “RECALL CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label>Відповідальний</label><input id="nfcOper" type="text" value="Студент ТПТ"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток 58 мм — “RECALL NOTICE”</h3>
+        <div class="row">
+          <button class="btn" onclick="scrollTicket()">🧾 Показати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>RECALL NOTICE</h4>
+          <p><b>RM лот:</b> <span id="tRM">—</span></p>
+          <p><b>Причина:</b> <span id="tWhy">—</span></p>
+          <div class="line"></div>
+          <p><b>Партії:</b> <span id="tB">—</span></p>
+          <p><b>FG лоти:</b> <span id="tFG">—</span></p>
+          <p><b>Клієнти:</b> <span id="tCl">—</span></p>
+          <div class="line"></div>
+          <p><small>Навчальна симуляція. Реальні дії — згідно Плану відкликання (FSMS).</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Створіть 3–5 лотів RM з залишками.</li>
+      <li>Зберіть 2–3 виробничі партії з кількох RM; перевірте мас-баланс (втрати ≤ 5–8%).</li>
+      <li>Додайте 2–3 відвантаження FG лотів різним клієнтам.</li>
+      <li>Виконайте Mock Recall від одного RM лота; сформуйте звіт, QR/NFC і квиток; скопіюйте CSV.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Повнота даних RM та коректні залишки</td><td>2</td></tr>
+        <tr><td>Партії: зв’язки RM→FG, мас-баланс</td><td>4</td></tr>
+        <tr><td>Відвантаження: клієнти/дати/FG</td><td>2</td></tr>
+        <tr><td>Mock Recall: коректний звіт + квиток/QR/NFC/CSV</td><td>2</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  function copyCSV(id){ const t=byId(id).textContent.trim(); if(!t||t==='—'){alert('Немає даних для копіювання');return;} navigator.clipboard.writeText(t); }
+  function copyEl(id){ const t=byId(id).textContent.trim(); if(!t||t==='—'){alert('Немає даних для копіювання');return;} navigator.clipboard.writeText(t); }
+  function reindex(tb){ [...tb.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  // ===== 1) RM =====
+  const bodyRM = byId('bodyRM');
+  function addRM(sample){
+    const s = Object.assign({name:'Свинина охол.', lot:'RM-XXXX', supp:'ТОВ «МʼясоПостач»', exp:new Date().toISOString().slice(0,10), left:500}, sample||{});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.name}"></td>
+      <td class="dark"><input type="text" value="${s.lot}"></td>
+      <td class="dark"><input type="text" value="${s.supp}"></td>
+      <td class="dark"><input type="date" value="${s.exp}"></td>
+      <td><input type="number" step="0.1" value="${s.left}"></td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyRM); buildCSV_RM(); refreshSelectors();">✖</button></td>
+    `;
+    bodyRM.appendChild(tr); reindex(bodyRM); buildCSV_RM(); refreshSelectors();
+  }
+  function presetRM(){
+    bodyRM.innerHTML='';
+    const d = (off)=> new Date(Date.now()+off*86400000).toISOString().slice(0,10);
+    addRM({name:'Свинина охол. окіст', lot:'RM-SV-251001', supp:'ТОВ «Ферма+»', exp:d(10), left:320});
+    addRM({name:'Свинина охол. лопатка', lot:'RM-SV-251003', supp:'ТОВ «Ферма+»', exp:d(12), left:280});
+    addRM({name:'Крохмаль харчовий', lot:'RM-AD-251002', supp:'ТОВ «Інгредієнт»', exp:d(180), left:50});
+    addRM({name:'Сіль харчова', lot:'RM-AD-250900', supp:'ТОВ «СільКом»', exp:d(365), left:40});
+    addRM({name:'Спеції суміш', lot:'RM-SP-251005', supp:'ТОВ «Спеції-UA»', exp:d(240), left:10});
+  }
+  function buildCSV_RM(){
+    const rows=[...bodyRM.querySelectorAll('tr')].map(r=>{
+      return [
+        r.querySelector('.idx').textContent.trim(),
+        r.children[1].querySelector('input').value.trim(),
+        r.children[2].querySelector('input').value.trim(),
+        r.children[3].querySelector('input').value.trim(),
+        r.children[4].querySelector('input').value.trim(),
+        r.children[5].querySelector('input').value.trim()
+      ].join(' | ');
+    });
+    byId('csvRM').textContent = rows.join('\n') || '—';
+  }
+
+  // селектори RM/FG
+  function refreshSelectors(){
+    const rmSel = byId('rmSel'); const recRM = byId('recRM');
+    const opts = [...bodyRM.querySelectorAll('tr')].map(r=>r.children[2].querySelector('input').value.trim());
+    rmSel.innerHTML = opts.map(o=>`<option>${o}</option>`).join('');
+    recRM.innerHTML = opts.map(o=>`<option>${o}</option>`).join('');
+  }
+  function refreshFGSelector(){
+    const fgSel = byId('shFg');
+    const lots = [...byId('bodyBatch').querySelectorAll('tr')].map(r=>r.children[3].textContent.trim()).filter(Boolean);
+    fgSel.innerHTML = lots.map(o=>`<option>${o}</option>`).join('');
+  }
+
+  // ===== 2) ПАРТІЯ =====
+  const bodyUse = byId('bodyUse'); const bodyBatch = byId('bodyBatch');
+  function addUse(){
+    const lot = byId('rmSel').value||'—';
+    const rmRow = [...bodyRM.querySelectorAll('tr')].find(r=>r.children[2].querySelector('input').value.trim()===lot);
+    const name = rmRow? rmRow.children[1].querySelector('input').value.trim() : '—';
+    const kg = +byId('rmKg').value||0;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td>${lot}</td>
+      <td class="dark">${name}</td>
+      <td class="dark">${rnd(kg,2)}</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyUse); buildCSV_Use(); massBalance();">✖</button></td>
+    `;
+    bodyUse.appendChild(tr); reindex(bodyUse); buildCSV_Use(); massBalance();
+  }
+  function buildCSV_Use(){
+    const rows=[...bodyUse.querySelectorAll('tr')].map(r=>{
+      return [r.querySelector('.idx').textContent.trim(), r.children[1].textContent.trim(), r.children[2].textContent.trim(), r.children[3].textContent.trim()].join(' | ');
+    });
+    byId('csvUse').textContent = rows.join('\n') || '—';
+  }
+  function massBalance(){
+    const sumIn = [...bodyUse.querySelectorAll('tr')].reduce((a,r)=>a+(+r.children[3].textContent.trim()||0),0);
+    const fg = +byId('fgKg').value||0;
+    const loss = sumIn>0 ? rnd((sumIn - fg)/sumIn*100,2) : 0;
+    const ok = (loss>=0 && loss<=8);
+    byId('massOut').textContent = `Вхід: ${rnd(sumIn,2)} кг; Вихід (FG): ${rnd(fg,2)} кг; Втрати: ${rnd(loss,2)}% → ${ok?'🟢 НОРМА':'🟠 ПЕРЕВИЩЕННЯ'}`;
+    return {sumIn, fg, loss, ok};
+  }
+  function saveBatch(){
+    const id = byId('bId').value||'—';
+    const date = byId('bDate').value||new Date().toISOString().slice(0,10);
+    const fg = byId('fgLot').value||'—';
+    const kg = +byId('fgKg').value||0;
+    const uses = [...bodyUse.querySelectorAll('tr')].map(r=>({lot:r.children[1].textContent.trim(), kg:+r.children[3].textContent.trim()}));
+    if(!uses.length){ alert('Додайте RM у склад партії'); return; }
+    // списати залишки з RM
+    uses.forEach(u=>{
+      const rmRow=[...bodyRM.querySelectorAll('tr')].find(r=>r.children[2].querySelector('input').value.trim()===u.lot);
+      if(rmRow){
+        const leftEl = rmRow.children[5].querySelector('input');
+        leftEl.value = rnd((+leftEl.value||0) - u.kg,2);
+      }
+    });
+    buildCSV_RM();
+
+    // розрахунок втрат
+    const mb = massBalance();
+
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td>${id}</td>
+      <td class="dark">${date}</td>
+      <td class="dark">${fg}</td>
+      <td>${rnd(kg,2)}</td>
+      <td>${uses.map(u=>`${u.lot}:${u.kg}кг`).join('; ')}</td>
+      <td>${rnd(mb.loss,2)}%</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyBatch); buildCSV_Batch(); refreshFGSelector();">✖</button></td>
+    `;
+    bodyBatch.appendChild(tr); reindex(bodyBatch); buildCSV_Batch(); refreshFGSelector();
+    // очистити склад
+    bodyUse.innerHTML=''; buildCSV_Use(); byId('massOut').textContent='—';
+  }
+  function buildCSV_Batch(){
+    const rows=[...bodyBatch.querySelectorAll('tr')].map(r=>{
+      return [
+        r.querySelector('.idx').textContent.trim(),
+        r.children[1].textContent.trim(),
+        r.children[2].textContent.trim(),
+        r.children[3].textContent.trim(),
+        r.children[4].textContent.trim(),
+        r.children[5].textContent.trim(),
+        r.children[6].textContent.trim()
+      ].join(' | ');
+    });
+    byId('csvBatch').textContent = rows.join('\n') || '—';
+  }
+  function presetBatch(){
+    // приклад: партія з двох RM
+    byId('bId').value = 'B-251017-02';
+    byId('fgLot').value = 'FG-251017-B';
+    byId('fgKg').value = 390;
+    bodyUse.innerHTML='';
+    byId('rmSel').selectedIndex = 0; byId('rmKg').value=320; addUse();
+    byId('rmSel').selectedIndex = 2; byId('rmKg').value=8; addUse();
+    byId('rmSel').selectedIndex = 3; byId('rmKg').value=6; addUse();
+    massBalance();
+  }
+
+  // ===== 3) ВІДВАНТАЖЕННЯ =====
+  const bodyShip = byId('bodyShip');
+  function addShip(){
+    const client = byId('shClient').value||'—';
+    const fg = byId('shFg').value||'—';
+    const kg = +byId('shKg').value||0;
+    const d = new Date().toISOString().slice(0,10);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${client}"></td>
+      <td class="dark">${fg}</td>
+      <td class="dark">${d}</td>
+      <td>${rnd(kg,2)}</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyShip); buildCSV_Ship();">✖</button></td>
+    `;
+    bodyShip.appendChild(tr); reindex(bodyShip); buildCSV_Ship();
+  }
+  function buildCSV_Ship(){
+    const rows=[...bodyShip.querySelectorAll('tr')].map(r=>{
+      return [
+        r.querySelector('.idx').textContent.trim(),
+        r.children[1].querySelector('input').value.trim(),
+        r.children[2].textContent.trim(),
+        r.children[3].textContent.trim(),
+        r.children[4].textContent.trim()
+      ].join(' | ');
+    });
+    byId('csvShip').textContent = rows.join('\n') || '—';
+  }
+
+  // ===== 4) MOCK RECALL =====
+  function runRecall(){
+    const rmLot = byId('recRM').value||'—';
+    // партії, що містять rmLot
+    const batches=[...bodyBatch.querySelectorAll('tr')].map(r=>({
+      id:r.children[1].textContent.trim(),
+      date:r.children[2].textContent.trim(),
+      fg:r.children[3].textContent.trim(),
+      fgkg:+r.children[4].textContent.trim()||0,
+      uses:r.children[5].textContent.trim() // "RM:kg; RM:kg"
+    })).filter(b=> b.uses.split(';').some(s=>s.trim().startsWith(rmLot+':')) );
+
+    const fgLots = batches.map(b=>b.fg);
+    // клієнти, що отримали ці FG
+    const shipments=[...bodyShip.querySelectorAll('tr')].map(r=>({
+      client:r.children[1].querySelector('input').value.trim(),
+      fg:r.children[2].textContent.trim(),
+      date:r.children[3].textContent.trim(),
+      kg:+r.children[4].textContent.trim()||0
+    })).filter(s=> fgLots.includes(s.fg));
+
+    // Вивід
+    const bTxt = batches.length? batches.map(b=>`${b.id} (${b.date}) → ${b.fg}`).join('\n') : '—';
+    const fgTxt = fgLots.length? fgLots.join(', ') : '—';
+    const clLines = shipments.length? shipments.map(s=>`${s.client}: ${s.fg} — ${s.kg} кг (${s.date})`).join('\n') : '—';
+
+    byId('recBatches').textContent = bTxt;
+    byId('recFG').textContent = fgTxt;
+    byId('recClients').textContent = clLines;
+
+    const csv = [];
+    csv.push(`RECALL|RM=${rmLot}|WHY=${byId('recReason').value}`);
+    batches.forEach(b=> csv.push(`BATCH|${b.id}|FG=${b.fg}|DATE=${b.date}|USES=${b.uses}`));
+    shipments.forEach(s=> csv.push(`SHIP|${s.client}|FG=${s.fg}|KG=${s.kg}|DATE=${s.date}`));
+    byId('csvRecall').textContent = csv.join('\n');
+
+    // Квиток підстановки
+    byId('tRM').textContent = rmLot;
+    byId('tWhy').textContent = byId('recReason').value;
+    byId('tB').textContent = batches.length? batches.map(b=>b.id).join(', ') : '—';
+    byId('tFG').textContent = fgTxt;
+    byId('tCl').textContent = shipments.length? `${shipments.length} шт.` : '—';
+  }
+
+  // ===== 5) ЖУРНАЛ / QR / NFC =====
+  const bodyLog = byId('bodyLog');
+  function addLog(){
+    const rm = byId('recRM').value||'—';
+    const b = (byId('recBatches').textContent||'—').replace(/\n/g,'; ');
+    const fg = byId('recFG').textContent||'—';
+    const cl = byId('recClients').textContent||'—';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td>${rm}</td>
+      <td class="dark">${b.length? b.slice(0,60)+'…' : '—'}</td>
+      <td class="dark">${fg.length? fg.slice(0,60)+'…' : '—'}</td>
+      <td>${cl==='—'?'0':cl.split('\n').length}</td>
+      <td>Звіт зібрано</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
+    `;
+    bodyLog.appendChild(tr); reindex(bodyLog); buildCSV_Log();
+  }
+  function buildCSV_Log(){
+    const rows=[...bodyLog.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const rm=r.children[1].textContent.trim();
+      const b=r.children[2].textContent.trim();
+      const fg=r.children[3].textContent.trim();
+      const n=r.children[4].textContent.trim();
+      const st=r.children[5].textContent.trim();
+      return [idx,rm,b,fg,n,st].join(' | ');
+    });
+    byId('csvLog').textContent = rows.join('\n') || '—';
+  }
+  function buildQR(){
+    const payload = {
+      rm: byId('recRM').value,
+      why: byId('recReason').value,
+      batches: byId('recBatches').textContent,
+      fg: byId('recFG').textContent,
+      clients: byId('recClients').textContent.slice(0,200)+'…'
+    };
+    byId('qrOut').textContent = JSON.stringify(payload);
+  }
+  function buildNFC(){
+    const txt = [
+      `RECALL_CARD`,
+      `RM:${byId('recRM').value}`,
+      `WHY:${byId('recReason').value}`,
+      `BATCHES:${byId('recBatches').textContent.replace(/\n/g,' | ')}`,
+      `FG:${byId('recFG').textContent}`,
+      `CLIENTS:${byId('recClients').textContent.split('\n').length} запис(ів)`,
+      `OPER:${byId('nfcOper').value} CONTACT:${byId('nfcPhone').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = txt;
+  }
+  function scrollTicket(){ byId('ticket').scrollIntoView({behavior:'smooth',block:'center'}); }
+
+  // ===== INIT =====
+  (function init(){
+    byId('bDate').value = new Date().toISOString().slice(0,10);
+    presetRM(); refreshSelectors();
+    // невеликий цикл: зробити 1–2 партії та 1 відвантаження, щоб було на чому тренуватись
+    presetBatch(); saveBatch();
+    byId('bId').value='B-251017-03'; byId('fgLot').value='FG-251017-C'; byId('fgKg').value=380;
+    bodyUse.innerHTML=''; byId('rmSel').selectedIndex=1; byId('rmKg').value=280; addUse();
+    byId('rmSel').selectedIndex=4; byId('rmKg').value=10; addUse();
+    saveBatch();
+    refreshFGSelector();
+    addShip();
+  })();
+</script>
+</body>
+</html>
