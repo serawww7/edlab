@@ -1,0 +1,614 @@
+<!-- tech_para12.html
+     ПАРА 12 (аудиторно) для технологів з переробки продукції тваринництва
+     Тема: СКЛАД • FEFO/FIFO, адресне зберігання, приймання, комплектування замовлень, відвантаження,
+           пікінг-лист, план завантаження, квиток 58 мм, QR/NFC, CSV.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; (опц.) термопринтер 58 мм; NFC-мітки.
+
+     Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
+     УВАГА: навчальна модель. Реальні процедури — за СОП складу, HACCP та вимогами клієнтів.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 12 (технологи) — Склад/FEFO: приймання, адресація, пікінг, відвантаження, квиток/QR/NFC/CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  textarea{min-height:84px}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано в Moodle (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+  .graph{font:12px/14px ui-monospace,monospace;white-space:pre;background:#fff;color:#000;padding:8px;border-radius:8px;border:1px solid #e5e7eb;overflow:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 12 · аудиторно · технологи переробки</span>
+  <h1>🏬 Склад/FEFO: приймання, адресація, пікінг, відвантаження, квиток/QR/NFC/CSV</h1>
+
+  <div class="card">
+    <h2>🎯 Мета пари</h2>
+    <p>
+      За заняття студенти: (1) проведуть <b>приймання</b> палет, (2) виконають <b>адресне зберігання</b>,
+      (3) сформують <b>замовлення клієнта</b>, (4) запустять <b>FEFO-відбір</b> та згенерують пікінг-лист,
+      (5) сформують <b>план завантаження</b> і <b>журнал відвантаження</b>, (6) створять <b>CSV</b>, <b>QR/NFC</b> і <b>квиток 58 мм</b>.
+    </p>
+    <p class="small muted">Навчальна модель. На виробництві — дотримуйтесь FEFO/температурних режимів, GS1-етикеток, інструкцій з безпеки.</p>
+  </div>
+
+  <!-- 1. ПАРАМЕТРИ СКЛАДУ -->
+  <div class="card">
+    <h2>⚙️ Параметри складу та адреси</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Зони</h3>
+        <div class="row">
+          <div style="flex:1"><label>Холод. зона (°C)</label><input id="tCold" type="number" step="0.1" value="4.0"></div>
+          <div style="flex:1"><label>Заморозка (°C)</label><input id="tFrz" type="number" step="0.1" value="-18.0"></div>
+        </div>
+        <p class="small muted">Контроль температур у журналі; відвантаження — тільки з холод. зони (для охолодженої продукції).</p>
+      </div>
+
+      <div class="box">
+        <h3>Адресні формати</h3>
+        <p class="small muted">Формат адреси: <span class="mono">ЗОНА-РЯД-ПОЛИЦЯ-МІСЦЕ</span> (напр. <span class="mono">C1-A-02-03</span>).</p>
+        <div class="row">
+          <div style="flex:1"><label>Префікс холод. зони</label><input id="prefCold" type="text" value="C1"></div>
+          <div style="flex:1"><label>Префікс заморозки</label><input id="prefFrz" type="text" value="F1"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="presetInbound()">🧪 Приклад приймання</button>
+          <button class="btn" onclick="copyCSV('csvInbound')">📋 CSV (inbound)</button>
+        </div>
+        <div id="csvInbound" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ПРИЙМАННЯ (INBOUND) -->
+  <div class="card">
+    <h2>🚚 Приймання палет (Inbound)</h2>
+    <div class="row">
+      <button class="btn" onclick="addInbound()">➕ Додати палету</button>
+      <button class="btn" onclick="assignLocation()">📦 Присвоїти адресу</button>
+      <button class="btn" onclick="copyCSV('csvStock')">📋 CSV (stock)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblInbound">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Продукт</th>
+            <th class="dark">ЛОТ</th>
+            <th class="dark">EXP</th>
+            <th class="dark">К-ть, ящ.</th>
+            <th>Адреса</th>
+            <th>Статус</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyInbound"></tbody>
+      </table>
+    </div>
+    <div id="csvStock" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 3. ЗАМОВЛЕННЯ КЛІЄНТА -->
+  <div class="card">
+    <h2>🧾 Замовлення клієнта</h2>
+    <div class="row">
+      <button class="btn" onclick="addOrder()">➕ Додати позицію</button>
+      <button class="btn" onclick="presetOrder()">🧪 Приклад замовлення</button>
+      <button class="btn" onclick="copyCSV('csvOrder')">📋 CSV (order)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblOrder">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Клієнт</th>
+            <th class="dark">Продукт</th>
+            <th class="dark">Потрібно, ящ.</th>
+            <th>FEFO Відбір</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyOrder"></tbody>
+      </table>
+    </div>
+    <div id="csvOrder" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 4. FEFO ПІКІНГ-ЛИСТ -->
+  <div class="card">
+    <h2>📋 FEFO пікінг-лист</h2>
+    <div class="row">
+      <button class="btn" onclick="runFEFO()">🧮 Згенерувати відбір</button>
+      <button class="btn" onclick="copyCSV('csvPick')">📋 CSV (picking)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblPick">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Продукт</th>
+            <th class="dark">ЛОТ</th>
+            <th class="dark">EXP</th>
+            <th class="dark">Адреса</th>
+            <th>Відібрати, ящ.</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyPick"></tbody>
+      </table>
+    </div>
+    <div id="csvPick" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 5. ПЛАН ЗАВАНТАЖЕННЯ + КВИТОК 58 мм -->
+  <div class="card">
+    <h2>🚛 План завантаження та квиток 58 мм</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>Параметри рейсу</h3>
+        <div class="row">
+          <div style="flex:1"><label>Номер рейсу</label><input id="tripNo" type="text" value="R-251017-01"></div>
+          <div style="flex:1"><label>Перевізник</label><input id="carrier" type="text" value="ТОВ «Холод-Транс»"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>t° кузова (поч.)</label><input id="tStart" type="number" step="0.1" value="3.5"></div>
+          <div style="flex:1"><label>t° кузова (кін.)</label><input id="tEnd" type="number" step="0.1" value="4.1"></div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn" onclick="buildLoadPlan()">📦 Побудувати план</button>
+          <button class="btn" onclick="copyCSV('csvLoad')">📋 CSV (load)</button>
+        </div>
+        <div id="loadOut" class="out" style="margin-top:8px">—</div>
+        <div id="csvLoad" class="out" style="margin-top:8px">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток 58 мм — “LOAD & SHIP”</h3>
+        <div class="row">
+          <button class="btn" onclick="printTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>LOAD & SHIP</h4>
+          <p><b>Рейс:</b> <span id="tTrip">—</span></p>
+          <p><b>Перевізник:</b> <span id="tCar">—</span></p>
+          <div class="line"></div>
+          <p><b>Замовл. клієнт:</b> <span id="tClient">—</span></p>
+          <p><b>Палети:</b> <span id="tPals">—</span> · <b>Ящиків:</b> <span id="tCases">—</span></p>
+          <p><b>t° кузова:</b> <span id="tTstart">—</span>→<span id="tTend">—</span> °C</p>
+          <div class="line"></div>
+          <p><small>FEFO, холодовий ланцюг, опломбування/журнали — згідно СОП.</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ЖУРНАЛ / QR / NFC -->
+  <div class="card">
+    <h2>📒 Журнал відвантажень / QR / NFC</h2>
+    <div class="row">
+      <button class="btn" onclick="addLog()">➕ Додати запис</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblLog">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Рейс</th>
+            <th class="dark">Клієнт</th>
+            <th class="dark">Палет</th>
+            <th>Ящиків</th>
+            <th>EXP мін.</th>
+            <th>t°</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyLog"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+
+    <div class="grid g2" style="margin-top:12px">
+      <div class="box">
+        <h3>QR-payload</h3>
+        <div class="row">
+          <button class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
+          <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
+        </div>
+        <div id="qrOut" class="out">—</div>
+      </div>
+      <div class="box">
+        <h3>NFC — “LOAD CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label>Водій</label><input id="nfcDriver" type="text" value="Студент ТПТ"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Створіть 4–8 палет (приймання) з лотом/EXP/кількістю; присвойте адреси.</li>
+      <li>Задьте замовлення клієнта (2–4 позиції); виконайте FEFO-відбір, збережіть пікінг-лист.</li>
+      <li>Побудуйте план завантаження; перевірте t° кузова.</li>
+      <li>Додайте запис у журнал, згенеруйте QR/NFC і квиток, скопіюйте CSV.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Коректне приймання та адресація палет</td><td>3</td></tr>
+        <tr><td>FEFO-відбір і пікінг-лист</td><td>4</td></tr>
+        <tr><td>План завантаження + квиток/NFC/QR</td><td>2</td></tr>
+        <tr><td>Журнал/CSV</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t);
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t);
+  }
+  function reindex(tb){ [...tb.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  // ===== 2) INBOUND =====
+  const bodyInbound = byId('bodyInbound');
+  function addInbound(sample){
+    const s = Object.assign({prod:'', lot:'', exp:'', cases:0, addr:'', st:'прийнято'}, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.prod}"></td>
+      <td class="dark"><input type="text" value="${s.lot}"></td>
+      <td class="dark"><input type="date" value="${s.exp}"></td>
+      <td class="dark"><input type="number" step="1" value="${s.cases}"></td>
+      <td><input type="text" value="${s.addr}"></td>
+      <td>${s.st}</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyInbound); buildCSV_Stock();">✖</button></td>
+    `;
+    bodyInbound.appendChild(tr); reindex(bodyInbound); buildCSV_Inbound(); buildCSV_Stock();
+  }
+  function presetInbound(){
+    bodyInbound.innerHTML='';
+    const today = new Date();
+    const d = dt => new Date(today.getTime()+dt*86400000).toISOString().slice(0,10);
+    addInbound({prod:'Шинка варена “Домашня” 400г', lot:'H-25101-A1', exp:d(20), cases:40, addr:'', st:'прийнято'});
+    addInbound({prod:'Ковбаса варена “Класична” 500г', lot:'K-25100-B3', exp:d(15), cases:50, addr:'', st:'прийнято'});
+    addInbound({prod:'Сосиски молочні 450г', lot:'S-25098-C2', exp:d(10), cases:60, addr:'', st:'прийнято'});
+    addInbound({prod:'Паштет печінковий 300г', lot:'P-25097-D1', exp:d(30), cases:35, addr:'', st:'прийнято'});
+    byId('csvInbound').textContent = 'PRESET INBOUND — додано 4 палети';
+  }
+  function buildCSV_Inbound(){
+    const rows=[...bodyInbound.querySelectorAll('tr')].map(r=>{
+      return [
+        r.querySelector('.idx').textContent.trim(),
+        r.children[1].querySelector('input').value.trim(),
+        r.children[2].querySelector('input').value.trim(),
+        r.children[3].querySelector('input').value.trim(),
+        r.children[4].querySelector('input').value.trim(),
+        r.children[5].querySelector('input').value.trim(),
+        r.children[6].textContent.trim()
+      ].join(' | ');
+    });
+    byId('csvInbound').textContent = rows.join('\n') || '—';
+  }
+  function buildCSV_Stock(){
+    const rows=[...bodyInbound.querySelectorAll('tr')].map(r=>{
+      return [
+        r.children[1].querySelector('input').value.trim(), // prod
+        r.children[2].querySelector('input').value.trim(), // lot
+        r.children[3].querySelector('input').value.trim(), // exp
+        r.children[4].querySelector('input').value.trim(), // cases
+        r.children[5].querySelector('input').value.trim(), // addr
+        r.children[6].textContent.trim()                   // status
+      ].join(' | ');
+    });
+    byId('csvStock').textContent = rows.join('\n') || '—';
+  }
+  function assignLocation(){
+    const prefC = byId('prefCold').value.trim()||'C1';
+    let row=1, shelf=1, spot=1;
+    [...bodyInbound.querySelectorAll('tr')].forEach((r,i)=>{
+      const addr = `${prefC}-${String.fromCharCode(65+(row-1))}-${String(shelf).padStart(2,'0')}-${String(spot).padStart(2,'0')}`;
+      r.children[5].querySelector('input').value = addr;
+      spot++; if(spot>4){ spot=1; shelf++; } if(shelf>6){ shelf=1; row++; }
+    });
+    buildCSV_Stock();
+  }
+
+  // ===== 3) ORDER =====
+  const bodyOrder = byId('bodyOrder');
+  function addOrder(sample){
+    const s = Object.assign({client:'ТОВ «Рітейл-Маркет»', prod:'', need:0, pick:''}, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.client}"></td>
+      <td class="dark"><input type="text" value="${s.prod}"></td>
+      <td class="dark"><input type="number" step="1" value="${s.need}"></td>
+      <td class="pick">—</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyOrder); buildCSV_Order();">✖</button></td>
+    `;
+    bodyOrder.appendChild(tr); reindex(bodyOrder); buildCSV_Order();
+  }
+  function presetOrder(){
+    bodyOrder.innerHTML='';
+    addOrder({client:'ТОВ «Рітейл-Маркет»', prod:'Сосиски молочні 450г', need:70});
+    addOrder({client:'ТОВ «Рітейл-Маркет»', prod:'Ковбаса варена “Класична” 500г', need:40});
+    buildCSV_Order();
+  }
+  function buildCSV_Order(){
+    const rows=[...bodyOrder.querySelectorAll('tr')].map(r=>{
+      return [
+        r.querySelector('.idx').textContent.trim(),
+        r.children[1].querySelector('input').value.trim(),
+        r.children[2].querySelector('input').value.trim(),
+        r.children[3].querySelector('input').value.trim(),
+        r.children[4].textContent.trim()
+      ].join(' | ');
+    });
+    byId('csvOrder').textContent = rows.join('\n') || '—';
+  }
+
+  // ===== 4) FEFO =====
+  const bodyPick = byId('bodyPick');
+  function runFEFO(){
+    bodyPick.innerHTML='';
+    const stock = [...bodyInbound.querySelectorAll('tr')].map(r=>({
+      prod: r.children[1].querySelector('input').value.trim(),
+      lot:  r.children[2].querySelector('input').value.trim(),
+      exp:  r.children[3].querySelector('input').value.trim(),
+      cases:+r.children[4].querySelector('input').value||0,
+      addr: r.children[5].querySelector('input').value.trim(),
+      st:   r.children[6].textContent.trim()
+    })).filter(x=>x.prod && x.cases>0 && x.st!=='відвантажено');
+
+    const orders = [...bodyOrder.querySelectorAll('tr')].map(r=>({
+      client: r.children[1].querySelector('input').value.trim(),
+      prod:   r.children[2].querySelector('input').value.trim(),
+      need:  +r.children[3].querySelector('input').value||0
+    })).filter(x=>x.prod && x.need>0);
+
+    // Для кожної позиції замовлення: беремо зі складу сортуванням за найранішою EXP (FEFO)
+    orders.forEach(o=>{
+      const pool = stock.filter(s=>s.prod===o.prod).sort((a,b)=> new Date(a.exp) - new Date(b.exp));
+      let remain = o.need;
+      const pickLines=[];
+      for(const p of pool){
+        if(remain<=0) break;
+        const take = Math.min(remain, p.cases);
+        if(take>0){
+          pickLines.push({prod:o.prod, lot:p.lot, exp:p.exp, addr:p.addr||'—', take});
+          p.cases -= take; remain -= take;
+        }
+      }
+      // Запис у таблицю відбору
+      pickLines.forEach(addPickLine);
+      // Відмітка у замовленні
+      const row = [...bodyOrder.querySelectorAll('tr')].find(r=>r.children[2].querySelector('input').value.trim()===o.prod);
+      if(row){
+        row.querySelector('.pick').textContent = pickLines.length
+          ? pickLines.map(pl=>`${pl.take} ящ. з ${pl.lot} (${pl.exp})@${pl.addr}`).join('; ')
+          : 'н/д';
+      }
+    });
+
+    buildCSV_Pick(); buildCSV_Order();
+  }
+  function addPickLine(s){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td>${s.prod}</td>
+      <td class="dark">${s.lot}</td>
+      <td class="dark">${s.exp}</td>
+      <td class="dark">${s.addr||'—'}</td>
+      <td>${s.take}</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyPick); buildCSV_Pick();">✖</button></td>
+    `;
+    bodyPick.appendChild(tr); reindex(bodyPick);
+  }
+  function buildCSV_Pick(){
+    const rows=[...bodyPick.querySelectorAll('tr')].map(r=>{
+      return [
+        r.querySelector('.idx').textContent.trim(),
+        r.children[1].textContent.trim(),
+        r.children[2].textContent.trim(),
+        r.children[3].textContent.trim(),
+        r.children[4].textContent.trim(),
+        r.children[5].textContent.trim()
+      ].join(' | ');
+    });
+    byId('csvPick').textContent = rows.join('\n') || '—';
+  }
+
+  // ===== 5) LOAD / TICKET =====
+  function buildLoadPlan(){
+    const picks=[...bodyPick.querySelectorAll('tr')].map(r=>({
+      prod:r.children[1].textContent.trim(),
+      lot:r.children[2].textContent.trim(),
+      exp:r.children[3].textContent.trim(),
+      addr:r.children[4].textContent.trim(),
+      take:+r.children[5].textContent.trim()||0
+    }));
+    if(!picks.length){ byId('loadOut').textContent='— спочатку сформуйте FEFO-відбір —'; byId('csvLoad').textContent='—'; return; }
+    // Групуємо по лоту → палета (спрощено: кожен лот = палета)
+    const map=new Map();
+    picks.forEach(p=>{
+      const k=p.lot; if(!map.has(k)) map.set(k,{cases:0, prod:p.prod, lot:p.lot, exp:p.exp});
+      map.get(k).cases += p.take;
+    });
+    const lines=[], csv=[];
+    let cases=0;
+    map.forEach(v=>{
+      lines.push(`Палета ${v.lot} [${v.prod}] EXP ${v.exp} → ${v.cases} ящ.`);
+      csv.push(`LOAD|${v.lot}|${v.prod}|exp=${v.exp}|cases=${v.cases}`);
+      cases+=v.cases;
+    });
+    byId('loadOut').textContent = lines.join('\n');
+    byId('csvLoad').textContent = csv.join('\n');
+
+    // Оновимо квиток
+    const client = [...bodyOrder.querySelectorAll('tr')][0]?.children[1].querySelector('input').value.trim() || '—';
+    byId('tTrip').textContent = byId('tripNo').value;
+    byId('tCar').textContent  = byId('carrier').value;
+    byId('tClient').textContent= client;
+    byId('tPals').textContent = map.size;
+    byId('tCases').textContent= cases;
+    byId('tTstart').textContent = byId('tStart').value;
+    byId('tTend').textContent   = byId('tEnd').value;
+  }
+  function printTicket(){
+    const el = document.getElementById('ticket');
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+
+  // ===== 6) JOURNAL / QR / NFC =====
+  const bodyLog = byId('bodyLog');
+  function addLog(){
+    const client = [...bodyOrder.querySelectorAll('tr')][0]?.children[1].querySelector('input').value.trim() || '—';
+    const expMin = (()=> {
+      const exps = [...bodyPick.querySelectorAll('tr')].map(r=>r.children[3].textContent.trim()).filter(Boolean);
+      return exps.length ? exps.sort()[0] : '—';
+    })();
+    const pals = byId('tPals').textContent || '0';
+    const cases = byId('tCases').textContent || '0';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${byId('tripNo').value}"></td>
+      <td class="dark">${client}</td>
+      <td class="dark">${pals}</td>
+      <td>${cases}</td>
+      <td>${expMin}</td>
+      <td>${byId('tStart').value}→${byId('tEnd').value}</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
+    `;
+    bodyLog.appendChild(tr); reindex(bodyLog); buildCSV_Log();
+  }
+  function buildCSV_Log(){
+    const rows=[...bodyLog.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const trip=r.children[1].querySelector('input').value.trim();
+      const client=r.children[2].textContent.trim();
+      const pals=r.children[3].textContent.trim();
+      const cases=r.children[4].textContent.trim();
+      const exp=r.children[5].textContent.trim();
+      const t=r.children[6].textContent.trim();
+      return [idx,trip,client,pals,cases,exp,t].join(' | ');
+    });
+    byId('csvLog').textContent = rows.join('\n') || '—';
+  }
+  function buildQR(){
+    const payload = {
+      trip: byId('tripNo').value,
+      carrier: byId('carrier').value,
+      client: [...bodyOrder.querySelectorAll('tr')][0]?.children[1].querySelector('input').value.trim() || '—',
+      pallets: byId('tPals').textContent || '0',
+      cases: byId('tCases').textContent || '0',
+      t_start: byId('tStart').value,
+      t_end: byId('tEnd').value
+    };
+    byId('qrOut').textContent = JSON.stringify(payload);
+  }
+  function buildNFC(){
+    const txt = [
+      `LOAD_CARD`,
+      `TRIP:${byId('tripNo').value} CARRIER:${byId('carrier').value}`,
+      `CLIENT:${[...bodyOrder.querySelectorAll('tr')][0]?.children[1].querySelector('input').value.trim() || '—'}`,
+      `PALLETS:${byId('tPals').textContent||'0'} CASES:${byId('tCases').textContent||'0'}`,
+      `T_DEG:${byId('tStart').value}->${byId('tEnd').value}C`,
+      `CONTACT:${byId('nfcPhone').value} DRIVER:${byId('nfcDriver').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = txt;
+  }
+
+  // ===== INIT =====
+  (function init(){
+    presetInbound(); assignLocation(); presetOrder(); runFEFO(); buildLoadPlan();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select,textarea')){
+        if(e.target.closest('#tblInbound')){ buildCSV_Inbound(); buildCSV_Stock(); }
+        if(e.target.closest('#tblOrder')){ buildCSV_Order(); }
+      }
+    });
+  })();
+</script>
+</body>
+</html>
