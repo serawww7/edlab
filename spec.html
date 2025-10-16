@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>EDLab — сторінка спеціальності</title>
+<title>EDLab — сторінка розділу</title>
 <meta name="color-scheme" content="light dark"/>
 <link rel="preload" href="assets/edlab.css" as="style">
 <link rel="stylesheet" href="assets/edlab.css"/>
@@ -19,6 +19,7 @@
 .btn.ghost{background:transparent;border-color:#334155;color:#cbd5e1}
 .btn.ghost:hover{background:#0f1f39}
 small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace}
+.note{background:#0c182a;color:#cde1ff;border:1px dashed #274364;padding:10px 12px;border-radius:12px;margin-top:8px}
 </style>
 </head>
 <body>
@@ -31,7 +32,7 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
     <a class="btn" href="index.html">⬅ На головну</a>
   </header>
 
-  <h1 id="specTitle">Спеціальність</h1>
+  <h1 id="specTitle">Розділ</h1>
   <p class="muted" id="specDesc">—</p>
 
   <div class="grid2">
@@ -39,6 +40,11 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
     <div class="card lesson-list" id="listCard">
       <h2 id="listTitle">Заняття</h2>
       <div id="lessons"></div>
+
+      <div id="coachHint" class="note" style="display:none">
+        У папці <b>coach/</b> не знайдено жодної тренінг-сторінки з типових назв.
+        Додай, наприклад: <span class="mono">coach_intro.html</span> або <span class="mono">coach_para1.html</span>, <span class="mono">session01.html</span>.
+      </div>
 
       <div id="previewBox" style="display:none;margin-top:14px">
         <div class="tester-toolbar">
@@ -93,7 +99,7 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
   <div class="footer-inner">
     <div class="col brand">
       <div class="brand-line"><span class="emoji">🌾</span><strong>EDLab</strong></div>
-      <p>Інтерактивні лабораторні з інформатики та цифровізації для ОПП коледжу.</p>
+      <p>Інтерактивні лабораторні та коуч-тренінги.</p>
     </div>
     <div class="col legal">
       <h3>Правова інформація</h3>
@@ -112,22 +118,14 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
 </footer>
 
 <script>
-// ——— 0) Утиліти
+// Утиліти
 const $ = (s)=>document.querySelector(s);
 const byId = (id)=>document.getElementById(id);
 const params = new URLSearchParams(location.search);
-const SPEC = (params.get('spec')||'core').toLowerCase();
+const SPEC = (params.get('spec')||'coach').toLowerCase();
 
-// ——— 1) Дані без плейсхолдерів
+// Базові (статичні) дані для профільних розділів
 const DATA = {
-  core: {
-    title: "🧠 Інформатика (ядро)",
-    desc: "Базові цифрові інструменти та інтеграції у Moodle.",
-    list: [
-      {n:1, title:"Пара 1 — Термодрук 58 мм: чек ПММ / інструмент", url:"1_para.html",
-       desc:"Конструктор чека 58 мм: ПММ/стрічка, друк і TXT-експорт."}
-    ]
-  },
   agro: {
     title: "🌾 Агрономія",
     desc: "Польові журнали, планування, моніторинги, QR/NFC.",
@@ -193,38 +191,129 @@ const DATA = {
   }
 };
 
-// ——— 2) Рендер сторінки
-function setSpecMeta(){
-  const S = DATA[SPEC] || DATA.core;
+// Динамічний розділ coach: будуємо список на льоту
+const COACH = {
+  title: "🧠 Психологічні тренінги (coach)",
+  desc: "Коучингові практики, рефлексія, soft skills, робота в групах.",
+  base: "coach/",
+  // кандидати імен файлів, які перевіряємо
+  candidates(){
+    const arr = [];
+    arr.push("coach_intro.html", "index.html"); // у папці coach/
+    for(let i=1;i<=20;i++){
+      arr.push(`coach_para${i}.html`);
+      arr.push(`session${String(i).padStart(2,'0')}.html`);
+      arr.push(`coach${i}.html`);
+    }
+    return arr.map(name=>COACH.base + name);
+  }
+};
+
+// Рендер сторінки
+function setSpecMetaStatic(specKey){
+  const S = DATA[specKey];
   byId('specTitle').textContent = S.title;
   byId('specDesc').textContent  = S.desc;
   byId('listTitle').textContent = S.title + " — уроки";
+  const html = S.list.map(item=>lessonCard(item)).join("");
+  byId('lessons').innerHTML = html;
+  const firstUrl = S.list[0]?.url ? absoluteUrl(S.list[0].url) : "";
+  byId('url').value = firstUrl; gen();
+}
 
-  // список занять
-  const html = S.list.map(item=>`
+function lessonCard(item){
+  const tags = item.tags ? `<div class="tags" style="margin-top:6px">${item.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>` : "";
+  return `
     <div class="lesson">
       <div class="thumb">📄</div>
       <div class="meta">
         <b>${item.title}</b>
         <small class="mono">${item.url}</small>
-        <p class="muted" style="margin-top:4px">${item.desc}</p>
+        <p class="muted" style="margin-top:4px">${item.desc||""}</p>
         <div class="row" style="margin-top:8px">
           <a class="btn" href="${item.url}" target="_blank" rel="noopener">Відкрити</a>
           <button class="btn secondary js-preview"  type="button" data-url="${item.url}">Швидке прев’ю</button>
           <button class="btn secondary js-iframe"   type="button" data-url="${item.url}">Згенерувати iFrame</button>
         </div>
+        ${tags}
       </div>
     </div>
-  `).join("");
-  byId('lessons').innerHTML = html;
-
-  // оновити генератор дефолтним першим уроком
-  const firstUrl = S.list[0]?.url || "";
-  byId('url').value = location.origin + location.pathname.replace('spec.html','') + firstUrl;
-  gen();
+  `;
 }
 
-// ——— 3) Прев’ю + генератор
+// Автопошук coach/
+async function buildCoachList(){
+  byId('specTitle').textContent = COACH.title;
+  byId('specDesc').textContent  = COACH.desc;
+  byId('listTitle').textContent = COACH.title + " — тренінги";
+
+  const base = location.origin + location.pathname.replace('spec.html','') + COACH.base;
+  const found = [];
+
+  // Перевіряємо кандидати HEAD/GET (HEAD на GH Pages іноді редіректить; GET без кеша)
+  for(const rel of COACH.candidates()){
+    const url = rel.startsWith('http') ? rel : (location.origin + location.pathname.replace('spec.html','') + rel);
+    try{
+      const res = await fetch(url, {method:'GET', cache:'no-store'});
+      if(res.ok){
+        // спробуємо дістати <title>
+        let titleTxt = "";
+        try{
+          const html = await res.text();
+          const m = html.match(/<title>([^<]{1,120})<\/title>/i);
+          if(m) titleTxt = m[1].trim();
+        }catch(_e){}
+        // формуємо запис
+        const name = rel.replace(COACH.base,'');
+        const pretty = titleTxt || prettyCoachName(name);
+        const desc   = titleTxt ? `Сторінка: ${name}` : `Сесія: ${name}`;
+        found.push({n:found.length+1, title:pretty, url: rel, desc});
+      }
+    }catch(_e){
+      // пропускаємо 404/мережеві
+    }
+  }
+
+  if(!found.length){
+    byId('lessons').innerHTML = "";
+    byId('coachHint').style.display = '';
+    byId('url').value = "";
+    gen();
+    return;
+  }
+
+  // рендер
+  byId('lessons').innerHTML = found.map(item=>lessonCard(item)).join("");
+  // дефолтний вибір у генераторі
+  byId('coachHint').style.display = 'none';
+  const firstUrl = absoluteUrl(found[0].url);
+  byId('url').value = firstUrl; gen();
+}
+
+// Гуманна назва з імені файлу
+function prettyCoachName(name){
+  // приклади: coach_para3.html → "Сесія 3 — coach_para3"
+  //           session05.html   → "Сесія 5 — session05"
+  //           coach_intro.html → "Вступ — coach_intro"
+  const base = name.replace(/\.html$/i,'');
+  let label = base;
+  const m1 = base.match(/coach_para(\d+)/i);
+  const m2 = base.match(/session(\d+)/i);
+  if(/intro/i.test(base)) label = "Вступ — " + base;
+  else if(m1) label = `Сесія ${m1[1]} — ${base}`;
+  else if(m2) label = `Сесія ${Number(m2[1])} — ${base}`;
+  else if(/^coach\d+$/i.test(base)){
+    const n = base.match(/\d+/)[0];
+    label = `Сесія ${n} — ${base}`;
+  }
+  return label;
+}
+
+// Прев’ю + генератор
+function absoluteUrl(relative){
+  const base = location.origin + location.pathname.replace('spec.html','');
+  return relative.startsWith('http') ? relative : base + relative;
+}
 function openPreview(u){
   const abs = absoluteUrl(u);
   byId('previewUrl').textContent = abs;
@@ -237,11 +326,6 @@ function closePreview(){
   byId('previewFrame').src = 'about:blank';
   byId('previewBox').style.display = 'none';
   byId('previewNote').style.display = 'none';
-}
-function absoluteUrl(relative){
-  // формуємо абсолютний URL для iFrame/preview (щоб Moodle не рідав)
-  const base = location.origin + location.pathname.replace('spec.html','');
-  return relative.startsWith('http') ? relative : base + relative;
 }
 function gen(){
   const url = byId('url').value.trim();
@@ -268,11 +352,11 @@ function copyCode(){
   setTimeout(()=>document.title = old, 900);
 }
 
-// ——— 4) Події (надійні кліки без «мертвих» кнопок)
+// Події
 document.addEventListener('click', (e)=>{
   const previewBtn = e.target.closest('.js-preview');
   if(previewBtn){
-    const u = absoluteUrl(previewBtn.dataset.url);
+    const u = previewBtn.dataset.url;
     openPreview(u);
     return;
   }
@@ -290,12 +374,17 @@ document.addEventListener('click', (e)=>{
   if(e.target.id==='btnCopy'){ copyCode(); }
 });
 
-// ——— 5) Ініціалізація
-(function init(){
-  // для вбудування в Moodle — тихий режим
-  if (window.self !== window.top) document.documentElement.classList.add('embedded');
-  setSpecMeta();
-  gen();
+// Ініціалізація
+(async function init(){
+  if (window.self !== window.top) document.documentElement.classList.add('embedded'); // Moodle friendly
+  if(SPEC==='coach'){
+    await buildCoachList();
+  }else if(['agro','mech','tech'].includes(SPEC)){
+    setSpecMetaStatic(SPEC);
+  }else{
+    //fallback → coach
+    await buildCoachList();
+  }
 })();
 </script>
 </body>
