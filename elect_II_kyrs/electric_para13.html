@@ -1,0 +1,554 @@
+<!-- electric_para13.html
+     Пара 13 (Електрики, аудиторно): ЕЛЕКТРОЩИТ · ПАНЕЛЬНИЙ ЖУРНАЛ
+     Відомість щита: кола/фази/навантаження/автомати/ПЗВ (RCD), баланс фаз, прості перевірки селективності,
+     наклейки 58 мм на лінії, A4-звіт, імпорт/експорт CSV.
+     Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Електрики · Пара 13 — Електрощит: панельний журнал, баланс фаз, RCD, наклейки</title>
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
+  .wrap{max-width:1120px; margin:0 auto; padding:24px 16px 96px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9aa5b1}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:1050px){.g3{grid-template-columns:1fr}; .g2{grid-template-columns:1fr}}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .small{font-size:12px; color:#93a3b5}
+  .chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; font-size:12px; margin-right:6px; background:#0d1a2e}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)} .muted{color:#9aa5b1}
+  input,select,textarea{padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb; width:100%}
+  textarea{min-height:88px}
+
+  /* Таблиці */
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+
+  /* Квитанції 58 мм */
+  .tickets{display:flex; gap:12px; flex-wrap:wrap}
+  .ticket{
+    width:58mm; background:#fff; color:#000; padding:5mm 4mm; border-radius:6px;
+    box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace
+  }
+  .ticket h4{margin:0 0 4px; font-size:13px; text-align:center}
+  .ticket p{margin:1px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:5px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+
+  /* A4 */
+  #printArea{background:#fff; color:#000; border-radius:12px; border:1px solid #e5e7eb; padding:16px}
+  .doc{page-break-after:always; padding:12mm; color:#000; font-family:Georgia,"Times New Roman",serif}
+  .doc h2{color:#000; font-size:20px; margin:0 0 6px}
+  .doc h3{color:#000; font-size:16px; margin:6px 0}
+  .doc p{color:#000; margin:4px 0}
+  .doc table{width:100%; border-collapse:collapse; border:1px solid #111}
+  .doc th,.doc td{border:1px solid #111; padding:6px 8px; font-size:12px; vertical-align:top}
+  .doc .sign{margin-top:10mm; display:flex; gap:10mm; flex-wrap:wrap}
+  .doc .sign div{flex:1 1 220px}
+
+  /* Вбудований режим (iframe/Moodle) */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+
+  @media print{
+    @page{ size:A4; margin:12mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    #printArea{ border:none; padding:0 }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Електрики · Пара 13 · аудиторно</span>
+    <h1>🛠️ Електрощит: панельний журнал → баланс фаз → RCD/RCBO → 🧾 наклейки 58 мм → A4</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>Скласти відомість щита: створити кола з параметрами навантаження, фазами, автоматами та ПЗВ; перевірити <b>баланс фаз</b>, просту <b>селективність</b> по номіналах; згенерувати наклейки 58 мм і A4-звіт. Працюємо з 1-ф та 3-ф колами.</p>
+      <div class="row">
+        <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
+        <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+      </div>
+      <p class="small">CSV: <span class="mono">id,name,type,phase,phases,kw,U,PF,eta,curve,mcbA,rcdType,rcd_mA,rcdA,rcdGroup,wire_mm2,length_m,url,notes,duty_pct,diversity_pct</span></p>
+    </div>
+
+    <div class="card">
+      <h2>🧩 Параметри щита</h2>
+      <div class="grid g3">
+        <div>
+          <div class="row"><label class="small" style="min-width:150px">Назва щита</label><input id="panelName" value="ЩО-1 · Майстерня"></div>
+          <div class="row"><label class="small" style="min-width:150px">Головний автомат, А</label>
+            <select id="mainMCB"><option>25</option><option selected>40</option><option>50</option><option>63</option></select></div>
+          <div class="row"><label class="small" style="min-width:150px">Крива головного</label>
+            <select id="mainCurve"><option selected>C</option><option>B</option><option>D</option></select></div>
+        </div>
+        <div>
+          <div class="row"><label class="small" style="min-width:150px">U фаз-фаза, В</label><input id="Ull" type="number" value="400"></div>
+          <div class="row"><label class="small" style="min-width:150px">U фаза-нуль, В</label><input id="Uln" type="number" value="230"></div>
+          <div class="row"><label class="small" style="min-width:150px">Відповідальний</label><input id="resp" value="Студент ПІБ / група"></div>
+        </div>
+        <div>
+          <div class="row"><label class="small" style="min-width:150px">Загальний коеф. попиту (diversity)</label><input id="diversity" type="number" step="1" value="80"></div>
+          <div class="row"><label class="small" style="min-width:150px">Ліміт дисбалансу фаз, %</label><input id="imbLimit" type="number" step="1" value="20"></div>
+          <div class="row"><button class="btn" onclick="calcTotals()">🧮 Перерахувати</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>➕ Додати коло</h2>
+      <div class="grid g3">
+        <div>
+          <h3>Навантаження</h3>
+          <div class="row"><label class="small" style="min-width:140px">ID</label><input id="id" value="L-01"></div>
+          <div class="row"><label class="small" style="min-width:140px">Назва</label><input id="name" value="Освітлення аудиторії"></div>
+          <div class="row"><label class="small" style="min-width:140px">Тип</label>
+            <select id="type"><option>Освітлення</option><option>Розетки</option><option>Двигун</option><option>Інше</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px">Потужність, кВт</label><input id="kw" type="number" step="0.1" value="1.2"></div>
+          <div class="row"><label class="small" style="min-width:140px">PF (cosφ)</label><input id="pf" type="number" step="0.01" value="0.95"></div>
+          <div class="row"><label class="small" style="min-width:140px">η (за потреби)</label><input id="eta" type="number" step="0.01" value="0.95"></div>
+        </div>
+        <div>
+          <h3>Фази / Захист</h3>
+          <div class="row"><label class="small" style="min-width:140px">Фази</label>
+            <select id="phases"><option selected>1Ф</option><option>3Ф</option></select></div>
+          <div class="row" id="phaseRow"><label class="small" style="min-width:140px">Фаза (1Ф)</label>
+            <select id="phase"><option>A</option><option>B</option><option>C</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px">MCB крива</label>
+            <select id="curve"><option>B</option><option selected>C</option><option>D</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px">MCB, А</label>
+            <select id="mcbA"><option>6</option><option>10</option><option selected>16</option><option>20</option><option>25</option><option>32</option></select></div>
+        </div>
+        <div>
+          <h3>RCD / Лінія</h3>
+          <div class="row"><label class="small" style="min-width:140px">RCD тип</label>
+            <select id="rcdType"><option>—</option><option selected>AC</option><option>A</option><option>F</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px">RCD IΔn, мА</label>
+            <select id="rcd_mA"><option>—</option><option>30</option><option selected>100</option><option>300</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px">RCD, А</label>
+            <select id="rcdA"><option>—</option><option>25</option><option selected>40</option><option>63</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px">Група RCD</label><input id="rcdGroup" value="RCD-1"></div>
+          <div class="row"><label class="small" style="min-width:140px">Провід, мм²</label><select id="wire"><option>1.5</option><option selected>2.5</option><option>4</option><option>6</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px">Довжина, м</label><input id="len" type="number" value="25"></div>
+        </div>
+      </div>
+      <div class="grid g3" style="margin-top:8px">
+        <div>
+          <div class="row"><label class="small" style="min-width:140px">URL (NFC/QR)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
+        </div>
+        <div>
+          <div class="row"><label class="small" style="min-width:140px">Нотатка</label><input id="notes" placeholder="Примітка"></div>
+        </div>
+        <div>
+          <div class="row"><label class="small" style="min-width:140px">Duty, % (корист.)</label><input id="duty" type="number" value="70"></div>
+          <div class="row"><label class="small" style="min-width:140px">Diversity, % (кола)</label><input id="div" type="number" value="100"></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
+        <button class="btn" onclick="seedOne()">🔄 Приклад кола</button>
+      </div>
+      <p class="small">Розрахунок I: 1Ф → <span class="mono">I = P / (Uln·PF·η)</span>, 3Ф → <span class="mono">I = P / (√3·Ull·PF·η)</span>. P = кВт·1000.</p>
+    </div>
+
+    <div class="card printable">
+      <h2>📋 Відомість щита</h2>
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>#</th><th>ID</th><th>Назва</th><th>Фази</th><th>Фаза</th><th>кВт</th><th>I, А</th><th>MCB</th><th>RCD</th><th>Провід</th><th>Довж., м</th><th>Статус</th><th>URL</th><th>Дії</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="small">Статус: <span class="chip ok">PASS</span> — ок; <span class="chip warn">IMB</span> — дисбаланс фаз; <span class="chip bad">MCB/RCD</span> — потенційна неузгодженість.</p>
+    </div>
+
+    <div class="card">
+      <h2>📊 Підсумки / Баланс фаз</h2>
+      <div id="sum" class="grid g3"></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" onclick="buildTickets()">🧾 Наклейки 58 мм (всі)</button>
+        <button class="btn" onclick="buildReport()">📄 A4-звіт</button>
+        <button class="btn" onclick="window.print()">🖨️ Друк</button>
+      </div>
+    </div>
+
+    <div class="card printable">
+      <h2>🧾 Наклейки 58 мм</h2>
+      <div id="tickets" class="tickets"></div>
+    </div>
+
+    <div class="card printable">
+      <h2>📄 A4-звіт (для друку/PDF)</h2>
+      <div id="printArea"></div>
+    </div>
+  </div>
+
+<script>
+  // Вбудовано у Moodle → стриманий вигляд
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // ======= СТАН =======
+  let circuits = []; // об'єкти кола
+  const tbody = document.querySelector('#tbl tbody');
+  const ticketsBox = document.getElementById('tickets');
+  const sumBox = document.getElementById('sum');
+
+  // ======= УТИЛІТИ =======
+  function esc(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function nowStamp(){ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+
+  function I_from(kW, phases, Uln, Ull, PF, eta){
+    const P = (parseFloat(kW)||0)*1000;
+    const pf = parseFloat(PF)||1;
+    const e = parseFloat(eta)||1;
+    if(phases==='3Ф'){ if(Ull<=0||pf<=0||e<=0) return 0; return P/(Math.sqrt(3)*Ull*pf*e); }
+    if(Uln<=0||pf<=0||e<=0) return 0; return P/(Uln*pf*e);
+  }
+
+  // ======= ДОДАВАННЯ / ОНОВЛЕННЯ =======
+  function addOrUpdate(){
+    const rec = {
+      id: (document.getElementById('id').value||'').trim(),
+      name: (document.getElementById('name').value||'').trim(),
+      type: document.getElementById('type').value,
+      phases: document.getElementById('phases').value,
+      phase: document.getElementById('phase').value,
+      kw: parseFloat(document.getElementById('kw').value||'0'),
+      PF: parseFloat(document.getElementById('pf').value||'1'),
+      eta: parseFloat(document.getElementById('eta').value||'1'),
+      curve: document.getElementById('curve').value,
+      mcbA: parseInt(document.getElementById('mcbA').value||'16',10),
+      rcdType: document.getElementById('rcdType').value,
+      rcd_mA: document.getElementById('rcd_mA').value,
+      rcdA: document.getElementById('rcdA').value,
+      rcdGroup: (document.getElementById('rcdGroup').value||'').trim(),
+      wire: parseFloat(document.getElementById('wire').value||'2.5'),
+      len: parseFloat(document.getElementById('len').value||'0'),
+      url: (document.getElementById('url').value||'').trim(),
+      notes: (document.getElementById('notes').value||'').trim(),
+      duty: parseFloat(document.getElementById('duty').value||'100'),
+      diversity: parseFloat(document.getElementById('div').value||'100')
+    };
+    if(!rec.id){ alert('Укажи ID'); return; }
+    const i = circuits.findIndex(x=>x.id===rec.id);
+    if(i>=0) circuits[i] = {...circuits[i], ...rec};
+    else circuits.push(rec);
+    calcTotals();
+  }
+
+  // ======= РОЗРАХУНКИ / ПЕРЕВІРКИ =======
+  function calcTotals(){
+    const Uln = parseFloat(document.getElementById('Uln').value||'230');
+    const Ull = parseFloat(document.getElementById('Ull').value||'400');
+    const mainA = parseFloat(document.getElementById('mainMCB').value||'40');
+    const mainCurve = document.getElementById('mainCurve').value;
+    const globDiv = parseFloat(document.getElementById('diversity').value||'100')/100;
+    const imbLimit = parseFloat(document.getElementById('imbLimit').value||'20');
+
+    // Розрахунок I та статусу для кожного кола
+    circuits.forEach(c=>{
+      c.I = Math.round(I_from(c.kw, c.phases, Uln, Ull, c.PF, c.eta)*100)/100;
+      c.status = 'PASS';
+      // Прості перевірки: MCB ≥ I*1.25
+      const need = (c.I || 0) * 1.25;
+      if(c.mcbA < need) c.status = 'MCB';
+      // RCD група: якщо заданий rcdType але немає групи — попередження
+      if(c.rcdType!=='—' && !c.rcdGroup){ c.status = (c.status==='PASS') ? 'RCD' : c.status; }
+    });
+
+    // Баланс фаз (враховуючи duty та diversity)
+    const A = sumPhase('A', circuits, globDiv);
+    const B = sumPhase('B', circuits, globDiv);
+    const C = sumPhase('C', circuits, globDiv);
+    const maxI = Math.max(A.I,B.I,C.I);
+    const minI = Math.min(A.I,B.I,C.I);
+    const imb = maxI>0 ? Math.round(((maxI-minI)/maxI)*100) : 0;
+
+    // Перевірка селективності по номіналах: головний ≥ 1.6× найбільшого відгалуження
+    const maxBranch = Math.max(...circuits.map(c=>c.mcbA||0),0);
+    const selective = mainA >= 1.6*maxBranch ? 'OK' : 'CHECK';
+
+    render(A,B,C,imb,imbLimit, mainA, mainCurve, selective);
+  }
+
+  function sumPhase(ph, list, globDiv){
+    // 3Ф ділиться рівномірно на A/B/C; 1Ф йде в конкретну фазу
+    let I = 0, P = 0;
+    list.forEach(c=>{
+      const duty = (c.duty||100)/100;
+      const div = (c.diversity||100)/100 * globDiv;
+      if(c.phases==='3Ф'){
+        I += (c.I/3) * duty * div;
+        P += (c.kw/3) * 1000 * duty * div;
+      }else if(c.phase===ph){
+        I += c.I * duty * div;
+        P += c.kw * 1000 * duty * div;
+      }
+    });
+    return {phase:ph, I: Math.round(I*100)/100, P: Math.round(P)};
+  }
+
+  // ======= РЕНДЕР =======
+  function render(A,B,C,imb,imbLimit, mainA, mainCurve, selective){
+    // Таблиця
+    tbody.innerHTML='';
+    circuits.forEach((c,i)=>{
+      const badge = badgeFor(c.status);
+      const rcd = c.rcdType==='—' ? '—' : `${c.rcdType} ${c.rcd_mA}мА / ${c.rcdA}A · ${esc(c.rcdGroup||'?')}`;
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td class="editable" data-k="id" data-id="${c.id}">${esc(c.id)}</td>
+        <td class="editable" data-k="name" data-id="${c.id}">${esc(c.name)}</td>
+        <td class="editable" data-k="phases" data-id="${c.id}">${esc(c.phases)}</td>
+        <td class="editable" data-k="phase" data-id="${c.id}">${esc(c.phases==='1Ф'?c.phase:'ABC')}</td>
+        <td class="editable" data-k="kw" data-id="${c.id}">${esc(c.kw)}</td>
+        <td>${c.I??'—'}</td>
+        <td class="editable" data-k="mcbA" data-id="${c.id}">${esc(c.curve)}${esc(c.mcbA)}</td>
+        <td class="editable" data-k="rcdGroup" data-id="${c.id}">${rcd}</td>
+        <td class="editable" data-k="wire" data-id="${c.id}">${esc(c.wire)}</td>
+        <td class="editable" data-k="len" data-id="${c.id}">${esc(c.len)}</td>
+        <td>${badge}</td>
+        <td class="editable" data-k="url" data-id="${c.id}">${esc(c.url||'')}</td>
+        <td class="mono">
+          <button class="btn" data-act="label" data-id="${c.id}">Наклейка</button>
+          <button class="btn" data-act="del" data-id="${c.id}">✖</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    // Підсумки
+    const imbBadge = imb>imbLimit ? `<span class="chip warn">Імбаланс ${imb}% (ліміт ${imbLimit}%)</span>` : `<span class="chip ok">Імбаланс ${imb}%</span>`;
+    const selBadge = selective==='OK' ? `<span class="chip ok">Селективність ~ OK</span>` : `<span class="chip warn">Селективність ~ CHECK</span>`;
+    sumBox.innerHTML = `
+      <div class="card"><h3>Фаза A</h3><p>I≈ <b>${A.I} А</b> · P≈ ${A.P} Вт</p></div>
+      <div class="card"><h3>Фаза B</h3><p>I≈ <b>${B.I} А</b> · P≈ ${B.P} Вт</p></div>
+      <div class="card"><h3>Фаза C</h3><p>I≈ <b>${C.I} А</b> · P≈ ${C.P} Вт</p></div>
+      <div class="card"><h3>Головний MCB</h3><p>${esc(document.getElementById('panelName').value)} · <b>${esc(document.getElementById('mainCurve').value)}${esc(document.getElementById('mainMCB').value)}A</b><br>${imbBadge} · ${selBadge}</p></div>
+    `;
+  }
+
+  function badgeFor(status){
+    let color = '#22c55e'; let txt='PASS';
+    if(status==='MCB' || status==='RCD'){ color='#ef4444'; txt=status; }
+    return `<span class="mono" style="padding:2px 8px;border:1px solid #223049;border-radius:999px;background:#0d1a2e;color:${color}">${txt}</span>`;
+  }
+
+  // Редагування в таблиці
+  tbody.addEventListener('dblclick', (e)=>{
+    const td = e.target.closest('.editable'); if(!td) return;
+    const id = td.getAttribute('data-id'); const key = td.getAttribute('data-k');
+    const idx = circuits.findIndex(x=>x.id===id); const c = circuits[idx];
+    const input = document.createElement('input'); input.value = key==='phase' && c.phases==='3Ф' ? 'ABC' : c[key]; input.style.width='100%'; input.style.padding='6px 8px';
+    input.addEventListener('blur', ()=>{
+      let v = input.value.trim();
+      if(['kw','mcbA','wire','len'].includes(key)) v = parseFloat(v.replace(',','.'))||0;
+      if(key==='phases' && (v!=='1Ф' && v!=='3Ф')) v = c.phases;
+      if(key==='phase' && c.phases==='3Ф') v = 'ABC';
+      c[key] = v; calcTotals();
+    });
+    td.innerHTML=''; td.appendChild(input); input.focus(); input.select();
+  });
+
+  tbody.addEventListener('click', (e)=>{
+    const b = e.target.closest('button'); if(!b) return;
+    const id = b.getAttribute('data-id'); const act = b.getAttribute('data-act');
+    if(act==='del'){ circuits = circuits.filter(x=>x.id!==id); calcTotals(); return; }
+    if(act==='label'){ const c = circuits.find(x=>x.id===id); buildTickets([c]); ticketsBox.scrollIntoView({behavior:'smooth'}); }
+  });
+
+  // ======= НАКЛЕЙКИ 58 мм =======
+  function buildTickets(list){
+    const L = list || circuits;
+    ticketsBox.innerHTML='';
+    const panel = document.getElementById('panelName').value.trim() || 'Щит';
+    L.forEach(c=>{
+      const el = document.createElement('div'); el.className='ticket';
+      const urlText = c.url ? c.url : `https://serawww7.github.io/edlab/electric_para13.html#${encodeURIComponent(c.id)}`;
+      el.innerHTML = `
+        <h4>ЛІНІЯ ЩИТА</h4>
+        <p><b>${esc(panel)}</b></p>
+        <div class="line"></div>
+        <p>${esc(c.id)} · ${esc(c.name)}</p>
+        <p>${esc(c.phases)} ${esc(c.phases==='1Ф'?c.phase:'ABC')} · ${esc(c.curve)}${esc(c.mcbA)}A · Провід ${esc(c.wire)} мм²</p>
+        <p>P=${c.kw} кВт · I≈ ${c.I??'—'} A</p>
+        <p>RCD: ${esc(c.rcdType==='—'?'—':(c.rcdType+' '+c.rcd_mA+'мА / '+c.rcdA+'A · '+(c.rcdGroup||'?')))}</p>
+        <div class="line"></div>
+        <p class="qr"><small>URL/NFC: ${esc(urlText)}</small></p>
+        <p><small>${nowStamp()}</small></p>
+      `;
+      ticketsBox.appendChild(el);
+    });
+  }
+
+  // ======= A4-ЗВІТ =======
+  function buildReport(){
+    if(!circuits.length){ alert('Немає кіл'); return; }
+    const panel = esc(document.getElementById('panelName').value.trim() || 'Щит');
+    const resp = esc(document.getElementById('resp').value.trim() || '—');
+    const rows = circuits.map((c,i)=>`
+      <tr>
+        <td>${i+1}</td><td>${esc(c.id)}</td><td>${esc(c.name)}</td><td>${esc(c.phases)}</td><td>${esc(c.phases==='1Ф'?c.phase:'ABC')}</td>
+        <td>${c.kw}</td><td>${c.I??'—'}</td><td>${esc(c.curve)}${esc(c.mcbA)}</td>
+        <td>${esc(c.rcdType==='—'?'—':(c.rcdType+' '+c.rcd_mA+'мА / '+c.rcdA+'A · '+(c.rcdGroup||'')))}</td>
+        <td>${c.wire}</td><td>${c.len}</td><td>${esc(c.url||'')}</td><td>${esc(c.notes||'')}</td>
+      </tr>
+    `).join('');
+    const Uln = parseFloat(document.getElementById('Uln').value||'230');
+    const Ull = parseFloat(document.getElementById('Ull').value||'400');
+    const mainA = parseFloat(document.getElementById('mainMCB').value||'40');
+    const mainCurve = document.getElementById('mainCurve').value;
+
+    // Повторний підрахунок для підсумків
+    const globDiv = parseFloat(document.getElementById('diversity').value||'100')/100;
+    const A = sumPhase('A', circuits, globDiv);
+    const B = sumPhase('B', circuits, globDiv);
+    const C = sumPhase('C', circuits, globDiv);
+    const maxI = Math.max(A.I,B.I,C.I), minI = Math.min(A.I,B.I,C.I);
+    const imb = maxI>0 ? Math.round(((maxI-minI)/maxI)*100) : 0;
+
+    const html = `
+      <section class="doc">
+        <h2>ВІДОМІСТЬ ЩИТА · ${panel}</h2>
+        <p>U<sub>LN</sub>=${Uln} В · U<sub>LL</sub>=${Ull} В · Головний: ${esc(mainCurve)}${mainA}A · Дата: ${nowStamp()} · Відповідальний: ${resp}</p>
+        <h3>1. Склад ліній</h3>
+        <table>
+          <thead><tr><th>#</th><th>ID</th><th>Назва</th><th>Фази</th><th>Фаза</th><th>кВт</th><th>I, А</th><th>MCB</th><th>RCD</th><th>Провід</th><th>Довж., м</th><th>URL</th><th>Прим.</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <h3>2. Підсумки / Баланс фаз</h3>
+        <table>
+          <thead><tr><th>Фаза</th><th>I сум., А (з коеф.)</th><th>P, Вт (з коеф.)</th></tr></thead>
+          <tbody>
+            <tr><td>A</td><td>${A.I}</td><td>${A.P}</td></tr>
+            <tr><td>B</td><td>${B.I}</td><td>${B.P}</td></tr>
+            <tr><td>C</td><td>${C.I}</td><td>${C.P}</td></tr>
+          </tbody>
+        </table>
+        <p>Імбаланс фаз: <b>${imb}%</b>. Рекомендація: прагнути &lt;= <span class="mono">${esc(document.getElementById('imbLimit').value)}%</span> шляхом перегрупування 1-ф кіл.</p>
+        <div class="sign"><div>Склав: ____________________</div><div>Перевірив: ____________________</div></div>
+        <p class="small">Зауваження: це навчальний розрахунок (спрощено без КЗ/селективних діаграм). У реальному проєкті перевіряйте КЗ-струми, часові/енергетичні селективні карти виробника, умови прокладки кабелів та ПУЕ/ДСТУ.</p>
+      </section>`;
+    document.getElementById('printArea').innerHTML = html;
+    document.getElementById('printArea').scrollIntoView({behavior:'smooth'});
+  }
+
+  // ======= CSV =======
+  function exportCSV(){
+    const headers = ['id','name','type','phase','phases','kw','U','PF','eta','curve','mcbA','rcdType','rcd_mA','rcdA','rcdGroup','wire_mm2','length_m','url','notes','duty_pct','diversity_pct'];
+    const U = parseFloat(document.getElementById('Uln').value||'230');
+    const csv = [headers.join(','), ...circuits.map(c=>[
+      c.id,c.name,c.type,c.phase,c.phases,c.kw,U,c.PF,c.eta,c.curve,c.mcbA,c.rcdType,c.rcd_mA,c.rcdA,c.rcdGroup,c.wire,c.len,c.url||'',c.notes||'',c.duty,c.diversity
+    ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='panel_schedule.csv'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  async function importCSV(){
+    const f=document.getElementById('file').files[0]; if(!f){ alert('Оберіть CSV'); return; }
+    const txt=await f.text();
+    const lines=txt.trim().split(/\r?\n/); if(lines.length<2){ alert('CSV порожній'); return; }
+    const headers=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());
+    const req=['id','name','type','phase','phases','kw','PF','eta','curve','mcbA','rcdType','rcd_mA','rcdA','rcdGroup','wire_mm2','length_m','url','notes','duty_pct','diversity_pct'];
+    const miss=req.filter(x=>!headers.includes(x)); if(miss.length){ alert('Відсутні поля: '+miss.join(', ')); return; }
+    const out=[];
+    for(let i=1;i<lines.length;i++){
+      const cells=splitCSV(lines[i]); if(!cells.length) continue;
+      const o={}; headers.forEach((h,j)=> o[h]=(cells[j]||'').replace(/^"|"$/g,''));
+      out.push({
+        id:o.id,name:o.name,type:o.type,phase:o.phase,phases:o.phases||'1Ф',kw:parseFloat(o.kw||'0'),
+        PF:parseFloat(o.PF||'1'),eta:parseFloat(o.eta||'1'),curve:o.curve||'C',mcbA:parseFloat(o.mcbA||'16'),
+        rcdType:o.rcdType||'—',rcd_mA:o.rcd_mA||'—',rcdA:o.rcdA||'—',rcdGroup:o.rcdGroup||'',
+        wire:parseFloat(o.wire_mm2||'2.5'),len:parseFloat(o.length_m||'0'),url:o.url||'',notes:o.notes||'',
+        duty:parseFloat(o.duty_pct||'100'),diversity:parseFloat(o.diversity_pct||'100')
+      });
+    }
+    circuits = out; calcTotals();
+  }
+  function splitCSV(line){
+    const res=[]; let cur=''; let q=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){ if(q && line[i+1]==='"'){ cur+='"'; i++; } else q=!q; }
+      else if(ch===',' && !q){ res.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    res.push(cur); return res;
+  }
+
+  // ======= ПРИКЛАДИ =======
+  function seedOne(){
+    document.getElementById('id').value='S-01';
+    document.getElementById('name').value='Розетки лабораторії';
+    document.getElementById('type').value='Розетки';
+    document.getElementById('kw').value=2.2;
+    document.getElementById('pf').value=0.95;
+    document.getElementById('eta').value=0.98;
+    document.getElementById('phases').value='1Ф';
+    document.getElementById('phase').value='A';
+    document.getElementById('curve').value='C';
+    document.getElementById('mcbA').value=16;
+    document.getElementById('rcdType').value='A';
+    document.getElementById('rcd_mA').value='30';
+    document.getElementById('rcdA').value='40';
+    document.getElementById('rcdGroup').value='RCD-1';
+    document.getElementById('wire').value=2.5;
+    document.getElementById('len').value=22;
+    document.getElementById('duty').value=60;
+    document.getElementById('div').value=80;
+  }
+
+  function seedDemo(){
+    circuits = [
+      {id:'L-01',name:'Освітлення ауд.101',type:'Освітлення',phases:'1Ф',phase:'A',kw:1.2,PF:0.95,eta:0.95,curve:'B',mcbA:10,rcdType:'AC',rcd_mA:'100',rcdA:'40',rcdGroup:'RCD-1',wire:1.5,len:25,url:'',notes:'LED',duty:80,diversity:100},
+      {id:'S-01',name:'Розетки лаб. №1',type:'Розетки',phases:'1Ф',phase:'B',kw:2.2,PF:0.95,eta:0.98,curve:'C',mcbA:16,rcdType:'A',rcd_mA:'30',rcdA:'40',rcdGroup:'RCD-2',wire:2.5,len:22,url:'',notes:'Група №1',duty:60,diversity:80},
+      {id:'M-01',name:'Вентилятор даховий',type:'Двигун',phases:'3Ф',phase:'ABC',kw:1.5,PF:0.9,eta:0.9,curve:'D',mcbA:16,rcdType:'—',rcd_mA:'—',rcdA:'—',rcdGroup:'',wire:2.5,len:30,url:'',notes:'Y/Δ вбуд.',duty:70,diversity:100},
+      {id:'S-02',name:'Розетки лаб. №2',type:'Розетки',phases:'1Ф',phase:'C',kw:1.6,PF:0.95,eta:0.98,curve:'C',mcbA:16,rcdType:'A',rcd_mA:'30',rcdA:'40',rcdGroup:'RCD-2',wire:2.5,len:18,url:'',notes:'Група №2',duty:60,diversity:80}
+    ];
+    calcTotals();
+  }
+
+  // ======= UI: показ/прихов. селектора фази =======
+  (function(){
+    const phasesSel = document.getElementById('phases');
+    const phaseRow = document.getElementById('phaseRow');
+    phasesSel.addEventListener('change', ()=>{ phaseRow.style.display = (phasesSel.value==='1Ф')?'flex':'none'; });
+    phaseRow.style.display = (phasesSel.value==='1Ф')?'flex':'none';
+  })();
+
+  // Авто-демо при старті
+  seedDemo();
+</script>
+</body>
+</html>
