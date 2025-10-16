@@ -1,0 +1,471 @@
+<!-- electric_para12.html
+     Пара 12 (Електрики, аудиторно): ПУСКОВІ СТРУМИ ДВИГУНІВ
+     Розрахунок In, Iпуск (за методом пуску), добір захистів (MCB/MPCB + теплове реле),
+     оцінка падіння напруги під час пуску/роботи, наклейки 58 мм, A4-звіт, CSV імпорт/експорт.
+     Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Електрики · Пара 12 — Пускові струми двигунів: In, Iпуск, захисти, ΔU, 58 мм</title>
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
+  .wrap{max-width:1120px; margin:0 auto; padding:24px 16px 96px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9aa5b1}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:1050px){.g3{grid-template-columns:1fr}; .g2{grid-template-columns:1fr}}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .small{font-size:12px; color:#93a3b5}
+  .chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; font-size:12px; margin-right:6px; background:#0d1a2e}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)} .muted{color:#9aa5b1}
+  input,select,textarea{padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb; width:100%}
+
+  /* Таблиці */
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+
+  /* Квитанції 58 мм */
+  .tickets{display:flex; gap:12px; flex-wrap:wrap}
+  .ticket{
+    width:58mm; background:#fff; color:#000; padding:5mm 4mm; border-radius:6px;
+    box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace
+  }
+  .ticket h4{margin:0 0 4px; font-size:13px; text-align:center}
+  .ticket p{margin:1px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:5px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+
+  /* A4 */
+  #printArea{background:#fff; color:#000; border-radius:12px; border:1px solid #e5e7eb; padding:16px}
+  .doc{page-break-after:always; padding:12mm; color:#000; font-family:Georgia,"Times New Roman",serif}
+  .doc h2{color:#000; font-size:20px; margin:0 0 6px}
+  .doc h3{color:#000; font-size:16px; margin:6px 0}
+  .doc p{color:#000; margin:4px 0}
+  .doc table{width:100%; border-collapse:collapse; border:1px solid #111}
+  .doc th,.doc td{border:1px solid #111; padding:6px 8px; font-size:12px; vertical-align:top}
+  .doc .sign{margin-top:10mm; display:flex; gap:10mm; flex-wrap:wrap}
+  .doc .sign div{flex:1 1 220px}
+
+  /* Вбудований режим (iframe/Moodle) */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+
+  @media print{
+    @page{ size:A4; margin:12mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    #printArea{ border:none; padding:0 }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Електрики · Пара 12 · аудиторно</span>
+    <h1>🛞 Пускові струми двигунів: In → Iпуск → захисти (MCB/MPCB, ТР) → ΔU → 🧾 58 мм</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>Оцінити номінальний струм <b>In</b>, пусковий струм <b>Iпуск</b> для різних методів пуску (DOL/зірка-трикутник/софт-стартер), підібрати <b>захисти</b> (MCB/MPCB + теплове реле), перевірити падіння напруги <b>ΔU</b> під час пуску і роботи та сформувати мітки 58 мм і A4-звіт.</p>
+      <p class="small">Формули: <span class="mono">In = P / (√3·U<sub>L-L</sub>·η·PF)</span>, <span class="mono">Iпуск = k·In</span>, де <span class="mono">k</span> залежить від методу (DOL: 6–8; Y/Δ: 2–3; софт-стартер: 1.8–2.5). <span class="mono">ΔU% ≈ I·2·L·ρ / (S·U)·100</span> (навчальна оцінка; Cu ρ=0.0175 Ω·мм²/м).</p>
+      <div class="row">
+        <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
+        <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+      </div>
+      <p class="small">CSV поля: <span class="mono">id,name,kW,U_LL,PF,eta,method,cable_mm2,length_m,starter,curve,stdA,run_drop_limit,start_drop_limit,notes,url</span></p>
+    </div>
+
+    <div class="card">
+      <h2>➕ Двигун / Лінія</h2>
+      <div class="grid g3">
+        <div>
+          <h3>Двигун</h3>
+          <div class="row"><label class="small" style="min-width:150px">ID</label><input id="mId" value="M-001"></div>
+          <div class="row"><label class="small" style="min-width:150px">Назва</label><input id="mName" value="Насос 3 кВт"></div>
+          <div class="row"><label class="small" style="min-width:150px">Потужність, кВт</label><input id="kW" type="number" step="0.1" value="3.0"></div>
+          <div class="row"><label class="small" style="min-width:150px">U<sub>L-L</sub>, В</label><input id="U" type="number" value="400"></div>
+          <div class="row"><label class="small" style="min-width:150px">PF (cosφ)</label><input id="pf" type="number" step="0.01" value="0.85"></div>
+          <div class="row"><label class="small" style="min-width:150px">η (коеф. корисної дії)</label><input id="eta" type="number" step="0.01" value="0.88"></div>
+        </div>
+        <div>
+          <h3>Метод пуску</h3>
+          <div class="row"><label class="small" style="min-width:150px">Метод</label>
+            <select id="method">
+              <option value="DOL" selected>DOL (прямий пуск)</option>
+              <option value="YΔ">Зірка-трикутник (Y/Δ)</option>
+              <option value="SOFT">Софт-стартер</option>
+            </select>
+          </div>
+          <div class="row"><label class="small" style="min-width:150px">k (множник Iпуск)</label><input id="k" type="number" step="0.1" value="7.0"></div>
+          <div class="row"><label class="small" style="min-width:150px">Стартер/Пускач</label><input id="starter" value="Контактор + ТР"></div>
+          <div class="row"><label class="small" style="min-width:150px">Крива MCB</label>
+            <select id="curve"><option>B</option><option selected>C</option><option>D</option></select>
+          </div>
+          <div class="row"><label class="small" style="min-width:150px">Ряд In (А)</label>
+            <select id="stdA"><option>6</option><option>10</option><option>13</option><option selected>16</option><option>20</option><option>25</option><option>32</option><option>40</option></select>
+          </div>
+        </div>
+        <div>
+          <h3>Лінія</h3>
+          <div class="row"><label class="small" style="min-width:150px">Кабель, мм²</label>
+            <select id="S"><option>2.5</option><option selected>4</option><option>6</option><option>10</option></select></div>
+          <div class="row"><label class="small" style="min-width:150px">Довжина L, м</label><input id="L" type="number" value="28"></div>
+          <div class="row"><label class="small" style="min-width:150px">Ліміт ΔU (робота), %</label><input id="runLimit" type="number" step="0.1" value="5"></div>
+          <div class="row"><label class="small" style="min-width:150px">Ліміт ΔU (пуск), %</label><input id="startLimit" type="number" step="0.1" value="10"></div>
+          <div class="row"><label class="small" style="min-width:150px">URL (NFC/QR)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
+        <button class="btn" onclick="calcOne()">🧮 Розрахувати</button>
+        <button class="btn" onclick="seedOne()">🔄 Приклад запису</button>
+      </div>
+    </div>
+
+    <div class="card printable">
+      <h2>📋 Реєстр двигунів / ліній</h2>
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>#</th><th>ID</th><th>Назва</th><th>kW</th><th>In, А</th><th>Iпуск, А</th><th>Метод</th><th>MCB/MPCB, А</th><th>ТР, А</th><th>Кабель, мм²</th><th>ΔUроб, %</th><th>ΔUпуск, %</th><th>Статус</th><th>URL</th><th>Дії</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="small">Статус: <span class="chip ok">PASS</span> — ΔU в межах лімітів; <span class="chip warn">WARN</span> — робота PASS, пуск близько до меж; <span class="chip bad">FAIL</span> — перевищення.</p>
+    </div>
+
+    <div class="card printable">
+      <h2>🧾 Наклейки 58 мм «ЛІНІЯ ДВИГУНА»</h2>
+      <div class="row">
+        <button class="btn" onclick="buildTickets()">🧩 Зібрати для всіх</button>
+        <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+        <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+      </div>
+      <div id="tickets" class="tickets"></div>
+    </div>
+
+    <div class="card printable">
+      <h2>📄 A4-звіт (для друку/PDF)</h2>
+      <div class="row">
+        <button class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
+        <button class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
+      </div>
+      <div id="printArea"></div>
+    </div>
+  </div>
+
+<script>
+  // Вбудований режим (Moodle) → стриманий вигляд
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // ======= СТАН =======
+  let motors = []; // {id,name,kW,U,PF,eta,method,k,S,L,starter,curve,stdA,runLimit,startLimit,url,calc:{In,Istart,mcb,tr,dropRun,dropStart,status}}
+  const tbody = document.querySelector('#tbl tbody');
+  const ticketsBox = document.getElementById('tickets');
+
+  // ======= УТИЛІТИ =======
+  function esc(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function nowStamp(){ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+
+  function In_calc(kW,U,eta,PF){
+    // In = P / (sqrt(3)*U*eta*PF), P=kW*1000
+    if(U<=0 || eta<=0 || PF<=0) return 0;
+    return (kW*1000)/(Math.sqrt(3)*U*eta*PF);
+  }
+  function drop_pct(I, L, S, U){
+    // ΔU% ≈ I · 2·L·ρ / (S·U) · 100  (одна лінія туди-назад, 3ф оцінка для фази)
+    const rho = 0.0175; // Ω·мм²/м (Cu)
+    if(S<=0||U<=0) return 0;
+    return (I * 2 * L * rho) / (S * U) * 100;
+  }
+  function pickMCB(Irun, stdA){
+    // підбір номіналу автомата (навчально): In ≥ 1.25*Irun, з ряду та не нижче stdA
+    const row=[6,10,13,16,20,25,32,40,50,63];
+    const need = Irun*1.25;
+    let pick = row.find(x=>x>=need) || row[row.length-1];
+    return Math.max(pick, stdA);
+  }
+  function pickThermal(Irun){ return Math.round(Irun*1.1*10)/10; } // ТР ~ 1.05–1.15·In → беремо 1.1·In
+
+  function statusFromDrops(dropRun, dropStart, runLimit, startLimit){
+    if(dropRun>runLimit || dropStart>startLimit) return 'FAIL';
+    if((startLimit - dropStart) <= 1.0) return 'WARN'; // близько до межі
+    return 'PASS';
+  }
+
+  // ======= РОЗРАХУНКИ =======
+  function calcObj(m){
+    const In = In_calc(m.kW, m.U, m.eta, m.PF);
+    const Istart = (m.k || 6)*In;
+    const Irun = In; // номінальний робочий
+    const mcb = pickMCB(Irun, m.stdA);
+    const tr = pickThermal(Irun);
+    const dropRun = Math.round(drop_pct(Irun, m.L, m.S, m.U)*100)/100;
+    const dropStart = Math.round(drop_pct(Istart, m.L, m.S, m.U)*100)/100;
+    const status = statusFromDrops(dropRun, dropStart, m.runLimit, m.startLimit);
+    m.calc = {In:round2(In), Istart:round2(Istart), mcb, tr, dropRun, dropStart, status};
+    return m;
+  }
+  function round2(x){ return Math.round(x*100)/100; }
+
+  // ======= ДОДАТИ/ОНОВИТИ =======
+  function addOrUpdate(){
+    const rec = {
+      id: (document.getElementById('mId').value||'').trim(),
+      name: (document.getElementById('mName').value||'').trim(),
+      kW: parseFloat(document.getElementById('kW').value||'0'),
+      U: parseFloat(document.getElementById('U').value||'400'),
+      PF: parseFloat(document.getElementById('pf').value||'0.85'),
+      eta: parseFloat(document.getElementById('eta').value||'0.88'),
+      method: document.getElementById('method').value,
+      k: parseFloat(document.getElementById('k').value||'6'),
+      starter: (document.getElementById('starter').value||'').trim(),
+      curve: document.getElementById('curve').value,
+      stdA: parseInt(document.getElementById('stdA').value||'16',10),
+      S: parseFloat(document.getElementById('S').value||'4'),
+      L: parseFloat(document.getElementById('L').value||'20'),
+      runLimit: parseFloat(document.getElementById('runLimit').value||'5'),
+      startLimit: parseFloat(document.getElementById('startLimit').value||'10'),
+      url: (document.getElementById('url').value||'').trim()
+    };
+    if(!rec.id){ alert('Укажи ID'); return; }
+    const i = motors.findIndex(x=>x.id===rec.id);
+    if(i>=0) motors[i] = {...motors[i], ...rec};
+    else motors.push(rec);
+    calcOne(rec.id);
+  }
+
+  function calcOne(idOpt){
+    const id = idOpt || (document.getElementById('mId').value||'').trim();
+    if(!id){ alert('Не вказано ID'); return; }
+    const m = motors.find(x=>x.id===id);
+    if(!m){ alert('Немає такого запису'); return; }
+    // Автопідстановка k за методом (лишай можливість ручної корекції)
+    if(m.method==='YΔ' && (!m.k || m.k>3)){ m.k = 2.5; document.getElementById('k').value=2.5; }
+    if(m.method==='SOFT' && (!m.k || m.k>3)){ m.k = 2.2; document.getElementById('k').value=2.2; }
+    if(m.method==='DOL' && (!m.k || m.k<5)){ m.k = 7; document.getElementById('k').value=7; }
+    calcObj(m); render(); buildTickets([m]);
+  }
+
+  // ======= ТАБЛИЦЯ =======
+  function render(){
+    tbody.innerHTML='';
+    motors.forEach((m,i)=>{
+      const c = m.calc || {};
+      const badge = `<span class="mono" style="padding:2px 8px;border:1px solid #223049;border-radius:999px;background:#0d1a2e;color:${
+        c.status==='PASS'?'#22c55e':(c.status==='WARN'?'#f59e0b':'#ef4444')
+      }">${c.status||'—'}</span>`;
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td class="editable" data-k="id" data-id="${m.id}">${esc(m.id)}</td>
+        <td class="editable" data-k="name" data-id="${m.id}">${esc(m.name)}</td>
+        <td class="editable" data-k="kW" data-id="${m.id}">${esc(m.kW)}</td>
+        <td>${c.In??'—'}</td>
+        <td>${c.Istart??'—'}</td>
+        <td class="editable" data-k="method" data-id="${m.id}">${esc(m.method)}</td>
+        <td>${m.curve}${c.mcb??'—'}</td>
+        <td>${c.tr??'—'}</td>
+        <td class="editable" data-k="S" data-id="${m.id}">${esc(m.S)}</td>
+        <td>${c.dropRun??'—'}</td>
+        <td>${c.dropStart??'—'}</td>
+        <td>${badge}</td>
+        <td class="editable" data-k="url" data-id="${m.id}">${esc(m.url||'')}</td>
+        <td class="mono"><button class="btn" data-act="label" data-id="${m.id}">Наклейка</button> <button class="btn" data-act="del" data-id="${m.id}">✖</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Редагування клітинок
+  tbody.addEventListener('dblclick', (e)=>{
+    const td = e.target.closest('.editable'); if(!td) return;
+    const id = td.getAttribute('data-id'); const key = td.getAttribute('data-k');
+    const idx = motors.findIndex(x=>x.id===id); const m = motors[idx];
+    const input = document.createElement('input'); input.value = m[key] || ''; input.style.width='100%'; input.style.padding='6px 8px';
+    input.addEventListener('blur', ()=>{
+      let v = input.value.trim();
+      if(['kW','S','L'].includes(key)) v = parseFloat(v.replace(',','.'))||0;
+      m[key] = v; calcObj(m); render();
+    });
+    td.innerHTML=''; td.appendChild(input); input.focus(); input.select();
+  });
+
+  // Дії
+  tbody.addEventListener('click', (e)=>{
+    const b = e.target.closest('button'); if(!b) return;
+    const id = b.getAttribute('data-id'); const act = b.getAttribute('data-act');
+    if(act==='del'){ motors = motors.filter(x=>x.id!==id); render(); return; }
+    if(act==='label'){ const m = motors.find(x=>x.id===id); if(!m.calc) calcObj(m); buildTickets([m]); ticketsBox.scrollIntoView({behavior:'smooth'}); }
+  });
+
+  // ======= НАКЛЕЙКИ 58 мм =======
+  function buildTickets(list){
+    const L = list || motors;
+    ticketsBox.innerHTML='';
+    L.forEach(m=>{
+      if(!m.calc) calcObj(m);
+      const el = document.createElement('div'); el.className='ticket';
+      const urlText = m.url ? m.url : `https://serawww7.github.io/edlab/electric_para12.html#${encodeURIComponent(m.id)}`;
+      el.innerHTML = `
+        <h4>ЛІНІЯ ДВИГУНА</h4>
+        <p><b>${esc(m.id)} · ${esc(m.name)}</b></p>
+        <div class="line"></div>
+        <p>In: ${m.calc.In} A · Iпуск: ${m.calc.Istart} A (${esc(m.method)})</p>
+        <p>MCB: ${esc(m.curve)}${m.calc.mcb} · ТР: ${m.calc.tr} A</p>
+        <p>Кабель: ${esc(m.S)} мм² · L=${esc(m.L)} м</p>
+        <p>ΔU роб: ${m.calc.dropRun}% · пуск: ${m.calc.dropStart}% · ${m.calc.status}</p>
+        <div class="line"></div>
+        <p class="qr"><small>URL/NFC: ${esc(urlText)}</small></p>
+        <p><small>${nowStamp()}</small></p>
+      `;
+      ticketsBox.appendChild(el);
+    });
+  }
+  function downloadTXT(){
+    if(!ticketsBox.firstChild){ alert('Спочатку згенеруйте наклейки'); return; }
+    const lines=['MOTOR LINE LABELS 58mm','-------------------'];
+    Array.from(ticketsBox.children).forEach(t=>{ lines.push(t.innerText.replace(/\n{2,}/g,'\n')); lines.push('-------------------'); });
+    const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='motor_line_58mm.txt'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // ======= A4-ЗВІТ =======
+  function buildReport(){
+    if(!motors.length){ alert('Немає записів'); return; }
+    const rows = motors.map((m,i)=>{
+      if(!m.calc) calcObj(m);
+      return `
+        <tr>
+          <td>${i+1}</td><td>${esc(m.id)}</td><td>${esc(m.name)}</td><td>${m.kW}</td>
+          <td>${m.calc.In}</td><td>${m.calc.Istart}</td><td>${esc(m.method)}</td>
+          <td>${esc(m.curve)}${m.calc.mcb}</td><td>${m.calc.tr}</td>
+          <td>${m.S}</td><td>${m.L}</td><td>${m.calc.dropRun}%</td><td>${m.calc.dropStart}%</td><td>${m.calc.status}</td>
+        </tr>`;
+    }).join('');
+    const html = `
+      <section class="doc">
+        <h2>РОЗРАХУНОК ПУСКОВИХ СТРУМІВ ТА ЗАХИСТІВ ДВИГУНІВ</h2>
+        <p>Дата: ${nowStamp()}</p>
+        <table>
+          <thead>
+            <tr><th>#</th><th>ID</th><th>Назва</th><th>кВт</th><th>In, А</th><th>Iпуск, А</th><th>Метод</th><th>MCB/MPCB</th><th>ТР, А</th><th>Кабель, мм²</th><th>L, м</th><th>ΔU роб, %</th><th>ΔU пуск, %</th><th>Статус</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <h3>Висновок</h3>
+        <p>PASS: ${motors.filter(m=>m.calc?.status==='PASS').length}; WARN: ${motors.filter(m=>m.calc?.status==='WARN').length}; FAIL: ${motors.filter(m=>m.calc?.status==='FAIL').length}.</p>
+        <div class="sign">
+          <div>Виконавець: ____________________</div>
+          <div>Перевірив: ____________________</div>
+        </div>
+        <p class="small">Примітка: розрахунки навчальні; у реальних проєктах обов’язково перевіряйте пусковий момент, категорію запуску, тривалість пуску, коефіцієнти корекції кабелю, умови ПУЕ/ДСТУ/виробника.</p>
+      </section>`;
+    document.getElementById('printArea').innerHTML = html;
+    document.getElementById('printArea').scrollIntoView({behavior:'smooth'});
+  }
+
+  // ======= CSV =======
+  function exportCSV(){
+    const headers = ['id','name','kW','U_LL','PF','eta','method','k','cable_mm2','length_m','starter','curve','stdA','run_drop_limit','start_drop_limit','In_A','Istart_A','mcb_A','thermal_A','drop_run_pct','drop_start_pct','status','url','timestamp'];
+    const stamp = nowStamp();
+    const csv = [headers.join(','), ...motors.map(m=>{
+      if(!m.calc) calcObj(m);
+      const vals = [m.id,m.name,m.kW,m.U,m.PF,m.eta,m.method,m.k,m.S,m.L,m.starter,m.curve,m.stdA,m.runLimit,m.startLimit,m.calc.In,m.calc.Istart,m.calc.mcb,m.calc.tr,m.calc.dropRun,m.calc.dropStart,m.calc.status,m.url||'',stamp];
+      return vals.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+    })].join('\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='motor_startup_registry.csv'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  async function importCSV(){
+    const f=document.getElementById('file').files[0]; if(!f){ alert('Оберіть CSV'); return; }
+    const txt=await f.text();
+    const lines = txt.trim().split(/\r?\n/); if(lines.length<2){ alert('CSV порожній'); return; }
+    const headers = lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());
+    const req = ['id','name','kW','U_LL','PF','eta','method','k','cable_mm2','length_m','starter','curve','stdA','run_drop_limit','start_drop_limit','url'];
+    const miss = req.filter(x=>!headers.includes(x)); if(miss.length){ alert('Відсутні поля: '+miss.join(', ')); return; }
+    const out=[];
+    for(let i=1;i<lines.length;i++){
+      const cells = splitCSV(lines[i]); if(!cells.length) continue;
+      const o={}; headers.forEach((h,j)=> o[h]=(cells[j]||'').replace(/^"|"$/g,''));
+      out.push({
+        id:o.id,name:o.name,kW:parseFloat(o.kW||'0'),U:parseFloat(o.U_LL||'400'),PF:parseFloat(o.PF||'0.85'),eta:parseFloat(o.eta||'0.88'),
+        method:o.method||'DOL',k:parseFloat(o.k||'6'),S:parseFloat(o.cable_mm2||'4'),L:parseFloat(o.length_m||'20'),
+        starter:o.starter||'',curve:o.curve||'C',stdA:parseInt(o.stdA||'16',10),
+        runLimit:parseFloat(o.run_drop_limit||'5'),startLimit:parseFloat(o.start_drop_limit||'10'),
+        url:o.url||''
+      });
+    }
+    motors = out.map(calcObj); render();
+  }
+  function splitCSV(line){
+    const res=[]; let cur=''; let q=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){ if(q && line[i+1]==='"'){ cur+='"'; i++; } else q=!q; }
+      else if(ch===',' && !q){ res.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    res.push(cur); return res;
+  }
+
+  // ======= ПРИКЛАД =======
+  function seedOne(){
+    document.getElementById('mId').value='M-001';
+    document.getElementById('mName').value='Насос 3 кВт';
+    document.getElementById('kW').value=3.0;
+    document.getElementById('U').value=400;
+    document.getElementById('pf').value=0.85;
+    document.getElementById('eta').value=0.88;
+    document.getElementById('method').value='DOL';
+    document.getElementById('k').value=7.0;
+    document.getElementById('starter').value='Контактор + ТР';
+    document.getElementById('curve').value='D';
+    document.getElementById('stdA').value=16;
+    document.getElementById('S').value=4;
+    document.getElementById('L').value=28;
+    document.getElementById('runLimit').value=5;
+    document.getElementById('startLimit').value=10;
+  }
+
+  function seedDemo(){
+    // 2 приклади різних методів
+    motors = [
+      {id:'M-001',name:'Насос 3 кВт',kW:3.0,U:400,PF:0.85,eta:0.88,method:'DOL',k:7,starter:'Контактор + ТР',curve:'D',stdA:16,S:4,L:28,runLimit:5,startLimit:10,url:''},
+      {id:'M-015',name:'Вентилятор 5.5 кВт',kW:5.5,U:400,PF:0.87,eta:0.9,method:'YΔ',k:2.5,starter:'Y/Δ пускач',curve:'C',stdA:25,S:6,L:45,runLimit:5,startLimit:10,url:''}
+    ].map(calcObj);
+    render(); buildTickets(motors);
+  }
+
+  // Авто-демо при старті
+  seedDemo();
+</script>
+</body>
+</html>
