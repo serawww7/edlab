@@ -1,0 +1,500 @@
+<!-- tech_para8.html
+     ПАРА 8 (аудиторно) для технологів з переробки продукції тваринництва
+     Тема: РЕЦЕПТУРА І СОБІВАРТІСТЬ — масштабування партії, % складу, вихід (yield),
+           інгредієнти з ціною, алергени, собівартість/кг, ціна, маржа, QR/NFC, квиток 58 мм, CSV.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; (опц.) термопринтер 58 мм; NFC-мітки.
+
+     Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
+     УВАГА: навчальна модель. Фактичні калькуляції погоджуйте з фінвідділом і нормативами підприємства.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 8 (технологи) — Рецептура і собівартість: масштабування, ціна/кг, маржа, QR/NFC/CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  textarea{min-height:84px}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано в Moodle (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 8 · аудиторно · технологи переробки</span>
+  <h1>📘 Рецептура і собівартість: масштабування, ціна/кг, маржа, QR/NFC/CSV</h1>
+
+  <div class="card">
+    <h2>🎯 Мета пари</h2>
+    <p>
+      За заняття студенти: (1) зберуть <b>рецептуру</b> з % і цінами, (2) виконають <b>масштабування партії</b>,
+      (3) оцінять <b>вихід (yield)</b>, (4) порахують <b>собівартість/кг</b> та <b>маржу</b>,
+      (5) згенерують <b>CSV</b>, <b>QR/NFC</b> і <b>квиток 58 мм</b>.
+    </p>
+    <p class="small muted">Ціни та норми — навчальні. Для виробництва слід врахувати втрати, енергію, амортизацію, зарплату й накладні.</p>
+  </div>
+
+  <!-- 1. БАЗОВІ НАЛАШТУВАННЯ -->
+  <div class="card">
+    <h2>⚙️ Базові налаштування партії</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Ідентифікація</h3>
+        <div class="row">
+          <div style="flex:1"><label>Виріб</label><input id="prodName" type="text" value="Ковбаса варена “Класична”"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Планова маса партії, кг</label><input id="batchKg" type="number" step="0.1" value="120"></div>
+          <div style="flex:1"><label>Очікуваний вихід (yield), %</label><input id="yieldPct" type="number" step="0.1" value="96.0"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Ціни і націнка</h3>
+        <div class="row">
+          <div style="flex:1"><label>Накладні (постійні), грн/партію</label><input id="ohFix" type="number" step="1" value="1200"></div>
+          <div style="flex:1"><label>Енергія та інше, грн/кг</label><input id="ohPerKg" type="number" step="0.1" value="6.5"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Цільова маржа, %</label><input id="targetMargin" type="number" step="0.1" value="25.0"></div>
+          <div style="flex:1"><label>ПДВ, %</label><input id="vatPct" type="number" step="0.1" value="20.0"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="recalc()">🧮 Перерахувати</button>
+          <button class="btn" onclick="presetRecipe()">🧪 Приклад рецептури</button>
+          <button class="btn" onclick="copyCSV('csvHead')">📋 CSV (head)</button>
+        </div>
+        <div id="csvHead" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. РЕЦЕПТУРА -->
+  <div class="card">
+    <h2>🥣 Рецептура (інгредієнти)</h2>
+    <div class="row">
+      <button class="btn" onclick="addIngred()">➕ Додати інгредієнт</button>
+      <button class="btn" onclick="copyCSV('csvIngred')">📋 CSV (recipe)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblIngred">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Назва</th>
+            <th class="dark">% у фарші</th>
+            <th class="dark">Ціна, грн/кг</th>
+            <th>АЛЕРГЕН?</th>
+            <th>Розрах. кг</th>
+            <th>Вартість, грн</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyIngred"></tbody>
+      </table>
+    </div>
+    <div id="csvIngred" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 3. ПІДСУМКИ КАЛЬКУЛЯЦІЇ -->
+  <div class="card">
+    <h2>📊 Підсумки калькуляції</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Маси</h3>
+        <p>Сума інгредієнтів (розрах.), кг: <b><span id="sumKg">—</span></b></p>
+        <p>Випуск з урах. yield, кг: <b><span id="outKg">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Собівартість</h3>
+        <p>Сировина, грн: <b><span id="rawCost">—</span></b></p>
+        <p>Накладні, грн: <b><span id="ohCost">—</span></b></p>
+        <p>Собівартість/кг, грн: <b><span id="cogsKg">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Ціноутворення</h3>
+        <p>Цільова маржа: <b><span id="margPct">—</span></b>%</p>
+        <p>Ціна без ПДВ, грн/кг: <b><span id="priceNet">—</span></b></p>
+        <p>Ціна з ПДВ, грн/кг: <b><span id="priceVat">—</span></b></p>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="copyCSV('csvSummary')">📋 CSV (summary)</button>
+        </div>
+        <div id="csvSummary" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. АЛЕРГЕНИ / ЕТИКЕТКА (ТЕКСТ) -->
+  <div class="card">
+    <h2>⚠️ Алергени та короткий “Склад”</h2>
+    <div class="row">
+      <button class="btn" onclick="buildComposition()">🔁 Зібрати склад</button>
+      <button class="btn" onclick="copyEl('composition')">📋 Копіювати</button>
+    </div>
+    <div id="composition" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 5. ЖУРНАЛ / QR / NFC / Квиток 58 мм -->
+  <div class="card">
+    <h2>📒 Журнал рецептів / QR / NFC / квиток</h2>
+    <div class="row">
+      <button class="btn" onclick="addLog()">➕ Додати в журнал</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblLog">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Виріб</th>
+            <th class="dark">Партія, кг</th>
+            <th class="dark">Випуск, кг</th>
+            <th class="dark">Собів./кг</th>
+            <th>Ціна без ПДВ</th>
+            <th>Ціна з ПДВ</th>
+            <th>Маржа, %</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyLog"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+
+    <div class="grid g2" style="margin-top:12px">
+      <div class="box">
+        <h3>QR-payload</h3>
+        <div class="row">
+          <button class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
+          <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
+        </div>
+        <div id="qrOut" class="out">—</div>
+
+        <h3 style="margin-top:12px">NFC — “RECIPE CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label>Розлив/фасування</label><input id="packInfo" type="text" value="батон Ø60, вакуум"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток 58 мм (калькуляція)</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>RECIPE COST TICKET</h4>
+          <p><b>Виріб:</b> <span id="tProd">—</span></p>
+          <p><b>Партія:</b> <span id="tBatch">—</span> кг · <b>Вихід:</b> <span id="tOut">—</span> кг</p>
+          <div class="line"></div>
+          <p><b>Собівартість/кг:</b> <span id="tCogs">—</span> грн</p>
+          <p><b>Ціна без ПДВ/кг:</b> <span id="tNet">—</span> грн</p>
+          <p><b>Ціна з ПДВ/кг:</b> <span id="tVat">—</span> грн</p>
+          <p><b>Маржа:</b> <span id="tMargin">—</span>%</p>
+          <div class="line"></div>
+          <p><small>Склад (скорочено): <span id="tComp">—</span></small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Заповніть параметри партії (кг, yield, накладні, маржу).</li>
+      <li>Додайте 6–10 інгредієнтів із % та цінами; позначте алергени.</li>
+      <li>Перерахунок → перевірте собівартість/кг, ціну та маржу.</li>
+      <li>Згенеруйте “Склад”, QR/NFC, квиток та CSV (recipe/summary/journal).</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Повна рецептура з цінами, коректна сума %</td><td>3</td></tr>
+        <tr><td>Собівартість/кг, ціноутворення, маржа</td><td>4</td></tr>
+        <tr><td>Склад з алергенами (виділення) + QR/NFC</td><td>2</td></tr>
+        <tr><td>Журнал і CSV</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const bodyIngred = byId('bodyIngred');
+  const bodyLog = byId('bodyLog');
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const pad = (n,w=2)=>String(n).padStart(w,'0');
+
+  // ===== Утиліти копіювання / CSV =====
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // ===== Робота з таблицями =====
+  function reindex(tbody){ [...tbody.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  function addIngred(sample){
+    const s = Object.assign({name:'', pct:'', price:'', allergen:false}, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.name}"></td>
+      <td class="dark"><input type="number" step="0.01" value="${s.pct}"></td>
+      <td class="dark"><input type="number" step="0.01" value="${s.price}"></td>
+      <td><select>${['ні','так'].map(v=>`<option ${ (s.allergen && v==='так')?'selected':'' }>${v}</option>`).join('')}</select></td>
+      <td class="kg">—</td>
+      <td class="cost">—</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyIngred); recalc();">✖</button></td>
+    `;
+    bodyIngred.appendChild(tr); reindex(bodyIngred); recalc();
+  }
+
+  function presetRecipe(){
+    bodyIngred.innerHTML='';
+    addIngred({name:'Свинина', pct:55, price:165});
+    addIngred({name:'Яловичина', pct:15, price:180});
+    addIngred({name:'Вода/лід', pct:22, price:2});
+    addIngred({name:'СОЄВИЙ ізолят', pct:3, price:95, allergen:true});
+    addIngred({name:'Крохмаль картопляний', pct:3, price:42});
+    addIngred({name:'Сіль кухонна', pct:1.5, price:20});
+    addIngred({name:'Суміш прянощів', pct:0.5, price:220});
+    recalc();
+  }
+
+  // ===== Розрахунки =====
+  function readRecipe(){
+    const batchKg = +byId('batchKg').value||0;
+    const rows = [...bodyIngred.querySelectorAll('tr')].map(r=>{
+      const name = r.children[1].querySelector('input').value.trim();
+      const pct  = Number(r.children[2].querySelector('input').value);
+      const price= Number(r.children[3].querySelector('input').value);
+      const all  = r.children[4].querySelector('select').value==='так';
+      return {tr:r, name, pct, price, all};
+    }).filter(x=>x.name && !isNaN(x.pct) && x.pct>=0);
+    return {batchKg, rows};
+  }
+
+  function recalc(){
+    const head = readRecipe();
+    const batchKg = head.batchKg;
+    const yieldPct = (+byId('yieldPct').value||100)/100;
+    let sumPct = 0, rawCost = 0;
+    head.rows.forEach(x=>{
+      const kg = batchKg * (x.pct/100);
+      const cost = kg * (x.price||0);
+      x.tr.querySelector('.kg').textContent   = rnd(kg,3);
+      x.tr.querySelector('.cost').textContent = rnd(cost,2);
+      sumPct += x.pct;
+      rawCost += cost;
+    });
+
+    // Вихід/накладні
+    const outKg = rnd(batchKg * yieldPct, 3);
+    const ohFix = +byId('ohFix').value||0;
+    const ohPer = +byId('ohPerKg').value||0;
+    const ohCost = rnd(ohFix + outKg*ohPer, 2);
+
+    // Собівартість на кг
+    const cogsKg = outKg>0 ? rnd((rawCost + ohCost)/outKg, 2) : 0;
+
+    // Ціни
+    const marg = (+byId('targetMargin').value||0)/100;
+    const priceNet = rnd(cogsKg * (1 + marg), 2);
+    const vat = (+byId('vatPct').value||0)/100;
+    const priceVat = rnd(priceNet * (1 + vat), 2);
+
+    // Вивід
+    byId('sumKg').textContent   = rnd(batchKg,3);
+    byId('outKg').textContent   = outKg;
+    byId('rawCost').textContent = rnd(rawCost,2);
+    byId('ohCost').textContent  = ohCost;
+    byId('cogsKg').textContent  = cogsKg;
+    byId('margPct').textContent = rnd(marg*100,1);
+    byId('priceNet').textContent= priceNet;
+    byId('priceVat').textContent= priceVat;
+
+    // CSV
+    byId('csvHead').textContent =
+      `HEAD|prod=${byId('prodName').value}|batch=${batchKg}kg|yield=${rnd(yieldPct*100,1)}%|oh_fix=${ohFix}UAH|oh_perkg=${ohPer}UAH|margin=${rnd(marg*100,1)}%|vat=${rnd(vat*100,1)}%`;
+    byId('csvIngred').textContent =
+      head.rows.map((x,i)=> [i+1, x.name, x.pct+'%', x.price+' грн/кг',
+                            x.tr.querySelector('.kg').textContent+' кг',
+                            x.tr.querySelector('.cost').textContent+' грн',
+                            x.all?'ALLERGEN':''].join(' | ')
+      ).join('\n') || '—';
+    byId('csvSummary').textContent =
+      `SUMMARY|sum_in=${rnd(batchKg,3)}kg|out=${outKg}kg|raw=${rnd(rawCost,2)}UAH|oh=${ohCost}UAH|cogs_perkg=${cogsKg}UAH|price_net=${priceNet}UAH|price_vat=${priceVat}UAH|margin=${rnd(marg*100,1)}%`;
+
+    // Оновити квиток
+    byId('tProd').textContent  = byId('prodName').value;
+    byId('tBatch').textContent = rnd(batchKg,3);
+    byId('tOut').textContent   = outKg;
+    byId('tCogs').textContent  = cogsKg;
+    byId('tNet').textContent   = priceNet;
+    byId('tVat').textContent   = priceVat;
+    buildComposition(); // оновити короткий склад
+  }
+
+  // Склад з алергенами (верхній регістр)
+  function buildComposition(){
+    const head = readRecipe();
+    const list = head.rows
+      .filter(x=>x.pct>0)
+      .sort((a,b)=>b.pct-a.pct)
+      .map(x=> (x.all? x.name.toUpperCase(): x.name) + ` (${rnd(x.pct,2)}%)`);
+    const text = list.length ? `Склад: ${list.join(', ')}.` : '—';
+    byId('composition').textContent = text;
+    byId('tComp').textContent = (text.length>90? text.slice(0,87)+'…': text);
+    return text;
+  }
+
+  // Журнал
+  function reindexLog(){ [...bodyLog.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+  function addLog(sample){
+    recalc();
+    const s = Object.assign({
+      prod: byId('prodName').value,
+      batch: byId('batchKg').value,
+      out: byId('outKg').textContent,
+      cogs: byId('cogsKg').textContent,
+      net: byId('priceNet').textContent,
+      vat: byId('priceVat').textContent,
+      marg: byId('margPct').textContent
+    }, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.prod}"></td>
+      <td class="dark">${s.batch}</td>
+      <td class="dark">${s.out}</td>
+      <td class="dark">${s.cogs}</td>
+      <td>${s.net}</td>
+      <td>${s.vat}</td>
+      <td>${s.marg}</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindexLog(); buildLogCSV();">✖</button></td>
+    `;
+    bodyLog.appendChild(tr); reindexLog(); buildLogCSV();
+  }
+  function buildLogCSV(){
+    const rows = [...bodyLog.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const prod=r.children[1].querySelector('input').value.trim();
+      const batch=r.children[2].textContent.trim();
+      const out=r.children[3].textContent.trim();
+      const cogs=r.children[4].textContent.trim();
+      const net=r.children[5].textContent.trim();
+      const vat=r.children[6].textContent.trim();
+      const marg=r.children[7].textContent.trim();
+      return [idx,prod,batch,out,cogs,net,vat,marg].join(' | ');
+    });
+    byId('csvLog').textContent = rows.join('\n') || '—';
+  }
+
+  // QR та NFC
+  function buildQR(){
+    const payload = {
+      prod: byId('prodName').value,
+      batch_kg: +byId('batchKg').value||0,
+      yield_pct: +byId('yieldPct').value||0,
+      out_kg: byId('outKg').textContent,
+      cogs_perkg: byId('cogsKg').textContent,
+      price_net: byId('priceNet').textContent,
+      price_vat: byId('priceVat').textContent
+    };
+    byId('qrOut').textContent = JSON.stringify(payload);
+  }
+  function buildNFC(){
+    const txt = [
+      `RECIPE_NFC`,
+      `PROD:${byId('prodName').value}`,
+      `BATCH:${byId('batchKg').value}kg OUT:${byId('outKg').textContent}kg`,
+      `COGS:${byId('cogsKg').textContent}UAH/kg NET:${byId('priceNet').textContent}UAH/kg VAT:${byId('priceVat').textContent}UAH/kg`,
+      `PACK:${byId('packInfo').value}`,
+      `CONTACT:${byId('nfcPhone').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = txt;
+  }
+
+  // Квиток
+  function buildTicket(){
+    window.scrollTo({top: document.getElementById('ticket').getBoundingClientRect().top + window.scrollY - 60, behavior:'smooth'});
+  }
+
+  // Ініціалізація
+  (function init(){
+    recalc();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select,textarea')) recalc();
+    });
+  })();
+</script>
+</body>
+</html>
