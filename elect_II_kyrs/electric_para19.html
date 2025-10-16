@@ -1,0 +1,456 @@
+<!-- electric_para19.html
+     Пара 19 (Електрики, аудиторно): LOTO (Lockout/Tagout) та Дозвіл на роботи
+     Мета: створити цифровий "Дозвіл на роботи" (PTW) із переліком точок ізоляції, чек-листами,
+     QR/NFC-ідентифікатором, наклейками 58 мм, A4-документом, CSV/ICS експортом.
+     Повністю автономно для GitHub Pages та вбудовування у Moodle (iframe).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Електрики · Пара 19 — LOTO та Дозвіл на роботи (PTW)</title>
+<meta name="color-scheme" content="light dark"/>
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#101826; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 32%,var(--bg)); color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
+  .wrap{max-width:1120px; margin:0 auto; padding:24px 16px 96px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9aa5b1}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e);
+     -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:1050px){.g3{grid-template-columns:1fr}; .g2{grid-template-columns:1fr}}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .small{font-size:12px; color:#93a3b5}
+  input,select,textarea{padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb; width:100%}
+  textarea{min-height:80px}
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+
+  .tickets{display:flex; gap:12px; flex-wrap:wrap}
+  .ticket{width:58mm; background:#fff; color:#000; padding:5mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 4px; font-size:13px; text-align:center}
+  .ticket p{margin:1px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:5px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+  #printArea{background:#fff; color:#000; border-radius:12px; border:1px solid #e5e7eb; padding:16px}
+  .doc{page-break-after:always; padding:12mm; color:#000; font-family:Georgia,"Times New Roman",serif}
+  .doc h2{color:#000; font-size:20px; margin:0 0 6px}
+  .doc h3{color:#000; font-size:16px; margin:6px 0}
+  .doc p{color:#000; margin:4px 0}
+  .doc table{width:100%; border-collapse:collapse; border:1px solid #111}
+  .doc th,.doc td{border:1px solid #111; padding:6px 8px; font-size:12px; vertical-align:top}
+  .doc .sign{margin-top:10mm; display:flex; gap:10mm; flex-wrap:wrap}
+  .doc .sign div{flex:1 1 220px}
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  @media print{
+    @page{ size:A4; margin:12mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    #printArea{ border:none; padding:0 }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+
+  .list{display:flex; gap:8px; flex-wrap:wrap}
+  .chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; background:#0d1a2e; font-size:12px}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Електрики · Пара 19 · аудиторно</span>
+  <h1>🔒 LOTO та «Дозвіл на роботи» (PTW): чек-листи → точки ізоляції → 58 мм → A4 → .csv → .ics</h1>
+
+  <div class="card">
+    <h2>🎯 Мета</h2>
+    <p>Змоделювати процес <b>LOTO</b>: створити дозвіл на роботи (PTW), зафіксувати <b>точки ізоляції</b>, сформувати <b>чек-листи</b>, 
+      згенерувати <b>наклейки 58 мм</b> для бірок/замків, <b>A4-документ</b> для друку/підписів, експорт <b>CSV</b> та <b>.ics</b> події.</p>
+    <div class="row">
+      <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
+      <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+      <input id="file" class="btn" type="file" accept=".csv,text/csv"/>
+      <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+      <button class="btn" onclick="downloadICS()">📅 .ics для календаря</button>
+    </div>
+    <p class="small">CSV: <span class="mono">ptw_id,job_title,location,requester,issuer,team,window_start,window_end,risk_level,work_type,notes,url,iso_points,precheck,postcheck</span></p>
+  </div>
+
+  <div class="card">
+    <h2>➕ Новий дозвіл (PTW)</h2>
+    <div class="grid g3">
+      <div>
+        <h3>Основне</h3>
+        <div class="row"><label class="small" style="min-width:140px">PTW ID</label><input id="ptw_id" value="PTW-001"></div>
+        <div class="row"><label class="small" style="min-width:140px">Робота</label><input id="job_title" value="Заміна автомата C16"></div>
+        <div class="row"><label class="small" style="min-width:140px">Локація</label><input id="location" value="ЩО-1 · Корпус А"></div>
+        <div class="row"><label class="small" style="min-width:140px">Тип робіт</label><select id="work_type">
+          <option selected>Електромонтаж</option><option>Огляд/ТО</option><option>Вимірювання</option><option>Прибирання зони</option></select></div>
+      </div>
+      <div>
+        <h3>Відповідальні</h3>
+        <div class="row"><label class="small" style="min-width:140px">Замовник</label><input id="requester" value="Викл. Сергій"></div>
+        <div class="row"><label class="small" style="min-width:140px">Дозвіл видав</label><input id="issuer" value="Староста групи"></div>
+        <div class="row"><label class="small" style="min-width:140px">Команда</label><input id="team" value="Студенти гр. ЕЛ-21 (2 ос.)"></div>
+        <div class="row"><label class="small" style="min-width:140px">Ризик</label><select id="risk_level"><option>Низький</option><option selected>Середній</option><option>Високий</option></select></div>
+      </div>
+      <div>
+        <h3>Вікно виконання</h3>
+        <div class="row"><label class="small" style="min-width:140px">Старт</label><input id="window_start" value="2025-10-20 09:00"></div>
+        <div class="row"><label class="small" style="min-width:140px">Кінець</label><input id="window_end" value="2025-10-20 11:00"></div>
+        <div class="row"><label class="small" style="min-width:140px">URL/QR (інструкція)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
+        <div class="row"><label class="small" style="min-width:140px">Примітка</label><input id="notes" placeholder="ЗІЗ, зона, сторонні"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔌 Точки ізоляції (Lockout)</h2>
+    <div class="grid g2">
+      <div>
+        <h3>Додати точку</h3>
+        <div class="row"><label class="small" style="min-width:140px">ID точки</label><input id="iso_id" value="ISO-01"></div>
+        <div class="row"><label class="small" style="min-width:140px">Опис</label><input id="iso_desc" value="Автомат C16, комірка 4"></div>
+        <div class="row"><label class="small" style="min-width:140px">Дія</label><select id="iso_action"><option selected>Вимкнути</option><option>Витягти плавку вставку</option><option>Роз'єднати штепсель</option><option>Закоротити/заземлити</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">Замок/Бірка</label><input id="iso_tag" value="Замок LOTO #12"></div>
+        <div class="row"><button class="btn" onclick="addIso()">➕ Додати</button></div>
+      </div>
+      <div>
+        <h3>Список</h3>
+        <table id="iso_tbl">
+          <thead><tr><th>#</th><th>ID</th><th>Опис</th><th>Дія</th><th>Замок/Бірка</th><th>Дії</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="small">Після ізоляції — <b>перевірити відсутність напруги</b> та <b>зняти залишкову енергію</b>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Чек-листи (Перед/Після)</h2>
+    <div class="grid g2">
+      <div>
+        <h3>Перед початком</h3>
+        <textarea id="precheck"></textarea>
+        <div class="row"><button class="btn" onclick="loadTemplate('pre')">📥 Шаблон</button></div>
+      </div>
+      <div>
+        <h3>Після завершення</h3>
+        <textarea id="postcheck"></textarea>
+        <div class="row"><button class="btn" onclick="loadTemplate('post')">📥 Шаблон</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card printable">
+    <h2>🧾 Наклейки 58 мм «LOTO / PTW»</h2>
+    <div class="row">
+      <button class="btn" onclick="buildTickets()">🧩 Згенерувати</button>
+      <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+      <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+    </div>
+    <div id="tickets" class="tickets"></div>
+  </div>
+
+  <div class="card printable">
+    <h2>📄 A4 «Дозвіл на роботи»</h2>
+    <div class="row">
+      <button class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
+      <button class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
+    </div>
+    <div id="printArea"></div>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // ===== СТАН =====
+  let isoPoints = [];
+
+  // ===== УТИЛІТИ =====
+  function esc(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&lt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function now(){ return new Date(); }
+  function nowStamp(){ const d=now(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+
+  function getPTW(){
+    return {
+      ptw_id: (document.getElementById('ptw_id').value||'').trim(),
+      job_title: (document.getElementById('job_title').value||'').trim(),
+      location: (document.getElementById('location').value||'').trim(),
+      work_type: document.getElementById('work_type').value,
+      requester: (document.getElementById('requester').value||'').trim(),
+      issuer: (document.getElementById('issuer').value||'').trim(),
+      team: (document.getElementById('team').value||'').trim(),
+      risk_level: document.getElementById('risk_level').value,
+      window_start: (document.getElementById('window_start').value||'').trim(),
+      window_end: (document.getElementById('window_end').value||'').trim(),
+      url: (document.getElementById('url').value||'').trim(),
+      notes: (document.getElementById('notes').value||'').trim(),
+      precheck: (document.getElementById('precheck').value||'').trim(),
+      postcheck: (document.getElementById('postcheck').value||'').trim(),
+      iso_points: isoPoints.slice()
+    };
+  }
+
+  // ===== ІЗОЛЯЦІЯ =====
+  const isoBody = document.querySelector('#iso_tbl tbody');
+  function addIso(){
+    const rec = {
+      id: (document.getElementById('iso_id').value||'').trim(),
+      desc: (document.getElementById('iso_desc').value||'').trim(),
+      action: document.getElementById('iso_action').value,
+      tag: (document.getElementById('iso_tag').value||'').trim()
+    };
+    if(!rec.id){ alert('Укажи ID точки'); return; }
+    const i = isoPoints.findIndex(x=>x.id===rec.id);
+    if(i>=0) isoPoints[i] = {...isoPoints[i], ...rec};
+    else isoPoints.push(rec);
+    renderIso();
+  }
+  function renderIso(){
+    isoBody.innerHTML='';
+    isoPoints.forEach((p,i)=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i+1}</td><td class="editable" data-k="id" data-id="${p.id}">${esc(p.id)}</td>
+        <td class="editable" data-k="desc" data-id="${p.id}">${esc(p.desc)}</td>
+        <td class="editable" data-k="action" data-id="${p.id}">${esc(p.action)}</td>
+        <td class="editable" data-k="tag" data-id="${p.id}">${esc(p.tag)}</td>
+        <td class="mono"><button class="btn" data-act="del" data-id="${p.id}">✖</button></td>`;
+      isoBody.appendChild(tr);
+    });
+  }
+  isoBody.addEventListener('dblclick',(e)=>{
+    const td=e.target.closest('.editable'); if(!td) return;
+    const id=td.getAttribute('data-id'); const key=td.getAttribute('data-k');
+    const idx=isoPoints.findIndex(x=>x.id===id); const r=isoPoints[idx];
+    const input=document.createElement('input'); input.value=r[key]||''; input.style.width='100%'; input.style.padding='6px 8px';
+    input.addEventListener('blur', ()=>{ r[key]=input.value.trim(); renderIso(); });
+    td.innerHTML=''; td.appendChild(input); input.focus(); input.select();
+  });
+  isoBody.addEventListener('click',(e)=>{
+    const b=e.target.closest('button'); if(!b) return;
+    const id=b.getAttribute('data-id'); isoPoints=isoPoints.filter(x=>x.id!==id); renderIso();
+  });
+
+  // ===== ШАБЛОНИ ЧЕК-ЛИСТІВ =====
+  function loadTemplate(which){
+    const pre = [
+      '• Оцінити ризики: напруга, висота, інструмент, ЗІЗ',
+      '• Повідомити зацікавлених та встановити межі зони',
+      '• Ідентифікувати всі джерела енергії (електр., механ., пневмо)',
+      '• Вимкнути/роз\'єднати джерела (LOTO), проставити замки/бірки',
+      '• Перевірити відсутність напруги тестером; зняти залишкову',
+      '• Організувати заземлення/закоротку (за потреби)'
+    ].join('\n');
+    const post = [
+      '• Прибрати інструмент/матеріали, відновити захисти',
+      '• Зняти заземлення/закоротки (за процедурою)',
+      '• Зняти замки/бірки у зворотному порядку авторизовано',
+      '• Попередити зацікавлених про пуск, провести тестовий запуск',
+      '• Закрити дозвіл, зробити запис у журналі'
+    ].join('\n');
+    if(which==='pre') document.getElementById('precheck').value = pre;
+    else document.getElementById('postcheck').value = post;
+  }
+
+  // ===== 58 ММ НАКЛЕЙКИ =====
+  const ticketsBox = document.getElementById('tickets');
+  function buildTickets(){
+    const P = getPTW();
+    ticketsBox.innerHTML='';
+    // Бірка на ДОЗВІЛ
+    ticketsBox.appendChild(ticket(`
+      <h4>PTW / LOTO</h4>
+      <p><b>${esc(P.ptw_id)}</b> — ${esc(P.job_title)}</p>
+      <div class="line"></div>
+      <p>${esc(P.location)}</p>
+      <p>Вікно: ${esc(P.window_start)} → ${esc(P.window_end)}</p>
+      <p>Рівень: ${esc(P.risk_level)} · Тип: ${esc(P.work_type)}</p>
+      <div class="line"></div>
+      <p class="qr"><small>URI: ${esc(P.url || defaultURL(P.ptw_id))}</small></p>
+      <p><small>${nowStamp()}</small></p>
+    `));
+    // Бірки на точки ізоляції
+    (P.iso_points||[]).forEach(x=>{
+      ticketsBox.appendChild(ticket(`
+        <h4>LOTO БІРКА</h4>
+        <p><b>${esc(P.ptw_id)} · ${esc(x.id)}</b></p>
+        <div class="line"></div>
+        <p>${esc(x.desc)}</p>
+        <p>Дія: ${esc(x.action)}</p>
+        <p>Замок/бірка: ${esc(x.tag)}</p>
+        <div class="line"></div>
+        <p class="qr"><small>URI: ${esc(P.url || defaultURL(P.ptw_id)+'#'+encodeURIComponent(x.id))}</small></p>
+        <p><small>${nowStamp()}</small></p>
+      `));
+    });
+  }
+  function ticket(innerHTML){
+    const el=document.createElement('div'); el.className='ticket'; el.innerHTML=innerHTML; return el;
+  }
+  function defaultURL(id){ return `https://serawww7.github.io/edlab/electric_para19.html#${encodeURIComponent(id)}`; }
+  function downloadTXT(){
+    if(!ticketsBox.firstChild){ alert('Спочатку згенеруйте наклейки'); return; }
+    const arr=['PTW/LOTO 58mm','-------------------'];
+    Array.from(ticketsBox.children).forEach(t=>{ arr.push(t.innerText.replace(/\n{2,}/g,'\n')); arr.push('-------------------'); });
+    const blob=new Blob([arr.join('\n')],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ptw_loto_labels_58mm.txt'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // ===== A4 ЗВІТ =====
+  function buildReport(){
+    const P=getPTW();
+    const isoRows=(P.iso_points||[]).map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.id)}</td><td>${esc(x.desc)}</td><td>${esc(x.action)}</td><td>${esc(x.tag)}</td></tr>`).join('');
+    const html=`
+      <section class="doc">
+        <h2>ДОЗВІЛ НА РОБОТИ (PTW) — ${esc(P.ptw_id)}</h2>
+        <p>Робота: <b>${esc(P.job_title)}</b> · Локація: ${esc(P.location)} · Тип: ${esc(P.work_type)} · Рівень ризику: ${esc(P.risk_level)}</p>
+        <p>Вікно виконання: ${esc(P.window_start)} → ${esc(P.window_end)}</p>
+        <p>Замовник: ${esc(P.requester)} · Дозвіл видав: ${esc(P.issuer)} · Команда: ${esc(P.team)}</p>
+        <p>URI/QR: ${esc(P.url || defaultURL(P.ptw_id))}</p>
+        <h3>1. Точки ізоляції</h3>
+        <table><thead><tr><th>#</th><th>ID</th><th>Опис</th><th>Дія</th><th>Замок/бірка</th></tr></thead>
+        <tbody>${isoRows || '<tr><td colspan="5">—</td></tr>'}</tbody></table>
+        <h3>2. Чек-лист перед початком</h3>
+        <p style="white-space:pre-wrap">${esc(P.precheck||'—')}</p>
+        <h3>3. Чек-лист після завершення</h3>
+        <p style="white-space:pre-wrap">${esc(P.postcheck||'—')}</p>
+        <h3>4. Підписи</h3>
+        <div class="sign">
+          <div>Відповідальний виконавець: ____________________ (дата/час)</div>
+          <div>Особа що видала дозвіл: ______________________ (дата/час)</div>
+        </div>
+        <p class="small">Навчальна модель LOTO/PTW. У реальній практиці застосовувати чинні інструкції з ОП, затверджені на підприємстві, та протоколи допуску.</p>
+      </section>
+    `;
+    const box=document.getElementById('printArea'); box.innerHTML=html; box.scrollIntoView({behavior:'smooth'});
+  }
+
+  // ===== CSV =====
+  function exportCSV(){
+    const P=getPTW();
+    // полями iso_points, precheck, postcheck підемо як окремі колонки (списки через " | ")
+    const headers=['ptw_id','job_title','location','requester','issuer','team','window_start','window_end','risk_level','work_type','notes','url','iso_points','precheck','postcheck','timestamp'];
+    const stamp=nowStamp();
+    const isoStr=(P.iso_points||[]).map(x=>`${x.id}:${x.action}:${x.tag}`).join(' | ');
+    const row=[P.ptw_id,P.job_title,P.location,P.requester,P.issuer,P.team,P.window_start,P.window_end,P.risk_level,P.work_type,P.notes,(P.url||defaultURL(P.ptw_id)),isoStr,P.precheck,P.postcheck,stamp]
+      .map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+    const blob=new Blob([[headers.join(','),row].join('\n')],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ptw_loto.csv'; a.click(); URL.revokeObjectURL(a.href);
+  }
+  async function importCSV(){
+    const f=document.getElementById('file').files[0]; if(!f){ alert('Оберіть CSV'); return; }
+    const txt=await f.text();
+    const lines=txt.trim().split(/\r?\n/); if(lines.length<2){ alert('CSV порожній'); return; }
+    const headers=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());
+    const cells=splitCSV(lines[1]); const o={}; headers.forEach((h,j)=> o[h]=(cells[j]||'').replace(/^"|"$/g,''));
+    document.getElementById('ptw_id').value=o.ptw_id||'';
+    document.getElementById('job_title').value=o.job_title||'';
+    document.getElementById('location').value=o.location||'';
+    document.getElementById('requester').value=o.requester||'';
+    document.getElementById('issuer').value=o.issuer||'';
+    document.getElementById('team').value=o.team||'';
+    document.getElementById('window_start').value=o.window_start||'';
+    document.getElementById('window_end').value=o.window_end||'';
+    document.getElementById('risk_level').value=o.risk_level||'Середній';
+    document.getElementById('work_type').value=o.work_type||'Електромонтаж';
+    document.getElementById('notes').value=o.notes||'';
+    document.getElementById('url').value=o.url||'';
+    document.getElementById('precheck').value=o.precheck||'';
+    document.getElementById('postcheck').value=o.postcheck||'';
+    isoPoints=[];
+    if(o.iso_points){
+      o.iso_points.split('|').forEach(chunk=>{
+        const t=chunk.trim(); if(!t) return;
+        const [id,action,tag]=t.split(':'); isoPoints.push({id:id||'',desc:'(з CSV)',action:action||'',tag:tag||''});
+      });
+    }
+    renderIso();
+  }
+  function splitCSV(line){
+    const res=[]; let cur=''; let q=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){ if(q && line[i+1]==='"'){ cur+='"'; i++; } else q=!q; }
+      else if(ch===',' && !q){ res.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    res.push(cur); return res;
+  }
+
+  // ===== ICS =====
+  function icsEscape(s){ return String(s).replace(/([,;])/g,'\\$1').replace(/\n/g,'\\n'); }
+  function icsFormatDateLocal(sISO){
+    // "YYYY-MM-DD HH:MM" -> basic local (без TZ, для простоти)
+    const [d,t]=String(sISO||'').split(' ');
+    const [y,m,dd]=(d||'').split('-'); const [hh,mm]=(t||'').split(':');
+    return `${y}${m}${dd}T${hh}${mm}00`;
+  }
+  function buildICS(){
+    const P=getPTW();
+    const uid = `${P.ptw_id}@edlab`;
+    const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//edlab//ptw//UA','BEGIN:VEVENT'];
+    lines.push('UID:'+uid);
+    lines.push('DTSTAMP:'+icsFormatDateLocal(nowStamp().replace(' ',' ')));
+    lines.push('DTSTART:'+icsFormatDateLocal(P.window_start||'2025-10-20 09:00'));
+    lines.push('DTEND:'+icsFormatDateLocal(P.window_end||'2025-10-20 11:00'));
+    lines.push('SUMMARY:'+icsEscape(`PTW: ${P.ptw_id} · ${P.job_title}`));
+    lines.push('LOCATION:'+icsEscape(P.location||''));
+    lines.push('DESCRIPTION:'+icsEscape(`Тип: ${P.work_type}\nРівень ризику: ${P.risk_level}\nЗамовник: ${P.requester}\nДозвіл видав: ${P.issuer}\nКоманда: ${P.team}\nURL: ${P.url||defaultURL(P.ptw_id)}`));
+    lines.push('END:VEVENT','END:VCALENDAR');
+    return lines.join('\n');
+  }
+  function downloadICS(){
+    const blob=new Blob([buildICS()],{type:'text/calendar;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ptw_loto.ics'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // ===== ДЕМО =====
+  function seedDemo(){
+    document.getElementById('ptw_id').value='PTW-101';
+    document.getElementById('job_title').value='Заміна розетки та автомата C16 у ауд.101';
+    document.getElementById('location').value='Корпус А, ЩО-1 (комірка 4), ауд.101';
+    document.getElementById('work_type').value='Електромонтаж';
+    document.getElementById('requester').value='Викл. Сергій';
+    document.getElementById('issuer').value='Староста ЕЛ-21';
+    document.getElementById('team').value='Студенти ЕЛ-21 (2 ос.)';
+    document.getElementById('risk_level').value='Середній';
+    document.getElementById('window_start').value='2025-10-23 09:00';
+    document.getElementById('window_end').value='2025-10-23 11:00';
+    document.getElementById('url').value='';
+    document.getElementById('notes').value='ЗІЗ: діелектричні рукавички, окуляри; попередити ауд.101.';
+    loadTemplate('pre'); loadTemplate('post');
+    isoPoints=[
+      {id:'ISO-01',desc:'Автомат C16, комірка 4',action:'Вимкнути',tag:'Замок #12'},
+      {id:'ISO-02',desc:'Розетка ауд.101',action:'Роз\'єднати штепсель',tag:'Бірка R-101'},
+      {id:'ISO-03',desc:'Перевірка напруги на клемах',action:'Переконатися у відсутності U',tag:'Тестер/індикатор'}
+    ];
+    renderIso();
+  }
+
+  // Автодемо
+  seedDemo();
+</script>
+</body>
+</html>
