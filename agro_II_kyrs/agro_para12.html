@@ -1,0 +1,520 @@
+<!-- agro_para12.html
+     ПАРА 12 (аудиторно) для агрономів
+     Тема: GPS-КАРТУВАННЯ ПОЛЯ — трек межі, площа/периметр, буферні смуги, ґрід точок відбору, GeoJSON/CSV
+     Фокус: телефони/ПК; без сторонніх бібліотек; працює на HTTPS (GitHub Pages) із Geolocation API.
+     Контраст: темні клітинки — зі світлим текстом.
+
+     Що вміє:
+     • Старт/стоп треку межі поля (GPS) або ручне додавання точки.
+     • Розрахунок периметра (м), площі (га) з геодезичною корекцією (еквідистантна проєкція по середній широті).
+     • Генерація буферної смуги (захисний пояс) на X метрів всередину/назовні (спрощений паралельний офсет).
+     • Створення регулярного ґріда точок (крок, м) і відбір лише тих, що лежать всередині полігона.
+     • Експорт GeoJSON (полігон, буфер, точки) та CSV (точки ґріда).
+     • Демодані для аудиторії без GPS.
+
+     Готово для GitHub Pages / iFrame у Moodle.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 12 — GPS-картування поля: межа, площа, буфер, ґрід, експорт</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .small{font-size:12px; color:#9fb0c8}
+  .muted{color:#93a3b5}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  input[type="text"], input[type="number"]{
+    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
+  }
+
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)}
+  .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
+  .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+
+  /* Міні-«карта» без тайлів: канва з локальним масштабуванням */
+  #canvas{width:100%; height:420px; background:#0b1324; border:1px solid #223049; border-radius:12px}
+  .legend{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+  .dot{display:inline-block; width:10px; height:10px; border-radius:50%}
+  .c-border{background:#60a5fa}
+  .c-buffer{background:#22c55e}
+  .c-grid{background:#f59e0b}
+  .c-me{background:#ef4444}
+
+  /* Вбудовано (iFrame) → світлий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+  html.embedded .box{background:#f8fafc; color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+
+  @media print{
+    @page{ margin:12mm }
+    .no-print{ display:none !important }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 12 · аудиторно · агрономи</span>
+    <h1>📍 GPS-картування поля: межа → площа/периметр → буфер → ґрід → GeoJSON/CSV</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        За пару студенти <b>записують трек межі поля</b> телефоном, отримують <b>периметр (м)</b> і <b>площу (га)</b>,
+        будують <b>буферну смугу</b> (захисний пояс) і генерують <b>ґрід точок відбору проб</b> з кроком (м).
+        Далі — <b>експорт</b> у GeoJSON/CSV для подальшої роботи у QGIS/Google Earth/Sheets.
+      </p>
+      <p class="small">Обчислення: координати WGS84 → локальна проєкція (еквідистантна за середньою широтою) → <span class="mono">периметр=haversine</span>, <span class="mono">площа=шнурок</span>.</p>
+    </div>
+
+    <!-- КЕРУВАННЯ / НАЛАШТУВАННЯ -->
+    <div class="card">
+      <h2>⚙️ Налаштування та керування</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Поле</h3>
+          <div class="row">
+            <div style="flex:1"><label>Код поля</label><input id="fieldCode" type="text" value="F-01"></div>
+            <div style="flex:1"><label>Назва</label><input id="fieldName" type="text" value="Навчальне поле"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <button class="btn" onclick="startTrack()">▶️ Старт треку</button>
+            <button class="btn" onclick="stopTrack()">⏸️ Стоп</button>
+            <button class="btn" onclick="addCurrent()">➕ Точка (GPS)</button>
+            <button class="btn" onclick="addManual()">✍️ Точка (ручн.)</button>
+          </div>
+          <p class="small">Працює на HTTPS; дозволь доступ до геолокації.</p>
+        </div>
+
+        <div class="box">
+          <h3>Буфер / Ґрід</h3>
+          <div class="row">
+            <div style="flex:1"><label>Буфер, м (всередину −, назовні +)</label><input id="bufferM" type="number" step="1" value="0"></div>
+            <div style="flex:1"><label>Крок ґріда, м</label><input id="gridStep" type="number" step="1" value="100"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <button class="btn" onclick="makeBuffer()">🟢 Побудувати буфер</button>
+            <button class="btn" onclick="makeGrid()">🟠 Згенерувати ґрід</button>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Експорт / Демо</h3>
+          <div class="row">
+            <button class="btn" onclick="exportGeoJSON()">⬇️ GeoJSON</button>
+            <button class="btn" onclick="copyCSV()">📋 CSV (ґрід)</button>
+            <button class="btn" onclick="demo()">🧪 Демо межа</button>
+            <button class="btn" onclick="resetAll()">♻️ Скинути</button>
+          </div>
+          <div class="legend" style="margin-top:8px">
+            <span class="dot c-border"></span><span class="small">межа</span>
+            <span class="dot c-buffer"></span><span class="small">буфер</span>
+            <span class="dot c-grid"></span><span class="small">ґрід</span>
+            <span class="dot c-me"></span><span class="small">місцезнаходження</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- «КАРТА» (канва) + ПІДСУМКИ -->
+    <div class="card">
+      <h2>🗺️ Огляд</h2>
+      <canvas id="canvas"></canvas>
+      <div class="grid g3" style="margin-top:12px">
+        <div class="box">
+          <h3>Підсумки</h3>
+          <p>Точок у межі: <b><span id="nPts">0</span></b></p>
+          <p>Периметр: <b><span id="perim">—</span> м</b></p>
+          <p>Площа: <b><span id="areaHa">—</span> га</b></p>
+        </div>
+        <div class="box">
+          <h3>Ґрід</h3>
+          <p>Точок у ґріді: <b><span id="nGrid">0</span></b></p>
+          <div id="csv" class="out">—</div>
+        </div>
+        <div class="box">
+          <h3>GeoJSON</h3>
+          <div id="gj" class="out">—</div>
+        </div>
+      </div>
+      <p class="small muted">Контраст забезпечено: темні комірки/рядки — світлий текст.</p>
+    </div>
+
+    <!-- ХІД РОБОТИ, ОЦІНЮВАННЯ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+      <ol>
+        <li>Натисни <b>Старт треку</b> і обійди межу поля → <b>Стоп</b>. За потреби додавай точки вручну.</li>
+        <li>Перевір <b>периметр</b> і <b>площу</b>. Заокругли до 0.01 га для звіту.</li>
+        <li>Задай <b>буфер</b> (наприклад, +10 м назовні для захисної смуги або −5 м всередину для безпечної зони обробітку) → <b>Побудувати буфер</b>.</li>
+        <li>Вкажи <b>крок ґріда</b> (наприклад, 100 м) → <b>Згенерувати ґрід</b> → Скопіюй CSV у Sheets (аркуш <span class="mono">FieldGrid</span>).</li>
+        <li>Експортуй GeoJSON і переглянь у QGIS/Google Earth.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Коректно зібрана межа (≥ 10 точок) і розрахована площа/периметр</td><td>4</td></tr>
+          <tr><td>Побудована буферна смуга і пояснено її призначення</td><td>2</td></tr>
+          <tr><td>Згенерований ґрід точок, CSV збережено</td><td>3</td></tr>
+          <tr><td>Короткі висновки (3 речення)</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">📍 GPS</p><p class="pill">📏 Периметр/площа</p><p class="pill">🟩 Буфер</p><p class="pill">🔢 Ґрід</p>
+    </div>
+  </div>
+
+<script>
+  // Режим вбудування
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // Дані
+  let border = [];      // [{lat,lon}]
+  let bufferPoly = [];  // офсетований полігон у проєкції → потім назад у lat/lon
+  let gridPts = [];     // [{lat,lon}]
+  let watchId = null;
+
+  // Утиліти
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2) => Number((+n).toFixed(d));
+  const toRad = d => d*Math.PI/180;
+  const toDeg = r => r*180/Math.PI;
+  const EARTH_R = 6371008.8;
+
+  // Haversine (м)
+  function havDist(a,b){
+    const lat1=toRad(a.lat), lon1=toRad(a.lon), lat2=toRad(b.lat), lon2=toRad(b.lon);
+    const dlat=lat2-lat1, dlon=lon2-lon1;
+    const h = Math.sin(dlat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dlon/2)**2;
+    return 2*EARTH_R*Math.asin(Math.sqrt(h));
+  }
+
+  // Локальна проєкція (еквідистантна за середньою широтою)
+  function projector(points){
+    const lat0 = points.length ? points.reduce((s,p)=>s+p.lat,0)/points.length : 50.0;
+    const lon0 = points.length ? points.reduce((s,p)=>s+p.lon,0)/points.length : 30.0;
+    const cos0 = Math.cos(toRad(lat0));
+    return {
+      fwd: (p)=>({ x: toRad(p.lon - lon0)*EARTH_R*cos0, y: toRad(p.lat - lat0)*EARTH_R }),
+      inv: (xy)=>({ lat: lat0 + toDeg(xy.y/EARTH_R), lon: lon0 + toDeg(xy.x/(EARTH_R*cos0)) })
+    };
+  }
+
+  // Площа шнурком (м²) у проєкції
+  function polygonAreaM2(polyXY){
+    if(polyXY.length<3) return 0;
+    let s=0;
+    for(let i=0;i<polyXY.length;i++){
+      const a=polyXY[i], b=polyXY[(i+1)%polyXY.length];
+      s += a.x*b.y - b.x*a.y;
+    }
+    return Math.abs(s)/2;
+  }
+
+  // Периметр (м) на сфері
+  function polygonPerimeterM(polyLL){
+    if(polyLL.length<2) return 0;
+    let s=0;
+    for(let i=0;i<polyLL.length;i++){
+      const a=polyLL[i], b=polyLL[(i+1)%polyLL.length];
+      s += havDist(a,b);
+    }
+    return s;
+  }
+
+  // Пойнт-ін-полігон (ray casting) у проєкції
+  function pip(pt, polyXY){
+    let inside=false;
+    for(let i=0,j=polyXY.length-1;i<polyXY.length;j=i++){
+      const xi=polyXY[i].x, yi=polyXY[i].y, xj=polyXY[j].x, yj=polyXY[j].y;
+      const intersect = ((yi>pt.y)!=(yj>pt.y)) && (pt.x < (xj-xi)*(pt.y-yi)/(yj-yi)+xi);
+      if(intersect) inside=!inside;
+    }
+    return inside;
+  }
+
+  // Примітивний офсет полігона (буфер) у проєкції: зсув ребер назовні на d і перетин
+  // (спрощено для навчання: зсуваємо вершини ортогонально до нормалей ребер, підходить для «плавних» полів)
+  function offsetPolygon(polyXY, d){
+    if(polyXY.length<3) return [];
+    const n=polyXY.length, out=[];
+    for(let i=0;i<n;i++){
+      const p=polyXY[i], p0=polyXY[(i-1+n)%n], p1=polyXY[(i+1)%n];
+      // нормалі до ребер
+      const e0 = {x: p.x-p0.x, y: p.y-p0.y}, e1 = {x: p1.x-p.x, y: p1.y-p.y};
+      const n0 = {x: -e0.y, y: e0.x}, n1 = {x: -e1.y, y: e1.x};
+      const len0 = Math.hypot(n0.x,n0.y)||1, len1=Math.hypot(n1.x,n1.y)||1;
+      const u0 = {x:n0.x/len0, y:n0.y/len0}, u1={x:n1.x/len1, y:n1.y/len1};
+      // бісектриса нормалей
+      const bis = {x: u0.x+u1.x, y: u0.y+u1.y};
+      const lenb = Math.hypot(bis.x,bis.y)||1;
+      const scale = d / Math.max(0.3, Math.abs((u0.x*u1.x+u0.y*u1.y)) + 0.3); // груба стабілізація
+      out.push({ x: p.x + (bis.x/lenb)*scale, y: p.y + (bis.y/lenb)*scale });
+    }
+    return out;
+  }
+
+  // Малювання
+  const canvas = byId('canvas'), ctx = canvas.getContext('2d');
+  function resizeCanvas(){
+    const r = canvas.getBoundingClientRect();
+    canvas.width = Math.floor(r.width); canvas.height = Math.floor(r.height);
+    draw();
+  }
+  window.addEventListener('resize', resizeCanvas);
+
+  function computeView(pointsLL, bufferXY, gridLL){
+    // межі для вʼюбоксу
+    let xs=[], ys=[];
+    const proj = projector(pointsLL.length?pointsLL:(gridLL.length?gridLL:[{lat:50,lon:30}]));
+    const borderXY = pointsLL.map(proj.fwd);
+    borderXY.forEach(p=>{xs.push(p.x); ys.push(p.y);});
+    bufferXY.forEach(p=>{xs.push(p.x); ys.push(p.y);});
+    gridLL.map(proj.fwd).forEach(p=>{xs.push(p.x); ys.push(p.y);});
+    if(xs.length===0){ xs=[-10,10]; ys=[-10,10]; }
+    const minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys);
+    const pad=20, W=canvas.width, H=canvas.height;
+    const scale = 0.9*Math.min(W/(maxX-minX||1), H/(maxY-minY||1));
+    const offX = (W - (maxX-minX)*scale)/2 - minX*scale;
+    const offY = (H - (maxY-minY)*scale)/2 - minY*scale;
+    return { proj, scale, offX, offY, borderXY };
+  }
+
+  function draw(){
+    const { proj, scale, offX, offY, borderXY } = computeView(border, bufferPoly, gridPts);
+    // фон
+    ctx.fillStyle = '#0b1324'; ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    // буфер
+    if(bufferPoly.length>=3){
+      ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2; ctx.fillStyle='rgba(34,197,94,0.08)';
+      ctx.beginPath();
+      bufferPoly.forEach((p,i)=>{ const x=p.x*scale+offX, y=p.y*scale+offY; i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+
+    // межа
+    if(borderXY.length>=2){
+      ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2; ctx.fillStyle='rgba(96,165,250,0.08)';
+      ctx.beginPath();
+      borderXY.forEach((p,i)=>{ const x=p.x*scale+offX, y=p.y*scale+offY; i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+      if(borderXY.length>=3){ ctx.closePath(); ctx.fill(); }
+      ctx.stroke();
+      // вершини
+      ctx.fillStyle='#60a5fa';
+      borderXY.forEach(p=>{ ctx.beginPath(); ctx.arc(p.x*scale+offX, p.y*scale+offY, 3, 0, Math.PI*2); ctx.fill(); });
+    }
+
+    // ґрід
+    if(gridPts.length){
+      ctx.fillStyle='#f59e0b';
+      gridPts.forEach(g=>{
+        const xy = proj.fwd(g);
+        ctx.beginPath(); ctx.arc(xy.x*scale+offX, xy.y*scale+offY, 2.5, 0, Math.PI*2); ctx.fill();
+      });
+    }
+
+    // поточне місцезнаходження (якщо є)
+    if(lastPos){
+      ctx.fillStyle='#ef4444';
+      const xy = proj.fwd(lastPos);
+      ctx.beginPath(); ctx.arc(xy.x*scale+offX, xy.y*scale+offY, 4, 0, Math.PI*2); ctx.fill();
+    }
+  }
+
+  // Геолокація
+  let lastPos=null;
+  function onPos(pos){
+    const {latitude:lat, longitude:lon, accuracy} = pos.coords;
+    lastPos = {lat,lon};
+    draw();
+  }
+  function onErr(e){ console.warn('Geo error', e); }
+
+  function startTrack(){
+    if(!navigator.geolocation){ alert('Геолокація не підтримується'); return; }
+    if(watchId!==null){ alert('Трек вже активний'); return; }
+    watchId = navigator.geolocation.watchPosition(p=>{
+      onPos(p);
+      // додаємо точку кожні ~5 м або при першій фіксації
+      const pt = {lat:p.coords.latitude, lon:p.coords.longitude};
+      if(border.length===0 || havDist(border[border.length-1], pt) > 5){
+        border.push(pt);
+        updateStats(); draw();
+      }
+    }, onErr, {enableHighAccuracy:true, maximumAge:1000, timeout:10000});
+  }
+  function stopTrack(){ if(watchId!==null){ navigator.geolocation.clearWatch(watchId); watchId=null; } }
+
+  function addCurrent(){
+    if(!lastPos){ alert('Немає фіксації GPS. Скористайся демо або додай вручну.'); return; }
+    border.push({...lastPos});
+    updateStats(); draw();
+  }
+  function addManual(){
+    const s = prompt('Введи координати у форматі "lat, lon" (десяткові градуси):', '50.0000, 30.0000');
+    if(!s) return;
+    const m = s.split(',').map(x=>parseFloat(x.trim()));
+    if(m.length===2 && isFinite(m[0]) && isFinite(m[1])){
+      border.push({lat:m[0], lon:m[1]});
+      updateStats(); draw();
+    } else alert('Невірний формат.');
+  }
+
+  function updateStats(){
+    byId('nPts').textContent = border.length;
+    const per = polygonPerimeterM(border);
+    const proj = projector(border);
+    const xy = border.map(proj.fwd);
+    const areaM2 = polygonAreaM2(xy);
+    byId('perim').textContent = border.length>=2 ? rnd(per,1) : '—';
+    byId('areaHa').textContent = border.length>=3 ? rnd(areaM2/10000,4) : '—';
+  }
+
+  function makeBuffer(){
+    if(border.length<3){ alert('Спочатку зафіксуй межу (≥3 точки).'); return; }
+    const d = parseFloat(byId('bufferM').value||'0'); // м (+ назовні, − всередину)
+    const proj = projector(border);
+    const xy = border.map(proj.fwd);
+    const off = offsetPolygon(xy, d);
+    bufferPoly = off;
+    // збережемо GeoJSON буфера
+    const gj = { type:'FeatureCollection', features:[] };
+    gj.features.push({
+      type:'Feature',
+      properties:{name: byId('fieldName').value+' — buffer', buffer_m:d},
+      geometry:{ type:'Polygon', coordinates:[ off.map(p=>{const ll=proj.inv(p); return [ll.lon, ll.lat];}) ] }
+    });
+    byId('gj').textContent = JSON.stringify(gj, null, 2);
+    draw();
+  }
+
+  function makeGrid(){
+    if(border.length<3){ alert('Спочатку межа.'); return; }
+    const step = Math.max(5, parseFloat(byId('gridStep').value||'100')); // м
+    const proj = projector(border);
+    const xy = border.map(proj.fwd);
+    // bbox
+    const xs = xy.map(p=>p.x), ys=xy.map(p=>p.y);
+    const minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys);
+    const pts=[];
+    for(let y=minY; y<=maxY; y+=step){
+      for(let x=minX; x<=maxX; x+=step){
+        const p={x:x+step/2, y:y+step/2};
+        if(pip(p, xy)){
+          const ll = proj.inv(p);
+          pts.push({lat:ll.lat, lon:ll.lon});
+        }
+      }
+    }
+    gridPts = pts;
+    byId('nGrid').textContent = pts.length;
+    // CSV
+    const lines = pts.map((p,i)=>[i+1, byId('fieldCode').value, rnd(p.lat,6), rnd(p.lon,6)].join(' | '));
+    byId('csv').textContent = (lines.length? ['# | Поле | Lat | Lon'].join(' | ')+'\n' : '') + (lines.join('\n') || '—');
+    draw();
+  }
+
+  function exportGeoJSON(){
+    if(border.length<3){ alert('Межа порожня.'); return; }
+    const gj = { type:'FeatureCollection', features:[] };
+    // border
+    gj.features.push({
+      type:'Feature',
+      properties:{ code: byId('fieldCode').value, name: byId('fieldName').value, kind:'border' },
+      geometry:{ type:'Polygon', coordinates:[ border.map(p=>[p.lon, p.lat]) ] }
+    });
+    // buffer (якщо є)
+    if(bufferPoly.length>=3){
+      const proj = projector(border);
+      gj.features.push({
+        type:'Feature',
+        properties:{ code: byId('fieldCode').value, name: byId('fieldName').value, kind:'buffer', buffer_m: parseFloat(byId('bufferM').value||'0') },
+        geometry:{ type:'Polygon', coordinates:[ bufferPoly.map(p=>{const ll=proj.inv(p); return [ll.lon,ll.lat];}) ] }
+      });
+    }
+    // grid (як MultiPoint)
+    if(gridPts.length){
+      gj.features.push({
+        type:'Feature',
+        properties:{ code: byId('fieldCode').value, name: byId('fieldName').value, kind:'grid', step_m: parseFloat(byId('gridStep').value||'100') },
+        geometry:{ type:'MultiPoint', coordinates: gridPts.map(p=>[p.lon,p.lat]) }
+      });
+    }
+    const txt = JSON.stringify(gj, null, 2);
+    byId('gj').textContent = txt;
+    // завантаження
+    const blob = new Blob([txt], {type:'application/geo+json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = (byId('fieldCode').value || 'field') + '_export.geojson';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  function copyCSV(){
+    const t = byId('csv').textContent.trim();
+    if(!t || t==='—'){ alert('Немає ґріда/даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  function resetAll(){ border=[]; bufferPoly=[]; gridPts=[]; byId('gj').textContent='—'; byId('csv').textContent='—'; updateStats(); byId('nGrid').textContent='0'; draw(); }
+
+  function demo(){
+    // Невеликий багатокутник поблизу широти 50°
+    border = [
+      {lat:50.0010, lon:30.0000},
+      {lat:50.0014, lon:30.0065},
+      {lat:49.9989, lon:30.0078},
+      {lat:49.9983, lon:30.0012}
+    ];
+    updateStats(); draw();
+  }
+
+  // Ініціалізація
+  resizeCanvas(); updateStats(); draw();
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(onPos, onErr, {enableHighAccuracy:true, timeout:8000});
+  }
+</script>
+</body>
+</html>
