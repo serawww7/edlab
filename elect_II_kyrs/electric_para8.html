@@ -1,0 +1,449 @@
+<!-- electric_para8.html
+     Пара 8 (Електрики, аудиторно): ОБЛІК ІНСТРУМЕНТУ
+     Картки інструменту, графік калібрувань, видача/повернення, стани, NFC/QR, друк 58 мм, імпорт/експорт CSV.
+     Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Електрики · Пара 8 — Облік інструменту, калібрування, QR/NFC, друк 58 мм</title>
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
+  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 80px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9aa5b1}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:1000px){.g3{grid-template-columns:1fr}; .g2{grid-template-columns:1fr}}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .small{font-size:12px; color:#93a3b5}
+  .chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; font-size:12px; margin-right:6px; background:#0d1a2e}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .muted{color:#9aa5b1}
+
+  /* Таблиці */
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+
+  /* Квитанція 58 мм */
+  .ticket{width:58mm; background:#fff; color:#000; padding:5mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 4px; font-size:13px; text-align:center}
+  .ticket p{margin:1px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:5px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+  .tickets{display:flex; gap:12px; flex-wrap:wrap}
+
+  /* Вбудований режим (iframe/Moodle) */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+
+  @media print{
+    @page{ size:58mm auto; margin:4mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Електрики · Пара 8 · аудиторно</span>
+    <h1>🧰 Облік інструменту · калібрування · видача/повернення · QR/NFC · 🧾 друк 58 мм</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>Навчитися вести облік електровимірювального та допоміжного інструменту: картки інструменту, графік калібрувань, <b>видача/повернення</b>, стани <b>OK/REPAIR/OOS</b>, швидкі <b>QR/NFC</b>-рядки, друк етикеток 58 мм, імпорт/експорт CSV.</p>
+      <div class="row">
+        <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
+        <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+      </div>
+      <p class="small">Поля CSV: <span class="mono">tool_id,name,category,serial,location,responsible,condition,last_cal,interval_m,next_cal,status,holder,notes,url</span></p>
+    </div>
+
+    <div class="card">
+      <h2>➕ Додавання/оновлення</h2>
+      <div class="grid g3">
+        <div>
+          <h3>Картка інструменту</h3>
+          <div class="field"><label for="tid">ID</label><input id="tid" value="TL-001" /></div>
+          <div class="field"><label for="tname">Назва</label><input id="tname" value="Мультиметр UT61E" /></div>
+          <div class="field"><label for="tcat">Категорія</label><input id="tcat" value="Вимірювальний" /></div>
+          <div class="field"><label for="tser">Серійний №</label><input id="tser" value="SN-A12345" /></div>
+          <div class="field"><label for="tloc">Локація</label><input id="tloc" value="Майстерня" /></div>
+          <div class="field"><label for="tresp">Відповідальний</label><input id="tresp" value="Студент ПІБ / група" /></div>
+          <div class="field"><label for="tcond">Стан</label>
+            <select id="tcond"><option value="OK" selected>OK</option><option value="REPAIR">REPAIR</option><option value="OOS">OOS</option></select>
+          </div>
+        </div>
+        <div>
+          <h3>Калібрування</h3>
+          <div class="field"><label for="tlast">Останнє калібрування</label><input id="tlast" type="date" /></div>
+          <div class="field"><label for="tint">Інтервал, міс</label><input id="tint" type="number" value="6" /></div>
+          <div class="field"><label for="tnext">Наступне (розрах.)</label><input id="tnext" type="text" readonly placeholder="—" /></div>
+          <div class="field"><label for="tstatus">Статус</label><input id="tstatus" type="text" readonly placeholder="—" /></div>
+        </div>
+        <div>
+          <h3>Посилання/Нотатки</h3>
+          <div class="field"><label for="turl">URL (NFC/QR)</label><input id="turl" placeholder="https://serawww7.github.io/edlab/..."></div>
+          <div class="field"><label for="tnote">Нотатка</label><input id="tnote" placeholder="Комплект щупів у кейсі" /></div>
+          <div class="row">
+            <button class="btn" onclick="calcNext()">🧩 Розрахувати наступну дату</button>
+            <button class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
+          </div>
+        </div>
+      </div>
+      <p class="small">Статус за термінами: <span class="chip ok">PASS</span> — в межах; <span class="chip warn">DUE</span> — сьогодні/скоро; <span class="chip bad">OVERDUE</span> — прострочено.</p>
+    </div>
+
+    <div class="card">
+      <h2>🧾 Видача/повернення</h2>
+      <div class="grid g2">
+        <div>
+          <div class="field"><label for="holder">Кому видано</label><input id="holder" placeholder="Студент Прізвище / група" /></div>
+          <div class="row">
+            <button class="btn" onclick="checkout()">📤 Видати</button>
+            <button class="btn" onclick="checkin()">📥 Повернення</button>
+            <button class="btn" onclick="markRepair()">🛠️ В ремонт</button>
+          </div>
+        </div>
+        <div>
+          <p class="small">Історію руху можна зберігати у вигляді CSV (експорт нижче) або дублювати у журналі ППР.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card printable">
+      <h2>📋 Реєстр інструменту</h2>
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>#</th><th>ID</th><th>Назва</th><th>Категорія</th><th>Серійний</th><th>Локація</th><th>Відп.</th>
+            <th>Стан</th><th>Ост. калібр.</th><th>Інтервал</th><th>Наступна</th><th>Статус</th><th>Кому видано</th><th>Дії</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="small">Подвійне клацання по клітинці — редагування. Кнопки у дії: Етикетка/✖.</p>
+    </div>
+
+    <div class="card printable">
+      <h2>🧾 Етикетка 58 мм (картка інструменту)</h2>
+      <div class="row">
+        <button class="btn" onclick="buildTicket()">🧩 Зібрати</button>
+        <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+        <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+      </div>
+      <div class="tickets" id="tickets">
+        <div id="ticket" class="ticket" aria-live="polite">
+          <h4>ІНСТРУМЕНТ</h4>
+          <p><b id="t-id">ID: —</b></p>
+          <div class="line"></div>
+          <p id="t-name">Назва: —</p>
+          <p id="t-ser">Серійний: —</p>
+          <p id="t-loc">Локація: —</p>
+          <p id="t-cond">Стан: —</p>
+          <div class="line"></div>
+          <p id="t-last">Ост. калібр.: —</p>
+          <p id="t-next">Наступна: —</p>
+          <p id="t-stat">Статус: —</p>
+          <div class="line"></div>
+          <p class="qr"><small id="t-url">QR/NFC: —</small></p>
+          <p><small id="t-ref">Ref: TL-XXXX</small></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📤 Експорт/списки</h2>
+      <div class="row">
+        <button class="btn" onclick="exportCSV()">CSV реєстру</button>
+        <button class="btn" onclick="exportDue()">CSV «До калібрування»</button>
+        <button class="btn" onclick="exportMovements()">CSV руху</button>
+      </div>
+      <p class="small">«До калібрування» включає <span class="chip warn">DUE</span> та <span class="chip bad">OVERDUE</span>.</p>
+    </div>
+  </div>
+
+<script>
+  // Вбудовано у Moodle
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // Стан
+  let rows = []; // об'єкти інструменту
+  let movements = []; // журнал руху: {time, tool_id, action, holder}
+  const tbody = document.querySelector('#tbl tbody');
+
+  // Утиліти дат
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function todayISO(){ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+  function addMonths(iso, m){
+    const [y,mo,d]=iso.split('-').map(Number);
+    const dt=new Date(y,mo-1,d||1);
+    dt.setMonth(dt.getMonth()+m);
+    return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+  }
+  function cmpISO(a,b){ return new Date(a) - new Date(b); }
+
+  // Статус за датами
+  function statusByDates(nextISO){
+    const t = todayISO();
+    if(!nextISO) return { status:'—', css:'' };
+    if(cmpISO(nextISO,t) < 0) return { status:'OVERDUE', css:'bad' };
+    if(nextISO === t) return { status:'DUE', css:'warn' };
+    // за 14 днів до — попередження
+    const soon = addMonths(t,-0); // копія
+    const soonDate = new Date(t); soonDate.setDate(soonDate.getDate()+14);
+    const soonISO = `${soonDate.getFullYear()}-${pad(soonDate.getMonth()+1)}-${pad(soonDate.getDate())}`;
+    if(cmpISO(nextISO, soonISO) <= 0) return { status:'DUE', css:'warn' };
+    return { status:'PASS', css:'ok' };
+  }
+
+  // Рендер таблиці
+  function render(){
+    tbody.innerHTML='';
+    rows.forEach((r,i)=>{
+      const st = statusByDates(r.next_cal);
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td class="editable" data-k="tool_id">${esc(r.tool_id)}</td>
+        <td class="editable" data-k="name">${esc(r.name)}</td>
+        <td class="editable" data-k="category">${esc(r.category)}</td>
+        <td class="editable" data-k="serial">${esc(r.serial)}</td>
+        <td class="editable" data-k="location">${esc(r.location)}</td>
+        <td class="editable" data-k="responsible">${esc(r.responsible)}</td>
+        <td class="editable" data-k="condition">${esc(r.condition)}</td>
+        <td class="editable" data-k="last_cal">${esc(r.last_cal)}</td>
+        <td class="editable" data-k="interval_m">${esc(r.interval_m)}</td>
+        <td class="editable" data-k="next_cal">${esc(r.next_cal)}</td>
+        <td class="${st.css}"><b>${st.status}</b></td>
+        <td class="editable" data-k="holder">${esc(r.holder||'')}</td>
+        <td class="mono">
+          <button class="btn" data-act="label" data-id="${r.tool_id}">Етикетка</button>
+          <button class="btn" data-act="del" data-id="${r.tool_id}">✖</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Редагування в таблиці
+  tbody.addEventListener('dblclick', (e)=>{
+    const td = e.target.closest('.editable'); if(!td) return;
+    const key = td.getAttribute('data-k');
+    const idx = td.parentElement.rowIndex-1;
+    const r = rows[idx];
+    const inp = document.createElement('input');
+    inp.value = r[key] || '';
+    inp.style.width='100%'; inp.style.padding='6px 8px';
+    inp.addEventListener('blur', ()=>{
+      r[key] = inp.value.trim();
+      if(key==='last_cal' || key==='interval_m'){
+        r.next_cal = (r.last_cal && r.interval_m) ? addMonths(r.last_cal, parseInt(r.interval_m,10)||0) : '';
+      }
+      render();
+    });
+    td.innerHTML=''; td.appendChild(inp); inp.focus(); inp.select();
+  });
+
+  // Дії
+  tbody.addEventListener('click', (e)=>{
+    const b = e.target.closest('button'); if(!b) return;
+    const id = b.getAttribute('data-id'); const act = b.getAttribute('data-act');
+    if(act==='del'){ rows = rows.filter(x=>x.tool_id!==id); render(); return; }
+    if(act==='label'){ const r = rows.find(x=>x.tool_id===id); buildTicket(r); document.getElementById('ticket').scrollIntoView({behavior:'smooth'}); }
+  });
+
+  // Додавання/оновлення
+  function calcNext(){
+    const last = document.getElementById('tlast').value || todayISO();
+    const m = parseInt(document.getElementById('tint').value,10)||0;
+    const next = m ? addMonths(last,m) : '';
+    document.getElementById('tnext').value = next || '—';
+    const st = statusByDates(next);
+    document.getElementById('tstatus').value = next ? st.status : '—';
+  }
+
+  function addOrUpdate(){
+    const rec = {
+      tool_id: (document.getElementById('tid').value||'').trim(),
+      name: (document.getElementById('tname').value||'').trim(),
+      category: (document.getElementById('tcat').value||'').trim(),
+      serial: (document.getElementById('tser').value||'').trim(),
+      location: (document.getElementById('tloc').value||'').trim(),
+      responsible: (document.getElementById('tresp').value||'').trim(),
+      condition: document.getElementById('tcond').value,
+      last_cal: document.getElementById('tlast').value || '',
+      interval_m: parseInt(document.getElementById('tint').value,10)||0,
+      next_cal: (document.getElementById('tnext').value && document.getElementById('tnext').value!=='—') ? document.getElementById('tnext').value : '',
+      status: document.getElementById('tstatus').value || '—',
+      holder: (document.getElementById('holder').value||'').trim(),
+      notes: (document.getElementById('tnote').value||'').trim(),
+      url: (document.getElementById('turl').value||'').trim()
+    };
+    if(!rec.tool_id){ alert('Заповни ID'); return; }
+    const i = rows.findIndex(x=>x.tool_id===rec.tool_id);
+    if(i>=0) rows[i] = {...rows[i], ...rec};
+    else rows.push(rec);
+    render();
+  }
+
+  // Видача/повернення/ремонт
+  function checkout(){
+    const id = document.getElementById('tid').value.trim();
+    const who = document.getElementById('holder').value.trim();
+    if(!id || !who){ alert('Вкажи ID і Кому видано'); return; }
+    const r = rows.find(x=>x.tool_id===id); if(!r){ alert('Немає такого ID у реєстрі'); return; }
+    r.holder = who; pushMove(id,'CHECKOUT',who); render();
+  }
+  function checkin(){
+    const id = document.getElementById('tid').value.trim();
+    const r = rows.find(x=>x.tool_id===id); if(!r){ alert('Немає такого ID у реєстрі'); return; }
+    pushMove(id,'CHECKIN', r.holder||''); r.holder=''; render();
+  }
+  function markRepair(){
+    const id = document.getElementById('tid').value.trim();
+    const r = rows.find(x=>x.tool_id===id); if(!r){ alert('Немає такого ID у реєстрі'); return; }
+    r.condition = 'REPAIR'; pushMove(id,'REPAIR', r.holder||''); render();
+  }
+  function pushMove(id, action, holder){ movements.push({time:nowStamp(), tool_id:id, action, holder}); }
+  function nowStamp(){ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+
+  // Етикетка
+  function buildTicket(rec){
+    let r = rec;
+    if(!r){
+      const id = (document.getElementById('tid').value||'').trim();
+      r = rows.find(x=>x.tool_id===id);
+    }
+    const t = (id)=>document.getElementById(id);
+    if(!r){
+      t('t-id').textContent = 'ID: —';
+      t('t-name').textContent = 'Назва: —';
+      t('t-ser').textContent = 'Серійний: —';
+      t('t-loc').textContent = 'Локація: —';
+      t('t-cond').textContent = 'Стан: —';
+      t('t-last').textContent = 'Ост. калібр.: —';
+      t('t-next').textContent = 'Наступна: —';
+      t('t-stat').textContent = 'Статус: —';
+      t('t-url').textContent = 'QR/NFC: —';
+      t('t-ref').textContent = 'Ref: TL-XXXX';
+      return;
+    }
+    const st = statusByDates(r.next_cal);
+    t('t-id').textContent = `ID: ${r.tool_id}`;
+    t('t-name').textContent = `Назва: ${r.name}`;
+    t('t-ser').textContent = `Серійний: ${r.serial||'—'}`;
+    t('t-loc').textContent = `Локація: ${r.location||'—'}`;
+    t('t-cond').textContent = `Стан: ${r.condition||'—'}`;
+    t('t-last').textContent = `Ост. калібр.: ${r.last_cal||'—'}`;
+    t('t-next').textContent = `Наступна: ${r.next_cal||'—'}`;
+    t('t-stat').textContent = `Статус: ${st.status}`;
+    const url = r.url || (`https://serawww7.github.io/edlab/electric_para8.html#${encodeURIComponent(r.tool_id)}`);
+    t('t-url').textContent = `QR/NFC: ${url}`;
+    t('t-ref').textContent = `Ref: ${r.tool_id}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
+  }
+
+  function downloadTXT(){
+    const lines=[];
+    lines.push('TOOL LABEL 58mm'); lines.push('----------------');
+    lines.push(document.getElementById('ticket').innerText.replace(/\n{2,}/g,'\n'));
+    const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='tool_label_58mm.txt'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // Експорт
+  function exportCSV(){
+    const headers = ['tool_id','name','category','serial','location','responsible','condition','last_cal','interval_m','next_cal','status','holder','notes','url'];
+    const csv = [headers.join(','), ...rows.map(r=>[
+      r.tool_id,r.name,r.category,r.serial,r.location,r.responsible,r.condition,r.last_cal,r.interval_m,r.next_cal,statusByDates(r.next_cal).status,r.holder||'',r.notes||'',r.url||''
+    ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download='tool_registry.csv'; a.click(); URL.revokeObjectURL(a.href);
+  }
+  function exportDue(){
+    const headers = ['tool_id','name','next_cal','status'];
+    const due = rows.filter(r=>['DUE','OVERDUE'].includes(statusByDates(r.next_cal).status));
+    const csv = [headers.join(','), ...due.map(r=>[r.tool_id,r.name,r.next_cal,statusByDates(r.next_cal).status].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download='tool_due_calibration.csv'; a.click(); URL.revokeObjectURL(a.href);
+  }
+  function exportMovements(){
+    const headers = ['time','tool_id','action','holder'];
+    const csv = [headers.join(','), ...movements.map(m=>[m.time,m.tool_id,m.action,m.holder].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download='tool_movements.csv'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // Імпорт
+  async function importCSV(){
+    const f=document.getElementById('file').files[0]; if(!f){ alert('Оберіть CSV'); return; }
+    const txt = await f.text();
+    const lines = txt.trim().split(/\r?\n/); if(lines.length<2){ alert('CSV порожній'); return; }
+    const headers = lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());
+    const req = ['tool_id','name','category','serial','location','responsible','condition','last_cal','interval_m','next_cal','status','holder','notes','url'];
+    const miss = req.filter(x=>!headers.includes(x));
+    if(miss.length){ alert('Відсутні поля: '+miss.join(', ')); return; }
+    const out=[];
+    for(let i=1;i<lines.length;i++){
+      const cells = splitCSV(lines[i]); if(!cells.length) continue;
+      const o={}; headers.forEach((h,j)=> o[h]=(cells[j]||'').replace(/^"|"$/g,''));
+      out.push({
+        tool_id:o.tool_id, name:o.name, category:o.category, serial:o.serial, location:o.location, responsible:o.responsible,
+        condition:o.condition, last_cal:o.last_cal, interval_m:parseInt(o.interval_m||'0',10), next_cal:o.next_cal,
+        status:o.status, holder:o.holder||'', notes:o.notes||'', url:o.url||''
+      });
+    }
+    rows = out; render();
+  }
+  function splitCSV(line){
+    const res=[]; let cur=''; let q=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){ if(q && line[i+1]==='"'){ cur+='"'; i++; } else q=!q; }
+      else if(ch===',' && !q){ res.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    res.push(cur); return res;
+  }
+
+  // Демо
+  function seedDemo(){
+    rows = [
+      {tool_id:'TL-001', name:'Мультиметр UT61E', category:'Вимірювальний', serial:'SN-A12345', location:'Майстерня', responsible:'Студент 1', condition:'OK', last_cal:todayISO(), interval_m:6, next_cal:addMonths(todayISO(),6), status:'PASS', holder:'', notes:'Комплект щупів', url:''},
+      {tool_id:'TL-002', name:'Кліщі струмові', category:'Вимірювальний', serial:'SN-B9988', location:'Майстерня', responsible:'Студент 2', condition:'OK', last_cal:'2025-05-01', interval_m:6, next_cal:'2025-11-01', status:'DUE', holder:'', notes:'', url:''},
+      {tool_id:'TL-010', name:'Паяльник 60W', category:'Допоміжний', serial:'', location:'Лабораторія', responsible:'Студент 3', condition:'REPAIR', last_cal:'', interval_m:0, next_cal:'', status:'—', holder:'', notes:'Заміна жала', url:''}
+    ];
+    render();
+  }
+
+  // Допоміжні
+  function esc(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+  // Авто-демо при старті
+  seedDemo();
+</script>
+</body>
+</html>
