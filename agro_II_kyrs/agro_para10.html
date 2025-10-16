@@ -1,0 +1,417 @@
+<!-- agro_para10.html
+     ПАРА 10 (аудиторно) для агрономів
+     Тема: ЗРОШЕННЯ ТА ВОДНИЙ БАЛАНС КОРЕНЕВОЇ ЗОНИ — ET0 з телефону, Kc, TAW/RAW, графік поливів
+     Фокус: телефони/ПК; студенти вносять ET0/опади вручну з будь-якого погодного застосунку.
+     Результат: добовий водний баланс, підказки «поливати/почекати», розрахунок глибини поливу, CSV.
+     Контраст: темні комірки мають світлий текст.
+
+     Примітка: модель навчальна (спрощена). Для виробничих рішень — інженерні карти поливів та локальні норми.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 10 — Зрошення: водний баланс, ET₀·Kc, TAW/RAW, план поливів</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .small{font-size:12px; color:#9fb0c8}
+  .muted{color:#93a3b5}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)}
+  .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
+  .table td .tag{display:inline-block; padding:3px 8px; border-radius:999px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; font-size:12px}
+  input[type="text"], input[type="number"], input[type="date"], select{
+    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
+  }
+  .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+  html.embedded .box{background:#f8fafc; color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+
+  @media print{
+    @page{ margin:12mm }
+    .no-print{ display:none !important }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 10 · аудиторно · агрономи</span>
+    <h1>💧 Зрошення та водний баланс: ET₀·Kc → ETc, TAW/RAW → скільки і коли поливати</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        За пару студенти налаштовують <b>модель кореневої зони</b>, вносять <b>ET₀ та опади</b> на 10 днів із будь-якого
+        погодного застосунку, обирають <b>Kc</b> (коеф. культури) та отримують підказки <b>коли поливати</b> і
+        <b>яку глибину поливу</b> задати з урахуванням ефективності системи. Результат — <b>CSV</b> для Sheets.
+      </p>
+      <p class="small">Позначення: TAW — загальний запас води в кореневій зоні; RAW — допустиме висушування (p×TAW).
+        Баланс (щоденно): <span class="mono">Sₜ = clamp[0..TAW](Sₜ₋₁ + P_eff + I_eff − ETc)</span>, де <span class="mono">ETc = ET₀×Kc</span>.
+      </p>
+    </div>
+
+    <!-- ПАРАМЕТРИ ПОЛЯ ТА ҐРУНТУ -->
+    <div class="card">
+      <h2>🧰 Параметри поля, ґрунту та системи зрошення</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Поле</h3>
+          <div class="row">
+            <div style="flex:1"><label>Код поля</label><input id="fieldCode" type="text" value="F-01"></div>
+            <div style="flex:1"><label>Культура</label><input id="crop" type="text" value="Кукурудза"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Площа, га</label><input id="area" type="number" step="0.01" value="25"></div>
+            <div style="flex:1"><label>Глибина коренів Zr, м</label><input id="Zr" type="number" step="0.1" value="0.6"></div>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Ґрунт (обʼємні %)</h3>
+          <div class="row">
+            <div style="flex:1"><label>FC (ППВ), %</label><input id="FC" type="number" step="0.1" value="30"></div>
+            <div style="flex:1"><label>PWP (ВРК), %</label><input id="PWP" type="number" step="0.1" value="15"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Початковий запас, % від TAW</label><input id="S0p" type="number" step="1" value="80"></div>
+            <div style="flex:1"><label>p (допустиме висушування)</label><input id="p" type="number" step="0.05" value="0.5"></div>
+          </div>
+          <p class="small">TAW = (FC − PWP) × 1000 × Zr (мм). RAW = p × TAW.</p>
+        </div>
+
+        <div class="box">
+          <h3>Зрошення</h3>
+          <div class="row">
+            <div style="flex:1"><label>Ефективність, η (0..1)</label><input id="eta" type="number" step="0.05" value="0.8"></div>
+            <div style="flex:1"><label>Макс. полив за раз, мм</label><input id="Imax" type="number" step="1" value="35"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Втрати дощів (коеф.)</label><input id="rainEff" type="number" step="0.05" value="0.9"></div>
+            <div style="flex:1"><label>Дата старту</label><input id="startDate" type="date"></div>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+            <button class="btn" onclick="preset()">🧪 Приклад</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- КУЛЬТУРА / Kc -->
+    <div class="card">
+      <h2>🌾 Коефіцієнт культури Kc</h2>
+      <div class="grid g2">
+        <div class="box">
+          <h3>Обрати стадію (підставить Kc)</h3>
+          <select id="kcStage" onchange="setStageKc()">
+            <option value="0.35">Початкова (Kc≈0.35)</option>
+            <option value="0.85">Ріст (Kc≈0.85)</option>
+            <option value="1.15" selected>Середина сезону (Kc≈1.15)</option>
+            <option value="0.8">Кінець сезону (Kc≈0.80)</option>
+          </select>
+          <p style="margin-top:8px"><label>Або вручну Kc</label><input id="Kc" type="number" step="0.01" value="1.15"></p>
+          <p class="small">Kc множиться на ET₀ з погодного застосунку.</p>
+        </div>
+        <div class="box">
+          <h3>Розрахунок TAW/RAW</h3>
+          <div>TAW (мм): <b><span id="TAW">—</span></b></div>
+          <div>RAW (мм): <b><span id="RAW">—</span></b></div>
+          <div>Початковий запас S₀ (мм): <b><span id="S0mm">—</span></b></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ТАБЛИЦЯ 10 ДНІВ -->
+    <div class="card">
+      <h2>📅 10-денний план (ET₀ з телефону, опади, полив)</h2>
+      <div class="row">
+        <button class="btn" onclick="autoIrrigate()">💦 Запропонувати поливи</button>
+        <button class="btn" onclick="copyCSV()">📋 Скопіювати CSV</button>
+      </div>
+      <div style="overflow:auto; margin-top:8px">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Дата</th>
+              <th>ET₀, мм</th>
+              <th>Kc</th>
+              <th class="dark">ETc, мм</th>
+              <th>Дощ, мм</th>
+              <th>Полив, мм (задано)</th>
+              <th class="dark">Полив еф., мм</th>
+              <th class="dark">Баланс S, мм</th>
+              <th class="dark">Дефіцит D, мм</th>
+              <th class="dark">Статус</th>
+              <th>Нотатка</th>
+            </tr>
+          </thead>
+          <tbody id="body"></tbody>
+          <tfoot>
+            <tr>
+              <th class="dark" colspan="8">Сумарно</th>
+              <th class="dark" id="sumS">—</th>
+              <th class="dark" id="sumD">—</th>
+              <th class="dark" id="sumStatus">—</th>
+              <th></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="csv" class="out" style="margin-top:8px">—</div>
+      <p class="small">CSV: <span class="mono"># | Дата | ET0 | Kc | ETc | Дощ | Полив_задано | Полив_еф | S | D | Статус | Нотатка</span></p>
+      <p class="small muted">Контраст забезпечено: темні клітинки (<span class="mono">.dark</span>) зі світлим текстом.</p>
+    </div>
+
+    <!-- ХІД РОБОТИ, ОЦІНЮВАННЯ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+      <ol>
+        <li>Внеси FC/PWP, Zr, p, ефективність поливу η, дощовий коеф. та дату старту — натисни <b>Перерахувати</b>.</li>
+        <li>Зніми з телефона ET₀ на 10 днів та опади → внеси в таблицю (Kc вже задано, але можна змінити по днях).</li>
+        <li>Натисни <b>Запропонувати поливи</b> → отримай глибини поливів у дні, де <b>D &gt; RAW</b>.</li>
+        <li>Скопіюй CSV у Google Sheets (аркуш <span class="mono">Irrigation10</span>) і побудуй графік S та D.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>TAW/RAW і S₀ розраховані коректно (виходячи з FC, PWP, Zr)</td><td>3</td></tr>
+          <tr><td>Заповнені 10 днів ET₀/опади, адекватні Kc</td><td>3</td></tr>
+          <tr><td>План поливів логічний (D→RAW) та в межах Imax і η</td><td>3</td></tr>
+          <tr><td>CSV у Sheets + короткі висновки</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">💧 TAW/RAW</p><p class="pill">🌡️ ET₀×Kc</p><p class="pill">📅 План поливів</p><p class="pill">📊 CSV → Sheets</p>
+    </div>
+  </div>
+
+<script>
+  // Вбудований режим для Moodle iFrame
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const bodyEl = document.getElementById('body');
+  const csvEl  = document.getElementById('csv');
+
+  // Утиліти
+  const byId = id => document.getElementById(id);
+  const num = id => parseFloat((byId(id).value||'').replace(',','.'))||0;
+  const val = id => (byId(id).value||'').trim();
+  const rnd = (n,d=2) => Number((+n).toFixed(d));
+  const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
+
+  function setStageKc(){ byId('Kc').value = byId('kcStage').value; recalc(); }
+
+  function computeTAW_RAW(){
+    const FC = num('FC'), PWP = num('PWP'), Zr = num('Zr'), p = num('p');
+    const TAW = (FC - PWP) * 10 * Zr * 100; // Пояснення: (FC-PWP)% × 10 мм на 1% у 1 см × Zr м × 100 см/м
+    // Спрощення: (FC-PWP) [об.%] × 1000 мм/м × Zr м = (FC-PWP)*10*Zr*100 (еквівалентно 1000*Zr*(FC-PWP)/100)
+    const RAW = p * TAW;
+    const S0 = (num('S0p')/100) * TAW;
+    byId('TAW').textContent = rnd(TAW,0);
+    byId('RAW').textContent = rnd(RAW,0);
+    byId('S0mm').textContent = rnd(S0,0);
+    return {TAW, RAW, S0};
+  }
+
+  function buildRows(){
+    bodyEl.innerHTML='';
+    const start = byId('startDate').value ? new Date(byId('startDate').value) : new Date();
+    for(let i=0;i<10;i++){
+      const d = new Date(start); d.setDate(d.getDate()+i);
+      const ds = d.toISOString().slice(0,10);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="idx">1</td>
+        <td><input type="date" value="${ds}"></td>
+        <td><input type="number" step="0.1" value="5.0"></td>
+        <td><input type="number" step="0.01" value="${num('Kc')||1.0}"></td>
+        <td class="dark etc">—</td>
+        <td><input type="number" step="0.1" value="0.0"></td>
+        <td><input type="number" step="0.1" value="0.0"></td>
+        <td class="dark ieff">—</td>
+        <td class="dark S">—</td>
+        <td class="dark D">—</td>
+        <td class="dark status">—</td>
+        <td><input type="text" value=""></td>
+      `;
+      bodyEl.appendChild(tr);
+    }
+    reindex();
+  }
+
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  function recalc(){
+    const {TAW, RAW, S0} = computeTAW_RAW();
+    reindex();
+    let S = S0;
+    let sumD=0;
+    const eta = num('eta'), rainEff = num('rainEff');
+
+    [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>{
+      const ET0 = parseFloat(tr.children[2].querySelector('input').value||'0');
+      const Kc  = parseFloat(tr.children[3].querySelector('input').value||'1');
+      const rain= parseFloat(tr.children[5].querySelector('input').value||'0');
+      const I   = parseFloat(tr.children[6].querySelector('input').value||'0');
+
+      const ETc = ET0 * Kc;
+      const Ieff = I * eta;
+      const Peff = rain * num('rainEff');
+
+      S = clamp(S + Peff + Ieff - ETc, 0, TAW);
+      const D = TAW - S;
+
+      tr.querySelector('.etc').textContent = rnd(ETc,1);
+      tr.querySelector('.ieff').textContent = rnd(Ieff,1);
+      tr.querySelector('.S').textContent = rnd(S,0);
+      tr.querySelector('.D').textContent = rnd(D,0);
+
+      let status='OK';
+      if(D > RAW){ status='💦 Поливати'; tr.querySelector('.status').style.color = '#10b981'; }
+      else if(D > RAW*0.8){ status='⚠️ Наближається'; tr.querySelector('.status').style.color = '#f59e0b'; }
+      else { status='Спостерігати'; tr.querySelector('.status').style.color = ''; }
+      tr.querySelector('.status').textContent = status;
+
+      sumD += D;
+    });
+
+    byId('sumD').textContent = rnd(sumD,0);
+    byId('sumS').textContent = [...bodyEl.querySelectorAll('.S')].slice(-1)[0]?.textContent || '—';
+    byId('sumStatus').textContent = 'Оновлено';
+    buildCSV();
+  }
+
+  function autoIrrigate(){
+    const {TAW, RAW} = computeTAW_RAW();
+    const Imax = num('Imax'), eta = num('eta');
+
+    let S_prev = parseFloat(byId('S0mm').textContent)||0;
+
+    [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>{
+      const ET0 = parseFloat(tr.children[2].querySelector('input').value||'0');
+      const Kc  = parseFloat(tr.children[3].querySelector('input').value||'1');
+      const rain= parseFloat(tr.children[5].querySelector('input').value||'0');
+
+      const ETc = ET0*Kc;
+      const Peff= rain * num('rainEff');
+
+      // прогноз без поливу
+      let S = clamp(S_prev + Peff - ETc, 0, TAW);
+      let D = TAW - S;
+
+      let Iset = 0;
+      if(D > RAW){
+        // Ціль — довести до 90% TAW, але не більше Imax*η
+        const target = 0.9 * TAW;
+        const need = Math.max(0, target - S); // ефективно
+        const Ieff = Math.min(need, Imax);    // обмеження по Imax (мм ефективних)
+        Iset = rnd(Ieff / eta, 1);            // задати «на полі», врахувавши ефективність
+      }
+
+      tr.children[6].querySelector('input').value = Iset.toString();
+
+      // перерахунок «з поливом»
+      const Ieff2 = Iset*eta;
+      S = clamp(S_prev + Peff + Ieff2 - ETc, 0, TAW);
+      S_prev = S;
+    });
+
+    recalc();
+  }
+
+  function buildCSV(){
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx = tr.querySelector('.idx').textContent.trim();
+      const d   = tr.children[1].querySelector('input').value.trim();
+      const et0 = tr.children[2].querySelector('input').value.trim();
+      const kc  = tr.children[3].querySelector('input').value.trim();
+      const etc = tr.querySelector('.etc').textContent.trim();
+      const rain= tr.children[5].querySelector('input').value.trim();
+      const I   = tr.children[6].querySelector('input').value.trim();
+      const ie  = tr.querySelector('.ieff').textContent.trim();
+      const S   = tr.querySelector('.S').textContent.trim();
+      const D   = tr.querySelector('.D').textContent.trim();
+      const st  = tr.querySelector('.status').textContent.trim();
+      const note= tr.children[11].querySelector('input').value.trim();
+      return [idx,d,et0,kc,etc,rain,I,ie,S,D,st,note].join(' | ');
+    });
+    csvEl.textContent = lines.join('\n') || '—';
+  }
+
+  function copyCSV(){
+    const t = csvEl.textContent.trim();
+    if(!t || t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося скопіювати'));
+  }
+
+  function preset(){
+    // Приклад: кукурудза, ET0 та дощі умовні
+    const today = new Date(); byId('startDate').value = today.toISOString().slice(0,10);
+    byId('FC').value = 30; byId('PWP').value = 15; byId('Zr').value = 0.6; byId('p').value=0.5;
+    byId('Kc').value = 1.15; byId('kcStage').value='1.15';
+    byId('eta').value=0.8; byId('rainEff').value=0.9; byId('Imax').value=35; byId('S0p').value=80;
+    buildRows();
+    // ET0/дощі (мм)
+    const et0 = [4.8,5.2,5.5,5.1,5.0,4.6,4.9,5.3,5.4,5.2];
+    const rain= [0.0,0.0,2.0,0.0,5.0,0.0,0.0,0.0,8.0,0.0];
+    [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>{
+      tr.children[2].querySelector('input').value = et0[i];
+      tr.children[5].querySelector('input').value = rain[i];
+    });
+    recalc();
+  }
+
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // Ініціалізація
+  (function init(){
+    const today = new Date(); byId('startDate').value = today.toISOString().slice(0,10);
+    buildRows(); computeTAW_RAW(); recalc();
+  })();
+</script>
+</body>
+</html>
