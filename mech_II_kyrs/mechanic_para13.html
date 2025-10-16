@@ -1,0 +1,545 @@
+<!-- mechanic_para13.html
+     ПАРА 13 (аудиторно) для механіків
+     Тема: ТРАНСМІСІЯ ТА ПРИВОДИ — передаточні числа (КПП/редуктор/диф), швидкість руху,
+           оберти ВВП, перерахунок шківів/зірочок, довжина та натяг ременя/ланцюга,
+           квиток 58 мм, NFC, CSV-журнали.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages / Moodle (iframe).
+     Обладнання: телефони; (опц.) штангенциркуль/тахометр; 58 мм принтер; NFC-мітки.
+
+     Можливості:
+     • Ground Speed: шина (діаметр/профіль/R), оберти двигуна, КПП/головна/роздатка → км/год.
+     • PTO: оберти двигуна ↔ об/хв ВВП (540/1000) через передаточне.
+     • Ремені: довжина класичного клинового (формула середньої довжини), натяг за ΔL і кутом обхвату.
+     • Ланцюг: крок, кількість ланок, зірочки, міжосьова — оцінка довжини та зміни при регулюванні.
+     • “Квиток” 58 мм, NFC-текст для мітки, CSV для Google Sheets.
+     Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 13 (механіки) — Трансмісія: передаточні, швидкість, ВВП, ремені/ланцюги, квиток 58 мм, NFC</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  /* Квиток 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 13 · аудиторно · механіки</span>
+  <h1>⚙️ Трансмісія: передаточні, швидкість руху, ВВП, ремені/ланцюги, квиток 58 мм, NFC</h1>
+
+  <div class="card">
+    <h2>🎯 Мета</h2>
+    <p>
+      За пару студенти навчаться рахувати <b>передаточні числа</b> та <b>швидкість руху</b> техніки,
+      перераховувати <b>оберти ВВП</b> від обертів двигуна, підбирати <b>шківи/зірочки</b> для потрібних обертів,
+      оцінювати <b>довжину та натяг ременя/ланцюга</b>, вести <b>журнал</b>, формувати <b>квиток</b>, <b>NFC</b> і <b>CSV</b>.
+    </p>
+    <p class="small">Нагадування: v(км/год) ≈ <span class="mono">ωдв / (iКПП·iГП·iРозд) · (π·Dкола) · 60 / 1000</span> (без буксування);
+      ремінь L≈<span class="mono">2C + π(R+r) + (R−r)^2/C</span>; V-профіль: натяг по допустимому прогину, ланцюг — за кількістю ланок і регулюванням центра C.</p>
+  </div>
+
+  <!-- 1. ШВИДКІСТЬ РУХУ -->
+  <div class="card">
+    <h2>🚜 Швидкість руху (Ground Speed)</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Параметри</h3>
+        <div class="row">
+          <div style="flex:1"><label>Оберти двигуна, об/хв</label><input id="rpm" type="number" step="1" value="1800"></div>
+          <div style="flex:1"><label>Передача КПП (i)</label><input id="ig" type="number" step="0.001" value="4.200"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Головна передача (i)</label><input id="ifd" type="number" step="0.001" value="3.800"></div>
+          <div style="flex:1"><label>Роздатка/редуктор (i)</label><input id="irt" type="number" step="0.001" value="1.000"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>D шини, мм</label><input id="Dtire" type="number" step="1" value="1500"></div>
+          <div style="flex:1"><label>Буксування, %</label><input id="slip" type="number" step="1" value="5"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Результат</h3>
+        <p>Кутова на колесі: <b><span id="wheelRPM">—</span></b> об/хв</p>
+        <p>Теоретична швидкість: <b><span id="vTheo">—</span></b> км/год</p>
+        <p>З урах. буксування: <b><span id="vReal">—</span></b> км/год</p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcSpeed()">🔁 Перерахувати</button>
+          <button class="btn" onclick="presetSpeed()">🧪 Приклад</button>
+          <button class="btn" onclick="copyCSV('csvSpeed')">📋 CSV (speed)</button>
+        </div>
+        <div id="csvSpeed" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ВВП / PTO -->
+  <div class="card">
+    <h2>🔄 ВВП (PTO) — 540/1000 об/хв</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Параметри</h3>
+        <div class="row">
+          <div style="flex:1"><label>Оберти двигуна, об/хв</label><input id="rpm2" type="number" step="1" value="1800"></div>
+          <div style="flex:1"><label>i двигун→ВВП</label><input id="ipto" type="number" step="0.001" value="3.000"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Ціль ВВП, об/хв</label>
+            <select id="ptoTarget"><option value="540">540</option><option value="1000" selected>1000</option></select>
+          </div>
+          <div style="flex:1"><label>Режим</label>
+            <select id="ptoMode"><option value="fromEngine">двигун → ВВП</option><option value="toEngine">ціль ВВП → потрібні оберти двигуна</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Результат</h3>
+        <p>Об/хв ВВП: <b><span id="ptoRPM">—</span></b></p>
+        <p>Потрібні об/хв двигуна для цілі: <b><span id="needRPM">—</span></b></p>
+        <p>Статус: <b><span id="ptoFlag">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcPTO()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvPTO')">📋 CSV (pto)</button>
+        </div>
+        <div id="csvPTO" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+    <p class="small muted">Пам’ятка: <span class="mono">nВВП = nдв / i</span>; зворотно: <span class="mono">nдв = nВВП·i</span>.</p>
+  </div>
+
+  <!-- 3. ШКІВИ / ЗІРОЧКИ -->
+  <div class="card">
+    <h2>🧯 Шківи/зірочки — перерахунок обертів</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Вихідні</h3>
+        <div class="row">
+          <div style="flex:1"><label>Ведучий Ø, мм</label><input id="d1" type="number" step="0.1" value="120"></div>
+          <div style="flex:1"><label>Ведений Ø, мм</label><input id="d2" type="number" step="0.1" value="200"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>n ведучий, об/хв</label><input id="n1" type="number" step="1" value="1800"></div>
+          <div style="flex:1"><label>Тип</label>
+            <select id="driveType"><option value="belt" selected>ременевий</option><option value="chain">ланцюговий (зірочки)</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Результат</h3>
+        <p>Передаточне i: <b><span id="i12">—</span></b></p>
+        <p>n ведений: <b><span id="n2">—</span></b> об/хв</p>
+        <p>Оберти змінити до цілі: <b><span id="tuneTip">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcPulley()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvPulley')">📋 CSV (pulleys)</button>
+        </div>
+        <div id="csvPulley" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+    <p class="small muted">Ремені/ланцюги ідеально: <span class="mono">i ≈ D2/D1</span> (або <span class="mono">Z2/Z1</span> для зірочок).</p>
+  </div>
+
+  <!-- 4. ДОВЖИНА ТА НАТЯГ РЕМЕНЯ/ЛАНЦЮГА -->
+  <div class="card">
+    <h2>⛓️ Довжина та натяг ременя / ланцюга</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>Ремінь (клиновий)</h3>
+        <div class="row">
+          <div style="flex:1"><label>Ø ведучий, мм</label><input id="bd1" type="number" step="0.1" value="120"></div>
+          <div style="flex:1"><label>Ø ведений, мм</label><input id="bd2" type="number" step="0.1" value="200"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Міжосьова C, мм</label><input id="bC" type="number" step="1" value="600"></div>
+          <div style="flex:1"><label>ΔC регулювання, мм</label><input id="bAdj" type="number" step="1" value="30"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="calcBelt()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvBelt')">📋 CSV (belt)</button>
+        </div>
+        <div class="out" id="csvBelt" style="margin-top:8px">—</div>
+      </div>
+      <div class="box">
+        <h3>Ланцюг (роликовий)</h3>
+        <div class="row">
+          <div style="flex:1"><label>К-ть зубів Z1/Z2</label><input id="cz1" type="number" step="1" value="15"></div>
+          <div style="flex:1"><label>—</label><input id="cz2" type="number" step="1" value="25"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Крок t, мм</label><input id="ct" type="number" step="0.01" value="12.7"></div>
+          <div style="flex:1"><label>Міжосьова C, мм</label><input id="cC" type="number" step="1" value="600"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="calcChain()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvChain')">📋 CSV (chain)</button>
+        </div>
+        <div class="out" id="csvChain" style="margin-top:8px">—</div>
+      </div>
+    </div>
+    <p class="small muted">Ремінь: L≈2C+π(R+r)+(R−r)^2/C, де R=D/2 (мм). Ланцюг (наближено): Lланк≈<span class="mono">2C/t + (Z1+Z2)/2 + ((Z2−Z1)^2)·t/(4π²·C)</span>.</p>
+  </div>
+
+  <!-- 5. ЖУРНАЛИ -->
+  <div class="card">
+    <h2>📒 Журнали розрахунків</h2>
+    <div class="row">
+      <button class="btn" onclick="addRow()">➕ Додати рядок</button>
+      <button class="btn" onclick="presetRows()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tbl">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Вузол</th>
+            <th>i (або D/Z)</th>
+            <th class="dark">n1→n2</th>
+            <th class="dark">v, км/год</th>
+            <th class="dark">PTO</th>
+            <th>Ремінь/Ланцюг (L…)</th>
+            <th>Примітка</th>
+          </tr>
+        </thead>
+        <tbody id="body"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 6. КВИТОК + NFC -->
+  <div class="card">
+    <h2>🧾 Квиток 58 мм та NFC</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>NFC — “DRIVELINE CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Машина/привід</label><input id="nfcId" type="text" value="TR-001/Drive-A"></div>
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+      <div class="box">
+        <h3>Квиток “DRIVELINE CHECK”</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>DRIVELINE CHECK</h4>
+          <p id="tDate"><small>Дата: —</small></p>
+          <div class="line"></div>
+          <p><b>v(км/год):</b> <span id="tV">—</span></p>
+          <p><b>n колесо:</b> <span id="tWh">—</span> об/хв</p>
+          <p><b>PTO:</b> <span id="tPTO">—</span></p>
+          <p><b>Шківи/зірочки:</b> <span id="tPul">—</span></p>
+          <p><b>Ремінь/ланцюг:</b> <span id="tBL">—</span></p>
+          <div class="line"></div>
+          <p><small id="tNote">Прим.: —</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Розрахуй <b>v</b> та <b>n колеса</b> для 2–3 передач і двох діаметрів шин.</li>
+      <li>Перевір <b>ВВП</b> (540/1000) — підбери оберти двигуна / або оцінюй відхилення.</li>
+      <li>Підібери <b>шківи/зірочки</b> під задану ціль обертів.</li>
+      <li>Оціни <b>довжину ременя</b> і <b>ланцюга</b>, перевір запас регулювання.</li>
+      <li>Заповни <b>журнал</b> (≥3 рядки), згенеруй <b>NFC</b>, <b>квиток</b> та <b>CSV</b> (<span class="mono">Driveline</span>).</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Розрахунок швидкості/ВВП коректний</td><td>4</td></tr>
+        <tr><td>Підібрані шківи/зірочки до цільових обертів</td><td>3</td></tr>
+        <tr><td>Ремінь/ланцюг: довжина/регулювання обґрунтовані</td><td>2</td></tr>
+        <tr><td>Квиток/NFC + CSV</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const bodyEl = document.getElementById('body');
+
+  // ===== 1) Швидкість руху =====
+  function calcSpeed(){
+    const rpm = +byId('rpm').value||0;
+    const ig  = +byId('ig').value||1;
+    const ifd = +byId('ifd').value||1;
+    const irt = +byId('irt').value||1;
+    const Dmm = +byId('Dtire').value||0;
+    const slip = (+byId('slip').value||0)/100;
+
+    const iTot = ig*ifd*irt;
+    const wheelRPM = iTot>0 ? rpm/iTot : 0;
+    const C = Math.PI * (Dmm/1000); // м
+    const vTheo = (wheelRPM * C * 60) / 1000; // км/год
+    const vReal = vTheo * (1 - slip);
+
+    byId('wheelRPM').textContent = rnd(wheelRPM,1);
+    byId('vTheo').textContent = rnd(vTheo,2);
+    byId('vReal').textContent = rnd(vReal,2);
+
+    const csv = `SPEED|rpm=${rpm}|iTot=${rnd(iTot,3)}|wheelRPM=${rnd(wheelRPM,1)}|D=${Dmm}mm|vTheo=${rnd(vTheo,2)}kmh|vReal=${rnd(vReal,2)}kmh|slip=${(slip*100).toFixed(1)}%`;
+    byId('csvSpeed').textContent = csv;
+
+    return {wheelRPM,vTheo,vReal,iTot};
+  }
+  function presetSpeed(){
+    byId('rpm').value=2000; byId('ig').value=3.200; byId('ifd').value=4.100; byId('irt').value=1.000; byId('Dtire').value=1580; byId('slip').value=6;
+    calcSpeed();
+  }
+
+  // ===== 2) PTO =====
+  function calcPTO(){
+    const rpm = +byId('rpm2').value||0;
+    const i   = +byId('ipto').value||1;
+    const target = +byId('ptoTarget').value||540;
+    const mode = byId('ptoMode').value;
+
+    const pto = i>0 ? rpm / i : 0;
+    const need = target * i;
+
+    let flag='—', color='#10b981';
+    const diff = pto - target;
+    if(Math.abs(diff)<=10) { flag='🟢 в нормі (±10 об/хв)'; }
+    else if(Math.abs(diff)<=50) { flag='🟠 близько'; color='#f59e0b'; }
+    else { flag='🔴 далеко'; color='#ef4444'; }
+
+    byId('ptoRPM').textContent = rnd(pto,0);
+    byId('needRPM').textContent = mode==='toEngine'? rnd(need,0) : '—';
+    byId('ptoFlag').textContent = flag; byId('ptoFlag').style.color = color;
+
+    const csv = `PTO|rpmEngine=${rpm}|i=${i}|pto=${rnd(pto,0)}rpm|target=${target}|needEngine=${rnd(need,0)}rpm|flag=${flag}`;
+    byId('csvPTO').textContent = csv;
+
+    return {pto,need,flag};
+  }
+
+  // ===== 3) Шківи / зірочки =====
+  function calcPulley(){
+    const d1 = +byId('d1').value||0;
+    const d2 = +byId('d2').value||0;
+    const n1 = +byId('n1').value||0;
+    const type = byId('driveType').value;
+
+    const i = (d1>0)? (d2/d1) : 0; // або Z2/Z1
+    const n2 = i>0 ? n1/i : 0;
+
+    let tip='—';
+    if(n2>0){
+      tip = (n2>1000)? 'зменшити D2 або збільшити D1' : (n2<300? 'збільшити D2 або зменшити D1' : 'похоже ок');
+    }
+
+    byId('i12').textContent = rnd(i,3);
+    byId('n2').textContent = rnd(n2,0);
+    byId('tuneTip').textContent = tip;
+
+    const csv = `PULLEY|type=${type}|D1=${d1}mm|D2=${d2}mm|i=${rnd(i,3)}|n1=${n1}rpm|n2=${rnd(n2,0)}rpm|tip=${tip}`;
+    byId('csvPulley').textContent = csv;
+
+    return {i,n2,tip};
+  }
+
+  // ===== 4) Ремінь / ланцюг =====
+  function calcBelt(){
+    const D1 = +byId('bd1').value||0, R = D1/2;
+    const D2 = +byId('bd2').value||0, r = D2/2;
+    const C  = +byId('bC').value||0;
+    const Adj= +byId('bAdj').value||0;
+
+    // Формула середньої довжини (мм)
+    const L = 2*C + Math.PI*(R+r) + ((R-r)*(R-r))/C;
+    const Lmin = 2*(C-Adj) + Math.PI*(R+r) + ((R-r)*(R-r))/(C-Adj);
+    const Lmax = 2*(C+Adj) + Math.PI*(R+r) + ((R-r)*(R-r))/(C+Adj);
+
+    const csv = `BELT|D1=${D1}mm|D2=${D2}mm|C=${C}mm|Adj=±${Adj}mm|L=${rnd(L,0)}mm|Lrange=[${rnd(Lmin,0)}..${rnd(Lmax,0)}]mm`;
+    byId('csvBelt').textContent = csv;
+
+    return {L,Lmin,Lmax};
+  }
+
+  function calcChain(){
+    const Z1 = +byId('cz1').value||0;
+    const Z2 = +byId('cz2').value||0;
+    const t  = +byId('ct').value||0; // мм
+    const C  = +byId('cC').value||0; // мм
+
+    // Кількість ланок (наближена класика)
+    const Llinks = 2*(C/t) + (Z1+Z2)/2 + ((Z2-Z1)*(Z2-Z1))*t/(4*Math.PI*Math.PI*C);
+    const Lmm = Llinks * t;
+
+    const csv = `CHAIN|Z1=${Z1}|Z2=${Z2}|t=${t}mm|C=${C}mm|Links≈${rnd(Llinks,1)}|L≈${rnd(Lmm,0)}mm`;
+    byId('csvChain').textContent = csv;
+
+    return {Llinks,Lmm};
+  }
+
+  // ===== 5) Журнал =====
+  function addRow(sample){
+    const sp = calcSpeed(), pto = calcPTO(), pl = calcPulley();
+    const b = calcBelt(), c = calcChain();
+    const def = {
+      node:'Привід жатки', io:rnd(pl.i,3), n:`${byId('n1').value}→${pl.n2?rnd(pl.n2,0):'—'}`,
+      v:rnd(sp.vReal,2), pto:`${rnd(pto.pto,0)}rpm(${pto.flag})`,
+      belt:`${rnd(b.L,0)}мм`, note:'ок'
+    };
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.node}"></td>
+      <td>${s.io}</td>
+      <td class="dark">${s.n}</td>
+      <td class="dark">${s.v}</td>
+      <td class="dark">${s.pto}</td>
+      <td>${s.belt}; chain≈${rnd(c.Lmm,0)}мм</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyEl.appendChild(tr); reindex(); buildCSVlog();
+  }
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+  function presetRows(){
+    bodyEl.innerHTML='';
+    const sp = calcSpeed(); const pto = calcPTO(); const pl = calcPulley(); const b = calcBelt(); const c = calcChain();
+    addRow({node:'Привід вентилятора', io:rnd(pl.i,3), n:`${byId('n1').value}→${rnd(pl.n2,0)}`, v:rnd(sp.vReal,2), pto:`${rnd(pto.pto,0)}rpm(${pto.flag})`, belt:`${rnd(b.L,0)}мм`, note:'натяг ок'});
+    addRow({node:'Привід молотильного барабана', io:'1.667', n:'1500→900', v:'—', pto:'—', belt:`${rnd(b.L,0)}мм`, note:'запас регулювання +20мм'});
+    addRow({node:'PTO → подрібнювач', io:'0.750', n:'1000→750', v:'—', pto:`${rnd(pto.pto,0)}rpm`, belt:`chain≈${rnd(c.Lmm,0)}мм`, note:'зірочки 18/24'});
+    buildCSVlog();
+  }
+  function buildCSVlog(){
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx=tr.querySelector('.idx').textContent.trim();
+      const node=tr.children[1].querySelector('input').value.trim();
+      const io  =tr.children[2].textContent.trim();
+      const n   =tr.children[3].textContent.trim();
+      const v   =tr.children[4].textContent.trim();
+      const pto =tr.children[5].textContent.trim();
+      const bl  =tr.children[6].textContent.trim();
+      const note=tr.children[7].querySelector('input').value.trim();
+      return [idx,node,io,n,v,pto,bl,note].join(' | ');
+    });
+    byId('csvLog').textContent = lines.join('\n') || '—';
+  }
+
+  // ===== 6) Квиток / NFC =====
+  function buildTicket(){
+    const sp = calcSpeed(); const pto = calcPTO(); const pl = calcPulley();
+    const b = calcBelt(); const c = calcChain();
+    const d = new Date().toISOString().slice(0,10);
+    byId('tDate').innerHTML = `<small>Дата: ${d}</small>`;
+    byId('tV').textContent = `${rnd(sp.vReal,2)} (теор. ${rnd(sp.vTheo,2)})`;
+    byId('tWh').textContent = rnd(sp.wheelRPM,1);
+    byId('tPTO').textContent = `${rnd(pto.pto,0)} rpm (${pto.flag})`;
+    byId('tPul').textContent = `i=${byId('i12').textContent}, n2=${byId('n2').textContent} rpm`;
+    byId('tBL').textContent = `belt≈${rnd(b.L,0)}мм, chain≈${rnd(c.Lmm,0)}мм`;
+    byId('tNote').textContent = `iTot=${rnd(sp.iTot||(+byId('ig').value*+byId('ifd').value*+byId('irt').value),3)}; D=${byId('Dtire').value}мм; slip=${byId('slip').value}%`;
+  }
+
+  function buildNFC(){
+    const sp = calcSpeed(); const pto = calcPTO(); const pl = calcPulley(); const b = calcBelt(); const c = calcChain();
+    const text = [
+      `DRIVELINE_NFC`,
+      `ID:${byId('nfcId').value}`,
+      `SPEED:v=${rnd(sp.vReal,2)}kmh (wheel=${rnd(sp.wheelRPM,1)}rpm)`,
+      `PTO:${rnd(pto.pto,0)}rpm target=${byId('ptoTarget').value}`,
+      `PULLEY:i=${byId('i12').textContent} n2=${byId('n2').textContent}rpm`,
+      `BELT≈${rnd(b.L,0)}mm; CHAIN≈${rnd(c.Lmm,0)}mm`,
+      `CONTACT:${byId('nfcPhone').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = text;
+  }
+
+  // ===== Утиліти =====
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // ===== Ініціалізація =====
+  (function init(){
+    calcSpeed(); calcPTO(); calcPulley(); calcBelt(); calcChain();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select')) { calcSpeed(); calcPTO(); calcPulley(); calcBelt(); calcChain(); }
+    });
+  })();
+</script>
+</body>
+</html>
