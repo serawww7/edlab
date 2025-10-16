@@ -1,13 +1,14 @@
 <!-- index.html — домашня сторінка EDLab на GitHub Pages
-     Готово до публікації у https://serawww7.github.io/edlab/
-     Містить: опис, картку уроку, генератор iFrame для Moodle, прев’ю-рамку з тестом кліків. -->
+     ОНОВЛЕНО: універсальна «шапка» для 5 спеціальностей + юридичний футер з посиланнями.
+     Відкрити: https://serawww7.github.io/edlab/
+-->
 <!DOCTYPE html>
 <html lang="uk">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>EDLab — цифрові пари для агрономів</title>
-<meta name="description" content="EDLab: готові інтерактивні пари з аграрної інформатики. Вставляй у Moodle через iFrame одним кліком." />
+<title>EDLab — цифрові пари для коледжу (5 спеціальностей)</title>
+<meta name="description" content="EDLab: готові інтерактивні пари для 5 спеціальностей коледжу. Вставляй у Moodle через iFrame з генератора." />
 <meta name="color-scheme" content="light dark" />
 <style>
   :root{
@@ -18,16 +19,34 @@
   body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55; color:var(--text);
        background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg));}
   .wrap{max-width:1100px; margin:0 auto; padding:28px 16px 80px}
-  header{display:flex; gap:16px; align-items:center; justify-content:space-between; margin-bottom:12px}
+
+  /* ====== HEADER ====== */
+  header{display:flex; gap:16px; align-items:center; justify-content:space-between; margin-bottom:8px}
   .logo{display:flex; align-items:center; gap:10px}
   .logo b{font-size:20px; letter-spacing:.3px}
   .badge{padding:6px 10px; border:1px solid var(--line); border-radius:999px; font-size:12px; color:var(--muted)}
-  h1{font-size:36px; margin:8px 0 6px; background:linear-gradient(90deg,var(--accent2),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h1{font-size:36px; margin:8px 0 10px; background:linear-gradient(90deg,var(--accent2),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
   p{margin:8px 0}
+
+  /* Навігація спеціальностей */
+  .specs{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 18px}
+  .spec{
+    display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:12px;
+    border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; font-size:14px
+  }
+  .spec:hover{background:#0f1f39}
+  .spec .dot{width:9px; height:9px; border-radius:50%}
+  .s1 .dot{background:#60a5fa}   /* Інформатика (ядро) */
+  .s2 .dot{background:#22c55e}   /* Агрономи */
+  .s3 .dot{background:#f59e0b}   /* Механіки */
+  .s4 .dot{background:#a78bfa}   /* Будівництво/газові мережі (G19) */
+  .s5 .dot{background:#ef4444}   /* Технологи тваринництва */
+
+  /* ====== LAYOUT ====== */
   .grid{display:grid; gap:16px}
   .g2{grid-template-columns:1.2fr .8fr}
-  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
   @media (max-width:1000px){.g2{grid-template-columns:1fr}}
+
   .card{background:linear-gradient(180deg,var(--card),var(--bg)); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 6px 24px rgba(0,0,0,.25)}
   .card h2{font-size:22px; margin:6px 0 8px}
   .muted{color:var(--muted); font-size:14px}
@@ -52,37 +71,51 @@
   textarea{min-height:140px; resize:vertical}
   .inline{display:grid; grid-template-columns:1fr 180px; gap:10px}
   @media (max-width:720px){.inline{grid-template-columns:1fr}}
-  .ok{color:#10b981}
-  .warn{color:#f59e0b}
 
   /* Тестер iFrame */
   .tester{border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff}
   .tester iframe{width:100%; height:520px; border:0; display:block; background:#fff}
 
+  /* ====== FOOTER (юридичний) ====== */
+  footer{margin-top:22px; padding-top:14px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  footer a{color:#9ec5ff; text-decoration:none}
+  footer a:hover{opacity:.9; text-decoration:underline}
+
   /* «Мудлівський» вигляд, якщо ця сторінка сама вставлена у iframe */
   html.embedded body{background:#fff; color:#111}
   html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
   html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .spec{background:#fff; color:#111; border:1px solid #e5e7eb}
+  html.embedded .spec:hover{background:#f8fafc}
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <div class="logo">
-        <span style="font-size:26px">🌾</span>
+        <span style="font-size:26px">🎓</span>
         <b>EDLab</b>
-        <span class="badge">Цифрові пари для агрономів</span>
+        <span class="badge">цифрові пари для коледжу</span>
       </div>
       <div class="muted">GitHub Pages · serawww7 / edlab</div>
     </header>
 
-    <h1>Лабораторні з інформатики для агрономів — просто, красиво, практично</h1>
-    <p class="muted">Сторінка-хаб: переходи до занять, генератор iFrame для Moodle та швидкий тест клікабельності.</p>
+    <h1>Практичні заняття для 5 спеціальностей — просто, красиво, інтерактивно</h1>
+    <p class="muted">Хаб курсу: уроки, генератор iFrame для Moodle та прев’ю. Обери спеціальність:</p>
 
-    <div class="grid g2" style="margin-top:16px">
+    <!-- Навігація спеціальностей (5 шт) -->
+    <nav class="specs" aria-label="Спеціальності">
+      <a class="spec s1" href="#core"><span class="dot" aria-hidden="true"></span>Інформатика (ядро)</a>
+      <a class="spec s2" href="#agro"><span class="dot" aria-hidden="true"></span>Агрономи</a>
+      <a class="spec s3" href="#mech"><span class="dot" aria-hidden="true"></span>Механіки</a>
+      <a class="spec s4" href="#g19"><span class="dot" aria-hidden="true"></span>Будівництво/газові мережі (G19)</a>
+      <a class="spec s5" href="#zoot"><span class="dot" aria-hidden="true"></span>Технологи тваринництва</a>
+    </nav>
+
+    <div class="grid g2" id="agro" style="margin-top:16px">
       <!-- Лівий стовпець: уроки + прев'ю -->
       <div class="card">
-        <h2>📚 Уроки</h2>
+        <h2>🌾 Агрономи — уроки</h2>
 
         <!-- ПАРА 1 -->
         <div class="lesson">
@@ -98,6 +131,8 @@
           </div>
         </div>
 
+        <!-- Тут далі додаватимеш нові уроки для кожної спец. такими ж картками -->
+
         <div style="margin-top:12px">
           <span class="tag">🖨️ 58 мм</span>
           <span class="tag">📄 TXT</span>
@@ -111,7 +146,7 @@
       </div>
 
       <!-- Правий стовпець: генератор iFrame -->
-      <div class="card">
+      <div class="card" id="core">
         <h2>🔧 Генератор коду для Moodle (iFrame)</h2>
         <label for="url">URL сторінки</label>
         <input id="url" type="text" value="https://serawww7.github.io/edlab/1_para.html" />
@@ -141,14 +176,34 @@
       </div>
     </div>
 
-    <div class="card" style="margin-top:16px">
-      <h2>❓ Навіщо так</h2>
-      <p>Кожна пара — це готовий інтерактив: студенти натискають кнопки, друкують чеки, формують файли, а ти просто вбудовуєш сторінку в Moodle. Все «легально» і безстановочно: GitHub Pages + iFrame.</p>
-      <p><span class="ok">✅</span> Працює навіть при жорстких політиках безпеки; <span class="warn">⚠️</span> якщо щось блокується — зменш набір sandbox або використай ресурс «URL→Embed».</p>
+    <!-- Порожні розділи-якорі для інших спеціальностей (готові до наповнення картками) -->
+    <div id="mech" class="card" style="margin-top:16px">
+      <h2>🚜 Механіки — уроки</h2>
+      <p class="muted">Додай сюди картки занять для механіків (профільні 16 ЛПЗ). Потрібна допомога — скажи, я зберу шаблони сторінок.</p>
     </div>
 
-    <footer style="margin-top:16px" class="muted">
-      © 2025 EDLab · Підтримка: оновлення сторінок за потреби. Якщо додаси нові файли (наприклад, <span class="mono">2_para.html</span>, <span class="mono">3_para.html</span>), ми розширимо хаб.
+    <div id="g19" class="card" style="margin-top:16px">
+      <h2>🛠️ Будівництво/газові мережі (G19) — уроки</h2>
+      <p class="muted">Секція для пар G19 (QGIS, паспортизація об’єктів, журнали робіт, акти, безпека).</p>
+    </div>
+
+    <div id="zoot" class="card" style="margin-top:16px">
+      <h2>🐄 Технологи тваринництва — уроки</h2>
+      <p class="muted">Живі картки: е-ферма, журнали надоїв/ветзаходів, HACCP, дашборди.</p>
+    </div>
+
+    <footer>
+      <p>
+        © 2025 <b>Сергій ПОЛІЩУК</b>. Усі матеріали цього сайту є об’єктами інтелектуальної власності
+        <b>Сергія ПОЛІЩУКА</b> та захищені законодавством України про авторське право і суміжні права.
+        Будь-яке копіювання, відтворення чи поширення матеріалів (повністю або частково) без письмового
+        дозволу правовласника заборонене.
+      </p>
+      <p>
+        Офіційні ресурси:
+        <a href="https://www.serawww.pp.ua" target="_blank" rel="noopener">serawww.pp.ua</a> ·
+        <a href="https://www.facebook.com/coach.Sergiy" target="_blank" rel="noopener">facebook.com/coach.Sergiy</a>
+      </p>
     </footer>
   </div>
 
@@ -192,7 +247,6 @@
     gen();
     openPreview(u);
   }
-
   // ініціалізація
   gen();
 </script>
