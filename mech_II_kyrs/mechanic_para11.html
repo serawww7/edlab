@@ -1,0 +1,628 @@
+<!-- mechanic_para11.html
+     ПАРА 11 (аудиторно) для механіків
+     Тема: ЕЛЕКТРИКА 12/24В — падіння напруги, підбір перерізу проводу, запобіжник/реле, баланс генератора,
+           споживачі (світло/насоси/ЕБУ), тест "маси" під навантаженням, чек 58 мм, NFC, CSV.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони (калькулятор/таймер); за наявності — мультиметр (дані можна ввести вручну).
+     Примітка щодо контрасту: темні клітинки таблиць мають світлий текст (.dark).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 11 (механіки) — Електрика 12/24В: падіння напруги, провід, запобіжник/реле, генератор, журнал, квиток 58 мм, NFC</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 11 · аудиторно · механіки</span>
+  <h1>🔌 Електрика 12/24В: падіння напруги, провід/запобіжник/реле, генератор, журнал, квиток 58 мм, NFC</h1>
+
+  <div class="card">
+    <h2>🎯 Мета</h2>
+    <p>
+      За пару студенти навчаться <b>розраховувати падіння напруги</b> та <b>підбирати переріз проводу</b>, 
+      правильно вибирати <b>запобіжник</b> і <b>реле</b>, оцінювати <b>баланс генератора</b> за сумою споживачів,
+      перевіряти <b>“масу” під навантаженням</b>, формувати <b>журнал</b>, <b>квиток 58 мм</b>, <b>NFC</b> та <b>CSV</b>.
+    </p>
+    <p class="small">Норми (навчально): падіння U — до <span class="mono">3 %</span> для живлення ЕБУ/насосів і <span class="mono">≤10 %</span> для освітлення; 
+      запобіжник ≈ <span class="mono">1.25×Iроб</span>, але не вище допустимого для перерізу; мідь: <span class="mono">ρ≈0.0175 Ω·мм²/м</span>, алюміній: <span class="mono">ρ≈0.028</span>.</p>
+  </div>
+
+  <!-- СЕКЦІЯ 1. Вихідні дані електросистеми -->
+  <div class="card">
+    <h2>⚙️ Профіль електросистеми</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Мережа та генератор</h3>
+        <div class="row">
+          <div style="flex:1"><label>Номінал мережі, В</label>
+            <select id="U" onchange="syncU()"><option value="12" selected>12</option><option value="24">24</option></select>
+          </div>
+          <div style="flex:1"><label>Генератор, А</label><input id="AltA" type="number" step="1" value="120"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Резерв на заряд АКБ, А</label><input id="AltReserve" type="number" step="1" value="15"></div>
+          <div style="flex:1"><label>Матеріал проводу</label>
+            <select id="mat"><option value="cu" selected>мідь</option><option value="al">алюміній</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Стан АКБ (оцінка)</h3>
+        <div class="row">
+          <div style="flex:1"><label>Ємність, Ah</label><input id="Ah" type="number" step="1" value="100"></div>
+          <div style="flex:1"><label>CCA, А (пуск)</label><input id="CCA" type="number" step="10" value="750"></div>
+        </div>
+        <p class="small">CCA дає уявлення про <b>пусковий струм стартера</b> і просідання напруги в мороз.</p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+          <button class="btn" onclick="preset()">🧪 Приклад</button>
+          <button class="btn" onclick="copyCSV('csvSys')">📋 CSV (система)</button>
+        </div>
+        <div id="csvSys" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- СЕКЦІЯ 2. Падіння напруги / підбір перерізу / запобіжник -->
+  <div class="card">
+    <h2>🔋 Падіння напруги, переріз проводу, запобіжник</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Лінія живлення</h3>
+        <div class="row">
+          <div style="flex:1"><label>Струм I, А</label><input id="I" type="number" step="0.1" value="8.5"></div>
+          <div style="flex:1"><label>Довжина шляху L, м (туди+назад)</label><input id="L" type="number" step="0.1" value="6"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Переріз S, мм²</label><input id="S" type="number" step="0.5" value="2.5"></div>
+          <div style="flex:1"><label>Граничне падіння, %</label><input id="dropPctLim" type="number" step="0.1" value="3"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Запобіжник, А</label><input id="fuse" type="number" step="1" value="15"></div>
+          <div style="flex:1"><label>Реле (котушка), Ω</label><input id="relayR" type="number" step="1" value="90"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Результати</h3>
+        <p>R лінії: <b><span id="Rline">—</span></b> Ω</p>
+        <p>Падіння ΔU: <b><span id="dU">—</span></b> В (<b><span id="dUp">—</span></b> %)</p>
+        <p>Рекоменд. мін. S (за лімітом): <b><span id="Sneed">—</span></b> мм²</p>
+        <p>Котушка реле I: <b><span id="IRelay">—</span></b> А</p>
+        <p>Статус лінії: <b><span id="lineFlag">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcDrop()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvDrop')">📋 CSV (лінія)</button>
+        </div>
+        <div id="csvDrop" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+    <p class="small muted">Формули: <span class="mono">R = ρ·(2L)/S</span>, де ρ для Cu = 0.0175 Ω·мм²/м (Al=0.028); <span class="mono">ΔU = I·R</span>; 
+      цільовий S за обмеженням: <span class="mono">S ≥ ρ·(2L)·I / ΔUдоп</span>. Запобіжник: <span class="mono">F ≈ 1.25·I</span>, але не вище допустимого для S.</p>
+  </div>
+
+  <!-- СЕКЦІЯ 3. Баланс генератора / споживачі -->
+  <div class="card">
+    <h2>⚡ Баланс генератора та споживачі</h2>
+    <div class="row">
+      <button class="btn" onclick="addLoad()">➕ Додати споживача</button>
+      <button class="btn" onclick="presetLoads()">🧪 Приклад</button>
+      <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+      <button class="btn" onclick="copyCSV('csvLoads')">📋 CSV (навантаження)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tbl">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Споживач</th>
+            <th>U, В</th>
+            <th>P, Вт</th>
+            <th class="dark">I, А</th>
+            <th class="dark">Група</th>
+            <th class="dark">Статус</th>
+            <th>Примітка</th>
+          </tr>
+        </thead>
+        <tbody id="body"></tbody>
+        <tfoot>
+          <tr>
+            <th class="dark" colspan="4">Сумарний струм</th>
+            <th class="dark" id="Itot">—</th>
+            <th class="dark" colspan="2">Запас генератора</th>
+            <th class="dark" id="AltHead">—</th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div id="csvLoads" class="out" style="margin-top:8px">—</div>
+    <p class="small muted">Групи: <span class="mono">постійно</span> (ЕБУ/насоси), <span class="mono">періодично</span> (кермо, підйом), <span class="mono">світло</span>.</p>
+  </div>
+
+  <!-- СЕКЦІЯ 4. Тест "маси" під навантаженням -->
+  <div class="card">
+    <h2>🧩 Тест “маси” під навантаженням</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Вхідні</h3>
+        <div class="row">
+          <div style="flex:1"><label>U без навантаження, В</label><input id="Uopen" type="number" step="0.01" value="12.6"></div>
+          <div style="flex:1"><label>U під навантаженням, В</label><input id="Uload" type="number" step="0.01" value="11.8"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>I навантаження, А</label><input id="Iload" type="number" step="0.1" value="20"></div>
+          <div style="flex:1"><label>Допустиме падіння, В</label><input id="Udok" type="number" step="0.01" value="0.5"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Результат</h3>
+        <p>Падіння на “масі”: <b><span id="Ugnd">—</span></b> В</p>
+        <p>Еквівалент R “маси”: <b><span id="Rgnd">—</span></b> Ω</p>
+        <p>Статус: <b><span id="gndFlag">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcGnd()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvGnd')">📋 CSV (маса)</button>
+        </div>
+        <div id="csvGnd" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+    <p class="small muted">Вимір: чорний щуп — на масу АКБ, червоний — на корпус споживача під навантаженням; нормальне падіння <span class="mono">≤0.2…0.5 В</span> (12 В).</p>
+  </div>
+
+  <!-- ЖУРНАЛ -->
+  <div class="card">
+    <h2>📒 Журнал перевірок</h2>
+    <div class="row">
+      <button class="btn" onclick="addLog()">➕ Додати запис</button>
+      <button class="btn" onclick="presetLog()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblLog">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Ланцюг</th>
+            <th>Uсист, В</th>
+            <th>I, А</th>
+            <th>S, мм²</th>
+            <th class="dark">ΔU, В</th>
+            <th class="dark">ΔU, %</th>
+            <th class="dark">Запоб., А</th>
+            <th class="dark">Статус</th>
+            <th>Примітка</th>
+          </tr>
+        </thead>
+        <tbody id="bodyLog"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- КВИТОК + NFC -->
+  <div class="card">
+    <h2>🧾 Квиток 58 мм та NFC</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>NFC — “ELEC CHECK”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток “ELEC CHECK”</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>ELEC CHECK</h4>
+          <p id="tDate"><small>Дата: —</small></p>
+          <div class="line"></div>
+          <p><b>ΔU лінії:</b> <span id="tDU">—</span> В (<span id="tDUp">—</span> %)</p>
+          <p><b>S факт / мін:</b> <span id="tS">—</span> / <span id="tSneed">—</span> мм²</p>
+          <p><b>Генератор запас:</b> <span id="tAltHead">—</span> А</p>
+          <p><b>Маса ΔU:</b> <span id="tUgnd">—</span> В</p>
+          <div class="line"></div>
+          <p><small id="tNote">Прим.: —</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Заповни <b>профіль системи</b> (12/24 В, генератор, резерв, матеріал проводу).</li>
+      <li>Для ключової лінії порахуй <b>R, ΔU, %</b>, підбери <b>S</b>, <b>запобіжник</b>, оцінюй <b>реле</b>.</li>
+      <li>Додай <b>споживачів</b> (світло/насоси/ЕБУ) — перевір <b>запас генератора</b>.</li>
+      <li>Виконай <b>тест “маси”</b> (введи виміри) — зроби висновок.</li>
+      <li>Заповни <b>журнал</b> (≥3 рядки), сформуй <b>NFC</b>, <b>квиток 58 мм</b> і <b>CSV</b> (<span class="mono">Electrical</span>).</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Розрахунок ΔU/S/запобіжника коректний</td><td>4</td></tr>
+        <tr><td>Баланс генератора і висновки</td><td>3</td></tr>
+        <tr><td>Тест “маси” та рекомендації</td><td>2</td></tr>
+        <tr><td>Квиток/NFC + CSV</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const bodyEl = document.getElementById('body');
+  const bodyLogEl = document.getElementById('bodyLog');
+
+  function syncU(){
+    // пересрахувати навантаження при зміні напруги
+    [...bodyEl.querySelectorAll('tr')].forEach(tr=>{
+      const U = +byId('U').value||12;
+      const Pin = +tr.children[3].querySelector('input').value||0;
+      const I = U>0 ? Pin/U : 0;
+      tr.querySelector('.I').textContent = rnd(I,2);
+    });
+    recalc();
+  }
+
+  function preset(){
+    byId('U').value = '12';
+    byId('AltA').value = 150;
+    byId('AltReserve').value = 20;
+    byId('mat').value = 'cu';
+    byId('Ah').value = 110;
+    byId('CCA').value = 800;
+    byId('I').value = 12.0;
+    byId('L').value = 5.2;
+    byId('S').value = 4;
+    byId('dropPctLim').value = 3;
+    byId('fuse').value = 20;
+    byId('relayR').value = 85;
+    recalc();
+  }
+
+  function recalc(){
+    calcDrop();
+    calcLoads();
+    calcGnd();
+    // CSV системи
+    const csv = [
+      `SYS|U=${byId('U').value}V|Alt=${byId('AltA').value}A|Reserve=${byId('AltReserve').value}A|mat=${byId('mat').value}`,
+      `BAT|Ah=${byId('Ah').value}|CCA=${byId('CCA').value}`
+    ].join('\n');
+    byId('csvSys').textContent = csv;
+  }
+
+  // ==== Падіння напруги / переріз ====
+  function rho(){ return byId('mat').value==='cu' ? 0.0175 : 0.028; } // Ω·мм²/м
+  function calcDrop(){
+    const U = +byId('U').value||12;
+    const I = +byId('I').value||0;
+    const L = +byId('L').value||0;
+    const S = Math.max(0.1, +byId('S').value||0.1);
+    const limP = +byId('dropPctLim').value||3;
+    const fuse = +byId('fuse').value||0;
+    const Rcoil = +byId('relayR').value||0;
+
+    const Rline = rho()*(2*L)/S;
+    const dU = I*Rline;
+    const dUp = U>0 ? (dU/U*100) : 0;
+
+    const dUlim = U*limP/100;
+    const Sneed = (rho()*(2*L)*I) / (dUlim>0 ? dUlim : 1e-9);
+
+    const IRelay = Rcoil>0 ? U/Rcoil : 0;
+
+    // статус
+    let flag='🟢 ок', color='#10b981';
+    if(dUp>limP) { flag='🔴 перевищує ліміт'; color='#ef4444'; }
+    else if(dUp>limP*0.7) { flag='🟠 близько до межі'; color='#f59e0b'; }
+
+    byId('Rline').textContent = rnd(Rline,4);
+    byId('dU').textContent = rnd(dU,3);
+    byId('dUp').textContent = rnd(dUp,1);
+    byId('Sneed').textContent = rnd(Sneed,2);
+    byId('IRelay').textContent = rnd(IRelay,2);
+    byId('lineFlag').textContent = flag; byId('lineFlag').style.color = color;
+
+    // CSV
+    const csv = `LINE|U=${U}V|I=${I}A|L=${L}m|S=${S}mm2|rho=${rho()}|dU=${rnd(dU,3)}V|dUp=${rnd(dUp,1)}%|Sneed>=${rnd(Sneed,2)}mm2|Fuse=${fuse}A|RelayI=${rnd(IRelay,2)}A`;
+    byId('csvDrop').textContent = csv;
+
+    return {U,I,L,S,Sneed,dU,dUp,fuse,IRelay};
+  }
+
+  // ==== Навантаження / генератор ====
+  function addLoad(sample){
+    const def = {name:'Робочий світлодіодний прожектор', U:+byId('U').value||12, P:36, group:'світло', note:''};
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    const I = s.U>0 ? s.P/s.U : 0;
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.name}"></td>
+      <td><input type="number" step="0.1" value="${s.U}"></td>
+      <td><input type="number" step="1" value="${s.P}"></td>
+      <td class="dark I">${rnd(I,2)}</td>
+      <td class="dark">
+        <select>
+          <option ${s.group==='постійно'?'selected':''}>постійно</option>
+          <option ${s.group==='періодично'?'selected':''}>періодично</option>
+          <option ${s.group==='світло'?'selected':''}>світло</option>
+        </select>
+      </td>
+      <td class="dark flag">—</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyEl.appendChild(tr); reindex(); calcLoads();
+    // слухачі на зміни U/P/group
+    tr.querySelectorAll('input,select').forEach(el=>{
+      el.addEventListener('change', ()=>{
+        const U = +tr.children[2].querySelector('input').value||0;
+        const P = +tr.children[3].querySelector('input').value||0;
+        tr.querySelector('.I').textContent = rnd(U>0? P/U : 0, 2);
+        calcLoads();
+      });
+    });
+  }
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  function calcLoads(){
+    const U = +byId('U').value||12;
+    const AltA = +byId('AltA').value||0;
+    const reserve = +byId('AltReserve').value||0;
+    let Itot = 0;
+    [...bodyEl.querySelectorAll('tr')].forEach(tr=>{
+      const I = +tr.querySelector('.I').textContent||0;
+      Itot += I;
+    });
+    const head = AltA - reserve - Itot; // запас після резерву на заряд
+    let flag='🟢 ок', color='#10b981';
+    if(head<0){ flag='🔴 перевантаження'; color='#ef4444'; }
+    else if(head<AltA*0.1){ flag='🟠 малий запас'; color='#f59e0b'; }
+
+    byId('Itot').textContent = rnd(Itot,2);
+    byId('AltHead').textContent = `${rnd(head,1)} А ${flag}`;
+    byId('AltHead').style.color = color;
+
+    // CSV
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx=tr.querySelector('.idx').textContent.trim();
+      const name=tr.children[1].querySelector('input').value.trim();
+      const u  =tr.children[2].querySelector('input').value.trim();
+      const p  =tr.children[3].querySelector('input').value.trim();
+      const i  =tr.querySelector('.I').textContent.trim();
+      const grp=tr.children[5].querySelector('select').value;
+      return [idx,name,u,p,i,grp].join(' | ');
+    });
+    const summary = `TOTAL|I=${rnd(Itot,2)}A|Alt=${AltA}A|Reserve=${reserve}A|Head=${rnd(head,1)}A`;
+    byId('csvLoads').textContent = lines.concat(summary).join('\n') || '—';
+
+    return {Itot,head};
+  }
+
+  function presetLoads(){
+    bodyEl.innerHTML='';
+    const U = +byId('U').value||12;
+    addLoad({name:'ЕБУ двигуна', U, P:30, group:'постійно'});
+    addLoad({name:'Паливний насос', U, P:60, group:'постійно'});
+    addLoad({name:'Підрульовий гідронасос (ел.клапани)', U, P:48, group:'періодично'});
+    addLoad({name:'Світло переднє LED', U, P:72, group:'світло'});
+    addLoad({name:'Габарити/панель', U, P:24, group:'світло'});
+    calcLoads();
+  }
+
+  // ==== Тест "маси" ====
+  function calcGnd(){
+    const Uo = +byId('Uopen').value||0;
+    const Ul = +byId('Uload').value||0;
+    const I = +byId('Iload').value||0;
+    const Ud = +byId('Udok').value||0.5;
+    const drop = Math.max(0, Uo - Ul);
+    const R = I>0 ? drop / I : 0;
+    let flag='🟢 ок', color='#10b981';
+    if(drop>Ud){ flag='🔴 велике падіння (очистити точки маси, затягнути болти)'; color='#ef4444'; }
+    else if(drop>Ud*0.6){ flag='🟠 близько до межі'; color='#f59e0b'; }
+    byId('Ugnd').textContent = rnd(drop,2);
+    byId('Rgnd').textContent = rnd(R,3);
+    byId('gndFlag').textContent = flag; byId('gndFlag').style.color = color;
+
+    const csv = `GND|Uopen=${Uo}V|Uload=${Ul}V|I=${I}A|drop=${rnd(drop,2)}V|R=${rnd(R,3)}Ω|Limit=${Ud}V|Flag=${flag}`;
+    byId('csvGnd').textContent = csv;
+
+    return {drop,R,flag};
+  }
+
+  // ==== Журнал ====
+  function addLog(sample){
+    const ld = calcDrop();
+    const name = sample?.name || 'Лінія живлення ЕБУ';
+    const U = +byId('U').value||12;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${name}"></td>
+      <td class="Us">${U}</td>
+      <td class="I">${rnd(ld.I,2)}</td>
+      <td class="S">${rnd(ld.S,2)}</td>
+      <td class="dark dU">${rnd(ld.dU,3)}</td>
+      <td class="dark dUp">${rnd(ld.dUp,1)}</td>
+      <td class="dark F">${byId('fuse').value}</td>
+      <td class="dark flag">${byId('lineFlag').textContent}</td>
+      <td><input type="text" value=""></td>
+    `;
+    bodyLogEl.appendChild(tr);
+    reindexLog(); buildCSVlog();
+  }
+  function reindexLog(){ [...bodyLogEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  function presetLog(){
+    bodyLogEl.innerHTML='';
+    addLog({name:'Лінія ЕБУ'});
+    // приклад інших ліній (ручне введення I/S для демонстрації)
+    const addCustom = (name,U,I,S,dU,dUp,F,flag,note)=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="idx">1</td>
+        <td><input type="text" value="${name}"></td>
+        <td class="Us">${U}</td>
+        <td class="I">${I}</td>
+        <td class="S">${S}</td>
+        <td class="dark dU">${dU}</td>
+        <td class="dark dUp">${dUp}</td>
+        <td class="dark F">${F}</td>
+        <td class="dark flag">${flag}</td>
+        <td><input type="text" value="${note}"></td>
+      `;
+      bodyLogEl.appendChild(tr);
+    };
+    addCustom('Світло переднє', 12, '6.00', '1.5', '0.48', '4.0', '10', '🟠 близько до межі', 'розвести лінію окремо');
+    addCustom('Насос паливний', 12, '5.00', '4', '0.35', '2.9', '15', '🟢 ок', '—');
+    reindexLog(); buildCSVlog();
+  }
+
+  function buildCSVlog(){
+    const lines = [...bodyLogEl.querySelectorAll('tr')].map(tr=>{
+      const idx=tr.querySelector('.idx').textContent.trim();
+      const name=tr.children[1].querySelector('input').value.trim();
+      const U  =tr.querySelector('.Us').textContent.trim();
+      const I  =tr.querySelector('.I').textContent.trim();
+      const S  =tr.querySelector('.S').textContent.trim();
+      const dU =tr.querySelector('.dU').textContent.trim();
+      const dUp=tr.querySelector('.dUp').textContent.trim();
+      const F  =tr.querySelector('.F').textContent.trim();
+      const flag=tr.querySelector('.flag').textContent.trim();
+      const note=tr.children[9].querySelector('input').value.trim();
+      return [idx,name,U,I,S,dU,dUp,F,flag,note].join(' | ');
+    });
+    byId('csvLog').textContent = lines.join('\n') || '—';
+  }
+
+  // ==== Квиток / NFC ====
+  function buildTicket(){
+    const d = new Date().toISOString().slice(0,10);
+    const ld = calcDrop();
+    const loads = calcLoads();
+    const g = calcGnd();
+    byId('tDate').innerHTML = `<small>Дата: ${d}</small>`;
+    byId('tDU').textContent = rnd(ld.dU,3);
+    byId('tDUp').textContent = rnd(ld.dUp,1);
+    byId('tS').textContent = rnd(ld.S,2);
+    byId('tSneed').textContent = rnd(ld.Sneed,2);
+    byId('tAltHead').textContent = rnd(loads.head,1);
+    byId('tUgnd').textContent = rnd(g.drop,2);
+    byId('tNote').textContent = `U=${byId('U').value}В; Fuse=${byId('fuse').value}А; РелеI=${byId('relayR').value>0?(+byId('U').value/+byId('relayR').value).toFixed(2):'0'}А`;
+  }
+
+  function buildNFC(){
+    const ld = calcDrop();
+    const loads = calcLoads();
+    const g = calcGnd();
+    const text = [
+      `ELEC_NFC`,
+      `MACHINE:${byId('nfcId').value}`,
+      `CONTACT:${byId('nfcPhone').value}`,
+      `LINE:dU=${rnd(ld.dU,3)}V(${rnd(ld.dUp,1)}%)|S=${rnd(ld.S,2)}mm2|Sneed>=${rnd(ld.Sneed,2)}mm2|Fuse=${byId('fuse').value}A`,
+      `ALT:Head=${rnd(loads.head,1)}A (Alt=${byId('AltA').value}A, Reserve=${byId('AltReserve').value}A)`,
+      `GND:drop=${rnd(g.drop,2)}V`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = text;
+  }
+
+  // ==== Копіювання ====
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // ==== Ініціалізація ====
+  (function init(){
+    addLoad(); // один споживач за замовчуванням
+    recalc();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select')) recalc();
+    });
+  })();
+</script>
+</body>
+</html>
