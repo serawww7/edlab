@@ -1,0 +1,460 @@
+<!-- tech_para1.html
+     ПАРА 1 (аудиторно) для технологів з переробки продукції тваринництва
+     Тема: МАРКУВАННЯ ПАРТІЙ, ТЕРМІН ПРИДАТНОСТІ ТА ПРОСТЕЖУВАНІСТЬ —
+           код партії (лот), дата/час, зміни, виробнича лінія, умови зберігання,
+           розрахунок терміну (база + коефіцієнти темп-ри/упаковки), чек 58 мм, NFC, CSV-журнал.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; (опц.) термопринтер 58 мм; NFC-мітки.
+
+     Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 1 (технологи) — Лот, термін придатності, простежуваність: чек 58 мм, NFC, CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано в Moodle (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 1 · аудиторно · технологи переробки</span>
+  <h1>🏷️ Лот, термін придатності та простежуваність: чек 58 мм, NFC, CSV</h1>
+
+  <div class="card">
+    <h2>🎯 Мета пари</h2>
+    <p>
+      За пару студенти навчаться формувати <b>код партії (лот)</b>, обирати <b>умови зберігання</b>,
+      розраховувати <b>термін придатності</b> з урахуванням типу продукту, пакування та температури,
+      генерувати <b>етикетку 58 мм</b>, <b>NFC-повідомлення</b> та вести <b>CSV-журнал</b>.
+    </p>
+    <p class="small muted">Основа: GS1-логіка дати (Юліанський день), зміна/лінія, час “часового вікна”,
+      умови зберігання (холодовий ланцюг), вплив пакування (MAP/вакуум) на термін.</p>
+  </div>
+
+  <!-- 1. ВХІДНІ ДАНІ ПРОДУКТУ -->
+  <div class="card">
+    <h2>🥛 Параметри партії</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Продукт та випуск</h3>
+        <div class="row">
+          <div style="flex:1"><label>Категорія</label>
+            <select id="category">
+              <option value="milk" selected>Молоко пастеризоване</option>
+              <option value="yogurt">Йогурт (термостатний)</option>
+              <option value="sausage">Ковбаса варена</option>
+              <option value="minced">Фарш охолоджений</option>
+              <option value="butter">Вершкове масло</option>
+              <option value="cheese">Сир твердий</option>
+            </select>
+          </div>
+          <div style="flex:1"><label>Тип пакування</label>
+            <select id="pack">
+              <option value="std" selected>Звичайне</option>
+              <option value="vac">Вакуум</option>
+              <option value="map">MAP (модиф. атмосфера)</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Дата виробн.</label><input id="prodDate" type="date"></div>
+          <div style="flex:1"><label>Час виробн.</label><input id="prodTime" type="time"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Лінія / зміна / умови</h3>
+        <div class="row">
+          <div style="flex:1"><label>ID лінії</label><input id="lineId" type="text" value="L1"></div>
+          <div style="flex:1"><label>Зміна</label>
+            <select id="shift">
+              <option value="A" selected>A (06:00–14:00)</option>
+              <option value="B">B (14:00–22:00)</option>
+              <option value="C">C (22:00–06:00)</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Температура збер., °C</label><input id="temp" type="number" step="0.1" value="4"></div>
+          <div style="flex:1"><label>Запас на логістику, дні</label><input id="logReserve" type="number" step="1" value="1"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Результат (лот/термін)</h3>
+        <p>Код партії: <b><span id="lot">—</span></b></p>
+        <p>“Вжити до” / “Кінц. споживати до”: <b><span id="expiry">—</span></b></p>
+        <p>Умови: <b><span id="cond">—</span></b></p>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="calcAll()">🔁 Перерахувати</button>
+          <button class="btn" onclick="preset()">🧪 Приклад</button>
+          <button class="btn" onclick="copyCSV('csvCore')">📋 CSV</button>
+        </div>
+        <div id="csvCore" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+    <p class="small muted">Лот (приклад): <span class="mono">YYJJJ-L1-A-HHMM</span>, де JJJ — юліанський день року.</p>
+  </div>
+
+  <!-- 2. ЖУРНАЛ ПАРТІЙ -->
+  <div class="card">
+    <h2>📒 Журнал партій</h2>
+    <div class="row">
+      <button class="btn" onclick="addRow()">➕ Додати рядок</button>
+      <button class="btn" onclick="presetRows()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tbl">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Продукт</th>
+            <th>Пакування</th>
+            <th class="dark">ЛОТ</th>
+            <th class="dark">Виробн.</th>
+            <th class="dark">Вжити до</th>
+            <th>Умови</th>
+            <th>Примітка</th>
+          </tr>
+        </thead>
+        <tbody id="body"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 3. КВИТОК 58 мм + NFC -->
+  <div class="card">
+    <h2>🧾 Квиток 58 мм та NFC</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>NFC — “FOOD LOT CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Контакт/техн.</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label>Об’єм партії, кг</label><input id="batchKg" type="number" step="0.1" value="500"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток для принтера 58 мм</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>LOT LABEL</h4>
+          <p><b>Продукт:</b> <span id="tProd">—</span></p>
+          <p><b>Пакування:</b> <span id="tPack">—</span></p>
+          <div class="line"></div>
+          <p><b>ЛОТ:</b> <span id="tLot">—</span></p>
+          <p><b>Виробн.:</b> <span id="tProdDT">—</span></p>
+          <p><b>Вжити до:</b> <span id="tExp">—</span></p>
+          <p><b>Умови:</b> <span id="tCond">—</span></p>
+          <div class="line"></div>
+          <p>Лінія: <span id="tLine">—</span> · Зміна: <span id="tShift">—</span></p>
+          <p>Партія: <span id="tBatch">—</span> кг</p>
+          <div class="line"></div>
+          <p><small id="tNote">Складувати при зазначеній T. Холодовий ланцюг не переривати.</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Оберіть <b>продукт</b>, <b>пакування</b>, внесіть <b>дату/час</b>, <b>лінію</b>, <b>зміну</b>, <b>умови T</b>.</li>
+      <li>Згенеруйте <b>код лоту</b> та <b>термін придатності</b>, додайте 1–2 партії в <b>журнал</b>.</li>
+      <li>Сформуйте <b>NFC-повідомлення</b> та <b>квиток 58 мм</b> для друку.</li>
+      <li>Експортуйте <b>CSV</b> (ядро та журнал) і вставте в Google Sheets.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Коректний код лоту та дата “вжити до”</td><td>4</td></tr>
+        <tr><td>Адекватні умови зберігання / пояснення</td><td>3</td></tr>
+        <tr><td>Квиток 58 мм і NFC зібрані</td><td>2</td></tr>
+        <tr><td>CSV-журнал оформлений</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const bodyEl = document.getElementById('body');
+
+  // Мапи базових термінів (днів) за категорією при 0…+4°C у стандартному пакуванні
+  const baseShelf = {
+    milk:   7,   // пастеризоване молоко
+    yogurt: 14,  // термостатний йогурт
+    sausage:10,  // варена ковбаса охол.
+    minced: 2,   // фарш
+    butter: 60,  // масло
+    cheese: 90   // твердий сир молодий
+  };
+  // Коефіцієнти пакування
+  const packMult = { std:1.0, vac:1.3, map:1.5 };
+  // Корекція температури (спрощено): кожен +2°C понад 4°C скорочує ~20%; кожен -2°C подовжує ~10%
+  function tempFactor(tempC){
+    const ref = 4;
+    const diff = tempC - ref;
+    if(diff>=0) return Math.max(0.2, 1 - 0.2*(diff/2)); // не нижче 20% від бази
+    return 1 + 0.10*((-diff)/2);
+  }
+
+  function pad(n, w){ return (Array(w).join('0') + n).slice(-w); }
+  function julianDay(date){
+    const d0 = new Date(date.getFullYear(),0,0);
+    const diff = date - d0;
+    const oneDay = 1000*60*60*24;
+    return Math.floor(diff/oneDay);
+  }
+
+  function productName(id){
+    return {
+      milk:'Молоко пастеризоване',
+      yogurt:'Йогурт (термостатний)',
+      sausage:'Ковбаса варена',
+      minced:'Фарш охолоджений',
+      butter:'Масло вершкове',
+      cheese:'Сир твердий'
+    }[id] || id;
+  }
+  function packName(id){
+    return {std:'Звичайне', vac:'Вакуум', map:'MAP'}[id] || id;
+  }
+
+  function calcAll(){
+    // Зчитування
+    const cat = byId('category').value;
+    const pck = byId('pack').value;
+    const lineId = byId('lineId').value.trim() || 'L1';
+    const shift = byId('shift').value;
+    const temp = +byId('temp').value || 4;
+    const rez = +byId('logReserve').value || 0;
+
+    const pdStr = byId('prodDate').value;
+    const ptStr = byId('prodTime').value;
+    const now = new Date();
+    const prod = (pdStr && ptStr) ? new Date(pdStr + 'T' + ptStr) :
+                 (pdStr ? new Date(pdStr + 'T' + pad(now.getHours(),2)+':'+pad(now.getMinutes(),2)) : now);
+
+    // ЛОТ: YYJJJ-LINE-SHIFT-HHMM
+    const YY = String(prod.getFullYear()).slice(-2);
+    const JJJ = pad(julianDay(prod),3);
+    const HHMM = pad(prod.getHours(),2)+pad(prod.getMinutes(),2);
+    const lot = `${YY}${JJJ}-${lineId}-${shift}-${HHMM}`;
+
+    // Розрахунок терміну
+    const base = baseShelf[cat] || 7;
+    const mult = packMult[pck] || 1.0;
+    const tf = tempFactor(temp);
+    const days = Math.max(1, Math.floor(base * mult * tf) - rez); // запас логістики віднімаємо
+    const expiry = new Date(prod); expiry.setDate(expiry.getDate() + days);
+
+    const cond = (temp<=4) ? `Зберігати при 0…+4°C` :
+                 (temp<=6) ? `Зберігати при 0…+6°C (скор. термін)` :
+                             `ОБЕРЕЖНО: понад +6°C — холодовий ланцюг порушено`;
+
+    // Вивід
+    byId('lot').textContent = lot;
+    byId('expiry').textContent = expiry.toISOString().slice(0,10);
+    byId('cond').textContent = cond;
+
+    const csv = [
+      `CORE|${productName(cat)}|pack=${packName(pck)}|line=${lineId}|shift=${shift}|temp=${temp}C|reserve=${rez}d`,
+      `LOT=${lot}|PROD=${prod.toISOString().slice(0,16)}|EXP=${expiry.toISOString().slice(0,10)}|DAYS=${days}|COND=${cond}`
+    ].join('\n');
+    byId('csvCore').textContent = csv;
+
+    return {cat,pck,lineId,shift,temp,rez,prod,expiry,days,lot,cond};
+  }
+
+  // Приклад
+  function preset(){
+    const d = new Date();
+    const iso = d.toISOString();
+    byId('category').value = 'sausage';
+    byId('pack').value = 'vac';
+    byId('lineId').value = 'L2';
+    byId('shift').value = 'B';
+    byId('temp').value = 4;
+    byId('logReserve').value = 1;
+    byId('prodDate').value = iso.slice(0,10);
+    byId('prodTime').value = iso.slice(11,16);
+    calcAll();
+  }
+
+  // ===== ЖУРНАЛ =====
+  function addRow(sample){
+    const r = calcAll();
+    const def = {
+      prod: productName(r.cat),
+      pack: packName(r.pck),
+      lot: r.lot,
+      prodDT: r.prod.toISOString().slice(0,16).replace('T',' '),
+      exp: r.expiry.toISOString().slice(0,10),
+      cond: r.cond,
+      note: ''
+    };
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.prod}"></td>
+      <td>${s.pack}</td>
+      <td class="dark">${s.lot}</td>
+      <td class="dark">${s.prodDT}</td>
+      <td class="dark">${s.exp}</td>
+      <td>${s.cond}</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyEl.appendChild(tr); reindex(); buildCSVlog();
+  }
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+  function presetRows(){
+    bodyEl.innerHTML='';
+    const r = calcAll();
+    addRow();
+    // Друга демонстраційна — фарш при +2°C, MAP
+    byId('category').value='minced'; byId('pack').value='map'; byId('temp').value=2;
+    const r2 = calcAll();
+    addRow({prod:productName('minced'), pack:packName('map'), lot:r2.lot, prodDT:r2.prod.toISOString().slice(0,16).replace('T',' '), exp:r2.expiry.toISOString().slice(0,10), cond:r2.cond, note:'охол., MAP'});
+    // Третя — масло при +6°C, std (показати скорочення)
+    byId('category').value='butter'; byId('pack').value='std'; byId('temp').value=6;
+    const r3 = calcAll();
+    addRow({prod:productName('butter'), pack:packName('std'), lot:r3.lot, prodDT:r3.prod.toISOString().slice(0,16).replace('T',' '), exp:r3.expiry.toISOString().slice(0,10), cond:r3.cond, note:'підвищена T'});
+    buildCSVlog();
+  }
+  function buildCSVlog(){
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx=tr.querySelector('.idx').textContent.trim();
+      const prod=tr.children[1].querySelector('input').value.trim();
+      const pack=tr.children[2].textContent.trim();
+      const lot =tr.children[3].textContent.trim();
+      const prd =tr.children[4].textContent.trim();
+      const exp =tr.children[5].textContent.trim();
+      const cond=tr.children[6].textContent.trim();
+      const note=tr.children[7].querySelector('input').value.trim();
+      return [idx,prod,pack,lot,prd,exp,cond,note].join(' | ');
+    });
+    byId('csvLog').textContent = lines.join('\n') || '—';
+  }
+
+  // ===== Квиток 58 мм / NFC =====
+  function buildTicket(){
+    const r = calcAll();
+    byId('tProd').textContent = productName(r.cat);
+    byId('tPack').textContent = packName(r.pck);
+    byId('tLot').textContent  = r.lot;
+    byId('tProdDT').textContent = r.prod.toISOString().slice(0,16).replace('T',' ');
+    byId('tExp').textContent  = r.expiry.toISOString().slice(0,10);
+    byId('tCond').textContent = r.cond;
+    byId('tLine').textContent = r.lineId;
+    byId('tShift').textContent= r.shift;
+    byId('tBatch').textContent= byId('batchKg').value || '—';
+  }
+  function buildNFC(){
+    const r = calcAll();
+    const text = [
+      `FOOD_LOT_NFC`,
+      `PROD:${productName(r.cat)} | PACK:${packName(r.pck)}`,
+      `LOT:${r.lot}`,
+      `PROD:${r.prod.toISOString().slice(0,16).replace('T',' ')}`,
+      `EXP:${r.expiry.toISOString().slice(0,10)} (DAYS=${r.days})`,
+      `COND:${r.cond}`,
+      `LINE:${r.lineId} SHIFT:${r.shift}`,
+      `BATCH:${byId('batchKg').value||'—'}kg`,
+      `CONTACT:${byId('nfcPhone').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = text;
+  }
+
+  // ===== Утиліти =====
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // ===== Ініціалізація =====
+  (function init(){
+    // За замовчуванням дата/час зараз
+    const now = new Date();
+    byId('prodDate').value = now.toISOString().slice(0,10);
+    byId('prodTime').value = now.toISOString().slice(11,16);
+    calcAll();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select')) { calcAll(); buildCSVlog(); }
+    });
+  })();
+</script>
+</body>
+</html>
