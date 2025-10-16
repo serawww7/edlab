@@ -1,0 +1,469 @@
+<!-- mechanic_para3.html
+     ПАРА 3 (аудиторно) для механіків
+     Тема: ПРОДУКТИВНІСТЬ ТА СОБІВАРТІСТЬ РОБОТИ АГРЕГАТУ — ширина, швидкість, перекриття, коеф. польової ефективності, час, ПММ, вартість/га
+     Фокус: телефони/ПК; без зовнішніх бібліотек; локально; готово для GitHub Pages / Moodle (iframe).
+     Обладнання: телефони, принтер 58 мм (опц.) для “план-зміни”, NFC (опц.) для тегу роботи.
+
+     Що вміє:
+     • Розрахунок теоретичної (TFC) і ефективної (EFC) продуктивності, часу на поле, підготовчо-завершального часу і простоїв.
+     • Пальне: з норм “л/га” або “л/год”; підрахунок вартості ПММ.
+     • Економіка: тариф/год, ставка машини/год → собівартість/га і на поле.
+     • План заїздів (за місткістю бункера/цистерни) — опціонально.
+     • Квиток 58 мм “План зміни” і NFC-текст із параметрами завдання.
+     • Експорт CSV.
+
+     Формули (навчально):
+     • Теоретична продуктивність: TFC = W(m) × V(km/h) / 10  →  га/год
+     • Ефективна продуктивність: EFC = TFC × FE, де FE — коеф. польової ефективності (0..1)
+     • Час на поле: T_field = Area / EFC
+     • Загальний час: T_total = T_field + T_prep + T_delays
+     • ПММ: якщо є л/га → F = Area × (л/га); інакше F = T_total × (л/год)
+     • Собівартість/га: C_ha = (Rate_lab * T_total + Rate_mach * T_total + Fuel_cost) / Area
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 3 (механіки) — Продуктивність, час, ПММ, собівартість/га, квиток 58 мм, NFC</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .small{font-size:12px; color:#9fb0c8}
+  .muted{color:#93a3b5}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)}
+  .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
+  .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+
+  input[type="text"], input[type="number"], input[type="date"], select, textarea{
+    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
+  }
+
+  /* Квиток 58 мм */
+  .ticket{ width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
+  .ticket p{margin:2px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:6px 0}
+  .ticket small{font-size:10px}
+
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+  html.embedded .box{background:#f8fafc; color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+
+  @media print{
+    @page{ margin:4mm }
+    .no-print{ display:none !important }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 3 · аудиторно · механіки</span>
+    <h1>📈 Продуктивність агрегату: TFC/EFC → час → ПММ → собівартість/га → квиток 58 мм, NFC</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        За пару студенти для одного чи кількох полів розрахують <b>TFC/EFC</b>, <b>час</b>, <b>пальне</b> та
+        <b>собівартість/га</b>, спланують <b>заїзди</b> (опц.) та сформують <b>квиток 58 мм</b> “План зміни” і <b>NFC</b>-текст завдання.
+      </p>
+      <p class="small">Коеф. польової ефективності (FE) враховує розвороти, налаштування, простої: зазвичай <span class="mono">0.6–0.85</span>.</p>
+    </div>
+
+    <!-- НАЛАШТУВАННЯ АГРЕГАТУ ТА ЕКОНОМІКА -->
+    <div class="card">
+      <h2>⚙️ Агрегат, пальне та економіка</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Агрегат</h3>
+          <div class="row">
+            <div style="flex:1"><label>Машина ID</label><input id="machId" type="text" value="TR-001"></div>
+            <div style="flex:1"><label>Модель</label><input id="machModel" type="text" value="МТЗ-82 + ґрунтообробний 4 м"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Ширина захвату W, м</label><input id="W" type="number" step="0.01" value="4.0"></div>
+            <div style="flex:1"><label>Швидкість V, км/год</label><input id="V" type="number" step="0.1" value="8.0"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Перекриття, %</label><input id="Ov" type="number" step="1" value="7"></div>
+            <div style="flex:1"><label>FE (0..1)</label><input id="FE" type="number" step="0.01" value="0.78"></div>
+          </div>
+          <p class="small">Ефективна ширина <span class="mono">Wᵉᶠᶠ = W × (1 − Ov%)</span>.</p>
+        </div>
+
+        <div class="box">
+          <h3>Пальне</h3>
+          <div class="row">
+            <div style="flex:1"><label>Витрата, л/га (якщо відома)</label><input id="fuel_ha" type="number" step="0.1" value="0"></div>
+            <div style="flex:1"><label>Витрата, л/год (альтерн.)</label><input id="fuel_h" type="number" step="0.1" value="7.5"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Ціна дизпального, грн/л</label><input id="price" type="number" step="0.01" value="63.50"></div>
+            <div style="flex:1"><label>Місткість бака/бункера, л/кг (опц.)</label><input id="tank" type="number" step="1" value="0"></div>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Економіка</h3>
+          <div class="row">
+            <div style="flex:1"><label>Тариф праці, грн/год</label><input id="rate_lab" type="number" step="1" value="220"></div>
+            <div style="flex:1"><label>Ставка машини, грн/год</label><input id="rate_mach" type="number" step="1" value="450"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>T підгот.-заверш., год</label><input id="t_prep" type="number" step="0.1" value="0.5"></div>
+            <div style="flex:1"><label>T простоїв (план), год</label><input id="t_delay" type="number" step="0.1" value="0.3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ТАБЛИЦЯ ПОЛІВ -->
+    <div class="card">
+      <h2>🧱 Поля / роботи</h2>
+      <div class="row">
+        <button class="btn" onclick="addRow()">➕ Додати поле</button>
+        <button class="btn" onclick="preset()">🧪 Приклад</button>
+        <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+        <button class="btn" onclick="copyCSV()">📋 CSV</button>
+      </div>
+      <div style="overflow:auto; margin-top:8px">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Поле / завдання</th>
+              <th>Площа, га</th>
+              <th>Опис робіт</th>
+              <th class="dark">TFC, га/год</th>
+              <th class="dark">EFC, га/год</th>
+              <th class="dark">Час на поле, год</th>
+              <th class="dark">Заг. час, год</th>
+              <th class="dark">ПММ, л</th>
+              <th class="dark">Собівартість, грн/га</th>
+              <th class="dark">Вартість, грн (поле)</th>
+              <th>Примітка</th>
+            </tr>
+          </thead>
+          <tbody id="body"></tbody>
+          <tfoot>
+            <tr>
+              <th class="dark" colspan="8">Разом</th>
+              <th class="dark" id="sumFuel">—</th>
+              <th class="dark" id="avgCostHa">—</th>
+              <th class="dark" id="sumCost">—</th>
+              <th></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="csv" class="out" style="margin-top:8px">—</div>
+      <p class="small">CSV: <span class="mono"># | Поле | Площа_га | Опис | TFC | EFC | T_field | T_total | ПММ_л | грн_га | грн_поле | Прим.</span></p>
+      <p class="small muted">Контраст забезпечено: темні клітинки (<span class="mono">.dark</span>) мають світлий текст.</p>
+    </div>
+
+    <!-- РЕЗЮМЕ + КВИТОК + NFC -->
+    <div class="card">
+      <h2>🧾 Підсумки, квиток 58 мм та NFC</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Підсумки</h3>
+          <p>Полів: <b><span id="fieldsCount">—</span></b> · Заг. площа: <b><span id="areaSum">—</span> га</b></p>
+          <p>Загальний час: <b><span id="timeSum">—</span> год</b> · ПММ: <b><span id="fuelSum">—</span> л</b></p>
+          <p>Середня собівартість: <b><span id="costHaAvg">—</span> грн/га</b></p>
+        </div>
+
+        <div class="box">
+          <h3>Квиток 58 мм — “План зміни”</h3>
+          <div class="row">
+            <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+            <button class="btn" onclick="window.print()">🖨️ Друк</button>
+          </div>
+          <div class="ticket" id="ticket" style="margin-top:8px">
+            <h4>ПЛАН ЗМІНИ</h4>
+            <p id="tDate"><small>Дата: —</small></p>
+            <div class="line"></div>
+            <p><b>Машина:</b> <span id="tId">—</span></p>
+            <p><b>Модель:</b> <span id="tModel">—</span></p>
+            <p><b>W×V×FE:</b> <span id="tSpec">—</span></p>
+            <div class="line"></div>
+            <p><b>Поле/завдання:</b> <span id="tField">—</span></p>
+            <p><b>Площа:</b> <span id="tArea">—</span> га · <b>EFC:</b> <span id="tEFC">—</span> га/год</p>
+            <p><b>Час:</b> <span id="tTime">—</span> год · <b>ПММ:</b> <span id="tFuel">—</span> л</p>
+            <p><b>Соб/га:</b> <span id="tCostHa">—</span> · <b>Разом:</b> <span id="tCost">—</span> грн</p>
+            <div class="line"></div>
+            <p><small id="tNote">Прим.: —</small></p>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>NFC — текст завдання</h3>
+          <div class="row">
+            <div style="flex:1"><label>Куратор/бригадир</label><input id="nfcBoss" type="text" value="Майстер діл. №1"></div>
+            <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+            <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          </div>
+          <div id="nfcOut" class="out">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ХІД РОБОТИ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+      <ol>
+        <li>Заповни параметри агрегату (W, V, перекриття, FE) та економіку (ставки, часи).</li>
+        <li>Додай 2–4 поля. Натисни <b>Перерахувати</b> і проаналізуй EFC, час, ПММ, собівартість.</li>
+        <li>Згенеруй <b>квиток 58 мм</b> і <b>NFC</b>-текст. Експортуй <b>CSV</b> у Sheets (<span class="mono">CapacityCost</span>).</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Коректні розрахунки TFC/EFC, часу та ПММ</td><td>4</td></tr>
+          <tr><td>Собівартість/га і підсумки по полях логічні</td><td>3</td></tr>
+          <tr><td>Квиток 58 мм і NFC-текст зібрані</td><td>2</td></tr>
+          <tr><td>CSV у Sheets + короткі висновки</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">📐 EFC</p><p class="pill">⛽ ПММ</p><p class="pill">💸 Собівартість</p><p class="pill">🧾 Квиток</p><p class="pill">🔖 NFC</p>
+    </div>
+  </div>
+
+<script>
+  // Режим вбудування (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const bodyEl = document.getElementById('body');
+  const csvEl  = document.getElementById('csv');
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2) => Number((+n).toFixed(d));
+
+  function effectiveW(){ const W=+byId('W').value||0; const Ov=(+byId('Ov').value||0)/100; return W*Math.max(0,1-Ov); }
+  function TFC(){ return (effectiveW() * ((+byId('V').value)||0)) / 10; }       // га/год
+  function EFC(){ return TFC() * ((+byId('FE').value)||0); }                    // га/год
+
+  function addRow(sample){
+    const def = { field:'F-01', area: 20.0, task:'Дисковання', note:'' };
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.field}"></td>
+      <td><input type="number" step="0.01" value="${s.area}"></td>
+      <td><input type="text" value="${s.task}"></td>
+      <td class="dark tfc">—</td>
+      <td class="dark efc">—</td>
+      <td class="dark tField">—</td>
+      <td class="dark tTotal">—</td>
+      <td class="dark fuel">—</td>
+      <td class="dark cHa">—</td>
+      <td class="dark cost">—</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyEl.appendChild(tr);
+    reindex();
+  }
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  function recalc(){
+    const tfc = TFC();
+    const efc = EFC();
+
+    const rateLab = +byId('rate_lab').value||0;
+    const rateMach= +byId('rate_mach').value||0;
+    const tPrep   = +byId('t_prep').value||0;
+    const tDelay  = +byId('t_delay').value||0;
+    const price   = +byId('price').value||0;
+    const f_ha    = +byId('fuel_ha').value||0;
+    const f_h     = +byId('fuel_h').value||0;
+
+    let sumFuel=0, sumCost=0, sumArea=0, sumTime=0, rows=0, costsHa=[];
+
+    [...bodyEl.querySelectorAll('tr')].forEach(tr=>{
+      const area = +tr.children[2].querySelector('input').value||0;
+
+      const T_field = efc>0 ? area / efc : 0;                 // год
+      const T_total = T_field + tPrep + tDelay;
+
+      let Fuel = 0;
+      if(f_ha>0) Fuel = area * f_ha;
+      else if(f_h>0) Fuel = T_total * f_h;
+
+      const FuelCost = Fuel * price;
+      const WorkCost = (rateLab + rateMach) * T_total;
+      const CostTotal = FuelCost + WorkCost;
+      const CostHa = area>0 ? (CostTotal / area) : 0;
+
+      tr.querySelector('.tfc').textContent    = tfc? rnd(tfc,2) : '—';
+      tr.querySelector('.efc').textContent    = efc? rnd(efc,2) : '—';
+      tr.querySelector('.tField').textContent = rnd(T_field,2);
+      tr.querySelector('.tTotal').textContent = rnd(T_total,2);
+      tr.querySelector('.fuel').textContent   = rnd(Fuel,1);
+      tr.querySelector('.cHa').textContent    = rnd(CostHa,0).toLocaleString('uk-UA');
+      tr.querySelector('.cost').textContent   = Math.round(CostTotal).toLocaleString('uk-UA');
+
+      sumFuel += Fuel; sumCost += CostTotal; sumArea += area; sumTime += T_total; rows++;
+      if(CostHa>0) costsHa.push(CostHa);
+    });
+
+    byId('sumFuel').textContent = rnd(sumFuel,1);
+    byId('sumCost').textContent = Math.round(sumCost).toLocaleString('uk-UA');
+    byId('avgCostHa').textContent = (costsHa.length? Math.round(costsHa.reduce((a,b)=>a+b,0)/costsHa.length) : 0).toLocaleString('uk-UA');
+
+    byId('fieldsCount').textContent = rows || '—';
+    byId('areaSum').textContent  = rnd(sumArea,2);
+    byId('timeSum').textContent  = rnd(sumTime,2);
+    byId('fuelSum').textContent  = rnd(sumFuel,1);
+    byId('costHaAvg').textContent= byId('avgCostHa').textContent;
+
+    buildCSV();
+  }
+
+  function buildCSV(){
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx=tr.querySelector('.idx').textContent.trim();
+      const field=tr.children[1].querySelector('input').value.trim();
+      const area =tr.children[2].querySelector('input').value.trim();
+      const task =tr.children[3].querySelector('input').value.trim();
+      const tfc  =tr.querySelector('.tfc').textContent.trim();
+      const efc  =tr.querySelector('.efc').textContent.trim();
+      const tf   =tr.querySelector('.tField').textContent.trim();
+      const tt   =tr.querySelector('.tTotal').textContent.trim();
+      const fuel =tr.querySelector('.fuel').textContent.trim();
+      const cha  =tr.querySelector('.cHa').textContent.trim();
+      const cost =tr.querySelector('.cost').textContent.trim();
+      const note =tr.children[11].querySelector('input').value.trim();
+      return [idx,field,area,task,tfc,efc,tf,tt,fuel,cha,cost,note].join(' | ');
+    });
+    csvEl.textContent = lines.join('\n') || '—';
+  }
+
+  function copyCSV(){
+    const t = csvEl.textContent.trim();
+    if(!t || t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+
+  function preset(){
+    bodyEl.innerHTML='';
+    addRow({field:'F-01', area:18.5, task:'Дисковання 1-й слід'});
+    addRow({field:'F-02', area:12.3, task:'Культивація'});
+    addRow({field:'F-03', area:25.0, task:'Передпосівна підготовка'});
+    recalc();
+  }
+
+  // ===== Квиток 58 мм =====
+  function buildTicket(){
+    const tr = bodyEl.querySelector('tr') || null;
+    const d  = new Date().toISOString().slice(0,10);
+    byId('tDate').innerHTML = `<small>Дата: ${d}</small>`;
+    byId('tId').textContent = byId('machId').value || '—';
+    byId('tModel').textContent = byId('machModel').value || '—';
+    byId('tSpec').textContent = `${(+byId('W').value||0)}м × ${(+byId('V').value||0)}км/год × FE ${(+byId('FE').value||0)}`;
+
+    if(tr){
+      const field = tr.children[1].querySelector('input').value.trim();
+      const area  = tr.children[2].querySelector('input').value.trim();
+      const efc = tr.querySelector('.efc').textContent.trim();
+      const tt  = tr.querySelector('.tTotal').textContent.trim();
+      const fuel= tr.querySelector('.fuel').textContent.trim();
+      const cha = tr.querySelector('.cHa').textContent.trim();
+      const cost= tr.querySelector('.cost').textContent.trim();
+
+      byId('tField').textContent = field;
+      byId('tArea').textContent  = area;
+      byId('tEFC').textContent   = efc;
+      byId('tTime').textContent  = tt;
+      byId('tFuel').textContent  = fuel;
+      byId('tCostHa').textContent= cha;
+      byId('tCost').textContent  = cost;
+      byId('tNote').textContent  = `Прим.: Автогенерація · Ref:${Math.random().toString(36).slice(2,8).toUpperCase()}`;
+    }
+  }
+
+  // ===== NFC =====
+  function buildNFC(){
+    const d  = new Date().toISOString().slice(0,19).replace('T',' ');
+    const tr = bodyEl.querySelector('tr') || null;
+    let field='—', area='—', efc='—', t='—', fuel='—';
+    if(tr){
+      field = tr.children[1].querySelector('input').value.trim();
+      area  = tr.children[2].querySelector('input').value.trim();
+      efc   = tr.querySelector('.efc').textContent.trim();
+      t     = tr.querySelector('.tTotal').textContent.trim();
+      fuel  = tr.querySelector('.fuel').textContent.trim();
+    }
+    const text = [
+      `TASK_NFC`,
+      `MACHINE:${byId('machId').value}`,
+      `MODEL:${byId('machModel').value}`,
+      `SPEC:W=${byId('W').value}m; V=${byId('V').value}kmh; FE=${byId('FE').value}`,
+      `FIELD:${field}; AREA:${area}ha`,
+      `EFC:${efc}ha_h; TIME:${t}h; FUEL:${fuel}L`,
+      `BOSS:${byId('nfcBoss').value}; PHONE:${byId('nfcPhone').value}`,
+      `STAMP:${d}`
+    ].join('\n');
+    byId('nfcOut').textContent = text;
+  }
+
+  // ===== Утиліти =====
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // Ініціалізація
+  (function init(){ addRow(); addRow(); recalc(); })();
+
+  // Рекалькуляція при змінах налаштувань
+  ['W','V','Ov','FE','fuel_ha','fuel_h','price','rate_lab','rate_mach','t_prep','t_delay'].forEach(id=>{
+    document.getElementById(id).addEventListener('change', recalc);
+  });
+</script>
+</body>
+</html>
