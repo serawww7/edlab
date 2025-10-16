@@ -1,0 +1,226 @@
+<!-- ПАРА 2 (аудиторно) для агрономів
+     Тема: Паспорт поля: QR/NFC → мобільна форма → таблиця/дашборд
+     Фокус: максимум телефону — скани QR/NFC, фото з геоміткою, короткі нотатки, миттєва аналітика.
+     Готово для розміщення на GitHub Pages або вставки в Moodle через iFrame.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 2 — Паспорт поля: QR/NFC → мобільна форма → дашборд</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --good:#10b981; --line:#1f2937;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:980px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  ul,ol{margin:8px 0 12px 22px}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  @media (max-width:820px){.g2{grid-template-columns:1fr}}
+  .kpi{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px dashed #263042; border-radius:12px}
+  .kpi b{font-size:14px}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:10px 12px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left}
+  .table tbody tr:nth-child(even){background:#0b1324}
+  .step{display:flex; gap:12px; align-items:flex-start; padding:10px 12px; border:1px solid #1f2937; border-radius:12px; background:#0b1324; margin:8px 0}
+  .step .n{min-width:30px; height:30px; border-radius:8px; background:#0e1a2e; display:grid; place-items:center; color:#a5b4fc; font-weight:700}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .muted{color:#93a3b5}
+  .ok{color:var(--good)} .warn{color:var(--warn)}
+  .no-print{display:block}
+
+  /* Вбудовано (iframe) → стриманий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+
+  /* Маленькі утиліти */
+  .flex{display:flex; gap:10px; flex-wrap:wrap}
+  .field{display:flex; gap:8px; margin:6px 0}
+  .field label{min-width:150px; color:#cbd5e1}
+  .field input{flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb}
+
+  @media print{
+    @page{ margin:12mm }
+    .no-print{ display:none !important }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 2 · ЛПЗ · агрономи</span>
+    <h1>🌱 Паспорт поля: QR/NFC → мобільна форма → таблиця/дашборд</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        Навчити студентів швидко збирати польові дані <b>зі смартфона</b> через <b>QR/NFC</b> та
+        <b>мобільну форму</b> з фото+геоміткою, а також правильно імпортувати відповіді в таблицю для оперативного аналізу.
+      </p>
+      <div class="grid g2">
+        <div class="kpi"><span>📍</span><div><b>Ідентифікація поля</b><br/>QR або NFC-стікер на табличці/папці</div></div>
+        <div class="kpi"><span>📷</span><div><b>Фото з EXIF</b><br/>геомітка + час + короткий опис стану</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🧰 Обладнання та ПЗ</h2>
+      <ul>
+        <li>Смартфон з камерою та (опційно) NFC.</li>
+        <li>Google Form (для збору даних) + Google Sheets (відповіді/дашборд).</li>
+        <li>QR-стікери <i>або</i> NFC-мітки (наклейки/брелоки).</li>
+      </ul>
+      <p class="muted">💡 Якщо NFC недоступний — використовуй QR. Головне — стабільний URL форми з попередньо заповненим кодом поля.</p>
+    </div>
+
+    <div class="card">
+      <h2>📋 Структура мобільної форми (Google Form)</h2>
+      <table class="table">
+        <thead><tr><th>#</th><th>Поле</th><th>Тип</th><th>Призначення</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><b>Код поля</b> (наприклад, F-01)</td><td>Short text (обов’язково)</td><td>Ідентифікує поле (підставляється через QR/NFC)</td></tr>
+          <tr><td>2</td><td><b>Оператор</b> (ПІБ)</td><td>Short text</td><td>Хто робив огляд</td></tr>
+          <tr><td>3</td><td><b>Стан</b></td><td>Dropdown/Multiple choice</td><td>«норма / бур’ян / шкідник / перезволоження / засуха / інше»</td></tr>
+          <tr><td>4</td><td><b>Коментар</b></td><td>Paragraph</td><td>Коротко: що саме помічено</td></tr>
+          <tr><td>5</td><td><b>Фото (1–3 шт.)</b></td><td>File upload</td><td>З увімкненою геоміткою (EXIF)</td></tr>
+          <tr><td>6</td><td><b>Координати</b></td><td>Short text (необов.)</td><td>Якщо EXIF нема — встав широту/довготу вручну</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">Порада: ввімкни в Камера → Налаштування → «Геомітка/Location tags». На iOS — дозволи геолокацію для Камери.</p>
+    </div>
+
+    <div class="card">
+      <h2>🧪 Хід роботи (45–60 хв)</h2>
+
+      <div class="step"><div class="n">1</div><div>
+        <b>Готуємо код поля</b> (5 хв). Створіть список: <span class="mono">F-01, F-02, F-03…</span>
+        Виберіть своє поле (або навчальне). Збережіть код.
+      </div></div>
+
+      <div class="step"><div class="n">2</div><div>
+        <b>Збираємо URL форми з автозаповненням</b> (8–10 хв). У Google Form відкрий «Попередній перегляд» (іконка ока) — скопіюй базовий URL.
+        Додай параметр <span class="mono">?field=F-01</span> (або власний ключ форми, якщо використовуєш entries). <br/>
+        Приклад: <span class="mono">https://docs.google.com/forms/d/e/ABC/viewform?field=F-01</span>
+      </div></div>
+
+      <div class="step"><div class="n">3</div><div>
+        <b>QR або NFC</b> (10 хв). Згенеруй QR на цей URL (будь-який локальний/онлайн-генератор) або запиши URL в NFC-мітку через додаток <i>NFC Tools</i>.
+        Наклей на «паспорт поля»/папку. Перевір скан з телефона.
+      </div></div>
+
+      <div class="step"><div class="n">4</div><div>
+        <b>Польове заповнення (імітація)</b> (10–15 хв). Скануй QR/NFC → відкрита форма вже з кодом поля.
+        Додай 1–3 фото (крупний план + загальний). Короткий коментар: «бур’ян осот, край поля», тощо. Відправ.
+      </div></div>
+
+      <div class="step"><div class="n">5</div><div>
+        <b>Відповіді у Sheets</b> (10 хв). У формі → «Відповіді» → Створити таблицю. Перевір колонки (час, код поля, стан, коментар, посилання на фото).
+        Додай умовне форматування для «критичних станів» (червоний).
+      </div></div>
+
+      <div class="step"><div class="n">6</div><div>
+        <b>Міні-дашборд</b> (5–8 хв). Створи діаграму «Стан за категоріями», і табличку «Останні огляди по полях» (фільтр по часу).
+      </div></div>
+    </div>
+
+    <div class="card">
+      <h2>🔗 Генератор URL для QR/NFC (локально, без зовнішніх бібліотек)</h2>
+      <p class="muted">Введи базову адресу своєї форми і код поля — отримаєш готовий URL для QR/NFC.</p>
+
+      <div class="field">
+        <label for="formUrl">Базовий URL форми (viewform)</label>
+        <input id="formUrl" type="text" value="https://docs.google.com/forms/d/e/XXXXXXXXXXXX/viewform" />
+      </div>
+      <div class="field">
+        <label for="param">Параметр для поля (наприклад, field або entry.123456)</label>
+        <input id="param" type="text" value="field" />
+      </div>
+      <div class="field">
+        <label for="code">Код поля (наприклад, F-01)</label>
+        <input id="code" type="text" value="F-01" />
+      </div>
+
+      <div class="flex no-print">
+        <button class="btn" type="button" onclick="buildURL()">🔁 Зібрати URL</button>
+        <button class="btn" type="button" onclick="copyURL()">📋 Скопіювати</button>
+        <a class="btn" id="openURL" href="#" target="_blank" rel="noopener">🔗 Відкрити</a>
+      </div>
+
+      <p class="muted" id="builtUrl" style="word-break:break-all; margin-top:10px">—</p>
+    </div>
+
+    <div class="card">
+      <h2>✅ Контроль якості та оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Працюючий QR або NFC для <b>свого</b> коду поля</td><td>3</td></tr>
+          <tr><td>Коректно заповнена форма з 1–3 фото (EXIF або координати)</td><td>3</td></tr>
+          <tr><td>Відповіді в Google Sheets + умовне форматування «критики»</td><td>2</td></tr>
+          <tr><td>Міні-дашборд: діаграма станів + таблиця «останні огляди»</td><td>2</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">📱 Максимум телефону</p>
+      <p class="pill">🔖 QR/NFC</p>
+      <p class="pill">📊 Швидка аналітика</p>
+    </div>
+
+    <div class="card">
+      <h2>🆘 Поради</h2>
+      <ul>
+        <li><b>EXIF немає?</b> Дозволь геолокацію для Камери або додай координати в окреме поле.</li>
+        <li><b>URL занадто довгий?</b> Можна скоротити (але не використовуй сервіси, які блокує школа/коледж).</li>
+        <li><b>Формат вигляду entries:</b> для Google Form кожне поле має свій <i>entry.xxxxxxx</i>. Якщо не знаєш ID — використовуй один спільний параметр <span class="mono">field=F-01</span> і зчитай його окремою колонкою.</li>
+      </ul>
+    </div>
+  </div>
+
+<script>
+  // Стриманий вигляд у вбудуванні
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  function buildURL(){
+    const u = document.getElementById('formUrl').value.trim();
+    const p = document.getElementById('param').value.trim();
+    const c = document.getElementById('code').value.trim();
+    if(!u || !p || !c){ show('Перевір заповнення полів.'); return; }
+    const sep = u.includes('?') ? '&' : '?';
+    const url = `${u}${sep}${encodeURIComponent(p)}=${encodeURIComponent(c)}`;
+    document.getElementById('builtUrl').textContent = url;
+    document.getElementById('openURL').href = url;
+  }
+  function copyURL(){
+    const t = document.getElementById('builtUrl').textContent.trim();
+    if(!t || t==='—'){ show('Спочатку згенеруй URL.'); return; }
+    navigator.clipboard.writeText(t).then(()=>show('✅ URL скопійовано'), ()=>show('Скопіювати не вдалося'));
+  }
+  function show(msg){
+    const old = document.title;
+    document.title = msg;
+    setTimeout(()=>document.title = old, 900);
+  }
+  // Початковий приклад
+  buildURL();
+</script>
+</body>
+</html>
