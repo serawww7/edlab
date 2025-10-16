@@ -1,0 +1,288 @@
+<!-- electric_para3.html
+     Пара 3 (Електрики, аудиторно): Формування Акту ППР (A4/PDF) і Дефектного листа з CSV журналу ППР
+     Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Електрики · Пара 3 — Акт ППР (A4/PDF) + Дефектний лист із CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --ink:#111827;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg));
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 80px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted)}
+  h1{font-size:32px; margin:6px 0 12px; background:linear-gradient(90deg,#60a5fa,#22c55e);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .small{font-size:12px; color:#93a3b5}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  @media (max-width:980px){.g2{grid-template-columns:1fr}}
+
+  /* Таблиця прев'ю CSV */
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+
+  /* Друкований Акт/Дефектний: білий фон, чорні шрифти, A4-верстка */
+  #printArea{background:#fff; color:#000; border-radius:12px; border:1px solid #e5e7eb; padding:16px; }
+  .doc{page-break-after:always; padding:12mm; color:#000; font-family:Georgia, "Times New Roman", serif}
+  .doc h2{color:#000; font-size:20px; margin:0 0 6px}
+  .doc h3{color:#000; font-size:16px; margin:6px 0}
+  .doc p{color:#000; margin:4px 0}
+  .doc .muted{color:#374151}
+  .doc table{width:100%; border-collapse:collapse; border:1px solid #111}
+  .doc th,.doc td{border:1px solid #111; padding:6px 8px; font-size:12px; vertical-align:top}
+  .doc .sign{margin-top:10mm; display:flex; gap:10mm; flex-wrap:wrap}
+  .doc .sign div{flex:1 1 220px}
+  .doc .kpi{margin:6px 0 10px}
+  .chip{display:inline-block; padding:2px 8px; border:1px solid #111; border-radius:999px; font-size:11px; margin-right:6px}
+  .ok{border-color:#16a34a} .bad{border-color:#dc2626}
+  .nowrap{white-space:nowrap}
+  .qrtext{font-size:11px; word-break:break-all}
+
+  /* Вбудовано (Moodle) — стриманіші картки */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+
+  @media print{
+    @page{ size:A4; margin:12mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    #printArea{ border:none; padding:0 }
+    .doc{ page-break-after:always }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Електрики · Пара 3 · аудиторно</span>
+    <h1>📄 Акт ППР (A4/PDF) + 🧾 Дефектний лист із CSV журналу</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>Імпортувати CSV журналу ППР, перевірити дані й згенерувати друковані документи: <b>Акт ППР</b> та <b>Дефектний лист</b>.</p>
+      <div class="row">
+        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <button class="btn" type="button" onclick="pasteSample()">⬇️ Вставити навчальний CSV</button>
+        <button class="btn" type="button" onclick="parseCSV()">🔎 Розібрати CSV</button>
+      </div>
+      <p class="small">Очікувані поля CSV: <span class="mono">id,object,place,period_months,responsible,last_date,next_date,status</span></p>
+      <textarea id="csv" style="width:100%;min-height:120px;margin-top:8px; padding:10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb" placeholder="Встав сюди вміст journal_ppr.csv"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>👀 Перевірка даних</h2>
+      <div class="grid g2">
+        <div>
+          <div class="row">
+            <label class="small">Номер акта</label>
+            <input id="actnum" type="text" value="ППР-001" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb"/>
+            <label class="small">Підрозділ/об’єкт</label>
+            <input id="dept" type="text" value="Електромайстерня / Коледж" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb"/>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <label class="small">Комісія, голова</label>
+            <input id="head" type="text" value="Викладач ПІБ" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb"/>
+            <label class="small">Члени комісії</label>
+            <input id="members" type="text" value="Студент1; Студент2" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb"/>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" type="button" onclick="buildDocs()">🧩 Згенерувати Акт і Дефектний лист</button>
+            <button class="btn" type="button" onclick="window.print()">🖨️ Друк / Зберегти у PDF</button>
+          </div>
+          <p class="small">Порада: після друку збережи PDF і завантаж у спільну папку. Назви файли так: <span class="mono">ГРУПА_Прізвище_АктППР.pdf</span> та <span class="mono">..._ДефектнийЛист.pdf</span> (або в одному PDF дві сторінки).</p>
+        </div>
+        <div>
+          <table id="preview"><thead></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card printable">
+      <h2>🖨️ Друкована зона (A4)</h2>
+      <div id="printArea">
+        <!-- Документи будуть згенеровані тут -->
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Вбудований режим (Moodle)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // ===== CSV імпорт =====
+  const fileInput = document.getElementById('file');
+  const csvTA = document.getElementById('csv');
+  const previewHead = document.querySelector('#preview thead');
+  const previewBody = document.querySelector('#preview tbody');
+  let rows = []; // масив об'єктів
+
+  fileInput.addEventListener('change', async (e)=>{
+    const f = e.target.files[0]; if(!f) return;
+    const txt = await f.text();
+    csvTA.value = txt;
+  });
+
+  function pasteSample(){
+    csvTA.value =
+`id,object,place,period_months,responsible,last_date,next_date,status
+ELC-001,"ЩО-1 / Автомат B16","Майстерня",3,"Студент 1",2025-10-15,2026-01-15,PASS
+ELC-002,"Подовжувач №2","Лабораторія",1,"Студент 2",2025-10-10,2025-11-10,FAIL
+ELC-003,"ПЗВ 30мА, лінія 3","Лабораторія",6,"Студент 3",2025-10-01,2026-04-01,PASS`;
+    parseCSV();
+  }
+
+  function parseCSV(){
+    const txt = csvTA.value.trim();
+    if(!txt){ alert('Встав CSV або обери файл'); return; }
+    const lines = txt.split(/\r?\n/);
+    const headers = lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());
+    const out = [];
+    for(let i=1;i<lines.length;i++){
+      const line = lines[i];
+      if(!line.trim()) continue;
+      const cells = splitCSV(line);
+      const obj = {};
+      headers.forEach((h,idx)=> obj[h] = (cells[idx]||'').replace(/^"|"$/g,''));
+      out.push(obj);
+    }
+    rows = out;
+    renderPreview(headers, rows);
+  }
+
+  function splitCSV(line){
+    const res=[]; let cur=''; let q=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"' ){ 
+        if(q && line[i+1]==='"'){ cur+='"'; i++; }
+        else q=!q;
+      } else if(ch===',' && !q){ res.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    res.push(cur);
+    return res;
+  }
+
+  function renderPreview(headers, data){
+    previewHead.innerHTML='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
+    previewBody.innerHTML='';
+    data.forEach(r=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = headers.map(h=>`<td>${escapeHTML(r[h]||'')}</td>`).join('');
+      previewBody.appendChild(tr);
+    });
+  }
+
+  function escapeHTML(s){ return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+  // ===== Генерація документів =====
+  function buildDocs(){
+    if(!rows.length){ alert('Спочатку імпортуй CSV'); return; }
+    const actnum = document.getElementById('actnum').value.trim() || 'ППР-XXX';
+    const dept = document.getElementById('dept').value.trim() || 'Підрозділ';
+    const head = document.getElementById('head').value.trim() || 'Голова комісії';
+    const members = document.getElementById('members').value.trim() || 'Член комісії';
+
+    const pass = rows.filter(r=> (r.status||'').toUpperCase()==='PASS');
+    const fail = rows.filter(r=> (r.status||'').toUpperCase()==='FAIL');
+    const due  = rows.filter(r=> (r.status||'').toUpperCase()==='DUE');
+
+    const today = new Date(); const pad=n=>n.toString().padStart(2,'0');
+    const dateStr = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+
+    const actHTML = `
+      <section class="doc" id="act">
+        <h2>АКТ ПЛАНОВО-ПОПЕРЕДЖУВАЛЬНОГО РЕМОНТУ № <span class="nowrap">${escapeHTML(actnum)}</span></h2>
+        <p class="muted">Підрозділ/об’єкт: ${escapeHTML(dept)} · Дата: ${dateStr}</p>
+        <div class="kpi">
+          <span class="chip ok">PASS: ${pass.length}</span>
+          <span class="chip">DUE: ${due.length}</span>
+          <span class="chip bad">FAIL: ${fail.length}</span>
+        </div>
+        <h3>1. Перелік перевірених об’єктів</h3>
+        ${buildTable(rows)}
+        <h3>2. Висновок</h3>
+        <p>За підсумками перевірки виявлено: <b>${fail.length}</b> об’єкт(и/ів) зі статусом <b>FAIL</b>. Необхідно усунути зауваження і провести повторний ППР до <span class="nowrap">${nextMonth(dateStr)}</span>.</p>
+        <div class="sign">
+          <div>Голова комісії: _____________________ / ${escapeHTML(head)}</div>
+          <div>Член(и) комісії: _____________________ / ${escapeHTML(members)}</div>
+        </div>
+        <p class="qrtext">Ref: ${escapeHTML(actnum)} · Звіт сформовано з CSV журналу ППР · ${location.href}</p>
+      </section>
+    `;
+
+    const defectHTML = `
+      <section class="doc" id="defects">
+        <h2>ДЕФЕКТНИЙ ЛИСТ до Акта ППР № <span class="nowrap">${escapeHTML(actnum)}</span></h2>
+        <p class="muted">Містить позиції зі статусом FAIL. Дата: ${dateStr}</p>
+        ${fail.length ? buildTable(fail) : '<p>FAIL-позицій не виявлено.</p>'}
+        ${fail.length ? '<p>Рекомендації: провести усунення дефектів у найкоротший термін, повторний ППР — після усунення.</p>' : ''}
+        <div class="sign">
+          <div>Керівник робіт: _____________________</div>
+          <div>Виконавець: ________________________</div>
+        </div>
+        <p class="qrtext">Ref: ${escapeHTML(actnum)}-DEF · ${location.href}</p>
+      </section>
+    `;
+
+    document.getElementById('printArea').innerHTML = actHTML + defectHTML;
+    // прокрутка до друкованого блоку
+    document.getElementById('printArea').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function nextMonth(iso){
+    const [y,m,d]=iso.split('-').map(Number);
+    const dt=new Date(y,m-1,d); dt.setMonth(dt.getMonth()+1);
+    const pad=n=>n.toString().padStart(2,'0');
+    return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+  }
+
+  function buildTable(arr){
+    const rowsHTML = arr.map((r,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td>${escapeHTML(r.id||'')}</td>
+        <td>${escapeHTML(r.object||'')}</td>
+        <td>${escapeHTML(r.place||'')}</td>
+        <td class="nowrap">${escapeHTML(r.last_date||'')}</td>
+        <td class="nowrap">${escapeHTML(r.next_date||'')}</td>
+        <td>${escapeHTML(r.status||'')}</td>
+        <td>${escapeHTML(r.responsible||'')}</td>
+      </tr>`).join('');
+    return `
+      <table>
+        <thead>
+          <tr>
+            <th>№</th><th>ID</th><th>Об’єкт</th><th>Місце</th><th>Остання</th><th>Наступна</th><th>Статус</th><th>Відповідальний</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHTML}</tbody>
+      </table>`;
+  }
+
+  // Автозапуск з демо, щоб було що друкувати при першому відкритті
+  pasteSample();
+</script>
+</body>
+</html>
