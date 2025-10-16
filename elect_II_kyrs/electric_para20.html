@@ -1,0 +1,506 @@
+<!-- electric_para20.html
+     Пара 20 (Електрики, аудиторно): ФІНАЛ — Комплексний мікропроєкт і захист
+     Імпорт результатів занять 16–19 (CSV), автоматичний аналіз KPI (кВт·год, пік, Δ% фаз, ТО, PTW),
+     формування оцінки за рубрикою, наклейка 58 мм "PROJECT TICKET", A4-звіт, .csv/.json/.ics експорт.
+     Працює офлайн, під GitHub Pages та вбудовується у Moodle (iframe).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Електрики · Пара 20 — Фінальний мікропроєкт і захист</title>
+<meta name="color-scheme" content="light dark"/>
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#101826; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa; --brand:#22c55e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 35%,var(--bg)); color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
+  .wrap{max-width:1120px; margin:0 auto; padding:24px 16px 96px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9aa5b1}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e);
+     -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:1050px){.g3{grid-template-columns:1fr}; .g2{grid-template-columns:1fr}}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .small{font-size:12px; color:#93a3b5}
+  input,select,textarea{padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb; width:100%}
+  textarea{min-height:72px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; background:#0d1a2e; font-size:12px; color:#9aa5b1}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .score{display:flex; gap:10px; flex-wrap:wrap}
+  .score .s{padding:10px 12px; border:1px solid #223049; border-radius:10px; background:#0d1a2e}
+  .kpi{display:grid; gap:8px; grid-template-columns:repeat(2,1fr)}
+  @media (max-width:800px){.kpi{grid-template-columns:1fr}}
+  .bar{height:12px; background:#0d1a2e; border:1px solid #223049; border-radius:999px; overflow:hidden}
+  .bar > div{height:100%; background:linear-gradient(90deg,#60a5fa,#22c55e)}
+  .tickets{display:flex; gap:12px; flex-wrap:wrap}
+  .ticket{width:58mm; background:#fff; color:#000; padding:5mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 4px; font-size:13px; text-align:center}
+  .ticket p{margin:1px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:5px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+  #printArea{background:#fff; color:#000; border-radius:12px; border:1px solid #e5e7eb; padding:16px}
+  .doc{page-break-after:always; padding:12mm; color:#000; font-family:Georgia,"Times New Roman",serif}
+  .doc h2{color:#000; font-size:20px; margin:0 0 6px}
+  .doc h3{color:#000; font-size:16px; margin:6px 0}
+  .doc p{color:#000; margin:4px 0}
+  .doc table{width:100%; border-collapse:collapse; border:1px solid #111}
+  .doc th,.doc td{border:1px solid #111; padding:6px 8px; font-size:12px; vertical-align:top}
+  .doc .sign{margin-top:10mm; display:flex; gap:10mm; flex-wrap:wrap}
+  .doc .sign div{flex:1 1 220px}
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  @media print{
+    @page{ size:A4; margin:12mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    #printArea{ border:none; padding:0 }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Електрики · Пара 20 · аудиторно</span>
+  <h1>🏁 Фінальний мікропроєкт: «Електробезпека та енергоефективність майстерні» — імпорт CSV → KPI → оцінка → 🧾 58 мм → 📄 A4</h1>
+
+  <div class="card">
+    <h2>🎯 Завдання пари</h2>
+    <ol>
+      <li>Завантажити CSV з попередніх занять (16–19) та отримати <b>KPI проєкту</b>.</li>
+      <li>Автоматично сформувати <b>оцінку</b> за рубрикою (0–100) і статус <b>PASS/REWORK</b>.</li>
+      <li>Згенерувати <b>наклейку 58 мм «PROJECT TICKET»</b> та <b>A4-звіт</b> для захисту.</li>
+      <li>Експортувати <b>.csv/.json/.ics</b> з підсумками (для архіву).</li>
+    </ol>
+    <div class="row">
+      <button class="btn" onclick="seedDemo()">🔄 Приклад даних</button>
+      <button class="btn" onclick="calcAll()">🧮 Перерахувати</button>
+      <button class="btn" onclick="buildTicket()">🧾 Наклейка 58 мм</button>
+      <button class="btn" onclick="buildReport()">📄 A4-звіт</button>
+      <button class="btn" onclick="exportAll()">📤 Експорт .csv/.json</button>
+      <button class="btn" onclick="downloadICS()">📅 .ics дедлайни</button>
+    </div>
+    <p class="small">Підтримувані CSV: <span class="mono">energy_profile_registry.csv</span> (заняття 16), <span class="mono">equipment_registry.csv</span> (17), <span class="mono">panel_balance_registry.csv</span> (18), <span class="mono">ptw_loto.csv</span> (19).</p>
+  </div>
+
+  <div class="card">
+    <h2>🧑‍💻 Дані про команду та об’єкт</h2>
+    <div class="grid g3">
+      <div>
+        <h3>Команда</h3>
+        <div class="row"><label class="small" style="min-width:140px">Група</label><input id="group" value="ЕЛ-21"></div>
+        <div class="row"><label class="small" style="min-width:140px">Учасники</label><input id="students" value="ПІБ1; ПІБ2"></div>
+        <div class="row"><label class="small" style="min-width:140px">Керівник</label><input id="mentor" value="Поліщук Сергій"></div>
+      </div>
+      <div>
+        <h3>Об’єкт</h3>
+        <div class="row"><label class="small" style="min-width:140px">Локація</label><input id="site" value="Майстерня · Корпус А"></div>
+        <div class="row"><label class="small" style="min-width:140px">URL/QR (портфоліо)</label><input id="projUrl" value="https://serawww7.github.io/edlab/"></div>
+        <div class="row"><label class="small" style="min-width:140px">Дата захисту</label><input id="defense" value="2025-10-23 12:00"></div>
+      </div>
+      <div>
+        <h3>Завантаження CSV</h3>
+        <div class="row"><label class="small" style="min-width:160px">Energy (16)</label><input id="file16" class="btn" type="file" accept=".csv,text/csv"></div>
+        <div class="row"><label class="small" style="min-width:160px">Equipment (17)</label><input id="file17" class="btn" type="file" accept=".csv,text/csv"></div>
+        <div class="row"><label class="small" style="min-width:160px">Panel (18)</label><input id="file18" class="btn" type="file" accept=".csv,text/csv"></div>
+        <div class="row"><label class="small" style="min-width:160px">PTW (19)</label><input id="file19" class="btn" type="file" accept=".csv,text/csv"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card printable">
+    <h2>📊 KPI проєкту</h2>
+    <div class="kpi" id="kpiBox">
+      <!-- наповнюється скриптом -->
+    </div>
+    <div class="score" id="scoreBox" style="margin-top:8px"></div>
+    <p class="small">Рубрика (100 б.): повнота артефактів 20 · енергоаналіз 25 · ТО/безпека 25 · баланс фаз 20 · PTW 10. PASS ≥ 60.</p>
+  </div>
+
+  <div class="card printable">
+    <h2>🧾 Наклейка 58 мм «PROJECT TICKET»</h2>
+    <div class="row">
+      <button class="btn" onclick="buildTicket()">🧩 Згенерувати</button>
+      <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+      <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+    </div>
+    <div id="tickets" class="tickets"></div>
+  </div>
+
+  <div class="card printable">
+    <h2>📄 A4 — Звіт на захист</h2>
+    <div class="row">
+      <button class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
+      <button class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
+    </div>
+    <div id="printArea"></div>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // ===== СТАН =====
+  let D16=null, D17=null, D18=null, D19=null; // сирі масиви з CSV
+  const kpiBox=document.getElementById('kpiBox');
+  const scoreBox=document.getElementById('scoreBox');
+  const ticketsBox=document.getElementById('tickets');
+
+  // ===== УТИЛІТИ =====
+  function esc(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function now(){ return new Date(); }
+  function nowStamp(){ const d=now(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+
+  // ===== CSV PARSER =====
+  async function readCSV(fileInput){
+    const f=fileInput.files[0]; if(!f) return null;
+    const txt=await f.text();
+    const lines=txt.trim().split(/\r?\n/);
+    const headers=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());
+    const out=[];
+    for(let i=1;i<lines.length;i++){
+      const cells=splitCSV(lines[i]);
+      if(!cells.length) continue;
+      const o={}; headers.forEach((h,j)=> o[h]=(cells[j]||'').replace(/^"|"$/g,''));
+      out.push(o);
+    }
+    return {headers, rows:out};
+  }
+  function splitCSV(line){
+    const res=[]; let cur=''; let q=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){ if(q && line[i+1]==='"'){ cur+='"'; i++; } else q=!q; }
+      else if(ch===',' && !q){ res.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    res.push(cur); return res;
+  }
+
+  // ===== АНАЛІТИКА =====
+  function analyze16(){
+    if(!D16) return {kWh:0, peak_kW:0, cost:0, count:0, ok:false};
+    let kWh=0, peakW=0, cost=0;
+    D16.rows.forEach(r=>{
+      kWh += parseFloat(r.kWh_day||r.kWh||'0') || 0;
+      peakW = Math.max(peakW, parseFloat(r.peak_W||'0')||0);
+      cost += parseFloat(r.cost_uah||'0')||0;
+    });
+    return {kWh:round2(kWh), peak_kW:round2((peakW||0)/1000), cost:round2(cost), count:D16.rows.length, ok:true};
+  }
+  function analyze17(){
+    if(!D17) return {count:0, soon:0, over:0, ok:false};
+    let soon=0, over=0;
+    const today = new Date();
+    D17.rows.forEach(r=>{
+      const nx = (r.next_yyyy_mm_dd||r.next||'').trim();
+      if(!nx) return;
+      const d = new Date(nx);
+      const diff = Math.round((d - today)/(1000*60*60*24));
+      if(diff < 0) over++; else if(diff <= 30) soon++;
+    });
+    return {count:D17.rows.length, soon, over, ok:true};
+  }
+  function analyze18(){
+    if(!D18) return {A:0,B:0,C:0,imb:0,status:'N/A',ok:false};
+    let A=0,B=0,C=0;
+    D18.rows.forEach(r=>{
+      const I = parseFloat(r.I_calc_A||'0') || estimateI(r);
+      const ph = (r.phase||'').toUpperCase();
+      const poles = (r.poles||'').toUpperCase();
+      if(ph==='3F' || poles==='3P'){ A+=I; B+=I; C+=I; }
+      else if(ph==='A') A+=I; else if(ph==='B') B+=I; else if(ph==='C') C+=I;
+    });
+    const avg=(A+B+C)/3;
+    const imb = avg>0? ((Math.max(A,B,C)-Math.min(A,B,C))/avg)*100 : 0;
+    let status='PASS'; if(imb>20) status='FAIL'; else if(imb>=10) status='WARN';
+    return {A:round2(A),B:round2(B),C:round2(C),imb:round2(imb),status,ok:true};
+  }
+  function estimateI(r){
+    const mode=(r.mode||'p').toLowerCase();
+    if(mode.startsWith('i')) return parseFloat(r.value||'0')||0;
+    const PkW=parseFloat(r.value||'0')||0;
+    const PF=parseFloat(r.PF||'1')||1, eta=parseFloat(r.eta||'1')||1;
+    const phase=(r.phase||'A').toUpperCase(), poles=(r.poles||'1P').toUpperCase();
+    if(phase==='3F' || poles==='3P') return (PkW*1000)/(Math.sqrt(3)*400*PF*eta);
+    return (PkW*1000)/(230*PF*eta);
+  }
+  function analyze19(){
+    if(!D19) return {has:false, window:'—', ok:false};
+    const row=D19.rows[0]||{};
+    const ws=row.window_start||'', we=row.window_end||'';
+    return {has:!!row.ptw_id, window:(ws&&we)?`${ws} → ${we}`:'—', ok:!!row.ptw_id};
+  }
+
+  function round2(x){ return Math.round((x+Number.EPSILON)*100)/100; }
+
+  function calcAll(){
+    kpiBox.innerHTML='';
+    const K16=analyze16(), K17=analyze17(), K18=analyze18(), K19=analyze19();
+
+    // KPI блоки
+    addKPI('⚡️ Енергія/добу', `${K16.kWh} кВт·год`, (K16.ok?1:0));
+    addKPI('🔺 Пікова потужність', `${K16.peak_kW} кВт`, 1 - Math.min(1, K16.peak_kW/10));
+    addKPI('💸 Вартість/добу', `${K16.cost} грн`, 1 - Math.min(1, K16.cost/500));
+    addKPI('🛠️ Обладнання', `${K17.count} од.`, (K17.ok?1:0));
+    addKPI('⏳ ТО скоро', `${K17.soon} од.`, 1 - Math.min(1, K17.soon/3));
+    addKPI('⛔ Прострочено ТО', `${K17.over} од.`, 1 - Math.min(1, Math.min(K17.over,5)/5));
+    addKPI('⚖️ Баланс фаз', `Δ%=${K18.imb} (${K18.status})`, K18.status==='PASS'?1:(K18.status==='WARN'?0.6:0.2));
+    addKPI('📝 PTW на роботи', K19.has?K19.window:'—', K19.has?1:0.3);
+
+    // Рубрика
+    const rubric = scoreRubric(K16,K17,K18,K19);
+    renderScore(rubric);
+  }
+
+  function addKPI(title,value,ratio){
+    const el=document.createElement('div');
+    el.innerHTML=`
+      <div class="card" style="padding:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><b>${esc(title)}</b><div class="small">${esc(value)}</div></div>
+          <div style="width:180px" class="bar"><div style="width:${Math.max(0,Math.min(1,ratio))*100}%"></div></div>
+        </div>
+      </div>`;
+    kpiBox.appendChild(el.firstElementChild);
+  }
+
+  function scoreRubric(K16,K17,K18,K19){
+    // 1) Повнота артефактів 20
+    let art = 0;
+    if(D16) art+=5; if(D17) art+=5; if(D18) art+=5; if(D19) art+=5;
+
+    // 2) Енергоаналіз 25: чим менший пік і вартість, тим краще (нормування)
+    const peakScore = 15 * Math.max(0, 1 - (K16.peak_kW/12)); // 12 кВт — граничне
+    const costScore = 10 * Math.max(0, 1 - (K16.cost/600));
+    const energy = round2(peakScore + costScore);
+
+    // 3) ТО/безпека 25: відсутність прострочених → +20, мало "скоро" → +5
+    const overScore = 20 * Math.max(0, 1 - Math.min(K17.over,5)/5);
+    const soonScore = 5 * Math.max(0, 1 - Math.min(K17.soon,5)/5);
+    const safety = round2(overScore + soonScore);
+
+    // 4) Баланс фаз 20: PASS=20, WARN~12, FAIL~4
+    const balance = (K18.status==='PASS')?20:(K18.status==='WARN'?12:4);
+
+    // 5) PTW 10: наявність 10, інакше 0
+    const ptw = K19.has?10:0;
+
+    const total = Math.max(0, Math.min(100, round2(art+energy+safety+balance+ptw)));
+    const status = total>=60?'PASS ✅':'REWORK 🔁';
+    return {art,energy,safety,balance,ptw,total,status};
+  }
+
+  function renderScore(R){
+    scoreBox.innerHTML='';
+    const blocks = [
+      ['Артефакти', R.art, 20],
+      ['Енергоаналіз', R.energy, 25],
+      ['ТО/безпека', R.safety, 25],
+      ['Баланс фаз', R.balance, 20],
+      ['PTW', R.ptw, 10],
+      ['ПІДСУМОК', R.total, 100],
+    ];
+    blocks.forEach(([t,val,max])=>{
+      const b=document.createElement('div'); b.className='s';
+      b.innerHTML=`<div><b>${esc(t)}</b></div><div>${val} / ${max}</div>`;
+      scoreBox.appendChild(b);
+    });
+    const mark=document.createElement('div');
+    mark.className='s'; mark.style.borderColor='var(--brand)'; mark.innerHTML=`<div><b>Статус</b></div><div style="color:var(--brand)">${esc(R.status)}</div>`;
+    scoreBox.appendChild(mark);
+  }
+
+  // ===== НАКЛЕЙКА 58 мм =====
+  function buildTicket(){
+    ticketsBox.innerHTML='';
+    const info = projInfo();
+    const R = scoreRubric(analyze16(), analyze17(), analyze18(), analyze19());
+    const url = info.url || defaultURL();
+    const el=document.createElement('div'); el.className='ticket';
+    el.innerHTML = `
+      <h4>PROJECT TICKET</h4>
+      <p><b>${esc(info.group)}</b> — ${esc(info.students)}</p>
+      <div class="line"></div>
+      <p>${esc(info.site)}</p>
+      <p>Оцінка: ${R.total}/100 · ${esc(R.status)}</p>
+      <p>Захист: ${esc(info.defense)}</p>
+      <div class="line"></div>
+      <p class="qr"><small>URI: ${esc(url)}</small></p>
+      <p><small>${nowStamp()}</small></p>
+    `;
+    ticketsBox.appendChild(el);
+  }
+  function downloadTXT(){
+    if(!ticketsBox.firstChild){ alert('Спочатку згенеруйте наклейку'); return; }
+    const txt = ticketsBox.firstChild.innerText.replace(/\n{2,}/g,'\n');
+    const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='project_ticket_58mm.txt'; a.click(); URL.revokeObjectURL(a.href);
+  }
+  function defaultURL(){ return 'https://serawww7.github.io/edlab/electric_para20.html'; }
+
+  // ===== A4-ЗВІТ =====
+  function buildReport(){
+    const info = projInfo();
+    const K16=analyze16(), K17=analyze17(), K18=analyze18(), K19=analyze19();
+    const R = scoreRubric(K16,K17,K18,K19);
+    const html = `
+      <section class="doc">
+        <h2>ФІНАЛЬНИЙ ЗВІТ — Електрики (Пара 20)</h2>
+        <p>Дата: ${nowStamp()}</p>
+        <p>Група: <b>${esc(info.group)}</b> · Учасники: ${esc(info.students)} · Керівник: ${esc(info.mentor)}</p>
+        <p>Обʼєкт: ${esc(info.site)} · Захист: ${esc(info.defense)} · Портфоліо: ${esc(info.url||defaultURL())}</p>
+        <h3>1. KPI проєкту</h3>
+        <table>
+          <thead><tr><th>Показник</th><th>Значення</th></tr></thead>
+          <tbody>
+            <tr><td>Енергія/добу</td><td>${K16.kWh} кВт·год</td></tr>
+            <tr><td>Пікова потужність</td><td>${K16.peak_kW} кВт</td></tr>
+            <tr><td>Вартість/добу</td><td>${K16.cost} грн</td></tr>
+            <tr><td>Обладнання (усього)</td><td>${K17.count} од.</td></tr>
+            <tr><td>ТО «скоро» (&le;30 дн)</td><td>${K17.soon} од.</td></tr>
+            <tr><td>ТО прострочено</td><td>${K17.over} од.</td></tr>
+            <tr><td>Баланс фаз</td><td>Δ%=${K18.imb} (${K18.status}); ΣA=${K18.A}А ΣB=${K18.B}А ΣC=${K18.C}А</td></tr>
+            <tr><td>PTW (вікно)</td><td>${esc(analyze19().window)}</td></tr>
+          </tbody>
+        </table>
+        <h3>2. Рубрика оцінювання</h3>
+        <table>
+          <thead><tr><th>Компонент</th><th>Бали</th><th>Макс</th></tr></thead>
+          <tbody>
+            <tr><td>Повнота артефактів</td><td>${R.art}</td><td>20</td></tr>
+            <tr><td>Енергоаналіз</td><td>${R.energy}</td><td>25</td></tr>
+            <tr><td>ТО/безпека</td><td>${R.safety}</td><td>25</td></tr>
+            <tr><td>Баланс фаз</td><td>${R.balance}</td><td>20</td></tr>
+            <tr><td>PTW</td><td>${R.ptw}</td><td>10</td></tr>
+            <tr><td><b>ПІДСУМОК</b></td><td><b>${R.total}</b></td><td><b>100</b></td></tr>
+          </tbody>
+        </table>
+        <h3>3. Коментарі викладача</h3>
+        <p style="min-height:24mm">................................................................................................................................................</p>
+        <h3>4. Підписи</h3>
+        <div class="sign">
+          <div>Команда: ____________________ (дата/час)</div>
+          <div>Викладач: ____________________ (дата/час)</div>
+        </div>
+      </section>
+    `;
+    const box=document.getElementById('printArea'); box.innerHTML=html; box.scrollIntoView({behavior:'smooth'});
+  }
+
+  // ===== ЕКСПОРТ =====
+  function exportAll(){
+    const info = projInfo();
+    const K16=analyze16(), K17=analyze17(), K18=analyze18(), K19=analyze19();
+    const R = scoreRubric(K16,K17,K18,K19);
+
+    // CSV
+    const headers=['group','students','mentor','site','defense','portfolio_url','kWh_day','peak_kW','cost_uah','equip_total','maint_soon','maint_over','phase_A','phase_B','phase_C','phase_imb_pct','phase_status','ptw_window','score_total','status','timestamp'];
+    const row=[info.group,info.students,info.mentor,info.site,info.defense,(info.url||defaultURL()),K16.kWh,K16.peak_kW,K16.cost,K17.count,K17.soon,K17.over,K18.A,K18.B,K18.C,K18.imb,K18.status,analyze19().window,R.total,R.status,nowStamp()]
+      .map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+    const csv=new Blob([[headers.join(','),row].join('\n')],{type:'text/csv;charset=utf-8'});
+    let a=document.createElement('a'); a.href=URL.createObjectURL(csv); a.download='project_summary.csv'; a.click(); URL.revokeObjectURL(a.href);
+
+    // JSON
+    const jsonObj={info,KPI:{energy:analyze16(),equip:analyze17(),panel:analyze18(),ptw:analyze19()},score:R,timestamp:nowStamp()};
+    const json=new Blob([JSON.stringify(jsonObj,null,2)],{type:'application/json;charset=utf-8'});
+    a=document.createElement('a'); a.href=URL.createObjectURL(json); a.download='project_summary.json'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // ===== ICS (дедлайни) =====
+  function icsEscape(s){ return String(s).replace(/([,;])/g,'\\$1').replace(/\n/g,'\\n'); }
+  function icsFormatLocal(ts){ // "YYYY-MM-DD HH:MM"
+    const [d,t]=String(ts||'').split(' ');
+    const [y,m,dd]=(d||'').split('-'); const [hh,mm]=(t||'').split(':');
+    return `${y}${m}${dd}T${hh}${mm}00`;
+  }
+  function downloadICS(){
+    const info=projInfo();
+    const start=info.defense || '2025-10-23 12:00';
+    const end = plusMinutes(start, 45);
+    const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//edlab//final//UA','BEGIN:VEVENT'];
+    lines.push('UID:'+'DEF-'+Date.now()+'@edlab');
+    lines.push('DTSTAMP:'+icsFormatLocal(nowStamp()));
+    lines.push('DTSTART:'+icsFormatLocal(start));
+    lines.push('DTEND:'+icsFormatLocal(end));
+    lines.push('SUMMARY:'+icsEscape(`Захист: ${info.group} · ${info.students}`));
+    lines.push('LOCATION:'+icsEscape(info.site));
+    lines.push('DESCRIPTION:'+icsEscape(`Керівник: ${info.mentor}\nURL: ${info.url||defaultURL()}`));
+    lines.push('END:VEVENT','END:VCALENDAR');
+    const blob=new Blob([lines.join('\n')],{type:'text/calendar;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='defense.ics'; a.click(); URL.revokeObjectURL(a.href);
+  }
+  function plusMinutes(ts, m){
+    const [d,t]=ts.split(' '); const [y,mo,da]=d.split('-').map(Number); const [hh,mm]=t.split(':').map(Number);
+    const dt=new Date(y,mo-1,da,hh,mm,0,0); dt.setMinutes(dt.getMinutes()+m);
+    return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+  }
+
+  // ===== ІМПОРТ ФАЙЛІВ (обробники) =====
+  document.getElementById('file16').addEventListener('change', async(e)=>{ D16=await readCSV(e.target); calcAll(); });
+  document.getElementById('file17').addEventListener('change', async(e)=>{ D17=await readCSV(e.target); calcAll(); });
+  document.getElementById('file18').addEventListener('change', async(e)=>{ D18=await readCSV(e.target); calcAll(); });
+  document.getElementById('file19').addEventListener('change', async(e)=>{ D19=await readCSV(e.target); calcAll(); });
+
+  // ===== ІНФО ПРОЄКТУ =====
+  function projInfo(){
+    return {
+      group:(document.getElementById('group').value||'').trim(),
+      students:(document.getElementById('students').value||'').trim(),
+      mentor:(document.getElementById('mentor').value||'').trim(),
+      site:(document.getElementById('site').value||'').trim(),
+      url:(document.getElementById('projUrl').value||'').trim(),
+      defense:(document.getElementById('defense').value||'').trim()
+    };
+  }
+
+  // ===== ДЕМО ДАНІ =====
+  function seedDemo(){
+    // Синтетичні масиви (імітація CSV)
+    D16={headers:['id','kWh_day','peak_W','cost_uah'], rows:[
+      {id:'E-01',kWh_day:'4.2',peak_W:'800',cost_uah:'12.6'},
+      {id:'E-02',kWh_day:'2.1',peak_W:'600',cost_uah:'6.3'},
+      {id:'E-03',kWh_day:'3.6',peak_W:'1200',cost_uah:'10.8'}
+    ]};
+    D17={headers:['id','next_yyyy_mm_dd'], rows:[
+      {id:'EQ-001',next_yyyy_mm_dd:futureISO(45)},
+      {id:'EQ-002',next_yyyy_mm_dd:futureISO(20)},
+      {id:'EQ-003',next_yyyy_mm_dd:futureISO(-5)}
+    ]};
+    D18={headers:['id','phase','poles','mode','value','PF','eta','I_calc_A'], rows:[
+      {id:'C-01',phase:'A',poles:'1P',mode:'p',value:'0.6',PF:'0.95',eta:'0.98',I_calc_A:''},
+      {id:'C-02',phase:'B',poles:'1P',mode:'p',value:'1.2',PF:'0.95',eta:'0.98',I_calc_A:''},
+      {id:'M-01',phase:'3F',poles:'3P',mode:'p',value:'2.2',PF:'0.9',eta:'0.9',I_calc_A:''}
+    ]};
+    D19={headers:['ptw_id','window_start','window_end'], rows:[
+      {ptw_id:'PTW-101',window_start:futureISO(1)+' 09:00',window_end:futureISO(1)+' 11:00'}
+    ]};
+    calcAll();
+  }
+  function futureISO(days){
+    const d=new Date(); d.setDate(d.getDate()+days);
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+
+  // Автодемо при відкритті (можна вимкнути, якщо потрібно порожньо)
+  seedDemo();
+</script>
+</body>
+</html>
