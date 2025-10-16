@@ -1,0 +1,494 @@
+<!-- electric_para10.html
+     Пара 10 (Електрики, аудиторно): ОСВІТЛЕННЯ
+     Розрахунок освітлення (люкс-метод), підбір кількості світильників, струмів та автоматів,
+     розбиття на групи, оцінка падіння напруги ΔU, пакет наклейок 58 мм, CSV, A4-звіт.
+     Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Електрики · Пара 10 — Освітлення: люкс-метод, групи, автомати, ΔU, друк 58 мм</title>
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
+  .wrap{max-width:1120px; margin:0 auto; padding:24px 16px 96px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9aa5b1}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:1050px){.g3{grid-template-columns:1fr}; .g2{grid-template-columns:1fr}}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .small{font-size:12px; color:#93a3b5}
+  .chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; font-size:12px; margin-right:6px; background:#0d1a2e}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  input,select,textarea{padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb; width:100%}
+
+  /* Таблиці */
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+
+  /* Квитанції 58 мм */
+  .tickets{display:flex; gap:12px; flex-wrap:wrap}
+  .ticket{
+    width:58mm; background:#fff; color:#000; padding:5mm 4mm; border-radius:6px;
+    box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace
+  }
+  .ticket h4{margin:0 0 4px; font-size:13px; text-align:center}
+  .ticket p{margin:1px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:5px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+
+  /* A4 */
+  #printArea{background:#fff; color:#000; border-radius:12px; border:1px solid #e5e7eb; padding:16px}
+  .doc{page-break-after:always; padding:12mm; color:#000; font-family:Georgia,"Times New Roman",serif}
+  .doc h2{color:#000; font-size:20px; margin:0 0 6px}
+  .doc h3{color:#000; font-size:16px; margin:6px 0}
+  .doc p{color:#000; margin:4px 0}
+  .doc table{width:100%; border-collapse:collapse; border:1px solid #111}
+  .doc th,.doc td{border:1px solid #111; padding:6px 8px; font-size:12px; vertical-align:top}
+  .doc .sign{margin-top:10mm; display:flex; gap:10mm; flex-wrap:wrap}
+  .doc .sign div{flex:1 1 220px}
+
+  /* Вбудований режим (iframe/Moodle) */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+
+  @media print{
+    @page{ size:A4; margin:12mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    #printArea{ border:none; padding:0 }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Електрики · Пара 10 · аудиторно</span>
+    <h1>💡 Освітлення: люкс-метод → кількість світильників → групи/автомати → ΔU → 🧾 наклейки 58 мм</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>Розрахувати освітлення приміщення за люкс-методом, визначити кількість світильників та їх схему підключення, розбити на групи, підібрати автомати захисту, оцінити падіння напруги й підготувати пакет наклейок 58 мм та A4-звіт.</p>
+      <p class="small">Формули: <span class="mono">N = ceil( E<sub>н</sub>·S / (Φ·UF·MF) )</span>, <span class="mono">I = P<sub>∑</sub> / (U·PF)</span>, <span class="mono">ΔU% ≈ I · 2·L·ρ / (S<sub>пров</sub> · U) · 100</span> для 1ф лінії (навчальна оцінка, Cu ρ=0.0175 Ω·мм²/м).</p>
+    </div>
+
+    <div class="card">
+      <h2>🏢 Вхідні дані приміщення</h2>
+      <div class="grid g3">
+        <div>
+          <div class="row"><label class="small" style="min-width:140px">Назва/адреса</label><input id="room" value="Майстерня · 101"></div>
+          <div class="row"><label class="small" style="min-width:140px">Довжина, м</label><input id="len" type="number" step="0.1" value="12"></div>
+          <div class="row"><label class="small" style="min-width:140px">Ширина, м</label><input id="wid" type="number" step="0.1" value="8"></div>
+          <div class="row"><label class="small" style="min-width:140px">Висота, м</label><input id="h" type="number" step="0.1" value="3.2"></div>
+        </div>
+        <div>
+          <div class="row"><label class="small" style="min-width:140px">Нормований люкс Eн</label><input id="lux" type="number" value="300"></div>
+          <div class="row"><label class="small" style="min-width:140px">Світловий потік Φ, лм/світ.</label><input id="phi" type="number" value="4000"></div>
+          <div class="row"><label class="small" style="min-width:140px">UF (викор.фактор)</label><input id="uf" type="number" step="0.05" value="0.7"></div>
+          <div class="row"><label class="small" style="min-width:140px">MF (коеф.запасу)</label><input id="mf" type="number" step="0.05" value="0.8"></div>
+        </div>
+        <div>
+          <div class="row"><label class="small" style="min-width:140px">P на світильник, Вт</label><input id="pLamp" type="number" value="36"></div>
+          <div class="row"><label class="small" style="min-width:140px">PF (cosφ)</label><input id="pf" type="number" step="0.05" value="0.95"></div>
+          <div class="row"><label class="small" style="min-width:140px">Напруга, В</label><input id="U" type="number" value="230"></div>
+          <div class="row"><label class="small" style="min-width:140px">Відповідальний</label><input id="resp" value="Студент ПІБ / група"></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" onclick="calcLumen()">🧩 Розрахунок люменів/кількості</button>
+        <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
+      </div>
+      <p id="lumenOut" class="small"></p>
+    </div>
+
+    <div class="card">
+      <h2>🧮 Розбиття на групи, дроти, автомати, ΔU</h2>
+      <div class="grid g3">
+        <div>
+          <h3>Групування</h3>
+          <div class="row"><label class="small" style="min-width:140px">Світильників всього</label><input id="N" type="number" value="0"></div>
+          <div class="row"><label class="small" style="min-width:140px">Макс. у групі</label><input id="perGroup" type="number" value="8"></div>
+          <div class="row"><label class="small" style="min-width:140px">К-ть груп (авто)</label><input id="groups" type="number" value="0" readonly></div>
+          <div class="row"><button class="btn" onclick="makeGroups()">🧩 Розбити на групи</button></div>
+          <p class="small">Рівномірно розподіляємо світильники між групами.</p>
+        </div>
+        <div>
+          <h3>Лінія (1ф, Cu)</h3>
+          <div class="row"><label class="small" style="min-width:140px">Довжина лінії L, м</label><input id="L" type="number" value="35"></div>
+          <div class="row"><label class="small" style="min-width:140px">Секція провідника, мм²</label>
+            <select id="S"><option>1.5</option><option selected>2.5</option><option>4</option><option>6</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px">Груповий PF</label><input id="pfG" type="number" step="0.05" value="0.95"></div>
+          <div class="row"><label class="small" style="min-width:140px">Допустима ΔU, %</label><input id="dropLimit" type="number" step="0.1" value="3"></div>
+        </div>
+        <div>
+          <h3>Автомат (MCB)</h3>
+          <div class="row"><label class="small" style="min-width:140px">Крива</label>
+            <select id="curve"><option>B</option><option selected>C</option><option>D</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px">Стандарти In, А</label>
+            <select id="standard">
+              <option>6</option><option selected>10</option><option>13</option><option>16</option><option>20</option>
+            </select></div>
+          <div class="row"><button class="btn" onclick="calcLines()">🧮 Обчислити струми/ΔU/MCB</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📋 Таблиця груп освітлення</h2>
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>#</th><th>Адреса</th><th>Світильники (шт)</th><th>P∑, Вт</th><th>I, А</th><th>MCB, А</th><th>Крива</th><th>Провід, мм²</th><th>ΔU, %</th><th>Статус</th><th>URL</th><th>Дії</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="small">Подвійне клацання по клітинці — редагування. Статус: <span class="chip ok">PASS</span> — ΔU ≤ ліміт; <span class="chip bad">FAIL</span> — перевищення.</p>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+      </div>
+    </div>
+
+    <div class="card printable">
+      <h2>🧾 Наклейки 58 мм (групи освітлення)</h2>
+      <div class="row">
+        <button class="btn" onclick="buildTickets()">🧩 Зібрати для всіх</button>
+        <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+        <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+      </div>
+      <div id="tickets" class="tickets"></div>
+    </div>
+
+    <div class="card printable">
+      <h2>📄 A4-звіт (для друку/PDF)</h2>
+      <div class="row">
+        <button class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
+        <button class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
+      </div>
+      <div id="printArea"></div>
+    </div>
+  </div>
+
+<script>
+  // Вбудований режим (Moodle)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // Стан
+  let groups = []; // {id, addr, n, Psum, I, mcb, curve, S, drop, status, url}
+  const tbody = document.querySelector('#tbl tbody');
+  const ticketsBox = document.getElementById('tickets');
+
+  function esc(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function pad2(n){ return n.toString().padStart(2,'0'); }
+  function nowStamp(){ const d=new Date(); const p=n=>n.toString().padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
+
+  // Люкс-метод
+  function calcLumen(){
+    const L = parseFloat(document.getElementById('len').value||'0');
+    const W = parseFloat(document.getElementById('wid').value||'0');
+    const E = parseFloat(document.getElementById('lux').value||'0');
+    const phi = parseFloat(document.getElementById('phi').value||'0');
+    const UF = parseFloat(document.getElementById('uf').value||'0.7');
+    const MF = parseFloat(document.getElementById('mf').value||'0.8');
+    const S = L*W;
+    const N = Math.ceil((E*S)/(phi*UF*MF));
+    const pLamp = parseFloat(document.getElementById('pLamp').value||'0');
+    const Psum = N * pLamp;
+    document.getElementById('N').value = isFinite(N)?N:0;
+    document.getElementById('lumenOut').innerHTML = `Площа S = <b>${S.toFixed(2)} м²</b>; Потрібний світловий потік: <span class="mono">${(E*S).toFixed(0)} лм</span> → Світильників: <span class="mono">${N}</span>; Сумарна потужність: <span class="mono">${Psum.toFixed(0)} Вт</span>.`;
+  }
+
+  // Розбиття на групи
+  function makeGroups(){
+    const room = document.getElementById('room').value.trim() || 'Приміщення';
+    const N = parseInt(document.getElementById('N').value||'0',10);
+    const per = Math.max(1, parseInt(document.getElementById('perGroup').value||'8',10));
+    const gCount = Math.ceil(N/per);
+    document.getElementById('groups').value = gCount;
+    const pLamp = parseFloat(document.getElementById('pLamp').value||'0');
+    const U = parseFloat(document.getElementById('U').value||'230');
+    const pf = parseFloat(document.getElementById('pfG').value||document.getElementById('pf').value||'0.95');
+    groups = [];
+    let rest = N;
+    for(let i=1;i<=gCount;i++){
+      const nHere = Math.min(per, rest); rest -= nHere;
+      const Psum = nHere * pLamp; // Вт
+      const I = U>0 ? (Psum/(U*pf)) : 0; // А
+      const addr = `${room}/Осв-${pad2(i)}`;
+      groups.push({
+        id:'G'+Math.random().toString(36).slice(2,7).toUpperCase(),
+        addr, n:nHere, Psum, I, mcb:10, curve:document.getElementById('curve').value,
+        S: parseFloat(document.getElementById('S').value||'2.5'),
+        drop:0, status:'—', url:''
+      });
+    }
+    render(); // первинний рендер
+  }
+
+  // Розрахунок струмів/ΔU/MCB підбір
+  function calcLines(){
+    const U = parseFloat(document.getElementById('U').value||'230');
+    const Lm = parseFloat(document.getElementById('L').value||'30');
+    const Smm = parseFloat(document.getElementById('S').value||'2.5');
+    const pf = parseFloat(document.getElementById('pfG').value||'0.95');
+    const limit = parseFloat(document.getElementById('dropLimit').value||'3');
+    const curve = document.getElementById('curve').value;
+    const std = parseInt(document.getElementById('standard').value||'10',10);
+    const rho = 0.0175; // Ω·мм²/м, Cu
+
+    groups.forEach(g=>{
+      // перерахунок I на базі Psum та PF (на випадок змін)
+      g.I = U>0 ? (g.Psum/(U*pf)) : 0;
+      // ΔU% = I · 2*L*ρ / (S*U) * 100
+      const drop = (g.I * 2 * Lm * rho) / (Smm * U) * 100;
+      g.drop = Math.round(drop*100)/100;
+      g.S = Smm;
+      g.curve = curve;
+      // Підбір автомата (навчально): In ≥ I*1.25, з ряду [6,10,13,16,20]
+      const need = g.I * 1.25;
+      const row = [6,10,13,16,20];
+      let pick = row.find(x=>x>=need) || 20;
+      // але не менше за std, якщо студент явно обрав інший ряд
+      pick = Math.max(pick, std);
+      g.mcb = pick;
+      g.status = (g.drop <= limit) ? 'PASS' : 'FAIL';
+    });
+    render();
+  }
+
+  function render(){
+    tbody.innerHTML='';
+    groups.forEach((g,i)=>{
+      const tr = document.createElement('tr');
+      const badge = `<span class="mono" style="padding:2px 8px;border:1px solid #223049;border-radius:999px;background:#0d1a2e;color:${g.status==='PASS'?'#22c55e':'#ef4444'}">${g.status}</span>`;
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td class="editable" data-k="addr" data-id="${g.id}">${esc(g.addr)}</td>
+        <td class="editable" data-k="n" data-id="${g.id}">${esc(g.n)}</td>
+        <td class="editable" data-k="Psum" data-id="${g.id}">${esc(Math.round(g.Psum))}</td>
+        <td class="editable" data-k="I" data-id="${g.id}">${esc((Math.round(g.I*100)/100).toFixed(2))}</td>
+        <td class="editable" data-k="mcb" data-id="${g.id}">${esc(g.mcb)}</td>
+        <td class="editable" data-k="curve" data-id="${g.id}">${esc(g.curve)}</td>
+        <td class="editable" data-k="S" data-id="${g.id}">${esc(g.S)}</td>
+        <td class="editable" data-k="drop" data-id="${g.id}">${esc(g.drop)}</td>
+        <td>${badge}</td>
+        <td class="editable" data-k="url" data-id="${g.id}">${esc(g.url||'')}</td>
+        <td class="mono">
+          <button class="btn" data-act="label" data-id="${g.id}">Наклейка</button>
+          <button class="btn" data-act="del" data-id="${g.id}">✖</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Редагування клітинок
+  tbody.addEventListener('dblclick', (e)=>{
+    const td = e.target.closest('.editable'); if(!td) return;
+    const id = td.getAttribute('data-id');
+    const key = td.getAttribute('data-k');
+    const idx = groups.findIndex(x=>x.id===id);
+    const g = groups[idx];
+    const input = document.createElement('input'); input.value = g[key] || ''; input.style.width='100%'; input.style.padding='6px 8px';
+    input.addEventListener('blur', ()=>{
+      let v = input.value.trim();
+      if(['n','Psum','I','mcb','S','drop'].includes(key)) v = parseFloat(v.replace(',','.')) || 0;
+      g[key] = v;
+      render();
+    });
+    td.innerHTML=''; td.appendChild(input); input.focus(); input.select();
+  });
+
+  // Дії
+  tbody.addEventListener('click', (e)=>{
+    const b = e.target.closest('button'); if(!b) return;
+    const id = b.getAttribute('data-id'); const act = b.getAttribute('data-act');
+    if(act==='del'){ groups = groups.filter(x=>x.id!==id); render(); return; }
+    if(act==='label'){ const g = groups.find(x=>x.id===id); buildTickets([g]); ticketsBox.scrollIntoView({behavior:'smooth'}); }
+  });
+
+  // Квитанції 58 мм
+  function buildTickets(list){
+    const L = list || groups;
+    ticketsBox.innerHTML='';
+    const room = document.getElementById('room').value.trim() || 'Приміщення';
+    const resp = document.getElementById('resp').value.trim() || '—';
+    L.forEach(g=>{
+      const el = document.createElement('div');
+      el.className='ticket';
+      const urlText = g.url ? g.url : `https://serawww7.github.io/edlab/electric_para10.html#${encodeURIComponent(g.addr)}`;
+      el.innerHTML = `
+        <h4>ГРУПА ОСВІТЛЕННЯ</h4>
+        <p><b>${esc(room)}</b></p>
+        <div class="line"></div>
+        <p>Адреса: <b>${esc(g.addr)}</b></p>
+        <p>Світильників: ${esc(g.n)} шт · P∑ ${Math.round(g.Psum)} Вт</p>
+        <p>MCB ${esc(g.curve)}${esc(g.mcb)} · Провід: ${esc(g.S)} мм²</p>
+        <p>ΔU: ${esc(g.drop)}% · Статус: ${esc(g.status||'—')}</p>
+        <div class="line"></div>
+        <p class="qr"><small>URL/NFC: ${esc(urlText)}</small></p>
+        <p><small>${nowStamp()} · Відп.: ${esc(resp)}</small></p>
+      `;
+      ticketsBox.appendChild(el);
+    });
+  }
+  function downloadTXT(){
+    if(!ticketsBox.firstChild){ alert('Спочатку згенеруйте наклейки'); return; }
+    const lines=['LIGHT GROUP LABELS 58mm','----------------------'];
+    Array.from(ticketsBox.children).forEach(t=>{ lines.push(t.innerText.replace(/\n{2,}/g,'\n')); lines.push('----------------------'); });
+    const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='light_groups_58mm.txt'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // A4-звіт
+  function buildReport(){
+    if(!groups.length){ alert('Немає груп'); return; }
+    const L = parseFloat(document.getElementById('len').value||'0');
+    const W = parseFloat(document.getElementById('wid').value||'0');
+    const H = parseFloat(document.getElementById('h').value||'0');
+    const E = parseFloat(document.getElementById('lux').value||'0');
+    const phi = parseFloat(document.getElementById('phi').value||'0');
+    const UF = parseFloat(document.getElementById('uf').value||'0.7');
+    const MF = parseFloat(document.getElementById('mf').value||'0.8');
+    const pLamp = parseFloat(document.getElementById('pLamp').value||'0');
+    const N = parseInt(document.getElementById('N').value||'0',10);
+    const S = L*W;
+    const room = esc(document.getElementById('room').value.trim() || 'Приміщення');
+    const resp = esc(document.getElementById('resp').value.trim() || '—');
+
+    const rowsHTML = groups.map((g,i)=>`
+      <tr>
+        <td>${i+1}</td><td>${esc(g.addr)}</td><td>${esc(g.n)}</td><td>${Math.round(g.Psum)}</td>
+        <td>${(Math.round(g.I*100)/100).toFixed(2)}</td><td>${esc(g.curve)}${esc(g.mcb)}</td>
+        <td>${esc(g.S)}</td><td>${esc(g.drop)}%</td><td>${esc(g.status)}</td>
+      </tr>
+    `).join('');
+
+    const doc = `
+      <section class="doc">
+        <h2>РОЗРАХУНОК ОСВІТЛЕННЯ ТА ГРУПОВИХ ЛІНІЙ</h2>
+        <p>Об’єкт: ${room} · Дата: ${nowStamp()}</p>
+        <h3>1. Вихідні дані</h3>
+        <table>
+          <tbody>
+            <tr><td>Геометрія</td><td>L=${L} м; W=${W} м; H=${H} м; S=${S.toFixed(2)} м²</td></tr>
+            <tr><td>Нормований Eн</td><td>${E} лк</td></tr>
+            <tr><td>Світильник</td><td>Φ=${phi} лм; P<sub>од</sub>=${pLamp} Вт; UF=${UF}; MF=${MF}</td></tr>
+            <tr><td>Результат люкс-методу</td><td>Потрібно світильників: <b>${N}</b></td></tr>
+            <tr><td>Відповідальний</td><td>${resp}</td></tr>
+          </tbody>
+        </table>
+        <h3>2. Групи освітлення</h3>
+        <table>
+          <thead><tr><th>#</th><th>Адреса</th><th>Світ.</th><th>P∑, Вт</th><th>I, А</th><th>MCB</th><th>Провід, мм²</th><th>ΔU, %</th><th>Статус</th></tr></thead>
+          <tbody>${rowsHTML}</tbody>
+        </table>
+        <h3>3. Висновок</h3>
+        <p>Груп з PASS: ${groups.filter(g=>g.status==='PASS').length}; з FAIL: ${groups.filter(g=>g.status==='FAIL').length}.</p>
+        <div class="sign">
+          <div>Виконавець: ______________________ / ${resp}</div>
+          <div>Керівник робіт: ______________________</div>
+        </div>
+        <p class="small">Примітка: ΔU — навчальна оцінка для 1ф лінії; у реальних проєктах потрібно враховувати спосіб прокладки, температуру, корекції навантажень, гармоніки тощо.</p>
+      </section>`;
+    document.getElementById('printArea').innerHTML = doc;
+    document.getElementById('printArea').scrollIntoView({behavior:'smooth'});
+  }
+
+  // CSV
+  function exportCSV(){
+    const headers = ['addr','lamps','Psum_W','I_A','MCB_A','curve','wire_mm2','drop_pct','status','url','room','resp','timestamp'];
+    const room = document.getElementById('room').value.trim();
+    const resp = document.getElementById('resp').value.trim();
+    const stamp = nowStamp();
+    const csv = [headers.join(','), ...groups.map(g=>[
+      g.addr, g.n, Math.round(g.Psum), (Math.round(g.I*100)/100).toFixed(2), g.mcb, g.curve, g.S, g.drop, g.status, g.url||'', room, resp, stamp
+    ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='lighting_groups.csv'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  async function importCSV(){
+    const f=document.getElementById('file').files[0]; if(!f){ alert('Оберіть CSV'); return; }
+    const txt=await f.text();
+    const lines=txt.trim().split(/\r?\n/); if(lines.length<2){ alert('CSV порожній'); return; }
+    const headers=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());
+    const req=['addr','lamps','Psum_W','I_A','MCB_A','curve','wire_mm2','drop_pct','status','url'];
+    const miss=req.filter(x=>!headers.includes(x)); if(miss.length){ alert('Відсутні поля: '+miss.join(', ')); return; }
+    const out=[];
+    for(let i=1;i<lines.length;i++){
+      const cells=splitCSV(lines[i]); if(!cells.length) continue;
+      const o={}; headers.forEach((h,j)=>o[h]=(cells[j]||'').replace(/^"|"$/g,''));
+      out.push({
+        id:'G'+Math.random().toString(36).slice(2,7).toUpperCase(),
+        addr:o.addr, n:parseInt(o.lamps,10)||0, Psum:parseFloat(o.Psum_W)||0, I:parseFloat(o.I_A)||0,
+        mcb:parseInt(o.MCB_A,10)||10, curve:o.curve||'C', S:parseFloat(o.wire_mm2)||2.5,
+        drop:parseFloat(o.drop_pct)||0, status:o.status||'—', url:o.url||''
+      });
+    }
+    groups = out; render();
+  }
+  function splitCSV(line){
+    const res=[]; let cur=''; let q=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){ if(q && line[i+1]==='"'){ cur+='"'; i++; } else q=!q; }
+      else if(ch===',' && !q){ res.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    res.push(cur); return res;
+  }
+
+  // Приклад
+  function seedDemo(){
+    document.getElementById('room').value='Майстерня · 101';
+    document.getElementById('len').value=12;
+    document.getElementById('wid').value=8;
+    document.getElementById('h').value=3.2;
+    document.getElementById('lux').value=300;
+    document.getElementById('phi').value=4000;
+    document.getElementById('uf').value=0.7;
+    document.getElementById('mf').value=0.8;
+    document.getElementById('pLamp').value=36;
+    document.getElementById('pf').value=0.95;
+    document.getElementById('U').value=230;
+    document.getElementById('resp').value='Студент ПІБ / група';
+    calcLumen();
+    document.getElementById('perGroup').value=6;
+    makeGroups();
+    document.getElementById('L').value=35;
+    document.getElementById('S').value=2.5;
+    document.getElementById('curve').value='C';
+    document.getElementById('standard').value=10;
+    document.getElementById('dropLimit').value=3;
+    calcLines();
+    buildTickets();
+  }
+
+  // Авто-демо при першому відкритті
+  seedDemo();
+</script>
+</body>
+</html>
