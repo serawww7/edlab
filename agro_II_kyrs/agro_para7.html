@@ -1,0 +1,336 @@
+<!-- ПАРА 7 (аудиторно) для агрономів
+     Тема: ҐРУНТОВІ ЗРАЗКИ — pH, EC, NPK(швидкі тести) → рекомендації внесення
+     Фокус: телефони/ПК, локально; зручний ввід декількох зразків, миттєві рекомендації та CSV.
+     ВАЖЛИВО (контраст): для всіх темних клітинок примусово встановлено світлий текст.
+     Готово для GitHub Pages / iFrame у Moodle. -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 7 — Ґрунтові зразки: pH · EC · NPK → рекомендації</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1080px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .muted{color:#93a3b5}
+  .small{font-size:12px; color:#9fb0c8}
+
+  .card{
+    background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0;
+    box-shadow:0 6px 24px rgba(0,0,0,.25)
+  }
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:980px){.g2,.g3{grid-template-columns:1fr}}
+
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)} /* КОНТРАСТ ДЛЯ ТЕМНИХ РЯДКІВ */
+  .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important} /* КОНТРАСТ ДЛЯ ТЕМНИХ КОМІРОК */
+  .table td .tag{display:inline-block; padding:3px 8px; border-radius:999px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; font-size:12px}
+
+  /* Вхідні поля на темному фоні — світлий текст */
+  input[type="text"], input[type="number"], input[type="date"], select, textarea{
+    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
+  }
+
+  .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+
+  /* Вбудовано (iframe) → стриманий вигляд на світлому */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+  html.embedded .box{background:#f8fafc; color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 7 · аудиторно · агрономи</span>
+    <h1>🧪 Ґрунтові зразки: pH, EC, NPK(швидкі тести) → базові рекомендації внесення</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        За пару студенти зберуть <b>дані по декількох зразках</b> (код поля, pH, EC, N, P, K за швидкими тестами),
+        отримають <b>миттєві рекомендації</b> по вапнуванню та NPK (навчальна спрощена модель), а також сформують <b>CSV</b> для Sheets.
+      </p>
+      <p class="small">Модель рекомендацій — навчальна, з простими порогами. У реальному господарстві коригувати за офіційними агрохімічними картами та рекомендаціями виробників добрив.</p>
+    </div>
+
+    <!-- ПАРАМЕТРИ КУЛЬТУРИ / ЦІЛЬОВІ ЗНАЧЕННЯ -->
+    <div class="card">
+      <h2>🌾 Культура/цілі</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Культура та цільовий pH</h3>
+          <label>Культура</label>
+          <input id="crop" type="text" value="Пшениця озима" />
+          <label style="margin-top:8px">Цільовий pH (H2O)</label>
+          <input id="phTarget" type="number" step="0.1" value="6.2" />
+          <p class="small">Типові діапазони (навчально): пшениця 6.0–7.0; кукурудза 6.0–6.8; ріпак 6.2–7.0.</p>
+        </div>
+        <div class="box">
+          <h3>Орієнтовні пороги NPK (рівні забезпеченості)</h3>
+          <p class="small">Використовуємо умовні пороги для швидких тестів (ppm):</p>
+          <table class="table">
+            <thead><tr><th class="dark">Поживн.</th><th class="dark">Низький</th><th class="dark">Середній</th><th class="dark">Високий</th></tr></thead>
+            <tbody>
+              <tr><td class="dark">N(NO₃)</td><td class="dark">0–10</td><td class="dark">11–25</td><td class="dark">26+</td></tr>
+              <tr><td class="dark">P₂O₅</td><td class="dark">0–15</td><td class="dark">16–30</td><td class="dark">31+</td></tr>
+              <tr><td class="dark">K₂O</td><td class="dark">0–80</td><td class="dark">81–150</td><td class="dark">151+</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box">
+          <h3>Коефіцієнти рекомендацій</h3>
+          <p class="small">Спрощена видача для навчання (кг/га діючої речовини):</p>
+          <ul class="small">
+            <li>N: низький → 90; середній → 60; високий → 30</li>
+            <li>P₂O₅: низький → 70; середній → 40; високий → 0</li>
+            <li>K₂O: низький → 80; середній → 40; високий → 0</li>
+          </ul>
+          <p class="small">Вапнування (CaCO₃): якщо pH нижче цілі на 0.3–0.7 → 1–2 т/га; нижче на ≥0.8 → 2–4 т/га (залежно від гранулометрії, за погодженням з агрохіміком).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ТАБЛИЦЯ ЗРАЗКІВ -->
+    <div class="card">
+      <h2>🧫 Зразки ґрунту (ввід даних)</h2>
+      <div class="row">
+        <button class="btn" type="button" onclick="addRow()">➕ Додати зразок</button>
+        <button class="btn" type="button" onclick="recalc()">🔁 Перерахувати</button>
+        <button class="btn" type="button" onclick="copyCSV()">📋 Скопіювати CSV</button>
+      </div>
+      <div style="overflow:auto; margin-top:8px">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Поле (код)</th>
+              <th>Зразок</th>
+              <th>Дата</th>
+              <th>Текстура</th>
+              <th>pH</th>
+              <th>EC, dS/m</th>
+              <th>N (ppm)</th>
+              <th>P₂O₅ (ppm)</th>
+              <th>K₂O (ppm)</th>
+              <th class="dark">Рівні</th>
+              <th class="dark">Реком., кг/га<br/>N | P₂O₅ | K₂O</th>
+              <th class="dark">Вапнування</th>
+              <th>Коментар</th>
+            </tr>
+          </thead>
+          <tbody id="body">
+            <!-- зразок-приклад -->
+          </tbody>
+        </table>
+      </div>
+      <div id="csv" class="out" style="margin-top:8px">—</div>
+      <p class="small">Формат CSV: <span class="mono"># | Поле | Зразок | Дата | Текстура | pH | EC | Nppm | Pppm | Kppm | Рівні | Реком.(N,P₂O₅,K₂O) | Вапнування | Коментар</span></p>
+      <p class="small">⚠️ Контраст перевірено: темні комірки — зі світлим текстом.</p>
+    </div>
+
+    <!-- ХІД РОБОТИ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+      <ol>
+        <li>З кожної бригади — мінімум 2 зразки (реальні або навчальні дані). Заповни таблицю.</li>
+        <li>Натисни «Перерахувати» — переглянь рівні забезпеченості та рекомендації.</li>
+        <li>Обговори в групі доцільність вапнування (різна текстура — різні дози, у реалі — за агрохімкартою).</li>
+        <li>«Скопіювати CSV» → встав у Google Sheets (аркуш <span class="mono">SoilLab</span>) та побудуй діаграми порівнянь.</li>
+      </ol>
+    </div>
+
+    <!-- ОЦІНЮВАННЯ -->
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Заповнено мін. 4 зразки з валідними pH, EC, NPK</td><td>4</td></tr>
+          <tr><td>Коректні рівні забезпеченості та базові рекомендації</td><td>3</td></tr>
+          <tr><td>CSV у Sheets + 2 діаграми</td><td>2</td></tr>
+          <tr><td>Короткий висновок (3 речення)</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">🧪 Швидкі тести</p><p class="pill">🌡️ EC</p><p class="pill">🧂 Вапнування</p><p class="pill">📊 CSV → Sheets</p>
+    </div>
+  </div>
+
+<script>
+  // Режим «вбудовано»
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const bodyEl = document.getElementById('body');
+  const csvEl  = document.getElementById('csv');
+
+  // Порогові рівні (ppm)
+  const TH = {
+    N: {low:[0,10], mid:[11,25]},          // >25 — high
+    P: {low:[0,15], mid:[16,30]},          // >30 — high
+    K: {low:[0,80], mid:[81,150]}          // >150 — high
+  };
+
+  const RECS = {
+    N: {low:90, mid:60, high:30},
+    P: {low:70, mid:40, high:0},
+    K: {low:80, mid:40, high:0}
+  };
+
+  function lvl(val, thr){
+    if(val<=thr.low[1]) return 'низький';
+    if(val<=thr.mid[1]) return 'середній';
+    return 'високий';
+  }
+
+  function limeDose(pH, target, texture){
+    // дуже спрощено для навчальних задач
+    const diff = target - pH; // скільки «не дотягує»
+    if(diff <= 0.2) return 'не потрібно';
+    let base = diff>=0.8 ? 3.0 : (diff>=0.4 ? 2.0 : 1.0); // т/га
+    // текстура: легкі -> менше, важкі -> більше
+    if(/піщ|супіс/i.test(texture)) base -= 0.5;
+    if(/суглин|глина/i.test(texture)) base += 0.5;
+    base = Math.max(0.5, Math.min(4, base));
+    return base.toFixed(1)+' т/га CaCO₃';
+    // у реалі: коригувати за гідролітичною кислотністю/буферністю ґрунту
+  }
+
+  function addRow(sample={
+    field:'F-01', code:'S-01', date:new Date().toISOString().slice(0,10),
+    texture:'суглинок', pH:5.8, EC:0.25, N:12, P:18, K:110, note:'Навчальний приклад'
+  }){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${sample.field}"/></td>
+      <td><input type="text" value="${sample.code}"/></td>
+      <td><input type="date" value="${sample.date}"/></td>
+      <td>
+        <select>
+          <option${/піщ/i.test(sample.texture)?' selected':''}>піщаний</option>
+          <option${/супіс/i.test(sample.texture)?' selected':''}>супіщаний</option>
+          <option${/суглин/i.test(sample.texture)?' selected':''}>суглинок</option>
+          <option${/глина/i.test(sample.texture)?' selected':''}>глина</option>
+        </select>
+      </td>
+      <td><input type="number" step="0.1" value="${sample.pH}"/></td>
+      <td><input type="number" step="0.01" value="${sample.EC}"/></td>
+      <td><input type="number" step="1" value="${sample.N}"/></td>
+      <td><input type="number" step="1" value="${sample.P}"/></td>
+      <td><input type="number" step="1" value="${sample.K}"/></td>
+      <td class="dark lvl">—</td>
+      <td class="dark rnpk">—</td>
+      <td class="dark lime">—</td>
+      <td><input type="text" value="${sample.note}"/></td>
+    `;
+    bodyEl.appendChild(tr);
+    reindex();
+  }
+
+  function reindex(){
+    [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent = i+1);
+  }
+
+  function recalc(){
+    const targetPH = parseFloat(document.getElementById('phTarget').value||'6.2');
+
+    [...bodyEl.querySelectorAll('tr')].forEach(tr=>{
+      const texture = tr.children[4].querySelector('select').value;
+      const pH = parseFloat(tr.children[5].querySelector('input').value||'0');
+      const EC = parseFloat(tr.children[6].querySelector('input').value||'0');
+      const N  = parseFloat(tr.children[7].querySelector('input').value||'0');
+      const P  = parseFloat(tr.children[8].querySelector('input').value||'0');
+      const K  = parseFloat(tr.children[9].querySelector('input').value||'0');
+
+      const nL = lvl(N, TH.N), pL = lvl(P, TH.P), kL = lvl(K, TH.K);
+      tr.querySelector('.lvl').innerHTML = `
+        <span class="tag">N: ${nL}</span>
+        <span class="tag">P: ${pL}</span>
+        <span class="tag">K: ${kL}</span>
+      `;
+
+      const recN = RECS.N[nL==='низький'?'low':(nL==='середній'?'mid':'high')];
+      const recP = RECS.P[pL==='низький'?'low':(pL==='середній'?'mid':'high')];
+      const recK = RECS.K[kL==='низький'?'low':(kL==='середній'?'mid':'high')];
+      tr.querySelector('.rnpk').textContent = `${recN} | ${recP} | ${recK}`;
+
+      const lime = limeDose(pH, targetPH, texture);
+      tr.querySelector('.lime').textContent = lime;
+
+      // кольорові підказки по EC (навчально): >2.0 dS/m — сільність (ризик)
+      if(EC >= 2.0){ tr.children[6].style.color = '#ef4444'; } else { tr.children[6].style.color = ''; }
+    });
+
+    buildCSV();
+  }
+
+  function buildCSV(){
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx = tr.querySelector('.idx').textContent.trim();
+      const field = tr.children[1].querySelector('input').value.trim();
+      const code  = tr.children[2].querySelector('input').value.trim();
+      const date  = tr.children[3].querySelector('input').value.trim();
+      const texture = tr.children[4].querySelector('select').value.trim();
+      const pH   = tr.children[5].querySelector('input').value.trim();
+      const EC   = tr.children[6].querySelector('input').value.trim();
+      const N    = tr.children[7].querySelector('input').value.trim();
+      const P    = tr.children[8].querySelector('input').value.trim();
+      const K    = tr.children[9].querySelector('input').value.trim();
+      const lvl  = tr.querySelector('.lvl').innerText.replace(/\s+/g,' ').trim();
+      const rnpk = tr.querySelector('.rnpk').textContent.trim();
+      const lime = tr.querySelector('.lime').textContent.trim();
+      const note = tr.children[13].querySelector('input').value.trim();
+      return [idx,field,code,date,texture,pH,EC,N,P,K,lvl,rnpk,lime,note].join(' | ');
+    });
+    csvEl.textContent = lines.join('\n') || '—';
+  }
+
+  function copyCSV(){
+    const txt = csvEl.textContent.trim();
+    if(!txt || txt==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(txt).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося скопіювати'));
+  }
+
+  function flash(msg){
+    const old=document.title; document.title=msg; setTimeout(()=>document.title=old,900);
+  }
+
+  // Початкові рядки
+  addRow(); // приклад
+  addRow({field:'F-02', code:'S-02', texture:'супіщаний', pH:5.4, EC:0.18, N:8, P:12, K:72, note:'Під лісосмугою'});
+  recalc();
+</script>
+</body>
+</html>
