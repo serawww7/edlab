@@ -1,0 +1,351 @@
+<!-- ПАРА 6 (аудиторно) для агрономів
+     Тема: НОРМА ВИСІВУ ТА КАЛІБРУВАННЯ СІВАЛКИ — TKW, схожість, цільова густота, рядкова норма, «ваговий тест» на колесо
+     Фокус: робота в коледжі, максимум телефону/ПК. Без зовнішніх бібліотек. Готово для GitHub Pages / iFrame у Moodle. -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 6 — Норма висіву та калібрування сівалки</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --good:#10b981; --bad:#ef4444; --line:#1f2937;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1080px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:980px){.g2,.g3{grid-template-columns:1fr}}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .muted{color:#93a3b5}
+  .small{font-size:12px; color:#9fb0c8}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .field{display:flex; gap:8px; margin:6px 0; align-items:center}
+  .field label{min-width:220px; color:#cbd5e1}
+  .field input, .field select{
+    flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb
+  }
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:#0b1324}
+  .out{background:#0b1324; border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+
+  /* Вбудовано (iframe) → стриманий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+
+  @media print{
+    @page{ margin:12mm }
+    .no-print{ display:none !important }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 6 · аудиторно · агрономи</span>
+    <h1>🌾 Норма висіву та калібрування сівалки: від TKW і схожості до «вагового тесту»</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        За пару студент розраховує <b>норму висіву (кг/га)</b> із урахуванням <b>маси 1000 насінин (TKW)</b>,
+        <b>схожості</b> та <b>польової приживлюваності</b>, отримує <b>рядкову норму (насінин/м)</b> для заданого кроку рядка,
+        а також планує <b>калібрування через «ваговий тест»</b> по оберту колеса сівалки.
+      </p>
+      <p class="muted">Фізика проста: <span class="mono">кг/га = (насінин/м² × TKW) / 100</span>; <span class="mono">насінин/м = насінин/м² × крок_рядка(м)</span>.</p>
+    </div>
+
+    <!-- ВХІДНІ ДАНІ -->
+    <div class="card">
+      <h2>🧰 Вхідні дані</h2>
+      <div class="grid g2">
+        <div class="box">
+          <h3>Насіння і ціль</h3>
+          <div class="field"><label for="crop">Культура</label><input id="crop" type="text" value="Пшениця озима" /></div>
+          <div class="field"><label for="tkw">TKW — маса 1000 насінин, г</label><input id="tkw" type="number" step="0.1" value="42" /></div>
+          <div class="field"><label for="germ">Схожість, %</label><input id="germ" type="number" step="1" value="95" /></div>
+          <div class="field"><label for="field">Польова приживлюваність, %</label><input id="field" type="number" step="1" value="90" /></div>
+          <div class="field"><label for="target">Цільова густота, рослин/м²</label><input id="target" type="number" step="1" value="450" /></div>
+          <div class="row"><button class="btn" type="button" onclick="calcSeed()">🔁 Розрахувати</button></div>
+        </div>
+
+        <div class="box">
+          <h3>Сівалка і геометрія</h3>
+          <div class="field"><label for="rowcm">Крок рядка, см</label><input id="rowcm" type="number" step="0.1" value="12.5" /></div>
+          <div class="field"><label for="width">Ширина захвату, м</label><input id="width" type="number" step="0.1" value="3.0" /></div>
+          <div class="field"><label for="rows">Кількість рядків (якщо відомо)</label><input id="rows" type="number" step="1" value="24" /></div>
+          <div class="field"><label for="wheelD">Діаметр колеса, см</label><input id="wheelD" type="number" step="0.1" value="90" /></div>
+          <div class="row"><button class="btn" type="button" onclick="calcWheel()">🛞 Обчислити «ваговий тест»</button></div>
+          <p class="small">Якщо рядки × крок не співпадають з шириною — переважно вірити <b>фактичній ширині</b> (вимір рулеткою).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ПІДСУМКИ -->
+    <div class="card">
+      <h2>📊 Підсумки розрахунків</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Норма висіву</h3>
+          <p><b>Ефективність (схожість×приживл.)</b>: <span id="eff">—</span> %</p>
+          <p><b>Потрібно насінин/м²</b>: <span id="seedsM2">—</span></p>
+          <p><b>Норма висіву (кг/га)</b>: <span id="kgHa">—</span></p>
+        </div>
+        <div class="box">
+          <h3>У рядку</h3>
+          <p><b>Крок рядка</b>: <span id="rowM">—</span> м</p>
+          <p><b>Насінин на метр</b>: <span id="seedsM">—</span> нас/м</p>
+          <p><b>Орієнт. інтервал між насінинами</b>: <span id="spacingCM">—</span> см</p>
+        </div>
+        <div class="box">
+          <h3>«Ваговий тест» (1 оберт колеса)</h3>
+          <p><b>Окружність колеса</b>: <span id="circM">—</span> м</p>
+          <p><b>Площа за оберт</b>: <span id="areaRev">—</span> м²</p>
+          <p><b>Насіння за оберт</b>: <span id="seedsRev">—</span> шт</p>
+          <p><b>Вага за оберт</b>: <span id="gramsRev">—</span> г</p>
+          <div class="row" style="margin-top:6px">
+            <button class="btn" type="button" onclick="copyRev()">📋 Скопіювати рядок</button>
+          </div>
+          <div id="revCSV" class="out" style="margin-top:6px">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ТАБЛИЦЯ КАЛІБРУВАННЯ -->
+    <div class="card">
+      <h2>🧱 План калібрування (збір ваги з висівних апаратів)</h2>
+      <p class="muted">Зроби <b>10 обертів</b> колеса в піднятій сівалці, або кроком «на козлах». Зваж зібране насіння з усіх апаратів, порівняй з очікуваною вагою.</p>
+      <div style="overflow:auto">
+        <table class="table" id="calTable">
+          <thead>
+            <tr>
+              <th># спроби</th>
+              <th>Оберти колеса</th>
+              <th>Очікувана вага, г</th>
+              <th>Фактична вага, г</th>
+              <th>Похибка, %</th>
+              <th>Коментар / Регулювання</th>
+            </tr>
+          </thead>
+          <tbody id="calBody">
+            <tr>
+              <td>1</td>
+              <td><input type="number" value="10" /></td>
+              <td class="mono exp">—</td>
+              <td><input type="number" step="0.1" value="0.0" /></td>
+              <td class="mono dev">—</td>
+              <td><input type="text" value="Зірочка +1 крок / заслінка +" /></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><input type="number" value="10" /></td>
+              <td class="mono exp">—</td>
+              <td><input type="number" step="0.1" value="0.0" /></td>
+              <td class="mono dev">—</td>
+              <td><input type="text" value="Тонка доводка" /></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" type="button" onclick="recalcCal()">🔁 Перерахувати таблицю</button>
+        <button class="btn" type="button" onclick="copyCal()">📋 Скопіювати як CSV</button>
+      </div>
+      <div id="csvCal" class="out" style="margin-top:8px">—</div>
+      <p class="small">Ціль: |похибка| ≤ 5%. Якщо вище — змінюй передаточне число/шторки/тиск, повторюй перевірку.</p>
+    </div>
+
+    <!-- ХІД РОБОТИ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+      <div class="row">
+        <div class="box" style="flex:1">
+          <h3>1) Розрахунок норми висіву</h3>
+          <ol>
+            <li>Введи <b>TKW</b>, <b>схожість</b>, <b>приживлюваність</b>, <b>ціль рослин/м²</b> → «Розрахувати».</li>
+            <li>Запиши <b>кг/га</b>, <b>насінин/м</b>, <b>інтервал</b>.</li>
+          </ol>
+        </div>
+        <div class="box" style="flex:1">
+          <h3>2) Геометрія сівалки</h3>
+          <ol>
+            <li>Введи <b>крок рядка</b>, <b>ширину</b>, <b>рядки</b>, <b>діаметр колеса</b> → «Обчислити «ваговий тест»».</li>
+            <li>Отримай <b>г/оберт</b> — це ціль для калібрування.</li>
+          </ol>
+        </div>
+        <div class="box" style="flex:1">
+          <h3>3) Калібрування</h3>
+          <ol>
+            <li>Проведи <b>10 обертів</b>, зваж фактичну вагу, внеси в таблицю.</li>
+            <li>Доможися <b>|похибка| ≤ 5%</b>, збережи CSV і встав у Sheets.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- ОЦІНЮВАННЯ -->
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Коректний розрахунок норми (кг/га) і нас/м з урахуванням TKW, схожості, приживл.</td><td>4</td></tr>
+          <tr><td>План «вагового тесту»: г/оберт, таблиця калібрування з 2 спробами</td><td>3</td></tr>
+          <tr><td>CSV збережено та вставлено у Sheets (і короткі висновки)</td><td>2</td></tr>
+          <tr><td>Усний аналіз: що змінює крок рядка/ширина/діаметр колеса</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">🌾 TKW</p><p class="pill">🌱 Схожість × приживлюваність</p><p class="pill">🛞 Ваговий тест</p><p class="pill">📊 CSV → Sheets</p>
+    </div>
+  </div>
+
+<script>
+  // Стриманий вигляд у вбудуванні
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  function val(id){ return parseFloat(document.getElementById(id).value||'0'); }
+  function txt(id){ return (document.getElementById(id).value||'').trim(); }
+  function out(id, v){ document.getElementById(id).textContent = v; }
+  function rnd(n,d=2){ return Number((+n).toFixed(d)); }
+
+  // 1) Розрахунок насіння
+  function calcSeed(){
+    const tkw = val('tkw');           // г/1000 насінин
+    const germ = val('germ')/100;     // 0..1
+    const field = val('field')/100;   // 0..1
+    const target = val('target');     // рослин/м²
+
+    if(tkw<=0 || germ<=0 || field<=0 || target<=0){ alert('Перевір вхідні дані для насіння.'); return; }
+
+    const eff = germ*field;                             // ефективність
+    const seedsPerM2 = target/eff;                      // потрібно насінин/м²
+    const kgHa = (seedsPerM2 * tkw) / 100.0;            // спрощена формула: кг/га = (нас/м² * TKW) / 100
+
+    // Рядкова норма
+    const rowM = val('rowcm')/100.0;                    // м
+    const seedsPerM = seedsPerM2 * rowM;                // нас/м
+    const spacingCM = seedsPerM>0 ? rnd(100.0/seedsPerM,1) : 0; // см між насінинами у рядку (орієнтовно)
+
+    out('eff', rnd(eff*100,1));
+    out('seedsM2', rnd(seedsPerM2,1));
+    out('kgHa', rnd(kgHa,1));
+    out('rowM', rnd(rowM,3)+' м');
+    out('seedsM', rnd(seedsPerM,1));
+    out('spacingCM', spacingCM+' см');
+  }
+
+  // 2) «Ваговий тест» на колесо
+  function calcWheel(){
+    // Переконуємось, що базові розрахунки зроблені
+    if(document.getElementById('kgHa').textContent==='—'){ calcSeed(); }
+
+    const rowM = val('rowcm')/100.0;
+    const width = val('width');
+    const rows = Math.max(1, Math.round(val('rows')));
+    const wheelD = val('wheelD')/100.0;
+
+    if(rowM<=0 || width<=0 || wheelD<=0){ alert('Перевір геометрію сівалки.'); return; }
+
+    // Контроль ширини за рядками
+    const widthByRows = rnd(rows*rowM,3);
+    // Фактична ширина важливіша, але покажемо довідково
+    // Окружність колеса
+    const circ = Math.PI * wheelD;
+
+    // Насіння/м² (із блоку 1)
+    const seedsM2 = parseFloat((document.getElementById('seedsM2').textContent||'0').replace(',','.'));
+    const tkw = val('tkw');
+
+    // Площа, що проходить сівалка за 1 оберт колеса ≈ окружність × ширина захвату
+    const areaRev = circ * width; // м²
+    // Насіння за оберт
+    const seedsRev = seedsM2 * areaRev;
+    // Вага за оберт (г): насіння × (г/нас.) = насіння × (TKW/1000)
+    const gramsRev = seedsRev * (tkw/1000.0);
+
+    out('circM', rnd(circ,3)+' м');
+    out('areaRev', rnd(areaRev,2)+' м²');
+    out('seedsRev', Math.round(seedsRev));
+    out('gramsRev', rnd(gramsRev,1)+' г');
+
+    // CSV-рядок
+    const line = [
+      'Культура: '+txt('crop'),
+      'Крок рядка: '+rowM.toFixed(3)+' м',
+      'Ширина: '+width+' м (рядки×крок ≈ '+widthByRows+' м)',
+      'Окружність: '+rnd(circ,3)+' м',
+      'Площа/оберт: '+rnd(areaRev,2)+' м²',
+      'Насіння/оберт: '+Math.round(seedsRev),
+      'Вага/оберт: '+rnd(gramsRev,1)+' г'
+    ].join(' | ');
+    document.getElementById('revCSV').textContent = line;
+  }
+
+  function copyRev(){
+    const t = document.getElementById('revCSV').textContent.trim();
+    if(!t || t==='—'){ alert('Спочатку розрахуй «ваговий тест».'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося скопіювати'));
+  }
+
+  // 3) Таблиця калібрування
+  function recalcCal(){
+    // очікувана вага = (г/оберт) × оберти
+    const gramsRevTxt = document.getElementById('gramsRev').textContent;
+    if(!gramsRevTxt || gramsRevTxt==='—'){ alert('Спочатку розрахуй вагу за 1 оберт.'); return; }
+    const gramsRev = parseFloat(gramsRevTxt.replace(/[^\d.,-]/g,'').replace(',','.')) || 0;
+
+    const rows = Array.from(document.querySelectorAll('#calBody tr'));
+    const outLines = [];
+    rows.forEach((tr,i)=>{
+      const turns = parseFloat(tr.children[1].querySelector('input').value||'0');
+      const exp = gramsRev * turns;
+      tr.querySelector('.exp').textContent = rnd(exp,1);
+      const fact = parseFloat(tr.children[3].querySelector('input').value||'0');
+      const dev = exp>0 ? ((fact-exp)/exp)*100 : 0;
+      tr.querySelector('.dev').textContent = (dev>0?'+':'')+rnd(dev,1);
+      const note = tr.children[5].querySelector('input').value||'';
+      outLines.push([i+1, turns, rnd(exp,1), rnd(fact,1), (dev>0?'+':'')+rnd(dev,1), note].join(' | '));
+    });
+    document.getElementById('csvCal').textContent = outLines.join('\n') || '—';
+  }
+
+  function copyCal(){
+    const t = document.getElementById('csvCal').textContent.trim();
+    if(!t || t==='—'){ alert('Спочатку перерахуй таблицю.'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося скопіювати'));
+  }
+
+  function flash(msg){
+    const old = document.title;
+    document.title = msg;
+    setTimeout(()=>document.title = old, 900);
+  }
+
+  // Ініціалізація: одразу первинні розрахунки
+  calcSeed();
+  calcWheel();
+  recalcCal();
+</script>
+</body>
+</html>
