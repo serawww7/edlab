@@ -1,0 +1,507 @@
+<!-- electric_para17.html
+     Пара 17 (Електрики, аудиторно): NFC-ПАСПОРТ ОБЛАДНАННЯ · ЖУРНАЛ ТО · НАКЛЕЙКИ 58 мм · A4 · ICS
+     Мета: створити реєстр обладнання, випустити NFC/QR-паспорти, план ТО з автопідрахунком "Наступне ТО",
+     друк квитків 58 мм (термопринтер), експорт/імпорт CSV, генерація подій .ics.
+     Працює офлайн, під GitHub Pages і вбудовується у Moodle (iframe).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Електрики · Пара 17 — NFC-паспорти обладнання, журнал ТО, 58 мм, A4, ICS</title>
+<meta name="color-scheme" content="light dark"/>
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 35%,var(--bg)); color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
+  .wrap{max-width:1120px; margin:0 auto; padding:24px 16px 96px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9aa5b1}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e);
+     -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0;
+        box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:1050px){.g3{grid-template-columns:1fr}; .g2{grid-template-columns:1fr}}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe;
+       text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .small{font-size:12px; color:#93a3b5}
+  input,select,textarea{padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb; width:100%}
+  textarea{min-height:72px}
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+  .chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; font-size:12px; background:#0d1a2e; color:#9aa5b1}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)} .muted{color:#9aa5b1}
+  .tickets{display:flex; gap:12px; flex-wrap:wrap}
+  .ticket{width:58mm; background:#fff; color:#000; padding:5mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset;
+          font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 4px; font-size:13px; text-align:center}
+  .ticket p{margin:1px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:5px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+  #printArea{background:#fff; color:#000; border-radius:12px; border:1px solid #e5e7eb; padding:16px}
+  .doc{page-break-after:always; padding:12mm; color:#000; font-family:Georgia,"Times New Roman",serif}
+  .doc h2{color:#000; font-size:20px; margin:0 0 6px}
+  .doc h3{color:#000; font-size:16px; margin:6px 0}
+  .doc p{color:#000; margin:4px 0}
+  .doc table{width:100%; border-collapse:collapse; border:1px solid #111}
+  .doc th,.doc td{border:1px solid #111; padding:6px 8px; font-size:12px; vertical-align:top}
+  .doc .sign{margin-top:10mm; display:flex; gap:10mm; flex-wrap:wrap}
+  .doc .sign div{flex:1 1 220px}
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  @media print{
+    @page{ size:A4; margin:12mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    #printArea{ border:none; padding:0 }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Електрики · Пара 17 · аудиторно</span>
+  <h1>🏷️ NFC-паспорт обладнання → журнал ТО → 🧾 наклейки 58 мм → 📄 A4 → 📅 .ics</h1>
+
+  <div class="card">
+    <h2>🎯 Мета</h2>
+    <p>Сформувати реєстр обладнання (ID, місце, живлення, серійний №, вартість, інтервал ТО), згенерувати NFC/QR-паспорт, 
+      обчислити <b>Наступне ТО</b>, друкувати етикетки 58 мм та A4-звіт, експортувати/імпортувати CSV та завантажити події <b>.ics</b> для календаря.</p>
+    <div class="row">
+      <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
+      <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+      <input id="file" class="btn" type="file" accept=".csv,text/csv"/>
+      <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+      <button class="btn" onclick="downloadICS()">📅 Експорт .ics (всі ТО)</button>
+    </div>
+    <p class="small">CSV поля: <span class="mono">id,name,location,circuit,phase,voltage_V,power_W,serial,installed_yyyy_mm_dd,last_yyyy_mm_dd,interval_months,responsible,url,notes</span></p>
+  </div>
+
+  <div class="card">
+    <h2>➕ Додати обладнання</h2>
+    <div class="grid g3">
+      <div>
+        <h3>Паспорт</h3>
+        <div class="row"><label class="small" style="min-width:140px">ID</label><input id="id" value="EQ-001"></div>
+        <div class="row"><label class="small" style="min-width:140px">Назва</label><input id="name" value="Витяжний вентилятор 3Ф"></div>
+        <div class="row"><label class="small" style="min-width:140px">Місце</label><input id="location" value="Майстерня А-101"></div>
+        <div class="row"><label class="small" style="min-width:140px">Лінія/щит</label><input id="circuit" value="ЩО-1 · M-01"></div>
+      </div>
+      <div>
+        <h3>Електрика</h3>
+        <div class="row"><label class="small" style="min-width:140px">Фаза</label><select id="phase"><option>A</option><option>B</option><option>C</option><option selected>3Ф</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">U, В</label><input id="voltage" type="number" value="400"></div>
+        <div class="row"><label class="small" style="min-width:140px">P, Вт</label><input id="power" type="number" value="1500"></div>
+        <div class="row"><label class="small" style="min-width:140px">Серійний №</label><input id="serial" value="SN-2309-001"></div>
+      </div>
+      <div>
+        <h3>ТО / посилання</h3>
+        <div class="row"><label class="small" style="min-width:140px">Встановлено</label><input id="installed" value="2025-09-10"></div>
+        <div class="row"><label class="small" style="min-width:140px">Останнє ТО</label><input id="last" value="2025-10-01"></div>
+        <div class="row"><label class="small" style="min-width:140px">Інтервал, міс</label><input id="interval" type="number" value="6"></div>
+        <div class="row"><label class="small" style="min-width:140px">Відповідальний</label><input id="resp" value="Студент ПІБ / група"></div>
+        <div class="row"><label class="small" style="min-width:140px">URL (інструкція)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
+        <div class="row"><label class="small" style="min-width:140px">Нотатка</label><input id="notes" placeholder="Особливості, ЗІЗ тощо"></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
+      <button class="btn" onclick="previewNFC()">📶 Зібрати NFC/QR</button>
+      <button class="btn" onclick="seedOne()">🔄 Приклад запису</button>
+    </div>
+    <p class="small">NFC порадник: тип NDEF URI або TEXT. Ми генеруємо рядок для запису (ви використаєте свою NFC-програму на телефоні).</p>
+  </div>
+
+  <div class="card printable">
+    <h2>📋 Реєстр обладнання</h2>
+    <table id="tbl">
+      <thead>
+        <tr>
+          <th>#</th><th>ID</th><th>Назва</th><th>Місце</th><th>Лінія</th><th>Фаза</th><th>U</th><th>P</th>
+          <th>Сер№</th><th>Вст.</th><th>ОСТ ТО</th><th>Наст ТО</th><th>URL</th><th>Дії</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p class="small">Статус ТО: <span class="chip ok">OK</span> — до строку ≥30 днів; <span class="chip warn">SOON</span> — &lt;30 днів; <span class="chip bad">OVERDUE</span> — прострочено.</p>
+  </div>
+
+  <div class="card">
+    <h2>📶 NFC/QR попередній перегляд</h2>
+    <div class="grid g2">
+      <div>
+        <h3>Зміст NDEF TEXT</h3>
+        <textarea id="ndefText" readonly></textarea>
+        <p class="small">Скопіюй у NFC-записувач як TEXT (або URI з поля праворуч).</p>
+      </div>
+      <div>
+        <h3>URI для NDEF/QR</h3>
+        <textarea id="ndefURI" readonly></textarea>
+        <p class="small">Цей URI відкриватиме паспорт/інструкцію. Його ж виводимо на наклейку 58 мм.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card printable">
+    <h2>🧾 Наклейки 58 мм «Паспорт обладнання»</h2>
+    <div class="row">
+      <button class="btn" onclick="buildTickets()">🧩 Для всіх записів</button>
+      <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+      <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+    </div>
+    <div id="tickets" class="tickets"></div>
+  </div>
+
+  <div class="card printable">
+    <h2>📄 A4-звіт (для друку/PDF)</h2>
+    <div class="row">
+      <button class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
+      <button class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
+    </div>
+    <div id="printArea"></div>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // ===== СТАН =====
+  let items = []; // масив паспортів
+  const tbody = document.querySelector('#tbl tbody');
+  const ticketsBox = document.getElementById('tickets');
+
+  // ===== УТИЛІТИ =====
+  function esc(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function dParse(s){ const [y,m,d]=String(s||'').split('-').map(x=>parseInt(x,10)); return new Date(y||2025,(m||1)-1,d||1); }
+  function dAddMonths(dt, m){ const d=new Date(dt.getTime()); d.setMonth(d.getMonth()+m); return d; }
+  function dFmt(dt){ return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`; }
+  function daysDiff(a,b){ return Math.round((a-b)/(1000*60*60*24)); }
+  function now(){ return new Date(); }
+  function nowStamp(){ const d=now(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+
+  // ===== МОДЕЛЬ ТО =====
+  function nextService(lastISO, intervalM){
+    const last = dParse(lastISO||'2025-10-01');
+    const nxt = dAddMonths(last, parseInt(intervalM||'6',10));
+    return dFmt(nxt);
+  }
+  function serviceStatus(nextISO){
+    const n = dParse(nextISO); const dd = daysDiff(n, now());
+    if(dd < 0) return {txt:'OVERDUE', cls:'bad'};
+    if(dd <= 30) return {txt:`SOON (${dd} дн)`, cls:'warn'};
+    return {txt:`OK (${dd} дн)`, cls:'ok'};
+  }
+
+  // ===== CRUD =====
+  function addOrUpdate(){
+    const rec = {
+      id:(document.getElementById('id').value||'').trim(),
+      name:(document.getElementById('name').value||'').trim(),
+      location:(document.getElementById('location').value||'').trim(),
+      circuit:(document.getElementById('circuit').value||'').trim(),
+      phase:document.getElementById('phase').value,
+      voltage:parseFloat(document.getElementById('voltage').value||'230'),
+      power:parseFloat(document.getElementById('power').value||'0'),
+      serial:(document.getElementById('serial').value||'').trim(),
+      installed:(document.getElementById('installed').value||'').trim(),
+      last:(document.getElementById('last').value||'').trim(),
+      interval:parseInt(document.getElementById('interval').value||'6',10),
+      responsible:(document.getElementById('resp').value||'').trim(),
+      url:(document.getElementById('url').value||'').trim(),
+      notes:(document.getElementById('notes').value||'').trim()
+    };
+    if(!rec.id){ alert('Укажи ID'); return; }
+    rec.next = nextService(rec.last, rec.interval);
+    const i = items.findIndex(x=>x.id===rec.id);
+    if(i>=0) items[i] = {...items[i], ...rec};
+    else items.push(rec);
+    render();
+    previewNFC(rec);
+    buildTickets([rec]);
+  }
+
+  // ===== РЕНДЕР =====
+  function render(){
+    tbody.innerHTML='';
+    items.forEach((r,i)=>{
+      const st = serviceStatus(r.next);
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td class="editable" data-k="id" data-id="${r.id}">${esc(r.id)}</td>
+        <td class="editable" data-k="name" data-id="${r.id}">${esc(r.name)}</td>
+        <td class="editable" data-k="location" data-id="${r.id}">${esc(r.location)}</td>
+        <td class="editable" data-k="circuit" data-id="${r.id}">${esc(r.circuit)}</td>
+        <td class="editable" data-k="phase" data-id="${r.id}">${esc(r.phase)}</td>
+        <td class="editable" data-k="voltage" data-id="${r.id}">${esc(r.voltage)}</td>
+        <td class="editable" data-k="power" data-id="${r.id}">${esc(r.power)}</td>
+        <td class="editable" data-k="serial" data-id="${r.id}">${esc(r.serial)}</td>
+        <td class="editable" data-k="installed" data-id="${r.id}">${esc(r.installed)}</td>
+        <td class="editable" data-k="last" data-id="${r.id}">${esc(r.last)}</td>
+        <td>${esc(r.next)} <span class="chip ${st.cls}">${st.txt}</span></td>
+        <td class="editable" data-k="url" data-id="${r.id}">${esc(r.url||'')}</td>
+        <td class="mono">
+          <button class="btn" data-act="nfc" data-id="${r.id}">NFC/QR</button>
+          <button class="btn" data-act="label" data-id="${r.id}">Наклейка</button>
+          <button class="btn" data-act="del" data-id="${r.id}">✖</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Інлайн редагування
+  tbody.addEventListener('dblclick',(e)=>{
+    const td=e.target.closest('.editable'); if(!td) return;
+    const id=td.getAttribute('data-id'); const key=td.getAttribute('data-k');
+    const idx=items.findIndex(x=>x.id===id); const r=items[idx];
+    const input=document.createElement('input'); input.value=r[key]||''; input.style.width='100%'; input.style.padding='6px 8px';
+    input.addEventListener('blur', ()=>{
+      let v=input.value.trim();
+      if(['voltage','power','interval'].includes(key)) v=parseFloat(v)||r[key];
+      r[key]=v;
+      if(key==='last' || key==='interval') r.next=nextService(r.last,r.interval);
+      render();
+    });
+    td.innerHTML=''; td.appendChild(input); input.focus(); input.select();
+  });
+
+  // Дії
+  tbody.addEventListener('click',(e)=>{
+    const b=e.target.closest('button'); if(!b) return;
+    const id=b.getAttribute('data-id'); const act=b.getAttribute('data-act');
+    const r=items.find(x=>x.id===id);
+    if(act==='del'){ items = items.filter(x=>x.id!==id); render(); return; }
+    if(act==='label'){ buildTickets([r]); ticketsBox.scrollIntoView({behavior:'smooth'}); }
+    if(act==='nfc'){ previewNFC(r); document.getElementById('ndefText').scrollIntoView({behavior:'smooth'}); }
+  });
+
+  // ===== NFC/QR ПРЕВ'Ю =====
+  function previewNFC(recOpt){
+    const r = recOpt || currentFormRecord();
+    if(!r) return;
+    const uri = r.url && r.url.length ? r.url : `https://serawww7.github.io/edlab/electric_para17.html#${encodeURIComponent(r.id)}`;
+    const text = [
+      `ID: ${r.id}`,
+      `Назва: ${r.name}`,
+      `Місце: ${r.location}`,
+      `Лінія: ${r.circuit}`,
+      `Фаза/U/P: ${r.phase}/${r.voltage}В/${r.power}Вт`,
+      `Сер№: ${r.serial}`,
+      `Вст: ${r.installed}  ОСТ ТО: ${r.last}  Наст ТО: ${r.next}`,
+      `Відповідальний: ${r.responsible}`,
+      `URL: ${uri}`
+    ].join('\n');
+    document.getElementById('ndefText').value = text;
+    document.getElementById('ndefURI').value = uri;
+  }
+  function currentFormRecord(){
+    const rec = {
+      id:(document.getElementById('id').value||'').trim(),
+      name:(document.getElementById('name').value||'').trim(),
+      location:(document.getElementById('location').value||'').trim(),
+      circuit:(document.getElementById('circuit').value||'').trim(),
+      phase:document.getElementById('phase').value,
+      voltage:parseFloat(document.getElementById('voltage').value||'230'),
+      power:parseFloat(document.getElementById('power').value||'0'),
+      serial:(document.getElementById('serial').value||'').trim(),
+      installed:(document.getElementById('installed').value||'').trim(),
+      last:(document.getElementById('last').value||'').trim(),
+      interval:parseInt(document.getElementById('interval').value||'6',10),
+      responsible:(document.getElementById('resp').value||'').trim(),
+      url:(document.getElementById('url').value||'').trim(),
+      notes:(document.getElementById('notes').value||'').trim()
+    };
+    if(!rec.id) return null;
+    rec.next = nextService(rec.last, rec.interval);
+    return rec;
+  }
+
+  // ===== НАКЛЕЙКИ 58 мм =====
+  function buildTickets(list){
+    const L = list || items;
+    ticketsBox.innerHTML='';
+    L.forEach(r=>{
+      const st = serviceStatus(r.next);
+      const el=document.createElement('div'); el.className='ticket';
+      const uri = r.url && r.url.length ? r.url : `https://serawww7.github.io/edlab/electric_para17.html#${encodeURIComponent(r.id)}`;
+      el.innerHTML = `
+        <h4>ПАСПОРТ ОБЛАДНАННЯ</h4>
+        <p><b>${esc(r.id)} · ${esc(r.name)}</b></p>
+        <div class="line"></div>
+        <p>${esc(r.location)}</p>
+        <p>${esc(r.circuit)} · ${esc(r.phase)} · ${esc(r.voltage)}В · ${esc(r.power)}Вт</p>
+        <p>Сер№ ${esc(r.serial)}</p>
+        <p>ОСТ ТО: ${esc(r.last)} · НАСТ: ${esc(r.next)}</p>
+        <p>Статус: ${st.txt}</p>
+        <div class="line"></div>
+        <p class="qr"><small>URI: ${esc(uri)}</small></p>
+        <p><small>${nowStamp()}</small></p>
+      `;
+      ticketsBox.appendChild(el);
+    });
+  }
+  function downloadTXT(){
+    if(!ticketsBox.firstChild){ alert('Спочатку згенеруйте наклейки'); return; }
+    const arr=['EQUIP PASSPORT 58mm','-------------------'];
+    Array.from(ticketsBox.children).forEach(t=>{ arr.push(t.innerText.replace(/\n{2,}/g,'\n')); arr.push('-------------------'); });
+    const blob = new Blob([arr.join('\n')],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='equip_passports_58mm.txt'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // ===== A4-ЗВІТ =====
+  function buildReport(){
+    if(!items.length){ alert('Немає записів'); return; }
+    const rows = items.map((r,i)=>{
+      const st = serviceStatus(r.next);
+      return `
+        <tr>
+          <td>${i+1}</td><td>${esc(r.id)}</td><td>${esc(r.name)}</td><td>${esc(r.location)}</td>
+          <td>${esc(r.circuit)}</td><td>${esc(r.phase)}</td><td>${esc(r.voltage)}</td><td>${esc(r.power)}</td>
+          <td>${esc(r.serial)}</td><td>${esc(r.installed)}</td><td>${esc(r.last)}</td><td>${esc(r.next)} (${st.txt})</td>
+          <td>${esc(r.responsible)}</td><td>${esc(r.notes||'')}</td>
+        </tr>`;
+    }).join('');
+    const html = `
+      <section class="doc">
+        <h2>РЕЄСТР ОБЛАДНАННЯ ТА ПЛАН ТО</h2>
+        <p>Дата: ${nowStamp()}</p>
+        <table>
+          <thead><tr>
+            <th>#</th><th>ID</th><th>Назва</th><th>Місце</th><th>Лінія</th><th>Фаза</th><th>U, В</th><th>P, Вт</th>
+            <th>Сер№</th><th>Встановлено</th><th>Останнє ТО</th><th>Наступне ТО</th><th>Відповідальний</th><th>Примітка</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div class="sign"><div>Виконавець: ____________________</div><div>Перевірив: ____________________</div></div>
+        <p class="small">Навчальна система; у реальних умовах додайте протоколи вимірювань, карти ризиків, підписи та фотофіксацію.</p>
+      </section>`;
+    document.getElementById('printArea').innerHTML = html;
+    document.getElementById('printArea').scrollIntoView({behavior:'smooth'});
+  }
+
+  // ===== CSV =====
+  function exportCSV(){
+    const headers=['id','name','location','circuit','phase','voltage_V','power_W','serial','installed_yyyy_mm_dd','last_yyyy_mm_dd','next_yyyy_mm_dd','interval_months','responsible','url','notes','timestamp'];
+    const stamp=nowStamp();
+    const csv=[headers.join(','), ...items.map(r=>{
+      const vals=[r.id,r.name,r.location,r.circuit,r.phase,r.voltage,r.power,r.serial,r.installed,r.last,r.next,r.interval,r.responsible,r.url||'',r.notes||'',stamp];
+      return vals.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+    })].join('\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='equipment_registry.csv'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  async function importCSV(){
+    const f=document.getElementById('file').files[0]; if(!f){ alert('Оберіть CSV'); return; }
+    const txt=await f.text();
+    const lines=txt.trim().split(/\r?\n/); if(lines.length<2){ alert('CSV порожній'); return; }
+    const headers=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());
+    const req=['id','name','location','circuit','phase','voltage_V','power_W','serial','installed_yyyy_mm_dd','last_yyyy_mm_dd','interval_months','responsible','url','notes'];
+    const miss=req.filter(x=>!headers.includes(x)); if(miss.length){ alert('Відсутні поля: '+miss.join(', ')); return; }
+    const out=[];
+    for(let i=1;i<lines.length;i++){
+      const cells=splitCSV(lines[i]); if(!cells.length) continue;
+      const o={}; headers.forEach((h,j)=> o[h]=(cells[j]||'').replace(/^"|"$/g,''));
+      const rec={
+        id:o.id,name:o.name,location:o.location,circuit:o.circuit,phase:o.phase||'A',
+        voltage:parseFloat(o.voltage_V||'230'), power:parseFloat(o.power_W||'0'), serial:o.serial||'',
+        installed:o.installed_yyyy_mm_dd||'', last:o.last_yyyy_mm_dd||'', interval:parseInt(o.interval_months||'6',10),
+        responsible:o.responsible||'', url:o.url||'', notes:o.notes||''
+      };
+      rec.next = nextService(rec.last, rec.interval);
+      out.push(rec);
+    }
+    items = out; render();
+  }
+  function splitCSV(line){
+    const res=[]; let cur=''; let q=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){ if(q && line[i+1]==='"'){ cur+='"'; i++; } else q=!q; }
+      else if(ch===',' && !q){ res.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    res.push(cur); return res;
+  }
+
+  // ===== ICS =====
+  function icsEscape(s){ return String(s).replace(/([,;])/g,'\\$1').replace(/\n/g,'\\n'); }
+  function icsFormatDate(d){ // UTC-less локальний
+    const dt = (d instanceof Date) ? d : dParse(d);
+    return dt.getFullYear().toString()
+      + pad(dt.getMonth()+1) + pad(dt.getDate()) + 'T' + pad(dt.getHours()) + pad(dt.getMinutes()) + '00';
+  }
+  function buildICS(){
+    const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//edlab//equip//UA'];
+    items.forEach(r=>{
+      const start = dParse(r.next); start.setHours(9,0,0,0);
+      const uid = `${r.id}-${r.next}@edlab`;
+      lines.push('BEGIN:VEVENT');
+      lines.push('UID:'+uid);
+      lines.push('DTSTAMP:'+icsFormatDate(new Date()));
+      lines.push('DTSTART:'+icsFormatDate(start));
+      lines.push('SUMMARY:'+icsEscape(`ТО: ${r.id} · ${r.name}`));
+      lines.push('LOCATION:'+icsEscape(r.location));
+      lines.push('DESCRIPTION:'+icsEscape(`Лінія: ${r.circuit}\nФаза/U/P: ${r.phase}/${r.voltage}В/${r.power}Вт\nСер№: ${r.serial}\nВідп.: ${r.responsible}\nURL: ${r.url||''}`));
+      lines.push('END:VEVENT');
+    });
+    lines.push('END:VCALENDAR');
+    return lines.join('\n');
+  }
+  function downloadICS(){
+    if(!items.length){ alert('Немає записів'); return; }
+    const blob = new Blob([buildICS()], {type:'text/calendar;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='equipment_maintenance.ics'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // ===== ПРИКЛАДИ =====
+  function seedOne(){
+    document.getElementById('id').value='EQ-002';
+    document.getElementById('name').value='Компресор 1Ф';
+    document.getElementById('location').value='Майстерня А-102';
+    document.getElementById('circuit').value='ЩО-1 · S-02';
+    document.getElementById('phase').value='B';
+    document.getElementById('voltage').value=230;
+    document.getElementById('power').value=900;
+    document.getElementById('serial').value='SN-2310-015';
+    document.getElementById('installed').value='2024-10-15';
+    document.getElementById('last').value='2025-04-10';
+    document.getElementById('interval').value=12;
+    document.getElementById('resp').value='Студент ПІБ / група';
+    document.getElementById('url').value='https://serawww7.github.io/edlab/manuals/compressor.html';
+    document.getElementById('notes').value='Перевірити ремінь, фільтр';
+  }
+  function seedDemo(){
+    items = [
+      {id:'EQ-001',name:'Витяжний вентилятор 3Ф',location:'Майстерня А-101',circuit:'ЩО-1 · M-01',phase:'3Ф',voltage:400,power:1500,serial:'SN-2309-001',installed:'2025-09-10',last:'2025-10-01',interval:6,responsible:'Студент ПІБ / група',url:'',notes:'Опір ізоляції щосезону'},
+      {id:'EQ-002',name:'Компресор 1Ф',location:'Майстерня А-102',circuit:'ЩО-1 · S-02',phase:'B',voltage:230,power:900,serial:'SN-2310-015',installed:'2024-10-15',last:'2025-04-10',interval:12,responsible:'Студент ПІБ / група',url:'https://serawww7.github.io/edlab/manuals/compressor.html',notes:'Перевірити ремінь, фільтр'},
+      {id:'EQ-003',name:'Паяльна станція',location:'Верстак С-12',circuit:'ЩО-1 · S-01',phase:'C',voltage:230,power:150,serial:'SN-2403-222',installed:'2023-03-22',last:'2025-03-01',interval:12,responsible:'Студент ПІБ / група',url:'',notes:'Калібрування жал'}
+    ];
+    items.forEach(r=>{ r.next = nextService(r.last, r.interval); });
+    render();
+  }
+
+  // Авто-демо
+  seedDemo();
+</script>
+</body>
+</html>
