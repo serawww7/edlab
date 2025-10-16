@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>EDLab — сторінка спеціальності</title>
+<meta name="color-scheme" content="light dark"/>
+<link rel="preload" href="assets/edlab.css" as="style">
+<link rel="stylesheet" href="assets/edlab.css"/>
+<style>
+.header-mini{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.grid2{display:grid;gap:16px;grid-template-columns:2fr 1fr}
+@media(max-width:980px){.grid2{grid-template-columns:1fr}}
+.lesson-list .lesson{position:relative}
+.lesson-list .btn{position:relative;z-index:2}
+.tester-toolbar{display:flex;justify-content:space-between;gap:8px;align-items:center;background:#0d1a2e;color:#e6eef9;border:1px solid #223049;border-bottom:0;border-radius:12px 12px 0 0;padding:8px 12px}
+.tester{border:1px solid #223049;border-radius:0 0 12px 12px;overflow:hidden;background:#0b1220}
+.tester iframe{width:100%;height:900px;border:0;background:#fff;display:block}
+.btn.ghost{background:transparent;border-color:#334155;color:#cbd5e1}
+.btn.ghost:hover{background:#0f1f39}
+small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="header-mini">
+    <div class="logo">
+      <span class="emoji">🎓</span><b>EDLab</b>
+      <span class="badge">цифрові пари для ОПП коледжу</span>
+    </div>
+    <a class="btn" href="index.html">⬅ На головну</a>
+  </header>
+
+  <h1 id="specTitle">Спеціальність</h1>
+  <p class="muted" id="specDesc">—</p>
+
+  <div class="grid2">
+    <!-- Ліво: список занять -->
+    <div class="card lesson-list" id="listCard">
+      <h2 id="listTitle">Заняття</h2>
+      <div id="lessons"></div>
+
+      <div id="previewBox" style="display:none;margin-top:14px">
+        <div class="tester-toolbar">
+          <div class="row">
+            <strong>Швидке прев’ю</strong>
+            <span class="muted mono" id="previewUrl">—</span>
+          </div>
+          <div class="row">
+            <button class="btn ghost" type="button" id="toGen">⚙️ До генератора</button>
+            <button class="btn" type="button" id="closePrev">✖️ Закрити прев’ю</button>
+          </div>
+        </div>
+        <div class="tester">
+          <iframe id="previewFrame" src="about:blank"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-downloads"
+            referrerpolicy="no-referrer"></iframe>
+        </div>
+      </div>
+      <p class="muted" id="previewNote" style="display:none;margin-top:6px">Порада: натисни «Згенерувати iFrame» — код справа вже з потрібним URL.</p>
+    </div>
+
+    <!-- Право: генератор iFrame -->
+    <div class="card" id="generator">
+      <h2>🔧 Генератор коду для Moodle (iFrame)</h2>
+      <label for="url">URL сторінки</label>
+      <input id="url" type="text" value=""/>
+
+      <div class="inline">
+        <div>
+          <label for="height">Висота фрейма (px)</label>
+          <input id="height" type="number" value="1600"/>
+        </div>
+        <div>
+          <label for="sandbox">Sandbox токени</label>
+          <input id="sandbox" type="text" value="allow-same-origin allow-scripts allow-forms allow-modals allow-downloads"/>
+        </div>
+      </div>
+
+      <label for="code">HTML-код для вставки у Moodle</label>
+      <textarea id="code" readonly></textarea>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn" type="button" id="btnGen">🔁 Оновити код</button>
+        <button class="btn" type="button" id="btnCopy">📋 Скопіювати</button>
+      </div>
+      <p class="muted" style="margin-top:6px">Режими вставки: <b>Page</b> або <b>URL (Display: Embed)</b>. Якщо кнопки «німі» — перевір фільтри ресурсу або зменш набір sandbox.</p>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="col brand">
+      <div class="brand-line"><span class="emoji">🌾</span><strong>EDLab</strong></div>
+      <p>Інтерактивні лабораторні з інформатики та цифровізації для ОПП коледжу.</p>
+    </div>
+    <div class="col legal">
+      <h3>Правова інформація</h3>
+      <p>© 2025 <b>Сергій ПОЛІЩУК</b>. Матеріали захищені авторським правом.</p>
+    </div>
+    <div class="col links">
+      <h3>Офіційні ресурси</h3>
+      <ul>
+        <li><a href="index.html">Головна EDLab</a></li>
+        <li><a href="https://www.serawww.pp.ua" target="_blank" rel="noopener">serawww.pp.ua</a></li>
+        <li><a href="https://www.facebook.com/coach.Sergiy" target="_blank" rel="noopener">facebook.com/coach.Sergiy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom"><span>Зроблено з турботою про зручність викладача і студента</span></div>
+</footer>
+
+<script>
+// ——— 0) Утиліти
+const $ = (s)=>document.querySelector(s);
+const byId = (id)=>document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const SPEC = (params.get('spec')||'core').toLowerCase();
+
+// ——— 1) Дані без плейсхолдерів
+const DATA = {
+  core: {
+    title: "🧠 Інформатика (ядро)",
+    desc: "Базові цифрові інструменти та інтеграції у Moodle.",
+    list: [
+      {n:1, title:"Пара 1 — Термодрук 58 мм: чек ПММ / інструмент", url:"1_para.html",
+       desc:"Конструктор чека 58 мм: ПММ/стрічка, друк і TXT-експорт."}
+    ]
+  },
+  agro: {
+    title: "🌾 Агрономія",
+    desc: "Польові журнали, планування, моніторинги, QR/NFC.",
+    list: [
+      {n:1,  title:"Пара 1 — Термопринтер 58 мм для агронома", url:"agro_II_kyrs/agro_para1.html",  desc:"Шаблони польових квитків: завдання, координати, QR/NFC."},
+      {n:2,  title:"Пара 2 — Облік насіння та матеріалів",     url:"agro_II_kyrs/agro_para2.html",  desc:"Склад насіння/ЗЗР; партії, залишки, видача; CSV+QR."},
+      {n:3,  title:"Пара 3 — Відбір ґрунтових проб",           url:"agro_II_kyrs/agro_para3.html",  desc:"План сітки, маркування проб, журнал GPS-точок."},
+      {n:4,  title:"Пара 4 — Польовий огляд (scouting)",       url:"agro_II_kyrs/agro_para4.html",  desc:"Чек-лист шкідників/хвороб, фото-посилання, серйозність."},
+      {n:5,  title:"Пара 5 — План внесення добрив",            url:"agro_II_kyrs/agro_para5.html",  desc:"Норми NPK, мішки/тонни, логістика, накладні 58 мм."},
+      {n:6,  title:"Пара 6 — Зрошення: графік та облік",       url:"agro_II_kyrs/agro_para6.html",  desc:"План поливу, лічильники, дефіцит вологи, нагадування."},
+      {n:7,  title:"Пара 7 — Моніторинг бур’янів і ЗЗР",       url:"agro_II_kyrs/agro_para7.html",  desc:"Облік засмічення/фази; вибір протоколу ЗЗР; безпечність."},
+      {n:8,  title:"Пара 8 — Оцінка стану посівів",            url:"agro_II_kyrs/agro_para8.html",  desc:"Висота/щільність, індекси, позначки по полю, висновок."},
+      {n:9,  title:"Пара 9 — Прогноз урожайності",              url:"agro_II_kyrs/agro_para9.html",  desc:"Квадрати вибірки, маса 1000 насінин, модель прогнозу."},
+      {n:10, title:"Пара 10 — Логістика жнив",                  url:"agro_II_kyrs/agro_para10.html", desc:"Черги комбайнів/авто, талони ваги, трек-журнал."},
+      {n:11, title:"Пара 11 — Склади та якість",                url:"agro_II_kyrs/agro_para11.html", desc:"Вологість, засміченість, партійність, FEFO, накладні."},
+      {n:12, title:"Пара 12 — Продажі/контракти",               url:"agro_II_kyrs/agro_para12.html", desc:"Контракти, відвантаження, ціни, контроль виконання."},
+      {n:13, title:"Пара 13 — План-факт витрат",                url:"agro_II_kyrs/agro_para13.html", desc:"Паливо/ЗЗР/запчастини; ліміти; підсумок по полю."},
+      {n:14, title:"Пара 14 — Техніка та ППР",                  url:"agro_II_kyrs/agro_para14.html", desc:"Графіки ТО, заявки, запасні частини, журнали робіт."},
+      {n:15, title:"Пара 15 — Підсумковий дашборд",             url:"agro_II_kyrs/agro_para15.html", desc:"Зведення сезону, KPI, чек-лист завершення кампанії."}
+    ]
+  },
+  mech: {
+    title: "🚜 Механізація (механіки)",
+    desc: "ТО/ППР, облік пального, заявки, діагностика, безпека.",
+    list: [
+      {n:1,  title:"Пара 1 — Облік пального + чек 58 мм",          url:"mech_II_kyrs/mechanic_para1.html",  desc:"Заправки, залишки, друк талонів, контроль норм."},
+      {n:2,  title:"Пара 2 — Журнал щоденного огляду",             url:"mech_II_kyrs/mechanic_para2.html",  desc:"Огляд трактор/комбайн; зауваження, фото-посилання."},
+      {n:3,  title:"Пара 3 — ППР/ТО планувальник",                 url:"mech_II_kyrs/mechanic_para3.html",  desc:"Інтервали, нагадування, перелік робіт, відповідальні."},
+      {n:4,  title:"Пара 4 — Заявки на ремонт/запчастини",         url:"mech_II_kyrs/mechanic_para4.html",  desc:"Пріоритети, склад, статуси, звітність."},
+      {n:5,  title:"Пара 5 — Витрати та норми пального",           url:"mech_II_kyrs/mechanic_para5.html",  desc:"План-факт, гектар/км, перевитрати, попередження."},
+      {n:6,  title:"Пара 6 — Маршрути та робочий час",             url:"mech_II_kyrs/mechanic_para6.html",  desc:"Зміни, простої, маршрутні листи, продуктивність."},
+      {n:7,  title:"Пара 7 — Гідравліка/електрика — заміри",       url:"mech_II_kyrs/mechanic_para7.html",  desc:"Протокол вимірювань тиску/напр. з формами та QR."},
+      {n:8,  title:"Пара 8 — Калібрування/крутний момент",         url:"mech_II_kyrs/mechanic_para8.html",  desc:"Таблиці моментів, шаблони актів, підписання."},
+      {n:9,  title:"Пара 9 — Техніка в полі (лог)",                url:"mech_II_kyrs/mechanic_para9.html",  desc:"Журнал змін, роботи з полем/полосами, простої."},
+      {n:10, title:"Пара 10 — Безпека та допуски",                  url:"mech_II_kyrs/mechanic_para10.html", desc:"Чек-листи ОП, інструктажі, наряди-допуски."},
+      {n:11, title:"Пара 11 — Телематика: аналіз треків",          url:"mech_II_kyrs/mechanic_para11.html", desc:"Імпорт CSV-треків, швидкість, простої."},
+      {n:12, title:"Пара 12 — Шини/ресурс",                         url:"mech_II_kyrs/mechanic_para12.html", desc:"Пробіги, зноси, перестановки, план закупівель."},
+      {n:13, title:"Пара 13 — Вартість ремонту",                    url:"mech_II_kyrs/mechanic_para13.html", desc:"Роботи/запчастини, калькуляція, порівняння варіантів."},
+      {n:14, title:"Пара 14 — Інвентаризація інструменту",         url:"mech_II_kyrs/mechanic_para14.html", desc:"Коди/QR, видача-повернення, відповідальні."},
+      {n:15, title:"Пара 15 — Підсумковий звіт сезону",             url:"mech_II_kyrs/mechanic_para15.html", desc:"KPI техніки, ТО, витрати, рішення на наступний сезон."}
+    ]
+  },
+  tech: {
+    title: "🐄 Технології виробництва продукції тваринництва",
+    desc: "HACCP/FSMS, SPC, простежуваність, аудит, CAPA.",
+    list: [
+      {n:1,  title:"Пара 1 — Паспорт продукту + термодрук",         url:"tech_II_kyrs/tech_para1.html",  desc:"Паспорт, лоти, чек 58 мм для етикеток/етапів."},
+      {n:2,  title:"Пара 2 — Маркування/штрих-коди/QR",              url:"tech_II_kyrs/tech_para2.html",  desc:"EAN-13/QR для лотів, перевірка, журнал."},
+      {n:3,  title:"Пара 3 — Журнали виробництва",                   url:"tech_II_kyrs/tech_para3.html",  desc:"Етапи, контрольні точки, зведення партій."},
+      {n:4,  title:"Пара 4 — Планування змін/потужностей",           url:"tech_II_kyrs/tech_para4.html",  desc:"Потоки, вузькі місця, балансування."},
+      {n:5,  title:"Пара 5 — Контроль якості (вхід/вихід)",          url:"tech_II_kyrs/tech_para5.html",  desc:"Специфікації, відбір проб, протоколи."},
+      {n:6,  title:"Пара 6 — Розсіл/рецептура/мас-баланс",           url:"tech_II_kyrs/tech_para6.html",  desc:"Формули, втрати, звіт по партії."},
+      {n:7,  title:"Пара 7 — Холодовий ланцюг/охолодження",          url:"tech_II_kyrs/tech_para7.html",  desc:"T-логери, криві охолодження, ліміти."},
+      {n:8,  title:"Пара 8 — Пакування/герметичність",               url:"tech_II_kyrs/tech_para8.html",  desc:"Критерії, випробування, облік дефектів."},
+      {n:9,  title:"Пара 9 — Етикетка/алергени/склад",               url:"tech_II_kyrs/tech_para9.html",  desc:"Опис, алергени, норми, контроль."},
+      {n:10, title:"Пара 10 — Журнал невідповідностей",              url:"tech_II_kyrs/tech_para10.html", desc:"NCR, аналіз причин, CAPA-зв’язки."},
+      {n:11, title:"Пара 11 — SPC: карти контролю",                  url:"tech_II_kyrs/tech_para11.html", desc:"X̄–R, межі, сигнали, Cp/Cpk."},
+      {n:12, title:"Пара 12 — Аудит постачальників",                 url:"tech_II_kyrs/tech_para12.html", desc:"Чек-листи, бали, рейтинг, дії."},
+      {n:13, title:"Пара 13 — SPC+CAPA інтегровано",                 url:"tech_II_kyrs/tech_para13.html", desc:"Карти, Cp/Cpk, NCR, CAPA, квиток 58 мм, QR/NFC."},
+      {n:14, title:"Пара 14 — Простежуваність & Mock Recall",        url:"tech_II_kyrs/tech_para14.html", desc:"RM→FG→клієнт, мас-баланс, звіт відкликання."},
+      {n:15, title:"Пара 15 — Підсумковий HACCP/FSMS",               url:"tech_II_kyrs/tech_para15.html", desc:"Небезпеки/CCP, аудит, CAPA, портфоліо, квиток, QR/NFC."}
+    ]
+  }
+};
+
+// ——— 2) Рендер сторінки
+function setSpecMeta(){
+  const S = DATA[SPEC] || DATA.core;
+  byId('specTitle').textContent = S.title;
+  byId('specDesc').textContent  = S.desc;
+  byId('listTitle').textContent = S.title + " — уроки";
+
+  // список занять
+  const html = S.list.map(item=>`
+    <div class="lesson">
+      <div class="thumb">📄</div>
+      <div class="meta">
+        <b>${item.title}</b>
+        <small class="mono">${item.url}</small>
+        <p class="muted" style="margin-top:4px">${item.desc}</p>
+        <div class="row" style="margin-top:8px">
+          <a class="btn" href="${item.url}" target="_blank" rel="noopener">Відкрити</a>
+          <button class="btn secondary js-preview"  type="button" data-url="${item.url}">Швидке прев’ю</button>
+          <button class="btn secondary js-iframe"   type="button" data-url="${item.url}">Згенерувати iFrame</button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+  byId('lessons').innerHTML = html;
+
+  // оновити генератор дефолтним першим уроком
+  const firstUrl = S.list[0]?.url || "";
+  byId('url').value = location.origin + location.pathname.replace('spec.html','') + firstUrl;
+  gen();
+}
+
+// ——— 3) Прев’ю + генератор
+function openPreview(u){
+  const abs = absoluteUrl(u);
+  byId('previewUrl').textContent = abs;
+  byId('previewFrame').src = abs;
+  byId('previewBox').style.display = '';
+  byId('previewNote').style.display = '';
+  window.scrollTo({top: byId('previewBox').getBoundingClientRect().top + window.scrollY - 20, behavior:'smooth'});
+}
+function closePreview(){
+  byId('previewFrame').src = 'about:blank';
+  byId('previewBox').style.display = 'none';
+  byId('previewNote').style.display = 'none';
+}
+function absoluteUrl(relative){
+  // формуємо абсолютний URL для iFrame/preview (щоб Moodle не рідав)
+  const base = location.origin + location.pathname.replace('spec.html','');
+  return relative.startsWith('http') ? relative : base + relative;
+}
+function gen(){
+  const url = byId('url').value.trim();
+  const h   = parseInt(byId('height').value,10) || 1600;
+  const sb  = byId('sandbox').value.trim();
+  const html =
+`<div style="max-width:980px;margin:0 auto;position:relative;z-index:1;">
+  <iframe
+    src="${url}"
+    style="width:100%;height:${h}px;border:0;display:block;pointer-events:auto;background:#fff;"
+    loading="eager"
+    referrerpolicy="no-referrer"
+    sandbox="${sb}">
+  </iframe>
+</div>`;
+  byId('code').value = html;
+}
+function copyCode(){
+  const ta = byId('code');
+  ta.select(); ta.setSelectionRange(0, ta.value.length);
+  document.execCommand('copy');
+  const old = document.title;
+  document.title = '✅ HTML скопійовано';
+  setTimeout(()=>document.title = old, 900);
+}
+
+// ——— 4) Події (надійні кліки без «мертвих» кнопок)
+document.addEventListener('click', (e)=>{
+  const previewBtn = e.target.closest('.js-preview');
+  if(previewBtn){
+    const u = absoluteUrl(previewBtn.dataset.url);
+    openPreview(u);
+    return;
+  }
+  const iframeBtn = e.target.closest('.js-iframe');
+  if(iframeBtn){
+    const u = absoluteUrl(iframeBtn.dataset.url);
+    byId('url').value = u;
+    gen();
+    openPreview(u);
+    return;
+  }
+  if(e.target.id==='closePrev'){ closePreview(); }
+  if(e.target.id==='toGen'){ byId('generator').scrollIntoView({behavior:'smooth',block:'start'}); }
+  if(e.target.id==='btnGen'){ gen(); }
+  if(e.target.id==='btnCopy'){ copyCode(); }
+});
+
+// ——— 5) Ініціалізація
+(function init(){
+  // для вбудування в Moodle — тихий режим
+  if (window.self !== window.top) document.documentElement.classList.add('embedded');
+  setSpecMeta();
+  gen();
+})();
+</script>
+</body>
+</html>
