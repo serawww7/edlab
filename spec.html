@@ -36,15 +36,11 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
   <p class="muted" id="specDesc">—</p>
 
   <div class="grid2">
-    <!-- Ліво: список занять -->
     <div class="card lesson-list" id="listCard">
       <h2 id="listTitle">Заняття</h2>
       <div id="lessons"></div>
 
-      <div id="coachHint" class="note" style="display:none">
-        У папці <b>coach/</b> не знайдено жодної тренінг-сторінки з типових назв.
-        Додай, наприклад: <span class="mono">coach_intro.html</span> або <span class="mono">coach_para1.html</span>, <span class="mono">session01.html</span>.
-      </div>
+      <div id="hintBox" class="note" style="display:none">—</div>
 
       <div id="previewBox" style="display:none;margin-top:14px">
         <div class="tester-toolbar">
@@ -66,7 +62,6 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
       <p class="muted" id="previewNote" style="display:none;margin-top:6px">Порада: натисни «Згенерувати iFrame» — код справа вже з потрібним URL.</p>
     </div>
 
-    <!-- Право: генератор iFrame -->
     <div class="card" id="generator">
       <h2>🔧 Генератор коду для Moodle (iFrame)</h2>
       <label for="url">URL сторінки</label>
@@ -124,105 +119,92 @@ const byId = (id)=>document.getElementById(id);
 const params = new URLSearchParams(location.search);
 const SPEC = (params.get('spec')||'coach').toLowerCase();
 
-// Базові (статичні) дані для профільних розділів
+// Статичні розділи (як було)
 const DATA = {
-  agro: {
-    title: "🌾 Агрономія",
-    desc: "Польові журнали, планування, моніторинги, QR/NFC.",
-    list: [
-      {n:1,  title:"Пара 1 — Термопринтер 58 мм для агронома", url:"agro_II_kyrs/agro_para1.html",  desc:"Шаблони польових квитків: завдання, координати, QR/NFC."},
-      {n:2,  title:"Пара 2 — Облік насіння та матеріалів",     url:"agro_II_kyrs/agro_para2.html",  desc:"Склад насіння/ЗЗР; партії, залишки, видача; CSV+QR."},
-      {n:3,  title:"Пара 3 — Відбір ґрунтових проб",           url:"agro_II_kyrs/agro_para3.html",  desc:"План сітки, маркування проб, журнал GPS-точок."},
-      {n:4,  title:"Пара 4 — Польовий огляд (scouting)",       url:"agro_II_kyrs/agro_para4.html",  desc:"Чек-лист шкідників/хвороб, фото-посилання, серйозність."},
-      {n:5,  title:"Пара 5 — План внесення добрив",            url:"agro_II_kyrs/agro_para5.html",  desc:"Норми NPK, мішки/тонни, логістика, накладні 58 мм."},
-      {n:6,  title:"Пара 6 — Зрошення: графік та облік",       url:"agro_II_kyrs/agro_para6.html",  desc:"План поливу, лічильники, дефіцит вологи, нагадування."},
-      {n:7,  title:"Пара 7 — Моніторинг бур’янів і ЗЗР",       url:"agro_II_kyrs/agro_para7.html",  desc:"Облік засмічення/фази; вибір протоколу ЗЗР; безпечність."},
-      {n:8,  title:"Пара 8 — Оцінка стану посівів",            url:"agro_II_kyrs/agro_para8.html",  desc:"Висота/щільність, індекси, позначки по полю, висновок."},
-      {n:9,  title:"Пара 9 — Прогноз урожайності",              url:"agro_II_kyrs/agro_para9.html",  desc:"Квадрати вибірки, маса 1000 насінин, модель прогнозу."},
-      {n:10, title:"Пара 10 — Логістика жнив",                  url:"agro_II_kyrs/agro_para10.html", desc:"Черги комбайнів/авто, талони ваги, трек-журнал."},
-      {n:11, title:"Пара 11 — Склади та якість",                url:"agro_II_kyrs/agro_para11.html", desc:"Вологість, засміченість, партійність, FEFO, накладні."},
-      {n:12, title:"Пара 12 — Продажі/контракти",               url:"agro_II_kyrs/agro_para12.html", desc:"Контракти, відвантаження, ціни, контроль виконання."},
-      {n:13, title:"Пара 13 — План-факт витрат",                url:"agro_II_kyrs/agro_para13.html", desc:"Паливо/ЗЗР/запчастини; ліміти; підсумок по полю."},
-      {n:14, title:"Пара 14 — Техніка та ППР",                  url:"agro_II_kyrs/agro_para14.html", desc:"Графіки ТО, заявки, запасні частини, журнали робіт."},
-      {n:15, title:"Пара 15 — Підсумковий дашборд",             url:"agro_II_kyrs/agro_para15.html", desc:"Зведення сезону, KPI, чек-лист завершення кампанії."}
-    ]
-  },
-  mech: {
-    title: "🚜 Механізація (механіки)",
-    desc: "ТО/ППР, облік пального, заявки, діагностика, безпека.",
-    list: [
-      {n:1,  title:"Пара 1 — Облік пального + чек 58 мм",          url:"mech_II_kyrs/mechanic_para1.html",  desc:"Заправки, залишки, друк талонів, контроль норм."},
-      {n:2,  title:"Пара 2 — Журнал щоденного огляду",             url:"mech_II_kyrs/mechanic_para2.html",  desc:"Огляд трактор/комбайн; зауваження, фото-посилання."},
-      {n:3,  title:"Пара 3 — ППР/ТО планувальник",                 url:"mech_II_kyrs/mechanic_para3.html",  desc:"Інтервали, нагадування, перелік робіт, відповідальні."},
-      {n:4,  title:"Пара 4 — Заявки на ремонт/запчастини",         url:"mech_II_kyrs/mechanic_para4.html",  desc:"Пріоритети, склад, статуси, звітність."},
-      {n:5,  title:"Пара 5 — Витрати та норми пального",           url:"mech_II_kyrs/mechanic_para5.html",  desc:"План-факт, гектар/км, перевитрати, попередження."},
-      {n:6,  title:"Пара 6 — Маршрути та робочий час",             url:"mech_II_kyrs/mechanic_para6.html",  desc:"Зміни, простої, маршрутні листи, продуктивність."},
-      {n:7,  title:"Пара 7 — Гідравліка/електрика — заміри",       url:"mech_II_kyrs/mechanic_para7.html",  desc:"Протокол вимірювань тиску/напр. з формами та QR."},
-      {n:8,  title:"Пара 8 — Калібрування/крутний момент",         url:"mech_II_kyrs/mechanic_para8.html",  desc:"Таблиці моментів, шаблони актів, підписання."},
-      {n:9,  title:"Пара 9 — Техніка в полі (лог)",                url:"mech_II_kyrs/mechanic_para9.html",  desc:"Журнал змін, роботи з полем/полосами, простої."},
-      {n:10, title:"Пара 10 — Безпека та допуски",                  url:"mech_II_kyrs/mechanic_para10.html", desc:"Чек-листи ОП, інструктажі, наряди-допуски."},
-      {n:11, title:"Пара 11 — Телематика: аналіз треків",          url:"mech_II_kyrs/mechanic_para11.html", desc:"Імпорт CSV-треків, швидкість, простої."},
-      {n:12, title:"Пара 12 — Шини/ресурс",                         url:"mech_II_kyrs/mechanic_para12.html", desc:"Пробіги, зноси, перестановки, план закупівель."},
-      {n:13, title:"Пара 13 — Вартість ремонту",                    url:"mech_II_kyrs/mechanic_para13.html", desc:"Роботи/запчастини, калькуляція, порівняння варіантів."},
-      {n:14, title:"Пара 14 — Інвентаризація інструменту",         url:"mech_II_kyrs/mechanic_para14.html", desc:"Коди/QR, видача-повернення, відповідальні."},
-      {n:15, title:"Пара 15 — Підсумковий звіт сезону",             url:"mech_II_kyrs/mechanic_para15.html", desc:"KPI техніки, ТО, витрати, рішення на наступний сезон."}
-    ]
-  },
-  tech: {
-    title: "🐄 Технології виробництва продукції тваринництва",
-    desc: "HACCP/FSMS, SPC, простежуваність, аудит, CAPA.",
-    list: [
-      {n:1,  title:"Пара 1 — Паспорт продукту + термодрук",         url:"tech_II_kyrs/tech_para1.html",  desc:"Паспорт, лоти, чек 58 мм для етикеток/етапів."},
-      {n:2,  title:"Пара 2 — Маркування/штрих-коди/QR",              url:"tech_II_kyrs/tech_para2.html",  desc:"EAN-13/QR для лотів, перевірка, журнал."},
-      {n:3,  title:"Пара 3 — Журнали виробництва",                   url:"tech_II_kyrs/tech_para3.html",  desc:"Етапи, контрольні точки, зведення партій."},
-      {n:4,  title:"Пара 4 — Планування змін/потужностей",           url:"tech_II_kyrs/tech_para4.html",  desc:"Потоки, вузькі місця, балансування."},
-      {n:5,  title:"Пара 5 — Контроль якості (вхід/вихід)",          url:"tech_II_kyrs/tech_para5.html",  desc:"Специфікації, відбір проб, протоколи."},
-      {n:6,  title:"Пара 6 — Розсіл/рецептура/мас-баланс",           url:"tech_II_kyrs/tech_para6.html",  desc:"Формули, втрати, звіт по партії."},
-      {n:7,  title:"Пара 7 — Холодовий ланцюг/охолодження",          url:"tech_II_kyrs/tech_para7.html",  desc:"T-логери, криві охолодження, ліміти."},
-      {n:8,  title:"Пара 8 — Пакування/герметичність",               url:"tech_II_kyrs/tech_para8.html",  desc:"Критерії, випробування, облік дефектів."},
-      {n:9,  title:"Пара 9 — Етикетка/алергени/склад",               url:"tech_II_kyrs/tech_para9.html",  desc:"Опис, алергени, норми, контроль."},
-      {n:10, title:"Пара 10 — Журнал невідповідностей",              url:"tech_II_kyrs/tech_para10.html", desc:"NCR, аналіз причин, CAPA-зв’язки."},
-      {n:11, title:"Пара 11 — SPC: карти контролю",                  url:"tech_II_kyrs/tech_para11.html", desc:"X̄–R, межі, сигнали, Cp/Cpk."},
-      {n:12, title:"Пара 12 — Аудит постачальників",                 url:"tech_II_kyrs/tech_para12.html", desc:"Чек-листи, бали, рейтинг, дії."},
-      {n:13, title:"Пара 13 — SPC+CAPA інтегровано",                 url:"tech_II_kyrs/tech_para13.html", desc:"Карти, Cp/Cpk, NCR, CAPA, квиток 58 мм, QR/NFC."},
-      {n:14, title:"Пара 14 — Простежуваність & Mock Recall",        url:"tech_II_kyrs/tech_para14.html", desc:"RM→FG→клієнт, мас-баланс, звіт відкликання."},
-      {n:15, title:"Пара 15 — Підсумковий HACCP/FSMS",               url:"tech_II_kyrs/tech_para15.html", desc:"Небезпеки/CCP, аудит, CAPA, портфоліо, квиток, QR/NFC."}
-    ]
-  }
+  agro: { title:"🌾 Агрономія", desc:"Польові журнали, планування, моніторинги, QR/NFC.", list:[
+    {n:1,  title:"Пара 1 — Термопринтер 58 мм для агронома", url:"agro_II_kyrs/agro_para1.html",  desc:"Шаблони польових квитків: завдання, координати, QR/NFC."},
+    {n:2,  title:"Пара 2 — Облік насіння та матеріалів",     url:"agro_II_kyrs/agro_para2.html",  desc:"Склад насіння/ЗЗР; партії, залишки, видача; CSV+QR."},
+    {n:3,  title:"Пара 3 — Відбір ґрунтових проб",           url:"agro_II_kyrs/agro_para3.html",  desc:"План сітки, маркування проб, журнал GPS-точок."},
+    {n:4,  title:"Пара 4 — Польовий огляд (scouting)",       url:"agro_II_kyrs/agro_para4.html",  desc:"Чек-лист шкідників/хвороб, фото-посилання, серйозність."},
+    {n:5,  title:"Пара 5 — План внесення добрив",            url:"agro_II_kyrs/agro_para5.html",  desc:"Норми NPK, мішки/тонни, логістика, накладні 58 мм."},
+    {n:6,  title:"Пара 6 — Зрошення: графік та облік",       url:"agro_II_kyrs/agro_para6.html",  desc:"План поливу, лічильники, дефіцит вологи, нагадування."},
+    {n:7,  title:"Пара 7 — Моніторинг бур’янів і ЗЗР",       url:"agro_II_kyrs/agro_para7.html",  desc:"Облік засмічення/фази; вибір протоколу ЗЗР; безпечність."},
+    {n:8,  title:"Пара 8 — Оцінка стану посівів",            url:"agro_II_kyrs/agro_para8.html",  desc:"Висота/щільність, індекси, позначки по полю, висновок."},
+    {n:9,  title:"Пара 9 — Прогноз урожайності",              url:"agro_II_kyrs/agro_para9.html",  desc:"Квадрати вибірки, маса 1000 насінин, модель прогнозу."},
+    {n:10, title:"Пара 10 — Логістика жнив",                  url:"agro_II_kyrs/agro_para10.html", desc:"Черги комбайнів/авто, талони ваги, трек-журнал."},
+    {n:11, title:"Пара 11 — Склади та якість",                url:"agro_II_kyrs/agro_para11.html", desc:"Вологість, засміченість, партійність, FEFO, накладні."},
+    {n:12, title:"Пара 12 — Продажі/контракти",               url:"agro_II_kyrs/agro_para12.html", desc:"Контракти, відвантаження, ціни, контроль виконання."},
+    {n:13, title:"Пара 13 — План-факт витрат",                url:"agro_II_kyrs/agro_para13.html", desc:"Паливо/ЗЗР/запчастини; ліміти; підсумок по полю."},
+    {n:14, title:"Пара 14 — Техніка та ППР",                  url:"agro_II_kyrs/agro_para14.html", desc:"Графіки ТО, заявки, запасні частини, журнали робіт."},
+    {n:15, title:"Пара 15 — Підсумковий дашборд",             url:"agro_II_kyrs/agro_para15.html", desc:"Зведення сезону, KPI, чек-лист завершення кампанії."}
+  ]},
+  mech: { title:"🚜 Механізація (механіки)", desc:"ТО/ППР, облік пального, заявки, діагностика, безпека.", list:[
+    {n:1,  title:"Пара 1 — Облік пального + чек 58 мм",          url:"mech_II_kyrs/mechanic_para1.html",  desc:"Заправки, залишки, друк талонів, контроль норм."},
+    {n:2,  title:"Пара 2 — Журнал щоденного огляду",             url:"mech_II_kyrs/mechanic_para2.html",  desc:"Огляд трактор/комбайн; зауваження, фото-посилання."},
+    {n:3,  title:"Пара 3 — ППР/ТО планувальник",                 url:"mech_II_kyrs/mechanic_para3.html",  desc:"Інтервали, нагадування, перелік робіт, відповідальні."},
+    {n:4,  title:"Пара 4 — Заявки на ремонт/запчастини",         url:"mech_II_kyrs/mechanic_para4.html",  desc:"Пріоритети, склад, статуси, звітність."},
+    {n:5,  title:"Пара 5 — Витрати та норми пального",           url:"mech_II_kyrs/mechanic_para5.html",  desc:"План-факт, гектар/км, перевитрати, попередження."},
+    {n:6,  title:"Пара 6 — Маршрути та робочий час",             url:"mech_II_kyrs/mechanic_para6.html",  desc:"Зміни, простої, маршрутні листи, продуктивність."},
+    {n:7,  title:"Пара 7 — Гідравліка/електрика — заміри",       url:"mech_II_kyrs/mechanic_para7.html",  desc:"Протокол вимірювань тиску/напр. з формами та QR."},
+    {n:8,  title:"Пара 8 — Калібрування/крутний момент",         url:"mech_II_kyrs/mechanic_para8.html",  desc:"Таблиці моментів, шаблони актів, підписання."},
+    {n:9,  title:"Пара 9 — Техніка в полі (лог)",                url:"mech_II_kyrs/mechanic_para9.html",  desc:"Журнал змін, роботи з полем/полосами, простої."},
+    {n:10, title:"Пара 10 — Безпека та допуски",                  url:"mech_II_kyrs/mechanic_para10.html", desc:"Чек-листи ОП, інструктажі, наряди-допуски."},
+    {n:11, title:"Пара 11 — Телематика: аналіз треків",          url:"mech_II_kyrs/mechanic_para11.html", desc:"Імпорт CSV-треків, швидкість, простої."},
+    {n:12, title:"Пара 12 — Шини/ресурс",                         url:"mech_II_kyrs/mechanic_para12.html", desc:"Пробіги, зноси, перестановки, план закупівель."},
+    {n:13, title:"Пара 13 — Вартість ремонту",                    url:"mech_II_kyrs/mechanic_para13.html", desc:"Роботи/запчастини, калькуляція, порівняння варіантів."},
+    {n:14, title:"Пара 14 — Інвентаризація інструменту",         url:"mech_II_kyrs/mechanic_para14.html", desc:"Коди/QR, видача-повернення, відповідальні."},
+    {n:15, title:"Пара 15 — Підсумковий звіт сезону",             url:"mech_II_kyrs/mechanic_para15.html", desc:"KPI техніки, ТО, витрати, рішення на наступний сезон."}
+  ]},
+  tech: { title:"🐄 Технології виробництва продукції тваринництва", desc:"HACCP/FSMS, SPC, простежуваність, аудит, CAPA.", list:[
+    {n:1,  title:"Пара 1 — Паспорт продукту + термодрук",         url:"tech_II_kyrs/tech_para1.html",  desc:"Паспорт, лоти, чек 58 мм для етикеток/етапів."},
+    {n:2,  title:"Пара 2 — Маркування/штрих-коди/QR",              url:"tech_II_kyrs/tech_para2.html",  desc:"EAN-13/QR для лотів, перевірка, журнал."},
+    {n:3,  title:"Пара 3 — Журнали виробництва",                   url:"tech_II_kyrs/tech_para3.html",  desc:"Етапи, контрольні точки, зведення партій."},
+    {n:4,  title:"Пара 4 — Планування змін/потужностей",           url:"tech_II_kyrs/tech_para4.html",  desc:"Потоки, вузькі місця, балансування."},
+    {n:5,  title:"Пара 5 — Контроль якості (вхід/вихід)",          url:"tech_II_kyrs/tech_para5.html",  desc:"Специфікації, відбір проб, протоколи."},
+    {n:6,  title:"Пара 6 — Розсіл/рецептура/мас-баланс",           url:"tech_II_kyrs/tech_para6.html",  desc:"Формули, втрати, звіт по партії."},
+    {n:7,  title:"Пара 7 — Холодовий ланцюг/охолодження",          url:"tech_II_kyrs/tech_para7.html",  desc:"T-логери, криві охолодження, ліміти."},
+    {n:8,  title:"Пара 8 — Пакування/герметичність",               url:"tech_II_kyrs/tech_para8.html",  desc:"Критерії, випробування, облік дефектів."},
+    {n:9,  title:"Пара 9 — Етикетка/алергени/склад",               url:"tech_II_kyrs/tech_para9.html",  desc:"Опис, алергени, норми, контроль."},
+    {n:10, title:"Пара 10 — Журнал невідповідностей",              url:"tech_II_kyrs/tech_para10.html", desc:"NCR, аналіз причин, CAPA-зв’язки."},
+    {n:11, title:"Пара 11 — SPC: карти контролю",                  url:"tech_II_kyrs/tech_para11.html", desc:"X̄–R, межі, сигнали, Cp/Cpk."},
+    {n:12, title:"Пара 12 — Аудит постачальників",                 url:"tech_II_kyrs/tech_para12.html", desc:"Чек-листи, бали, рейтинг, дії."},
+    {n:13, title:"Пара 13 — SPC+CAPA інтегровано",                 url:"tech_II_kyrs/tech_para13.html", desc:"Карти, Cp/Cpk, NCR, CAPA, квиток 58 мм, QR/NFC."},
+    {n:14, title:"Пара 14 — Простежуваність & Mock Recall",        url:"tech_II_kyrs/tech_para14.html", desc:"RM→FG→клієнт, мас-баланс, звіт відкликання."},
+    {n:15, title:"Пара 15 — Підсумковий HACCP/FSMS",               url:"tech_II_kyrs/tech_para15.html", desc:"Небезпеки/CCP, аудит, CAPA, портфоліо, квиток, QR/NFC."}
+  ]}
 };
 
-// Динамічний розділ coach: будуємо список на льоту
+// Динамічні конфіги
 const COACH = {
-  title: "🧠 Психологічні тренінги (coach)",
-  desc: "Коучингові практики, рефлексія, soft skills, робота в групах.",
-  base: "coach/",
-  // кандидати імен файлів, які перевіряємо
+  key:'coach',
+  title:"🧠 Психологічні тренінги (coach)",
+  desc:"Коучингові практики, рефлексія, soft skills, робота в групах.",
+  base:"coach/",
   candidates(){
-    const arr = [];
-    arr.push("coach_intro.html", "index.html"); // у папці coach/
+    const arr=["coach_intro.html","index.html"];
     for(let i=1;i<=20;i++){
-      arr.push(`coach_para${i}.html`);
-      arr.push(`session${String(i).padStart(2,'0')}.html`);
-      arr.push(`coach${i}.html`);
+      arr.push(`coach_para${i}.html`,`session${String(i).padStart(2,'0')}.html`,`coach${i}.html`);
     }
-    return arr.map(name=>COACH.base + name);
+    return arr.map(n=>this.base+n);
   }
 };
 
-// Рендер сторінки
-function setSpecMetaStatic(specKey){
-  const S = DATA[specKey];
-  byId('specTitle').textContent = S.title;
-  byId('specDesc').textContent  = S.desc;
-  byId('listTitle').textContent = S.title + " — уроки";
-  const html = S.list.map(item=>lessonCard(item)).join("");
-  byId('lessons').innerHTML = html;
-  const firstUrl = S.list[0]?.url ? absoluteUrl(S.list[0].url) : "";
-  byId('url').value = firstUrl; gen();
-}
+const ELECT = {
+  key:'electric',
+  title:"⚡ Електроенергетика/електрика",
+  desc:"Вимірювання, маркування, ППР, калькулятори перерізів, журнали ОП.",
+  base:"elect_II_kyrs/", // ← якщо у тебе інша папка, зміни тут
+  candidates(){
+    const arr=["index.html"];
+    for(let i=1;i<=20;i++){
+      arr.push(`elect_para${i}.html`,`electric_para${i}.html`,`electrician_para${i}.html`,`el_para${i}.html`);
+    }
+    return arr.map(n=>this.base+n);
+  }
+};
 
+// Рендер/логіка
 function lessonCard(item){
-  const tags = item.tags ? `<div class="tags" style="margin-top:6px">${item.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>` : "";
   return `
     <div class="lesson">
       <div class="thumb">📄</div>
@@ -235,81 +217,9 @@ function lessonCard(item){
           <button class="btn secondary js-preview"  type="button" data-url="${item.url}">Швидке прев’ю</button>
           <button class="btn secondary js-iframe"   type="button" data-url="${item.url}">Згенерувати iFrame</button>
         </div>
-        ${tags}
       </div>
-    </div>
-  `;
+    </div>`;
 }
-
-// Автопошук coach/
-async function buildCoachList(){
-  byId('specTitle').textContent = COACH.title;
-  byId('specDesc').textContent  = COACH.desc;
-  byId('listTitle').textContent = COACH.title + " — тренінги";
-
-  const base = location.origin + location.pathname.replace('spec.html','') + COACH.base;
-  const found = [];
-
-  // Перевіряємо кандидати HEAD/GET (HEAD на GH Pages іноді редіректить; GET без кеша)
-  for(const rel of COACH.candidates()){
-    const url = rel.startsWith('http') ? rel : (location.origin + location.pathname.replace('spec.html','') + rel);
-    try{
-      const res = await fetch(url, {method:'GET', cache:'no-store'});
-      if(res.ok){
-        // спробуємо дістати <title>
-        let titleTxt = "";
-        try{
-          const html = await res.text();
-          const m = html.match(/<title>([^<]{1,120})<\/title>/i);
-          if(m) titleTxt = m[1].trim();
-        }catch(_e){}
-        // формуємо запис
-        const name = rel.replace(COACH.base,'');
-        const pretty = titleTxt || prettyCoachName(name);
-        const desc   = titleTxt ? `Сторінка: ${name}` : `Сесія: ${name}`;
-        found.push({n:found.length+1, title:pretty, url: rel, desc});
-      }
-    }catch(_e){
-      // пропускаємо 404/мережеві
-    }
-  }
-
-  if(!found.length){
-    byId('lessons').innerHTML = "";
-    byId('coachHint').style.display = '';
-    byId('url').value = "";
-    gen();
-    return;
-  }
-
-  // рендер
-  byId('lessons').innerHTML = found.map(item=>lessonCard(item)).join("");
-  // дефолтний вибір у генераторі
-  byId('coachHint').style.display = 'none';
-  const firstUrl = absoluteUrl(found[0].url);
-  byId('url').value = firstUrl; gen();
-}
-
-// Гуманна назва з імені файлу
-function prettyCoachName(name){
-  // приклади: coach_para3.html → "Сесія 3 — coach_para3"
-  //           session05.html   → "Сесія 5 — session05"
-  //           coach_intro.html → "Вступ — coach_intro"
-  const base = name.replace(/\.html$/i,'');
-  let label = base;
-  const m1 = base.match(/coach_para(\d+)/i);
-  const m2 = base.match(/session(\d+)/i);
-  if(/intro/i.test(base)) label = "Вступ — " + base;
-  else if(m1) label = `Сесія ${m1[1]} — ${base}`;
-  else if(m2) label = `Сесія ${Number(m2[1])} — ${base}`;
-  else if(/^coach\d+$/i.test(base)){
-    const n = base.match(/\d+/)[0];
-    label = `Сесія ${n} — ${base}`;
-  }
-  return label;
-}
-
-// Прев’ю + генератор
 function absoluteUrl(relative){
   const base = location.origin + location.pathname.replace('spec.html','');
   return relative.startsWith('http') ? relative : base + relative;
@@ -347,27 +257,63 @@ function copyCode(){
   const ta = byId('code');
   ta.select(); ta.setSelectionRange(0, ta.value.length);
   document.execCommand('copy');
-  const old = document.title;
-  document.title = '✅ HTML скопійовано';
-  setTimeout(()=>document.title = old, 900);
+  const old = document.title; document.title='✅ HTML скопійовано';
+  setTimeout(()=>document.title=old,900);
+}
+function setSpecMetaStatic(key){
+  const S = DATA[key];
+  byId('specTitle').textContent=S.title;
+  byId('specDesc').textContent=S.desc;
+  byId('listTitle').textContent=S.title+' — уроки';
+  byId('lessons').innerHTML = S.list.map(lessonCard).join('');
+  const firstUrl = S.list[0]?.url ? absoluteUrl(S.list[0].url) : "";
+  byId('url').value = firstUrl; gen();
+}
+
+// Узагальнений динамічний побудовник (coach/electric/будь-який інший)
+async function buildDynamic(cfg){
+  byId('specTitle').textContent = cfg.title;
+  byId('specDesc').textContent  = cfg.desc;
+  byId('listTitle').textContent = cfg.title + " — матеріали";
+  const found=[];
+  for(const rel of cfg.candidates()){
+    const url = absoluteUrl(rel);
+    try{
+      const res = await fetch(url,{method:'GET',cache:'no-store'});
+      if(!res.ok) continue;
+      let titleTxt="", page="";
+      try{ page = await res.text(); const m=page.match(/<title>([^<]{1,160})<\/title>/i); if(m) titleTxt=m[1].trim(); }catch(_){}
+      const nice = titleTxt || humanize(rel.replace(cfg.base,''));
+      found.push({title: nice, url: rel, desc: titleTxt?`Сторінка: ${rel.replace(cfg.base,'')}`:`Матеріал: ${rel.replace(cfg.base,'')}`});
+    }catch(_){}
+  }
+  if(!found.length){
+    byId('lessons').innerHTML="";
+    const msg = (cfg.key==='coach')
+      ? "У папці coach/ не знайдено тренінг-сторінок з типових назв. Додай coach_intro.html або coach_para1.html тощо."
+      : "У папці elect_II_kyrs/ не знайдено файлів електриків із типових назв. Додай elect_para1.html або electric_para1.html тощо.";
+    const hint = byId('hintBox'); hint.textContent = msg; hint.style.display='';
+    byId('url').value=""; gen(); return;
+  }
+  byId('hintBox').style.display='none';
+  byId('lessons').innerHTML = found.map(lessonCard).join('');
+  const firstUrl = absoluteUrl(found[0].url);
+  byId('url').value = firstUrl; gen();
+}
+function humanize(name){
+  const base = name.replace(/\.html$/i,'');
+  if(/intro/i.test(base)) return "Вступ — " + base;
+  const n = (base.match(/(\d+)/)||[])[1];
+  if(n) return `Матеріал ${Number(n)} — ${base}`;
+  return base;
 }
 
 // Події
 document.addEventListener('click', (e)=>{
-  const previewBtn = e.target.closest('.js-preview');
-  if(previewBtn){
-    const u = previewBtn.dataset.url;
-    openPreview(u);
-    return;
-  }
-  const iframeBtn = e.target.closest('.js-iframe');
-  if(iframeBtn){
-    const u = absoluteUrl(iframeBtn.dataset.url);
-    byId('url').value = u;
-    gen();
-    openPreview(u);
-    return;
-  }
+  const p = e.target.closest('.js-preview');
+  if(p){ openPreview(p.dataset.url); return; }
+  const i = e.target.closest('.js-iframe');
+  if(i){ const u = absoluteUrl(i.dataset.url); byId('url').value = u; gen(); openPreview(u); return; }
   if(e.target.id==='closePrev'){ closePreview(); }
   if(e.target.id==='toGen'){ byId('generator').scrollIntoView({behavior:'smooth',block:'start'}); }
   if(e.target.id==='btnGen'){ gen(); }
@@ -376,15 +322,17 @@ document.addEventListener('click', (e)=>{
 
 // Ініціалізація
 (async function init(){
-  if (window.self !== window.top) document.documentElement.classList.add('embedded'); // Moodle friendly
-  if(SPEC==='coach'){
-    await buildCoachList();
-  }else if(['agro','mech','tech'].includes(SPEC)){
-    setSpecMetaStatic(SPEC);
-  }else{
-    //fallback → coach
-    await buildCoachList();
+  if (window.self !== window.top) document.documentElement.classList.add('embedded');
+  if(SPEC==='coach'){ await buildDynamic(COACH); return; }
+  if(SPEC==='electric'){ await buildDynamic(ELECT); return; }
+  if(['agro','mech','tech'].includes(SPEC)){ setSpecMetaStatic(SPEC); return; }
+  // необов'язкові майбутні: G19 тощо — можна теж зробити dynamic
+  if(SPEC==='g19'){
+    await buildDynamic({key:'g19', title:'🛠️ Будівництво та цивільна інженерія (G19)', desc:'QGIS, журнали робіт, акти, безпека.', base:'g19_II_kyrs/', candidates(){ const L=[]; L.push('index.html'); for(let i=1;i<=20;i++){L.push(`g19_para${i}.html`);} return L.map(n=>this.base+n);} });
+    return;
   }
+  // fallback
+  await buildDynamic(COACH);
 })();
 </script>
 </body>
