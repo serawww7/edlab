@@ -1,0 +1,336 @@
+<!-- pair1-thermoprint.html
+     Пара 1 (аудиторно, 03.10.2025): Вступ + термодрук 58 мм (чек ПММ / видача інструменту)
+     Повністю автономний файл для розміщення на GitHub Pages та вставки в Moodle через <iframe>.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 1 — Вступ + Термодрук 58 мм</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  /* --------- БАЗОВА ТЕМА (standalone) --------- */
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --good:#10b981;
+    --border:#1f2937;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:980px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--border); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  ul,ol{margin:8px 0 12px 22px}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--border); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .grid{display:grid; gap:12px}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:820px){.g3{grid-template-columns:1fr}}
+  .kpi{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px dashed #263042; border-radius:12px}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:10px 12px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left}
+  .step{display:flex; gap:12px; align-items:flex-start; padding:10px 12px; border:1px solid #1f2937; border-radius:12px; background:#0b1324; margin:8px 0}
+  .step .n{min-width:30px; height:30px; border-radius:8px; background:#0e1a2e; display:grid; place-items:center; color:#a5b4fc; font-weight:700}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .footer{margin-top:28px; font-size:12px; color:#93a3b5}
+
+  /* --- Блок «Квитанція 58 мм» --- */
+  .ticket-wrap{display:flex; gap:16px; flex-wrap:wrap}
+  .ticket-panel{flex:1 1 360px}
+  .ticket{
+    width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px;
+    box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace;
+  }
+  .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
+  .ticket p{margin:2px 0; font-size:12px}
+  .ticket .center{text-align:center}
+  .ticket .line{border-top:1px dashed #111; margin:6px 0}
+  .ticket .qr{font-size:11px; word-break:break-all}
+  .ticket small{font-size:10px}
+
+  .field{display:flex; gap:8px; margin:6px 0}
+  .field label{min-width:120px; color:#cbd5e1}
+  .field input, .field select{
+    flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb
+  }
+  .row-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px}
+  .no-print{display:block}
+
+  /* --------- ВЕРСІЯ ДЛЯ ВБУДОВУВАННЯ (iframe/Moodle) --------- */
+  html.embedded body{
+    background:#fff; color:#111; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif
+  }
+  html.embedded .wrap{max-width:100%; padding:16px 0 24px}
+  html.embedded .badge{display:none}
+  html.embedded h1{
+    -webkit-text-fill-color:initial; background:none; color:#111; font-weight:800;
+    font-size:28px; margin:4px 12px 8px
+  }
+  html.embedded .card{
+    background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px; margin:10px 12px; box-shadow:none
+  }
+  html.embedded h2{font-size:20px; margin:4px 0 8px}
+  html.embedded h3{font-size:16px; margin:8px 0 6px; color:#111}
+  html.embedded .step{background:#fafafa; border:1px solid #e5e7eb}
+  html.embedded .field label{color:#374151}
+  html.embedded .field input, html.embedded .field select{
+    background:#fff; color:#111; border:1px solid #d1d5db
+  }
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+  html.embedded .btn:hover{background:#0b1220}
+  html.embedded .footer{color:#6b7280; margin:4px 12px}
+
+  @media print{
+    @page{ size:58mm auto; margin:4mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+</style>
+<noscript><meta http-equiv="refresh" content="0; url=?noscript=1"></noscript>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 1 · ЛПЗ · агрономи · 03.10.2025</span>
+    <h1>🌾 Вступ до курсу + 🧾 термодрук 58 мм: чек ПММ / видача інструменту</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>Швидкий старт: вводимо прості дані (агрегат, оператор, ПММ/інструмент) → генеруємо <b>квитанцію 58 мм</b> → друкуємо. Мінімум слів — максимум дії.</p>
+      <div class="grid g3">
+        <div class="kpi"><span>🧑‍🌾</span><div><b>Фокус</b><br/>простота, зрозумілі кроки</div></div>
+        <div class="kpi"><span>🖨️</span><div><b>Прилад</b><br/>термопринтер 58 мм (ESC/POS або системний друк)</div></div>
+        <div class="kpi"><span>📄</span><div><b>Артефакти</b><br/>чек «ПММ», чек «Інструмент»</div></div>
+      </div>
+    </div>
+
+    <div class="card printable">
+      <h2>🧪 Практикум: сформуй чек і надрукуй</h2>
+
+      <div class="ticket-wrap">
+        <!-- Панель заповнення -->
+        <div class="ticket-panel">
+          <h3>1) Введення даних</h3>
+
+          <div class="field">
+            <label for="type">Тип чека</label>
+            <select id="type">
+              <option value="fuel">ПММ — видача пального</option>
+              <option value="tool">Інструмент — видача/повернення</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="machine">Агрегат</label>
+            <input id="machine" type="text" value="МТЗ-82" />
+          </div>
+
+          <div class="field">
+            <label for="operator">Оператор</label>
+            <input id="operator" type="text" value="Іван" />
+          </div>
+
+          <div class="field" data-for="fuel">
+            <label for="fuel">ПММ, л</label>
+            <input id="fuel" type="number" step="0.1" value="12" />
+          </div>
+
+          <div class="field" data-for="tool" style="display:none">
+            <label for="toolname">Інструмент</label>
+            <input id="toolname" type="text" value="Ключ-27" />
+          </div>
+
+          <div class="field" data-for="tool" style="display:none">
+            <label for="action">Дія</label>
+            <select id="action">
+              <option value="ВИДАЧА">ВИДАЧА</option>
+              <option value="ПОВЕРНЕННЯ">ПОВЕРНЕННЯ</option>
+            </select>
+          </div>
+
+          <div class="row-actions no-print">
+            <button class="btn" type="button" id="buildBtn">🧩 Зібрати чек</button>
+            <button class="btn" type="button" id="printBtn">🖨️ Друкувати 58 мм</button>
+            <button class="btn" type="button" id="saveBtn">📥 Зберегти як TXT</button>
+          </div>
+
+          <p style="margin-top:10px; color:#a3b2c4" class="no-print">
+            Порада: якщо обрізає — у діалозі друку зменш поля/масштаб до 90–95%.
+          </p>
+        </div>
+
+        <!-- Попередній перегляд 58 мм -->
+        <div class="ticket-panel">
+          <h3>2) Попередній перегляд (те, що піде на стрічку)</h3>
+          <div id="ticket" class="ticket" aria-live="polite">
+            <h4>АГРОСЕРВІС · КВИТАНЦІЯ</h4>
+            <p class="center"><small id="t-date">Дата: —</small></p>
+            <div class="line"></div>
+            <p><b id="t-title">ПММ — видача пального</b></p>
+            <p>Агрегат: <span id="t-machine">—</span></p>
+            <p>Оператор: <span id="t-operator">—</span></p>
+            <p id="t-fuel">ПММ: — л</p>
+            <p id="t-tool" style="display:none">Інструмент: —</p>
+            <p id="t-action" style="display:none">Дія: —</p>
+            <div class="line"></div>
+            <p class="qr"><small id="t-ref">Ref: LOCAL-0001</small></p>
+            <p class="center"><small>Підпис оператора: __________</small></p>
+            <div class="line"></div>
+            <p class="center"><small>Дякуємо! Бережіть інструмент і пальне 🌱</small></p>
+          </div>
+          <div class="row-actions no-print" style="margin-top:10px">
+            <button class="btn" type="button" id="refreshBtn">🔄 Оновити попередній перегляд</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🪜 Хід роботи (швидко і просто)</h2>
+      <div class="step"><div class="n">1</div><div><b>Пояснення</b> (що таке чек і навіщо у полі).</div></div>
+      <div class="step"><div class="n">2</div><div><b>Підключення принтера</b> (система має його бачити; тест-друк 1 рядка).</div></div>
+      <div class="step"><div class="n">3</div><div><b>Заповнення полів</b> (тип, агрегат, оператор, ПММ/інструмент).</div></div>
+      <div class="step"><div class="n">4</div><div><b>Збір чека</b> (🧩), перевірка, <b>друк</b> (🖨️) або <b>TXT-експорт</b> (📥).</div></div>
+    </div>
+
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Заповнені поля (агрегат, оператор, ПММ або інструмент)</td><td>3</td></tr>
+          <tr><td>Коректний попередній перегляд (дата, Ref)</td><td>2</td></tr>
+          <tr><td>Друк чека 58 мм (читабельно)</td><td>3</td></tr>
+          <tr><td>Фото чека у спільній папці з правильною назвою</td><td>2</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer">
+      <span class="pill">🧾 Чек ПММ</span>
+      <span class="pill">🧰 Чек інструменту</span>
+      <span class="pill">🔰 Вступ</span>
+    </div>
+  </div>
+
+<script>
+  // Вбудований режим (iframe): спрощений вигляд «під Moodle»
+  (function(){
+    if (window.self !== window.top) {
+      document.documentElement.classList.add('embedded');
+    }
+  })();
+
+  // Перемикання полів
+  const typeEl = document.getElementById('type');
+  const fuelBlock = document.querySelector('[data-for="fuel"]');
+  const toolBlocks = document.querySelectorAll('[data-for="tool"]');
+  function toggleFields(){
+    const t = typeEl.value;
+    if(t === 'fuel'){
+      fuelBlock.style.display = '';
+      toolBlocks.forEach(el=>el.style.display='none');
+    }else{
+      fuelBlock.style.display = 'none';
+      toolBlocks.forEach(el=>el.style.display='');
+    }
+  }
+  typeEl.addEventListener('change', toggleFields);
+  toggleFields();
+
+  // Побудова квитанції
+  function buildTicket(){
+    const t = typeEl.value;
+    const machine = document.getElementById('machine').value.trim() || '—';
+    const operator = document.getElementById('operator').value.trim() || '—';
+    const fuel = document.getElementById('fuel').value;
+    const toolname = document.getElementById('toolname').value.trim() || '—';
+    const action = document.getElementById('action').value;
+
+    const now = new Date();
+    const pad = n => n.toString().padStart(2,'0');
+    const stamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    document.getElementById('t-date').textContent = `Дата: ${stamp}`;
+
+    document.getElementById('t-machine').textContent = machine;
+    document.getElementById('t-operator').textContent = operator;
+
+    const title = (t==='fuel') ? 'ПММ — видача пального' : 'Інструмент — видача/повернення';
+    document.getElementById('t-title').textContent = title;
+
+    const fuelLine = document.getElementById('t-fuel');
+    const toolLine = document.getElementById('t-tool');
+    const actionLine = document.getElementById('t-action');
+
+    if(t==='fuel'){
+      fuelLine.style.display = '';
+      fuelLine.textContent = `ПММ: ${fuel ? fuel : '—'} л`;
+      toolLine.style.display = 'none';
+      actionLine.style.display = 'none';
+    }else{
+      fuelLine.style.display = 'none';
+      toolLine.style.display = '';
+      toolLine.textContent = `Інструмент: ${toolname}`;
+      actionLine.style.display = '';
+      actionLine.textContent = `Дія: ${action}`;
+    }
+
+    const ref = 'LOCAL-' + Math.random().toString(36).slice(2,8).toUpperCase();
+    document.getElementById('t-ref').textContent = `Ref: ${ref}`;
+  }
+
+  // TXT-збереження
+  function downloadTXT(){
+    const tTitle = document.getElementById('t-title').textContent;
+    const tDate  = document.getElementById('t-date').textContent;
+    const tMachine = document.getElementById('t-machine').textContent;
+    const tOperator= document.getElementById('t-operator').textContent;
+    const tFuel = document.getElementById('t-fuel').style.display==='none' ? '' : document.getElementById('t-fuel').textContent;
+    const tTool = document.getElementById('t-tool').style.display==='none' ? '' : document.getElementById('t-tool').textContent;
+    const tAction = document.getElementById('t-action').style.display==='none' ? '' : document.getElementById('t-action').textContent;
+    const tRef  = document.getElementById('t-ref').textContent;
+
+    const lines = [
+      'AGROSERVICE RECEIPT',
+      '--------------------',
+      tTitle,
+      tDate,
+      `Агрегат: ${tMachine}`,
+      `Оператор: ${tOperator}`,
+      tFuel, tTool, tAction,
+      '--------------------',
+      tRef,
+      'Підпис: ____________',
+      'Дякуємо! Бережіть ресурс.'
+    ].filter(Boolean);
+
+    const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'check_58mm.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  // Кнопки
+  document.getElementById('buildBtn').addEventListener('click', buildTicket);
+  document.getElementById('refreshBtn').addEventListener('click', buildTicket);
+  document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+  document.getElementById('saveBtn').addEventListener('click', downloadTXT);
+
+  // Початковий зразок
+  buildTicket();
+</script>
+</body>
+</html>
