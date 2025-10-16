@@ -1,0 +1,200 @@
+<!-- index.html — домашня сторінка EDLab на GitHub Pages
+     Готово до публікації у https://serawww7.github.io/edlab/
+     Містить: опис, картку уроку, генератор iFrame для Moodle, прев’ю-рамку з тестом кліків. -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EDLab — цифрові пари для агрономів</title>
+<meta name="description" content="EDLab: готові інтерактивні пари з аграрної інформатики. Вставляй у Moodle через iFrame одним кліком." />
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e5e7eb; --muted:#9aa5b1;
+    --accent:#22c55e; --accent2:#60a5fa; --line:#1f2937; --soft:#0b1324;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55; color:var(--text);
+       background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg));}
+  .wrap{max-width:1100px; margin:0 auto; padding:28px 16px 80px}
+  header{display:flex; gap:16px; align-items:center; justify-content:space-between; margin-bottom:12px}
+  .logo{display:flex; align-items:center; gap:10px}
+  .logo b{font-size:20px; letter-spacing:.3px}
+  .badge{padding:6px 10px; border:1px solid var(--line); border-radius:999px; font-size:12px; color:var(--muted)}
+  h1{font-size:36px; margin:8px 0 6px; background:linear-gradient(90deg,var(--accent2),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  p{margin:8px 0}
+  .grid{display:grid; gap:16px}
+  .g2{grid-template-columns:1.2fr .8fr}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg,var(--card),var(--bg)); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .card h2{font-size:22px; margin:6px 0 8px}
+  .muted{color:var(--muted); font-size:14px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .btn.secondary{background:#0b1324}
+  .tag{display:inline-block; padding:4px 10px; border:1px solid var(--line); border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+
+  /* Список уроків */
+  .lesson{display:grid; gap:12px; grid-template-columns:120px 1fr; align-items:center}
+  .lesson .thumb{height:90px; border-radius:12px; background:#0b1324; border:1px solid var(--line); display:grid; place-items:center; font-size:34px}
+  .lesson .meta b{display:block; font-size:18px}
+  .lesson .meta small{color:var(--muted)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+
+  /* Генератор iFrame */
+  label{display:block; font-size:13px; color:#cbd5e1; margin:8px 0 4px}
+  input[type="text"], input[type="number"], textarea{
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#e5e7eb;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+  textarea{min-height:140px; resize:vertical}
+  .inline{display:grid; grid-template-columns:1fr 180px; gap:10px}
+  @media (max-width:720px){.inline{grid-template-columns:1fr}}
+  .ok{color:#10b981}
+  .warn{color:#f59e0b}
+
+  /* Тестер iFrame */
+  .tester{border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff}
+  .tester iframe{width:100%; height:520px; border:0; display:block; background:#fff}
+
+  /* «Мудлівський» вигляд, якщо ця сторінка сама вставлена у iframe */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">
+        <span style="font-size:26px">🌾</span>
+        <b>EDLab</b>
+        <span class="badge">Цифрові пари для агрономів</span>
+      </div>
+      <div class="muted">GitHub Pages · serawww7 / edlab</div>
+    </header>
+
+    <h1>Лабораторні з інформатики для агрономів — просто, красиво, практично</h1>
+    <p class="muted">Сторінка-хаб: переходи до занять, генератор iFrame для Moodle та швидкий тест клікабельності.</p>
+
+    <div class="grid g2" style="margin-top:16px">
+      <!-- Лівий стовпець: уроки + прев'ю -->
+      <div class="card">
+        <h2>📚 Уроки</h2>
+
+        <!-- ПАРА 1 -->
+        <div class="lesson">
+          <div class="thumb">🧾</div>
+          <div class="meta">
+            <b>Пара 1 — Термодрук 58 мм: чек ПММ / інструмент</b>
+            <small>03.10.2025 · інтерактивний конструктор чека, друк та TXT-експорт</small>
+            <div class="row" style="margin-top:8px">
+              <a class="btn" href="https://serawww7.github.io/edlab/1_para.html" target="_blank" rel="noopener">Відкрити</a>
+              <button class="btn secondary" type="button" onclick="openPreview('https://serawww7.github.io/edlab/1_para.html')">Швидке прев’ю</button>
+              <button class="btn secondary" type="button" onclick="fillIframe('https://serawww7.github.io/edlab/1_para.html')">Згенерувати iFrame</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <span class="tag">🖨️ 58 мм</span>
+          <span class="tag">📄 TXT</span>
+          <span class="tag">🔗 iFrame для Moodle</span>
+        </div>
+
+        <div id="preview" class="tester" style="margin-top:14px; display:none">
+          <iframe id="previewFrame" src="about:blank" sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-downloads" referrerpolicy="no-referrer"></iframe>
+        </div>
+        <p class="muted" id="previewNote" style="display:none; margin-top:6px">Порада: натисни «Згенерувати iFrame» — код знизу вже буде з правильним URL.</p>
+      </div>
+
+      <!-- Правий стовпець: генератор iFrame -->
+      <div class="card">
+        <h2>🔧 Генератор коду для Moodle (iFrame)</h2>
+        <label for="url">URL сторінки</label>
+        <input id="url" type="text" value="https://serawww7.github.io/edlab/1_para.html" />
+
+        <div class="inline">
+          <div>
+            <label for="height">Висота фрейма (px)</label>
+            <input id="height" type="number" value="1600" />
+          </div>
+          <div>
+            <label for="sandbox">Sandbox токени</label>
+            <input id="sandbox" type="text" value="allow-same-origin allow-scripts allow-forms allow-modals allow-downloads" />
+          </div>
+        </div>
+
+        <label for="code">HTML-код для вставки у Moodle</label>
+        <textarea id="code" readonly></textarea>
+
+        <div class="row" style="margin-top:8px">
+          <button class="btn" type="button" onclick="gen()">🔁 Оновити код</button>
+          <button class="btn" type="button" onclick="copyCode()">📋 Скопіювати</button>
+        </div>
+        <p class="muted" style="margin-top:6px">
+          Рекомендовано вставляти як <b>Ресурс → Page</b> або <b>URL (Display: Embed)</b>.  
+          Якщо кнопки «німі» — перевір фільтри ресурсу, або зменш набір sandbox.
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>❓ Навіщо так</h2>
+      <p>Кожна пара — це готовий інтерактив: студенти натискають кнопки, друкують чеки, формують файли, а ти просто вбудовуєш сторінку в Moodle. Все «легально» і безстановочно: GitHub Pages + iFrame.</p>
+      <p><span class="ok">✅</span> Працює навіть при жорстких політиках безпеки; <span class="warn">⚠️</span> якщо щось блокується — зменш набір sandbox або використай ресурс «URL→Embed».</p>
+    </div>
+
+    <footer style="margin-top:16px" class="muted">
+      © 2025 EDLab · Підтримка: оновлення сторінок за потреби. Якщо додаси нові файли (наприклад, <span class="mono">2_para.html</span>, <span class="mono">3_para.html</span>), ми розширимо хаб.
+    </footer>
+  </div>
+
+<script>
+  // Режим «вбудовано у Moodle»
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  function gen(){
+    const url = document.getElementById('url').value.trim();
+    const h   = parseInt(document.getElementById('height').value,10) || 1600;
+    const sb  = document.getElementById('sandbox').value.trim();
+    const html =
+`<div style="max-width:980px;margin:0 auto;position:relative;z-index:1;">
+  <iframe
+    src="${url}"
+    style="width:100%;height:${h}px;border:0;display:block;pointer-events:auto;background:#fff;"
+    loading="eager"
+    referrerpolicy="no-referrer"
+    sandbox="${sb}">
+  </iframe>
+</div>`;
+    document.getElementById('code').value = html;
+  }
+  function copyCode(){
+    const ta = document.getElementById('code');
+    ta.select(); ta.setSelectionRange(0, ta.value.length);
+    document.execCommand('copy');
+    const old = document.querySelector('title').textContent;
+    document.title = '✅ HTML скопійовано';
+    setTimeout(()=>document.title = old, 900);
+  }
+  function openPreview(u){
+    const box = document.getElementById('preview');
+    const note = document.getElementById('previewNote');
+    box.style.display = ''; note.style.display='';
+    document.getElementById('previewFrame').src = u;
+    window.scrollTo({top: box.getBoundingClientRect().top + window.scrollY - 20, behavior:'smooth'});
+  }
+  function fillIframe(u){
+    document.getElementById('url').value = u;
+    gen();
+    openPreview(u);
+  }
+
+  // ініціалізація
+  gen();
+</script>
+</body>
+</html>
