@@ -1,0 +1,573 @@
+<!-- tech_para13.html
+     ПАРА 13 (аудиторно) для технологів з переробки продукції тваринництва
+     Тема: SPC + CAPA — карти X̄–R, межі керування, Cp/Cpk, невідповідності (NCR) та план CAPA,
+           квиток 58 мм, QR/NFC, CSV.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; (опц.) термопринтер 58 мм; NFC-мітки.
+
+     Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
+     УВАГА: навчальна модель. Фактичні карти/межі розраховують QA на реальних вибірках.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 13 (технологи) — SPC X̄–R, Cp/Cpk, NCR & CAPA, квиток/QR/NFC/CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  textarea{min-height:84px}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано в Moodle (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+  /* ASCII графіки */
+  .graph{font:12px/14px ui-monospace,monospace;white-space:pre;background:#fff;color:#000;padding:8px;border-radius:8px;border:1px solid #e5e7eb;overflow:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 13 · аудиторно · технологи переробки</span>
+  <h1>📈 SPC X̄–R, Cp/Cpk, NCR & CAPA, квиток/QR/NFC/CSV</h1>
+
+  <div class="card">
+    <h2>🎯 Мета пари</h2>
+    <p>
+      За заняття студенти: (1) зберуть <b>вимірювання</b> по підгрупах, (2) побудують <b>карти X̄–R</b> з межами керування,
+      (3) розрахують <b>Cp/Cpk</b>, (4) зафіксують <b>невідповідності (NCR)</b> та сформують <b>план CAPA</b>,
+      (5) оформлять <b>CSV</b>, <b>QR/NFC</b> та <b>квиток 58 мм</b>.
+    </p>
+    <p class="small muted">Модель для навчання. На виробництві — узгоджуйте з QA методики, розмір підгруп, правила сигналів (WECO), плани відбору.</p>
+  </div>
+
+  <!-- 1. СПЕЦИФІКАЦІЯ/ПАРАМЕТРИ SPC -->
+  <div class="card">
+    <h2>⚙️ Специфікація та параметри SPC</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Показник</h3>
+        <div class="row">
+          <div style="flex:1"><label>Назва</label><input id="charName" type="text" value="Маса нетто, г"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>LSL</label><input id="lsl" type="number" step="0.1" value="390"></div>
+          <div style="flex:1"><label>TARGET</label><input id="tgt" type="number" step="0.1" value="400"></div>
+          <div style="flex:1"><label>USL</label><input id="usl" type="number" step="0.1" value="410"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Підгрупи</h3>
+        <div class="row">
+          <div style="flex:1"><label>Розмір підгрупи (n, 2–10)</label><input id="n" type="number" step="1" value="5"></div>
+          <div style="flex:1"><label>Підгруп заплановано</label><input id="k" type="number" step="1" value="8"></div>
+        </div>
+        <p class="small muted">Карти: X̄ (середні) та R (розмах). Константи A2/D3/D4/d2 — за вибраним n.</p>
+      </div>
+
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="presetData()">🧪 Приклад даних</button>
+          <button class="btn" onclick="recalc()">✅ Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvData')">📋 CSV (raw)</button>
+        </div>
+        <div id="csvData" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ДАНІ ВИМІРЮВАНЬ -->
+  <div class="card">
+    <h2>🧪 Вимірювання</h2>
+    <div class="row">
+      <button class="btn" onclick="addRow()">➕ Додати вимір</button>
+      <button class="btn" onclick="autoSubgroup()">🔁 Заповнити підгрупи</button>
+      <button class="btn" onclick="copyCSV('csvSub')">📋 CSV (subgroups)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tbl">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Підгрупа</th>
+            <th class="dark">Значення</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="body"></tbody>
+      </table>
+    </div>
+    <div id="csvSub" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 3. РЕЗУЛЬТАТИ SPC -->
+  <div class="card">
+    <h2>📊 Результати SPC</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>Підсумки</h3>
+        <div id="sumOut" class="out">—</div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="copyCSV('csvSPC')">📋 CSV (spc)</button>
+        </div>
+        <div id="csvSPC" class="out" style="margin-top:8px">—</div>
+      </div>
+      <div class="box">
+        <h3>Сигнали/порушення</h3>
+        <div id="sigOut" class="out">—</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:12px">Карти X̄ та R (ASCII)</h3>
+    <div class="grid g2">
+      <div>
+        <div class="graph" id="chartX">—</div>
+      </div>
+      <div>
+        <div class="graph" id="chartR">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. NCR + CAPA -->
+  <div class="card">
+    <h2>🚨 Невідповідності (NCR) та CAPA</h2>
+    <div class="row">
+      <button class="btn" onclick="addNCR()">➕ Додати NCR</button>
+      <button class="btn" onclick="presetNCR()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvNCR')">📋 CSV (NCR)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblNCR">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Опис</th>
+            <th class="dark">Root cause</th>
+            <th class="dark">Corrective</th>
+            <th class="dark">Preventive</th>
+            <th>Відповідальний</th>
+            <th>Термін</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyNCR"></tbody>
+      </table>
+    </div>
+    <div id="csvNCR" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 5. ЖУРНАЛ / КВИТОК 58 мм / QR / NFC -->
+  <div class="card">
+    <h2>📒 Журнал SPC / Квиток 58 мм / QR / NFC</h2>
+    <div class="row">
+      <button class="btn" onclick="addLog()">➕ Додати у журнал</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblLog">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Показник</th>
+            <th class="dark">X̄±A2·R̄</th>
+            <th class="dark">R̄ (LCL/UCL)</th>
+            <th>Cp/Cpk</th>
+            <th>Сигнали</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyLog"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+
+    <div class="grid g2" style="margin-top:12px">
+      <div class="box">
+        <h3>QR-payload</h3>
+        <div class="row">
+          <button class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
+          <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
+        </div>
+        <div id="qrOut" class="out">—</div>
+
+        <h3 style="margin-top:12px">NFC — “SPC CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label>Аналітик</label><input id="nfcOper" type="text" value="Студент ТПТ"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток 58 мм — “SPC SUMMARY”</h3>
+        <div class="row">
+          <button class="btn" onclick="scrollTicket()">🧾 Показати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>SPC SUMMARY</h4>
+          <p><b>Показник:</b> <span id="tChar">—</span></p>
+          <p><b>X̄:</b> <span id="tXbar">—</span> · <b>R̄:</b> <span id="tRbar">—</span></p>
+          <p><b>Межі X̄:</b> <span id="tXlim">—</span></p>
+          <p><b>Межі R:</b> <span id="tRlim">—</span></p>
+          <div class="line"></div>
+          <p><b>Cp/Cpk:</b> <span id="tCap">—</span></p>
+          <p><b>Сигнали:</b> <span id="tSig">—</span></p>
+          <div class="line"></div>
+          <p><small>Надійність оцінки залежить від вибірки; для рішень — консультуйтеся з QA.</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Задайте LSL/TARGET/USL та n,k; внесіть 30–50 вимірювань або скористайтесь прикладом.</li>
+      <li>Перерахуйте карти X̄–R; перегляньте ASCII-графіки та сигнали.</li>
+      <li>Розрахуйте Cp/Cpk; за потреби створіть NCR та CAPA.</li>
+      <li>Занесіть підсумок у журнал; сформуйте QR/NFC і квиток; скопіюйте CSV.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Коректний набір даних та групування</td><td>3</td></tr>
+        <tr><td>Правильні межі, карти X̄–R, інтерпретація сигналів</td><td>4</td></tr>
+        <tr><td>Cp/Cpk + висновок</td><td>2</td></tr>
+        <tr><td>Журнал/QR/NFC/квиток/CSV</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  function copyCSV(id){ const t=byId(id).textContent.trim(); if(!t||t==='—'){alert('Немає даних');return;} navigator.clipboard.writeText(t); }
+  function copyEl(id){ const t=byId(id).textContent.trim(); if(!t||t==='—'){alert('Немає даних');return;} navigator.clipboard.writeText(t); }
+  function reindex(tb){ [...tb.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  // ===== Константи для n=2..10 =====
+  const CONST = {
+    2:{A2:1.880,D3:0.000,D4:3.267,d2:1.128},
+    3:{A2:1.023,D3:0.000,D4:2.574,d2:1.693},
+    4:{A2:0.729,D3:0.000,D4:2.282,d2:2.059},
+    5:{A2:0.577,D3:0.000,D4:2.114,d2:2.326},
+    6:{A2:0.483,D3:0.000,D4:2.004,d2:2.534},
+    7:{A2:0.419,D3:0.076,D4:1.924,d2:2.704},
+    8:{A2:0.373,D3:0.136,D4:1.864,d2:2.847},
+    9:{A2:0.337,D3:0.184,D4:1.816,d2:2.970},
+    10:{A2:0.308,D3:0.223,D4:1.777,d2:3.078}
+  };
+
+  // ===== Дані вимірювань =====
+  const body = byId('body');
+  function addRow(sample){
+    const s = Object.assign({sg:1, val:400}, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="number" step="1" value="${s.sg}"></td>
+      <td class="dark"><input type="number" step="0.1" value="${s.val}"></td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(body); buildCSV_Raw(); recalc();">✖</button></td>
+    `;
+    body.appendChild(tr); reindex(body); buildCSV_Raw();
+  }
+  function autoSubgroup(){
+    const n = +byId('n').value||5;
+    const k = +byId('k').value||8;
+    // переприсвоїти підгрупи по n
+    const rows=[...body.querySelectorAll('tr')];
+    rows.forEach((r,i)=> r.children[1].querySelector('input').value = Math.floor(i/n)+1 );
+    reindex(body); buildCSV_Raw(); recalc();
+  }
+  function buildCSV_Raw(){
+    const lines=[...body.querySelectorAll('tr')].map(r=>{
+      return [r.querySelector('.idx').textContent.trim(),
+              r.children[1].querySelector('input').value.trim(),
+              r.children[2].querySelector('input').value.trim()].join(' | ');
+    });
+    byId('csvData').textContent = lines.join('\n') || '—';
+  }
+  function presetData(){
+    body.innerHTML='';
+    // згенеруємо навчальний набір навколо TARGET з невеликим трендом
+    const target = +byId('tgt').value||400, n = +byId('n').value||5, k=+byId('k').value||8;
+    let sg=1, count=0;
+    for(let i=0;i<n*k;i++){
+      if(i>0 && i%n===0) sg++;
+      const drift = (sg-1)*0.5; // тренд +0.5 г на підгрупу
+      const noise = (Math.random()*2-1)*2.0; // випадковість ~±2 г
+      addRow({sg:sg, val: rnd(target + drift + noise,1)});
+      count++;
+    }
+    autoSubgroup(); recalc();
+  }
+
+  // ===== Розрахунок карт X̄–R, Cp/Cpk, сигнали =====
+  function groupData(){
+    const n = +byId('n').value||5;
+    const rows = [...body.querySelectorAll('tr')].map(r=>({
+      sg:+r.children[1].querySelector('input').value||1,
+      val:+r.children[2].querySelector('input').value||NaN
+    })).filter(x=>!isNaN(x.val));
+    const map = new Map();
+    rows.forEach(r=>{ if(!map.has(r.sg)) map.set(r.sg, []); map.get(r.sg).push(r.val); });
+    // відфільтрувати лише повні підгрупи розміру n
+    const sgs = [...map.keys()].sort((a,b)=>a-b).filter(k=>map.get(k).length===n);
+    const data = sgs.map(k=>{
+      const arr = map.get(k);
+      const mean = arr.reduce((a,x)=>a+x,0)/arr.length;
+      const range = Math.max(...arr)-Math.min(...arr);
+      return {sg:k, arr, mean, range};
+    });
+    return data;
+  }
+
+  function recalc(){
+    const n = Math.min(10, Math.max(2, (+byId('n').value||5)));
+    byId('n').value = n;
+    const C = CONST[n];
+    const data = groupData();
+    if(!data.length){ byId('sumOut').textContent='— недостатньо повних підгруп —'; byId('csvSPC').textContent='—'; byId('sigOut').textContent='—'; byId('chartX').textContent='—'; byId('chartR').textContent='—'; return; }
+
+    const means = data.map(d=>d.mean);
+    const ranges= data.map(d=>d.range);
+    const xbarbar = means.reduce((a,x)=>a+x,0)/means.length;
+    const rbar    = ranges.reduce((a,x)=>a+x,0)/ranges.length;
+
+    const UCLx = xbarbar + C.A2 * rbar;
+    const LCLx = xbarbar - C.A2 * rbar;
+    const UCLr = C.D4 * rbar;
+    const LCLr = C.D3 * rbar;
+
+    // Порушення: за межами UCL/LCL та 7 точок з трендом (монотонно)
+    const sig = [];
+    data.forEach(d=>{
+      if(d.mean>UCLx || d.mean<LCLx) sig.push(`X̄: підгрупа ${d.sg} поза межами`);
+      if(d.range>UCLr || d.range<LCLr) sig.push(`R: підгрупа ${d.sg} поза межами`);
+    });
+    // просте правило тренду: 7 поспіль зрост./спад.
+    if(data.length>=7){
+      let up=1, down=1;
+      for(let i=1;i<data.length;i++){
+        if(data[i].mean>data[i-1].mean){ up++; down=1; } else
+        if(data[i].mean<data[i-1].mean){ down++; up=1; } else { up=1; down=1; }
+        if(up>=7){ sig.push('X̄: 7 підряд зростання (тренд)'); break; }
+        if(down>=7){ sig.push('X̄: 7 підряд спадання (тренд)'); break; }
+      }
+    }
+
+    // Оцінка sigma процесу через R̄/d2
+    const sigma = rbar / C.d2;
+    const LSL = +byId('lsl').value||NaN, USL = +byId('usl').value||NaN, tgt=+byId('tgt').value||NaN;
+    let Cp='н/д', Cpk='н/д';
+    if(!isNaN(LSL)&&!isNaN(USL)&&sigma>0){
+      Cp = rnd((USL-LSL)/(6*sigma),2);
+      const Cpu = (USL - xbarbar)/(3*sigma);
+      const Cpl = (xbarbar - LSL)/(3*sigma);
+      Cpk = rnd(Math.min(Cpu, Cpl),2);
+    }
+
+    // Вивід сумарний + CSV
+    byId('sumOut').textContent =
+      `n=${n}; підгруп=${data.length}; X̄̄=${rnd(xbarbar,3)}; R̄=${rnd(rbar,3)}; `+
+      `Межі X̄: [${rnd(LCLx,2)}; ${rnd(UCLx,2)}]; Межі R: [${rnd(LCLr,2)}; ${rnd(UCLr,2)}]; `+
+      `σ≈${rnd(sigma,3)}; Cp=${Cp}; Cpk=${Cpk}`;
+    const lines = [
+      `SPC|n=${n}|k=${data.length}|Xbarbar=${rnd(xbarbar,3)}|Rbar=${rnd(rbar,3)}|LCLx=${rnd(LCLx,2)}|UCLx=${rnd(UCLx,2)}|LCLr=${rnd(LCLr,2)}|UCLr=${rnd(UCLr,2)}|sigma=${rnd(sigma,3)}|Cp=${Cp}|Cpk=${Cpk}`
+    ];
+    data.forEach(d=> lines.push(`SUB|${d.sg}|mean=${rnd(d.mean,3)}|R=${rnd(d.range,3)}`));
+    byId('csvSPC').textContent = lines.join('\n');
+
+    // Сигнали
+    byId('sigOut').textContent = sig.length? ('⚠️ '+sig.join('\n')) : '🟢 Сигналів не виявлено';
+
+    // ASCII графіки
+    drawAsciiChart('chartX', data.map(d=>d.mean), xbarbar, LCLx, UCLx, 'X̄');
+    drawAsciiChart('chartR', data.map(d=>d.range), rbar, LCLr, UCLr, 'R');
+
+    // Оновити квиток/журнал підстановками
+    byId('tChar').textContent = byId('charName').value;
+    byId('tXbar').textContent = rnd(xbarbar,3);
+    byId('tRbar').textContent = rnd(rbar,3);
+    byId('tXlim').textContent = `[${rnd(LCLx,2)}; ${rnd(UCLx,2)}]`;
+    byId('tRlim').textContent = `[${rnd(LCLr,2)}; ${rnd(UCLr,2)}]`;
+    byId('tCap').textContent  = `Cp=${Cp}; Cpk=${Cpk}`;
+    byId('tSig').textContent  = sig.length? sig[0] : '—';
+  }
+
+  function drawAsciiChart(elId, arr, center, LCL, UCL, label){
+    // Нормуємо на рядок 60 символів
+    const width=60;
+    const min = Math.min(...arr, LCL);
+    const max = Math.max(...arr, UCL);
+    const scale = (x)=> Math.round((x-min)/(max-min||1)*(width-1));
+    const lines = [];
+    lines.push(`${label} chart: min=${rnd(min,2)} center=${rnd(center,2)} max=${rnd(max,2)}`);
+    const posL=scale(LCL), posC=scale(center), posU=scale(UCL);
+    lines.push('|'+' '.repeat(posL)+'L'+' '.repeat(Math.max(0,posC-posL-1))+'C'+' '.repeat(Math.max(0,posU-posC-1))+'U'+ ' '.repeat(Math.max(0,width-posU-1))+'|');
+    arr.forEach((v,i)=>{
+      const p=scale(v);
+      let row = new Array(width).fill(' ');
+      row[posL]='|'; row[posU]='|'; row[posC]='|';
+      row[p] = (v<UCL && v>LCL)? '*' : '✖';
+      lines.push(String(i+1).padStart(2,'0')+' '+row.join(''));
+    });
+    byId(elId).textContent = lines.join('\n');
+  }
+
+  // ===== NCR/CAPA =====
+  const bodyNCR = byId('bodyNCR');
+  function addNCR(sample){
+    const s = Object.assign({desc:'Вихід точки за UCL X̄', root:'Тренд у дозаторі', corr:'Переналаштувати вагу', prev:'План калібрування щотижня', resp:'Студент ТПТ', due:(new Date().toISOString().slice(0,10))}, sample||{});
+    const tr=document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.desc}"></td>
+      <td class="dark"><input type="text" value="${s.root}"></td>
+      <td class="dark"><input type="text" value="${s.corr}"></td>
+      <td class="dark"><input type="text" value="${s.prev}"></td>
+      <td><input type="text" value="${s.resp}"></td>
+      <td><input type="date" value="${s.due}"></td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyNCR); buildCSV_NCR();">✖</button></td>
+    `;
+    bodyNCR.appendChild(tr); reindex(bodyNCR); buildCSV_NCR();
+  }
+  function presetNCR(){
+    bodyNCR.innerHTML='';
+    addNCR({desc:'7 підряд зростання X̄', root:'Повільний дрейф температури розсолу', corr:'Охолодити розсіл до 2–3°C', prev:'Контроль T кожні 30 хв', resp:'Студент ТПТ', due:new Date().toISOString().slice(0,10)});
+  }
+  function buildCSV_NCR(){
+    const rows=[...bodyNCR.querySelectorAll('tr')].map(r=>{
+      return [
+        r.querySelector('.idx').textContent.trim(),
+        r.children[1].querySelector('input').value.trim(),
+        r.children[2].querySelector('input').value.trim(),
+        r.children[3].querySelector('input').value.trim(),
+        r.children[4].querySelector('input').value.trim(),
+        r.children[5].querySelector('input').value.trim(),
+        r.children[6].querySelector('input').value.trim()
+      ].join(' | ');
+    });
+    byId('csvNCR').textContent = rows.join('\n') || '—';
+  }
+
+  // ===== ЖУРНАЛ / QR / NFC / ТИКЕТ =====
+  const bodyLog = byId('bodyLog');
+  function addLog(){
+    const summary = byId('sumOut').textContent || '';
+    const sigs = byId('sigOut').textContent || '—';
+    // витягнемо межі
+    const mX = summary.match(/Межі X̄: \[([0-9.\-]+); ([0-9.\-]+)\]/);
+    const mR = summary.match(/Межі R: \[([0-9.\-]+); ([0-9.\-]+)\]/);
+    const cap = (summary.match(/Cp=([0-9.]+); Cpk=([0-9.]+)/) || []).slice(1).join('/');
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${byId('charName').value}"></td>
+      <td class="dark">${mX?`[${mX[1]}; ${mX[2]}]`:'—'}</td>
+      <td class="dark">${mR?`[${mR[1]}; ${mR[2]}]`:'—'}</td>
+      <td>${cap||'—'}</td>
+      <td>${sigs.length>2? 'Є сигнали' : 'Немає'}</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
+    `;
+    bodyLog.appendChild(tr); reindex(bodyLog); buildCSV_Log();
+  }
+  function buildCSV_Log(){
+    const rows=[...bodyLog.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const ch=r.children[1].querySelector('input').value.trim();
+      const x=r.children[2].textContent.trim();
+      const R=r.children[3].textContent.trim();
+      const cap=r.children[4].textContent.trim();
+      const sig=r.children[5].textContent.trim();
+      return [idx,ch,x,R,cap,sig].join(' | ');
+    });
+    byId('csvLog').textContent = rows.join('\n') || '—';
+  }
+  function buildQR(){
+    const payload = {
+      char: byId('charName').value,
+      summary: byId('sumOut').textContent,
+      signals: byId('sigOut').textContent.slice(0,120)+'…'
+    };
+    byId('qrOut').textContent = JSON.stringify(payload);
+  }
+  function buildNFC(){
+    const txt = [
+      `SPC_CARD`,
+      `CHAR:${byId('charName').value}`,
+      `SUM:${byId('sumOut').textContent}`,
+      `SIG:${byId('sigOut').textContent.slice(0,100)}`,
+      `OPER:${byId('nfcOper').value} CONTACT:${byId('nfcPhone').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = txt;
+  }
+  function scrollTicket(){ byId('ticket').scrollIntoView({behavior:'smooth',block:'center'}); }
+
+  // ===== INIT =====
+  (function init(){
+    // стартовий невеликий набір
+    presetData();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select,textarea')){
+        if(e.target.closest('#tbl')){ buildCSV_Raw(); recalc(); }
+        if(['lsl','tgt','usl','n','k'].includes(e.target.id)){ recalc(); }
+      }
+    });
+  })();
+</script>
+</body>
+</html>
