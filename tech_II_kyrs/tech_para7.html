@@ -1,0 +1,556 @@
+<!-- tech_para7.html
+     ПАРА 7 (аудиторно) для технологів з переробки продукції тваринництва
+     Тема: КОНТРОЛЬ ЯКОСТІ ГОТОВОЇ ПРОДУКЦІЇ — металодетекція, контроль маси, pH/aw,
+           герметичність, етикетка/штрихкод, квиток 58 мм, NFC, CSV-журнал.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; (опц.) термопринтер 58 мм; NFC-мітки; (за наявності) тест-куля для металодетектора.
+     Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 7 (технологи) — QC: металодетекція, маса, pH/aw, герметичність, етикетка, квиток/NFC/CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,Monaco,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  textarea{min-height:84px}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано в Moodle (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 7 · аудиторно · технологи переробки</span>
+  <h1>🧪 QC: металодетекція, маса, pH/aw, герметичність, етикетка, квиток/NFC/CSV</h1>
+
+  <div class="card">
+    <h2>🎯 Мета пари</h2>
+    <p>
+      За заняття студенти виконають повний <b>контроль партії готової продукції</b>:
+      (1) <b>металодетекція</b>, (2) <b>контроль маси</b>, (3) <b>pH</b> та <b>aw</b> (активність води) — вносимо дані вручну,
+      (4) <b>герметичність/вакуум</b>, (5) <b>перевірка етикетки/штрихкоду</b>, (6) <b>журнал</b>, <b>квиток 58 мм</b>, <b>NFC</b> і <b>CSV</b>.
+    </p>
+    <p class="small muted">Це навчальна модель ККТ. Фактичні межі/процедури затверджуються у вашому HACCP-плані та інструкціях підприємства.</p>
+  </div>
+
+  <!-- 1. ДАНІ ПАРТІЇ -->
+  <div class="card">
+    <h2>📦 Дані партії</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Ідентифікація</h3>
+        <div class="row">
+          <div style="flex:1"><label>Виріб</label><input id="prodName" type="text" value="Сосиски молочні"></div>
+          <div style="flex:1"><label>ЛОТ</label><input id="lot" type="text" value="S-25047-M1"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>EAN-13</label><input id="ean13" type="text" value="4820001234567"></div>
+          <div style="flex:1"><label>К-ть упаковок</label><input id="packs" type="number" step="1" value="50"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Маса нетто</h3>
+        <div class="row">
+          <div style="flex:1"><label>Номінал, г</label><input id="netNom" type="number" step="1" value="400"></div>
+          <div style="flex:1"><label>Допуск, % (±)</label><input id="tolPct" type="number" step="0.1" value="2.5"></div>
+        </div>
+        <p class="small muted">Кожна упаковка повинна бути в межах номіналу ± допуск; також перевіряємо середнє.</p>
+      </div>
+
+      <div class="box">
+        <h3>pH / aw / герметичність</h3>
+        <div class="row">
+          <div style="flex:1"><label>Ціль pH (діапазон)</label><input id="phMin" type="number" step="0.01" value="5.8"></div>
+          <div style="flex:1"><label>··</label><input id="phMax" type="number" step="0.01" value="6.4"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Макс. aw</label><input id="awMax" type="number" step="0.001" value="0.970"></div>
+          <div style="flex:1"><label>Мін. вакуум, кПа</label><input id="vacMin" type="number" step="0.1" value="30.0"></div>
+        </div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="btn" onclick="calcLimits()">📏 Розрахувати межі</button>
+      <button class="btn" onclick="copyCSV('csvBatch')">📋 CSV (batch)</button>
+    </div>
+    <div id="csvBatch" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 2. МЕТАЛОДЕТЕКЦІЯ -->
+  <div class="card">
+    <h2>🧲 Металодетекція</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Налаштування</h3>
+        <div class="row">
+          <div style="flex:1"><label>Отвір (апертура), мм</label><input id="aperture" type="number" step="1" value="120"></div>
+          <div style="flex:1"><label>Чутливість (реф.)</label>
+            <select id="sens">
+              <option>Стандарт</option>
+              <option>Підвищена</option>
+              <option>Висока</option>
+            </select>
+          </div>
+        </div>
+        <p class="small muted">Референс-тіла: Fe, Non-Fe, SS (нерж.). Мінімальні кульки за інструкцією виробника.</p>
+      </div>
+
+      <div class="box">
+        <h3>Результати тесту</h3>
+        <div class="row">
+          <div style="flex:1"><label>Fe, мм (виявлено ≤)</label><input id="fe_mm" type="number" step="0.1" value="2.0"></div>
+          <div style="flex:1"><label>Non-Fe, мм (виявлено ≤)</label><input id="nfe_mm" type="number" step="0.1" value="2.5"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>SS, мм (виявлено ≤)</label><input id="ss_mm" type="number" step="0.1" value="3.0"></div>
+          <div style="flex:1"><label>Фальш-спрацьовування</label>
+            <select id="falseTrig"><option>Ні</option><option>Так</option></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Підсумок</h3>
+        <p>Статус: <b><span id="mdStatus">—</span></b></p>
+        <p>Порогові кульки (реф.): <b><span id="mdRef">—</span></b></p>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="evalMetal()">✅ Оцінити</button>
+          <button class="btn" onclick="copyCSV('csvMD')">📋 CSV (MD)</button>
+        </div>
+        <div id="csvMD" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. КОНТРОЛЬ МАСИ -->
+  <div class="card">
+    <h2>⚖️ Контроль маси</h2>
+    <div class="row">
+      <button class="btn" onclick="addWeight()">➕ Додати зважування</button>
+      <button class="btn" onclick="presetWeights()">🧪 Приклад</button>
+      <button class="btn" onclick="evaluateWeights()">✅ Перевірити</button>
+      <button class="btn" onclick="copyCSV('csvWeights')">📋 CSV (weights)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblW">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Час</th>
+            <th class="dark">Показ, г</th>
+            <th>В межах?</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyW"></tbody>
+      </table>
+    </div>
+    <div id="wSummary" class="out" style="margin-top:8px">—</div>
+    <div id="csvWeights" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 4. pH / aw / ГЕРМЕТИЧНІСТЬ / ЕТИКЕТКА -->
+  <div class="card">
+    <h2>🧫 pH / aw / герметичність / етикетка</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>Вимірювання</h3>
+        <div class="row">
+          <div style="flex:1"><label>pH</label><input id="phVal" type="number" step="0.01" value="6.10"></div>
+          <div style="flex:1"><label>aw</label><input id="awVal" type="number" step="0.001" value="0.965"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Вакуум, кПа</label><input id="vacVal" type="number" step="0.1" value="32.0"></div>
+          <div style="flex:1"><label>Тест герметичн.</label>
+            <select id="sealOk"><option>Ок</option><option>Проблема</option></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Етикетка/штрихкод</h3>
+        <div class="row">
+          <div style="flex:1"><label>Дата “вжити до”</label><input id="expDate" type="date"></div>
+          <div style="flex:1"><label>Розбірливість друку</label>
+            <select id="printQual"><option>Добра</option><option>Посередня</option><option>Погана</option></select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="evalLab()">✅ Перевірити</button>
+          <button class="btn" onclick="copyCSV('csvLab')">📋 CSV (lab)</button>
+        </div>
+        <div id="labOut" class="out" style="margin-top:8px">—</div>
+        <div id="csvLab" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ЖУРНАЛ + КВИТОК 58 мм + NFC -->
+  <div class="card">
+    <h2>📒 Журнал / Квиток / NFC</h2>
+    <div class="row">
+      <button class="btn" onclick="addLog()">➕ Додати у журнал</button>
+      <button class="btn" onclick="presetLog()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblLog">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Виріб</th>
+            <th class="dark">ЛОТ</th>
+            <th class="dark">EAN-13</th>
+            <th>MD</th>
+            <th>Маса</th>
+            <th>pH/aw</th>
+            <th>Гермет.</th>
+            <th>Етикетка</th>
+            <th>Висновок</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyLog"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+
+    <div class="grid g2" style="margin-top:12px">
+      <div class="box">
+        <h3>NFC — “QC BATCH CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label>Оператор</label><input id="operator" type="text" value="Студент ТПТ"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток 58 мм</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>QC CHECK TICKET</h4>
+          <p><b>Виріб:</b> <span id="tProd">—</span></p>
+          <p><b>ЛОТ:</b> <span id="tLot">—</span></p>
+          <p><b>EAN-13:</b> <span id="tEAN">—</span></p>
+          <div class="line"></div>
+          <p><b>MD:</b> <span id="tMD">—</span></p>
+          <p><b>Маса:</b> <span id="tW">—</span></p>
+          <p><b>pH/aw:</b> <span id="tPA">—</span></p>
+          <p><b>Гермет.:</b> <span id="tSeal">—</span></p>
+          <p><b>Етикетка:</b> <span id="tLab">—</span></p>
+          <div class="line"></div>
+          <p><b>Висновок:</b> <span id="tVerdict">—</span></p>
+          <div class="line"></div>
+          <p><small>ККТ: Металодетектор/Маса/Маркування — згідно з HACCP-планом.</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Заповніть дані партії; задайте межі pH/aw/вакуум.</li>
+      <li>Внесіть результати <b>металодетекції</b> та натисніть “Оцінити”.</li>
+      <li>Зробіть 8–12 зважувань, перевірте відповідність.</li>
+      <li>Внесіть pH, aw, вакуум і результат герметичності; перевірте етикетку.</li>
+      <li>Додайте рядок у журнал, сформуйте NFC і квиток, скопіюйте CSV.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Металодетекція: коректні пороги і висновок</td><td>3</td></tr>
+        <tr><td>Контроль маси: вибірка, середнє, відсоток браку</td><td>3</td></tr>
+        <tr><td>pH/aw/вакуум/герметичність/етикетка</td><td>3</td></tr>
+        <tr><td>Журнал + квиток/NFC + CSV</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const pad2 = n => String(n).padStart(2,'0');
+
+  // ===== CSV/копіювання =====
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // ===== 1) Межі маси та CSV партії =====
+  function calcLimits(){
+    const nom = +byId('netNom').value||0;
+    const tol = (+byId('tolPct').value||0)/100;
+    const low = nom*(1 - tol), high = nom*(1 + tol);
+    byId('csvBatch').textContent =
+      `BATCH|prod=${byId('prodName').value}|lot=${byId('lot').value}|ean13=${byId('ean13').value}|packs=${byId('packs').value}\n`+
+      `WEIGHT_LIMITS|nom=${nom}g|tol=±${rnd(tol*100,1)}%|low=${rnd(low,1)}g|high=${rnd(high,1)}g\n`+
+      `PH=${byId('phMin').value}..${byId('phMax').value}|aw_max=${byId('awMax').value}|vac_min=${byId('vacMin').value}kPa`;
+    return {low, high};
+  }
+
+  // ===== 2) Металодетекція =====
+  function mdRefs(){
+    // Спрощені референс-межі, залежно від чутливості (демо)
+    const sens = byId('sens').value;
+    if(sens==='Висока')   return {Fe:2.0, NFe:2.5, SS:3.0};
+    if(sens==='Підвищена')return {Fe:2.5, NFe:3.0, SS:3.5};
+    return {Fe:3.0, NFe:3.5, SS:4.0};
+  }
+  function evalMetal(){
+    const ref = mdRefs();
+    const fe = +byId('fe_mm').value||999;
+    const nfe= +byId('nfe_mm').value||999;
+    const ss = +byId('ss_mm').value||999;
+    const ft = byId('falseTrig').value==='Так';
+    const pass = (fe<=ref.Fe && nfe<=ref.NFe && ss<=ref.SS && !ft);
+    byId('mdStatus').textContent = pass? '🟢 PASS' : '🔴 FAIL';
+    byId('mdStatus').style.color = pass? '#10b981' : '#ef4444';
+    byId('mdRef').textContent = `Fe ≤ ${ref.Fe} мм; Non-Fe ≤ ${ref.NFe} мм; SS ≤ ${ref.SS} мм; false-trigger: ні`;
+    byId('csvMD').textContent =
+      `MD|aperture=${byId('aperture').value}mm|sens=${byId('sens').value}|fe=${fe}mm|nonfe=${nfe}mm|ss=${ss}mm|falseTrig=${ft?'yes':'no'}|status=${pass?'PASS':'FAIL'}`;
+    return pass;
+  }
+
+  // ===== 3) Контроль маси =====
+  const bodyW = byId('bodyW');
+  function reindex(tb){ [...tb.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+  function nowHHMM(){ const d=new Date(); return pad2(d.getHours())+':'+pad2(d.getMinutes()); }
+  function limits(){ const nom=+byId('netNom').value||0; const tol=(+byId('tolPct').value||0)/100; return {low:nom*(1-tol), high:nom*(1+tol)}; }
+  function addWeight(sample){
+    const s = Object.assign({time: nowHHMM(), g:''}, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="time" value="${s.time}"></td>
+      <td class="dark"><input type="number" step="0.1" value="${s.g}"></td>
+      <td class="wok">—</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyW); buildWCSV();">✖</button></td>
+    `;
+    bodyW.appendChild(tr); reindex(bodyW); buildWCSV();
+  }
+  function presetWeights(){
+    bodyW.innerHTML='';
+    addWeight({g:402.3}); addWeight({g:398.9}); addWeight({g:401.2}); addWeight({g:396.8});
+    addWeight({g:405.0}); addWeight({g:399.6}); addWeight({g:403.4}); addWeight({g:397.5});
+    evaluateWeights();
+  }
+  function evaluateWeights(){
+    const {low,high} = limits();
+    const rows=[...bodyW.querySelectorAll('tr')];
+    let ok=0, sum=0, n=0;
+    rows.forEach(r=>{
+      const g = Number(r.children[2].querySelector('input').value);
+      if(!isNaN(g)){ n++; sum+=g; const pass=(g>=low && g<=high);
+        r.children[3].textContent = pass?'в межах':'поза межами';
+        r.children[3].style.color = pass? '#10b981' : '#ef4444';
+        if(pass) ok++;
+      } else { r.children[3].textContent='н/д'; r.children[3].style.color='#f59e0b'; }
+    });
+    const avg = n? sum/n : 0;
+    const passAll = (ok===n && avg>=low && avg<=high);
+    const msg = `Вибірка: ${n} шт; в межах: ${ok}; середнє: ${rnd(avg,1)} г (межі ${rnd(low,1)}…${rnd(high,1)} г) — ${passAll?'🟢 PASS':'🟠 MIXED'}`;
+    byId('wSummary').textContent = msg;
+    buildWCSV();
+    return {n, ok, avg, low, high, passAll};
+  }
+  function buildWCSV(){
+    const lines=[...bodyW.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const tm=r.children[1].querySelector('input').value.trim();
+      const g=r.children[2].querySelector('input').value.trim();
+      const st=r.children[3].textContent.trim();
+      return [idx,tm,g,st].join(' | ');
+    });
+    byId('csvWeights').textContent = lines.join('\n') || '—';
+  }
+
+  // ===== 4) pH/aw/герметичність/етикетка =====
+  function evalLab(){
+    const ph = +byId('phVal').value, pmin=+byId('phMin').value, pmax=+byId('phMax').value;
+    const aw = +byId('awVal').value, awMax=+byId('awMax').value;
+    const vac= +byId('vacVal').value, vacMin=+byId('vacMin').value;
+    const seal = byId('sealOk').value==='Ок';
+    const ean = byId('ean13').value.replace(/\D/g,'');
+    const eanOk = ean.length===13;
+    const expOk = !!byId('expDate').value;
+    const print = byId('printQual').value;
+    const phOk = (!isNaN(ph) && ph>=pmin && ph<=pmax);
+    const awOk = (!isNaN(aw) && aw<=awMax);
+    const vacOk= (!isNaN(vac) && vac>=vacMin);
+
+    const status = (phOk&&awOk&&vacOk&&seal&&eanOk&&expOk&&print!=='Погана')?'🟢 PASS':'🟠 REVIEW';
+    const text = [
+      `pH=${ph} (норма ${pmin}…${pmax}) — ${phOk?'ок':'ні'}`,
+      `aw=${aw} (≤${awMax}) — ${awOk?'ок':'ні'}`,
+      `Vac=${vac}кПа (≥${vacMin}) — ${vacOk?'ок':'ні'}`,
+      `Герметичність — ${seal?'ок':'проблема'}`,
+      `EAN13(${ean.length}) — ${eanOk?'ок':'ні'}`,
+      `Дата EXP — ${expOk?'задано':'відсутня'}`,
+      `Друк — ${print}`
+    ].join(' | ');
+    byId('labOut').textContent = `STATUS ${status} | ${text}`;
+    byId('csvLab').textContent = `LAB|${text}|STATUS=${status.includes('PASS')?'PASS':'REVIEW'}`;
+    return {status, phOk, awOk, vacOk, seal, eanOk, expOk, print};
+  }
+
+  // ===== 5) Журнал / квиток / NFC =====
+  const bodyL = byId('bodyLog');
+  function addLog(sample){
+    const md = evalMetal();
+    const w  = evaluateWeights();
+    const lab= evalLab();
+
+    const def = {
+      prod: byId('prodName').value,
+      lot: byId('lot').value,
+      ean: byId('ean13').value,
+      mdS: md?'PASS':'FAIL',
+      wS:  w.passAll?`PASS (avg ${rnd(w.avg,1)}г)`:`MIX`,
+      paS: `pH ${byId('phVal').value}/aw ${byId('awVal').value}`,
+      seal: (byId('sealOk').value==='Ок' && (+byId('vacVal').value)>= (+byId('vacMin').value))?'PASS':'REVIEW',
+      labS: lab.status.includes('PASS')?'PASS':'REVIEW',
+      verdict: (md && w.passAll && lab.status.includes('PASS'))?'🟢 ДОПУСТИТИ':'🟠 УМОВНО/ПЕРЕВІРИТИ'
+    };
+    const s = Object.assign({}, def, sample||{});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.prod}"></td>
+      <td class="dark">${s.lot}</td>
+      <td class="dark">${s.ean}</td>
+      <td>${s.mdS}</td>
+      <td>${s.wS}</td>
+      <td>${s.paS}</td>
+      <td>${s.seal}</td>
+      <td>${s.labS}</td>
+      <td>${s.verdict}</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyL); buildLogCSV();">✖</button></td>
+    `;
+    bodyL.appendChild(tr); reindex(bodyL); buildLogCSV();
+    // Оновити квиток
+    byId('tProd').textContent = s.prod;
+    byId('tLot').textContent  = s.lot;
+    byId('tEAN').textContent  = s.ean;
+    byId('tMD').textContent   = s.mdS;
+    byId('tW').textContent    = s.wS;
+    byId('tPA').textContent   = s.paS;
+    byId('tSeal').textContent = s.seal;
+    byId('tLab').textContent  = s.labS;
+    byId('tVerdict').textContent = s.verdict;
+  }
+  function presetLog(){
+    presetWeights(); evalMetal(); evalLab(); addLog();
+  }
+  function buildLogCSV(){
+    const rows=[...bodyL.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const prod=r.children[1].querySelector('input').value.trim();
+      const lot=r.children[2].textContent.trim();
+      const ean=r.children[3].textContent.trim();
+      const md=r.children[4].textContent.trim();
+      const w =r.children[5].textContent.trim();
+      const pa=r.children[6].textContent.trim();
+      const se=r.children[7].textContent.trim();
+      const lb=r.children[8].textContent.trim();
+      const vd=r.children[9].textContent.trim();
+      return [idx,prod,lot,ean,md,w,pa,se,lb,vd].join(' | ');
+    });
+    byId('csvLog').textContent = rows.join('\n') || '—';
+  }
+  function buildTicket(){
+    window.scrollTo({top: document.getElementById('ticket').getBoundingClientRect().top + window.scrollY - 60, behavior:'smooth'});
+  }
+  function buildNFC(){
+    const txt = [
+      `QC_BATCH_NFC`,
+      `PROD:${byId('prodName').value} LOT:${byId('lot').value} EAN13:${byId('ean13').value}`,
+      `MD:${byId('tMD').textContent} | MASS:${byId('tW').textContent}`,
+      `PH_AW:${byId('tPA').textContent} | SEAL:${byId('tSeal').textContent} | LABEL:${byId('tLab').textContent}`,
+      `VERDICT:${byId('tVerdict').textContent}`,
+      `OPER:${byId('operator').value} CONTACT:${byId('nfcPhone').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = txt;
+  }
+
+  // ===== Ініціалізація / слухачі =====
+  (function init(){
+    const now=new Date(); byId('expDate').value = byId('expDate').value || now.toISOString().slice(0,10);
+    calcLimits(); evalMetal(); evaluateWeights(); evalLab();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select,textarea')) {
+        if(e.target.closest('#tblW')) evaluateWeights();
+        calcLimits(); buildWCSV(); buildLogCSV();
+      }
+    });
+  })();
+</script>
+</body>
+</html>
