@@ -1,0 +1,386 @@
+<!-- agro_para13.html
+     ПАРА 13 (аудиторно) для агрономів
+     Тема: ПЛАНУВАННЯ ПОЛЬОВОЇ ОПЕРАЦІЇ — площа за проходами, насіння/добрива, ПММ, час, завантаження
+     Фокус: телефони/ПК; без бібліотек; все локально. Контраст темних клітинок → світлий текст.
+
+     Що робимо:
+     • Вносимо проходи (довжина гону, кількість проходів, ширина захвату, % перекриття, швидкість, витрата пального).
+     • Отримуємо площу (га), час (год), витрату пального (л), насіння/добрива/ЗЗР за нормами та мішками/бегами.
+     • Плануємо завантаження (місткість бункера/сівалки/обприскувача).
+     • Експорт у CSV для Google Sheets. Готово для GitHub Pages / iFrame у Moodle.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 13 — Планування польової операції: площа, ресурси, час, завантаження</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .small{font-size:12px; color:#9fb0c8}
+  .muted{color:#93a3b5}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)}
+  .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
+  .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+
+  input[type="text"], input[type="number"]{
+    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
+  }
+
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+  html.embedded .box{background:#f8fafc; color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+
+  @media print{
+    @page{ margin:12mm }
+    .no-print{ display:none !important }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 13 · аудиторно · агрономи</span>
+    <h1>🚜 Планування операції: площа за проходами → насіння/добрива/ЗЗР → ПММ → час → завантаження</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        За пару студенти спланують одну польову операцію (наприклад, сівбу/розкидання/обприскування) для 1–3 полів:
+        внесуть <b>проходи</b>, отримають <b>площу</b>, <b>час</b>, <b>паливо</b>, <b>кількість насіння/добрив/ЗЗР</b>,
+        а також <b>план завантажень</b> за місткістю агрегату. Результат — <b>CSV</b> для Sheets.
+      </p>
+      <p class="small">Ефективна ширина захвату: <span class="mono">Wᵉᶠᶠ = W × (1 − Overlap%)</span>.
+        Площа (га): <span class="mono">A = (L × Passes × Wᵉᶠᶠ) / 10 000</span>, де <span class="mono">L</span> — довжина гону (м).</p>
+    </div>
+
+    <!-- ПАРАМЕТРИ ОПЕРАЦІЇ -->
+    <div class="card">
+      <h2>⚙️ Параметри операції та норми</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Загальне</h3>
+          <div class="row">
+            <div style="flex:1"><label>Операція</label><input id="op" type="text" value="Сівба ячменю"></div>
+            <div style="flex:1"><label>Код зміни</label><input id="shift" type="text" value="S-01"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Ширина захвату W, м</label><input id="W" type="number" step="0.01" value="6.0"></div>
+            <div style="flex:1"><label>Перекриття, %</label><input id="Ov" type="number" step="1" value="6"></div>
+          </div>
+          <p class="small">Перекриття 0–15%: для обприскування зазвичай більше, для сівби — менше.</p>
+        </div>
+
+        <div class="box">
+          <h3>Норми (на 1 га)</h3>
+          <div class="row">
+            <div style="flex:1"><label>Насіння, кг/га</label><input id="seedN" type="number" step="0.1" value="180"></div>
+            <div style="flex:1"><label>Добриво, кг/га</label><input id="fertN" type="number" step="0.1" value="120"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Робочий розчин/ЗЗР, л/га</label><input id="sprN" type="number" step="0.1" value="0"></div>
+            <div style="flex:1"><label>ПММ, л/га (орієнтир)</label><input id="fuelHa" type="number" step="0.1" value="8.5"></div>
+          </div>
+          <p class="small">Якщо відома витрата пального «л/год», введи її у таблиці проходів — програма сама перерахує.</p>
+        </div>
+
+        <div class="box">
+          <h3>Логістика</h3>
+          <div class="row">
+            <div style="flex:1"><label>Місткість бункера/цистерни, кг/л</label><input id="hopper" type="number" step="1" value="3000"></div>
+            <div style="flex:1"><label>Вага мішка насіння, кг</label><input id="bagSeed" type="number" step="1" value="50"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Вага біг-бега добрив, кг</label><input id="bagFert" type="number" step="1" value="600"></div>
+            <div style="flex:1"><label>Кан. ЗЗР, л</label><input id="canSpr" type="number" step="1" value="10"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ТАБЛИЦЯ ПРОХОДІВ -->
+    <div class="card">
+      <h2>🧱 Проходи по полю/полях</h2>
+      <div class="row">
+        <button class="btn" onclick="addRow()">➕ Додати рядок</button>
+        <button class="btn" onclick="preset()">🧪 Приклад</button>
+        <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+        <button class="btn" onclick="copyCSV()">📋 CSV</button>
+      </div>
+      <div style="overflow:auto; margin-top:8px">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Поле</th>
+              <th>Довжина гону L, м</th>
+              <th>К-ть проходів</th>
+              <th>Ширина W (м, опц.)</th>
+              <th>Перекр., % (опц.)</th>
+              <th>Швидк., км/год</th>
+              <th>ПММ, л/год (опц.)</th>
+              <th class="dark">Площа, га</th>
+              <th class="dark">Час, год</th>
+              <th class="dark">ПММ, л</th>
+              <th>Примітка</th>
+            </tr>
+          </thead>
+          <tbody id="body"></tbody>
+          <tfoot>
+            <tr>
+              <th class="dark" colspan="8">Разом</th>
+              <th class="dark" id="sumA">—</th>
+              <th class="dark" id="sumT">—</th>
+              <th class="dark" id="sumF">—</th>
+              <th></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- РЕЗУЛЬТАТИ -->
+    <div class="card">
+      <h2>📊 Результати та завантаження</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Сумарно по операції</h3>
+          <p>Площа: <b><span id="Aha">—</span> га</b></p>
+          <p>Час: <b><span id="Th">—</span> год</b> · ПММ: <b><span id="Fl">—</span> л</b></p>
+          <p>Насіння: <b><span id="SeedKg">—</span> кг</b> (<span id="SeedBags">—</span> міш.)</p>
+          <p>Добриво: <b><span id="FertKg">—</span> кг</b> (<span id="FertBags">—</span> біг-бег)</p>
+          <p>Розчин/ЗЗР: <b><span id="SprL">—</span> л</b> (<span id="SprCans">—</span> кан.)</p>
+        </div>
+        <div class="box">
+          <h3>План завантажень</h3>
+          <p>Місткість: <span id="Hcap">—</span> → Орієнт. завантажень: <b><span id="Loads">—</span></b></p>
+          <div id="LoadsPlan" class="out">—</div>
+        </div>
+        <div class="box">
+          <h3>CSV</h3>
+          <div id="csv" class="out">—</div>
+          <p class="small">Формат: <span class="mono"># | Поле | L | Passes | W | Ov% | V_kmh | Fuel_h | A_ha | T_h | F_l | Note</span></p>
+        </div>
+      </div>
+      <p class="small muted">Контраст забезпечено: темні клітинки (<span class="mono">.dark</span>) зі світлим текстом.</p>
+    </div>
+
+    <!-- ХІД РОБОТИ, ОЦІНЮВАННЯ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+      <ol>
+        <li>Заповни параметри операції (W, перекриття, норми, логістика).</li>
+        <li>Внеси 3–6 рядків проходів по одному чи кількох полях (довжина гону, к-ть проходів, швидкість).</li>
+        <li>Натисни <b>Перерахувати</b> — перевір площу, насіння/добрива/ЗЗР, час і ПММ. За потреби відкоригуй.</li>
+        <li>Переглянь план завантажень і <b>скопіюй CSV</b> у Google Sheets (аркуш <span class="mono">FieldOps</span>).</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Коректний розрахунок площі з урахуванням перекриття</td><td>3</td></tr>
+          <tr><td>Ресурси (насіння/добрива/ЗЗР, ПММ) та час розраховано й обґрунтовано</td><td>4</td></tr>
+          <tr><td>Логістика (завантаження) складена логічно</td><td>2</td></tr>
+          <tr><td>CSV у Sheets + короткі висновки</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">📐 Площа</p><p class="pill">🌾 Насіння/добрива</p><p class="pill">⛽ ПММ</p><p class="pill">📦 Завантаження</p>
+    </div>
+  </div>
+
+<script>
+  // Вбудований режим (для Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const bodyEl = document.getElementById('body');
+  const csvEl  = document.getElementById('csv');
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2) => Number((+n).toFixed(d));
+
+  function addRow(sample){
+    const def = { field:'F-01', L: 950, passes: 20, W: '', Ov: '', V: 8.5, FuelH: '', note:'' };
+    const s = Object.assign(def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.field}"></td>
+      <td><input type="number" step="1" value="${s.L}"></td>
+      <td><input type="number" step="1" value="${s.passes}"></td>
+      <td><input type="number" step="0.01" value="${s.W}"></td>
+      <td><input type="number" step="1" value="${s.Ov}"></td>
+      <td><input type="number" step="0.1" value="${s.V}"></td>
+      <td><input type="number" step="0.1" value="${s.FuelH}"></td>
+      <td class="dark area">—</td>
+      <td class="dark time">—</td>
+      <td class="dark fuel">—</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyEl.appendChild(tr);
+    reindex();
+  }
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  function effectiveWidth(rowW, rowOv){
+    const W = parseFloat(rowW) || parseFloat(byId('W').value||'0');
+    const Ov = (parseFloat(rowOv) || parseFloat(byId('Ov').value||'0'))/100;
+    return Math.max(0, W * (1 - Ov));
+  }
+
+  function recalc(){
+    let sumA=0, sumT=0, sumF=0;
+
+    [...bodyEl.querySelectorAll('tr')].forEach(tr=>{
+      const L = parseFloat(tr.children[2].querySelector('input').value||'0');          // м
+      const passes = parseFloat(tr.children[3].querySelector('input').value||'0');
+      const W = tr.children[4].querySelector('input').value;
+      const Ov = tr.children[5].querySelector('input').value;
+      const V = parseFloat(tr.children[6].querySelector('input').value||'0');          // км/год
+      const FuelH = parseFloat(tr.children[7].querySelector('input').value||'0');      // л/год (опційно)
+
+      const Weff = effectiveWidth(W, Ov); // м
+      const A = (L * passes * Weff) / 10000; // га
+
+      // Час: шлях = L*passes (м) → км; час = S / V
+      const distance_km = (L * passes) / 1000;
+      const T = V>0 ? (distance_km / V) : 0;
+
+      // Паливо: якщо задано л/год — F = FuelH * T; інакше беремо норму л/га
+      const fuelHa = parseFloat(byId('fuelHa').value||'0');
+      const F = FuelH>0 ? (FuelH * T) : (fuelHa * A);
+
+      tr.querySelector('.area').textContent = rnd(A,3);
+      tr.querySelector('.time').textContent = rnd(T,2);
+      tr.querySelector('.fuel').textContent = rnd(F,1);
+
+      sumA += A; sumT += T; sumF += F;
+    });
+
+    byId('sumA').textContent = rnd(sumA,3);
+    byId('sumT').textContent = rnd(sumT,2);
+    byId('sumF').textContent = rnd(sumF,1);
+
+    // Ресурси за нормами
+    const seedKg = sumA * parseFloat(byId('seedN').value||'0');
+    const fertKg = sumA * parseFloat(byId('fertN').value||'0');
+    const sprL   = sumA * parseFloat(byId('sprN').value||'0');
+
+    byId('Aha').textContent = rnd(sumA,3);
+    byId('Th').textContent  = rnd(sumT,2);
+    byId('Fl').textContent  = rnd(sumF,1);
+    byId('SeedKg').textContent = rnd(seedKg,0);
+    byId('FertKg').textContent = rnd(fertKg,0);
+    byId('SprL').textContent   = rnd(sprL,0);
+
+    const bagSeed = Math.max(1, parseFloat(byId('bagSeed').value||'50'));
+    const bagFert = Math.max(1, parseFloat(byId('bagFert').value||'600'));
+    const canSpr  = Math.max(1, parseFloat(byId('canSpr').value||'10'));
+
+    byId('SeedBags').textContent = Math.ceil(seedKg / bagSeed);
+    byId('FertBags').textContent = Math.ceil(fertKg / bagFert);
+    byId('SprCans').textContent  = Math.ceil(sprL / canSpr);
+
+    // Завантаження (орієнтир): використовуємо найбільшу з трьох номенклатур, яка задана
+    const hopper = parseFloat(byId('hopper').value||'0');
+    byId('Hcap').textContent = hopper ? (hopper.toLocaleString('uk-UA') + ' кг/л') : '—';
+
+    // Якщо є розчин (sprL>0) — рахуємо по ньому, інакше — по насінню або добриву (що більше за масою)
+    let massForLoads = 0, label='Розчин/ЗЗР';
+    if(sprL>0){ massForLoads = sprL; }
+    else if(fertKg>=seedKg){ massForLoads = fertKg; label='Добриво'; }
+    else { massForLoads = seedKg; label='Насіння'; }
+
+    let loads = 0, plan = '—';
+    if(hopper>0 && massForLoads>0){
+      loads = Math.max(1, Math.ceil(massForLoads / hopper));
+      const per = massForLoads / loads;
+      plan = `${label}: разом ≈ ${rnd(massForLoads,0)} (кг/л)\n`+
+             `Місткість: ${hopper} → ${loads} завантажень × ~${rnd(per,0)} (кг/л)`;
+    }
+    byId('Loads').textContent = loads || '—';
+    byId('LoadsPlan').textContent = plan;
+
+    buildCSV();
+  }
+
+  function buildCSV(){
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx = tr.querySelector('.idx').textContent.trim();
+      const field = tr.children[1].querySelector('input').value.trim();
+      const L = tr.children[2].querySelector('input').value.trim();
+      const passes = tr.children[3].querySelector('input').value.trim();
+      const W = tr.children[4].querySelector('input').value.trim() || byId('W').value.trim();
+      const Ov = tr.children[5].querySelector('input').value.trim() || byId('Ov').value.trim();
+      const V = tr.children[6].querySelector('input').value.trim();
+      const FuelH = tr.children[7].querySelector('input').value.trim();
+      const A = tr.querySelector('.area').textContent.trim();
+      const T = tr.querySelector('.time').textContent.trim();
+      const F = tr.querySelector('.fuel').textContent.trim();
+      const note = tr.children[11].querySelector('input').value.trim();
+      return [idx,field,L,passes,W,Ov,V,FuelH,A,T,F,note].join(' | ');
+    });
+    csvEl.textContent = lines.join('\n') || '—';
+  }
+
+  function copyCSV(){
+    const t = csvEl.textContent.trim();
+    if(!t || t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+
+  function preset(){
+    bodyEl.innerHTML='';
+    // 3 приклади: сівба на трьох полях із різними довжинами та швидкостями
+    addRow({field:'F-01', L:1000, passes:18, W:'', Ov:'', V:8.2, FuelH:''});
+    addRow({field:'F-02', L:850,  passes:22, W:'', Ov:'', V:7.8, FuelH:16.5});
+    addRow({field:'F-03', L:1200, passes:15, W:'', Ov:8,  V:8.8, FuelH:''});
+    recalc();
+  }
+
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // Ініціалізація
+  (function init(){ addRow(); addRow(); recalc(); })();
+</script>
+</body>
+</html>
