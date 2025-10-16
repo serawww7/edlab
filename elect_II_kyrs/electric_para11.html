@@ -1,0 +1,461 @@
+<!-- electric_para11.html
+     Пара 11 (Електрики, аудиторно): ЕЛЕКТРОБЕЗПЕКА
+     Чек-листи ОП (охорона праці), журнал інструктажів (первинний/повторний/цільовий/позаплановий),
+     наряд-допуск (LOTO-пункти), етикетки-допуски 58 мм, A4-звіти, імпорт/експорт CSV, NFC/QR.
+     Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Електрики · Пара 11 — Електробезпека: інструктажі, наряд-допуск, LOTO, 58 мм, A4</title>
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
+  .wrap{max-width:1120px; margin:0 auto; padding:24px 16px 96px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9aa5b1}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:1050px){.g3{grid-template-columns:1fr}; .g2{grid-template-columns:1fr}}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .small{font-size:12px; color:#93a3b5}
+  .chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; font-size:12px; margin-right:6px; background:#0d1a2e}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)} .muted{color:#9aa5b1}
+  input,select,textarea{padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb; width:100%}
+  textarea{min-height:88px}
+
+  /* Таблиці */
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+
+  /* Квитанції 58 мм */
+  .tickets{display:flex; gap:12px; flex-wrap:wrap}
+  .ticket{
+    width:58mm; background:#fff; color:#000; padding:5mm 4mm; border-radius:6px;
+    box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace
+  }
+  .ticket h4{margin:0 0 4px; font-size:13px; text-align:center}
+  .ticket p{margin:1px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:5px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+
+  /* A4 */
+  #printArea{background:#fff; color:#000; border-radius:12px; border:1px solid #e5e7eb; padding:16px}
+  .doc{page-break-after:always; padding:12mm; color:#000; font-family:Georgia,"Times New Roman",serif}
+  .doc h2{color:#000; font-size:20px; margin:0 0 6px}
+  .doc h3{color:#000; font-size:16px; margin:6px 0}
+  .doc p{color:#000; margin:4px 0}
+  .doc table{width:100%; border-collapse:collapse; border:1px solid #111}
+  .doc th,.doc td{border:1px solid #111; padding:6px 8px; font-size:12px; vertical-align:top}
+  .doc .sign{margin-top:10mm; display:flex; gap:10mm; flex-wrap:wrap}
+  .doc .sign div{flex:1 1 220px}
+
+  /* Вбудований режим (iframe/Moodle) */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+
+  @media print{
+    @page{ size:A4; margin:12mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    #printArea{ border:none; padding:0 }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Електрики · Пара 11 · аудиторно</span>
+    <h1>⚡ Електробезпека: інструктажі · наряд-допуск · LOTO · 🧾 етикетки 58 мм · A4-звіти</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>Відпрацювати оформлення інструктажів з ОП, створення наряду-допуску з чек-листами <b>LOTO</b>, генерацію етикеток-допусків 58 мм та A4-звітів, а також експортувати/імпортувати CSV.</p>
+      <div class="row">
+        <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
+        <button class="btn" onclick="exportAll()">📤 Експорт CSV (3 файли)</button>
+        <input id="fileInstr" type="file" accept=".csv,text/csv" class="btn"/>
+        <button class="btn" onclick="importInstr()">⬆️ Імпорт CSV (інструктажі)</button>
+      </div>
+      <p class="small">CSV (інструктажі): <span class="mono">date,type,student,group,topic,result,notes</span></p>
+    </div>
+
+    <div class="card">
+      <h2>👥 Журнал інструктажів</h2>
+      <div class="grid g3">
+        <div>
+          <h3>Додати запис</h3>
+          <div class="row"><label class="small" style="min-width:140px">Дата</label><input id="iDate" type="date"></div>
+          <div class="row"><label class="small" style="min-width:140px">Тип</label>
+            <select id="iType"><option>Первинний</option><option selected>Повторний</option><option>Цільовий</option><option>Позаплановий</option></select>
+          </div>
+          <div class="row"><label class="small" style="min-width:140px">Студент</label><input id="iStudent" placeholder="Прізвище І.П."></div>
+          <div class="row"><label class="small" style="min-width:140px">Група</label><input id="iGroup" placeholder="Е-21"></div>
+          <div class="row"><label class="small" style="min-width:140px">Тема</label><input id="iTopic" value="Роботи в електроустановках до 1000В"></div>
+          <div class="row"><label class="small" style="min-width:140px">Результат</label>
+            <select id="iResult"><option class="ok">PASS</option><option class="bad">FAIL</option></select>
+          </div>
+          <div class="row"><label class="small" style="min-width:140px">Нотатка</label><input id="iNote" placeholder="Завдання на повторне ознайомлення (якщо FAIL)"></div>
+          <div class="row"><button class="btn" onclick="addInstr()">➕ Додати</button></div>
+        </div>
+
+        <div>
+          <h3>Фільтр/службове</h3>
+          <div class="row">
+            <select id="iFilter">
+              <option selected>Всі</option><option>Лише PASS</option><option>Лише FAIL</option><option>Первинний</option><option>Повторний</option><option>Цільовий</option><option>Позаплановий</option>
+            </select>
+            <button class="btn" onclick="renderInstr()">🔎 Фільтр</button>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" onclick="clearInstr()">🧹 Очистити</button>
+            <button class="btn" onclick="buildA4Instr()">📄 A4-відомість</button>
+          </div>
+          <p class="small">Відомість містить підсумки PASS/FAIL і місце для підписів.</p>
+        </div>
+
+        <div>
+          <h3>Етикетка-допуск 58 мм</h3>
+          <div class="row"><label class="small" style="min-width:140px">Обрана особа</label>
+            <select id="iSelect"></select>
+          </div>
+          <div class="row">
+            <button class="btn" onclick="buildTicket()">🧾 Зібрати</button>
+            <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+            <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+          </div>
+        </div>
+      </div>
+
+      <table id="iTable" style="margin-top:12px">
+        <thead>
+          <tr><th>#</th><th>Дата</th><th>Тип</th><th>Студент</th><th>Група</th><th>Тема</th><th>Результат</th><th>Нотатка</th><th>Дії</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>📝 Наряд-допуск + LOTO чек-лист</h2>
+      <div class="grid g2">
+        <div>
+          <h3>Загальне</h3>
+          <div class="row"><label class="small" style="min-width:160px">Номер наряду</label><input id="wId" value="ND-001"></div>
+          <div class="row"><label class="small" style="min-width:160px">Місце/об’єкт</label><input id="wSite" value="Майстерня · щит ЩО-1"></div>
+          <div class="row"><label class="small" style="min-width:160px">Керівник робіт</label><input id="wLead" value="Викладач / Майстер"></div>
+          <div class="row"><label class="small" style="min-width:160px">Бригада</label><input id="wCrew" value="2 особи (студент1, студент2)"></div>
+          <div class="row"><label class="small" style="min-width:160px">Опис робіт</label><textarea id="wDesc">Заміна MCB у лінії освітлення.</textarea></div>
+        </div>
+        <div>
+          <h3>LOTO / Безпечна підготовка</h3>
+          <div class="row"><label class="small" style="min-width:160px">Вимкнення джерела</label><select id="wIso"><option selected>Виконано</option><option>Н/З</option></select></div>
+          <div class="row"><label class="small" style="min-width:160px">Замок (Lock)</label><select id="wLock"><option selected>Встановлено</option><option>Н/З</option></select></div>
+          <div class="row"><label class="small" style="min-width:160px">Бирка (Tag)</label><select id="wTag"><option selected>Встановлено</option><option>Н/З</option></select></div>
+          <div class="row"><label class="small" style="min-width:160px">Перевірка відсутності напруги</label><select id="wTest"><option selected>Виконано</option><option>Н/З</option></select></div>
+          <div class="row"><label class="small" style="min-width:160px">ЗІЗ (PPE) перевірено</label><select id="wPPE"><option selected>Так</option><option>Ні</option></select></div>
+          <div class="row"><button class="btn" onclick="buildA4Permit()">📄 A4 наряд-допуск</button></div>
+          <p class="small">Після відновлення — <b>зняти lock/tag</b>, записати час завершення робіт.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card printable">
+      <h2>🧾 Етикетка 58 мм «Допуск/Інструктаж»</h2>
+      <div class="tickets" id="tickets">
+        <div class="ticket" id="ticket" aria-live="polite">
+          <h4>ДОПУСК · ЕЛЕКТРОБЕЗПЕКА</h4>
+          <p><b id="t-name">Студент —</b></p>
+          <div class="line"></div>
+          <p>Тип: <span id="t-type">—</span> · Результат: <span id="t-res">—</span></p>
+          <p>Група: <span id="t-grp">—</span> · Дата: <span id="t-date">—</span></p>
+          <p>Тема: <span id="t-topic">—</span></p>
+          <div class="line"></div>
+          <p class="qr"><small id="t-url">NFC/QR: —</small></p>
+          <p><small id="t-ref">Ref: PERM-XXXX</small></p>
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+        <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+      </div>
+    </div>
+
+    <div class="card printable">
+      <h2>📄 A4-документи</h2>
+      <div class="row">
+        <button class="btn" onclick="buildA4Instr()">🧩 Відомість інструктажу (A4)</button>
+        <button class="btn" onclick="buildA4Permit()">🧩 Наряд-допуск (A4)</button>
+        <button class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
+      </div>
+      <div id="printArea"></div>
+    </div>
+  </div>
+
+<script>
+  // Вбудовано у Moodle
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // ======= СТАН =======
+  let instr = [];   // інструктажі
+  const iBody = document.querySelector('#iTable tbody');
+  const iSelect = document.getElementById('iSelect');
+
+  // ======= УТИЛІТИ =======
+  function esc(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&gt;','>':'&lt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function todayISO(){ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+  function nowStamp(){ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+
+  // ======= ІНСТРУКТАЖІ =======
+  function addInstr(){
+    const d = document.getElementById('iDate').value || todayISO();
+    const t = document.getElementById('iType').value;
+    const s = (document.getElementById('iStudent').value||'').trim();
+    const g = (document.getElementById('iGroup').value||'').trim();
+    const tp = (document.getElementById('iTopic').value||'').trim();
+    const r = document.getElementById('iResult').value;
+    const note = (document.getElementById('iNote').value||'').trim();
+    if(!s){ alert('Вкажи студента'); return; }
+    const row = { id:'I'+Math.random().toString(36).slice(2,7).toUpperCase(), date:d, type:t, student:s, group:g, topic:tp, result:r, notes:note };
+    instr.push(row); renderInstr(); rebuildSelect();
+  }
+
+  function renderInstr(){
+    const flt = document.getElementById('iFilter').value;
+    iBody.innerHTML='';
+    let view = instr.slice();
+    if(flt==='Лише PASS') view=view.filter(x=>x.result==='PASS');
+    if(flt==='Лише FAIL') view=view.filter(x=>x.result==='FAIL');
+    if(['Первинний','Повторний','Цільовий','Позаплановий'].includes(flt)) view=view.filter(x=>x.type===flt);
+    view.forEach((r,i)=>{
+      const tr=document.createElement('tr');
+      const badge = `<span class="mono" style="padding:2px 8px;border:1px solid #223049;border-radius:999px;background:#0d1a2e;color:${r.result==='PASS'?'#22c55e':'#ef4444'}">${r.result}</span>`;
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td class="editable" data-k="date" data-id="${r.id}">${esc(r.date)}</td>
+        <td class="editable" data-k="type" data-id="${r.id}">${esc(r.type)}</td>
+        <td class="editable" data-k="student" data-id="${r.id}">${esc(r.student)}</td>
+        <td class="editable" data-k="group" data-id="${r.id}">${esc(r.group)}</td>
+        <td class="editable" data-k="topic" data-id="${r.id}">${esc(r.topic)}</td>
+        <td>${badge}</td>
+        <td class="editable" data-k="notes" data-id="${r.id}">${esc(r.notes||'')}</td>
+        <td class="mono"><button class="btn" data-act="label" data-id="${r.id}">Етикетка</button> <button class="btn" data-act="del" data-id="${r.id}">✖</button></td>`;
+      iBody.appendChild(tr);
+    });
+  }
+
+  // Редагування
+  iBody.addEventListener('dblclick', (e)=>{
+    const td = e.target.closest('.editable'); if(!td) return;
+    const id = td.getAttribute('data-id'); const key = td.getAttribute('data-k');
+    const idx = instr.findIndex(x=>x.id===id); const r=instr[idx];
+    const input = document.createElement('input'); input.value = r[key] || ''; input.style.width='100%'; input.style.padding='6px 8px';
+    input.addEventListener('blur', ()=>{ r[key] = input.value.trim(); renderInstr(); rebuildSelect(); });
+    td.innerHTML=''; td.appendChild(input); input.focus(); input.select();
+  });
+
+  iBody.addEventListener('click', (e)=>{
+    const b = e.target.closest('button'); if(!b) return;
+    const id = b.getAttribute('data-id'); const act = b.getAttribute('data-act');
+    if(act==='del'){ instr = instr.filter(x=>x.id!==id); renderInstr(); rebuildSelect(); return; }
+    if(act==='label'){ iSelect.value = id; buildTicket(); document.getElementById('ticket').scrollIntoView({behavior:'smooth'}); }
+  });
+
+  function clearInstr(){ if(confirm('Очистити журнал інструктажів?')){ instr=[]; renderInstr(); rebuildSelect(); } }
+
+  function rebuildSelect(){
+    iSelect.innerHTML='';
+    instr.forEach(x=>{
+      const op=document.createElement('option'); op.value=x.id; op.textContent=`${x.student} · ${x.type} (${x.result})`;
+      iSelect.appendChild(op);
+    });
+  }
+
+  // ======= ЕТИКЕТКА 58 мм =======
+  function buildTicket(){
+    const id = iSelect.value || (instr[0]?.id || '');
+    const r = instr.find(x=>x.id===id);
+    const t = (id)=>document.getElementById(id);
+    if(!r){
+      t('t-name').textContent='Студент —'; t('t-type').textContent='—'; t('t-res').textContent='—';
+      t('t-grp').textContent='—'; t('t-date').textContent='—'; t('t-topic').textContent='—';
+      t('t-url').textContent='NFC/QR: —'; t('t-ref').textContent='Ref: PERM-XXXX'; return;
+    }
+    t('t-name').textContent = r.student;
+    t('t-type').textContent = r.type;
+    t('t-res').textContent = r.result;
+    t('t-grp').textContent = r.group || '—';
+    t('t-date').textContent = r.date;
+    t('t-topic').textContent = r.topic;
+    const url = `https://serawww7.github.io/edlab/electric_para11.html#${encodeURIComponent(r.student)}`
+    t('t-url').textContent = 'NFC/QR: ' + url;
+    t('t-ref').textContent = 'Ref: PERM-' + Math.random().toString(36).slice(2,7).toUpperCase();
+  }
+
+  function downloadTXT(){
+    const lines=[
+      'SAFETY PERMIT 58mm','-------------------',
+      'ПІБ: ' + document.getElementById('t-name').textContent,
+      'Тип/Результат: ' + document.getElementById('t-type').textContent + ' / ' + document.getElementById('t-res').textContent,
+      'Група/Дата: ' + document.getElementById('t-grp').textContent + ' / ' + document.getElementById('t-date').textContent,
+      'Тема: ' + document.getElementById('t-topic').textContent,
+      document.getElementById('t-url').textContent,
+      document.getElementById('t-ref').textContent
+    ];
+    const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='safety_permit_58mm.txt'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // ======= A4: Відомість інструктажу =======
+  function buildA4Instr(){
+    if(!instr.length){ alert('Додай хоча б один інструктаж'); return; }
+    const pass = instr.filter(x=>x.result==='PASS').length;
+    const fail = instr.filter(x=>x.result==='FAIL').length;
+    const rows = instr.map((x,i)=>`
+      <tr>
+        <td>${i+1}</td><td>${esc(x.date)}</td><td>${esc(x.type)}</td><td>${esc(x.student)}</td>
+        <td>${esc(x.group)}</td><td>${esc(x.topic)}</td><td>${esc(x.result)}</td><td>${esc(x.notes||'')}</td>
+        <td style="height:24px"></td>
+      </tr>`).join('');
+    const html = `
+      <section class="doc">
+        <h2>ВІДОМІСТЬ ІНСТРУКТАЖУ З ОХОРОНИ ПРАЦІ (ЕЛЕКТРОБЕЗПЕКА)</h2>
+        <p>Дата формування: ${nowStamp()}</p>
+        <table>
+          <thead><tr><th>#</th><th>Дата</th><th>Тип</th><th>ПІБ</th><th>Група</th><th>Тема</th><th>Результат</th><th>Нотатка</th><th>Підпис</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <h3>Підсумок</h3>
+        <p>PASS: ${pass} · FAIL: ${fail}</p>
+        <div class="sign"><div>Викладач: ____________________</div><div>Майстер: ____________________</div></div>
+      </section>`;
+    document.getElementById('printArea').innerHTML = html;
+    document.getElementById('printArea').scrollIntoView({behavior:'smooth'});
+  }
+
+  // ======= A4: Наряд-допуск =======
+  function buildA4Permit(){
+    const w = {
+      id: document.getElementById('wId').value.trim(),
+      site: document.getElementById('wSite').value.trim(),
+      lead: document.getElementById('wLead').value.trim(),
+      crew: document.getElementById('wCrew').value.trim(),
+      desc: document.getElementById('wDesc').value.trim(),
+      iso: document.getElementById('wIso').value,
+      lock: document.getElementById('wLock').value,
+      tag: document.getElementById('wTag').value,
+      test: document.getElementById('wTest').value,
+      ppe: document.getElementById('wPPE').value
+    };
+    const rows = [
+      ['Вимкнення джерела', w.iso],
+      ['LOCK встановлено', w.lock],
+      ['TAG встановлено', w.tag],
+      ['Перевірка відсутності напруги', w.test],
+      ['ЗІЗ перевірено', w.ppe]
+    ].map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join('');
+    const html = `
+      <section class="doc">
+        <h2>НАРЯД-ДОПУСК № ${esc(w.id)}</h2>
+        <p>Об’єкт: ${esc(w.site)} · Дата: ${nowStamp()}</p>
+        <table>
+          <tbody>
+            <tr><td>Керівник робіт</td><td>${esc(w.lead)}</td></tr>
+            <tr><td>Склад бригади</td><td>${esc(w.crew)}</td></tr>
+            <tr><td>Опис робіт</td><td>${esc(w.desc)}</td></tr>
+          </tbody>
+        </table>
+        <h3>Чек-лист LOTO / Підготовка</h3>
+        <table><thead><tr><th>#</th><th>Пункт</th><th>Статус</th></tr></thead><tbody>${rows}</tbody></table>
+        <div class="sign">
+          <div>Видав наряд: ____________________</div>
+          <div>Допущено до робіт: ____________________</div>
+          <div>Роботи завершено (час): _____________ Підпис: _____________</div>
+        </div>
+        <p class="small">Примітка: документ сформовано у межах навчальної роботи; для реальних робіт користуйтесь чинними формами підприємства.</p>
+      </section>`;
+    document.getElementById('printArea').innerHTML = html;
+    document.getElementById('printArea').scrollIntoView({behavior:'smooth'});
+  }
+
+  // ======= ЕКСПОРТ/ІМПОРТ =======
+  function exportAll(){
+    exportCSV(instr, ['date','type','student','group','topic','result','notes'], 'safety_instructions.csv');
+    // Допоміжно — витяг для допусків (успішні)
+    const passes = instr.filter(x=>x.result==='PASS');
+    exportCSV(passes, ['date','student','group','type','topic'], 'safety_passes.csv');
+    // Порожній шаблон для LOTO (щоб студенти заповнювали текстом)
+    const templ = [{item:'Вимкнення джерела'},{item:'Замок встановлено'},{item:'Бирка встановлена'},{item:'Перевірка відсутності напруги'},{item:'ЗІЗ перевірено'}];
+    exportCSV(templ, ['item'], 'loto_template.csv');
+  }
+
+  function exportCSV(arr, headers, name){
+    const csv = [headers.join(','), ...arr.map(o=>headers.map(h=>`"${String((o[h]??'')).replace(/"/g,'""')}"`).join(','))].join('\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  async function importInstr(){
+    const f = document.getElementById('fileInstr').files[0]; if(!f){ alert('Оберіть CSV'); return; }
+    const txt = await f.text();
+    const lines = txt.trim().split(/\r?\n/); if(lines.length<2){ alert('CSV порожній'); return; }
+    const headers = lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());
+    const req = ['date','type','student','group','topic','result','notes'];
+    const miss = req.filter(x=>!headers.includes(x)); if(miss.length){ alert('Відсутні поля: '+miss.join(', ')); return; }
+    const out=[];
+    for(let i=1;i<lines.length;i++){
+      const cells = splitCSV(lines[i]); if(!cells.length) continue;
+      const o={}; headers.forEach((h,j)=> o[h]=(cells[j]||'').replace(/^"|"$/g,''));
+      out.push({ id:'I'+Math.random().toString(36).slice(2,7).toUpperCase(), ...o });
+    }
+    instr = out; renderInstr(); rebuildSelect();
+  }
+
+  function splitCSV(line){
+    const res=[]; let cur=''; let q=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){ if(q && line[i+1]==='"'){ cur+='"'; i++; } else q=!q; }
+      else if(ch===',' && !q){ res.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    res.push(cur); return res;
+  }
+
+  // ======= ДЕМО =======
+  function seedDemo(){
+    instr = [
+      {id:'I001', date:todayISO(), type:'Повторний', student:'Іваненко І.О.', group:'Е-21', topic:'Роботи в ЕУ до 1000В', result:'PASS', notes:''},
+      {id:'I002', date:todayISO(), type:'Цільовий', student:'Петренко П.П.', group:'Е-21', topic:'Роботи під напругою заборонено', result:'PASS', notes:'Нагадано про ЗІЗ'},
+      {id:'I003', date:todayISO(), type:'Первинний', student:'Сидоренко С.С.', group:'Е-22', topic:'LOTO: lock/tag/test', result:'FAIL', notes:'Повторне вивчення розділу LOTO'}
+    ];
+    renderInstr(); rebuildSelect();
+    buildTicket();
+    buildA4Instr();
+  }
+
+  // Авто-демо при старті
+  seedDemo();
+</script>
+</body>
+</html>
