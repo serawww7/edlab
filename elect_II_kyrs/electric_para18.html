@@ -1,0 +1,495 @@
+<!-- electric_para18.html
+     Пара 18 (Електрики, аудиторно): БАЛАНСУВАННЯ ФАЗ ТА ПЛАН-ЩИТОК
+     Мета: скласти реєстр кіл щитка, порахувати струми по фазах (A/B/C), оцінити дисбаланс і струм N,
+     запропонувати перестановки для балансування, надрукувати наклейки 58 мм та A4-«план-щиток»,
+     експорт/імпорт CSV. Працює офлайн, під GitHub Pages і Moodle (iframe).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Електрики · Пара 18 — Балансування фаз і план-щиток</title>
+<meta name="color-scheme" content="light dark"/>
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
+  .wrap{max-width:1120px; margin:0 auto; padding:24px 16px 96px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9aa5b1}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:1050px){.g3{grid-template-columns:1fr}; .g2{grid-template-columns:1fr}}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .small{font-size:12px; color:#93a3b5}
+  input,select,textarea{padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb; width:100%}
+  textarea{min-height:72px}
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+  .chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; font-size:12px; background:#0d1a2e; color:#9aa5b1}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .tickets{display:flex; gap:12px; flex-wrap:wrap}
+  .ticket{width:58mm; background:#fff; color:#000; padding:5mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 4px; font-size:13px; text-align:center}
+  .ticket p{margin:1px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:5px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+  #printArea{background:#fff; color:#000; border-radius:12px; border:1px solid #e5e7eb; padding:16px}
+  .doc{page-break-after:always; padding:12mm; color:#000; font-family:Georgia,"Times New Roman",serif}
+  .doc h2{color:#000; font-size:20px; margin:0 0 6px}
+  .doc h3{color:#000; font-size:16px; margin:6px 0}
+  .doc p{color:#000; margin:4px 0}
+  .doc table{width:100%; border-collapse:collapse; border:1px solid #111}
+  .doc th,.doc td{border:1px solid #111; padding:6px 8px; font-size:12px; vertical-align:top}
+  .doc .sign{margin-top:10mm; display:flex; gap:10mm; flex-wrap:wrap}
+  .doc .sign div{flex:1 1 220px}
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  @media print{
+    @page{ size:A4; margin:12mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    #printArea{ border:none; padding:0 }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+  .banner{display:flex; gap:8px; flex-wrap:wrap}
+  .banner .b{padding:8px 10px; border:1px solid #223049; border-radius:10px; background:#0d1a2e}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Електрики · Пара 18 · аудиторно</span>
+  <h1>⚖️ Балансування фаз: A/B/C → %дисбалансу → I<sub>N</sub> → пропозиції перестановок → 🧾 58 мм → 📄 план-щиток</h1>
+
+  <div class="card">
+    <h2>🎯 Мета</h2>
+    <p>Заповнити реєстр кіл щитка (1Ф/3Ф), обчислити струми по фазах, оцінити <b>% дисбалансу</b> та <b>I<sub>N</sub></b> (нейтраль),
+      отримати <b>пропозиції перестановок</b> для балансування, сформувати наклейки 58 мм і A4 «план-щиток», обмінюватись CSV.</p>
+    <div class="row">
+      <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
+      <button class="btn" onclick="recalc()">🧮 Перерахувати</button>
+      <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+      <input id="file" class="btn" type="file" accept=".csv,text/csv"/>
+      <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+    </div>
+    <p class="small">CSV: <span class="mono">way,id,name,phase,poles,mode,p_or_I,value,PF,eta,duty_pct,diversity_pct,curve,In_A,location,notes,url,nonlinear</span> (mode=p або i; value=кВт або А; poles=1P/3P; phase=A/B/C/3F; nonlinear=Так/Ні).</p>
+  </div>
+
+  <div class="card">
+    <h2>➕ Додати коло</h2>
+    <div class="grid g3">
+      <div>
+        <h3>Ідентифікація</h3>
+        <div class="row"><label class="small" style="min-width:140px">№ комірки (way)</label><input id="way" type="number" value="1"></div>
+        <div class="row"><label class="small" style="min-width:140px">ID</label><input id="id" value="C-01"></div>
+        <div class="row"><label class="small" style="min-width:140px">Назва</label><input id="name" value="Освітлення ауд.101"></div>
+        <div class="row"><label class="small" style="min-width:140px">Локація</label><input id="location" value="Корпус А · 1 пов."></div>
+      </div>
+      <div>
+        <h3>Електрика</h3>
+        <div class="row"><label class="small" style="min-width:140px">Фаза</label><select id="phase"><option selected>A</option><option>B</option><option>C</option><option>3F</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">Полюсів</label><select id="poles"><option selected>1P</option><option>3P</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">Режим навантаження</label><select id="mode"><option selected>p (кВт)</option><option>i (А)</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">Значення</label><input id="value" type="number" step="0.1" value="0.6"></div>
+        <div class="row"><label class="small" style="min-width:140px">PF</label><input id="pf" type="number" step="0.01" value="0.95"></div>
+        <div class="row"><label class="small" style="min-width:140px">η</label><input id="eta" type="number" step="0.01" value="0.98"></div>
+      </div>
+      <div>
+        <h3>Захист/режим</h3>
+        <div class="row"><label class="small" style="min-width:140px">Duty, %</label><input id="duty" type="number" value="80"></div>
+        <div class="row"><label class="small" style="min-width:140px">Диверсиф., %</label><input id="divers" type="number" value="100"></div>
+        <div class="row"><label class="small" style="min-width:140px">Крива</label><select id="curve"><option>B</option><option selected>C</option><option>D</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">Номінал MCB, А</label><select id="InA"><option>6</option><option selected>10</option><option>16</option><option>20</option><option>25</option><option>32</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">Нелінійне?</label><select id="nonlin"><option>Ні</option><option>Так</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">URL</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
+      <button class="btn" onclick="seedOne()">🔄 Приклад запису</button>
+    </div>
+    <p class="small">Розрахунки: 1Ф I≈P/(U·PF·η) при U=230В; 3Ф Iф≈P/(√3·U<sub>LL</sub>·PF·η) при U<sub>LL</sub>=400В; застосовується duty·diversity.</p>
+  </div>
+
+  <div class="card printable">
+    <h2>📋 Реєстр кіл щитка</h2>
+    <div class="banner" id="banner"></div>
+    <table id="tbl">
+      <thead>
+        <tr>
+          <th>#</th><th>way</th><th>ID</th><th>Назва</th><th>Фаза</th><th>Полюсів</th>
+          <th>Режим</th><th>Значення</th><th>I, А</th><th>Крива/MCB</th><th>Нелін.</th><th>URL</th><th>Дії</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p class="small">Ліміти: <span class="chip">PASS &lt; 10%</span> · <span class="chip">WARN 10–20%</span> · <span class="chip">FAIL &gt; 20%</span> дисбалансу фаз.</p>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" onclick="suggest()">🧭 Запропонувати перестановки</button>
+      <button class="btn" onclick="buildTickets()">🧾 Наклейки 58 мм</button>
+      <button class="btn" onclick="buildReport()">📄 A4 План-щиток</button>
+      <button class="btn" onclick="window.print()">🖨️ Друк</button>
+    </div>
+  </div>
+
+  <div class="card printable">
+    <h2>🧾 Наклейки 58 мм «Коло щитка»</h2>
+    <div id="tickets" class="tickets"></div>
+  </div>
+
+  <div class="card printable">
+    <h2>📄 A4 «План-щиток»</h2>
+    <div id="printArea"></div>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // ===== СТАН =====
+  let rows = []; // кола щитка
+  const tbody = document.querySelector('#tbl tbody');
+  const ticketsBox = document.getElementById('tickets');
+  const banner = document.getElementById('banner');
+
+  // ===== УТИЛІТИ =====
+  function esc(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&lt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function round2(x){ return Math.round(x*100)/100; }
+  function nowStamp(){ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+
+  // Розрахунок струму кола (з урахуванням duty і diversity)
+  function currentOf(r){
+    const duty = (parseFloat(r.duty)||100)/100;
+    const divs = (parseFloat(r.diversity)||100)/100;
+    if(r.mode==='i'){ return (parseFloat(r.value)||0)*duty*divs; }
+    // режим потужності
+    const PkW = parseFloat(r.value)||0;
+    if(r.phase==='3F' || r.poles==='3P'){
+      const I = (PkW*1000)/(Math.sqrt(3)*400*(parseFloat(r.PF)||1)*(parseFloat(r.eta)||1));
+      return I*duty*divs;
+    }else{
+      const I = (PkW*1000)/(230*(parseFloat(r.PF)||1)*(parseFloat(r.eta)||1));
+      return I*duty*divs;
+    }
+  }
+
+  // Сумування по фазах і нейтраль
+  function totals(){
+    let A=0,B=0,C=0;
+    let nonlinA=0,nonlinB=0,nonlinC=0;
+    rows.forEach(r=>{
+      const I = currentOf(r);
+      if(r.phase==='3F' || r.poles==='3P'){
+        // рівномірно по трьох фазах
+        A+=I; B+=I; C+=I;
+        if(r.nonlinear==='Так'){ nonlinA+=I; nonlinB+=I; nonlinC+=I; }
+      }else if(r.phase==='A'){
+        A+=I; if(r.nonlinear==='Так') nonlinA+=I;
+      }else if(r.phase==='B'){
+        B+=I; if(r.nonlinear==='Так') nonlinB+=I;
+      }else if(r.phase==='C'){
+        C+=I; if(r.nonlinear==='Так') nonlinC+=I;
+      }
+    });
+    // Векторна сума для лінійних складових (A∠0, B∠-120, C∠+120)
+    function phasorSum(a,b,c){
+      const rad = Math.PI/180;
+      const Ax=a, Ay=0;
+      const Bx=b*Math.cos(-120*rad), By=b*Math.sin(-120*rad);
+      const Cx=c*Math.cos(120*rad),  Cy=c*Math.sin(120*rad);
+      return Math.sqrt((Ax+Bx+Cx)**2 + (Ay+By+Cy)**2);
+    }
+    const In_linear = phasorSum(A-nonlinA, B-nonlinB, C-nonlinC);
+    // Триплетні гармоніки від нелінійних — груба оцінка: 1.5× середньої нелінійної складової
+    const avgNonlin = (nonlinA+nonlinB+nonlinC)/3;
+    const In_triplen = 1.5 * avgNonlin;
+    const In = round2(In_linear + In_triplen);
+
+    const arr=[A,B,C];
+    const avg=(A+B+C)/3;
+    const diff = Math.max(...arr) - Math.min(...arr);
+    const pct = avg>0 ? (diff/avg)*100 : 0;
+    let status='PASS'; if(pct>20) status='FAIL'; else if(pct>=10) status='WARN';
+    return {A:round2(A),B:round2(B),C:round2(C),In,avg:round2(avg),imb_pcnt:round2(pct),status,nonlin:{A:round2(nonlinA),B:round2(nonlinB),C:round2(nonlinC)}};
+  }
+
+  // Рендер банера
+  function renderBanner(){
+    const t=totals();
+    banner.innerHTML='';
+    const chips=[
+      `ΣA=${t.A} А`,`ΣB=${t.B} А`,`ΣC=${t.C} А`,`Iₙ≈${t.In} А`,`Δ%= ${t.imb_pcnt}`,
+      t.status==='PASS'?'<span class="b" style="color:#22c55e">PASS</span>':
+      (t.status==='WARN'?'<span class="b" style="color:#f59e0b">WARN</span>':'<span class="b" style="color:#ef4444">FAIL</span>')
+    ];
+    chips.forEach(x=>{ const s=document.createElement('div'); s.className='b'; s.innerHTML=x; banner.appendChild(s); });
+  }
+
+  // CRUD
+  function addOrUpdate(){
+    const r={
+      way:parseInt(document.getElementById('way').value||'1',10),
+      id:(document.getElementById('id').value||'').trim(),
+      name:(document.getElementById('name').value||'').trim(),
+      phase:document.getElementById('phase').value,
+      poles:document.getElementById('poles').value,
+      mode:document.getElementById('mode').value.startsWith('p')?'p':'i',
+      value:parseFloat(document.getElementById('value').value||'0'),
+      PF:parseFloat(document.getElementById('pf').value||'1'),
+      eta:parseFloat(document.getElementById('eta').value||'1'),
+      duty:parseFloat(document.getElementById('duty').value||'100'),
+      diversity:parseFloat(document.getElementById('divers').value||'100'),
+      curve:document.getElementById('curve').value,
+      In_A:parseFloat(document.getElementById('InA').value||'10'),
+      nonlinear:document.getElementById('nonlin').value,
+      location:(document.getElementById('location').value||'').trim(),
+      url:(document.getElementById('url').value||'').trim(),
+      notes:''
+    };
+    if(!r.id){ alert('Укажи ID'); return; }
+    const i=rows.findIndex(x=>x.id===r.id);
+    if(i>=0) rows[i]={...rows[i],...r}; else rows.push(r);
+    recalc();
+    buildTickets([r]);
+  }
+
+  function recalc(){ rows.sort((a,b)=>a.way-b.way); render(); renderBanner(); }
+
+  // Таблиця
+  function render(){
+    tbody.innerHTML='';
+    rows.forEach((r,i)=>{
+      const I = round2(currentOf(r));
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td>${i+1}</td>
+        <td class="editable" data-k="way" data-id="${r.id}">${r.way}</td>
+        <td class="editable" data-k="id" data-id="${r.id}">${esc(r.id)}</td>
+        <td class="editable" data-k="name" data-id="${r.id}">${esc(r.name)}</td>
+        <td class="editable" data-k="phase" data-id="${r.id}">${esc(r.phase)}</td>
+        <td class="editable" data-k="poles" data-id="${r.id}">${esc(r.poles)}</td>
+        <td class="editable" data-k="mode" data-id="${r.id}">${esc(r.mode)}</td>
+        <td class="editable" data-k="value" data-id="${r.id}">${esc(r.value)}</td>
+        <td>${I}</td>
+        <td class="editable" data-k="In_A" data-id="${r.id}">${esc(r.curve)}${esc(r.In_A)}</td>
+        <td class="editable" data-k="nonlinear" data-id="${r.id}">${esc(r.nonlinear)}</td>
+        <td class="editable" data-k="url" data-id="${r.id}">${esc(r.url||'')}</td>
+        <td class="mono">
+          <button class="btn" data-act="label" data-id="${r.id}">Наклейка</button>
+          <button class="btn" data-act="del" data-id="${r.id}">✖</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Інлайн редагування
+  tbody.addEventListener('dblclick',(e)=>{
+    const td=e.target.closest('.editable'); if(!td) return;
+    const id=td.getAttribute('data-id'); const key=td.getAttribute('data-k');
+    const idx=rows.findIndex(x=>x.id===id); const r=rows[idx];
+    const input=document.createElement('input'); input.value=r[key]||''; input.style.width='100%'; input.style.padding='6px 8px';
+    input.addEventListener('blur', ()=>{ let v=input.value.trim();
+      if(['way','value','In_A'].includes(key)) v=parseFloat(v)||0;
+      r[key]=v; recalc(); });
+    td.innerHTML=''; td.appendChild(input); input.focus(); input.select();
+  });
+
+  // Кнопки в таблиці
+  tbody.addEventListener('click',(e)=>{
+    const b=e.target.closest('button'); if(!b) return;
+    const id=b.getAttribute('data-id'); const act=b.getAttribute('data-act');
+    if(act==='del'){ rows=rows.filter(x=>x.id!==id); recalc(); return; }
+    if(act==='label'){ const r=rows.find(x=>x.id===id); buildTickets([r]); ticketsBox.scrollIntoView({behavior:'smooth'}); }
+  });
+
+  // Пропозиції перестановок (жадібний алгоритм)
+  function suggest(){
+    let changed=true; let steps=[];
+    // працюємо з копією
+    const arr=rows.map(x=>({...x}));
+    function totalsOf(a){
+      let A=0,B=0,C=0;
+      a.forEach(r=>{
+        const I=currentOf(r);
+        if(r.phase==='3F' || r.poles==='3P'){ A+=I;B+=I;C+=I; }
+        else if(r.phase==='A') A+=I; else if(r.phase==='B') B+=I; else C+=I;
+      });
+      return {A,B,C};
+    }
+    while(changed){
+      changed=false;
+      const T=totalsOf(arr);
+      const listA=arr.filter(r=>r.phase==='A' && r.poles!=='3P').sort((x,y)=>currentOf(y)-currentOf(x));
+      const listB=arr.filter(r=>r.phase==='B' && r.poles!=='3P').sort((x,y)=>currentOf(y)-currentOf(x));
+      const listC=arr.filter(r=>r.phase==='C' && r.poles!=='3P').sort((x,y)=>currentOf(y)-currentOf(x));
+      const phases=[{k:'A',I:T.A,list:listA},{k:'B',I:T.B,list:listB},{k:'C',I:T.C,list:listC}].sort((x,y)=>y.I-x.I);
+      const maxP=phases[0], minP=phases[2];
+      if(maxP.I - minP.I < 0.5) break; // поріг чутливості
+      const donor = maxP.list[0];
+      if(!donor) break;
+      donor.phase = minP.k; changed=true;
+      steps.push(`Перенести ${donor.id} (${round2(currentOf(donor))} А) з ${phases[0].k} → ${minP.k}`);
+    }
+    const t=totalsOf(arr);
+    const avg=(t.A+t.B+t.C)/3;
+    const pct = avg>0 ? ((Math.max(t.A,t.B,t.C)-Math.min(t.A,t.B,t.C))/avg)*100 : 0;
+    const text = steps.length ? (`✅ Пропозиції:\n- `+steps.join('\n- ')
+      + `\nОчікувані ΣA=${round2(t.A)}A ΣB=${round2(t.B)}A ΣC=${round2(t.C)}A (Δ%≈${round2(pct)})`)
+      : 'ℹ️ Перестановки не потрібні або немає 1Ф кіл великої потужності.';
+    alert(text);
+  }
+
+  // Наклейки 58 мм
+  function buildTickets(list){
+    const L=list||rows;
+    ticketsBox.innerHTML='';
+    L.forEach(r=>{
+      const I=round2(currentOf(r));
+      const el=document.createElement('div'); el.className='ticket';
+      const urlText = r.url && r.url.length ? r.url : `https://serawww7.github.io/edlab/electric_para18.html#${encodeURIComponent(r.id)}`;
+      el.innerHTML = `
+        <h4>КОЛО ЩИТКА</h4>
+        <p><b>${esc(r.id)} · ${esc(r.name)}</b></p>
+        <div class="line"></div>
+        <p>Фаза/полюси: ${esc(r.phase)}/${esc(r.poles)} · ${esc(r.curve)}${esc(r.In_A)}A</p>
+        <p>I≈ ${I} A · Режим: ${esc(r.mode==='p'?'кВт':'А')} · Duty ${esc(r.duty||100)}% · Div ${esc(r.diversity||100)}%</p>
+        <p>Нелін.: ${esc(r.nonlinear||'Ні')}</p>
+        <div class="line"></div>
+        <p class="qr"><small>URL: ${esc(urlText)}</small></p>
+        <p><small>${nowStamp()}</small></p>
+      `;
+      ticketsBox.appendChild(el);
+    });
+  }
+
+  // A4 план-щиток
+  function buildReport(){
+    if(!rows.length){ alert('Немає записів'); return; }
+    const t=totals();
+    const head=`
+      <p>Дата: ${nowStamp()}</p>
+      <p>Підсумки: ΣA=${t.A} A · ΣB=${t.B} A · ΣC=${t.C} A · Iₙ≈${t.In} A · Δ%=${t.imb_pcnt} → ${t.status}</p>
+    `;
+    const lines = rows.map(r=>{
+      const I=round2(currentOf(r));
+      return `<tr>
+        <td>${r.way}</td><td>${esc(r.id)}</td><td>${esc(r.name)}</td><td>${esc(r.location||'')}</td>
+        <td>${esc(r.phase)}</td><td>${esc(r.poles)}</td><td>${esc(r.mode==='p'?'кВт':'А')}=${esc(r.value)}</td>
+        <td>${I}</td><td>${esc(r.curve)}${esc(r.In_A)}</td><td>${esc(r.nonlinear||'Ні')}</td><td>${esc(r.url||'')}</td>
+      </tr>`;
+    }).join('');
+    const html = `
+      <section class="doc">
+        <h2>ПЛАН-ЩИТОК (баланс фаз)</h2>
+        ${head}
+        <table>
+          <thead>
+            <tr><th>way</th><th>ID</th><th>Назва</th><th>Локація</th><th>Фаза</th><th>Полюсів</th><th>Вихідні дані</th><th>I, А</th><th>MCB</th><th>Нелінійне</th><th>URL</th></tr>
+          </thead>
+          <tbody>${lines}</tbody>
+        </table>
+        <h3>Примітка</h3>
+        <p>Струм N оцінено як векторну суму лінійних складових + додаток від триплетних гармонік (1.5×avg нелінійної складової). У реальних проектах вимірюйте I<sub>N</sub> і використовуйте фактичні профілі навантаження.</p>
+        <div class="sign"><div>Виконавець: ____________________</div><div>Перевірив: ____________________</div></div>
+      </section>`;
+    document.getElementById('printArea').innerHTML=html;
+    document.getElementById('printArea').scrollIntoView({behavior:'smooth'});
+  }
+
+  // CSV
+  function exportCSV(){
+    const headers=['way','id','name','phase','poles','mode','p_or_I','value','PF','eta','duty_pct','diversity_pct','curve','In_A','location','notes','url','nonlinear','I_calc_A','timestamp'];
+    const stamp=nowStamp();
+    const csv=[headers.join(','), ...rows.map(r=>{
+      const vals=[r.way,r.id,r.name,r.phase,r.poles,r.mode,(r.mode==='p'?'p':'i'),r.value,r.PF,r.eta,r.duty,r.diversity,r.curve,r.In_A,r.location||'',r.notes||'',r.url||'',r.nonlinear||'Ні',round2(currentOf(r)),stamp];
+      return vals.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+    })].join('\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='panel_balance_registry.csv'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  async function importCSV(){
+    const f=document.getElementById('file').files[0]; if(!f){ alert('Оберіть CSV'); return; }
+    const txt=await f.text();
+    const lines=txt.trim().split(/\r?\n/); if(lines.length<2){ alert('CSV порожній'); return; }
+    const headers=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());
+    const req=['way','id','name','phase','poles','mode','value','PF','eta','duty_pct','diversity_pct','curve','In_A','location','url','nonlinear'];
+    const miss=req.filter(x=>!headers.includes(x)); if(miss.length){ alert('Відсутні поля: '+miss.join(', ')); return; }
+    const out=[];
+    for(let i=1;i<lines.length;i++){
+      const cells=splitCSV(lines[i]); if(!cells.length) continue;
+      const o={}; headers.forEach((h,j)=> o[h]=(cells[j]||'').replace(/^"|"$/g,''));
+      out.push({
+        way:parseInt(o.way||'1',10), id:o.id, name:o.name, phase:o.phase||'A', poles:o.poles||'1P',
+        mode:(o.mode||'p').startsWith('p')?'p':'i', value:parseFloat(o.value||'0'), PF:parseFloat(o.PF||'1'), eta:parseFloat(o.eta||'1'),
+        duty:parseFloat(o.duty_pct||'100'), diversity:parseFloat(o.diversity_pct||'100'),
+        curve:o.curve||'C', In_A:parseFloat(o.In_A||'10'), location:o.location||'', notes:o.notes||'', url:o.url||'', nonlinear:o.nonlinear||'Ні'
+      });
+    }
+    rows=out; recalc();
+  }
+  function splitCSV(line){
+    const res=[]; let cur=''; let q=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){ if(q && line[i+1]==='"'){ cur+='"'; i++; } else q=!q; }
+      else if(ch===',' && !q){ res.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    res.push(cur); return res;
+  }
+
+  // Приклади
+  function seedOne(){
+    document.getElementById('way').value=4;
+    document.getElementById('id').value='C-04';
+    document.getElementById('name').value='Розетки лаб.1';
+    document.getElementById('phase').value='C';
+    document.getElementById('poles').value='1P';
+    document.getElementById('mode').value='p (кВт)';
+    document.getElementById('value').value=1.2;
+    document.getElementById('pf').value=0.95;
+    document.getElementById('eta').value=0.98;
+    document.getElementById('duty').value=60;
+    document.getElementById('divers').value=80;
+    document.getElementById('curve').value='C';
+    document.getElementById('InA').value=16;
+    document.getElementById('nonlin').value='Так';
+    document.getElementById('location').value='Лаб. електрики';
+  }
+
+  function seedDemo(){
+    rows = [
+      {way:1,id:'C-01',name:'Освітлення ауд.101',phase:'A',poles:'1P',mode:'p',value:0.6,PF:0.95,eta:0.98,duty:80,diversity:100,curve:'C',In_A:10,nonlinear:'Ні',location:'Корпус А · 1 пов.',url:''},
+      {way:2,id:'C-02',name:'Розетки ауд.101',phase:'A',poles:'1P',mode:'p',value:1.5,PF:0.95,eta:0.98,duty:70,diversity:80,curve:'C',In_A:16,nonlinear:'Так',location:'Корпус А · 1 пов.',url:''},
+      {way:3,id:'M-01',name:'Вентилятор 3Ф',phase:'3F',poles:'3P',mode:'p',value:2.2,PF:0.9,eta:0.9,duty:100,diversity:100,curve:'D',In_A:20,nonlinear:'Ні',location:'Майстерня',url:''},
+      {way:4,id:'C-03',name:'Витяжка',phase:'B',poles:'1P',mode:'p',value:0.35,PF:1,eta:1,duty:100,diversity:100,curve:'B',In_A:10,nonlinear:'Ні',location:'Лабораторія',url:''},
+      {way:5,id:'S-01',name:'Інвертор (SMPS)',phase:'C',poles:'1P',mode:'i',value:6.0,PF:0.9,eta:0.95,duty:100,diversity:100,curve:'C',In_A:16,nonlinear:'Так',location:'Лабораторія',url:''}
+    ];
+    recalc();
+  }
+
+  // Автодемо
+  seedDemo();
+</script>
+</body>
+</html>
