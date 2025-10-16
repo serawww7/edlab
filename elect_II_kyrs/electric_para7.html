@@ -1,0 +1,380 @@
+<!-- electric_para7.html
+     Пара 7 (Електрики, аудиторно): МАРКУВАННЯ ЩИТА
+     Генератор адрес/ланцюгів, таблиця навантажень, пакет наклейок 58 мм, NFC/QR-рядок, імпорт/експорт CSV.
+     Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Електрики · Пара 7 — Маркування щита: адреси, навантаження, наклейки 58 мм</title>
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
+  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 80px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9aa5b1}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:1000px){.g3{grid-template-columns:1fr}; .g2{grid-template-columns:1fr}}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .small{font-size:12px; color:#93a3b5}
+  .field{display:flex; gap:8px; margin:6px 0}
+  .field label{min-width:170px; color:#cbd5e1}
+  .field input,.field select,.field textarea{flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb}
+  .chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; font-size:12px; margin-right:6px; background:#0d1a2e}
+
+  /* Таблиця */
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+
+  /* Квитанції 58 мм */
+  .tickets{display:flex; gap:12px; flex-wrap:wrap}
+  .ticket{
+    width:58mm; background:#fff; color:#000; padding:5mm 4mm; border-radius:6px;
+    box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace
+  }
+  .ticket h4{margin:0 0 4px; font-size:13px; text-align:center}
+  .ticket p{margin:1px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:5px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+  .no-print{display:block}
+
+  /* Вбудований режим */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+
+  @media print{
+    @page{ size:58mm auto; margin:4mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Електрики · Пара 7 · аудиторно</span>
+    <h1>🏷️ Маркування щита: адреси, навантаження, пакет наклейок 58 мм + CSV/NFC</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>Сформувати **адресацію кола** (щит/модуль/позиція), опис навантаження, номінали захистів і згенерувати **пакет наклейок 58 мм** для щита. Передбачено **іміпорт/експорт CSV** та **NFC/QR-рядок** для швидкого доступу.</p>
+      <div class="row">
+        <button class="btn" type="button" onclick="seedDemo()">🔄 Приклад</button>
+        <button class="btn" type="button" onclick="exportCSV()">📤 Експорт CSV</button>
+        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <button class="btn" type="button" onclick="importCSV()">⬆️ Імпорт CSV</button>
+      </div>
+      <p class="small">Поле CSV: <span class="mono">panel,circuit,addr,device,mcbrating_A,phase,wire,load,room,notes,url</span></p>
+    </div>
+
+    <div class="card">
+      <h2>➕ Додавання та пакетне створення</h2>
+      <div class="grid g3">
+        <div>
+          <h3>Один запис</h3>
+          <div class="field"><label for="panel">Щит (panel)</label><input id="panel" value="ЩО-1"></div>
+          <div class="field"><label for="circuit">№ кола</label><input id="circuit" type="number" value="5"></div>
+          <div class="field"><label for="device">Пристрій</label>
+            <select id="device"><option selected>MCB</option><option>RCD</option><option>RCBO</option></select></div>
+          <div class="field"><label for="mcb">Номінал, А</label><input id="mcb" type="number" value="16"></div>
+          <div class="field"><label for="phase">Фази</label>
+            <select id="phase"><option selected>1ф</option><option>3ф</option></select></div>
+          <div class="field"><label for="wire">Кабель</label><input id="wire" value="Cu 3x2.5"></div>
+          <div class="field"><label for="load">Навантаження</label><input id="load" value="Розетки майстерні"></div>
+          <div class="field"><label for="room">Локація/пом.</label><input id="room" value="Майстерня"></div>
+          <div class="field"><label for="notes">Нотатка</label><input id="notes" placeholder="ПЗВ 30мА або інше"></div>
+          <div class="field"><label for="url">URL (NFC/QR)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
+          <div class="row"><button class="btn" onclick="addOne()">➕ Додати</button></div>
+        </div>
+
+        <div>
+          <h3>Пакетно (діапазон)</h3>
+          <div class="field"><label for="panelB">Щит</label><input id="panelB" value="ЩО-1"></div>
+          <div class="field"><label for="from">З №</label><input id="from" type="number" value="1"></div>
+          <div class="field"><label for="to">По №</label><input id="to" type="number" value="8"></div>
+          <div class="field"><label for="mcbB">Номінал, А</label><input id="mcbB" type="number" value="16"></div>
+          <div class="field"><label for="deviceB">Пристрій</label>
+            <select id="deviceB"><option selected>MCB</option><option>RCBO</option></select></div>
+          <div class="field"><label for="phaseB">Фази</label>
+            <select id="phaseB"><option selected>1ф</option><option>3ф</option></select></div>
+          <div class="field"><label for="wireB">Кабель</label><input id="wireB" value="Cu 3x2.5"></div>
+          <div class="field"><label for="roomB">Локація</label><input id="roomB" value="Майстерня"></div>
+          <div class="field"><label for="loadB">Шаблон навантаження</label><input id="loadB" value="Розетка #NUM"></div>
+          <div class="row"><button class="btn" onclick="bulkAdd()">⚙️ Згенерувати</button></div>
+          <p class="small">В шаблоні <span class="mono">#NUM</span> заміниться на номер кола (з нулем: 01, 02…).</p>
+        </div>
+
+        <div>
+          <h3>Сервіс</h3>
+          <p class="small">Адреса кола формується як <span class="mono">panel/XX</span>, де <span class="mono">XX</span> — двозначний номер.</p>
+          <div class="row">
+            <button class="btn" onclick="clearAll()">🧹 Очистити</button>
+            <button class="btn" onclick="buildAllTickets()">🧾 Побудувати всі наклейки</button>
+            <button class="btn" onclick="printAll()">🖨️ Друк всіх</button>
+          </div>
+          <p class="small">Після друку — зробіть фото частини стрічки та додайте у спільну папку.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📋 Таблиця кола/навантаження</h2>
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>#</th><th>Адреса</th><th>Пристрій</th><th>Номінал</th><th>Фаза</th><th>Кабель</th><th>Навантаження</th><th>Локація</th><th>URL</th><th>Дії</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="small">Редагуйте рядки подвійним кліком на клітинці. Видалити — кнопка ✖ у дії.</p>
+    </div>
+
+    <div class="card printable">
+      <h2>🧾 Прев’ю наклейок 58 мм (обрана/пакет)</h2>
+      <div class="row">
+        <button class="btn" onclick="buildSelected()">🧩 Зібрати для виділеного</button>
+        <button class="btn" onclick="window.print()">🖨️ Друк (видиме)</button>
+        <button class="btn" onclick="downloadTXT()">📥 TXT (видиме)</button>
+      </div>
+      <div class="tickets" id="tickets"></div>
+      <p class="small">Щоб надрукувати всі наклейки відразу — натисніть «Побудувати всі наклейки», а потім «Друк (видиме)».</p>
+    </div>
+  </div>
+
+<script>
+  // Вбудований режим (Moodle)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // Стан
+  let rows = []; // {id,panel,circuit,addr,device,mcb,phase,wire,load,room,url,notes}
+  const tbody = document.querySelector('#tbl tbody');
+  const ticketsBox = document.getElementById('tickets');
+
+  function pad2(n){ return n.toString().padStart(2,'0'); }
+  function addr(panel, circuit){ return `${panel}/${pad2(circuit)}`; }
+  function escapeHTML(s){ return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function nowStamp(){ const d=new Date(); const p=n=>n.toString().padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
+
+  function render(){
+    tbody.innerHTML='';
+    rows.forEach((r,i)=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td class="editable" data-k="addr">${escapeHTML(r.addr)}</td>
+        <td class="editable" data-k="device">${escapeHTML(r.device)}</td>
+        <td class="editable" data-k="mcb">${escapeHTML(r.mcb)}</td>
+        <td class="editable" data-k="phase">${escapeHTML(r.phase)}</td>
+        <td class="editable" data-k="wire">${escapeHTML(r.wire)}</td>
+        <td class="editable" data-k="load">${escapeHTML(r.load)}</td>
+        <td class="editable" data-k="room">${escapeHTML(r.room)}</td>
+        <td class="editable" data-k="url">${escapeHTML(r.url||'')}</td>
+        <td class="mono"><button class="btn" data-act="build" data-id="${r.id}">Наклейка</button> <button class="btn" data-act="del" data-id="${r.id}">✖</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Редагування в таблиці
+  tbody.addEventListener('dblclick', (e)=>{
+    const td = e.target.closest('.editable'); if(!td) return;
+    const key = td.getAttribute('data-k');
+    const rowIdx = td.parentElement.rowIndex-1; // мінус рядок заголовка
+    const r = rows[rowIdx];
+    const oldVal = r[key] || '';
+    const input = document.createElement('input');
+    input.value = oldVal;
+    input.style.width='100%'; input.style.padding='6px 8px';
+    input.addEventListener('blur', ()=>{
+      r[key] = input.value.trim();
+      if(key==='addr'){
+        // Спробуємо оновити panel/circuit зі строки адреси PANEL/NN
+        const m = r[key].match(/^(.*)\/(\d{1,2})$/);
+        if(m){ r.panel = m[1]; r.circuit = parseInt(m[2],10); }
+      }
+      render();
+    });
+    td.innerHTML=''; td.appendChild(input); input.focus(); input.select();
+  });
+
+  // Дії по кнопках
+  tbody.addEventListener('click', (e)=>{
+    const b = e.target.closest('button'); if(!b) return;
+    const id = b.getAttribute('data-id'); const act = b.getAttribute('data-act');
+    if(act==='del'){ rows = rows.filter(x=>x.id!==id); render(); return; }
+    if(act==='build'){ const r = rows.find(x=>x.id===id); buildTickets([r]); ticketsBox.scrollIntoView({behavior:'smooth'}); }
+  });
+
+  function addOne(){
+    const r = {
+      id: 'C'+Math.random().toString(36).slice(2,7).toUpperCase(),
+      panel: document.getElementById('panel').value.trim(),
+      circuit: parseInt(document.getElementById('circuit').value,10),
+      device: document.getElementById('device').value,
+      mcb: parseInt(document.getElementById('mcb').value,10),
+      phase: document.getElementById('phase').value,
+      wire: document.getElementById('wire').value.trim(),
+      load: document.getElementById('load').value.trim(),
+      room: document.getElementById('room').value.trim(),
+      notes: document.getElementById('notes').value.trim(),
+      url: document.getElementById('url').value.trim()
+    };
+    r.addr = addr(r.panel, r.circuit);
+    rows.push(r); render();
+  }
+
+  function bulkAdd(){
+    const panel = document.getElementById('panelB').value.trim();
+    const from = parseInt(document.getElementById('from').value,10);
+    const to = parseInt(document.getElementById('to').value,10);
+    const mcb = parseInt(document.getElementById('mcbB').value,10);
+    const dev = document.getElementById('deviceB').value;
+    const phase = document.getElementById('phaseB').value;
+    const wire = document.getElementById('wireB').value.trim();
+    const room = document.getElementById('roomB').value.trim();
+    const templ = document.getElementById('loadB').value;
+    for(let n=from;n<=to;n++){
+      const name = templ.replace('#NUM', pad2(n));
+      const rec = {
+        id: 'C'+Math.random().toString(36).slice(2,7).toUpperCase(),
+        panel, circuit:n, addr:addr(panel,n),
+        device:dev, mcb, phase, wire, room, load:name, url:'', notes:''
+      };
+      rows.push(rec);
+    }
+    render();
+  }
+
+  function clearAll(){ if(confirm('Очистити всі записи?')){ rows=[]; render(); ticketsBox.innerHTML=''; } }
+
+  // Наклейки
+  function buildTickets(list){
+    const L = list || rows;
+    ticketsBox.innerHTML='';
+    L.forEach(r=>{
+      const el = document.createElement('div');
+      el.className='ticket';
+      const urlText = r.url ? r.url : `https://serawww7.github.io/edlab/electric_para7.html#${encodeURIComponent(r.addr)}`;
+      el.innerHTML = `
+        <h4>ЩИТ: ${escapeHTML(r.panel)}</h4>
+        <p><b>АДРЕСА: ${escapeHTML(r.addr)}</b></p>
+        <div class="line"></div>
+        <p>Коло: ${escapeHTML(String(r.circuit))} · ${escapeHTML(r.phase)} · ${escapeHTML(r.device)} ${escapeHTML(String(r.mcb))}A</p>
+        <p>Кабель: ${escapeHTML(r.wire)}</p>
+        <p>Навантаження: ${escapeHTML(r.load)}</p>
+        <p>Локація: ${escapeHTML(r.room)}</p>
+        ${r.notes ? `<p>Прим.: ${escapeHTML(r.notes)}</p>` : ``}
+        <div class="line"></div>
+        <p class="qr"><small>NFC/QR: ${escapeHTML(urlText)}</small></p>
+        <p class="qr"><small>Ref: LBL-${Math.random().toString(36).slice(2,7).toUpperCase()}</small></p>
+        <p><small>${nowStamp()}</small></p>
+      `;
+      ticketsBox.appendChild(el);
+    });
+  }
+
+  function buildSelected(){
+    const sel = tbody.querySelector('tr'); // якщо нічого не вибрано — беремо перший
+    if(!rows.length){ alert('Немає записів'); return; }
+    const idx = Math.max(0, (sel ? sel.rowIndex-1 : 0));
+    buildTickets([rows[idx]]);
+  }
+
+  function buildAllTickets(){ if(!rows.length){ alert('Немає записів'); return; } buildTickets(rows); }
+
+  function printAll(){ if(!rows.length){ alert('Немає записів'); return; } buildTickets(rows); window.print(); }
+
+  function downloadTXT(){
+    if(!ticketsBox.firstChild){ alert('Спочатку згенеруйте наклейки'); return; }
+    const lines = [];
+    lines.push('PANEL LABELS 58mm'); lines.push('-----------------');
+    Array.from(ticketsBox.children).forEach(t=>{
+      const ttext = t.innerText.replace(/\n{2,}/g,'\n').trim();
+      lines.push(ttext); lines.push('-----------------');
+    });
+    const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'panel_labels_58mm.txt'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // CSV I/O
+  function exportCSV(){
+    const headers = ['panel','circuit','addr','device','mcbrating_A','phase','wire','load','room','notes','url'];
+    const csv = [headers.join(','), ...rows.map(r=>[
+      r.panel, r.circuit, r.addr, r.device, r.mcb, r.phase, r.wire, r.load, r.room, r.notes||'', r.url||''
+    ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'panel_marking.csv'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  async function importCSV(){
+    const f = document.getElementById('file').files[0];
+    if(!f){ alert('Оберіть CSV'); return; }
+    const txt = await f.text();
+    const lines = txt.trim().split(/\r?\n/); if(lines.length<2){ alert('CSV порожній'); return; }
+    const headers = lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());
+    const req = ['panel','circuit','addr','device','mcbrating_A','phase','wire','load','room','notes','url'];
+    const miss = req.filter(x=>!headers.includes(x));
+    if(miss.length){ alert('Відсутні поля: '+miss.join(', ')); return; }
+    const out=[];
+    for(let i=1;i<lines.length;i++){
+      const cells = splitCSV(lines[i]); if(!cells.length) continue;
+      const o = {}; headers.forEach((h,j)=> o[h]= (cells[j]||'').replace(/^"|"$/g,''));
+      out.push({
+        id:'C'+Math.random().toString(36).slice(2,7).toUpperCase(),
+        panel:o.panel, circuit:parseInt(o.circuit,10), addr:o.addr||addr(o.panel,o.circuit),
+        device:o.device, mcb:parseInt(o.mcbrating_A,10), phase:o.phase, wire:o.wire,
+        load:o.load, room:o.room, notes:o.notes||'', url:o.url||''
+      });
+    }
+    rows = out; render();
+  }
+
+  function splitCSV(line){
+    const res=[]; let cur=''; let q=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){ if(q && line[i+1]==='"'){ cur+='"'; i++; } else q=!q; }
+      else if(ch===',' && !q){ res.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    res.push(cur); return res;
+  }
+
+  // Демо
+  function seedDemo(){
+    rows = [
+      {id:'C001', panel:'ЩО-1', circuit:1, addr:'ЩО-1/01', device:'MCB', mcb:16, phase:'1ф', wire:'Cu 3x2.5', load:'Розетка 01', room:'Майстерня', notes:'ПЗВ 30мА', url:''},
+      {id:'C002', panel:'ЩО-1', circuit:2, addr:'ЩО-1/02', device:'MCB', mcb:16, phase:'1ф', wire:'Cu 3x2.5', load:'Розетка 02', room:'Майстерня', notes:'', url:''},
+      {id:'C003', panel:'ЩО-1', circuit:5, addr:'ЩО-1/05', device:'RCBO', mcb:16, phase:'1ф', wire:'Cu 3x2.5', load:'Розетки верстак', room:'Майстерня', notes:'RCBO 30мА', url:'https://serawww7.github.io/edlab/electric_para2.html#asset=ELC-001'}
+    ];
+    render(); buildTickets(rows.slice(0,2));
+  }
+
+  // Автозапуск демо, щоб було що показати
+  seedDemo();
+</script>
+</body>
+</html>
