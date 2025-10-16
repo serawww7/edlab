@@ -1,0 +1,437 @@
+<!-- electric_para16.html
+     Пара 16 (Електрики, аудиторно): ЕНЕРГООБЛІК ТА ПРОФІЛЬ НАВАНТАЖЕННЯ
+     Мета: змоделювати добовий профіль навантаження (15-хв інтервали), підрахувати кВт·год,
+     пікову потужність, вартість за одно/двозонним тарифом; зробити "енергопаспорти" (58 мм),
+     A4-звіт, CSV імпорт/експорт. Працює офлайн, під Moodle (iframe).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Електрики · Пара 16 — Енергооблік: добовий профіль, кВт·год, тарифи, 58 мм</title>
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
+  .wrap{max-width:1120px; margin:0 auto; padding:24px 16px 96px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9aa5b1}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:1050px){.g3{grid-template-columns:1fr}; .g2{grid-template-columns:1fr}}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .small{font-size:12px; color:#93a3b5}
+  .chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; font-size:12px; margin-right:6px; background:#0d1a2e}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)} .muted{color:#9aa5b1}
+  input,select,textarea{padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb; width:100%}
+  textarea{min-height:88px}
+
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+
+  .tickets{display:flex; gap:12px; flex-wrap:wrap}
+  .ticket{
+    width:58mm; background:#fff; color:#000; padding:5mm 4mm; border-radius:6px;
+    box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace
+  }
+  .ticket h4{margin:0 0 4px; font-size:13px; text-align:center}
+  .ticket p{margin:1px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:5px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+
+  #printArea{background:#fff; color:#000; border-radius:12px; border:1px solid #e5e7eb; padding:16px}
+  .doc{page-break-after:always; padding:12mm; color:#000; font-family:Georgia,"Times New Roman",serif}
+  .doc h2{color:#000; font-size:20px; margin:0 0 6px}
+  .doc h3{color:#000; font-size:16px; margin:6px 0}
+  .doc p{color:#000; margin:4px 0}
+  .doc table{width:100%; border-collapse:collapse; border:1px solid #111}
+  .doc th,.doc td{border:1px solid #111; padding:6px 8px; font-size:12px; vertical-align:top}
+  .doc .sign{margin-top:10mm; display:flex; gap:10mm; flex-wrap:wrap}
+  .doc .sign div{flex:1 1 220px}
+
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+
+  @media print{
+    @page{ size:A4; margin:12mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    #printArea{ border:none; padding:0 }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+
+  /* Мікро-діаграма профілю (без зовнішніх бібліотек) */
+  .spark{height:64px; width:100%; background:linear-gradient(180deg,#0b1220,#0b1220 60%,#0e1a2c); border:1px solid #223049; border-radius:8px; position:relative; overflow:hidden}
+  .spark canvas{position:absolute; inset:0}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Електрики · Пара 16 · аудиторно</span>
+    <h1>📈 Енергооблік: добовий профіль (15 хв) → кВт·год → пікова потужність → тарифи → 🧾 58 мм</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>Створити <b>добовий профіль навантаження</b> (96 інтервалів по 15 хв), порахувати <b>кВт·год</b>, <b>пікову потужність</b>, вартість за <b>одно/двозонним тарифом</b>; згенерувати наклейки 58 мм «Енергопаспорт точки» та A4-звіт.</p>
+      <div class="row">
+        <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
+        <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+      </div>
+      <p class="small">CSV: <span class="mono">id,name,phase,p_w,qty,mode,start,end,hours,duty_pct,url,notes</span> (mode: BLOCK або HOURS; BLOCK = інтервал [start,end] у форматі HH:MM, HOURS = години/добу рівномірно).</p>
+    </div>
+
+    <div class="card">
+      <h2>⚙️ Тарифи та налаштування</h2>
+      <div class="grid g3">
+        <div>
+          <h3>Тариф</h3>
+          <div class="row"><label class="small" style="min-width:140px">Тип</label>
+            <select id="tariffType"><option selected>Однозонний</option><option>Двозонний (ніч/день)</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px">Ціна день, грн/кВт·год</label><input id="priceDay" type="number" step="0.01" value="3.00"></div>
+          <div class="row"><label class="small" style="min-width:140px">Ціна ніч, грн/кВт·год</label><input id="priceNight" type="number" step="0.01" value="1.80"></div>
+          <div class="row"><label class="small" style="min-width:140px">Нічний період</label>
+            <div class="row" style="gap:6px"><input id="nightStart" value="22:00" style="width:120px"><input id="nightEnd" value="06:00" style="width:120px"></div></div>
+        </div>
+        <div>
+          <h3>Відомості</h3>
+          <div class="row"><label class="small" style="min-width:140px">Об'єкт</label><input id="site" value="Майстерня · Корпус А"></div>
+          <div class="row"><label class="small" style="min-width:140px">Відповідальний</label><input id="resp" value="Студент ПІБ / група"></div>
+          <div class="row"><label class="small" style="min-width:140px">Ліміт піку, кВт</label><input id="peakLimit" type="number" step="0.1" value="10"></div>
+          <div class="row"><button class="btn" onclick="recalcAll()">🧮 Перерахувати</button></div>
+        </div>
+        <div>
+          <h3>Дії</h3>
+          <div class="row"><button class="btn" onclick="buildTickets()">🧾 Наклейки 58 мм</button></div>
+          <div class="row"><button class="btn" onclick="buildReport()">📄 A4-звіт</button></div>
+          <div class="row"><button class="btn" onclick="window.print()">🖨️ Друк</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>➕ Додати споживач</h2>
+      <div class="grid g3">
+        <div>
+          <h3>Паспорт</h3>
+          <div class="row"><label class="small" style="min-width:140px">ID</label><input id="id" value="E-01"></div>
+          <div class="row"><label class="small" style="min-width:140px">Назва</label><input id="name" value="Освітлення ауд.101"></div>
+          <div class="row"><label class="small" style="min-width:140px">Фаза</label><select id="phase"><option>A</option><option selected>B</option><option>C</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px">Потужність, Вт</label><input id="p_w" type="number" step="10" value="600"></div>
+          <div class="row"><label class="small" style="min-width:140px">К-ть</label><input id="qty" type="number" value="1"></div>
+        </div>
+        <div>
+          <h3>Графік</h3>
+          <div class="row"><label class="small" style="min-width:140px">Режим</label><select id="mode"><option selected>BLOCK</option><option>HOURS</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px">Початок</label><input id="start" value="08:00"></div>
+          <div class="row"><label class="small" style="min-width:140px">Кінець</label><input id="end" value="18:00"></div>
+          <div class="row"><label class="small" style="min-width:140px">Годин/добу (HOURS)</label><input id="hours" type="number" step="0.25" value="4"></div>
+          <div class="row"><label class="small" style="min-width:140px">Duty, %</label><input id="duty" type="number" value="80"></div>
+        </div>
+        <div>
+          <h3>Службове</h3>
+          <div class="row"><label class="small" style="min-width:140px">URL (NFC/QR)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
+          <div class="row"><label class="small" style="min-width:140px">Примітка</label><input id="notes" placeholder="Примітка"></div>
+          <div class="row"><button class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button></div>
+          <div class="row"><button class="btn" onclick="seedOne()">🔄 Приклад запису</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card printable">
+      <h2>📋 Реєстр споживачів</h2>
+      <div class="spark"><canvas id="spark"></canvas></div>
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>#</th><th>ID</th><th>Назва</th><th>Фаза</th><th>Pном, Вт</th><th>Qty</th><th>Режим</th><th>Графік</th><th>kВт·год/добу</th><th>Пікові Вт</th><th>Вартість, грн</th><th>URL</th><th>Дії</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="small">Лічильник: сумарні кВт·год, добовий пік (кВт) та кошторис — нижче у звіті.</p>
+    </div>
+
+    <div class="card printable">
+      <h2>🧾 Наклейки 58 мм «Енергопаспорт точки»</h2>
+      <div class="row">
+        <button class="btn" onclick="buildTickets()">🧩 Зібрати для всіх</button>
+        <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+        <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+      </div>
+      <div id="tickets" class="tickets"></div>
+    </div>
+
+    <div class="card printable">
+      <h2>📄 A4-звіт (для друку/PDF)</h2>
+      <div class="row">
+        <button class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
+        <button class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
+      </div>
+      <div id="printArea"></div>
+    </div>
+  </div>
+
+<script>
+  // Вбудований режим (Moodle) → спрощене тло
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // ======= СТАН =======
+  let loads = []; // список споживачів
+  const tbody = document.querySelector('#tbl tbody');
+  const ticketsBox = document.getElementById('tickets');
+
+  // ======= УТИЛІТИ =======
+  function esc(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function nowStamp(){ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+  function hhmmToIdx(t){
+    const [H,M]=t.split(':').map(x=>parseInt(x,10)); const i=Math.floor((H*60+M)/15);
+    return Math.min(95, Math.max(0, isNaN(i)?0:i));
+  }
+  function idxToHHMM(i){ const m=i*15; const H=Math.floor(m/60), M=m%60; return `${pad(H)}:${pad(M)}`; }
+
+  // ======= ПРОФІЛІ =======
+  function makeEmptyProfile(){ return new Array(96).fill(0); }
+
+  function profileFromLoad(L){
+    const prof=makeEmptyProfile();
+    const P = (L.p_w||0) * (L.qty||1) * ( (L.duty||100)/100 );
+    if(L.mode==='HOURS'){
+      // рівномірно по добі: години/добу
+      const slots = Math.round((L.hours||0)*4); // 4 інтервали на годину
+      if(slots<=0) return prof;
+      const step=Math.floor(96/slots);
+      let i=0, placed=0;
+      while(placed<slots && i<96){ prof[i]+=P; i+=step; placed++; }
+    }else{
+      // BLOCK: від start до end; якщо end < start → через північ
+      let s=hhmmToIdx(L.start||'00:00'), e=hhmmToIdx(L.end||'24:00');
+      if(e<=s) e+=96;
+      for(let i=s;i<e;i++){ const j=i%96; prof[j]+=P; }
+    }
+    return prof;
+  }
+
+  function sumProfiles(list){
+    const sum=makeEmptyProfile();
+    list.forEach(L=>{
+      const p=profileFromLoad(L);
+      for(let i=0;i<96;i++) sum[i]+=p[i];
+    });
+    return sum;
+  }
+
+  function kWhFromProfile(prof){ // Вт * 0.25 год → Вт·год → кВт·год
+    let wh=0; for(let i=0;i<96;i++) wh += prof[i]*0.25;
+    return wh/1000;
+  }
+  function peakFromProfile(prof){ return Math.max(...prof)/1000; } // кВт
+
+  function costFromProfile(prof){
+    const type=document.getElementById('tariffType').value;
+    const priceDay=parseFloat(document.getElementById('priceDay').value||'3');
+    const priceNight=parseFloat(document.getElementById('priceNight').value||'1.8');
+    const ns=(document.getElementById('nightStart').value||'22:00');
+    const ne=(document.getElementById('nightEnd').value||'06:00');
+    if(type==='Однозонний'){
+      const kWh=kWhFromProfile(prof); return {day:kWh*priceDay, night:0, total:kWh*priceDay};
+    }
+    // двозонний
+    const s=hhmmToIdx(ns), e=hhmmToIdx(ne)+(hhmmToIdx(ne)<=hhmmToIdx(ns)?96:0);
+    let whDay=0, whNight=0;
+    for(let i=0;i<96;i++){
+      const inNight = (i>=s && i<96) || (i+96<s?false:(i+96)<e);
+      const add = prof[i]*0.25; // Вт*год
+      if(inNight) whNight+=add; else whDay+=add;
+    }
+    const kWhDay=whDay/1000, kWhNight=whNight/1000;
+    return {day:kWhDay*priceDay, night:kWhNight*priceNight, total:kWhDay*priceDay + kWhNight*priceNight, kWhDay, kWhNight};
+  }
+
+  // ======= ДОДАТИ / ОНОВИТИ =======
+  function addOrUpdate(){
+    const L = {
+      id:(document.getElementById('id').value||'').trim(),
+      name:(document.getElementById('name').value||'').trim(),
+      phase:document.getElementById('phase').value,
+      p_w:parseFloat(document.getElementById('p_w').value||'0'),
+      qty:parseInt(document.getElementById('qty').value||'1',10),
+      mode:document.getElementById('mode').value,
+      start:document.getElementById('start').value,
+      end:document.getElementById('end').value,
+      hours:parseFloat(document.getElementById('hours').value||'0'),
+      duty:parseFloat(document.getElementById('duty').value||'100'),
+      url:(document.getElementById('url').value||'').trim(),
+      notes:(document.getElementById('notes').value||'').trim()
+    };
+    if(!L.id){ alert('Укажи ID'); return; }
+    const i = loads.findIndex(x=>x.id===L.id);
+    if(i>=0) loads[i]={...loads[i],...L}; else loads.push(L);
+    recalcAll(); buildTickets([L]);
+  }
+
+  // ======= РЕНДЕР =======
+  function render(){
+    const profAll = sumProfiles(loads);
+    drawSpark(profAll);
+    tbody.innerHTML='';
+    loads.forEach((L,i)=>{
+      const prof = profileFromLoad(L);
+      const kWh = kWhFromProfile(prof);
+      const peakW = Math.max(...prof);
+      const cost = costFromProfile(prof).total;
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td class="editable" data-k="id" data-id="${L.id}">${esc(L.id)}</td>
+        <td class="editable" data-k="name" data-id="${L.id}">${esc(L.name)}</td>
+        <td class="editable" data-k="phase" data-id="${L.id}">${esc(L.phase)}</td>
+        <td class="editable" data-k="p_w" data-id="${L.id}">${esc(L.p_w)}</td>
+        <td class="editable" data-k="qty" data-id="${L.id}">${esc(L.qty)}</td>
+        <td class="editable" data-k="mode" data-id="${L.id}">${esc(L.mode)}</td>
+        <td class="editable" data-k="start" data-id="${L.id}">${esc(L.mode==='BLOCK' ? (L.start+'–'+L.end) : (L.hours+' год/доба'))}</td>
+        <td>${kWh.toFixed(2)}</td>
+        <td>${Math.round(peakW)}</td>
+        <td>${cost.toFixed(2)}</td>
+        <td class="editable" data-k="url" data-id="${L.id}">${esc(L.url||'')}</td>
+        <td class="mono"><button class="btn" data-act="label" data-id="${L.id}">Наклейка</button> <button class="btn" data-act="del" data-id="${L.id}">✖</button></td>`;
+      tbody.appendChild(tr);
+    });
+
+    // Підсумки під таблицею
+    const totals = totalsAll();
+    const tfoot = document.createElement('tr');
+    tfoot.innerHTML = `<td colspan="8" style="text-align:right"><b>РАЗОМ</b></td>
+      <td><b>${totals.kWh.toFixed(2)}</b></td>
+      <td><b>${(totals.peak_kW*1000).toFixed(0)}</b></td>
+      <td><b>${totals.cost.toFixed(2)}</b></td>
+      <td colspan="2"></td>`;
+    tbody.appendChild(tfoot);
+  }
+
+  function recalcAll(){ render(); }
+
+  // Інлайн-редагування
+  tbody.addEventListener('dblclick', (e)=>{
+    const td=e.target.closest('.editable'); if(!td) return;
+    const id=td.getAttribute('data-id'); const key=td.getAttribute('data-k');
+    const idx=loads.findIndex(x=>x.id===id); const L=loads[idx];
+    const input=document.createElement('input'); input.value=(key==='start' || key==='end' || key==='mode')? (L[key] || '') : (L[key] || '');
+    input.style.width='100%'; input.style.padding='6px 8px';
+    input.addEventListener('blur', ()=>{ let v=input.value.trim(); if(['p_w','qty','hours','duty'].includes(key)) v=parseFloat(v.replace(',','.'))||0; L[key]=v; recalcAll(); });
+    td.innerHTML=''; td.appendChild(input); input.focus(); input.select();
+  });
+
+  // Кнопки
+  tbody.addEventListener('click', (e)=>{
+    const b=e.target.closest('button'); if(!b) return;
+    const id=b.getAttribute('data-id'); const act=b.getAttribute('data-act');
+    if(act==='del'){ loads=loads.filter(x=>x.id!==id); recalcAll(); return; }
+    if(act==='label'){ const L=loads.find(x=>x.id===id); buildTickets([L]); ticketsBox.scrollIntoView({behavior:'smooth'}); }
+  });
+
+  // ======= ДІАГРАМА СПАРКЛАЙН =======
+  function drawSpark(prof){
+    const cvs=document.getElementById('spark'); const w=cvs.clientWidth||cvs.parentElement.clientWidth; const h=cvs.clientHeight||64;
+    cvs.width=w; cvs.height=h; const ctx=cvs.getContext('2d');
+    ctx.clearRect(0,0,w,h);
+    const max=Math.max(1, ...prof);
+    const step=w/95;
+    ctx.beginPath();
+    for(let i=0;i<96;i++){
+      const x=i*step;
+      const y=h - (prof[i]/max)*(h-6) - 3;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.lineWidth=2; ctx.strokeStyle='rgba(96,165,250,0.95)'; ctx.stroke();
+  }
+
+  // ======= ПІДСУМКИ СИСТЕМИ =======
+  function totalsAll(){
+    const profAll=sumProfiles(loads);
+    const kWh=kWhFromProfile(profAll);
+    const peak=peakFromProfile(profAll);
+    const cost=costFromProfile(profAll);
+    const peakLimit=parseFloat(document.getElementById('peakLimit').value||'10');
+    return {kWh, peak_kW:peak, cost:cost.total, kWhDay:cost.kWhDay, kWhNight:cost.kWhNight, peak_ok: peak<=peakLimit};
+  }
+
+  // ======= НАКЛЕЙКИ 58 мм =======
+  function buildTickets(list){
+    const L=list||loads;
+    ticketsBox.innerHTML='';
+    L.forEach(x=>{
+      const prof=profileFromLoad(x), kWh=kWhFromProfile(prof), pk=Math.max(...prof)/1000, cost=costFromProfile(prof).total;
+      const el=document.createElement('div'); el.className='ticket';
+      const urlText = x.url ? x.url : `https://serawww7.github.io/edlab/electric_para16.html#${encodeURIComponent(x.id)}`;
+      el.innerHTML = `
+        <h4>ЕНЕРГОПАСПОРТ ТОЧКИ</h4>
+        <p><b>${esc(x.id)} · ${esc(x.name)}</b></p>
+        <div class="line"></div>
+        <p>Pном=${(x.p_w||0)*(x.qty||1)} Вт · Duty=${x.duty||100}%</p>
+        <p>Добове: ${kWh.toFixed(2)} кВт·год · Пік≈ ${pk.toFixed(2)} кВт</p>
+        <p>Орієнт. вартість: ${cost.toFixed(2)} грн/добу</p>
+        <div class="line"></div>
+        <p class="qr"><small>URL/NFC: ${esc(urlText)}</small></p>
+        <p><small>${nowStamp()}</small></p>
+      `;
+      ticketsBox.appendChild(el);
+    });
+  }
+  function downloadTXT(){
+    if(!ticketsBox.firstChild){ alert('Спочатку згенеруйте наклейки'); return; }
+    const lines=['ENERGOPASPORT 58mm','-------------------'];
+    Array.from(ticketsBox.children).forEach(t=>{ lines.push(t.innerText.replace(/\n{2,}/g,'\n')); lines.push('-------------------'); });
+    const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='energy_labels_58mm.txt'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // ======= A4-ЗВІТ =======
+  function buildReport(){
+    if(!loads.length){ alert('Немає записів'); return; }
+    const profAll=sumProfiles(loads);
+    const totals=totalsAll();
+    const rows=loads.map((x,i)=>{
+      const prof=profileFromLoad(x), kWh=kWhFromProfile(prof), pk=Math.max(...prof)/1000, c=costFromProfile(prof).total;
+      return `
+        <tr>
+          <td>${i+1}</td><td>${esc(x.id)}</td><td>${esc(x.name)}</td><td>${esc(x.phase)}</td>
+          <td>${(x.p_w||0)*(x.qty||1)}</td><td>${esc(x.mode==='BLOCK' ? (x.start+'–'+x.end) : (x.hours+' год/доба'))}</td>
+          <td>${(x.duty||100)}%</td><td>${kWh.toFixed(2)}</td><td>${pk.toFixed(2)}</td><td>${c.toFixed(2)}</td><td>${esc(x.notes||'')}</td>
+        </tr>`;
+    }).join('');
+    const html=`
+      <section class="doc">
+        <h2>ДОБОВИЙ ПРОФІЛЬ НАВАНТАЖЕННЯ · ${esc(document.getElementById('site').value||'Обʼєкт')}</h2>
+        <p>Дата: ${nowStamp()} · Відповідальний: ${esc(document.getElementById('resp').value||'—')}</p>
+        <p>Тариф: ${esc(document.getElementById('tariffType').value)} · День=${parseFloat(document.getElementById('priceDay').value||'3').toFixed(2)} грн/кВт·год · Ніч=${parseFloat(document.getElementById('priceNight').value||'1.8').toFixed(2)} грн/кВт·год</p>
+        <h3>1. Склад споживачів</h3>
+        <table>
+          <thead><tr><th>#</th><th>ID</th><th>Назва</th><th>Фаза</th><th>Pном, Вт</th><th>Графік</th><th>Duty</th><th>кВт·год/добу</th><th>Пік, кВт</th><th>Вартість, грн</th><th>Примітка</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <h3>2. Підсумки</h3>
+        <table>
+          <thead><tr><th>Показник</th><th>Значення</th></tr></thead>
+          <tbody>
+            <tr><td>Сумарні кВт·год/добу</td><td><b>${totals.kWh.toFixed(2)}</b></td></tr>
