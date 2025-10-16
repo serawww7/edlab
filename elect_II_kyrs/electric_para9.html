@@ -1,0 +1,488 @@
+<!-- electric_para9.html
+     Пара 9 (Електрики, аудиторно): ВУЗОЛ ЗАЗЕМЛЕННЯ
+     Протокол огляду і вимірювань: опір заземлювача (Ω), неперервність PE (Ω), оцінка PASS/FAIL, A4-протокол (PDF/друк),
+     мітка 58 мм «ЗАЗЕМЛЕННЯ · ПЕРЕВІРЕНО», NFC/QR-рядок, імпорт/експорт CSV.
+     Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Електрики · Пара 9 — Вузол заземлення: протокол, PASS/FAIL, друк 58 мм</title>
+<meta name="color-scheme" content="light dark" />
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
+  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 80px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9aa5b1}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:1000px){.g3{grid-template-columns:1fr}; .g2{grid-template-columns:1fr}}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .small{font-size:12px; color:#93a3b5}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .muted{color:#9aa5b1}
+
+  /* Таблиця */
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+
+  /* Друкована зона A4 */
+  #printArea{background:#fff; color:#000; border-radius:12px; border:1px solid #e5e7eb; padding:16px}
+  .doc{page-break-after:always; padding:12mm; color:#000; font-family:Georgia,"Times New Roman",serif}
+  .doc h2{color:#000; font-size:20px; margin:0 0 6px}
+  .doc h3{color:#000; font-size:16px; margin:6px 0}
+  .doc p{color:#000; margin:4px 0}
+  .doc table{width:100%; border-collapse:collapse; border:1px solid #111}
+  .doc th,.doc td{border:1px solid #111; padding:6px 8px; font-size:12px; vertical-align:top}
+  .doc .sign{margin-top:10mm; display:flex; gap:10mm; flex-wrap:wrap}
+  .doc .sign div{flex:1 1 220px}
+  .chip{display:inline-block; padding:2px 8px; border:1px solid #111; border-radius:999px; font-size:11px; margin-right:6px}
+  .okb{border-color:#16a34a} .badb{border-color:#dc2626}
+
+  /* Квитанція 58 мм */
+  .ticket{width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
+  .ticket p{margin:2px 0; font-size:12px}
+  .ticket .center{text-align:center}
+  .ticket .line{border-top:1px dashed #111; margin:6px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+  .tickets{display:flex; gap:12px; flex-wrap:wrap}
+
+  /* Вбудований режим (iframe/Moodle) */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+
+  @media print{
+    @page{ size:A4; margin:12mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    #printArea{ border:none; padding:0 }
+    .doc{ page-break-after:always }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Електрики · Пара 9 · аудиторно</span>
+    <h1>🟩 Вузол заземлення: огляд, вимірювання, A4-протокол + 🧾 мітка 58 мм</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>Виконати огляд вузла заземлення, виміряти <b>опір заземлювача</b> (Ω) та <b>неперервність провідника PE</b> (Ω), оцінити PASS/FAIL за навчальними лімітами, сформувати A4-протокол і мітку 58 мм.</p>
+      <p class="small">Навчальні ліміти (спрощено): <span class="chip">R<sub>заз</sub> ≤ 4 Ω</span> (TT/TN*), <span class="chip">R<sub>PE</sub> ≤ 0.5 Ω</span> (континуїтет PE). Для окремих об’єктів допускаються інші ліміти — ми задаємо їх у полі «Ліміт» для кожної точки.</p>
+    </div>
+
+    <div class="card">
+      <h2>🏷️ Об’єкт та умови</h2>
+      <div class="grid g2">
+        <div>
+          <div class="row">
+            <label class="small" style="min-width:140px">Об’єкт/адреса</label>
+            <input id="site" class="btn" value="Коледж · Майстерня" />
+          </div>
+          <div class="row" style="margin-top:8px">
+            <label class="small" style="min-width:140px">Система</label>
+            <select id="system" class="btn"><option>TN</option><option selected>TT</option></select>
+            <label class="small" style="min-width:80px">Темп. °C</label>
+            <input id="temp" class="btn" type="number" value="20" />
+          </div>
+          <div class="row" style="margin-top:8px">
+            <label class="small" style="min-width:140px">Відповідальний</label>
+            <input id="resp" class="btn" value="Студент ПІБ / група" />
+          </div>
+        </div>
+        <div>
+          <div class="row">
+            <button class="btn" type="button" onclick="seedDemo()">🔄 Приклад даних</button>
+            <button class="btn" type="button" onclick="buildProtocol()">🧩 Згенерувати A4-протокол</button>
+            <button class="btn" type="button" onclick="window.print()">🖨️ Друк / PDF</button>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" type="button" onclick="exportCSV()">📤 Експорт CSV</button>
+            <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+            <button class="btn" type="button" onclick="importCSV()">⬆️ Імпорт CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>➕ Точки вимірювання</h2>
+      <div class="grid g3">
+        <div>
+          <h3>Додати точку</h3>
+          <div class="row"><label class="small" style="min-width:120px">Тип</label>
+            <select id="ptType" class="btn">
+              <option selected>Rзаз (електрод/контур)</option>
+              <option>RPE (неперервність PE)</option>
+            </select>
+          </div>
+          <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px">Назва точки</label>
+            <input id="ptName" class="btn" value="Контур 1 · болт контрольний"/>
+          </div>
+          <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px">R вимір., Ω</label>
+            <input id="ptR" class="btn" type="number" step="0.01" value="3.2"/>
+          </div>
+          <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px">Ліміт, Ω</label>
+            <input id="ptLimit" class="btn" type="number" step="0.01" value="4"/>
+          </div>
+          <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px">Примітка</label>
+            <input id="ptNote" class="btn" placeholder="схема 62% / 3-кiлки / довжина..." />
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" onclick="addPoint()">➕ Додати</button>
+            <button class="btn" onclick="seedPoints()">🔄 2 приклади</button>
+          </div>
+        </div>
+
+        <div class="g2">
+          <div>
+            <h3>Фільтр</h3>
+            <div class="row">
+              <select id="flt" class="btn">
+                <option selected>Всі</option>
+                <option>Лише Rзаз</option>
+                <option>Лише RPE</option>
+                <option>Лише FAIL</option>
+                <option>Лише PASS</option>
+              </select>
+              <button class="btn" onclick="render()">🔎 Застосувати</button>
+            </div>
+            <p class="small">PASS, якщо <span class="mono">Rвимір ≤ Ліміт</span>.</p>
+          </div>
+          <div>
+            <h3>Сервіс</h3>
+            <div class="row">
+              <button class="btn" onclick="clearAll()">🧹 Очистити</button>
+              <button class="btn" onclick="buildLabel()">🧾 Мітка 58 мм</button>
+            </div>
+            <p class="small">Мітка будується для виділеного рядка або першого у списку.</p>
+          </div>
+        </div>
+
+        <div>
+          <h3>Вибір для мітки</h3>
+          <div class="row">
+            <select id="labelSel" class="btn"></select>
+          </div>
+          <p class="small">Вибери точку зі списку — дані підставляться в мітку 58 мм.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card printable">
+      <h2>📋 Журнал вимірювань</h2>
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>#</th><th>Тип</th><th>Назва точки</th><th>R вимір, Ω</th><th>Ліміт, Ω</th><th>Статус</th><th>Примітка</th><th>Дії</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="small">Подвійний клік — редагування клітинки. Кнопки у дії: Мітка/✖.</p>
+    </div>
+
+    <div class="card printable">
+      <h2>🧾 Мітка 58 мм «ЗАЗЕМЛЕННЯ · ПЕРЕВІРЕНО»</h2>
+      <div class="row">
+        <button class="btn" onclick="buildLabel()">🧩 Зібрати</button>
+        <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+        <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+      </div>
+      <div class="tickets" id="tickets">
+        <div id="ticket" class="ticket" aria-live="polite">
+          <h4>ЗАЗЕМЛЕННЯ · ПЕРЕВІРЕНО</h4>
+          <p class="center"><small id="t-date">Дата: —</small></p>
+          <div class="line"></div>
+          <p><b id="t-site">Об’єкт: —</b></p>
+          <p>Система: <span id="t-sys">—</span> · T= <span id="t-temp">—</span>°C</p>
+          <p>Точка: <span id="t-name">—</span></p>
+          <p>Тип/Ліміт: <span id="t-type">—</span> / <span id="t-lim">—</span> Ω</p>
+          <p>R вимір: <span id="t-R">—</span> Ω · Статус: <span id="t-status">—</span></p>
+          <div class="line"></div>
+          <p class="center"><small>Відп.: <span id="t-resp">—</span></small></p>
+          <p class="qr"><small id="t-ref">Ref: EARTH-0001</small></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card printable">
+      <h2>📄 A4-протокол (для друку/PDF)</h2>
+      <div id="printArea"></div>
+    </div>
+  </div>
+
+<script>
+  // Вбудовано у Moodle → стриманіша палітра
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // Стан
+  let points = []; // {id, type, name, R, limit, note, status}
+  const tbody = document.querySelector('#tbl tbody');
+  const labelSel = document.getElementById('labelSel');
+
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function nowStamp(){ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+  function escapeHTML(s){ return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+  // Додавання / приклади
+  function addPoint(){
+    const type = document.getElementById('ptType').value;
+    const name = document.getElementById('ptName').value.trim() || (type.startsWith('Rзаз')?'Контур':'PE-лінія');
+    const R = parseFloat(document.getElementById('ptR').value);
+    const limit = parseFloat(document.getElementById('ptLimit').value);
+    const note = document.getElementById('ptNote').value.trim();
+    if(!(R>=0) || !(limit>0)){ alert('Перевір R та Ліміт'); return; }
+    const status = (R <= limit) ? 'PASS' : 'FAIL';
+    const rec = { id: 'E'+Math.random().toString(36).slice(2,7).toUpperCase(), type, name, R:round2(R), limit:round2(limit), note, status };
+    points.push(rec); render(); rebuildLabelSel();
+  }
+
+  function seedPoints(){
+    // 2 приклади: Rзаз OK та RPE FAIL
+    document.getElementById('ptType').value='Rзаз (електрод/контур)';
+    document.getElementById('ptName').value='Контур 1 · болт контрольний';
+    document.getElementById('ptR').value=3.2; document.getElementById('ptLimit').value=4; addPoint();
+    document.getElementById('ptType').value='RPE (неперервність PE)';
+    document.getElementById('ptName').value='PE лінія · щит — розетка 01';
+    document.getElementById('ptR').value=0.72; document.getElementById('ptLimit').value=0.5; addPoint();
+  }
+
+  function seedDemo(){
+    document.getElementById('site').value='Коледж · Майстерня';
+    document.getElementById('system').value='TT';
+    document.getElementById('temp').value=20;
+    document.getElementById('resp').value='Студент ПІБ / група';
+    points = [];
+    seedPoints();
+  }
+
+  // Рендер таблиці + редагування
+  function render(){
+    const flt = document.getElementById('flt').value;
+    tbody.innerHTML='';
+    let view = points.slice();
+    if(flt==='Лише Rзаз') view = view.filter(p=>p.type.startsWith('Rзаз'));
+    if(flt==='Лише RPE') view = view.filter(p=>p.type.startsWith('RPE'));
+    if(flt==='Лише FAIL') view = view.filter(p=>p.status==='FAIL');
+    if(flt==='Лише PASS') view = view.filter(p=>p.status==='PASS');
+
+    view.forEach((p,i)=>{
+      const tr=document.createElement('tr');
+      const badge = `<span class="mono" style="padding:2px 8px;border:1px solid #223049;border-radius:999px;background:#0d1a2e;color:${p.status==='PASS'?'#22c55e':'#ef4444'}">${p.status}</span>`;
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td class="editable" data-k="type" data-id="${p.id}">${escapeHTML(p.type)}</td>
+        <td class="editable" data-k="name" data-id="${p.id}">${escapeHTML(p.name)}</td>
+        <td class="editable" data-k="R" data-id="${p.id}">${escapeHTML(p.R)}</td>
+        <td class="editable" data-k="limit" data-id="${p.id}">${escapeHTML(p.limit)}</td>
+        <td>${badge}</td>
+        <td class="editable" data-k="note" data-id="${p.id}">${escapeHTML(p.note||'')}</td>
+        <td class="mono"><button class="btn" data-act="label" data-id="${p.id}">Мітка</button> <button class="btn" data-act="del" data-id="${p.id}">✖</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  tbody.addEventListener('dblclick', (e)=>{
+    const td = e.target.closest('.editable'); if(!td) return;
+    const key = td.getAttribute('data-k'); const id = td.getAttribute('data-id');
+    const idx = points.findIndex(x=>x.id===id); const p = points[idx];
+    const input = document.createElement('input'); input.value = p[key]; input.style.width='100%'; input.style.padding='6px 8px';
+    input.addEventListener('blur', ()=>{
+      let v = input.value.trim();
+      if(key==='R' || key==='limit'){ v = round2(parseFloat(v)); if(!(v>=0)){ v = p[key]; } }
+      p[key] = v;
+      if(key==='R' || key==='limit'){ p.status = (parseFloat(p.R) <= parseFloat(p.limit)) ? 'PASS' : 'FAIL'; }
+      render(); rebuildLabelSel();
+    });
+    td.innerHTML=''; td.appendChild(input); input.focus(); input.select();
+  });
+
+  tbody.addEventListener('click', (e)=>{
+    const b = e.target.closest('button'); if(!b) return;
+    const id = b.getAttribute('data-id'); const act = b.getAttribute('data-act');
+    if(act==='del'){ points = points.filter(x=>x.id!==id); render(); rebuildLabelSel(); return; }
+    if(act==='label'){ labelSel.value = id; buildLabel(); document.getElementById('ticket').scrollIntoView({behavior:'smooth'}); }
+  });
+
+  function rebuildLabelSel(){
+    labelSel.innerHTML='';
+    points.forEach(p=>{
+      const opt=document.createElement('option'); opt.value=p.id; opt.textContent=`${p.name} (${p.status})`;
+      labelSel.appendChild(opt);
+    });
+  }
+
+  function clearAll(){ if(confirm('Очистити журнал?')){ points=[]; render(); rebuildLabelSel(); } }
+
+  // Мітка 58 мм
+  function buildLabel(){
+    const sel = labelSel.value || (points[0]?.id || '');
+    const p = points.find(x=>x.id===sel);
+    const site = document.getElementById('site').value.trim() || '—';
+    const sys = document.getElementById('system').value;
+    const temp = document.getElementById('temp').value || '—';
+    const resp = document.getElementById('resp').value.trim() || '—';
+
+    document.getElementById('t-date').textContent = `Дата: ${nowStamp()}`;
+    document.getElementById('t-site').textContent = `Об’єкт: ${site}`;
+    document.getElementById('t-sys').textContent = sys;
+    document.getElementById('t-temp').textContent = temp;
+    document.getElementById('t-resp').textContent = resp;
+
+    if(!p){
+      document.getElementById('t-name').textContent='—';
+      document.getElementById('t-type').textContent='—';
+      document.getElementById('t-lim').textContent='—';
+      document.getElementById('t-R').textContent='—';
+      document.getElementById('t-status').textContent='—';
+      document.getElementById('t-ref').textContent='Ref: EARTH-XXXX';
+      return;
+    }
+    document.getElementById('t-name').textContent = p.name;
+    document.getElementById('t-type').textContent = p.type.startsWith('Rзаз')?'Rзаз':'RPE';
+    document.getElementById('t-lim').textContent = p.limit;
+    document.getElementById('t-R').textContent = p.R;
+    document.getElementById('t-status').textContent = p.status;
+    const ref = 'EARTH-' + Math.random().toString(36).slice(2,8).toUpperCase();
+    document.getElementById('t-ref').textContent = `Ref: ${ref}`;
+  }
+
+  function downloadTXT(){
+    const lines = [];
+    lines.push('EARTHING CHECK 58mm');
+    lines.push('-------------------');
+    lines.push(document.getElementById('t-date').textContent);
+    lines.push(document.getElementById('t-site').textContent);
+    lines.push(`Система: ${document.getElementById('t-sys').textContent} · T=${document.getElementById('t-temp').textContent}°C`);
+    lines.push(`Точка: ${document.getElementById('t-name').textContent}`);
+    lines.push(`Тип/Ліміт: ${document.getElementById('t-type').textContent} / ${document.getElementById('t-lim').textContent} Ω`);
+    lines.push(`R вимір: ${document.getElementById('t-R').textContent} Ω · Статус: ${document.getElementById('t-status').textContent}`);
+    lines.push(`Відп.: ${document.getElementById('t-resp').textContent}`);
+    lines.push(document.getElementById('t-ref').textContent);
+    const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='earthing_check_58mm.txt'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // A4-протокол
+  function buildProtocol(){
+    if(!points.length){ alert('Додай хоча б одну точку'); return; }
+    const site = escapeHTML(document.getElementById('site').value.trim() || '—');
+    const sys = escapeHTML(document.getElementById('system').value);
+    const temp = escapeHTML(document.getElementById('temp').value);
+    const resp = escapeHTML(document.getElementById('resp').value.trim() || '—');
+    const passCount = points.filter(p=>p.status==='PASS').length;
+    const failCount = points.filter(p=>p.status==='FAIL').length;
+
+    const rowsHTML = points.map((p,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td>${escapeHTML(p.type)}</td>
+        <td>${escapeHTML(p.name)}</td>
+        <td>${escapeHTML(p.R)}</td>
+        <td>${escapeHTML(p.limit)}</td>
+        <td>${escapeHTML(p.status)}</td>
+        <td>${escapeHTML(p.note||'')}</td>
+      </tr>`).join('');
+
+    const docHTML = `
+      <section class="doc">
+        <h2>ПРОТОКОЛ ОГЛЯДУ ТА ВИМІРЮВАНЬ ВУЗЛА ЗАЗЕМЛЕННЯ</h2>
+        <p class="muted">Об’єкт: ${site} · Система: ${sys} · Температура: ${temp} °C · Дата: ${nowStamp()}</p>
+        <p>Відповідальний: ${resp}</p>
+        <h3>1. Результати вимірювань</h3>
+        <table>
+          <thead>
+            <tr><th>№</th><th>Тип</th><th>Назва точки</th><th>R вимір, Ω</th><th>Ліміт, Ω</th><th>Статус</th><th>Примітка</th></tr>
+          </thead>
+          <tbody>${rowsHTML}</tbody>
+        </table>
+        <h3>2. Висновок</h3>
+        <p>Позицій PASS: <span class="chip okb">${passCount}</span> · Позицій FAIL: <span class="chip badb">${failCount}</span>.</p>
+        <p>${failCount ? 'Виявлені невідповідності слід усунути та провести повторну перевірку.' : 'Стан вузла заземлення відповідає навчальним критеріям цієї роботи.'}</p>
+        <div class="sign">
+          <div>Виконавець: _____________________ / ${resp}</div>
+          <div>Керівник робіт: _____________________</div>
+        </div>
+        <p class="muted">Цей протокол згенеровано у межах навчального завдання курсу «Комп’ютеризація».</p>
+      </section>
+    `;
+    document.getElementById('printArea').innerHTML = docHTML;
+    document.getElementById('printArea').scrollIntoView({behavior:'smooth'});
+  }
+
+  // CSV I/O
+  function exportCSV(){
+    const headers = ['type','name','R_ohm','limit_ohm','status','note','site','system','temp_C','responsible','timestamp'];
+    const site = document.getElementById('site').value.trim();
+    const sys = document.getElementById('system').value;
+    const temp = document.getElementById('temp').value;
+    const resp = document.getElementById('resp').value.trim();
+    const stamp = nowStamp();
+    const csv = [headers.join(','), ...points.map(p=>[
+      p.type, p.name, p.R, p.limit, p.status, p.note||'', site, sys, temp, resp, stamp
+    ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download='earthing_protocol.csv'; a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  async function importCSV(){
+    const f=document.getElementById('file').files[0]; if(!f){ alert('Оберіть CSV'); return; }
+    const txt=await f.text();
+    const lines=txt.trim().split(/\r?\n/); if(lines.length<2){ alert('CSV порожній'); return; }
+    const headers=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());
+    const req=['type','name','R_ohm','limit_ohm','status','note']; const miss=req.filter(x=>!headers.includes(x));
+    if(miss.length){ alert('Відсутні поля: '+miss.join(', ')); return; }
+    const out=[];
+    for(let i=1;i<lines.length;i++){
+      const cells = splitCSV(lines[i]); if(!cells.length) continue;
+      const o={}; headers.forEach((h,j)=> o[h]=(cells[j]||'').replace(/^"|"$/g,''));
+      out.push({
+        id:'E'+Math.random().toString(36).slice(2,7).toUpperCase(),
+        type:o.type, name:o.name, R:round2(parseFloat(o.R_ohm||'0')), limit:round2(parseFloat(o.limit_ohm||'0')),
+        note:o.note||'', status:(o.status||((parseFloat(o.R_ohm||'0')<=parseFloat(o.limit_ohm||'0'))?'PASS':'FAIL'))
+      });
+    }
+    points = out; render(); rebuildLabelSel();
+  }
+
+  function splitCSV(line){
+    const res=[]; let cur=''; let q=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){ if(q && line[i+1]==='"'){ cur+='"'; i++; } else q=!q; }
+      else if(ch===',' && !q){ res.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    res.push(cur); return res;
+  }
+
+  function round2(x){ return Math.round(x*100)/100; }
+
+  // Авто-демо
+  seedDemo();
+</script>
+</body>
+</html>
