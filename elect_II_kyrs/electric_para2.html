@@ -1,0 +1,437 @@
+<!-- electric_para2.html
+     Пара 2 (Електрики, аудиторно): Журнал ППР · чек-листи · PASS/FAIL · експорт CSV · друк 58 мм · NFC/QR-текст
+     Повністю автономний файл для GitHub Pages та вбудовування в Moodle через <iframe>.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Електрики · Пара 2 — Журнал ППР, чек-листи, друк 58 мм, NFC/QR</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1024px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted)}
+  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:22px 0 12px}
+  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+  p{margin:8px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  @media (max-width:900px){.g2{grid-template-columns:1fr}}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+  /* Таблиця журналу */
+  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+  tbody tr:nth-child(even){background:#0b1324}
+  .status{display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px; border:1px solid #223049; background:#0d1a2e; font-size:12px}
+  .dot{width:10px; height:10px; border-radius:50%}
+  .pass .dot{background:var(--ok)} .fail .dot{background:var(--bad)} .due .dot{background:var(--warn)}
+  .btn{display:inline-block; padding:8px 12px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+
+  /* Форма додавання */
+  .field{display:flex; gap:8px; margin:6px 0}
+  .field label{min-width:140px; color:#cbd5e1}
+  .field input,.field select,.field textarea{flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb}
+  .small{font-size:12px; color:#93a3b5}
+
+  /* Квитанція 58 мм */
+  .ticket{width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
+  .ticket p{margin:2px 0; font-size:12px}
+  .ticket .center{text-align:center}
+  .ticket .line{border-top:1px dashed #111; margin:6px 0}
+  .ticket small{font-size:10px}
+  .ticket .qr{font-size:10px; word-break:break-all}
+
+  /* Вбудований режим (iframe/Moodle) */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+
+  @media print{
+    @page{ size:58mm auto; margin:4mm }
+    body{ background:#fff; color:#000 }
+    .no-print, .card:not(.printable){ display:none !important }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Електрики · Пара 2 · аудиторно</span>
+    <h1>🛠️ Журнал ППР · ✅/❌ чек-листи · 🧾 друк 58 мм · 🔗 NFC/QR</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>Створити цифровий журнал ППР електрооб’єктів, проводити перевірку за чек-листом, фіксувати статус <b>PASS/FAIL</b>, друкувати «Мітку обслуговування 58 мм» і генерувати <b>NFC/QR-рядок</b> для швидкого доступу.</p>
+      <div class="row">
+        <button class="btn" type="button" onclick="seedDemo()">🔄 Заповнити приклад</button>
+        <button class="btn" type="button" onclick="exportCSV()">📤 Експорт CSV</button>
+      </div>
+      <p class="small">Порада: після заняття завантаж CSV у спільну папку групи. Назва: <span class="mono">ГРУПА_Прізвище_ППР.csv</span></p>
+    </div>
+
+    <!-- Форма додавання об'єкта -->
+    <div class="card">
+      <h2>➕ Додати об’єкт до журналу</h2>
+      <div class="field">
+        <label for="objName">Об’єкт</label>
+        <input id="objName" type="text" value="ЩО-1 / Автомат B16" />
+      </div>
+      <div class="field">
+        <label for="objPlace">Місце</label>
+        <input id="objPlace" type="text" value="Майстерня" />
+      </div>
+      <div class="field">
+        <label for="period">Періодичність</label>
+        <select id="period">
+          <option value="1">1 міс</option>
+          <option value="3" selected>3 міс</option>
+          <option value="6">6 міс</option>
+          <option value="12">12 міс</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="resp">Відповідальний</label>
+        <input id="resp" type="text" value="ПІБ / група" />
+      </div>
+      <div class="row">
+        <button class="btn" type="button" onclick="addObject()">➕ Додати в таблицю</button>
+      </div>
+      <p class="small">Після додавання виконай перевірку (чек-лист) і зафіксуй результат.</p>
+    </div>
+
+    <!-- Журнал -->
+    <div class="card printable">
+      <h2>📋 Журнал ППР</h2>
+      <table id="journal">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Об’єкт</th>
+            <th>Місце</th>
+            <th>Період, міс</th>
+            <th>Відповідальний</th>
+            <th>Остання дата</th>
+            <th>Наступна дата</th>
+            <th>Статус</th>
+            <th>Дії</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="small">Статуси: <span class="status pass"><span class="dot"></span>PASS</span> · <span class="status fail"><span class="dot"></span>FAIL</span> · <span class="status due"><span class="dot"></span>DUE</span> (коли прострочено/сьогодні).</p>
+    </div>
+
+    <!-- Чек-лист + друк -->
+    <div class="card">
+      <h2>✅ Чек-лист перевірки · Мітка обслуговування 58 мм</h2>
+      <div class="grid g2">
+        <div>
+          <h3>1) Обери рядок журналу й виконай чек-лист</h3>
+          <div id="selectedInfo" class="small">Обрано: —</div>
+          <div id="checklist" style="margin-top:8px">
+            <label><input type="checkbox" class="cl" data-name="Вимкнення живлення" /> Вимкнення живлення (LOTO)</label><br/>
+            <label><input type="checkbox" class="cl" data-name="Візуальний огляд" /> Візуальний огляд (корпус, клеми, позначення)</label><br/>
+            <label><input type="checkbox" class="cl" data-name="Затягування контактів" /> Затягування контактів (за потреби)</label><br/>
+            <label><input type="checkbox" class="cl" data-name="Перевірка захисту" /> Перевірка номіналу захисту (автомат/ПЗВ)</label><br/>
+            <label><input type="checkbox" class="cl" data-name="Тест індикації" /> Тест індикації/маркування</label><br/>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" type="button" onclick="markPass()">✅ PASS</button>
+            <button class="btn" type="button" onclick="markFail()">❌ FAIL</button>
+          </div>
+          <p class="small">Під час FAIL додай примітку в полі нижче перед друком.</p>
+          <div class="field" style="margin-top:8px">
+            <label for="note">Примітка</label>
+            <input id="note" type="text" placeholder="Напр.: Заміна автомата до 20.10.2025" />
+          </div>
+        </div>
+
+        <div>
+          <h3>2) Попередній перегляд мітки 58 мм</h3>
+          <div id="ticket" class="ticket" aria-live="polite">
+            <h4>ППР · МІТКА ОБСЛУГОВУВАННЯ</h4>
+            <p class="center"><small id="t-date">Дата: —</small></p>
+            <div class="line"></div>
+            <p><b id="t-obj">Об’єкт: —</b></p>
+            <p>Місце: <span id="t-place">—</span></p>
+            <p>Перiодичнiсть: <span id="t-per">—</span> міс</p>
+            <p>Відповідальний: <span id="t-resp">—</span></p>
+            <p>Статус: <span id="t-status">—</span></p>
+            <p id="t-note-wrap" style="display:none">Примітка: <span id="t-note">—</span></p>
+            <div class="line"></div>
+            <p>Остання: <span id="t-last">—</span></p>
+            <p>Наступна: <span id="t-next">—</span></p>
+            <div class="line"></div>
+            <p class="qr"><small id="t-nfc">NFC/QR: —</small></p>
+            <p class="center"><small>Підпис: ____________</small></p>
+          </div>
+          <div class="row no-print" style="margin-top:8px">
+            <button class="btn" type="button" onclick="buildTicket()">🧩 Зібрати мітку</button>
+            <button class="btn" type="button" onclick="window.print()">🖨️ Друк 58 мм</button>
+            <button class="btn" type="button" onclick="downloadTXT()">📥 TXT</button>
+          </div>
+          <p class="small">NFC/QR-рядок нижче можна <b>записати на NFC-мітку</b> стороннім додатком або надрукувати у вигляді QR (онлайн-генератором).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- NFC/QR генератор -->
+    <div class="card">
+      <h2>🔗 NFC/QR-ідентифікатор</h2>
+      <p class="small">Рекомендуємо формат URL, що веде на цю сторінку з якорем об’єкта.</p>
+      <div class="field">
+        <label for="nfcText">Текст для запису на NFC / QR</label>
+        <input id="nfcText" type="text" value="https://serawww7.github.io/edlab/electric_para2.html#asset=ELC-001" />
+      </div>
+      <div class="row">
+        <button class="btn" type="button" onclick="genNFC()">🔁 Згенерувати з обраного рядка</button>
+        <button class="btn" type="button" onclick="copyNFC()">📋 Скопіювати</button>
+      </div>
+      <p class="small">Щоб закодувати NFC: відкрий додаток для запису NFC → «Write» → встав цей рядок → торкнися міткою телефона.</p>
+    </div>
+  </div>
+
+<script>
+  // Режим «вбудовано у Moodle»
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const tbody = document.querySelector('#journal tbody');
+  let data = []; // {id, name, place, period, resp, lastISO, nextISO, status}
+
+  function pad(n){ return n.toString().padStart(2,'0'); }
+  function toISO(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+  function addMonths(date, m){
+    const d = new Date(date.getTime());
+    d.setMonth(d.getMonth() + m);
+    return d;
+  }
+  function todayISO(){ return toISO(new Date()); }
+
+  function render(){
+    tbody.innerHTML = '';
+    const today = new Date(todayISO());
+    data.forEach((row, i)=>{
+      const tr = document.createElement('tr');
+
+      const next = new Date(row.nextISO);
+      let statusClass = row.status === 'PASS' ? 'pass' : (row.status === 'FAIL' ? 'fail' : 'due');
+      if (row.status === 'PASS' && next <= today) statusClass = 'due';
+
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td>${row.name}</td>
+        <td>${row.place}</td>
+        <td>${row.period}</td>
+        <td>${row.resp}</td>
+        <td>${row.lastISO}</td>
+        <td>${row.nextISO}</td>
+        <td><span class="status ${statusClass}"><span class="dot"></span>${statusClass.toUpperCase()}</span></td>
+        <td class="mono">
+          <button class="btn" data-act="select" data-id="${row.id}">Обрати</button>
+          <button class="btn" data-act="pass" data-id="${row.id}">PASS</button>
+          <button class="btn" data-act="fail" data-id="${row.id}">FAIL</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function addObject(){
+    const name = document.getElementById('objName').value.trim();
+    const place= document.getElementById('objPlace').value.trim();
+    const period = parseInt(document.getElementById('period').value,10);
+    const resp = document.getElementById('resp').value.trim();
+    if(!name || !place || !resp){ alert('Заповніть Об’єкт, Місце та Відповідального'); return; }
+    const last = new Date(); // сьогодні як поточна перевірка
+    const next = addMonths(last, period);
+    const row = {
+      id: 'ELC-' + Math.random().toString(36).slice(2,7).toUpperCase(),
+      name, place, period, resp,
+      lastISO: toISO(last),
+      nextISO: toISO(next),
+      status: 'PASS'
+    };
+    data.push(row);
+    render();
+    selectRow(row.id);
+  }
+
+  function seedDemo(){
+    data = [
+      {id:'ELC-001', name:'ЩО-1 / Автомат B16', place:'Майстерня', period:3, resp:'Студент 1', lastISO:todayISO(), nextISO:toISO(addMonths(new Date(),3)), status:'PASS'},
+      {id:'ELC-002', name:'Подовжувач №2', place:'Лабораторія', period:1, resp:'Студент 2', lastISO:todayISO(), nextISO:toISO(addMonths(new Date(),1)), status:'PASS'}
+    ];
+    render();
+    selectRow('ELC-001');
+  }
+
+  // Вибір рядка
+  let currentId = null;
+  function selectRow(id){
+    const row = data.find(r=>r.id===id);
+    if(!row) return;
+    currentId = id;
+    document.getElementById('selectedInfo').textContent = `Обрано: ${row.name} (${row.id})`;
+    buildTicket(); // оновити попередній перегляд
+  }
+
+  tbody.addEventListener('click', (e)=>{
+    const b = e.target.closest('button');
+    if(!b) return;
+    const id = b.getAttribute('data-id');
+    const act = b.getAttribute('data-act');
+    const row = data.find(r=>r.id===id);
+    if(!row) return;
+
+    if(act==='select'){ selectRow(id); return; }
+    if(act==='pass'){
+      row.status = 'PASS';
+      row.lastISO = todayISO();
+      row.nextISO = toISO(addMonths(new Date(), row.period));
+      render(); selectRow(id);
+    }
+    if(act==='fail'){
+      row.status = 'FAIL';
+      row.lastISO = todayISO();
+      row.nextISO = toISO(addMonths(new Date(), row.period)); // план наступного огляду
+      render(); selectRow(id);
+    }
+  });
+
+  // Маркування через чек-лист
+  function markPass(){
+    if(!currentId){ alert('Спочатку оберіть рядок журналу'); return; }
+    const row = data.find(r=>r.id===currentId);
+    row.status = 'PASS';
+    row.lastISO = todayISO();
+    row.nextISO = toISO(addMonths(new Date(), row.period));
+    render(); selectRow(currentId);
+  }
+  function markFail(){
+    if(!currentId){ alert('Спочатку оберіть рядок журналу'); return; }
+    const row = data.find(r=>r.id===currentId);
+    row.status = 'FAIL';
+    row.lastISO = todayISO();
+    row.nextISO = toISO(addMonths(new Date(), row.period));
+    render(); selectRow(currentId);
+  }
+
+  // Побудова мітки 58 мм
+  function buildTicket(){
+    const now = new Date(); const stamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    document.getElementById('t-date').textContent = `Дата: ${stamp}`;
+
+    const row = data.find(r=>r.id===currentId);
+    if(!row){
+      document.getElementById('t-obj').textContent = 'Об’єкт: —';
+      document.getElementById('t-place').textContent = '—';
+      document.getElementById('t-per').textContent = '—';
+      document.getElementById('t-resp').textContent = '—';
+      document.getElementById('t-status').textContent = '—';
+      document.getElementById('t-last').textContent = '—';
+      document.getElementById('t-next').textContent = '—';
+      document.getElementById('t-note-wrap').style.display = 'none';
+      document.getElementById('t-nfc').textContent = 'NFC/QR: —';
+      return;
+    }
+    const note = document.getElementById('note').value.trim();
+
+    document.getElementById('t-obj').textContent = `Об’єкт: ${row.name}`;
+    document.getElementById('t-place').textContent = row.place;
+    document.getElementById('t-per').textContent = row.period;
+    document.getElementById('t-resp').textContent = row.resp;
+    document.getElementById('t-status').textContent = row.status;
+    document.getElementById('t-last').textContent = row.lastISO;
+    document.getElementById('t-next').textContent = row.nextISO;
+
+    if(note){
+      document.getElementById('t-note').textContent = note;
+      document.getElementById('t-note-wrap').style.display = '';
+    }else{
+      document.getElementById('t-note-wrap').style.display = 'none';
+    }
+
+    const url = `https://serawww7.github.io/edlab/electric_para2.html#asset=${row.id}`;
+    document.getElementById('t-nfc').textContent = `NFC/QR: ${url}`;
+    document.getElementById('nfcText').value = url;
+  }
+
+  function downloadTXT(){
+    const lines = [];
+    lines.push('PPR LABEL 58mm');
+    lines.push('----------------');
+    lines.push(document.getElementById('t-date').textContent);
+    lines.push(document.getElementById('t-obj').textContent);
+    lines.push(`Місце: ${document.getElementById('t-place').textContent}`);
+    lines.push(`Періодичність: ${document.getElementById('t-per').textContent} міс`);
+    lines.push(`Відповідальний: ${document.getElementById('t-resp').textContent}`);
+    lines.push(`Статус: ${document.getElementById('t-status').textContent}`);
+    const noteWrap = document.getElementById('t-note-wrap');
+    if(noteWrap.style.display!=='none'){ lines.push(`Примітка: ${document.getElementById('t-note').textContent}`); }
+    lines.push(`Остання: ${document.getElementById('t-last').textContent}`);
+    lines.push(`Наступна: ${document.getElementById('t-next').textContent}`);
+    lines.push(document.getElementById('t-nfc').textContent);
+
+    const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'ppr_label_58mm.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function exportCSV(){
+    const headers = ['id','object','place','period_months','responsible','last_date','next_date','status'];
+    const rows = data.map(r=>[r.id, r.name, r.place, r.period, r.resp, r.lastISO, r.nextISO, r.status]);
+    const csv = [headers.join(','), ...rows.map(a=>a.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'journal_ppr.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function genNFC(){
+    if(!currentId){ alert('Оберіть рядок журналу'); return; }
+    const row = data.find(r=>r.id===currentId);
+    const url = `https://serawww7.github.io/edlab/electric_para2.html#asset=${row.id}`;
+    document.getElementById('nfcText').value = url;
+    buildTicket();
+  }
+  function copyNFC(){
+    const el = document.getElementById('nfcText');
+    el.select(); el.setSelectionRange(0, el.value.length);
+    document.execCommand('copy');
+    alert('Скопійовано у буфер обміну.');
+  }
+
+  // Якщо прийшли з #asset=... — просто виділимо та підсвітимо (даних немає, бо сторінка без бекенду)
+  (function(){
+    const h = location.hash || '';
+    const m = h.match(/asset=([A-Z0-9\-]+)/i);
+    if(m){ document.getElementById('nfcText').value = location.href; }
+  })();
+
+  // Старт
+  seedDemo();
+</script>
+</body>
+</html>
