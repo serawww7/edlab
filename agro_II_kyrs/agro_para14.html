@@ -1,0 +1,365 @@
+<!-- agro_para14.html
+     ПАРА 14 (аудиторно) для агрономів
+     Тема: НОРМА ВИСІВУ — від цільової густоти до кг/га, насіння/м, кроку між насінинами та витрати кг/хв
+     Фокус: телефони/ПК; без бібліотек; усе локально. Контраст темних клітинок → світлий текст.
+     Результат: розрахунок для кількох полів/сортів, план мішків, калібрування (кг/хв), CSV.
+
+     Формули (навчально):
+     • Необхідно насінин/м²: N = Ptarget / ((G_lab/100) * (E_field/100))
+     • Норма, кг/га: Rate = N * TKW * 0.01  (де TKW — г/1000 насінин)
+     • Насіння/м рядка: n_m = N * Row(m)
+     • Крок між насінинами: s(cm) = 100 / n_m
+     • Потік насіння, кг/хв: Flow = Rate * V(km/h) * W(m) / 600
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 14 — Норма висіву: кг/га, насіння/м, крок, кг/хв, мішки</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .small{font-size:12px; color:#9fb0c8}
+  .muted{color:#93a3b5}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)}
+  .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
+  .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+
+  input[type="text"], input[type="number"]{
+    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
+  }
+
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+  html.embedded .box{background:#f8fafc; color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+
+  @media print{
+    @page{ margin:12mm }
+    .no-print{ display:none !important }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 14 · аудиторно · агрономи</span>
+    <h1>🌱 Норма висіву: від цільової густоти до налаштування сівалки</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        За пару студенти для кількох полів/сортів обчислюють <b>необхідну норму висіву (кг/га)</b> з урахуванням
+        <b>М1000 (TKW)</b>, <b>схожості</b> та <b>польової схожості</b>, отримують <b>насіння/м рядка</b>,
+        <b>крок між насінинами</b> та <b>потік насіння (кг/хв)</b> для калібрування. На виході — <b>план мішків</b> і <b>CSV</b>.
+      </p>
+      <p class="small">Памʼятка: польова схожість (E_field) враховує втрати від ґрунтових умов/шкідників і зазвичай <span class="mono">0.75–0.9</span>.</p>
+    </div>
+
+    <!-- ПАРАМЕТРИ СІВАЛКИ ТА ЛОГІСТИКИ -->
+    <div class="card">
+      <h2>⚙️ Сівалка та логістика</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Сівалка</h3>
+          <div class="row">
+            <div style="flex:1"><label>Робоча ширина W, м</label><input id="W" type="number" step="0.01" value="6.0"></div>
+            <div style="flex:1"><label>Міжряддя, см</label><input id="rowCm" type="number" step="0.1" value="15.0"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Швидкість, км/год</label><input id="V" type="number" step="0.1" value="8.5"></div>
+            <div style="flex:1"><label>Місткість бункера, кг</label><input id="hopper" type="number" step="1" value="3000"></div>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Мішки/біг-беги</h3>
+          <div class="row">
+            <div style="flex:1"><label>Вага мішка, кг</label><input id="bag" type="number" step="1" value="50"></div>
+            <div style="flex:1"><label>Дод. запас, %</label><input id="reserve" type="number" step="1" value="3"></div>
+          </div>
+          <p class="small">Запас покриває налаштування та розгін/зупинки.</p>
+        </div>
+
+        <div class="box">
+          <h3>Керування</h3>
+          <div class="row">
+            <button class="btn" onclick="addRow()">➕ Додати поле/сорт</button>
+            <button class="btn" onclick="preset()">🧪 Приклад</button>
+            <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+            <button class="btn" onclick="copyCSV()">📋 CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ТАБЛИЦЯ ПОЛІВ/СОРТІВ -->
+    <div class="card">
+      <h2>🧱 Поля / сорти</h2>
+      <div style="overflow:auto">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Поле</th>
+              <th>Культура/Сорт</th>
+              <th>Площа, га</th>
+              <th>Ціль рослин, шт/м²</th>
+              <th>TKW (г/1000)</th>
+              <th>Схожість, %</th>
+              <th>Польова схожість, %</th>
+              <th class="dark">Насінин/м²</th>
+              <th class="dark">кг/га</th>
+              <th class="dark">Насінин/м</th>
+              <th class="dark">Крок, см</th>
+              <th class="dark">кг на поле</th>
+              <th class="dark">Мішки</th>
+              <th class="dark">кг/хв (калібр.)</th>
+              <th>Примітка</th>
+            </tr>
+          </thead>
+          <tbody id="body"></tbody>
+          <tfoot>
+            <tr>
+              <th class="dark" colspan="12">Разом</th>
+              <th class="dark" id="sumKg">—</th>
+              <th class="dark" id="sumBags">—</th>
+              <th class="dark" id="sumFlow">—</th>
+              <th></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="csv" class="out" style="margin-top:8px">—</div>
+      <p class="small">CSV: <span class="mono"># | Поле | Культура | Площа_га | Ціль_штм2 | TKW | Схожість_% | Польова_% | Насінин_м2 | кг_га | Насінин_м | Крок_см | кг_поле | Мішки | кг_хв | Примітка</span></p>
+      <p class="small muted">Контраст забезпечено: темні клітинки (<span class="mono">.dark</span>) мають світлий текст.</p>
+    </div>
+
+    <!-- ПІДСУМКИ та ПЛАН ЗАВАНТАЖЕНЬ -->
+    <div class="card">
+      <h2>📊 Підсумки та завантаження</h2>
+      <div class="grid g2">
+        <div class="box">
+          <h3>Сумарно</h3>
+          <p>Насіння разом: <b><span id="sumKg2">—</span> кг</b> · <b><span id="sumBags2">—</span> міш.</b></p>
+          <p>Орієнтовний потік: <b><span id="flowNote">—</span></b></p>
+        </div>
+        <div class="box">
+          <h3>План завантажень</h3>
+          <p>Місткість бункера: <b><span id="Hcap">—</span></b></p>
+          <p>Орієнтовно: <b><span id="Loads">—</span> завантажень</b></p>
+          <div id="LoadsPlan" class="out">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ХІД РОБОТИ, ОЦІНЮВАННЯ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+      <ol>
+        <li>Внеси для кожного поля: площу, TKW, лабораторну та польову схожість, цільову густоту.</li>
+        <li>Перевір <b>кг/га</b>, <b>насінин/м</b> і <b>крок</b>. За потреби змінюй цілі й параметри.</li>
+        <li>Звір <b>кг/хв</b> для калібрування (прокрутка коліс/котушок) за заданої швидкості та ширини.</li>
+        <li>Скопіюй CSV у Google Sheets (аркуш <span class="mono">SeedingRate</span>) і додай фото з калібрування.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Коректний розрахунок норми (кг/га) з урахуванням TKW, схожості та польової схожості</td><td>4</td></tr>
+          <tr><td>Розрахунок насінин/м і кроку з логічними поясненнями</td><td>3</td></tr>
+          <tr><td>Калібрування: обґрунтований потік кг/хв і план мішків/завантажень</td><td>2</td></tr>
+          <tr><td>CSV у Sheets + короткі висновки</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">🌾 М1000 (TKW)</p><p class="pill">🌱 Густота</p><p class="pill">📏 Крок</p><p class="pill">⚙️ Калібрування</p>
+    </div>
+  </div>
+
+<script>
+  // Вбудований режим (для Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const bodyEl = document.getElementById('body');
+  const csvEl  = document.getElementById('csv');
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2) => Number((+n).toFixed(d));
+
+  function addRow(sample){
+    const def = {
+      field:'F-01', crop:'Пшениця/Сорт-A', area: 25.0,
+      P: 450, TKW: 45, G: 92, Ef: 85, note:''
+    };
+    const s = Object.assign(def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.field}"></td>
+      <td><input type="text" value="${s.crop}"></td>
+      <td><input type="number" step="0.01" value="${s.area}"></td>
+      <td><input type="number" step="1" value="${s.P}"></td>
+      <td><input type="number" step="0.1" value="${s.TKW}"></td>
+      <td><input type="number" step="0.1" value="${s.G}"></td>
+      <td><input type="number" step="0.1" value="${s.Ef}"></td>
+      <td class="dark N">—</td>
+      <td class="dark KgHa">—</td>
+      <td class="dark perM">—</td>
+      <td class="dark stepCm">—</td>
+      <td class="dark KgField">—</td>
+      <td class="dark Bags">—</td>
+      <td class="dark Flow">—</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyEl.appendChild(tr);
+    reindex();
+  }
+
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  function recalc(){
+    const W = parseFloat(byId('W').value||'0');
+    const rowCm = parseFloat(byId('rowCm').value||'15');
+    const rowM = rowCm/100;
+    const V = parseFloat(byId('V').value||'0');
+    const bag = Math.max(1, parseFloat(byId('bag').value||'50'));
+    const reserve = Math.max(0, parseFloat(byId('reserve').value||'0'));
+    const hopper = parseFloat(byId('hopper').value||'0');
+
+    let sumKg=0, sumBags=0, sumFlow=0;
+
+    [...bodyEl.querySelectorAll('tr')].forEach(tr=>{
+      const area  = parseFloat(tr.children[3].querySelector('input').value||'0');
+      const P     = parseFloat(tr.children[4].querySelector('input').value||'0');     // ціль рослин/м²
+      const TKW   = parseFloat(tr.children[5].querySelector('input').value||'0');     // г/1000
+      const G     = parseFloat(tr.children[6].querySelector('input').value||'0');     // %
+      const Ef    = parseFloat(tr.children[7].querySelector('input').value||'0');     // %
+
+      const germ = (G/100) * (Ef/100);
+      const N = germ>0 ? (P / germ) : 0;                // насінин/м²
+      const KgHa = N * TKW * 0.01;                      // кг/га (див. шапку)
+      const perM = N * rowM;                            // насінин/м
+      const stepCm = perM>0 ? (100 / perM) : 0;         // см
+      const KgField = KgHa * area * (1 + reserve/100);  // з запасом
+      const Bags = KgField>0 ? Math.ceil(KgField / bag) : 0;
+
+      // Потік для калібрування (кг/хв): Rate*V*W/600
+      const Flow = (KgHa * V * W) / 600;
+
+      tr.querySelector('.N').textContent      = rnd(N,1);
+      tr.querySelector('.KgHa').textContent   = rnd(KgHa,1);
+      tr.querySelector('.perM').textContent   = rnd(perM,2);
+      tr.querySelector('.stepCm').textContent = rnd(stepCm,1);
+      tr.querySelector('.KgField').textContent= rnd(KgField,0);
+      tr.querySelector('.Bags').textContent   = Bags;
+      tr.querySelector('.Flow').textContent   = rnd(Flow,2);
+
+      sumKg += KgField; sumBags += Bags; sumFlow += Flow;
+    });
+
+    byId('sumKg').textContent   = rnd(sumKg,0);
+    byId('sumBags').textContent = sumBags;
+    byId('sumFlow').textContent = rnd(sumFlow,2);
+
+    byId('sumKg2').textContent   = rnd(sumKg,0);
+    byId('sumBags2').textContent = sumBags;
+    byId('flowNote').textContent = `На швидкості ${V} км/год і ширині ${W} м сумарний потік ≈ ${rnd(sumFlow,2)} кг/хв`;
+
+    // Завантаження
+    byId('Hcap').textContent = hopper ? `${hopper} кг` : '—';
+    let loads='—', plan='—';
+    if(hopper>0 && sumKg>0){
+      const L = Math.max(1, Math.ceil(sumKg / hopper));
+      loads = L;
+      const per = sumKg / L;
+      plan = `Разом насіння ≈ ${rnd(sumKg,0)} кг\nМісткість ${hopper} кг → ${L} завантажень × ~${rnd(per,0)} кг`;
+    }
+    byId('Loads').textContent = loads;
+    byId('LoadsPlan').textContent = plan;
+
+    buildCSV();
+  }
+
+  function buildCSV(){
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx  = tr.querySelector('.idx').textContent.trim();
+      const field= tr.children[1].querySelector('input').value.trim();
+      const crop = tr.children[2].querySelector('input').value.trim();
+      const area = tr.children[3].querySelector('input').value.trim();
+      const P    = tr.children[4].querySelector('input').value.trim();
+      const TKW  = tr.children[5].querySelector('input').value.trim();
+      const G    = tr.children[6].querySelector('input').value.trim();
+      const Ef   = tr.children[7].querySelector('input').value.trim();
+      const N    = tr.querySelector('.N').textContent.trim();
+      const KgHa = tr.querySelector('.KgHa').textContent.trim();
+      const perM = tr.querySelector('.perM').textContent.trim();
+      const step = tr.querySelector('.stepCm').textContent.trim();
+      const KgFld= tr.querySelector('.KgField').textContent.trim();
+      const Bags = tr.querySelector('.Bags').textContent.trim();
+      const Flow = tr.querySelector('.Flow').textContent.trim();
+      const note = tr.children[15].querySelector('input').value.trim();
+      return [idx,field,crop,area,P,TKW,G,Ef,N,KgHa,perM,step,KgFld,Bags,Flow,note].join(' | ');
+    });
+    csvEl.textContent = lines.join('\n') || '—';
+  }
+
+  function copyCSV(){
+    const t = csvEl.textContent.trim();
+    if(!t || t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+
+  function preset(){
+    bodyEl.innerHTML='';
+    addRow({field:'F-01', crop:'Пшениця/Сорт-A', area:24.5, P:450, TKW:45, G:92, Ef:85});
+    addRow({field:'F-02', crop:'Пшениця/Сорт-B', area:18.2, P:420, TKW:42, G:94, Ef:88});
+    addRow({field:'F-03', crop:'Ячмінь/Сорт-C',  area:30.0, P:380, TKW:48, G:90, Ef:82});
+    recalc();
+  }
+
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // Ініціалізація
+  (function init(){ addRow(); addRow(); recalc(); })();
+</script>
+</body>
+</html>
