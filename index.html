@@ -1,10 +1,13 @@
 <!-- index.html — домашня сторінка EDLab на GitHub Pages
-     ОНОВЛЕНО:
-     - Шапка: "Цифрові пари для ОПП коледжу" (без згадки кількості)
-     - Додано спеціальність "Електрики" (Електроенергетика, електротехніка та електромеханіка)
-     - Виразний, відокремлений футер з юридичним блоком і посиланнями
-     - Стилі винесені у /assets/edlab.css
-     Відкрити: https://serawww7.github.io/edlab/
+     НОВЕ:
+     • Автоскан усіх папок з роботами через GitHub API (Contents)
+     • Динамічне побудування карток занять у секціях спеціальностей
+     • Кнопка ⬅️ Закрити прев’ю (згортання фрейму)
+     • Fallback на випадок rate limit/мережевих збоїв
+
+     Перевірено під Moodle (iframe), GitHub Pages, мобільні.
+
+     Якщо треба: змініть нижче масив SECTIONS під реальні назви папок.
 -->
 <!DOCTYPE html>
 <html lang="uk">
@@ -16,6 +19,24 @@
 <meta name="color-scheme" content="light dark" />
 <link rel="preload" href="assets/edlab.css" as="style">
 <link rel="stylesheet" href="assets/edlab.css" />
+<style>
+  /* Невеликий локальний акцент для прев’ю-контейнера і кнопки «Закрити» */
+  .tester { border:1px solid #223049; border-radius:12px; background:#0d1a2e; padding:10px }
+  .tester iframe { width:100%; height:70vh; border:0; background:#fff; display:block }
+  .row { display:flex; gap:10px; flex-wrap:wrap }
+  .btn.close { background:#1e293b; border-color:#334155 }
+  .lessons-grid { display:grid; grid-template-columns:1fr; gap:12px }
+  .lesson { display:flex; gap:12px; border:1px solid var(--line, #223049); border-radius:12px; padding:10px; background:var(--card, #0f172a) }
+  .lesson .thumb { font-size:22px; width:40px; display:flex; align-items:center; justify-content:center }
+  .lesson .meta b { display:block }
+  .tag { display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid #20314a; background:#0c182a; color:#e5edfb; font-size:12px; margin-right:6px }
+  .muted { color:#93a3b5 }
+  .specs { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 16px }
+  .spec { text-decoration:none; border:1px solid var(--line, #223049); padding:8px 10px; border-radius:10px }
+  .section-header { display:flex; align-items:center; gap:8px }
+  .section-header .pill { padding:2px 8px; border-radius:999px; border:1px solid #20314a; background:#0c182a; font-size:12px }
+  .err { color:#fca5a5 }
+</style>
 </head>
 <body>
   <div class="wrap">
@@ -40,16 +61,109 @@
       <a class="spec s2" href="#agro"><span class="dot" aria-hidden="true"></span>Агрономія</a>
       <a class="spec s3" href="#mech"><span class="dot" aria-hidden="true"></span>Механізація (механіки)</a>
       <a class="spec s4" href="#g19"><span class="dot" aria-hidden="true"></span>Будівництво та цивільна інженерія (G19)</a>
-      <a class="spec s5" href="#zoot"><span class="dot" aria-hidden="true"></span>Технології тваринництва</a>
+      <a class="spec s5" href="#tech"><span class="dot" aria-hidden="true"></span>Технології тваринництва</a>
       <a class="spec s6" href="#electric"><span class="dot" aria-hidden="true"></span>Електроенергетика, електротехніка та електромеханіка</a>
     </nav>
 
-    <div class="grid g2" id="agro" style="margin-top:16px">
-      <!-- Лівий стовпець: уроки + прев'ю -->
-      <div class="card">
+    <!-- АГРО -->
+    <section id="agro" class="card" style="margin-top:16px">
+      <div class="section-header">
         <h2>🌾 Агрономія — уроки</h2>
+        <span class="pill" id="agro-count">завантаження…</span>
+      </div>
+      <div class="lessons-grid" id="agro-list"></div>
 
-        <!-- ПАРА 1 -->
+      <div id="agro-preview" class="tester" style="margin-top:14px; display:none">
+        <div class="row">
+          <button class="btn close" type="button" onclick="closePreview('agro')">⬅️ Закрити прев’ю</button>
+        </div>
+        <iframe id="agro-frame" src="about:blank"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-downloads"
+                referrerpolicy="no-referrer"></iframe>
+      </div>
+      <p class="muted" id="agro-note" style="display:none; margin-top:6px">Порада: «Згенерувати iFrame» дасть готовий код під Moodle.</p>
+    </section>
+
+    <!-- МЕХ -->
+    <section id="mech" class="card" style="margin-top:16px">
+      <div class="section-header">
+        <h2>🚜 Механізація (механіки) — уроки</h2>
+        <span class="pill" id="mech-count">завантаження…</span>
+      </div>
+      <div class="lessons-grid" id="mech-list"></div>
+
+      <div id="mech-preview" class="tester" style="margin-top:14px; display:none">
+        <div class="row">
+          <button class="btn close" type="button" onclick="closePreview('mech')">⬅️ Закрити прев’ю</button>
+        </div>
+        <iframe id="mech-frame" src="about:blank"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-downloads"
+                referrerpolicy="no-referrer"></iframe>
+      </div>
+      <p class="muted" id="mech-note" style="display:none; margin-top:6px">Готові 16 ЛПЗ для механіків — рендеряться автоматично.</p>
+    </section>
+
+    <!-- G19 -->
+    <section id="g19" class="card" style="margin-top:16px">
+      <div class="section-header">
+        <h2>🛠️ Будівництво та цивільна інженерія (G19) — уроки</h2>
+        <span class="pill" id="g19-count">завантаження…</span>
+      </div>
+      <div class="lessons-grid" id="g19-list"></div>
+
+      <div id="g19-preview" class="tester" style="margin-top:14px; display:none">
+        <div class="row">
+          <button class="btn close" type="button" onclick="closePreview('g19')">⬅️ Закрити прев’ю</button>
+        </div>
+        <iframe id="g19-frame" src="about:blank"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-downloads"
+                referrerpolicy="no-referrer"></iframe>
+      </div>
+      <p class="muted" id="g19-note" style="display:none; margin-top:6px">QGIS, паспортизація, журнали робіт — все тут, як тільки додано у папку.</p>
+    </section>
+
+    <!-- ТЕХНОЛОГІЇ ТВАРИННИЦТВА -->
+    <section id="tech" class="card" style="margin-top:16px">
+      <div class="section-header">
+        <h2>🐄 Технології виробництва продукції тваринництва — уроки</h2>
+        <span class="pill" id="tech-count">завантаження…</span>
+      </div>
+      <div class="lessons-grid" id="tech-list"></div>
+
+      <div id="tech-preview" class="tester" style="margin-top:14px; display:none">
+        <div class="row">
+          <button class="btn close" type="button" onclick="closePreview('tech')">⬅️ Закрити прев’ю</button>
+        </div>
+        <iframe id="tech-frame" src="about:blank"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-downloads"
+                referrerpolicy="no-referrer"></iframe>
+      </div>
+      <p class="muted" id="tech-note" style="display:none; margin-top:6px">HACCP, SPC, Traceability, Mock Recall — автолістинг з папки.</p>
+    </section>
+
+    <!-- ЕЛЕКТРИКИ -->
+    <section id="electric" class="card" style="margin-top:16px">
+      <div class="section-header">
+        <h2>⚡ Електроенергетика, електротехніка та електромеханіка — уроки</h2>
+        <span class="pill" id="electric-count">завантаження…</span>
+      </div>
+      <div class="lessons-grid" id="electric-list"></div>
+
+      <div id="electric-preview" class="tester" style="margin-top:14px; display:none">
+        <div class="row">
+          <button class="btn close" type="button" onclick="closePreview('electric')">⬅️ Закрити прев’ю</button>
+        </div>
+        <iframe id="electric-frame" src="about:blank"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-downloads"
+                referrerpolicy="no-referrer"></iframe>
+      </div>
+      <p class="muted" id="electric-note" style="display:none; margin-top:6px">Лаби з вимірювань, чек-листи, маркування — підтягнуться з папки.</p>
+    </section>
+
+    <!-- ІНФОРМАТИКА (ядро) + Генератор iFrame -->
+    <div class="grid g2" id="core" style="margin-top:16px">
+      <div class="card">
+        <h2>🧾 Інформатика (ядро) — приклад та швидке прев’ю</h2>
         <div class="lesson">
           <div class="thumb">🧾</div>
           <div class="meta">
@@ -57,28 +171,24 @@
             <small>03.10.2025 · інтерактивний конструктор чека, друк та TXT-експорт</small>
             <div class="row" style="margin-top:8px">
               <a class="btn" href="https://serawww7.github.io/edlab/1_para.html" target="_blank" rel="noopener">Відкрити</a>
-              <button class="btn secondary" type="button" onclick="openPreview('https://serawww7.github.io/edlab/1_para.html')">Швидке прев’ю</button>
+              <button class="btn secondary" type="button" onclick="openPreviewStandalone('https://serawww7.github.io/edlab/1_para.html')">Швидке прев’ю</button>
               <button class="btn secondary" type="button" onclick="fillIframe('https://serawww7.github.io/edlab/1_para.html')">Згенерувати iFrame</button>
             </div>
           </div>
         </div>
 
-        <!-- Тут додавай нові пари картками за цією ж схемою -->
-
-        <div class="tags">
-          <span class="tag">🖨️ 58 мм</span>
-          <span class="tag">📄 TXT</span>
-          <span class="tag">🔗 iFrame для Moodle</span>
+        <div id="standalone-preview" class="tester" style="margin-top:14px; display:none">
+          <div class="row">
+            <button class="btn close" type="button" onclick="closePreviewStandalone()">⬅️ Закрити прев’ю</button>
+          </div>
+          <iframe id="standalone-frame" src="about:blank"
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-downloads"
+                  referrerpolicy="no-referrer"></iframe>
         </div>
-
-        <div id="preview" class="tester" style="margin-top:14px; display:none">
-          <iframe id="previewFrame" src="about:blank" sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-downloads" referrerpolicy="no-referrer"></iframe>
-        </div>
-        <p class="muted" id="previewNote" style="display:none; margin-top:6px">Порада: натисни «Згенерувати iFrame» — код знизу вже буде з правильним URL.</p>
       </div>
 
       <!-- Правий стовпець: генератор iFrame -->
-      <div class="card" id="core">
+      <div class="card">
         <h2>🔧 Генератор коду для Moodle (iFrame)</h2>
         <label for="url">URL сторінки</label>
         <input id="url" type="text" value="https://serawww7.github.io/edlab/1_para.html" />
@@ -102,31 +212,10 @@
           <button class="btn" type="button" onclick="copyCode()">📋 Скопіювати</button>
         </div>
         <p class="muted" style="margin-top:6px">
-          Рекомендовано вставляти як <b>Ресурс → Page</b> або <b>URL (Display: Embed)</b>.  
+          Рекомендовано вставляти як <b>Ресурс → Page</b> або <b>URL (Display: Embed)</b>.
           Якщо кнопки «німі» — перевір фільтри ресурсу, або зменш набір sandbox.
         </p>
       </div>
-    </div>
-
-    <!-- Інші спеціальності — готові секції-якорі для наповнення -->
-    <div id="mech" class="card" style="margin-top:16px">
-      <h2>🚜 Механізація (механіки) — уроки</h2>
-      <p class="muted">Додай картки занять для механіків (профільні 16 ЛПЗ). Потрібна допомога — скажи, зберу шаблони сторінок.</p>
-    </div>
-
-    <div id="g19" class="card" style="margin-top:16px">
-      <h2>🛠️ Будівництво та цивільна інженерія (G19) — уроки</h2>
-      <p class="muted">Секція для пар G19 (QGIS, паспортизація об’єктів, журнали робіт, акти, безпека).</p>
-    </div>
-
-    <div id="zoot" class="card" style="margin-top:16px">
-      <h2>🐄 Технології виробництва продукції тваринництва — уроки</h2>
-      <p class="muted">Живі картки: е-ферма, журнали надоїв/ветзаходів, HACCP, дашборди.</p>
-    </div>
-
-    <div id="electric" class="card" style="margin-top:16px">
-      <h2>⚡ Електроенергетика, електротехніка та електромеханіка — уроки</h2>
-      <p class="muted">Секція для «електриків»: лабораторні з протоколами вимірювань, чек-листи ОП, журнал ППР, маркування щитів, бірки/QR-ідентифікація, Excel-калькулятори перерізів і втраточ.</p>
     </div>
   </div>
 
@@ -165,13 +254,32 @@
   </footer>
 
 <script>
-  // «Вбудовано у Moodle» → увімкнути стриманий вигляд
+  // «Вбудовано у Moodle» → стриманий вигляд (якщо у фреймі)
   (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
 
+  /* ======================== НАЛАШТУВАННЯ СЕКЦІЙ (скан папок) ======================== */
+  const OWNER = 'serawww7';
+  const REPO  = 'edlab';
+  // За потреби змініть імʼя папки G19 нижче (якщо інше в репо)
+  const SECTIONS = [
+    { id:'agro',    title:'Агрономія',                         folder:'agro_II_kyrs',   emoji:'🌾' },
+    { id:'mech',    title:'Механізація (механіки)',            folder:'mech_II_kyrs',   emoji:'🚜' },
+    { id:'g19',     title:'Будівництво та цивільна інженерія', folder:'g19_II_kyrs',    emoji:'🛠️' }, // ← перевірте фактичну папку
+    { id:'tech',    title:'Технології тваринництва',           folder:'tech_II_kyrs',   emoji:'🐄' },
+    { id:'electric',title:'Електрики',                         folder:'elect_II_kyrs',  emoji:'⚡' },
+  ];
+
+  /* ======================== УТИЛІТИ ======================== */
+  function pagesBaseUrl(folder, file){ return `https://${OWNER}.github.io/${REPO}/${folder}/${file}`; }
+  function apiFolderUrl(folder){ return `https://api.github.com/repos/${OWNER}/${REPO}/contents/${folder}?ref=main`; }
+  function el(id){ return document.getElementById(id); }
+  function esc(s){ return s.replace(/[&<>"]/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m])); }
+
+  // Генератор коду iFrame
   function gen(){
-    const url = document.getElementById('url').value.trim();
-    const h   = parseInt(document.getElementById('height').value,10) || 1600;
-    const sb  = document.getElementById('sandbox').value.trim();
+    const url = el('url').value.trim();
+    const h   = parseInt(el('height').value,10) || 1600;
+    const sb  = el('sandbox').value.trim();
     const html =
 `<div style="max-width:980px;margin:0 auto;position:relative;z-index:1;">
   <iframe
@@ -182,30 +290,134 @@
     sandbox="${sb}">
   </iframe>
 </div>`;
-    document.getElementById('code').value = html;
+    el('code').value = html;
   }
   function copyCode(){
-    const ta = document.getElementById('code');
+    const ta = el('code');
     ta.select(); ta.setSelectionRange(0, ta.value.length);
     document.execCommand('copy');
     const old = document.title;
     document.title = '✅ HTML скопійовано';
     setTimeout(()=>document.title = old, 900);
   }
-  function openPreview(u){
-    const box = document.getElementById('preview');
-    const note = document.getElementById('previewNote');
-    box.style.display = ''; note.style.display='';
-    document.getElementById('previewFrame').src = u;
-    window.scrollTo({top: box.getBoundingClientRect().top + window.scrollY - 20, behavior:'smooth'});
+
+  /* ======================== Превʼю (з кнопкою «Закрити») ======================== */
+  function openPreview(sectionId, url){
+    const box = el(`${sectionId}-preview`);
+    const note = el(`${sectionId}-note`);
+    const frame = el(`${sectionId}-frame`);
+    box.style.display = ''; note && (note.style.display='');
+    frame.src = url;
+    window.scrollTo({ top: box.getBoundingClientRect().top + window.scrollY - 20, behavior:'smooth' });
   }
+  function closePreview(sectionId){
+    const box = el(`${sectionId}-preview`);
+    const frame = el(`${sectionId}-frame`);
+    frame.src = 'about:blank';
+    box.style.display = 'none';
+  }
+  // Standalone блок (ядро)
+  function openPreviewStandalone(url){
+    const box = el('standalone-preview');
+    const frame = el('standalone-frame');
+    box.style.display = '';
+    frame.src = url;
+    window.scrollTo({ top: box.getBoundingClientRect().top + window.scrollY - 20, behavior:'smooth' });
+  }
+  function closePreviewStandalone(){
+    const box = el('standalone-preview');
+    const frame = el('standalone-frame');
+    frame.src = 'about:blank';
+    box.style.display = 'none';
+  }
+  // Швидке заповнення iFrame-генератора
   function fillIframe(u){
-    document.getElementById('url').value = u;
+    el('url').value = u;
     gen();
-    openPreview(u);
   }
-  // ініціалізація
-  gen();
+
+  /* ======================== Побудова картки заняття ======================== */
+  function buildCard(sectionId, title, url){
+    const div = document.createElement('div');
+    div.className = 'lesson';
+    div.innerHTML = `
+      <div class="thumb">📄</div>
+      <div class="meta">
+        <b>${esc(title)}</b>
+        <small class="muted">${esc(url)}</small>
+        <div class="row" style="margin-top:8px">
+          <a class="btn" href="${esc(url)}" target="_blank" rel="noopener">Відкрити</a>
+          <button class="btn secondary" type="button" onclick="openPreview('${sectionId}','${esc(url)}')">Швидке прев’ю</button>
+          <button class="btn secondary" type="button" onclick="fillIframe('${esc(url)}')">Згенерувати iFrame</button>
+        </div>
+      </div>
+    `;
+    return div;
+  }
+
+  /* ======================== Скан папки через GitHub API ======================== */
+  async function loadSection(sec){
+    const listEl = el(`${sec.id}-list`);
+    const countEl = el(`${sec.id}-count`);
+    listEl.innerHTML = '';
+    countEl.textContent = 'сканую…';
+    try{
+      const r = await fetch(apiFolderUrl(sec.folder), { headers:{ 'Accept':'application/vnd.github+json' } });
+      if(!r.ok) throw new Error(`HTTP ${r.status}`);
+      const arr = await r.json();
+      // беремо лише .html
+      const files = arr.filter(x => x.type === 'file' && /\.html?$/i.test(x.name));
+      // сортування: спочатку *_paraN.html за номером, потім інші алфавітом
+      const numeric = [], other = [];
+      files.forEach(f=>{
+        const m = f.name.match(/(\d+)\.html?$/i) || f.name.match(/para(\d+)\.html?$/i) || f.name.match(/_(\d+)\.html?$/i);
+        if(m){ numeric.push({n:parseInt(m[1],10), f}); } else { other.push(f); }
+      });
+      numeric.sort((a,b)=>a.n-b.n);
+      other.sort((a,b)=>a.name.localeCompare(b.name,'uk'));
+      const ordered = [...numeric.map(x=>x.f), ...other];
+
+      if(!ordered.length){
+        countEl.textContent = '0 занять';
+        listEl.innerHTML = `<div class="muted">Поки що немає .html у папці <span class="mono">${sec.folder}</span></div>`;
+        return;
+      }
+      ordered.forEach(f=>{
+        const url = pagesBaseUrl(sec.folder, f.name);
+        const title = f.name.replace(/_/g,' ');
+        listEl.appendChild(buildCard(sec.id, title, url));
+      });
+      countEl.textContent = `${ordered.length} занять`;
+    }catch(e){
+      // Fallback — мінімальний набір відомих робіт
+      countEl.innerHTML = `<span class="err">автоскан недоступний</span>`;
+      const fallback = {
+        agro:    ['agro_para1.html','agro_para2.html','agro_para3.html','agro_para4.html','agro_para5.html','agro_para6.html','agro_para7.html','agro_para8.html','agro_para9.html','agro_para10.html','agro_para11.html','agro_para12.html','agro_para13.html','agro_para14.html','agro_para15.html'],
+        mech:    ['mechanic_para1.html','mechanic_para2.html','mechanic_para3.html','mechanic_para4.html','mechanic_para5.html','mechanic_para6.html','mechanic_para7.html','mechanic_para8.html','mechanic_para9.html','mechanic_para10.html','mechanic_para11.html','mechanic_para12.html','mechanic_para13.html','mechanic_para14.html','mechanic_para15.html'],
+        tech:    ['tech_para1.html','tech_para2.html','tech_para3.html','tech_para4.html','tech_para5.html','tech_para6.html','tech_para7.html','tech_para8.html','tech_para9.html','tech_para10.html','tech_para11.html','tech_para12.html','tech_para13.html','tech_para14.html','tech_para15.html'],
+        g19:     [],
+        electric:[]
+      };
+      const known = fallback[sec.id] || [];
+      if(known.length){
+        known.forEach(name=>{
+          listEl.appendChild(buildCard(sec.id, name, pagesBaseUrl(sec.folder, name)));
+        });
+        countEl.textContent = `${known.length} (fallback)`;
+      }else{
+        listEl.innerHTML = `<div class="muted">Додайте файли у <span class="mono">${sec.folder}/</span> — і вони зʼявляться тут.</div>`;
+      }
+      console.warn('Scan error:', sec.folder, e);
+    }
+  }
+
+  /* ======================== Init ======================== */
+  function init(){
+    gen(); // iFrame-код за замовчанням
+    // Завантажити всі секції паралельно
+    SECTIONS.forEach(loadSection);
+  }
+  init();
 </script>
 </body>
 </html>
