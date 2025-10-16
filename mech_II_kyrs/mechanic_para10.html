@@ -1,0 +1,657 @@
+<!-- mechanic_para10.html
+     ПАРА 10 (аудиторно) для механіків
+     Тема: ГІДРАВЛІКА — тиск/витрата, сила/швидкість циліндра, налаштування редукційного (перепускного) клапана,
+           підбір рукавів/труб за швидкістю потоку, теплонавантаження, чистота ISO 4406, чек 58 мм, NFC, CSV.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; за наявності — манометр, витратомір-навантажувач (демо значення вводяться вручну).
+     Примітка щодо контрасту: темні клітинки таблиць мають світлий текст (.dark).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 10 (механіки) — Гідравліка: тиск/витрата, циліндри, клапан, рукава, теплонавантаження, ISO 4406</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+
+  input[type="text"],input[type="number"],input[type="date"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 10 · аудиторно · механіки</span>
+  <h1>💧 Гідравліка: тиск/витрата, циліндри, клапан, рукава, теплонавантаження, ISO 4406</h1>
+
+  <div class="card">
+    <h2>🎯 Мета</h2>
+    <p>
+      За пару студенти розрахують <b>силу/швидкість гідроциліндра</b>, <b>потужність насоса</b>, перевірять
+      <b>налаштування перепускного клапана</b>, підберуть <b>діаметр рукава</b> за граничною швидкістю потоку,
+      оцінять <b>теплонавантаження</b> та <b>чистоту оливи (ISO 4406)</b>, сформують <b>квиток 58 мм</b>, <b>NFC</b> і <b>CSV</b>.
+    </p>
+    <p class="small">Пам’ятка: P(кВт) ≈ (Q(л/хв) × Δp(бар)) / 600; F(N) = p(Pa) × A(м²) × η; v (циліндр) = Q/A; швидкість у рукаві: v = 4Q/(πD²), де Q — м³/с.</p>
+  </div>
+
+  <!-- СЕКЦІЯ 1. ПАРАМЕТРИ НАСОСА/СИСТЕМИ -->
+  <div class="card">
+    <h2>⛽ Насос та контур</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Вихідні</h3>
+        <div class="row">
+          <div style="flex:1"><label>Витрата Q, л/хв</label><input id="Q" type="number" step="0.1" value="60"></div>
+          <div style="flex:1"><label>Робочий тиск p, бар</label><input id="Pbar" type="number" step="1" value="180"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Перепад на клапані Δp, бар</label><input id="dP" type="number" step="1" value="10"></div>
+          <div style="flex:1"><label>ККД загальний η</label><input id="eta" type="number" step="0.01" value="0.85"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Результати</h3>
+        <p>Потужність насоса: <b><span id="Pkw">—</span></b> кВт</p>
+        <p>Втрати на клапані: <b><span id="Ploss">—</span></b> кВт</p>
+        <p>Оцінка нагріву (ΔT/год): <b><span id="dT">—</span></b> °C/год</p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcPump()">🔁 Перерахувати</button>
+          <button class="btn" onclick="presetPump()">🧪 Приклад</button>
+          <button class="btn" onclick="copyCSV('csvPump')">📋 CSV (насос)</button>
+        </div>
+        <div id="csvPump" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+    <p class="small muted">ΔT оцінюємо за спрощенням: <span class="mono">ΔT≈(Pвтрат кВт × 860) / (масло л × ρ(кг/л) × c (ккал/кг·°C))</span>, беремо ρ≈0.86, c≈0.5 ккал/кг·°C.</p>
+  </div>
+
+  <!-- СЕКЦІЯ 2. ЦИЛІНДР -->
+  <div class="card">
+    <h2>🧱 Гідроциліндр: сила та швидкість</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Геометрія</h3>
+        <div class="row">
+          <div style="flex:1"><label>Ø гільзи D, мм</label><input id="cylD" type="number" step="1" value="80"></div>
+          <div style="flex:1"><label>Ø штока d, мм</label><input id="rodD" type="number" step="1" value="45"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Хід L, мм</label><input id="stroke" type="number" step="1" value="500"></div>
+          <div style="flex:1"><label>Тиск p, бар</label><input id="cylP" type="number" step="1" value="180"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Результати</h3>
+        <p>Площа поршня A₁: <b><span id="A1">—</span></b> м² · без штока A₂: <b><span id="A2">—</span></b> м²</p>
+        <p>Сила ↗ (виштовх.): <b><span id="Fext">—</span></b> кН · Сила ↘ (втяг.): <b><span id="Fret">—</span></b> кН</p>
+        <p>Швидк. ↗ / ↘: <b><span id="Vext">—</span></b> / <b><span id="Vret">—</span></b> мм/с</p>
+        <p>Час ходу ↗ / ↘: <b><span id="Text">—</span></b> / <b><span id="Tret">—</span></b> с</p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcCyl()">🔁 Перерахувати</button>
+          <button class="btn" onclick="presetCyl()">🧪 Приклад</button>
+          <button class="btn" onclick="copyCSV('csvCyl')">📋 CSV (циліндр)</button>
+        </div>
+        <div id="csvCyl" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+    <p class="small muted">Сили: <span class="mono">Fext = p·A₁·η</span>, <span class="mono">Fret = p·A₂·η</span>; швидкості: <span class="mono">v = Q/A</span>, де Q — м³/с.</p>
+  </div>
+
+  <!-- СЕКЦІЯ 3. КЛАПАН -->
+  <div class="card">
+    <h2>🧩 Перепускний клапан (редукційний) — налаштування/перевірка</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Вихідні</h3>
+        <div class="row">
+          <div style="flex:1"><label>Бажане p(клап.), бар</label><input id="reliefSet" type="number" step="1" value="190"></div>
+          <div style="flex:1"><label>Вимір під навантаженням, бар</label><input id="reliefMeas" type="number" step="1" value="184"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Допуск, ±бар</label><input id="reliefTol" type="number" step="1" value="10"></div>
+          <div style="flex:1"><label>Падіння до клапана, бар</label><input id="preDrop" type="number" step="1" value="6"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Результат</h3>
+        <p>Розрах. на клапані: <b><span id="reliefAt">—</span></b> бар</p>
+        <p>Статус: <b><span id="reliefFlag">—</span></b></p>
+        <p>Порада: <b><span id="reliefTip">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcRelief()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvRelief')">📋 CSV (клапан)</button>
+        </div>
+        <div id="csvRelief" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- СЕКЦІЯ 4. РУКАВА/ТРУБИ -->
+  <div class="card">
+    <h2>🧵 Рукава/труби — швидкість потоку та діаметр</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Вихідні</h3>
+        <div class="row">
+          <div style="flex:1"><label>Витрата Q, л/хв</label><input id="hoseQ" type="number" step="0.1" value="60"></div>
+          <div style="flex:1"><label>Внутр. діаметр D, мм</label><input id="hoseD" type="number" step="0.1" value="12"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Гранична швидк., м/с</label><input id="vLim" type="number" step="0.1" value="5.0"></div>
+          <div style="flex:1"><label>Режим</label>
+            <select id="hoseMode">
+              <option value="pressure" selected>Напірна лінія (рекоменд. 3–5 м/с)</option>
+              <option value="return">Злив (рекоменд. 2–3 м/с)</option>
+              <option value="suction">Всмокт. (рекоменд. 0.5–1.5 м/с)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Результат</h3>
+        <p>Швидкість v: <b><span id="hoseV">—</span></b> м/с</p>
+        <p>Статус: <b><span id="hoseFlag">—</span></b></p>
+        <p>Рекоменд. D мін.: <b><span id="hoseDrec">—</span></b> мм</p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcHose()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvHose')">📋 CSV (рукав)</button>
+        </div>
+        <div id="csvHose" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+    <p class="small muted">Орієнтир: <span class="mono">напір 3–5</span> м/с, <span class="mono">злив 2–3</span> м/с, <span class="mono">всмокт. 0.5–1.5</span> м/с.</p>
+  </div>
+
+  <!-- СЕКЦІЯ 5. ЧИСТОТА ОЛИВИ (ISO 4406, навчальна оцінка) -->
+  <div class="card">
+    <h2>🧪 Чистота оливи — ISO 4406 (навчальна оцінка)</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Лічильник частинок</h3>
+        <div class="row">
+          <div style="flex:1"><label>≥4 μm, кількість/мл</label><input id="c4" type="number" step="1" value="8000"></div>
+          <div style="flex:1"><label>≥6 μm, кількість/мл</label><input id="c6" type="number" step="1" value="1600"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>≥14 μm, кількість/мл</label><input id="c14" type="number" step="1" value="200"></div>
+          <div style="flex:1"><label>Цільовий код (напр. 18/16/13)</label><input id="isoTarget" type="text" value="18/16/13"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Результат</h3>
+        <p>Код ISO 4406: <b><span id="isoCode">—</span></b></p>
+        <p>Статус: <b><span id="isoFlag">—</span></b></p>
+        <p>Порада: <b><span id="isoTip">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcISO()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvISO')">📋 CSV (ISO)</button>
+        </div>
+        <div id="csvISO" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+    <p class="small muted">Табличне кодування: кожне число — “ступінь” по діапазону частинок/мл (наближено). Це <b>навчальна</b> оцінка, не заміняє лабораторію.</p>
+  </div>
+
+  <!-- ЖУРНАЛ -->
+  <div class="card">
+    <h2>📒 Журнал вимірів</h2>
+    <div class="row">
+      <button class="btn" onclick="addRow()">➕ Додати запис</button>
+      <button class="btn" onclick="presetRows()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tbl">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Узел</th>
+            <th>Q, л/хв</th>
+            <th>p, бар</th>
+            <th class="dark">P, кВт</th>
+            <th class="dark">Δp, бар</th>
+            <th class="dark">Втрати, кВт</th>
+            <th>Цил. F↗/F↘, кН</th>
+            <th>v рукава, м/с</th>
+            <th>ISO</th>
+            <th>Примітка</th>
+          </tr>
+        </thead>
+        <tbody id="body"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- КВИТОК + NFC -->
+  <div class="card">
+    <h2>🧾 Квиток 58 мм та NFC</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>NFC — “HYDRO CHECK”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток “HYDRO CHECK”</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>HYDRO CHECK</h4>
+          <p id="tDate"><small>Дата: —</small></p>
+          <div class="line"></div>
+          <p><b>Q/p:</b> <span id="tQ">—</span> л/хв / <span id="tP">—</span> бар</p>
+          <p><b>P насоса:</b> <span id="tPkW">—</span> кВт · <b>Втрати:</b> <span id="tPloss">—</span> кВт</p>
+          <p><b>Цил. F↗/F↘:</b> <span id="tFext">—</span>/<span id="tFret">—</span> кН</p>
+          <p><b>Рукав v:</b> <span id="tVhose">—</span> м/с (мін. D: <span id="tDhose">—</span> мм)</p>
+          <p><b>Клапан:</b> <span id="tRelief">—</span> бар (<span id="tReliefFlag">—</span>)</p>
+          <p><b>ISO:</b> <span id="tISO">—</span></p>
+          <div class="line"></div>
+          <p><small id="tNote">Прим.: —</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Внеси <b>Q, p</b> системи — оціни <b>потужність</b>, <b>втрати</b>, <b>нагрів</b>.</li>
+      <li>Задай параметри <b>циліндра</b> — отримай <b>силу</b>, <b>швидкість</b> і <b>час ходу</b>.</li>
+      <li>Перевір <b>перепускний клапан</b> з урахуванням падіння до нього.</li>
+      <li>Підібери <b>рукав/трубу</b> за швидкістю потоку.</li>
+      <li>Оціни <b>ISO 4406</b> і зроби висновок про фільтрацію/обслуговування.</li>
+      <li>Згенеруй <b>квиток</b>, <b>NFC</b> та <b>CSV</b> для звіту (<span class="mono">Hydraulics</span>).</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Потужність/втрати/нагрів розраховано вірно</td><td>3</td></tr>
+        <tr><td>Циліндр: сила/швидкість/час — коректно</td><td>3</td></tr>
+        <tr><td>Клапан і рукав — адекватні висновки</td><td>3</td></tr>
+        <tr><td>Квиток/NFC + CSV</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const bodyEl = document.getElementById('body');
+
+  // ====== 1) Насос/контур ======
+  function calcPump(){
+    const Q = +byId('Q').value||0;          // л/хв
+    const Pbar = +byId('Pbar').value||0;    // бар
+    const dP = +byId('dP').value||0;        // бар (на клапані)
+    const eta = +byId('eta').value||1;
+
+    const PkW = (Q * Pbar) / 600;           // кВт (≈ Q*l/min * bar / 600)
+    const Ploss = (Q * dP) / 600;           // кВт
+    // Оцінка нагріву на 100 л масла (стандартний бак умовно)
+    const oilL = 100, rho=0.86, c=0.5;      // кг/л, ккал/кг°C
+    const dT = (Ploss * 860) / (oilL * rho * c); // °C/год
+
+    byId('Pkw').textContent = rnd(PkW,2);
+    byId('Ploss').textContent = rnd(Ploss,2);
+    byId('dT').textContent = rnd(dT,1);
+
+    const csv = [
+      `PUMP|Q=${Q} lpm|p=${Pbar} bar|eta=${eta}`,
+      `POWER|P=${rnd(PkW,2)} kW|Loss=${rnd(Ploss,2)} kW|Heat=${rnd(dT,1)} Cph`
+    ].join('\n');
+    byId('csvPump').textContent = csv;
+
+    return {Q,Pbar,dP,eta,PkW,Ploss,dT};
+  }
+  function presetPump(){
+    byId('Q').value=75; byId('Pbar').value=190; byId('dP').value=8; byId('eta').value=0.88;
+    calcPump();
+  }
+
+  // ====== 2) Циліндр ======
+  function calcCyl(){
+    const Dmm = +byId('cylD').value||0;
+    const dmm = +byId('rodD').value||0;
+    const Lmm = +byId('stroke').value||0;
+    const pBar = +byId('cylP').value||0;
+    const Qlpm = +byId('Q').value||0; // беремо загальну витрату, як на секцію
+
+    const D = Dmm/1000, d = dmm/1000; // м
+    const A1 = Math.PI*(D**2)/4;                  // м² (виштовх)
+    const A2 = Math.PI*(D**2 - d**2)/4;           // м² (втяг)
+    const pPa = pBar * 1e5;                       // Па (1 бар ≈ 1e5 Па)
+    const eta = 0.9;
+
+    const Fext = pPa*A1*eta/1000;                 // кН
+    const Fret = pPa*A2*eta/1000;                 // кН
+
+    const Qm3s = Qlpm/1000/60;                    // м³/с
+    const Vext = (A1>0)? (Qm3s/A1)*1000 : 0;      // мм/с
+    const Vret = (A2>0)? (Qm3s/A2)*1000 : 0;      // мм/с
+    const Text = (Lmm>0 && Vext>0)? Lmm/Vext : 0; // с
+    const Tret = (Lmm>0 && Vret>0)? Lmm/Vret : 0; // с
+
+    byId('A1').textContent = rnd(A1,5);
+    byId('A2').textContent = rnd(A2,5);
+    byId('Fext').textContent = rnd(Fext,1);
+    byId('Fret').textContent = rnd(Fret,1);
+    byId('Vext').textContent = rnd(Vext,1);
+    byId('Vret').textContent = rnd(Vret,1);
+    byId('Text').textContent = rnd(Text,1);
+    byId('Tret').textContent = rnd(Tret,1);
+
+    const csv = [
+      `CYL|D=${Dmm}mm|d=${dmm}mm|L=${Lmm}mm|p=${pBar}bar|Q=${Qlpm}lpm`,
+      `AREA|A1=${rnd(A1,5)} m2|A2=${rnd(A2,5)} m2`,
+      `FORCE|Fext=${rnd(Fext,1)} kN|Fret=${rnd(Fret,1)} kN`,
+      `SPEED|Vext=${rnd(Vext,1)} mmps|Vret=${rnd(Vret,1)} mmps|Text=${rnd(Text,1)} s|Tret=${rnd(Tret,1)} s`
+    ].join('\n');
+    byId('csvCyl').textContent = csv;
+
+    return {A1,A2,Fext,Fret,Vext,Vret,Text,Tret,Qlpm,pBar,Dmm,dmm,Lmm};
+  }
+  function presetCyl(){
+    byId('cylD').value=90; byId('rodD').value=50; byId('stroke').value=600; byId('cylP').value=185;
+    calcCyl();
+  }
+
+  // ====== 3) Клапан ======
+  function calcRelief(){
+    const set = +byId('reliefSet').value||0;
+    const meas = +byId('reliefMeas').value||0;
+    const tol = +byId('reliefTol').value||0;
+    const pre = +byId('preDrop').value||0;
+
+    const atValve = meas + pre;
+    let flag='—', tip='—', color='#10b981';
+    if(Math.abs(atValve - set) <= tol){ flag='🟢 в межах допуску'; tip='залишити або перевірити після розігріву'; }
+    else if(atValve < set - tol){ flag='🔴 занизьке'; tip='підкрутити пружину/перевірити затікання, знос сідла'; color='#ef4444'; }
+    else { flag='🔴 зависоке'; tip='зменшити натяг пружини; ризик перегріву/перевантаження'; color='#ef4444'; }
+
+    byId('reliefAt').textContent = rnd(atValve,0);
+    byId('reliefFlag').textContent = flag; byId('reliefFlag').style.color = color;
+    byId('reliefTip').textContent = tip;
+
+    const csv = `RELIEF|Set=${set}bar|Meas=${meas}bar|PreDrop=${pre}bar|AtValve=${rnd(atValve,0)}bar|Flag=${flag}`;
+    byId('csvRelief').textContent = csv;
+
+    return {set,meas,pre,atValve,flag};
+  }
+
+  // ====== 4) Рукав ======
+  function calcHose(){
+    const Qlpm = +byId('hoseQ').value||0;
+    const Dmm  = +byId('hoseD').value||0;
+    const vLim = +byId('vLim').value||0;
+    const mode = byId('hoseMode').value;
+
+    const Qm3s = Qlpm/1000/60;
+    const Dm = Dmm/1000;
+    const v = (Dm>0)? (4*Qm3s)/(Math.PI*Dm*Dm) : 0;
+
+    // межі за режимом
+    const ranges = { pressure:[3,5], return:[2,3], suction:[0.5,1.5] };
+    const [vMin,vMax] = ranges[mode];
+    let flag='—', color='#10b981';
+    if(v>vMax) { flag='🔴 завелика швидкість (шум/втрати)'; color='#ef4444'; }
+    else if(v<vMin) { flag='🟠 занизька (зайвий діаметр/вартість)'; color='#f59e0b'; }
+    else { flag='🟢 в нормі'; }
+
+    // Підбір мін. D при заданому ліміті
+    const Drec_m = Math.sqrt(4*Qm3s/(Math.PI*vLim));
+    const Drec_mm = Drec_m*1000;
+
+    byId('hoseV').textContent = rnd(v,2);
+    byId('hoseFlag').textContent = flag; byId('hoseFlag').style.color = color;
+    byId('hoseDrec').textContent = rnd(Drec_mm,1);
+
+    const csv = `HOSE|Q=${Qlpm}lpm|D=${Dmm}mm|v=${rnd(v,2)}mps|mode=${mode}|Drec>=${rnd(Drec_mm,1)}mm|Flag=${flag}`;
+    byId('csvHose').textContent = csv;
+
+    return {Qlpm,Dmm,v,vLim,mode,Drec_mm,flag};
+  }
+
+  // ====== 5) ISO 4406 (навчальна апроксимація) ======
+  function isoClassFromCount(c){
+    // Спрощені пороги (близько до стандарту): повертає код 6..24
+    const limits = [
+      {code:24, min:8000000},
+      {code:23, min:4000000},
+      {code:22, min:2000000},
+      {code:21, min:1000000},
+      {code:20, min:500000},
+      {code:19, min:250000},
+      {code:18, min:130000},
+      {code:17, min:64000},
+      {code:16, min:32000},
+      {code:15, min:16000},
+      {code:14, min:8000},
+      {code:13, min:4000},
+      {code:12, min:2000},
+      {code:11, min:1000},
+      {code:10, min:500},
+      {code:9,  min:250},
+      {code:8,  min:130},
+      {code:7,  min:64},
+      {code:6,  min:32}
+    ];
+    for(const r of limits){ if(c>=r.min) return r.code; }
+    return 5;
+  }
+  function calcISO(){
+    const n4 = +byId('c4').value||0;
+    const n6 = +byId('c6').value||0;
+    const n14= +byId('c14').value||0;
+    const tStr = byId('isoTarget').value.trim();
+    const t = tStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{1,2})$/);
+
+    const c1 = isoClassFromCount(n4);
+    const c2 = isoClassFromCount(n6);
+    const c3 = isoClassFromCount(n14);
+    const code = `${c1}/${c2}/${c3}`;
+
+    let flag='—', tip='—', color='#10b981';
+    if(t){
+      const [_,a,b,c]=t.map(x=>+x||0);
+      if(c1>a || c2>b || c3>c){ flag='🔴 гірше цілі'; tip='перевірити фільтри, герметичність, точку відбору'; color='#ef4444'; }
+      else if(c1===a && c2===b && c3===c){ flag='🟠 на межі'; tip='рекомендовано заміна фільтрів за графіком'; color='#f59e0b'; }
+      else { flag='🟢 краще цілі'; tip='ок'; }
+    }else{
+      flag='🟢 оцінено'; tip='вкажи цільовий код для порівняння';
+    }
+
+    byId('isoCode').textContent = code;
+    byId('isoFlag').textContent = flag; byId('isoFlag').style.color = color;
+    byId('isoTip').textContent = tip;
+
+    const csv = `ISO4406|>=4um=${n4}/ml|>=6um=${n6}/ml|>=14um=${n14}/ml|Code=${code}|Target=${tStr||'-'}|Flag=${flag}`;
+    byId('csvISO').textContent = csv;
+
+    return {code,flag};
+  }
+
+  // ====== Журнал ======
+  function addRow(sample){
+    const p = calcPump(); const c = calcCyl(); const h = calcHose(); const iso = calcISO();
+    const def = { node:'Гідророзподільник 1', Q:p.Q, P:p.Pbar, dP:p.dP, PkW:p.PkW, Ploss:p.Ploss,
+                  Fext:c.Fext, Fret:c.Fret, vhose:h.v, iso:iso.code, note:'' };
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.node}"></td>
+      <td><input type="number" step="0.1" value="${rnd(s.Q,1)}"></td>
+      <td><input type="number" step="1" value="${rnd(s.P,0)}"></td>
+      <td class="dark pkW">${rnd(s.PkW,2)}</td>
+      <td class="dark dp">${rnd(s.dP,0)}</td>
+      <td class="dark loss">${rnd(s.Ploss,2)}</td>
+      <td class="force">${rnd(s.Fext,1)}/${rnd(s.Fret,1)}</td>
+      <td class="vhose">${rnd(s.vhose,2)}</td>
+      <td class="iso">${s.iso}</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyEl.appendChild(tr); reindex(); buildCSVlog();
+  }
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+  function presetRows(){
+    bodyEl.innerHTML='';
+    addRow({node:'Секція підйому', Q:62, P:175, dP:7, PkW:(62*175/600), Ploss:(62*7/600), Fext:95, Fret:78, vhose:4.6, iso:'18/16/13', note:'норма'});
+    addRow({node:'Секція гідровиводу', Q:40, P:160, dP:10, PkW:(40*160/600), Ploss:(40*10/600), Fext:75, Fret:61, vhose:3.1, iso:'19/17/14', note:'фільтр забрудн.'});
+    addRow({node:'Рульове', Q:18, P:110, dP:4, PkW:(18*110/600), Ploss:(18*4/600),  Fext:50, Fret:40, vhose:2.0, iso:'17/15/12', note:'ок'});
+    buildCSVlog();
+  }
+  function buildCSVlog(){
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx=tr.querySelector('.idx').textContent.trim();
+      const node=tr.children[1].querySelector('input').value.trim();
+      const Q  =tr.children[2].querySelector('input').value.trim();
+      const P  =tr.children[3].querySelector('input').value.trim();
+      const PkW=tr.querySelector('.pkW').textContent.trim();
+      const dP =tr.querySelector('.dp').textContent.trim();
+      const loss=tr.querySelector('.loss').textContent.trim();
+      const F  =tr.querySelector('.force').textContent.trim();
+      const v  =tr.querySelector('.vhose').textContent.trim();
+      const iso=tr.querySelector('.iso').textContent.trim();
+      const note=tr.children[10].querySelector('input').value.trim();
+      return [idx,node,Q,P,PkW,dP,loss,F,v,iso,note].join(' | ');
+    });
+    byId('csvLog').textContent = lines.join('\n') || '—';
+  }
+
+  // ====== Квиток / NFC ======
+  function buildTicket(){
+    const p = calcPump(); const c = calcCyl(); const h = calcHose(); const r = calcRelief(); const iso = calcISO();
+    const d = new Date().toISOString().slice(0,10);
+    byId('tDate').innerHTML = `<small>Дата: ${d}</small>`;
+    byId('tQ').textContent = rnd(p.Q,1);
+    byId('tP').textContent = rnd(p.Pbar,0);
+    byId('tPkW').textContent = rnd(p.PkW,2);
+    byId('tPloss').textContent = rnd(p.Ploss,2);
+    byId('tFext').textContent = rnd(c.Fext,1);
+    byId('tFret').textContent = rnd(c.Fret,1);
+    byId('tVhose').textContent = rnd(h.v,2);
+    byId('tDhose').textContent = rnd(h.Drec_mm,1);
+    byId('tRelief').textContent = byId('reliefAt').textContent || '—';
+    byId('tReliefFlag').textContent = byId('reliefFlag').textContent || '—';
+    byId('tISO').textContent = iso.code;
+    byId('tNote').textContent = `Mode:${byId('hoseMode').value}; vLim=${byId('vLim').value}м/с; Ціль ISO: ${byId('isoTarget').value}`;
+  }
+  function buildNFC(){
+    const p = calcPump(); const c = calcCyl(); const h = calcHose(); const r = calcRelief(); const iso = calcISO();
+    const text = [
+      `HYDRO_NFC`,
+      `MACHINE:${byId('nfcId').value}`,
+      `CONTACT:${byId('nfcPhone').value}`,
+      `Q:${rnd(p.Q,1)} lpm; p:${rnd(p.Pbar,0)} bar; P:${rnd(p.PkW,2)} kW; Loss:${rnd(p.Ploss,2)} kW`,
+      `CYL:Fext=${rnd(c.Fext,1)}kN/Fret=${rnd(c.Fret,1)}kN; Vhose=${rnd(h.v,2)}mps; Drec>=${rnd(h.Drec_mm,1)}mm`,
+      `RELIEF:${byId('reliefAt').textContent} bar (${byId('reliefFlag').textContent})`,
+      `ISO:${iso.code}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = text;
+  }
+
+  // ====== Копіювання ======
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // ====== Ініціалізація ======
+  (function init(){
+    // розрахунки за замовчуванням
+    calcPump(); calcCyl(); calcRelief(); calcHose(); calcISO();
+    // слухачі
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select')) { calcPump(); calcCyl(); calcRelief(); calcHose(); calcISO(); }
+    });
+  })();
+</script>
+</body>
+</html>
