@@ -1,0 +1,604 @@
+<!-- tech_para6.html
+     ПАРА 6 (аудиторно) для технологів з переробки продукції тваринництва
+     Тема: ПЛАНУВАННЯ ТЕРМООБРОБКИ — графік (Gantt), цикл печі/коптильні, пропускна здатність,
+           енергоспоживання, контроль Tядра/витримки, квиток 58 мм, NFC, CSV.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; (опц.) термопринтер 58 мм; NFC-мітки.
+
+     Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
+     УВАГА: це навчальний планувальник. Фактичні програми варки/копчення звіряйте з картами процесу й інструкціями заводу.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 6 (технологи) — Планування термообробки: графік, пропускна здатність, енергоспоживання, квиток/NFC/CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  textarea{min-height:84px}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано в Moodle (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+  /* "Гант" ASCII */
+  .bars{font:12px/12px ui-monospace,monospace;white-space:pre;background:#fff;color:#000;padding:8px;border-radius:8px;border:1px solid #e5e7eb;overflow:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 6 · аудиторно · технологи переробки</span>
+  <h1>🔥 Планування термообробки: графік (Gantt), пропускна здатність, енергоспоживання, квиток/NFC/CSV</h1>
+
+  <div class="card">
+    <h2>🎯 Мета пари</h2>
+    <p>
+      За заняття студенти: (1) налаштують <b>лінію термообробки</b> (піч/коптильня), (2) створять <b>партії</b>,
+      (3) згенерують <b>графік (Gantt)</b> і перевірять <b>пропускну здатність</b>,
+      (4) оцінять <b>енергоспоживання</b>, (5) зафіксують <b>T ядра/витримку</b> та оформлять <b>CSV, NFC і квиток 58 мм</b>.
+    </p>
+    <p class="small muted">Спрощена модель: час циклу = <span class="mono">прогрів + (a·діаметр + b·навантаження/ємність) + витримка</span>. Коефіцієнти можна змінювати.</p>
+  </div>
+
+  <!-- 1. ПАРАМЕТРИ ОБЛАДНАННЯ -->
+  <div class="card">
+    <h2>🛠️ Обладнання</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Піч / коптильня</h3>
+        <div class="row">
+          <div style="flex:1"><label>Потужність, кВт</label><input id="powerKW" type="number" step="0.1" value="18.0"></div>
+          <div style="flex:1"><label>Ємність, кг/цикл</label><input id="capacityKg" type="number" step="1" value="300"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Прогрів, хв</label><input id="preheatMin" type="number" step="1" value="20"></div>
+          <div style="flex:1"><label>Витримка (Tядра), хв</label><input id="holdMin" type="number" step="1" value="15"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Модель часу (коефіцієнти)</h3>
+        <div class="row">
+          <div style="flex:1"><label>a · діаметр (хв/см)</label><input id="coefA" type="number" step="0.1" value="2.0"></div>
+          <div style="flex:1"><label>b · навантаження (хв · ємн.)</label><input id="coefB" type="number" step="0.1" value="30.0"></div>
+        </div>
+        <p class="small muted">Термін “b” — додатковий час при заповненні ємності на 100%. Якщо 50% — додається 0.5·b.</p>
+      </div>
+
+      <div class="box">
+        <h3>Контроль Tядра</h3>
+        <div class="row">
+          <div style="flex:1"><label>Ціль Tядра, °C</label><input id="targetCore" type="number" step="0.1" value="72.0"></div>
+          <div style="flex:1"><label>Межа часу досягн., хв (≤)</label><input id="timeLimit" type="number" step="1" value="120"></div>
+        </div>
+        <p class="small muted">Допуск для навчального контролю: досягти Tядра ≤ заданого ліміту часу.</p>
+      </div>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="btn" onclick="buildSchedule()">🧮 Розрахувати графік</button>
+      <button class="btn" onclick="presetBatches()">🧪 Приклад партій</button>
+      <button class="btn" onclick="copyCSV('csvEquip')">📋 CSV (equip)</button>
+    </div>
+    <div id="csvEquip" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 2. ПАРТІЇ -->
+  <div class="card">
+    <h2>📦 Партії на сьогодні</h2>
+    <div class="row">
+      <button class="btn" onclick="addBatch()">➕ Додати партію</button>
+      <button class="btn" onclick="copyCSV('csvBatches')">📋 CSV (batches)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblBatches">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Виріб</th>
+            <th class="dark">Навантаження, кг</th>
+            <th class="dark">Ø батона, мм</th>
+            <th class="dark">Заплан. старт</th>
+            <th>ЛОТ</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyBatches"></tbody>
+      </table>
+    </div>
+    <div id="csvBatches" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 3. ГРАФІК (GANTT) + ПРОПУСКНА ЗДАТНІСТЬ + ЕНЕРГІЯ -->
+  <div class="card">
+    <h2>📊 Графік циклів, пропускна здатність і енергія</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>План-графік</h3>
+        <div id="gantt" class="bars">—</div>
+      </div>
+      <div class="box">
+        <h3>Підсумки</h3>
+        <p>Циклів: <b><span id="sumCycles">—</span></b></p>
+        <p>Зайнятість печі: <b><span id="sumHours">—</span></b> год</p>
+        <p>Планова пропускна здатність: <b><span id="sumKg">—</span></b> кг/день</p>
+        <p>Енергоспоживання (оцінка): <b><span id="sumKWh">—</span></b> кВт·год</p>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="copyCSV('csvSchedule')">📋 CSV (schedule)</button>
+        </div>
+        <div id="csvSchedule" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. КОНТРОЛЬ Tядра / ВИТРИМКИ (міні-трекер) -->
+  <div class="card">
+    <h2>🌡️ Контроль Tядра / витримки</h2>
+    <div class="row">
+      <button class="btn" onclick="addPoint()">➕ Додати точку</button>
+      <button class="btn" onclick="presetPoints()">🧪 Приклад</button>
+      <button class="btn" onclick="evaluateCore()">✅ Перевірити</button>
+      <button class="btn" onclick="copyCSV('csvCoreTrack')">📋 CSV (T-track)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblCore">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Час (HH:MM)</th>
+            <th class="dark">Tядра, °C</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyCore"></tbody>
+      </table>
+    </div>
+    <div id="coreStatus" class="out" style="margin-top:8px">—</div>
+    <div id="csvCoreTrack" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 5. ЖУРНАЛ + КВИТОК 58 мм + NFC -->
+  <div class="card">
+    <h2>📒 Журнал / Квиток / NFC</h2>
+    <div class="row">
+      <button class="btn" onclick="addLog()">➕ Додати у журнал</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblLog">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Виріб</th>
+            <th class="dark">ЛОТ</th>
+            <th class="dark">Старт</th>
+            <th class="dark">Кінець</th>
+            <th>Тривалість, хв</th>
+            <th>Енергія, кВт·год</th>
+            <th>Примітка</th>
+          </tr>
+        </thead>
+        <tbody id="bodyLog"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+
+    <div class="grid g2" style="margin-top:12px">
+      <div class="box">
+        <h3>NFC — “THERMAL BATCH CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label>Оператор</label><input id="operator" type="text" value="Студент ТПТ"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток 58 мм</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>THERMAL CYCLE TICKET</h4>
+          <p><b>Виріб:</b> <span id="tProd">—</span></p>
+          <p><b>ЛОТ:</b> <span id="tLot">—</span></p>
+          <div class="line"></div>
+          <p><b>Старт:</b> <span id="tStart">—</span></p>
+          <p><b>Кінець (план):</b> <span id="tEnd">—</span></p>
+          <p><b>Тривалість:</b> <span id="tDur">—</span> хв</p>
+          <div class="line"></div>
+          <p><b>Tядра ціль:</b> <span id="tCore">—</span> °C · <b>Витримка:</b> <span id="tHold">—</span> хв</p>
+          <p><b>Енергія:</b> <span id="tKWh">—</span> кВт·год</p>
+          <div class="line"></div>
+          <p><small>Дотримуватись програми термообробки та HACCP.</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Задайте параметри печі та моделі часу.</li>
+      <li>Додайте 3–5 партій із масою, Ø батона та старт-часом.</li>
+      <li>Згенеруйте графік, перевірте енергію й пропускну здатність.</li>
+      <li>Для однієї партії зафіксуйте Tядра/витримку, додайте рядок у журнал, сформуйте NFC і квиток.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Коректні вхідні дані та модель часу</td><td>3</td></tr>
+        <tr><td>Графік + пропускна здатність + енергетика</td><td>4</td></tr>
+        <tr><td>Контроль Tядра/витримки (трекинг)</td><td>2</td></tr>
+        <tr><td>Журнал + квиток/NFC</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const pad2 = n => String(n).padStart(2,'0');
+
+  // ===== CSV/копіювання =====
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // ===== ПАРТІЇ =====
+  const bodyB = byId('bodyBatches');
+  function reindex(tb){ [...tb.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+  function addBatch(sample){
+    const s = Object.assign({name:'Ковбаса варена', kg:150, dia:60, start:'08:00', lot:'LOT-0001'}, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.name}"></td>
+      <td class="dark"><input type="number" step="1" value="${s.kg}"></td>
+      <td class="dark"><input type="number" step="1" value="${s.dia}"></td>
+      <td class="dark"><input type="time" value="${s.start}"></td>
+      <td><input type="text" value="${s.lot}"></td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyB); buildSchedule();">✖</button></td>
+    `;
+    bodyB.appendChild(tr); reindex(bodyB); buildBatchesCSV();
+  }
+  function presetBatches(){
+    bodyB.innerHTML='';
+    addBatch({name:'Ковбаса варена “Класична”', kg:180, dia:60, start:'08:00', lot:'K-25041-A'});
+    addBatch({name:'Сосиски молочні', kg:120, dia:25, start:'10:30', lot:'S-25041-B'});
+    addBatch({name:'Шинка формована', kg:200, dia:100, start:'13:30', lot:'H-25041-C'});
+    buildSchedule();
+  }
+  function buildBatchesCSV(){
+    const rows = [...bodyB.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const name=r.children[1].querySelector('input').value.trim();
+      const kg=r.children[2].querySelector('input').value.trim();
+      const dia=r.children[3].querySelector('input').value.trim();
+      const start=r.children[4].querySelector('input').value.trim();
+      const lot=r.children[5].querySelector('input').value.trim();
+      return [idx,name,kg,dia,start,lot].join(' | ');
+    });
+    byId('csvBatches').textContent = rows.join('\n') || '—';
+  }
+
+  // ===== РОЗКЛАД / ГАНТТ / ЕНЕРГІЯ =====
+  function parseTimeHHMM(t){
+    const m=/^(\d{2}):(\d{2})$/.exec(t||'');
+    if(!m) return null;
+    const d=new Date(); d.setHours(+m[1],+m[2],0,0); return d;
+  }
+  function minutesBetween(a,b){ return Math.round((b-a)/60000); }
+  function addMinutes(date, m){ const d=new Date(date); d.setMinutes(d.getMinutes()+m); return d; }
+  function fmtHHMM(d){ return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`; }
+
+  function scheduleOne(batch, ctx){
+    // Параметри моделі
+    const cap = +byId('capacityKg').value||300;
+    const pre = +byId('preheatMin').value||20;
+    const hold= +byId('holdMin').value||15;
+    const a = +byId('coefA').value||2.0; // хв/см
+    const b = +byId('coefB').value||30.0; // хв при 100%
+    // Розрахунок часу нагріву
+    const dia_cm = (+batch.dia||60)/10; // см
+    const loadFrac = Math.min(1, Math.max(0, (+batch.kg||0)/cap));
+    const heatMin = a*dia_cm + b*loadFrac;
+    const cycleMin = pre + heatMin + hold;
+    // Планування: старт — max(заплан., попередній кінець)
+    const startPlan = new Date(Math.max(batch.startTime, ctx.lastEnd));
+    const endPlan   = addMinutes(startPlan, Math.ceil(cycleMin));
+    // Енергія
+    const kW = +byId('powerKW').value||18;
+    const kWh = kW * (minutesBetween(startPlan,endPlan)/60);
+    return {
+      start: startPlan, end: endPlan,
+      duration: Math.ceil(cycleMin),
+      pre, heatMin: Math.ceil(heatMin), hold,
+      kWh: rnd(kWh,2)
+    };
+  }
+
+  function buildSchedule(){
+    buildBatchesCSV();
+    const rows=[...bodyB.querySelectorAll('tr')].map(r=>{
+      return {
+        name:r.children[1].querySelector('input').value.trim(),
+        kg:+r.children[2].querySelector('input').value||0,
+        dia:+r.children[3].querySelector('input').value||0,
+        start:r.children[4].querySelector('input').value.trim(),
+        lot:r.children[5].querySelector('input').value.trim(),
+        startTime: parseTimeHHMM(r.children[4].querySelector('input').value.trim())?.getTime() || new Date().setHours(8,0,0,0)
+      };
+    });
+    if(!rows.length){ byId('gantt').textContent='—'; byId('csvSchedule').textContent='—'; return; }
+
+    // Посортуємо за стартом
+    rows.sort((a,b)=>a.startTime-b.startTime);
+
+    const lines=[];
+    let sumKg=0, sumMin=0, sumKWh=0;
+    let ctx={lastEnd: rows[0].startTime};
+    lines.push('ЧАС  | ГРАФІК ЦИКЛІВ (— прогрів ▒ нагрів █ витримка)\n------------------------------------------------------');
+
+    const segmentsCSV=[];
+    rows.forEach((b,i)=>{
+      const res = scheduleOne(b, ctx);
+      ctx.lastEnd = res.end.getTime();
+      sumKg += b.kg;
+      sumMin += res.duration;
+      sumKWh += +res.kWh;
+
+      // ASCII-бар: 1 символ ~ 5 хв
+      const units = Math.max(1, Math.round(res.duration/5));
+      const preU = Math.max(0, Math.round(res.pre/5));
+      const heatU= Math.max(0, Math.round(res.heatMin/5));
+      const holdU= Math.max(0, Math.round(res.hold/5));
+      const bar = '—'.repeat(preU) + '▒'.repeat(heatU) + '█'.repeat(holdU) + '·'.repeat(Math.max(0, units - preU - heatU - holdU));
+      lines.push(`${fmtHHMM(res.start)}–${fmtHHMM(res.end)} | ${bar}  ${b.name} (${b.kg} кг, Ø${b.dia} мм, лот ${b.lot})`);
+
+      segmentsCSV.push(
+        `CYCLE|${i+1}|prod=${b.name}|lot=${b.lot}|kg=${b.kg}|dia=${b.dia}mm|start=${fmtHHMM(res.start)}|end=${fmtHHMM(res.end)}|dur_min=${res.duration}|kWh=${res.kWh}`
+      );
+
+      // Оновити квиток попереднім останнім циклом для швидкого друку
+      if(i===rows.length-1){
+        byId('tProd').textContent = b.name;
+        byId('tLot').textContent  = b.lot;
+        byId('tStart').textContent= fmtHHMM(res.start);
+        byId('tEnd').textContent  = fmtHHMM(res.end);
+        byId('tDur').textContent  = res.duration;
+        byId('tCore').textContent = byId('targetCore').value || '—';
+        byId('tHold').textContent = byId('holdMin').value || '—';
+        byId('tKWh').textContent  = res.kWh;
+      }
+    });
+
+    // Вивід
+    byId('gantt').textContent = lines.join('\n');
+
+    const hours = rnd(sumMin/60,2);
+    byId('sumCycles').textContent = rows.length;
+    byId('sumHours').textContent  = hours;
+    byId('sumKg').textContent     = sumKg;
+    byId('sumKWh').textContent    = rnd(sumKWh,2);
+
+    byId('csvSchedule').textContent = segmentsCSV.join('\n');
+    byId('csvEquip').textContent = `EQUIP|power=${byId('powerKW').value}kW|capacity=${byId('capacityKg').value}kg|preheat=${byId('preheatMin').value}min|hold=${byId('holdMin').value}min|a=${byId('coefA').value}|b=${byId('coefB').value}|targetCore=${byId('targetCore').value}C|timeLimit=${byId('timeLimit').value}min`;
+  }
+
+  // ===== КОНТРОЛЬ Tядра / ВИТРИМКИ =====
+  const bodyCore = byId('bodyCore');
+  function addPoint(sample){
+    const now = new Date();
+    const hh = pad2(now.getHours()), mm = pad2(now.getMinutes());
+    const s = Object.assign({hms:`${hh}:${mm}`, temp:''}, sample||{});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="time" value="${s.hms}"></td>
+      <td class="dark"><input type="number" step="0.1" value="${s.temp}"></td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyCore); buildCoreCSV();">✖</button></td>
+    `;
+    bodyCore.appendChild(tr); reindex(bodyCore); buildCoreCSV();
+  }
+  function presetPoints(){
+    bodyCore.innerHTML='';
+    addPoint({hms:'10:00', temp:55.0});
+    addPoint({hms:'10:20', temp:64.0});
+    addPoint({hms:'10:35', temp:70.5});
+    addPoint({hms:'10:45', temp:72.3});
+    addPoint({hms:'10:55', temp:72.1});
+    buildCoreCSV();
+  }
+  function parseHM(s){
+    const m=/^(\d{2}):(\d{2})$/.exec(s||''); if(!m) return null;
+    const d=new Date(); d.setHours(+m[1],+m[2],0,0); return d;
+  }
+  function buildCoreCSV(){
+    const rows=[...bodyCore.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const time=r.children[1].querySelector('input').value.trim();
+      const t=r.children[2].querySelector('input').value.trim();
+      return [idx,time,t].join(' | ');
+    });
+    byId('csvCoreTrack').textContent = rows.join('\n') || '—';
+  }
+  function evaluateCore(){
+    const Tt = +byId('targetCore').value||72;
+    const limitMin = +byId('timeLimit').value||120;
+    const pts = [...bodyCore.querySelectorAll('tr')].map(r=>{
+      const time=r.children[1].querySelector('input').value.trim();
+      const t=Number(r.children[2].querySelector('input').value);
+      const d=parseHM(time); return (d && !isNaN(t))? {d,t}:null;
+    }).filter(Boolean).sort((a,b)=>a.d-b.d);
+    if(pts.length<2){ byId('coreStatus').textContent='Недостатньо точок'; return; }
+    // Знаходимо перший момент Tядра ≥ цілі
+    let tAch=null;
+    for(let i=1;i<pts.length;i++){
+      const a=pts[i-1], b=pts[i];
+      if( (a.t<Tt && b.t>=Tt) || (a.t>=Tt && b.t<Tt) ){
+        // інтерполяція
+        const dt=(b.d-a.d)/60000, dT=b.t-a.t;
+        const frac=(Tt - a.t)/dT;
+        tAch = new Date(a.d.getTime()+frac*dt*60000);
+        break;
+      }
+      if(a.t>=Tt && !tAch) tAch=a.d;
+    }
+    // Витримка: час, протягом якого T ≥ Tt
+    let hold=0;
+    for(let i=1;i<pts.length;i++){
+      const a=pts[i-1], b=pts[i];
+      const dt=(b.d-a.d)/60000, T0=a.t, T1=b.t;
+      if(T0>=Tt && T1>=Tt) hold+=dt;
+      else if((T0>=Tt && T1<Tt) || (T0<Tt && T1>=Tt)){
+        const dT=T1-T0; if(dT!==0){
+          const frac=(Tt - T0)/dT;
+          if(T0>=Tt) hold += Math.max(0, dt*frac);
+          else hold += Math.max(0, dt*(1-frac));
+        }
+      }
+    }
+    const status = (tAch && hold>= (+byId('holdMin').value||15) && minutesBetween(pts[0].d,tAch) <= limitMin)
+      ? '🟢 ВИКОНАНО'
+      : '🔴 НЕ ВИКОНАНО';
+
+    const msg = [
+      `STATUS: ${status}`,
+      `Tядра≥${Tt}°C досягнуто о ${tAch?fmtHHMM(tAch):'—'}`,
+      `Витримка ≥${byId('holdMin').value} хв: фактично ${rnd(hold,0)} хв`,
+      `Час досягнення від початку треку: ${tAch? minutesBetween(pts[0].d,tAch):'—'} хв (ліміт ≤ ${limitMin})`
+    ].join('\n');
+    byId('coreStatus').textContent = msg;
+  }
+
+  // ===== ЖУРНАЛ / КВИТОК / NFC =====
+  const bodyL = byId('bodyLog');
+  function addLog(sample){
+    // Використаємо останній цикл з графіка (з квитка)
+    const def = {
+      prod: byId('tProd').textContent || 'Виріб',
+      lot: byId('tLot').textContent  || '—',
+      start: byId('tStart').textContent|| '—',
+      end: byId('tEnd').textContent    || '—',
+      dur: byId('tDur').textContent    || '—',
+      kwh: byId('tKWh').textContent    || '—',
+      note:''
+    };
+    const s = Object.assign({}, def, sample||{});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.prod}"></td>
+      <td class="dark">${s.lot}</td>
+      <td class="dark">${s.start}</td>
+      <td class="dark">${s.end}</td>
+      <td>${s.dur}</td>
+      <td>${s.kwh}</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyL.appendChild(tr); reindex(bodyL); buildLogCSV();
+  }
+  function buildLogCSV(){
+    const rows=[...bodyL.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const prod=r.children[1].querySelector('input').value.trim();
+      const lot=r.children[2].textContent.trim();
+      const start=r.children[3].textContent.trim();
+      const end=r.children[4].textContent.trim();
+      const dur=r.children[5].textContent.trim();
+      const kwh=r.children[6].textContent.trim();
+      const note=r.children[7].querySelector('input').value.trim();
+      return [idx,prod,lot,start,end,dur,kwh,note].join(' | ');
+    });
+    byId('csvLog').textContent = rows.join('\n') || '—';
+  }
+  function buildTicket(){
+    // вже заповнений у buildSchedule() для останньої партії
+    window.scrollTo({top: document.getElementById('ticket').getBoundingClientRect().top + window.scrollY - 60, behavior:'smooth'});
+  }
+  function buildNFC(){
+    const txt = [
+      `THERMAL_BATCH_NFC`,
+      `PROD:${byId('tProd').textContent} LOT:${byId('tLot').textContent}`,
+      `START:${byId('tStart').textContent} END:${byId('tEnd').textContent} DUR:${byId('tDur').textContent}min`,
+      `CORE_TGT:${byId('tCore').textContent}C HOLD:${byId('tHold').textContent}min`,
+      `ENERGY:${byId('tKWh').textContent}kWh`,
+      `OPER:${byId('operator').value} CONTACT:${byId('nfcPhone').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = txt;
+  }
+
+  // ===== Ініціалізація / слухачі =====
+  (function init(){
+    presetBatches();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select,textarea')) {
+        buildBatchesCSV();
+        if(e.target.closest('#tblBatches') || e.target.closest('.box')) buildSchedule();
+        buildLogCSV(); buildCoreCSV();
+      }
+    });
+  })();
+</script>
+</body>
+</html>
