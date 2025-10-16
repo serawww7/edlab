@@ -1,0 +1,498 @@
+<!-- mechanic_para9.html
+     ПАРА 9 (аудиторно) для механіків
+     Тема: ПЛАНУВАННЯ ТО — ТО-0/ТО-1/ТО-2, інтервали (м/г і календар), прогноз “до/прострочено”, чек-листи,
+           58 мм квиток “ПЛАН ТО”, NFC-маркер для машини, CSV-журнал.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages / Moodle (iframe).
+     Обладнання: телефони, 58 мм термопринтер (опц.), NFC-мітки (опц.).
+
+     Що вміє:
+     • Вести картку машини: модель, рік, інв. №, годинник, пробіг (опц.), тип мастила/фільтрів.
+     • Інтервали ТО в м/год і/або днях; зберігає останні виконання; прогнозує “Залишок, м/г / днів”.
+     • Чек-лист задач ТО (масло, фільтри, ремені, охолодж., гідравліка, гальма, світло, електрика, ПЗ/коди).
+     • Генерує 58 мм квиток та NFC-текст; експорт CSV; кольорові стани: 🟢 ок / 🟠 скоро / 🔴 прострочено.
+     Примітка щодо контрасту: темні клітинки мають світлий текст (.dark).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 9 (механіки) — Планування ТО: інтервали, прогноз, чек-листи, квиток 58 мм, NFC, CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 9 · аудиторно · механіки</span>
+  <h1>🛠️ Планування ТО: інтервали, прогноз, чек-листи, квиток 58 мм, NFC, CSV</h1>
+
+  <div class="card">
+    <h2>🎯 Мета</h2>
+    <p>
+      За пару студенти створять <b>цифрову картку машини</b>, зададуть <b>інтервали ТО</b> (м/год і календар),
+      отримають <b>прогноз</b> по кожному пункту (🟢/🟠/🔴), сформують <b>чек-лист робіт</b>,
+      згенерують <b>квиток 58 мм</b>, <b>NFC</b>-маркер і <b>CSV</b>-журнал.
+    </p>
+    <p class="small">Базові інтервали (навчально): масло двигуна 250 м/г або 6 міс; фільтр масла 250 м/г; паливний фільтр 500 м/г; повітряний фільтр 250 м/г;
+      охолоджуюча рідина 24 міс; гідравлічне масло 1000 м/г; ремені — огляд кожні 250 м/г; гальма/світло — щомісяця.</p>
+  </div>
+
+  <!-- КАРТКА МАШИНИ -->
+  <div class="card">
+    <h2>🚜 Картка машини</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Загальні</h3>
+        <div class="row">
+          <div style="flex:1"><label>Модель</label><input id="model" type="text" value="Трактор MFWD 120hp"></div>
+          <div style="flex:1"><label>Рік</label><input id="year" type="number" value="2019"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Інв. №</label><input id="inv" type="text" value="TR-001"></div>
+          <div style="flex:1"><label>Власник/бригада</label><input id="owner" type="text" value="Бригада №2"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Лічильники</h3>
+        <div class="row">
+          <div style="flex:1"><label>Поточні м/г</label><input id="hours" type="number" step="1" value="3240"></div>
+          <div style="flex:1"><label>Сер. м/г за добу</label><input id="hoursPerDay" type="number" step="0.1" value="6.0"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Сьогодні (дата)</label><input id="today" type="date"></div>
+          <div style="flex:1"><label>Контакт (тел.)</label><input id="phone" type="text" value="+380XXXXXXXXX"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="preset()">🧪 Приклад</button>
+          <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvCard')">📋 CSV (картка)</button>
+        </div>
+        <div id="csvCard" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ІНТЕРВАЛИ ТА ОСТАННЄ ВИКОНАННЯ -->
+  <div class="card">
+    <h2>⏱️ Інтервали ТО та останнє виконання</h2>
+    <div class="row">
+      <button class="btn" onclick="addRow()">➕ Додати пункт</button>
+      <button class="btn" onclick="presetRows()">📚 Заповнити базові</button>
+      <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+      <button class="btn" onclick="copyCSV('csvPlan')">📋 CSV (план)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tbl">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Пункт ТО</th>
+            <th>Інтервал, м/г</th>
+            <th>Інтервал, днів</th>
+            <th>Останні м/г</th>
+            <th>Остання дата</th>
+            <th class="dark">До м/г</th>
+            <th class="dark">До днів</th>
+            <th class="dark">Статус</th>
+            <th>Примітка</th>
+          </tr>
+        </thead>
+        <tbody id="body"></tbody>
+      </table>
+    </div>
+    <div id="csvPlan" class="out" style="margin-top:8px">—</div>
+    <p class="small muted">Статус: 🟢 ≥15% запасу; 🟠 <15% запасу; 🔴 ≤0 (прострочено). Якщо задано і м/г, і дні — береться гірший (критичніший) результат.</p>
+  </div>
+
+  <!-- ЧЕК-ЛИСТ РОБІТ -->
+  <div class="card">
+    <h2>✅ Чек-лист робіт для наступного ТО</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>Стандартний перелік</h3>
+        <div class="row">
+          <label style="flex:1"><input type="checkbox" class="chk" checked> Заміна масла двигуна (вказати марку)</label>
+        </div>
+        <div class="row">
+          <label style="flex:1"><input type="checkbox" class="chk" checked> Фільтр масляний</label>
+        </div>
+        <div class="row">
+          <label style="flex:1"><input type="checkbox" class="chk" checked> Фільтр паливний / відстійник</label>
+        </div>
+        <div class="row">
+          <label style="flex:1"><input type="checkbox" class="chk" checked> Повітряний фільтр (+ очищення попередника)</label>
+        </div>
+        <div class="row">
+          <label style="flex:1"><input type="checkbox" class="chk"> Перевірка ременів/натягу/шківів</label>
+        </div>
+        <div class="row">
+          <label style="flex:1"><input type="checkbox" class="chk"> Рідина охолодження (щільність, рівень, шланги)</label>
+        </div>
+        <div class="row">
+          <label style="flex:1"><input type="checkbox" class="chk"> Гідравлічне масло/фільтр/витоки</label>
+        </div>
+        <div class="row">
+          <label style="flex:1"><input type="checkbox" class="chk"> Гальма, стоянкове, регулювання</label>
+        </div>
+        <div class="row">
+          <label style="flex:1"><input type="checkbox" class="chk"> Світло, сигнал, електрика, клеми АКБ</label>
+        </div>
+        <div class="row">
+          <label style="flex:1"><input type="checkbox" class="chk"> Перевірка кодів/оновлення ПЗ (якщо є)</label>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Додати власні задачі</h3>
+        <div class="row">
+          <input id="customTask" type="text" placeholder="Напр.: Змащення шарнірів навіски">
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="addTask()">➕ Додати</button>
+          <button class="btn" onclick="buildChecklist()">🧾 Зібрати нотатки</button>
+        </div>
+        <div id="checkOut" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- КВИТОК + NFC -->
+  <div class="card">
+    <h2>🧾 Квиток 58 мм та NFC</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>NFC — “SERVICE CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток “ПЛАН ТО”</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>ПЛАН ТО</h4>
+          <p id="tDate"><small>Дата: —</small></p>
+          <div class="line"></div>
+          <p><b>Модель:</b> <span id="tModel">—</span></p>
+          <p><b>Інв. № / Рік:</b> <span id="tInv">—</span> / <span id="tYear">—</span></p>
+          <p><b>Лічильник:</b> <span id="tHours">—</span> м/г</p>
+          <div class="line"></div>
+          <p><b>ТО найближче:</b></p>
+          <p id="tNext1">—</p>
+          <p id="tNext2">—</p>
+          <div class="line"></div>
+          <p><small id="tNote">Прим.: —</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Заповни <b>картку машини</b> (модель, інв.№, м/г, дата, бригада, контакт).</li>
+      <li>Додай/скоригуй <b>пункти ТО</b>, заповни <b>інтервали</b> та <b>останнє виконання</b> → натисни “Перерахувати”.</li>
+      <li>Подивись <b>статуси</b> (🟢/🟠/🔴), сформуй <b>чек-лист</b> і <b>план</b> на найближчі 50 м/г або 30 днів.</li>
+      <li>Згенеруй <b>NFC</b>, <b>квиток 58 мм</b> та <b>CSV</b> у Sheets (<span class="mono">ServicePlan</span>).</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Картка машини (дані повні, реалістичні)</td><td>2</td></tr>
+        <tr><td>Інтервали/остання дата/м/г коректно внесені</td><td>3</td></tr>
+        <tr><td>Статуси та прогноз розраховані, рішення обґрунтовані</td><td>3</td></tr>
+        <tr><td>Квиток/NFC + CSV</td><td>2</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const bodyEl = document.getElementById('body');
+
+  // Сьогодні за замовчуванням
+  (function setToday(){
+    const t = new Date();
+    byId('today').value = new Date(t.getTime()-t.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  })();
+
+  // --- Модель даних рядка ТО ---
+  function addRow(sample){
+    const def = {name:'Масло двигуна', intH:250, intD:180, lastH:3000, lastD:(byId('today').value), note:''};
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.name}"></td>
+      <td><input type="number" step="1" value="${s.intH}"></td>
+      <td><input type="number" step="1" value="${s.intD}"></td>
+      <td><input type="number" step="1" value="${s.lastH}"></td>
+      <td><input type="date" value="${s.lastD}"></td>
+      <td class="dark toH">—</td>
+      <td class="dark toD">—</td>
+      <td class="dark flag">—</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyEl.appendChild(tr);
+    reindex();
+  }
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  // --- Пресети ---
+  function preset(){
+    byId('model').value = 'John Deere 6155M';
+    byId('year').value  = 2020;
+    byId('inv').value   = 'JD-6155-02';
+    byId('owner').value = 'Бригада №1';
+    byId('hours').value = 4120;
+    byId('hoursPerDay').value = 7.5;
+    byId('phone').value = '+380671234567';
+  }
+
+  function presetRows(){
+    bodyEl.innerHTML='';
+    const today = byId('today').value;
+    const dateShift = d => {
+      const dt = new Date(today); dt.setDate(dt.getDate()-d);
+      return new Date(dt.getTime()-dt.getTimezoneOffset()*60000).toISOString().slice(0,10);
+    };
+    addRow({name:'Масло двигуна',     intH:250, intD:180, lastH:+byId('hours').value-220, lastD:dateShift(150)});
+    addRow({name:'Фільтр масляний',   intH:250, intD:180, lastH:+byId('hours').value-220, lastD:dateShift(150)});
+    addRow({name:'Фільтр паливний',   intH:500, intD:360, lastH:+byId('hours').value-520, lastD:dateShift(380)});
+    addRow({name:'Фільтр повітряний', intH:250, intD:180, lastH:+byId('hours').value-100, lastD:dateShift(90)});
+    addRow({name:'Охол. рідина',      intH:999999, intD:730, lastH:+byId('hours').value-800, lastD:dateShift(600)});
+    addRow({name:'Гідравл. масло',    intH:1000, intD:720, lastH:+byId('hours').value-1100,lastD:dateShift(800)});
+    addRow({name:'Ремені/шківи',      intH:250, intD:90,  lastH:+byId('hours').value-180, lastD:dateShift(70)});
+    addRow({name:'Гальма/стояночне',  intH:200, intD:30,  lastH:+byId('hours').value-60,  lastD:dateShift(20)});
+    addRow({name:'Світло/електрика',  intH:200, intD:30,  lastH:+byId('hours').value-60,  lastD:dateShift(20)});
+    addRow({name:'Коди/ПЗ',           intH:500, intD:180, lastH:+byId('hours').value-300, lastD:dateShift(100)});
+    recalc();
+  }
+
+  // --- Розрахунок залишку та статусів ---
+  function daysBetween(d1, d2){
+    const a = new Date(d1+'T00:00:00'); const b = new Date(d2+'T00:00:00');
+    const ms = (b - a); return Math.round(ms / 86400000);
+  }
+
+  function statusByRemain(remH, remD){
+    // Негатив або нуль → червоне
+    const worst = Math.min(remH, remD);
+    if (worst <= 0) return {txt:'🔴 прострочено', cls:'bad'};
+    // Запас у % по гіршому критерію: візьмемо від інтервалу
+    return {txt:'🟢 ок', cls:'ok'};
+  }
+
+  function recalc(){
+    const hours = +byId('hours').value||0;
+    const hpd = +byId('hoursPerDay').value||0;
+    const today = byId('today').value;
+
+    let planLines = [];
+    [...bodyEl.querySelectorAll('tr')].forEach(tr=>{
+      const name = tr.children[1].querySelector('input').value.trim();
+      const intH = +tr.children[2].querySelector('input').value||0;
+      const intD = +tr.children[3].querySelector('input').value||0;
+      const lastH = +tr.children[4].querySelector('input').value||0;
+      const lastD = tr.children[5].querySelector('input').value;
+
+      // Залишки
+      const remH = (intH>999000 ? Infinity : (intH - (hours - lastH)));
+      const daysSince = daysBetween(lastD, today);
+      const remD = (intD>999000 ? Infinity : (intD - daysSince));
+
+      // Оцінимо дату спрацювання по м/г: якщо hpd>0
+      let etaHDate = '—';
+      if (isFinite(remH) && remH!==Infinity && hpd>0){
+        const daysTo = Math.max(0, Math.ceil(remH / hpd));
+        const dt = new Date(today+'T00:00:00'); dt.setDate(dt.getDate()+daysTo);
+        etaHDate = new Date(dt.getTime()-dt.getTimezoneOffset()*60000).toISOString().slice(0,10);
+      }
+
+      // Статус (беремо гірший критерій): перетворимо Infinity у великий запас
+      const remHf = isFinite(remH)? remH : 1e9;
+      const remDf = isFinite(remD)? remD : 1e9;
+      let worst = remHf; let worstTag='м/г';
+      if(remDf < worst){ worst = remDf; worstTag='дні'; }
+
+      let flagTxt='🟢 ок', color='#10b981';
+      if (worst <= 0){ flagTxt='🔴 прострочено'; color='#ef4444'; }
+      else {
+        // % запасу: відносно інтервалу по відповідному критерію
+        const base = (worstTag==='м/г' ? intH : intD);
+        const pct = base>0? worst/base*100 : 100;
+        if (pct < 15){ flagTxt='🟠 скоро'; color='#f59e0b'; }
+      }
+
+      tr.querySelector('.toH').textContent = isFinite(remH)? (Math.round(remH)+' м/г') : '—';
+      tr.querySelector('.toD').textContent = isFinite(remD)? (Math.round(remD)+' дн') : '—';
+      tr.querySelector('.flag').textContent = flagTxt+' ('+worstTag+')';
+      tr.querySelector('.flag').style.color = color;
+
+      planLines.push([name, intH||'-', intD||'-', lastH, lastD, isFinite(remH)?Math.round(remH):'-', isFinite(remD)?Math.round(remD):'-', flagTxt].join(' | '));
+    });
+
+    // CSV картки
+    const card = [
+      `CARD|Model=${byId('model').value}|Year=${byId('year').value}|Inv=${byId('inv').value}|Owner=${byId('owner').value}`,
+      `METER|Hours=${hours}|HPD=${hpd}|Date=${today}|Phone=${byId('phone').value}`
+    ].join('\n');
+    byId('csvCard').textContent = card;
+
+    // CSV плану
+    byId('csvPlan').textContent = planLines.join('\n') || '—';
+  }
+
+  // --- Чек-лист в текст ---
+  function addTask(){
+    const s = byId('customTask').value.trim();
+    if(!s){ alert('Введи назву задачі'); return; }
+    const div = document.createElement('div');
+    div.className='row';
+    div.innerHTML = `<label style="flex:1"><input type="checkbox" class="chk" checked> ${s}</label>`;
+    byId('customTask').value='';
+    // додамо перед кнопками — у першій колонці (стандартний перелік)
+    // знайдемо першу колонку і додамо в її кінець
+    const firstBox = document.querySelectorAll('.grid.g2 .box')[0];
+    firstBox.appendChild(div);
+  }
+
+  function buildChecklist(){
+    const items = [...document.querySelectorAll('.chk')].map(ch=>{
+      const txt = ch.parentElement.textContent.trim();
+      return (ch.checked?'[x] ':'[ ] ') + txt;
+    });
+    byId('checkOut').textContent = items.join('\n');
+  }
+
+  // --- Квиток 58 мм ---
+  function buildTicket(){
+    const d = new Date().toISOString().slice(0,10);
+    byId('tDate').innerHTML = `<small>Дата: ${d}</small>`;
+    byId('tModel').textContent = byId('model').value;
+    byId('tInv').textContent   = byId('inv').value;
+    byId('tYear').textContent  = byId('year').value;
+    byId('tHours').textContent = byId('hours').value;
+
+    // Витягнемо два найближчих (найменший залишок з > -∞)
+    const rows = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const name = tr.children[1].querySelector('input').value.trim();
+      const remH = tr.querySelector('.toH').textContent;
+      const remD = tr.querySelector('.toD').textContent;
+      const flag = tr.querySelector('.flag').textContent.trim();
+      // числові
+      const nH = remH==='—'? 1e9 : parseInt(remH);
+      const nD = remD==='—'? 1e9 : parseInt(remD);
+      const score = Math.min(nH, nD); // менший → ближче
+      return {name, remH, remD, flag, score};
+    }).sort((a,b)=>a.score-b.score);
+
+    const line = r => `${r.name}: ${r.remH}, ${r.remD} — ${r.flag}`;
+    byId('tNext1').textContent = rows[0]? line(rows[0]) : '—';
+    byId('tNext2').textContent = rows[1]? line(rows[1]) : '—';
+
+    byId('tNote').textContent = `Бригада: ${byId('owner').value}; Контакт: ${byId('phone').value}`;
+  }
+
+  // --- NFC-текст ---
+  function buildNFC(){
+    const text = [
+      `SERVICE_NFC`,
+      `MODEL:${byId('model').value}`,
+      `INV:${byId('inv').value}`,
+      `HOURS:${byId('hours').value}; HPD:${byId('hoursPerDay').value}`,
+      `DATE:${byId('today').value}`,
+      `NEXT:${document.getElementById('tNext1').textContent.replace(/\s+/g,' ')}`,
+      `PHONE:${byId('phone').value}`
+    ].join('\n');
+    byId('nfcOut').textContent = text;
+  }
+
+  // --- Копіювання CSV/текстів ---
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // --- Ініціалізація та слухачі ---
+  (function init(){
+    addRow();
+    recalc();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select')) recalc();
+    });
+  })();
+</script>
+</body>
+</html>
