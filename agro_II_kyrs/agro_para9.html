@@ -1,0 +1,440 @@
+<!-- agro_para9.html
+     ПАРА 9 (аудиторно) для агрономів
+     Тема: ЗМІШУВАННЯ ДОБРИВ NPK — ціль по N–P₂O₅–K₂O, підбір суміші (до 3 продуктів), собівартість, план завантажень, CSV
+     Фокус: телефони/ПК, локально; без сторонніх бібліотек. Контраст темних клітинок: світлий текст.
+
+     Що є:
+     • Список добрив (редагований): %N, %P₂O₅, %K₂O, ціна грн/т.
+     • Ціль kg/ha N–P–K, площа поля, місткість розкидача/сівалки.
+     • Підбір суміші (апрокс. NNLS): перебір x3 та розв’язок 2×2 для x1,x2, з обмеженнями ≥0, maxRate.
+     • Показ відхилень, вартість/га, вартість на поле, план завантажень (тоннаж), CSV-експорт.
+     • Темні клітинки (клас .dark) — світлий текст (як просив викладач).
+
+     Готово для GitHub Pages / вставки в Moodle через iFrame.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 9 — Змішування NPK: ціль → суміш → вартість → завантаження</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .small{font-size:12px; color:#9fb0c8}
+  .muted{color:#93a3b5}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)}
+  .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
+  .table td .tag{display:inline-block; padding:3px 8px; border-radius:999px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; font-size:12px}
+
+  input[type="text"], input[type="number"]{
+    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
+  }
+  .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+  html.embedded .box{background:#f8fafc; color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+
+  @media print{
+    @page{ margin:12mm }
+    .no-print{ display:none !important }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 9 · аудиторно · агрономи</span>
+    <h1>🧮 Змішування добрив NPK: ціль → суміш → вартість → завантаження</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        За пару студенти підбирають <b>суміш до 3 добрив</b> під задану норму <b>N–P₂O₅–K₂O, кг/га</b> з урахуванням ціни і технічних обмежень.
+        Результат: <b>рецепт, відхилення, собівартість/га</b>, план завантажень для усього поля та <b>CSV</b> для Sheets.
+      </p>
+      <p class="small">Математика: простий пошук прийнятного рішення (x≥0) із мінімальною сумою квадратичних відхилень по N,P,K з кроком для третього продукту.</p>
+    </div>
+
+    <!-- ЦІЛІ + ПАРАМЕТРИ ПОЛЯ -->
+    <div class="card">
+      <h2>🎯 Цілі внесення та параметри поля</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Ціль (кг діючої речовини / га)</h3>
+          <div class="row">
+            <div style="flex:1"><label>N</label><input id="tN" type="number" step="1" value="90"></div>
+            <div style="flex:1"><label>P₂O₅</label><input id="tP" type="number" step="1" value="60"></div>
+            <div style="flex:1"><label>K₂O</label><input id="tK" type="number" step="1" value="60"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Допустиме відхилення, %</label><input id="tol" type="number" step="1" value="7"></div>
+            <div style="flex:1"><label>Макс суміш, кг/га</label><input id="maxRate" type="number" step="1" value="500"></div>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Поле та логістика</h3>
+          <div class="row">
+            <div style="flex:1"><label>Код поля</label><input id="fieldCode" type="text" value="F-01"></div>
+            <div style="flex:1"><label>Площа, га</label><input id="area" type="number" step="0.01" value="25"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Місткість бункера/розкидача, кг</label><input id="hopper" type="number" step="10" value="3000"></div>
+            <div style="flex:1"><label>Крок x₃ (кг/га) для пошуку</label><input id="step3" type="number" step="1" value="5"></div>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Керування</h3>
+          <div class="row">
+            <button class="btn" onclick="solve()">🔁 Підібрати суміш</button>
+            <button class="btn" onclick="addFert()">➕ Додати продукт</button>
+            <button class="btn" onclick="preset()">🧪 Приклад</button>
+          </div>
+          <p class="small">Порада: для старту скористайся «Приклад» (сечовина + DAP + MOP).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ТАБЛИЦЯ ДОБРИВ -->
+    <div class="card">
+      <h2>🧱 Перелік добрив (редагуй за потреби)</h2>
+      <div class="small muted">Формат: Назва | %N | %P₂O₅ | %K₂O | Ціна, грн/т</div>
+      <div style="overflow:auto; margin-top:8px">
+        <table class="table" id="fertTbl">
+          <thead>
+            <tr>
+              <th>#</th><th>Назва</th><th>%N</th><th>%P₂O₅</th><th>%K₂O</th><th>Ціна, грн/т</th><th>Використати?</th>
+            </tr>
+          </thead>
+          <tbody id="fertBody">
+            <!-- наповнюється скриптом -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- РЕЗУЛЬТАТИ -->
+    <div class="card">
+      <h2>📊 Результат підбору</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Рецепт (кг/га)</h3>
+          <div id="recipe" class="out">—</div>
+          <p class="small">Суміш: <span id="sumMix" class="mono">—</span> кг/га</p>
+          <p class="small">Поживні з суміші: <span id="achieved" class="mono">—</span> (N | P₂O₅ | K₂O)</p>
+          <p class="small">Відхилення: <span id="devi" class="mono">—</span> %</p>
+        </div>
+        <div class="box">
+          <h3>Економіка</h3>
+          <p><b>Вартість суміші</b>: <span id="costHa" class="mono">—</span> грн/га</p>
+          <p><b>На поле (<span id="areaShow">—</span> га)</b>: <span id="costField" class="mono">—</span> грн</p>
+          <p><b>Ціна 1 кг N/P₂O₅/K₂O</b> (з суміші): <span id="cpu" class="mono">—</span> грн/кг N | P | K</p>
+        </div>
+        <div class="box">
+          <h3>План завантажень</h3>
+          <p>Разом маса суміші на поле: <b><span id="massField">—</span> кг</b></p>
+          <p>Місткість бункера: <span id="hopShow">—</span> кг → <b><span id="loads">—</span> завантажень</b></p>
+          <div id="loadsPlan" class="out" style="margin-top:6px">—</div>
+        </div>
+      </div>
+
+      <div class="grid g2" style="margin-top:12px">
+        <div class="box">
+          <h3>📄 CSV — рецепт (кг/га, ціна)</h3>
+          <div id="csv1" class="out">—</div>
+          <div class="row" style="margin-top:6px">
+            <button class="btn" onclick="copyEl('csv1')">📋 Копіювати</button>
+          </div>
+        </div>
+        <div class="box">
+          <h3>📄 CSV — тоннаж на поле</h3>
+          <div id="csv2" class="out">—</div>
+          <div class="row" style="margin-top:6px">
+            <button class="btn" onclick="copyEl('csv2')">📋 Копіювати</button>
+          </div>
+        </div>
+      </div>
+      <p class="small muted">Контраст: темні клітинки (клас <span class="mono">.dark</span>) та парні рядки таблиць мають світлий текст.</p>
+    </div>
+
+    <!-- ХІД РОБОТИ, ОЦІНЮВАННЯ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+      <ol>
+        <li>Заповни цілі N–P–K, площу, місткість бункера та таблицю добрив (або натисни «Приклад»).</li>
+        <li>Відміть галочкою 2–3 продукти, якими дозволено користуватись, та натисни «Підібрати суміш».</li>
+        <li>Перевір відхилення від цілі та собівартість. За потреби змінюй набір продуктів або ціль/допуск.</li>
+        <li>Скопіюй CSV у Google Sheets: «Recipe» та «FieldLoads», побудуй діаграму ціни/га для різних рецептів.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Коректний рецепт (відхилення в межах допуску) та розрахунок мас</td><td>4</td></tr>
+          <tr><td>Економіка: вартість/га, вартість на поле, ціна 1 кг N/P/K</td><td>3</td></tr>
+          <tr><td>План завантажень сформовано, CSV збережено у Sheets</td><td>2</td></tr>
+          <tr><td>Короткі висновки (що впливає на ціну та відхилення)</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">🧮 Лінійні суміші</p><p class="pill">💸 Собівартість/га</p><p class="pill">🚚 Завантаження</p><p class="pill">📊 CSV → Sheets</p>
+    </div>
+  </div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const fertBody = document.getElementById('fertBody');
+
+  function addFertRow(f){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${f.name}"></td>
+      <td><input type="number" step="0.1" value="${f.N}"></td>
+      <td><input type="number" step="0.1" value="${f.P}"></td>
+      <td><input type="number" step="0.1" value="${f.K}"></td>
+      <td><input type="number" step="1" value="${f.price}"></td>
+      <td style="text-align:center"><input type="checkbox" ${f.use?'checked':''}></td>
+    `;
+    fertBody.appendChild(tr);
+    reindexF();
+  }
+  function reindexF(){ [...fertBody.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  function readFerts(){
+    const rows = [...fertBody.querySelectorAll('tr')];
+    return rows.map(tr=>{
+      return {
+        name: tr.children[1].querySelector('input').value.trim(),
+        N: parseFloat(tr.children[2].querySelector('input').value||'0'),
+        P: parseFloat(tr.children[3].querySelector('input').value||'0'),
+        K: parseFloat(tr.children[4].querySelector('input').value||'0'),
+        price: parseFloat(tr.children[5].querySelector('input').value||'0'),
+        use: tr.children[6].querySelector('input').checked,
+        _tr: tr
+      };
+    });
+  }
+
+  function addFert(){
+    addFertRow({name:'NPK 16-16-16',N:16,P:16,K:16,price:19000,use:true});
+  }
+
+  function preset(){
+    fertBody.innerHTML='';
+    addFertRow({name:'Сечовина (46-0-0)',N:46,P:0,K:0,price:22000,use:true});
+    addFertRow({name:'ДАФ (18-46-0)',N:18,P:46,K:0,price:26000,use=true});
+    addFertRow({name:'MOP Калій хлористий (0-0-60)',N:0,P:0,K:60,price:18000,use=true});
+    addFertRow({name:'Аміачна селітра (34-0-0)',N:34,P:0,K:0,price:21000,use:false});
+    addFertRow({name:'MAP (11-52-0)',N:11,P:52,K:0,price:27000,use:false});
+  }
+
+  function solve(){
+    const tN = num('tN'), tP = num('tP'), tK = num('tK');
+    const tol = num('tol'); // %
+    const maxRate = num('maxRate'); // кг/га
+    const step3 = Math.max(1, num('step3'));
+
+    const ferts = readFerts().filter(f=>f.use);
+    if(ferts.length<2){ alert('Відміть щонайменше ДВА продукти для підбору.'); return; }
+    if(ferts.length>3){ alert('Для цієї пари використай до 3 продуктів (відміть максимум три).'); return; }
+
+    // Якщо рівно 2 продукти — розвʼязуємо по двох нутрієнтах (N і P), K контролюємо як відхилення.
+    // Якщо 3 продукти — перебираємо x3 з кроком і розвʼязуємо 2×2 для x1,x2.
+    let best=null;
+
+    if(ferts.length===2){
+      const [A,B] = ferts;
+      // виберемо дві рівняння: N та P (якщо P обох 0, беремо K)
+      let M=[[A.N/100, B.N/100],[A.P/100, B.P/100]], b=[tN, tP], useK=false;
+      if(A.P===0 && B.P===0){ M=[[A.N/100,B.N/100],[A.K/100,B.K/100]]; b=[tN,tK]; useK=true; }
+
+      const sol = solve2(M,b);
+      if(sol){
+        const [x1,x2] = sol;
+        if(x1>=0 && x2>=0 && x1+x2<=maxRate){
+          const n = x1*A.N/100 + x2*B.N/100;
+          const p = x1*A.P/100 + x2*B.P/100;
+          const k = x1*A.K/100 + x2*B.K/100;
+          const devN = pctDev(n,tN), devP=pctDev(p,tP), devK=pctDev(k,tK);
+          const ok = Math.abs(devN)<=tol && Math.abs(devP)<=tol && Math.abs(devK)<=tol;
+          const score = devN*devN + devP*devP + devK*devK + (ok?0:1000);
+          best = {x:[x1,x2,0], ferts:[A,B], n,p,k, dev:[devN,devP,devK], score};
+        }
+      }
+    } else {
+      const [A,B,C] = ferts;
+      for(let x3=0; x3<=maxRate; x3+=step3){
+        // Рівняння: [N,P] для x1,x2 з поправкою на внесок x3
+        const bN = tN - x3*C.N/100;
+        const bP = tP - x3*C.P/100;
+        const M=[[A.N/100, B.N/100],[A.P/100, B.P/100]], b=[bN,bP];
+
+        const sol = solve2(M,b);
+        if(!sol) continue;
+        const [x1,x2]=sol;
+        if(x1<0||x2<0) continue;
+        if(x1+x2+x3>maxRate) continue;
+
+        const n = x1*A.N/100 + x2*B.N/100 + x3*C.N/100;
+        const p = x1*A.P/100 + x2*B.P/100 + x3*C.P/100;
+        const k = x1*A.K/100 + x2*B.K/100 + x3*C.K/100;
+
+        const devN = pctDev(n,tN), devP=pctDev(p,tP), devK=pctDev(k,tK);
+        const ok = Math.abs(devN)<=tol && Math.abs(devP)<=tol && Math.abs(devK)<=tol;
+        const score = devN*devN + devP*devP + devK*devK + (ok?0:1000) + (x1+x2+x3)/10000; // легкий пріор. менших сумішей
+        if(!best || score<best.score){
+          best = {x:[x1,x2,x3], ferts:[A,B,C], n,p,k, dev:[devN,devP,devK], score};
+        }
+      }
+    }
+
+    if(!best){
+      show('recipe','❌ Не знайдено прийнятної суміші. Спробуй ↑ допуск, ↑ maxRate або інші продукти.');
+      document.getElementById('achieved').textContent='—';
+      document.getElementById('devi').textContent='—';
+      document.getElementById('sumMix').textContent='—';
+      document.getElementById('costHa').textContent='—';
+      document.getElementById('costField').textContent='—';
+      document.getElementById('cpu').textContent='—';
+      document.getElementById('massField').textContent='—';
+      document.getElementById('loads').textContent='—';
+      document.getElementById('loadsPlan').textContent='—';
+      document.getElementById('csv1').textContent='—';
+      document.getElementById('csv2').textContent='—';
+      return;
+    }
+
+    const x = best.x.map(v=>round(v,1));
+    const names = best.ferts.map(f=>f.name);
+    const recipeLines = x.map((v,i)=>`${names[i]||('Dobриво '+(i+1))}: ${v} кг/га`);
+    show('recipe', recipeLines.join('\n'));
+    const sumMix = x.reduce((a,b)=>a+b,0);
+    byId('sumMix').textContent = round(sumMix,1);
+
+    byId('achieved').textContent = `${round(best.n,1)} | ${round(best.p,1)} | ${round(best.k,1)} кг/га`;
+    const devs = best.dev.map(d=>round(d,1));
+    byId('devi').textContent = `${fmtDev(devs[0])} | ${fmtDev(devs[1])} | ${fmtDev(devs[2])}`;
+
+    // Економіка
+    const prices = best.ferts.map(f=>f.price);
+    const costPerHa = x.reduce((s,v,i)=>s + (v/1000)*prices[i], 0);
+    byId('costHa').textContent = round(costPerHa,0).toLocaleString('uk-UA');
+
+    const area = num('area'); byId('areaShow').textContent = area;
+    const costField = costPerHa * area;
+    byId('costField').textContent = round(costField,0).toLocaleString('uk-UA');
+
+    // Ціна за кг діючої речовини у суміші (орієнтовно; якщо нуль — «—»)
+    const cN = best.n>0 ? costPerHa/best.n : 0;
+    const cP = best.p>0 ? costPerHa/best.p : 0;
+    const cK = best.k>0 ? costPerHa/best.k : 0;
+    byId('cpu').textContent = `${cN?round(cN,1):'—'} | ${cP?round(cP,1):'—'} | ${cK?round(cK,1):'—'}`;
+
+    // План завантажень
+    const massField = sumMix * area; byId('massField').textContent = round(massField,0).toLocaleString('uk-UA');
+    const hopper = num('hopper'); byId('hopShow').textContent = hopper.toLocaleString('uk-UA');
+    const loads = Math.max(1, Math.ceil(massField / hopper));
+    byId('loads').textContent = loads;
+
+    const tonsPerFert = x.map(v=>v*area/1000); // т на поле
+    const loadsPlan = tonsPerFert.map((t,i)=>`${names[i]}: ${round(t,2)} т`).join('\n');
+    byId('loadsPlan').textContent = loadsPlan;
+
+    // CSV
+    const csv1 = [
+      ['Поле', 'Площа,га', 'Продукт', 'кг/га', 'Ціна,грн/т', 'Вартість/га,грн'].join(' | ')
+    ].concat(
+      x.map((v,i)=>[val('fieldCode'), area, names[i], round(v,1), prices[i], round((v/1000)*prices[i],0)].join(' | '))
+    ).concat([
+      ['Разом, кг/га', round(sumMix,1)].join(' | '),
+      ['Досягнуто N | P₂O₅ | K₂O', `${round(best.n,1)} | ${round(best.p,1)} | ${round(best.k,1)}`].join(' | '),
+      ['Відхилення N | P₂O₅ | K₂O, %', `${fmtDev(devs[0])} | ${fmtDev(devs[1])} | ${fmtDev(devs[2])}`].join(' | '),
+      ['Вартість суміші, грн/га', round(costPerHa,0)].join(' | ')
+    ]).join('\n');
+    byId('csv1').textContent = csv1;
+
+    const csv2 = [
+      ['Поле', 'Площа,га', 'Продукт', 'Тоннаж,т'].join(' | ')
+    ].concat(
+      tonsPerFert.map((t,i)=>[val('fieldCode'), area, names[i], round(t,2)].join(' | '))
+    ).concat([
+      ['Разом суміш, т', round(massField/1000,2)].join(' | '),
+      ['Місткість бункера, кг', hopper].join(' | '),
+      ['Завантажень (≈)', loads].join(' | ')
+    ]).join('\n');
+    byId('csv2').textContent = csv2;
+  }
+
+  // Допоміжні функції
+  function solve2(M,b){
+    // M 2x2, b 2x1 → повертає [x1,x2] або null
+    const a=M[0][0], c=M[0][1], d=M[1][0], e=M[1][1];
+    const det = a*e - c*d;
+    if(Math.abs(det)<1e-9) return null;
+    const x1 = ( b[0]*e - c*b[1] )/det;
+    const x2 = ( a*b[1] - b[0]*d )/det;
+    return [x1,x2];
+  }
+  function pctDev(val,target){ if(target===0) return 0; return (val-target)/target*100; }
+  function round(n,d=1){ return Number((+n).toFixed(d)); }
+  function num(id){ return parseFloat((document.getElementById(id).value||'').replace(',','.'))||0; }
+  function val(id){ return (document.getElementById(id).value||'').trim(); }
+  function byId(id){ return document.getElementById(id); }
+  function show(id,txt){ byId(id).textContent = txt; }
+  function fmtDev(d){ const s= (d>=0?'+':'')+d.toFixed(1); return s; }
+  function copyEl(id){
+    const t = byId(id).textContent.trim(); if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // Початкові дані
+  preset();
+  solve();
+</script>
+</body>
+</html>
