@@ -1,0 +1,471 @@
+<!-- tech_para3.html
+     ПАРА 3 (аудиторно) для технологів з переробки продукції тваринництва
+     Тема: РЕЦЕПТУРИ ТА ПОСІЛ — розсол, кухонна сіль, нітритна сіль, ppm нітриту,
+           водозв’язування та втрати при термообробці, харчова цінність, квиток 58 мм, NFC, CSV-журнал.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; (опц.) термопринтер 58 мм; NFC-мітки.
+
+     Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
+     ВАЖЛИВО: це навчальний калькулятор. Фактичні норми (нітрит/сіль/добавки) перевіряйте за чинними ТУ, рецептурами та HACCP-планом.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 3 (технологи) — Рецептури та посіл: розсол, нітрит, ppm, втрати, квиток 58 мм, NFC</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  textarea{min-height:84px}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано в Moodle (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 3 · аудиторно · технологи переробки</span>
+  <h1>🧂 Рецептури та посіл: розсол, нітрит, ppm, втрати, квиток 58 мм, NFC</h1>
+
+  <div class="card">
+    <h2>🎯 Мета пари</h2>
+    <p>
+      За заняття студенти: (1) сформують <b>розсол</b> (%, г/л), (2) розрахують <b>дозу нітритної солі</b> та <b>ppm нітриту</b>,
+      (3) оцінять <b>втрати при термообробці</b> і <b>вихід</b>, (4) приблизно визначать <b>харчову цінність</b> на 100&nbsp;г,
+      (5) оформлять <b>журнал</b>, <b>квиток 58&nbsp;мм</b>, <b>NFC</b> та <b>CSV</b>.
+    </p>
+    <p class="small muted">Допущення: нітритна сіль містить <span class="mono">0.6% NaNO₂</span> у суміші з кухонною сіллю (тип Prague Powder #1).
+      Для ковбас варених/напівкопчених ціль — орієнтир <span class="mono">≤ 150 ppm</span> NaNO₂ у готовому продукті (після теплової обробки).
+      Завжди звіряйте з чинними нормами та ТУ.</p>
+  </div>
+
+  <!-- 1. РЕЦЕПТУРА ТА РОЗСОЛ -->
+  <div class="card">
+    <h2>🥩 Рецептура та розсол</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Партія</h3>
+        <div class="row">
+          <div style="flex:1"><label>Маса м'яса, кг</label><input id="meatKg" type="number" step="0.1" value="50"></div>
+          <div style="flex:1"><label>Вода/лід, кг</label><input id="waterKg" type="number" step="0.1" value="10"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Сіль кухонна, % від маси фаршу</label><input id="saltPct" type="number" step="0.01" value="1.8"></div>
+          <div style="flex:1"><label>Нітритна сіль, % від маси фаршу</label><input id="nsPct" type="number" step="0.01" value="0.2"></div>
+        </div>
+        <p class="small muted">Фаршова маса = м'ясо + вода + всі добавки (наближено).</p>
+      </div>
+
+      <div class="box">
+        <h3>Розсол (для ін'єкції/масажу)</h3>
+        <div class="row">
+          <div style="flex:1"><label>Цільова концентрація солі в розсолі, %</label><input id="brineSaltPct" type="number" step="0.1" value="8"></div>
+          <div style="flex:1"><label>Об'єм розсолу, л</label><input id="brineL" type="number" step="0.1" value="15"></div>
+        </div>
+        <p class="small muted">Підказка: 8–12% NaCl у розсолі — типово для масажу/ін'єкції залежно від продукту.</p>
+      </div>
+
+      <div class="box">
+        <h3>Результат</h3>
+        <p>Фаршова маса: <b><span id="mixKg">—</span></b> кг</p>
+        <p>Сіль кухонна: <b><span id="saltG">—</span></b> г</p>
+        <p>Нітритна сіль (0.6% NaNO₂): <b><span id="nsG">—</span></b> г</p>
+        <p>Розсол: <b><span id="brineSaltG">—</span></b> г солі на <span id="brineVolL">—</span> л</p>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="calcRecipe()">🔁 Перерахувати</button>
+          <button class="btn" onclick="presetRecipe()">🧪 Приклад</button>
+          <button class="btn" onclick="copyCSV('csvRecipe')">📋 CSV (recipe)</button>
+        </div>
+        <div id="csvRecipe" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. НІТРИТ: РОЗРАХУНОК ppm -->
+  <div class="card">
+    <h2>🧪 Нітрит: ppm у готовому продукті</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Параметри</h3>
+        <div class="row">
+          <div style="flex:1"><label>Частка NaNO₂ у нітритній солі, %</label><input id="naNo2Pct" type="number" step="0.01" value="0.6"></div>
+          <div style="flex:1"><label>Втрати при варці/запіканні, %</label><input id="cookLossPct" type="number" step="0.1" value="8"></div>
+        </div>
+        <p class="small muted">Допущення: рівномірний розподіл, втрати маси зменшують <i>масу</i> готового продукту, а не внесений NaNO₂.</p>
+      </div>
+
+      <div class="box">
+        <h3>Результат</h3>
+        <p>Внесений NaNO₂: <b><span id="naNo2_mg">—</span></b> мг</p>
+        <p>Маса готового продукту: <b><span id="readyKg">—</span></b> кг</p>
+        <p>Оціночний рівень: <b><span id="ppm">—</span></b> ppm</p>
+        <p>Статус: <b><span id="ppmFlag">—</span></b></p>
+      </div>
+
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcNitrite()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvNitrite')">📋 CSV (nitrite)</button>
+        </div>
+        <div id="csvNitrite" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+    <p class="small muted">Нагадування: верхні межі для конкретних продуктів визначаються законодавством/ТУ. Дотримуйтеся HACCP-процедур і протоколів лабораторного контролю.</p>
+  </div>
+
+  <!-- 3. ХАРЧОВА ЦІННІСТЬ (НАБЛИЖЕНО) -->
+  <div class="card">
+    <h2>🥗 Харчова цінність (на 100 г, приблизно)</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Вхідні</h3>
+        <div class="row">
+          <div style="flex:1"><label>Білок, % у готовому</label><input id="protPct" type="number" step="0.1" value="16"></div>
+          <div style="flex:1"><label>Жир, % у готовому</label><input id="fatPct" type="number" step="0.1" value="18"></div>
+        </div>
+        <p class="small muted">Енергетичні коефіцієнти: білок ~4 ккал/г, жир ~9 ккал/г, вуглеводи (за наявності) ~4 ккал/г.</p>
+      </div>
+      <div class="box">
+        <h3>Результат</h3>
+        <p>Енергія: <b><span id="kcal">—</span></b> ккал</p>
+        <p>Сіль, г/100г (оцінка): <b><span id="saltPer100">—</span></b></p>
+        <p>ПІДВАЛ ЕТИКЕТКИ: <b><span id="labelLine">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcNutrition()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvNutri')">📋 CSV (nutrition)</button>
+        </div>
+        <div id="csvNutri" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ЖУРНАЛ РЕЦЕПТУР -->
+  <div class="card">
+    <h2>📒 Журнал рецептур</h2>
+    <div class="row">
+      <button class="btn" onclick="addRow()">➕ Додати рядок</button>
+      <button class="btn" onclick="presetRows()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tbl">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Виріб</th>
+            <th class="dark">Фарш, кг</th>
+            <th class="dark">NaCl, г</th>
+            <th class="dark">NO₂, ppm</th>
+            <th>Втрати, %</th>
+            <th>Вихід, кг</th>
+            <th>Ккал/100г</th>
+            <th>Примітка</th>
+          </tr>
+        </thead>
+        <tbody id="body"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 5. КВИТОК + NFC -->
+  <div class="card">
+    <h2>🧾 Квиток 58 мм та NFC</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>NFC — “CURE BATCH CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Назва виробу</label><input id="prodName" type="text" value="Ковбаса варена"></div>
+          <div style="flex:1"><label>Лот</label><input id="lotId" type="text" value="LOT-REC-0003"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label>Оператор</label><input id="operator" type="text" value="Студент ТПТ"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток для принтера 58 мм</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>RECIPE & CURE TICKET</h4>
+          <p><b>Виріб:</b> <span id="tProd">—</span></p>
+          <p><b>ЛОТ:</b> <span id="tLot">—</span></p>
+          <div class="line"></div>
+          <p><b>Фарш:</b> <span id="tMix">—</span> кг</p>
+          <p><b>NaCl:</b> <span id="tSalt">—</span> г · <b>NO₂:</b> <span id="tPPM">—</span> ppm</p>
+          <p><b>Втрати:</b> <span id="tLoss">—</span>% · <b>Вихід:</b> <span id="tYield">—</span> кг</p>
+          <p><b>Енергія:</b> <span id="tKcal">—</span> ккал/100г</p>
+          <div class="line"></div>
+          <p><small id="tNote">Норми підтвердити за ТУ/законодавством. Лаб. контроль — обовʼязково.</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Задайте <b>партію</b> (м'ясо, вода, % солей) та сформуйте <b>розсол</b>.</li>
+      <li>Обчисліть <b>ppm нітриту</b> з урахуванням <b>втрат</b> маси при термообробці.</li>
+      <li>Оцініть <b>харчову цінність</b> (ккал, сіль/100г), перевірте статус.</li>
+      <li>Заповніть <b>журнал</b> (≥2 рядки), сформуйте <b>NFC</b>, <b>квиток</b> та <b>CSV</b>.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Коректний розрахунок розсолу і солей</td><td>3</td></tr>
+        <tr><td>ppm нітриту з обґрунтуванням втрат</td><td>3</td></tr>
+        <tr><td>Харчова цінність + журнал + CSV</td><td>3</td></tr>
+        <tr><td>Квиток/NFC оформлені</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const bodyEl = document.getElementById('body');
+
+  // ==== 1) Рецептура / розсол ====
+  function calcRecipe(){
+    const meat = +byId('meatKg').value||0;
+    const water = +byId('waterKg').value||0;
+    const saltPct = (+byId('saltPct').value||0)/100;
+    const nsPct = (+byId('nsPct').value||0)/100;
+
+    const mix = meat + water; // без урах. маси добавок (наближено)
+    const saltG = mix * saltPct * 1000;
+    const nsG   = mix * nsPct   * 1000;
+
+    const brinePct = (+byId('brineSaltPct').value||0)/100;
+    const brineL   = +byId('brineL').value||0;
+    const brineSaltG = brinePct * brineL * 1000 * 1.0; // 1 л ≈ 1 кг води
+
+    byId('mixKg').textContent = rnd(mix,2);
+    byId('saltG').textContent = rnd(saltG,0);
+    byId('nsG').textContent   = rnd(nsG,0);
+    byId('brineSaltG').textContent = rnd(brineSaltG,0);
+    byId('brineVolL').textContent  = rnd(brineL,1);
+
+    const csv = `RECIPE|meat=${meat}kg|water=${water}kg|mix=${rnd(mix,2)}kg|NaCl=${rnd(saltG,0)}g|nitriteSalt=${rnd(nsG,0)}g|brine:${byId('brineSaltPct').value}%*${brineL}L=>${rnd(brineSaltG,0)}g`;
+    byId('csvRecipe').textContent = csv;
+
+    return {mix, saltG, nsG};
+  }
+  function presetRecipe(){
+    byId('meatKg').value=40; byId('waterKg').value=12;
+    byId('saltPct').value=1.9; byId('nsPct').value=0.25;
+    byId('brineSaltPct').value=10; byId('brineL').value=18;
+    calcRecipe(); calcNitrite(); calcNutrition();
+  }
+
+  // ==== 2) Нітрит (ppm) ====
+  function calcNitrite(){
+    const r = calcRecipe();
+    const naNo2Pct = (+byId('naNo2Pct').value||0)/100; // частка у нітритній солі
+    const cookLoss = (+byId('cookLossPct').value||0)/100;
+
+    const NaNO2_g = r.nsG * naNo2Pct;          // г чистого NaNO2
+    const NaNO2_mg = NaNO2_g * 1000;           // мг
+    const readyKg = r.mix * (1 - cookLoss);    // кг
+    const ppm = (readyKg>0) ? (NaNO2_mg / readyKg) : 0;
+
+    let flag='🟢 ок (≤150 ppm орієнтир)'; let color='#10b981';
+    if(ppm>150 && ppm<=200){ flag='🟠 близько/вище орієнтиру — перевірити ТУ'; color='#f59e0b'; }
+    if(ppm>200){ flag='🔴 перевищення — неприпустимо'; color='#ef4444'; }
+
+    byId('naNo2_mg').textContent = rnd(NaNO2_mg,0);
+    byId('readyKg').textContent  = rnd(readyKg,2);
+    byId('ppm').textContent      = rnd(ppm,0);
+    const el=byId('ppmFlag'); el.textContent=flag; el.style.color=color;
+
+    const csv = `NITRITE|NaNO2=${rnd(NaNO2_mg,0)}mg|ready=${rnd(readyKg,2)}kg|ppm=${rnd(ppm,0)}|status=${flag}`;
+    byId('csvNitrite').textContent = csv;
+
+    return {ppm, readyKg, NaNO2_mg};
+  }
+
+  // ==== 3) Харчова цінність ====
+  function calcNutrition(){
+    const prot = +byId('protPct').value||0;
+    const fat  = +byId('fatPct').value ||0;
+    const kcal = prot*4 + fat*9;
+    // Оцінка солі на 100 г: беремо загальну сіль (NaCl+нітритна) / маса готового
+    const r = calcRecipe(); const n = calcNitrite();
+    const totalSaltG = r.saltG + r.nsG; // г
+    const saltPer100 = (n.readyKg>0) ? (totalSaltG / (n.readyKg*10)) : 0; // г на 100 г
+
+    byId('kcal').textContent = rnd(kcal,0);
+    byId('saltPer100').textContent = rnd(saltPer100,2);
+    byId('labelLine').textContent = `Енергетична цінність ${rnd(kcal,0)} ккал; Білок ${prot}% · Жир ${fat}% · Сіль ${rnd(saltPer100,2)} г/100г`;
+
+    const csv = `NUTRITION|kcal=${rnd(kcal,0)}|protein=${prot}%|fat=${fat}%|salt_per_100g=${rnd(saltPer100,2)}g`;
+    byId('csvNutri').textContent = csv;
+
+    return {kcal, prot, fat, saltPer100};
+  }
+
+  // ==== 4) Журнал ====
+  function addRow(sample){
+    const rec = calcRecipe(); const nit = calcNitrite(); const nut = calcNutrition();
+    const loss = +byId('cookLossPct').value||0;
+    const outKg = rnd(nit.readyKg,2);
+    const def = {
+      name: byId('prodName').value || 'Виріб',
+      mix: rnd(rec.mix,2),
+      nacl: rnd(rec.saltG,0),
+      ppm: rnd(nit.ppm,0),
+      loss: loss,
+      yield: outKg,
+      kcal: rnd(nut.kcal,0),
+      note: ''
+    };
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.name}"></td>
+      <td class="dark">${s.mix}</td>
+      <td class="dark">${s.nacl}</td>
+      <td class="dark">${s.ppm}</td>
+      <td>${s.loss}</td>
+      <td>${s.yield}</td>
+      <td>${s.kcal}</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyEl.appendChild(tr); reindex(); buildCSVlog();
+  }
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+  function presetRows(){
+    bodyEl.innerHTML='';
+    presetRecipe();
+    addRow({name:'Ковбаса варена “Класична”', note:'масаж 60 хв'});
+    byId('nsPct').value=0.18; calcRecipe(); calcNitrite(); calcNutrition();
+    addRow({name:'Шинка варена', note:'інʼєкція 20%'});
+    buildCSVlog();
+  }
+  function buildCSVlog(){
+    const rows = [...bodyEl.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const name=r.children[1].querySelector('input').value.trim();
+      const mix=r.children[2].textContent.trim();
+      const nacl=r.children[3].textContent.trim();
+      const ppm=r.children[4].textContent.trim();
+      const loss=r.children[5].textContent.trim();
+      const y=r.children[6].textContent.trim();
+      const kcal=r.children[7].textContent.trim();
+      const note=r.children[8].querySelector('input').value.trim();
+      return [idx,name,mix,nacl,ppm,loss,y,kcal,note].join(' | ');
+    });
+    byId('csvLog').textContent = rows.join('\n') || '—';
+  }
+
+  // ==== 5) Квиток / NFC ====
+  function buildTicket(){
+    const rec = calcRecipe(); const nit = calcNitrite(); const nut = calcNutrition();
+    byId('tProd').textContent = byId('prodName').value || 'Виріб';
+    byId('tLot').textContent  = byId('lotId').value || '—';
+    byId('tMix').textContent  = rnd(rec.mix,2);
+    byId('tSalt').textContent = rnd(rec.saltG,0);
+    byId('tPPM').textContent  = rnd(nit.ppm,0);
+    byId('tLoss').textContent = byId('cookLossPct').value || '—';
+    byId('tYield').textContent= rnd(nit.readyKg,2);
+    byId('tKcal').textContent = rnd(nut.kcal,0);
+  }
+  function buildNFC(){
+    const rec = calcRecipe(); const nit = calcNitrite(); const nut = calcNutrition();
+    const txt = [
+      `CURE_BATCH_NFC`,
+      `PROD:${byId('prodName').value} LOT:${byId('lotId').value}`,
+      `MIX:${rnd(rec.mix,2)}kg | NaCl:${rnd(rec.saltG,0)}g | NO2:${rnd(nit.ppm,0)}ppm`,
+      `LOSS:${byId('cookLossPct').value}% | YIELD:${rnd(nit.readyKg,2)}kg`,
+      `ENERGY:${rnd(nut.kcal,0)}kcal/100g | SALT:${rnd(nut.saltPer100,2)}g/100g`,
+      `OPER:${byId('operator').value} CONTACT:${byId('nfcPhone').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = txt;
+  }
+
+  // ==== Утиліти ====
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // ==== Ініціалізація ====
+  (function init(){
+    calcRecipe(); calcNitrite(); calcNutrition();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select,textarea')) { calcRecipe(); calcNitrite(); calcNutrition(); buildCSVlog(); }
+    });
+  })();
+</script>
+</body>
+</html>
