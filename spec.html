@@ -21,10 +21,6 @@
 small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace}
 .note{background:#0c182a;color:#cde1ff;border:1px dashed #274364;padding:10px 12px;border-radius:12px;margin-top:8px}
 .note.error{background:#230b0b;color:#ffd4d4;border-color:#8a2b2b}
-.debugbox{background:#0c182a;color:#cde1ff;border:1px dashed #274364;padding:10px 12px;border-radius:12px;margin-top:8px;display:none}
-.debugbox table{width:100%;border-collapse:collapse;font-size:13px}
-.debugbox th,.debugbox td{border-bottom:1px solid #243b55;padding:6px 8px;text-align:left;vertical-align:top;word-break:break-all}
-.debug-actions{margin-top:8px;display:flex;gap:8px;align-items:center}
 .selector{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:12px}
 .selector a{display:block;padding:16px;border:1px solid #223049;border-radius:12px;background:#0b1220;text-decoration:none}
 .selector a:hover{background:#0f1f39}
@@ -49,14 +45,6 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
       <div id="lessons"></div>
 
       <div id="hintBox" class="note" style="display:none">—</div>
-
-      <div class="debug-actions">
-        <button class="btn ghost" type="button" id="toggleDebug">🔍 Показати деталі маніфесту</button>
-      </div>
-      <div id="debugBox" class="debugbox">
-        <div><b>Діагностика маніфесту</b> — RAW → absolute</div>
-        <div id="debugTableWrap" style="margin-top:8px"></div>
-      </div>
 
       <div id="previewBox" style="display:none;margin-top:14px">
         <div class="tester-toolbar">
@@ -129,9 +117,8 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
 </footer>
 
 <script>
-// ===== Утиліти (без жодного GitHub API)
-const $ = s => document.querySelector(s);
-const byId = id => document.getElementById(id);
+// ===== Без GitHub API — лише локальні маніфести
+const byId = (id)=>document.getElementById(id);
 const SECTION_KEYS = ['coach','electric','agro','mech','tech'];
 const SECTION_META = {
   coach:   { title:"🧠 Психологічні тренінги (coach)", desc:"Коучингові практики, рефлексія, soft skills, робота в групах." },
@@ -151,9 +138,7 @@ const SECTION_TO_DIR = {
 function absoluteUrl(relative){
   if(/^https?:\/\//i.test(relative)) return relative;
   if(relative.startsWith('/')) return location.origin + relative;
-  // spec.html лежить у корені сайту
-  const base = location.origin + '/';
-  return base + relative.replace(/^\.?\//,'');
+  return location.origin + '/' + relative.replace(/^\.?\//,'');
 }
 function humanizeFromPath(p){
   const name = (p||'').split('/').pop() || p;
@@ -184,19 +169,6 @@ async function tryFetchJson(url){
   }catch(_){ return null; }
 }
 
-function renderDebug(urls){
-  const wrap = byId('debugTableWrap');
-  if(!Array.isArray(urls) || !urls.length){
-    wrap.innerHTML = '<div class="muted">Дані відсутні.</div>';
-    return;
-  }
-  const rows = urls.map(raw=>{
-    const abs = absoluteUrl(raw);
-    return `<tr><td><small class="mono">${raw}</small></td><td><small class="mono"><a href="${abs}" target="_blank" rel="noopener">${abs}</a></small></td></tr>`;
-  }).join('');
-  wrap.innerHTML = `<table><thead><tr><th>RAW</th><th>absolute</th></tr></thead><tbody>${rows}</tbody></table>`;
-}
-
 function getSpecKey(){
   const sp = new URLSearchParams(location.search).get('spec');
   if (sp && SECTION_KEYS.includes(sp.toLowerCase())) return sp.toLowerCase();
@@ -208,23 +180,23 @@ function getSpecKey(){
   return null;
 }
 
-// ===== Завантаження маніфестів (ЛОКАЛЬНО!)
+// === Локальні маніфести
 async function loadManifestFor(key){
   const dir = SECTION_TO_DIR[key];
   if(!dir) return null;
 
-  // 1) Глобальний маніфест (перевага)
-  const global = await tryFetchJson(absoluteUrl('/assets/edlab-manifest.json'));
-  if(global && Array.isArray(global[dir])) return { src:'/assets/edlab-manifest.json#'+dir, data: global[dir] };
+  // 1) глобальний маніфест (твій вірний шлях)
+  const global = await tryFetchJson(absoluteUrl('/assets/manifest.json'));
+  if(global && Array.isArray(global[dir])) return { src:'/assets/manifest.json#'+dir, data: global[dir] };
 
-  // 2) Локальний маніфест секції
+  // 2) локальний маніфест секції
   const local = await tryFetchJson(absoluteUrl('/'+dir+'/manifest.json'));
   if(Array.isArray(local)) return { src: '/'+dir+'/manifest.json', data: local };
 
   return null;
 }
 
-// ===== Побудова секції
+// === Побудова секції
 async function buildSection(key){
   const meta = SECTION_META[key];
   byId('specTitle').textContent = meta.title;
@@ -237,10 +209,8 @@ async function buildSection(key){
 
   const man = await loadManifestFor(key);
   if(!man || !Array.isArray(man.data) || !man.data.length){
-    hint.textContent = `Маніфест не знайдено або порожній для "${key}". Перевір, що існує /assets/edlab-manifest.json або /${SECTION_TO_DIR[key]}/manifest.json.`;
+    hint.textContent = `Маніфест не знайдено або порожній для "${key}". Перевір, що існує /assets/manifest.json або /${SECTION_TO_DIR[key]}/manifest.json.`;
     hint.classList.add('error'); hint.style.display='';
-    byId('debugBox').style.display = '';
-    renderDebug([]);
     return;
   }
 
@@ -253,12 +223,9 @@ async function buildSection(key){
 
   const firstAbs = list[0]?.url ? absoluteUrl(list[0].url) : '';
   byId('url').value = firstAbs; gen();
-
-  byId('debugBox').style.display = 'none';
-  renderDebug(list.map(i=>i.url));
 }
 
-// ===== Рендер «вибору розділу», якщо spec не заданий
+// === Рендер «вибору розділу», якщо spec не заданий
 function renderSelector(){
   byId('specTitle').textContent = 'Вибери розділ';
   byId('specDesc').textContent  = 'Оберіть напрям із переліку нижче.';
@@ -273,7 +240,7 @@ function renderSelector(){
     </div>`;
 }
 
-// ===== Прев’ю + iFrame-генератор
+// === Прев’ю + iFrame-генератор
 function openPreview(u){
   const abs = absoluteUrl(u);
   byId('previewUrl').textContent = abs;
@@ -311,7 +278,7 @@ function copyCode(){
   setTimeout(()=>document.title=old,900);
 }
 
-// ===== Події
+// === Події
 document.addEventListener('click', (e)=>{
   const p = e.target.closest('.js-preview');
   if(p){ openPreview(p.dataset.url); return; }
@@ -321,19 +288,24 @@ document.addEventListener('click', (e)=>{
   if(e.target.id==='toGen'){ document.getElementById('generator').scrollIntoView({behavior:'smooth',block:'start'}); }
   if(e.target.id==='btnGen'){ gen(); }
   if(e.target.id==='btnCopy'){ copyCode(); }
-  if(e.target.id==='toggleDebug'){
-    const box = byId('debugBox');
-    box.style.display = (box.style.display==='none'||!box.style.display) ? '' : 'none';
-  }
 });
 
-// ===== Ініціалізація
+// === Ініціалізація
 (async function init(){
   if (window.self !== window.top) document.documentElement.classList.add('embedded');
 
-  const key = getSpecKey();
-  if(!key){ renderSelector(); return; }
+  const key = (()=>{
+    const sp = new URLSearchParams(location.search).get('spec');
+    if (sp && SECTION_KEYS.includes(sp.toLowerCase())) return sp.toLowerCase();
+    const h = (location.hash||'').replace(/^#/, '').trim();
+    if (h.startsWith('spec=')){
+      const v = h.slice(5).toLowerCase();
+      if (SECTION_KEYS.includes(v)) return v;
+    }
+    return null;
+  })();
 
+  if(!key){ renderSelector(); return; }
   await buildSection(key);
 })();
 </script>
