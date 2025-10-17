@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ук">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -152,7 +152,7 @@ function lessonCard(item){
         <small class="mono">${item.url}</small>
         <p class="muted" style="margin-top:4px">${item.desc||""}</p>
         <div class="row" style="margin-top:8px">
-          <a class="btn" href="${item.url}" target="_blank" rel="noopener">Відкрити</a>
+          <a class="btn" href="${absoluteUrl(item.url)}" target="_blank" rel="noopener">Відкрити</a>
           <button class="btn secondary js-preview" type="button" data-url="${item.url}">Швидке прев’ю</button>
           <button class="btn secondary js-iframe"  type="button" data-url="${item.url}">Згенерувати iFrame</button>
         </div>
@@ -170,14 +170,10 @@ const SECTION_META = {
 };
 const SECTION_KEYS = Object.keys(SECTION_META);
 
-  // ось так виглядає buildSection
-async function buildSection(key){
-  const meta = SECTION_META[key] || SECTION_META.coach; // запасний тайтл (тільки для текстів)
-  document.getElementById('specTitle').textContent = meta.title;
-  document.getElementById('specDesc').textContent  = meta.desc;
-  document.getElementById('listTitle').textContent = meta.title + ' — матеріали';
+// ===== де зберігати останній список для діагностики
+let __lastUrls = [];
 
-// ===== Звідки беремо ключ секції (URL-параметр або hash)
+// ===== читання ключа з URL (без дефолту «coach»)
 function getSpecKey(){
   const sp = new URLSearchParams(location.search).get('spec');
   if (sp && SECTION_KEYS.includes(sp.toLowerCase())) return sp.toLowerCase();
@@ -186,10 +182,10 @@ function getSpecKey(){
     const v = h.slice(5).toLowerCase();
     if (SECTION_KEYS.includes(v)) return v;
   }
-  return null; // НІЯКОГО дефолту на coach
+  return null;
 }
 
-// ===== Маніфести
+// ===== Завантаження маніфесту
 async function tryFetchJson(url){
   try{
     const r = await fetch(url,{method:'GET',cache:'no-store'});
@@ -198,18 +194,11 @@ async function tryFetchJson(url){
   }catch(_){ return null; }
 }
 async function loadManifestFor(key){
-  // Глобальний (рекомендований)
+  // 1) глобальний
   const global = await tryFetchJson(absoluteUrl('/assets/edlab-manifest.json'));
   if(global && Array.isArray(global[key])) return { src:'/assets/edlab-manifest.json#'+key, data: global[key] };
-
-  // Локальні як fallback
-  const candidates = [
-    '/coach/manifest.json',
-    '/elect_II_kyrs/manifest.json',
-    '/agro/manifest.json',
-    '/mech/manifest.json',
-    '/tech/manifest.json'
-  ];
+  // 2) локальні як fallback
+  const candidates = ['/coach/manifest.json','/elect_II_kyrs/manifest.json','/agro/manifest.json','/mech/manifest.json','/tech/manifest.json'];
   for(const u of candidates){
     const j = await tryFetchJson(absoluteUrl(u));
     if(!j) continue;
@@ -221,9 +210,9 @@ async function loadManifestFor(key){
 
 // ===== Рендер «вибору розділу», якщо spec не заданий
 function renderSelector(){
-  $('#specTitle').textContent = 'Вибери розділ';
-  $('#specDesc').textContent  = 'Оберіть потрібний напрям із переліку нижче.';
-  $('#listTitle').textContent = 'Доступні розділи';
+  byId('specTitle').textContent = 'Вибери розділ';
+  byId('specDesc').textContent  = 'Оберіть потрібний напрям із переліку нижче.';
+  byId('listTitle').textContent = 'Доступні розділи';
 
   const list = `
     <div class="selector">
@@ -236,7 +225,7 @@ function renderSelector(){
   byId('lessons').innerHTML = list;
 }
 
-// ===== Діагностика (не блокує рендер)
+// ===== Діагностика (кнопка показує останній список URL)
 function renderDebug(urls){
   const wrap = byId('debugTableWrap');
   if(!Array.isArray(urls) || !urls.length){
@@ -250,7 +239,7 @@ function renderDebug(urls){
   wrap.innerHTML = `<table><thead><tr><th>RAW</th><th>absolute</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-// ===== Побудова секції (миттєво, без перевірок сторінок)
+// ===== Побудова секції (ОСНОВНЕ)
 async function buildSection(key){
   const meta = SECTION_META[key];
   byId('specTitle').textContent = meta.title;
@@ -262,18 +251,31 @@ async function buildSection(key){
   hint.classList.remove('error');
 
   const man = await loadManifestFor(key);
-  if(!man || !Array.isArray(man.data) || !man.data.length){
-    hint.textContent = `Маніфест не знайдено або порожній для "${key}". Рекомендовано вести /assets/edlab-manifest.json.`;
+  if(!man || !Array.isArray(man.data)){
+    hint.textContent = `Маніфест не знайдено для "${key}". Рекомендовано вести /assets/edlab-manifest.json.`;
     hint.classList.add('error'); hint.style.display='';
+    __lastUrls = [];
     byId('debugBox').style.display = '';
-    renderDebug([]);
+    renderDebug(__lastUrls);
     return;
   }
 
+  // приймаємо рядки або об'єкти
   const list = man.data.map(x => {
     if (typeof x === 'string') return { url:x, title: humanizeFromPath(x), desc: x };
     return { url:x.url, title:(x.title||humanizeFromPath(x.url)), desc:(x.desc||x.url) };
   });
+
+  __lastUrls = list.map(i=>i.url);
+
+  if(!list.length){
+    hint.textContent = `Маніфест порожній для "${key}".`;
+    hint.classList.add('error'); hint.style.display='';
+    byId('lessons').innerHTML = '';
+    byId('debugBox').style.display = '';
+    renderDebug(__lastUrls);
+    return;
+  }
 
   byId('lessons').innerHTML = list.map(lessonCard).join('');
 
@@ -281,7 +283,7 @@ async function buildSection(key){
   byId('url').value = firstAbs; gen();
 
   byId('debugBox').style.display = 'none';
-  renderDebug(list.map(i=>i.url));
+  // renderDebug(__lastUrls); // за замовчуванням не показуємо
 }
 
 // ===== Прев’ю + iFrame-генератор
@@ -335,50 +337,21 @@ document.addEventListener('click', (e)=>{
   if(e.target.id==='toggleDebug'){
     const box = byId('debugBox');
     box.style.display = (box.style.display==='none'||!box.style.display) ? '' : 'none';
-    if(box.style.display!=='none') renderDebug([]); // наповниться при buildSection
+    if(box.style.display!=='none') renderDebug(__lastUrls);
   }
 });
 
-// ===== Ініціалізація
-// Дозволені ключі розділів (додай g19, якщо потрібно)
-const SECTION_KEYS = ['coach','electric','agro','mech','tech'];
-
-function getSpecKey(){
-  const sp = new URLSearchParams(location.search).get('spec');
-  if (sp && SECTION_KEYS.includes(sp.toLowerCase())) return sp.toLowerCase();
-  // також підтримуємо #spec=... на випадок якорів
-  const h = (location.hash||'').replace(/^#/, '').trim();
-  if (h.startsWith('spec=')) {
-    const v = h.slice(5).toLowerCase();
-    if (SECTION_KEYS.includes(v)) return v;
-  }
-  return null; // НІЯКОГО дефолту на coach
-}
-
+// ===== Ініціалізація (без дефолту coach)
 (async function init(){
   if (window.self !== window.top) document.documentElement.classList.add('embedded');
 
   const key = getSpecKey();
   if(!key){
-    // Показуємо вибір розділів замість падіння в coach
-    document.getElementById('specTitle').textContent = 'Вибери розділ';
-    document.getElementById('specDesc').textContent  = 'Оберіть напрям із переліку нижче.';
-    document.getElementById('listTitle').textContent = 'Доступні розділи';
-    document.getElementById('lessons').innerHTML = `
-      <div class="selector" style="display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:12px">
-        <a href="spec.html?spec=agro">🌾 Агрономія</a>
-        <a href="spec.html?spec=mech">🚜 Механізація (механіки)</a>
-        <a href="spec.html?spec=tech">🐄 Технології тваринництва</a>
-        <a href="spec.html?spec=electric">⚡ Електроенергетика/електрика</a>
-        <a href="spec.html?spec=coach">🧠 Coach</a>
-      </div>`;
+    renderSelector(); // немає/невірний spec → показати вибір
     return;
   }
-
-  // Викликаємо твою існуючу buildSection саме з ключем (без жодних назв/текстів тут)
   await buildSection(key);
 })();
-
 </script>
 </body>
 </html>
