@@ -2,158 +2,398 @@
 <html lang="uk">
 <head>
   <meta charset="utf-8">
-  <title>Вправа «Мій сирий продукт — мій готовий продукт» — для технологів</title>
+  <title>Вправа «Мій сирий продукт — мій готовий продукт» — для технологів (інтерактив)</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Онлайн-вправа для технологів: сировина → процес → інгредієнти → готовий продукт → стандарти якості. Малюнок-схема, обмін, рефлексія.">
+  <meta name="description" content="Інтерактив для технологів: сировина → процес → інгредієнти → готовий продукт → стандарти. Автозбереження, таймер, експорт .txt/.png, друк.">
   <style>
     :root{
-      --bg:#0b1220; --card:#0f172a; --muted:#93a4bf; --fg:#e6eefc; --accent:#60a5fa; --ok:#34d399; --warn:#fbbf24; --danger:#f87171; --border:#1f2a44;
-      --code:#0b132b;
+      --bg:#0b1220; --card:#0f172a; --muted:#93a4bf; --fg:#e6eefc; --accent:#60a5fa; --ok:#34d399; --warn:#fbbf24; --danger:#f87171; --border:#1f2a44; --ink:#0a1020;
     }
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,'Apple Color Emoji','Segoe UI Emoji';line-height:1.6}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,'Apple Color Emoji','Segoe UI Emoji';line-height:1.6}
     a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
-    .wrap{max-width:980px;margin:0 auto;padding:20px}
-    header{background:linear-gradient(180deg,#0d1b2a,#0b1220);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
-    .head{max-width:980px;margin:0 auto;padding:16px 20px}
+    header{background:linear-gradient(180deg,#0d1b2a,#0b1220);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+    .head{max-width:1080px;margin:0 auto;padding:16px 20px}
     .title{margin:0;font-size:28px;letter-spacing:.2px}
     .subtitle{margin:6px 0 0 0;color:var(--muted);font-size:15px}
+    .wrap{max-width:1080px;margin:0 auto;padding:20px}
     .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin:14px 0}
     h2{margin:0 0 10px 0;font-size:22px}
     h3{margin:12px 0 8px 0;font-size:18px}
     .grid{display:grid;gap:12px}
-    @media(min-width:840px){.grid.cols-2{grid-template-columns:1fr 1fr}}
-    .list{margin:8px 0 0 18px}
-    .list li{margin:6px 0}
+    @media(min-width:900px){.grid.cols-2{grid-template-columns:1fr 1fr}}
+    .list{margin:8px 0 0 18px}.list li{margin:6px 0}
     .hint{color:var(--muted);font-size:14px}
     .script{background:#0a1020;border:1px dashed var(--border);border-radius:10px;padding:12px;margin-top:10px}
-    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;background:#0a1020;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:#dbeafe}
+    .kbd{font-family:ui-monospace,Menlo,Consolas,monospace;background:#0a1020;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:#dbeafe}
     .agenda{display:grid;gap:8px}
     .agenda .item{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:#0b1528}
     .agenda .item span{font-size:14px;color:var(--muted)}
     .divider{height:1px;background:var(--border);margin:12px 0}
     .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-    .btn{display:inline-block;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:#0c1426;color:var(--fg);text-decoration:none}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:#0c1426;color:#e6eefc;text-decoration:none;cursor:pointer}
     .btn:hover{background:#0e1a32}
-    footer{color:var(--muted);font-size:13px;margin:24px 0}
-    .small{font-size:13px;color:var(--muted)}
+    input[type="text"],textarea,select{width:100%;background:#0b1528;color:#e6eefc;border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+    textarea{min-height:64px;resize:vertical}
+    .two{display:grid;gap:12px} @media(min-width:820px){.two{grid-template-columns:1fr 1fr}}
+    .timer{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;font-size:13px;color:#dbeafe;background:#0b1528}
+    .chip input{width:120px}
+    .badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);color:#93a4bf;margin-left:8px}
+    .sketch{background:#081125;border:1px dashed var(--border);border-radius:12px;touch-action:none}
+    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+    @media print{
+      header,.btn,.hint,.toolbar{display:none !important}
+      body{background:#fff;color:#000}
+      .card{border:0;background:#fff}
+      input,textarea{border:0}
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div class="head">
-      <h1 class="title">Вправа «Мій сирий продукт — мій готовий продукт» — для технологів</h1>
-      <p class="subtitle">Google Meet • формат: індивідуальний ескіз + обмін • тривалість ≈ 20–25 хв</p>
+<header>
+  <div class="head">
+    <h1 class="title">Вправа «Мій сирий продукт — мій готовий продукт» — для технологів</h1>
+    <p class="subtitle">Редагована схема 🧪⚙️ • 10 хв на заповнення • автозбереження • експорт .txt/.png • друк</p>
+    <div class="btn-row">
+      <button class="btn" id="exportTxt">⬇️ Експорт .txt</button>
+      <button class="btn" id="savePng">🖼️ Експорт схеми .png</button>
+      <button class="btn" id="printPage">🖨️ Друк</button>
+      <button class="btn" id="clearAll">🗑️ Очистити</button>
+      <span class="timer">Таймер: <span id="t1">00:00</span> <button class="btn" id="startTimer">▶ 10:00</button></span>
+      <span class="hint">Дані зберігаються локально на цьому пристрої.</span>
     </div>
-  </header>
+  </div>
+</header>
 
-  <main class="wrap">
-    <section class="card">
-      <div class="grid cols-2">
-        <div>
-          <h2>Мета заняття</h2>
-          <ul class="list">
-            <li>Осмислити «сировину» власного розвитку: здібності, знання, риси.</li>
-            <li>Спроєктувати «технологічний процес» змін: дії, умови, наставництво.</li>
-            <li>Визначити «інгредієнти» для підсилення якості та власні стандарти.</li>
-          </ul>
-          <div class="divider"></div>
-          <h3>Правила роботи</h3>
-          <ul class="list">
-            <li>Це не художній конкурс — робимо схему/ескіз для себе.</li>
-            <li>Короткі підписи (1–5 слів), конкретність замість загальних фраз.</li>
-            <li>Ділитися — добровільно. Повага і конфіденційність.</li>
-          </ul>
+<main class="wrap">
+  <section class="card">
+    <div class="grid cols-2">
+      <div>
+        <h2>Мета заняття</h2>
+        <ul class="list">
+          <li>Осмислити «сировину» власного розвитку.</li>
+          <li>Спроєктувати «процес перетворення» (кроки, умови, наставництво).</li>
+          <li>Визначити «інгредієнти» та особисті стандарти якості.</li>
+        </ul>
+        <div class="divider"></div>
+        <h3>Правила роботи</h3>
+        <ul class="list">
+          <li>Схема для себе — не художній конкурс.</li>
+          <li>Короткі підписи (1–5 слів), конкретно.</li>
+          <li>Ділитися — добровільно. Повага й конфіденційність.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>План і таймінг</h2>
+        <div class="agenda">
+          <div class="item"><strong>1. Вступ</strong> <span>2 хв</span></div>
+          <div class="item"><strong>2. Індивідуальне завдання</strong> <span>10 хв</span></div>
+          <div class="item"><strong>3. Обмін</strong> <span>5–7 хв</span></div>
+          <div class="item"><strong>4. Рефлексія</strong> <span>5 хв</span></div>
         </div>
-        <div>
-          <h2>План і таймінг</h2>
-          <div class="agenda">
-            <div class="item"><strong>1. Вступ</strong> <span>2 хв</span></div>
-            <div class="item"><strong>2. Індивідуальне завдання</strong> <span>10 хв</span></div>
-            <div class="item"><strong>3. Обмін</strong> <span>5–7 хв</span></div>
-            <div class="item"><strong>4. Рефлексія</strong> <span>5 хв</span></div>
-          </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1. Вступ -->
+  <section class="card">
+    <h2>1) Вступ (2 хв)</h2>
+    <div class="script">
+      <p class="kbd">«Ви — майбутні технологи. Ваше завдання — із сирої сировини створювати цінний продукт. Подивімося на це як на метафору вашого розвитку: з чого стартуєте, що додаєте і в що перетворюєтесь».</p>
+    </div>
+  </section>
+
+  <!-- 2. Індивідуальне завдання -->
+  <section class="card">
+    <h2>2) Індивідуальне завдання (10 хв)</h2>
+    <p class="hint">Заповни поля (1–5 слів). Підписи одразу з’являються на схемі.</p>
+
+    <div class="two">
+      <div>
+        <label class="kbd">Сировина — що в мене вже є зараз (здібності, риси, знання)</label>
+        <textarea id="raw"></textarea>
+
+        <label class="kbd">Процес обробки — дії/умови/зусилля для перетворення</label>
+        <textarea id="process"></textarea>
+
+        <label class="kbd">Додаткові інгредієнти — що додати для якості</label>
+        <textarea id="ingredients"></textarea>
+
+        <label class="kbd">Мій готовий продукт — ким/яким спеціалістом хочу вийти</label>
+        <textarea id="product"></textarea>
+
+        <label class="kbd">Термін придатності / маркування — мої цінності й стандарти</label>
+        <textarea id="labeling"></textarea>
+      </div>
+
+      <!-- Схема виробництва: SVG + скетч -->
+      <div>
+        <div class="toolbar" style="margin-bottom:8px">
+          <span class="chip">Перо <input type="range" id="penSize" min="1" max="10" value="3"><input type="color" id="penColor" value="#60a5fa"></span>
+          <span class="chip">Ластик <input type="range" id="eraserSize" min="5" max="30" value="14"></span>
+          <button class="btn" id="modePen">✏️ Перо</button>
+          <button class="btn" id="modeEraser">🧽 Ластик</button>
+          <button class="btn" id="clearSketch">♻️ Очистити штрих</button>
         </div>
+
+        <svg id="flowSvg" viewBox="0 0 760 420" style="width:100%;background:#081322;border:1px solid var(--border);border-radius:12px">
+          <!-- стрічка конвеєра -->
+          <rect x="40" y="260" width="680" height="16" fill="#2b3a55"/>
+          <!-- блоки -->
+          <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="12" fill="#e6eefc" stroke="#1f2a44" stroke-width="2">
+            <!-- RAW BIN -->
+            <rect x="40" y="120" width="120" height="120" rx="10" fill="#0b1f3a"></rect>
+            <text x="100" y="110" text-anchor="middle">СИРОВИНА</text>
+            <!-- MIXER -->
+            <rect x="200" y="120" width="140" height="120" rx="10" fill="#102744"></rect>
+            <text x="270" y="110" text-anchor="middle">ПРОЦЕС</text>
+            <!-- ADDITIONS -->
+            <rect x="380" y="120" width="140" height="120" rx="10" fill="#0f2c38"></rect>
+            <text x="450" y="110" text-anchor="middle">ІНГРЕДІЄНТИ</text>
+            <!-- PRODUCT -->
+            <rect x="560" y="120" width="160" height="120" rx="10" fill="#10361f"></rect>
+            <text x="640" y="110" text-anchor="middle">ГОТОВИЙ ПРОДУКТ</text>
+          </g>
+          <!-- стрілки -->
+          <g stroke="#60a5fa" stroke-width="3" fill="none">
+            <path d="M160,180 L200,180"/><polygon points="200,180 192,175 192,185" fill="#60a5fa"/>
+            <path d="M340,180 L380,180"/><polygon points="380,180 372,175 372,185" fill="#60a5fa"/>
+            <path d="M520,180 L560,180"/><polygon points="560,180 552,175 552,185" fill="#60a5fa"/>
+          </g>
+          <!-- іконки -->
+          <g>
+            <circle cx="100" cy="300" r="10" fill="#8b6b3f"/><circle cx="130" cy="300" r="10" fill="#8b6b3f"/>
+            <rect x="250" y="292" width="40" height="16" fill="#a3a3a3"/>
+            <circle cx="450" cy="300" r="8" fill="#fbbf24"/>
+            <rect x="620" y="292" width="60" height="18" rx="4" fill="#34d399"/>
+          </g>
+
+          <!-- ПІДПИСИ (оновлюються з полів) -->
+          <g id="labels" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="12" fill="#e6eefc">
+            <foreignObject x="50" y="140" width="100" height="90">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="mono" style="color:#e6eefc; font-size:12px" id="l_raw">• …</div>
+            </foreignObject>
+            <foreignObject x="210" y="140" width="120" height="90">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="mono" id="l_process">• …</div>
+            </foreignObject>
+            <foreignObject x="390" y="140" width="120" height="90">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="mono" id="l_ing">• …</div>
+            </foreignObject>
+            <foreignObject x="570" y="140" width="140" height="90">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="mono" id="l_prod">• …</div>
+            </foreignObject>
+            <text id="l_label" x="640" y="330" text-anchor="middle">стандарти: …</text>
+          </g>
+        </svg>
+
+        <!-- Штрих-канва над схемою -->
+        <canvas id="sketch" class="sketch" width="760" height="420" style="width:100%;margin-top:8px"></canvas>
+        <div class="hint">Намалюй стрілки/рамки пером (тач/миша). Ластик стирає штрих.</div>
       </div>
-    </section>
+    </div>
 
-    <!-- 1. Вступ -->
-    <section class="card">
-      <h2>1) Вступ (2 хв)</h2>
-      <p class="hint">Мета: підвести до професійної метафори технолога.</p>
-      <div class="script">
-        <p class="kbd">«Ви — майбутні технологи. Ваше завдання — із сирої сировини створювати цінний продукт. Подивімося на це як на метафору вашого особистого розвитку: з чого ви стартуєте, що додаєте і в що перетворюєтесь».</p>
+    <div class="script" style="margin-top:10px">
+      <p class="kbd">Приклади формату: «сировина: уважність; базова хімія» • «процес: практика щотижня; тьютор 1×/тиж» • «інгредієнти: Excel; HACCP-курс» • «продукт: технолог з контролю якості» • «стандарти: чесність; простежуваність; гігієна».</p>
+    </div>
+  </section>
+
+  <!-- 3. Обмін -->
+  <section class="card">
+    <h2>3) Обмін (5–7 хв)</h2>
+    <div class="btn-row">
+      <button class="btn" id="shareRaw">Озвучити сировину</button>
+      <button class="btn" id="shareIng">Назвати інгредієнт</button>
+      <button class="btn" id="shareProd">Описати продукт</button>
+      <span class="badge" id="shareOut">—</span>
+    </div>
+    <p class="hint">Клікни — отримаєш короткий текст для озвучення/чату (копіюється в буфер).</p>
+  </section>
+
+  <!-- 4. Рефлексія -->
+  <section class="card">
+    <h2>4) Рефлексія (5 хв)</h2>
+    <div class="two">
+      <div>
+        <label class="kbd">Що зрозумів(ла) про себе через метафору «перетворення»?</label>
+        <textarea id="ref1"></textarea>
       </div>
-    </section>
-
-    <!-- 2. Індивідуальне завдання -->
-    <section class="card">
-      <h2>2) Індивідуальне завдання (10 хв)</h2>
-      <p class="hint">Намалюй просту схему в зошиті (або в Google Drawings/Jamboard) і коротко підпиши блоки.</p>
-      <ul class="list">
-        <li><strong>Сировина</strong> 🥛🍖🐟🍯 — що в мене вже є зараз як у студента? (здібності, риси, знання, характер).</li>
-        <li><strong>Процес обробки</strong> ⚙️🔥 — які дії, умови чи зусилля допоможуть «перетворитися» (навчання, практика, наставники, дисципліна, комунікація).</li>
-        <li><strong>Додаткові інгредієнти</strong> 🧂🥗 — що «додати» у розвиток, аби смак/якість підвищились? (нові навички, досвід, середовище, люди).</li>
-        <li><strong>Мій готовий продукт</strong> 🧀🥩🍯 — якою людиною і спеціалістом хочу вийти після навчання? яку цінність отримають «споживачі» (суспільство, роботодавці, родина)?</li>
-        <li><strong>Термін придатності / маркування</strong> 🏷️ — мої особисті цінності і стандарти якості (що для мене важливо; без чого я не працюю).</li>
-      </ul>
-      <div class="script">
-        <p class="kbd">Порада: пиши у форматі «іменник + уточнення». Напр.: «сировина: уважність, базова хімія»; «процес: щотижнева практика, тьютор 1×/тиждень»; «інгредієнти: Excel для обліку, HACCP-курси»; «готовий продукт: технолог із відповідальністю за якість»; «маркування: чесність, гігієна, простежуваність».</p>
+      <div>
+        <label class="kbd">Що можемо «додавати» одне одному як група?</label>
+        <textarea id="ref2"></textarea>
       </div>
-      <p class="small">Можна показати ескіз у камеру або надіслати фото/скрін у чат Meet.</p>
-    </section>
-
-    <!-- 3. Обмін -->
-    <section class="card">
-      <h2>3) Обмін (5–7 хв)</h2>
-      <p class="hint">Запроси 3–4 добровольців коротко поділитися ескізом/ідеями.</p>
-      <ul class="list">
-        <li>Що стало для тебе головною «сировиною»?</li>
-        <li>Який «інгредієнт» ти хочеш точно додати?</li>
-        <li>Як виглядає твій «готовий продукт»?</li>
-      </ul>
-      <div class="btn-row">
-        <span class="btn">Озвучити сировину</span>
-        <span class="btn">Назвати інгредієнт</span>
-        <span class="btn">Описати продукт</span>
+    </div>
+    <div class="two" style="margin-top:10px">
+      <div>
+        <label class="kbd">Мій перший крок (дієслово + коли + як довго)</label>
+        <textarea id="ref3"></textarea>
       </div>
-    </section>
-
-    <!-- 4. Рефлексія -->
-    <section class="card">
-      <h2>4) Рефлексія (5 хв)</h2>
-      <ul class="list">
-        <li>Що ви усвідомили про себе через цю метафору?</li>
-        <li>Як підхід «перетворення» з технології відображає наш особистий розвиток?</li>
-        <li>Що ми можемо «додавати» одне одному як група, щоб ставати сильнішими?</li>
-      </ul>
-      <details>
-        <summary>Чому це працює</summary>
-        <div class="script">
-          <p class="kbd">• Професійна мова: «сировина → процес → готовий продукт».  
-• Психологічний сенс: я сам створюю свій розвиток.  
-• Коучингова глибина: визначаю ресурси, кроки й цінності.  
-• Тімбілдинг: обмін показує різність підходів при спільній меті.</p>
-        </div>
-      </details>
-    </section>
-
-    <!-- Матеріал для курсу -->
-    <section class="card">
-      <h2>Матеріал для збереження в курсі</h2>
-      <p class="hint">Збережи цей файл у репозиторії та вбудуй у Moodle через <span class="kbd">&lt;iframe&gt;</span>. Студенти зможуть повертатися до структури вправи у будь-який момент.</p>
-      <div class="btn-row">
-        <span class="btn">Моя ключова сировина</span>
-        <span class="btn">Мій процес змін</span>
-        <span class="btn">Інгредієнти якості</span>
-        <span class="btn">Опис готового продукту</span>
-        <span class="btn">Мої стандарти якості</span>
+      <div>
+        <label class="kbd">Критичні стандарти якості, яких я дотримуюсь завжди</label>
+        <textarea id="ref4"></textarea>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <footer>
-      <div>© Тренінговий конспект для дистанційних занять. Спеціально для спеціальності «Технологія виробництва та переробки продукції».</div>
-    </footer>
-  </main>
+  <!-- Матеріал -->
+  <section class="card">
+    <h2>Матеріал для збереження в курсі</h2>
+    <p class="hint">Збережи файл у репозиторії та вбудуй у Moodle через <span class="kbd">&lt;iframe&gt;</span>. Студенти можуть повертатися й оновлювати свій план.</p>
+    <div class="btn-row">
+      <span class="btn">Моя ключова сировина</span>
+      <span class="btn">Мій процес змін</span>
+      <span class="btn">Інгредієнти якості</span>
+      <span class="btn">Опис готового продукту</span>
+      <span class="btn">Мої стандарти якості</span>
+    </div>
+  </section>
+
+  <footer class="card">
+    <div class="hint">© Вправа для спеціальності «Технологія виробництва та переробки продукції». Дані зберігаються локально (localStorage).</div>
+  </footer>
+</main>
+
+<script>
+  // ===== УТИЛІТИ
+  const $=(s,ctx=document)=>ctx.querySelector(s);
+  const $$=(s,ctx=document)=>Array.from(ctx.querySelectorAll(s));
+  const KEY='tech_product_map_v1';
+
+  function fmt(s){const m=String(Math.floor(s/60)).padStart(2,'0');const ss=String(s%60).padStart(2,'0');return `${m}:${ss}`;}
+  function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();const g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=880;g.gain.value=0.05;o.start();setTimeout(()=>{o.stop();c.close();},300);}catch(e){}}
+
+  // ===== ТАЙМЕР 10 хв
+  let timer=null,sec=0,limit=600;
+  $('#startTimer').addEventListener('click',()=>{
+    if(timer){clearInterval(timer); timer=null; sec=0; $('#t1').textContent='00:00'; return;}
+    timer=setInterval(()=>{sec++; $('#t1').textContent=fmt(sec); if(sec>=limit){clearInterval(timer); timer=null; beep();}},1000);
+  });
+
+  // ===== ОНОВЛЕННЯ ПІДПИСІВ НА SVG
+  const fields=['raw','process','ingredients','product','labeling','ref1','ref2','ref3','ref4'];
+  fields.forEach(id=>{
+    $('#'+id).addEventListener('input',()=>{ updateLabels(); save(); });
+  });
+
+  function bulletize(text,maxLines=5){
+    const parts = text.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,maxLines);
+    if(parts.length===0) return '• …';
+    return '• ' + parts.join('<br>• ');
+  }
+  function updateLabels(){
+    $('#l_raw').innerHTML = bulletize($('#raw').value);
+    $('#l_process').innerHTML = bulletize($('#process').value);
+    $('#l_ing').innerHTML = bulletize($('#ingredients').value);
+    $('#l_prod').innerHTML = bulletize($('#product').value);
+    $('#l_label').textContent = 'стандарти: ' + ($('#labeling').value.trim()||'…');
+  }
+
+  // ===== СКЕТЧ ПОВЕРХ СХЕМИ
+  const sketch = $('#sketch'); const ctx = sketch.getContext('2d');
+  let mode='pen', drawing=false, last=[0,0];
+  function pos(e){
+    const r=sketch.getBoundingClientRect();
+    const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+    const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
+    const sx=sketch.width/r.width, sy=sketch.height/r.height;
+    return [x*sx,y*sy];
+  }
+  function start(e){drawing=true; last=pos(e); e.preventDefault();}
+  function move(e){
+    if(!drawing) return;
+    const [x,y]=pos(e);
+    ctx.lineCap='round'; ctx.lineJoin='round';
+    if(mode==='pen'){ ctx.globalCompositeOperation='source-over'; ctx.strokeStyle=$('#penColor').value; ctx.lineWidth=+$('#penSize').value; }
+    else{ ctx.globalCompositeOperation='destination-out'; ctx.strokeStyle='rgba(0,0,0,1)'; ctx.lineWidth=+$('#eraserSize').value; }
+    ctx.beginPath(); ctx.moveTo(last[0],last[1]); ctx.lineTo(x,y); ctx.stroke(); last=[x,y];
+  }
+  function end(){drawing=false; save();}
+  sketch.addEventListener('mousedown',start); sketch.addEventListener('mousemove',move); window.addEventListener('mouseup',end);
+  sketch.addEventListener('touchstart',start,{passive:false}); sketch.addEventListener('touchmove',move,{passive:false}); sketch.addEventListener('touchend',end);
+  $('#modePen').addEventListener('click',()=>mode='pen');
+  $('#modeEraser').addEventListener('click',()=>mode='eraser');
+  $('#clearSketch').addEventListener('click',()=>{ ctx.clearRect(0,0,sketch.width,sketch.height); save(); });
+
+  // ===== ОБМІН: ШВИДКІ ФРАЗИ
+  function clip(t){ navigator.clipboard?.writeText(t).catch(()=>{}); $('#shareOut').textContent=t; }
+  $('#shareRaw').addEventListener('click',()=> clip('Моя ключова «сировина»: '+($('#raw').value.trim()||'—')));
+  $('#shareIng').addEventListener('click',()=> clip('Інгредієнт, який додам: '+($('#ingredients').value.trim()||'—')));
+  $('#shareProd').addEventListener('click',()=> clip('Мій «готовий продукт»: '+($('#product').value.trim()||'—')));
+
+  // ===== ЗБЕРЕЖЕННЯ
+  function save(){
+    const d={}; fields.forEach(id=> d[id]=$('#'+id).value);
+    try{ d.sketch = sketch.toDataURL('image/png'); }catch(e){}
+    localStorage.setItem(KEY, JSON.stringify(d));
+  }
+  function load(){
+    const raw=localStorage.getItem(KEY); if(!raw){ updateLabels(); return; }
+    try{
+      const d=JSON.parse(raw);
+      fields.forEach(id=>{ if(d[id]!=null) $('#'+id).value=d[id]; });
+      updateLabels();
+      if(d.sketch){
+        const img=new Image(); img.onload=()=>{ ctx.clearRect(0,0,sketch.width,sketch.height); ctx.drawImage(img,0,0); }; img.src=d.sketch;
+      }
+    }catch(e){ updateLabels(); }
+  }
+
+  // ===== ЕКСПОРТ У TXT
+  $('#exportTxt').addEventListener('click',()=>{
+    const d=fields.reduce((o,id)=>(o[id]=$('#'+id).value,o),{});
+    const txt=[
+'ВПРАВА «МІЙ СИРИЙ ПРОДУКТ — МІЙ ГОТОВИЙ ПРОДУКТ» — ПІДСУМОК',
+'',
+'СИРОВИНА:', d.raw,
+'',
+'ПРОЦЕС ОБРОБКИ:', d.process,
+'',
+'ДОДАТКОВІ ІНГРЕДІЄНТИ:', d.ingredients,
+'',
+'ГОТОВИЙ ПРОДУКТ:', d.product,
+'',
+'СТАНДАРТИ/МАРКУВАННЯ:', d.labeling,
+'',
+'[РЕФЛЕКСІЯ]',
+'Усвідомлення: '+(d.ref1||'-'),
+'Підсилення групою: '+(d.ref2||'-'),
+'Перший крок: '+(d.ref3||'-'),
+'Мої критичні стандарти: '+(d.ref4||'-')
+    ].join('\n');
+    const a=document.createElement('a');
+    const stamp=new Date().toISOString().slice(0,16).replace('T','_').replace(':','-');
+    a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
+    a.download=`tech_product_${stamp}.txt`; document.body.appendChild(a); a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},0);
+  });
+
+  // ===== ЕКСПОРТ СХЕМИ В PNG (SVG + ескіз)
+  $('#savePng').addEventListener('click',()=>{
+    const svgNode=$('#flowSvg');
+    const s = new XMLSerializer().serializeToString(svgNode);
+    const svg64 = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+    const img=new Image();
+    img.onload=()=>{
+      const can=document.createElement('canvas'); can.width=svgNode.viewBox.baseVal.width; can.height=svgNode.viewBox.baseVal.height;
+      const c=can.getContext('2d');
+      c.drawImage(img,0,0);
+      c.drawImage(sketch,0,0);
+      const a=document.createElement('a');
+      a.href=can.toDataURL('image/png'); const stamp=new Date().toISOString().slice(0,16).replace('T','_').replace(':','-');
+      a.download=`tech_product_diagram_${stamp}.png`; document.body.appendChild(a); a.click();
+      setTimeout(()=>a.remove(),0);
+    };
+    img.src=svg64;
+  });
+
+  // ===== ДРУК / ОЧИСТКА
+  $('#printPage').addEventListener('click',()=>window.print());
+  $('#clearAll').addEventListener('click',()=>{ if(confirm('Очистити всі локальні дані цієї сторінки?')){ localStorage.removeItem(KEY); location.reload(); }});
+
+  // ===== СТАРТ
+  window.addEventListener('load', load);
+</script>
 </body>
 </html>
