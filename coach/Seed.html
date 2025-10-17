@@ -2,155 +2,388 @@
 <html lang="uk">
 <head>
   <meta charset="utf-8">
-  <title>Вправа «Насіння мого розвитку» — для агрономів</title>
+  <title>Вправа «Насіння мого розвитку» — для агрономів (інтерактив)</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Аграрний онлайн-тренінг: метафора насіння для самоусвідомлення. Малюнок-схема, обмін у групі, рефлексія.">
+  <meta name="description" content="Інтерактив: аграрна метафора розвитку. Редагована схема, автозбереження, таймер, експорт .txt та .png, друк.">
   <style>
     :root{
-      --bg:#0b1220; --card:#0f172a; --muted:#93a4bf; --fg:#e6eefc; --accent:#60a5fa; --ok:#34d399; --warn:#fbbf24; --danger:#f87171; --border:#1f2a44;
-      --code:#0b132b;
+      --bg:#0b1220; --card:#0f172a; --muted:#93a4bf; --fg:#e6eefc; --accent:#60a5fa; --ok:#34d399; --warn:#fbbf24; --danger:#f87171; --border:#1f2a44; --ink:#0a1020;
     }
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,'Apple Color Emoji','Segoe UI Emoji';line-height:1.6}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,'Apple Color Emoji','Segoe UI Emoji';line-height:1.6}
     a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
-    .wrap{max-width:980px;margin:0 auto;padding:20px}
-    header{background:linear-gradient(180deg,#0d1b2a,#0b1220);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
-    .head{max-width:980px;margin:0 auto;padding:16px 20px}
+    header{background:linear-gradient(180deg,#0d1b2a,#0b1220);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+    .head{max-width:1080px;margin:0 auto;padding:16px 20px}
     .title{margin:0;font-size:28px;letter-spacing:.2px}
     .subtitle{margin:6px 0 0 0;color:var(--muted);font-size:15px}
+    .wrap{max-width:1080px;margin:0 auto;padding:20px}
     .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin:14px 0}
     h2{margin:0 0 10px 0;font-size:22px}
     h3{margin:12px 0 8px 0;font-size:18px}
     .grid{display:grid;gap:12px}
-    @media(min-width:840px){.grid.cols-2{grid-template-columns:1fr 1fr}}
-    .list{margin:8px 0 0 18px}
-    .list li{margin:6px 0}
+    @media(min-width:900px){.grid.cols-2{grid-template-columns:1fr 1fr}}
+    .list{margin:8px 0 0 18px}.list li{margin:6px 0}
     .hint{color:var(--muted);font-size:14px}
     .script{background:#0a1020;border:1px dashed var(--border);border-radius:10px;padding:12px;margin-top:10px}
-    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;background:#0a1020;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:#dbeafe}
+    .kbd{font-family:ui-monospace,Menlo,Consolas,monospace;background:#0a1020;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:#dbeafe}
     .agenda{display:grid;gap:8px}
     .agenda .item{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:#0b1528}
     .agenda .item span{font-size:14px;color:var(--muted)}
     .divider{height:1px;background:var(--border);margin:12px 0}
     .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-    .btn{display:inline-block;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:#0c1426;color:var(--fg);text-decoration:none}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:#0c1426;color:#e6eefc;text-decoration:none;cursor:pointer}
     .btn:hover{background:#0e1a32}
-    footer{color:var(--muted);font-size:13px;margin:24px 0}
-    .small{font-size:13px;color:var(--muted)}
+    input[type="text"],textarea,select{width:100%;background:#0b1528;color:#e6eefc;border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+    textarea{min-height:64px;resize:vertical}
+    .two{display:grid;gap:12px} @media(min-width:820px){.two{grid-template-columns:1fr 1fr}}
+    .timer{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+    /* Канва для ручного штриха */
+    .sketch{background:#081125;border:1px dashed var(--border);border-radius:12px;touch-action:none}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:999px;font-size:13px;color:#dbeafe;background:#0b1528}
+    .chip input{width:120px}
+    .badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);color:#93a4bf;margin-left:8px}
+    /* Print */
+    @media print{
+      header,.btn,.hint,.toolbar{display:none !important}
+      body{background:#fff;color:#000}
+      .card{border:0;background:#fff}
+      input,textarea{border:0}
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div class="head">
-      <h1 class="title">Вправа «Насіння мого розвитку» — для агрономів</h1>
-      <p class="subtitle">Google Meet • формат: індивідуальний малюнок-схема + обмін • тривалість ≈ 20–25 хв</p>
+<header>
+  <div class="head">
+    <h1 class="title">Вправа «Насіння мого розвитку» — для агрономів</h1>
+    <p class="subtitle">Редагована схема 🌱 • 10 хв на заповнення • автозбереження • експорт .txt/.png • друк</p>
+    <div class="btn-row">
+      <button class="btn" id="exportTxt">⬇️ Експорт .txt</button>
+      <button class="btn" id="savePng">🖼️ Експорт схеми .png</button>
+      <button class="btn" id="printPage">🖨️ Друк</button>
+      <button class="btn" id="clearAll">🗑️ Очистити</button>
+      <span class="timer">Таймер: <span id="t1">00:00</span> <button class="btn" id="startTimer">▶ 10:00</button></span>
+      <span class="hint">Дані зберігаються локально на цьому пристрої.</span>
     </div>
-  </header>
+  </div>
+</header>
 
-  <main class="wrap">
-    <section class="card">
-      <div class="grid cols-2">
-        <div>
-          <h2>Мета заняття</h2>
-          <ul class="list">
-            <li>Через аграрну метафору усвідомити власні здібності й умови росту.</li>
-            <li>Позначити джерела енергії та знання, які слід «долити» для проростання.</li>
-            <li>Окреслити бажані «плоди» через 3–4 роки навчання в аграрній сфері.</li>
-          </ul>
-          <div class="divider"></div>
-          <h3>Правила роботи</h3>
-          <ul class="list">
-            <li>Не художній конкурс — це схема для себе.</li>
-            <li>Короткі підписи, прості символи, без зайвих деталей.</li>
-            <li>Ділитися — добровільно. Повага і конфіденційність.</li>
-          </ul>
+<main class="wrap">
+  <section class="card">
+    <div class="grid cols-2">
+      <div>
+        <h2>Мета заняття</h2>
+        <ul class="list">
+          <li>Через аграрну метафору усвідомити здібності й умови росту.</li>
+          <li>Позначити джерела енергії та знання, які варто «долити».</li>
+          <li>Окреслити «плоди» через 3–4 роки навчання.</li>
+        </ul>
+        <div class="divider"></div>
+        <h3>Правила роботи</h3>
+        <ul class="list">
+          <li>Це не художній конкурс — це ваша схема.</li>
+          <li>Короткі підписи (1–4 слова), прості символи.</li>
+          <li>Ділитися — за бажанням. Повага і конфіденційність.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>План і таймінг</h2>
+        <div class="agenda">
+          <div class="item"><strong>1. Вступ</strong> <span>2 хв</span></div>
+          <div class="item"><strong>2. Індивідуальне завдання</strong> <span>10 хв</span></div>
+          <div class="item"><strong>3. Обмін у групі</strong> <span>5–7 хв</span></div>
+          <div class="item"><strong>4. Рефлексія</strong> <span>5 хв</span></div>
         </div>
-        <div>
-          <h2>План і таймінг</h2>
-          <div class="agenda">
-            <div class="item"><strong>1. Вступ</strong> <span>2 хв</span></div>
-            <div class="item"><strong>2. Індивідуальне завдання</strong> <span>10 хв</span></div>
-            <div class="item"><strong>3. Обмін у групі</strong> <span>5–7 хв</span></div>
-            <div class="item"><strong>4. Рефлексія</strong> <span>5 хв</span></div>
-          </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1. Вступ -->
+  <section class="card">
+    <h2>1) Вступ (2 хв)</h2>
+    <div class="script">
+      <p class="kbd">«Ви обрали професію, пов’язану з ростом і доглядом. Подивімося на себе як на насіння, що проростає: що вже є, що живить, що додати, якими будуть плоди».</p>
+    </div>
+  </section>
+
+  <!-- 2. Індивідуальне завдання -->
+  <section class="card">
+    <h2>2) Індивідуальне завдання (10 хв)</h2>
+    <p class="hint">Заповни поля (1–4 слова). Підписи одразу з’являються на схемі.</p>
+
+    <div class="two">
+      <div>
+        <label class="kbd">Насіння — мої здібності, що вже є</label>
+        <textarea id="seed"></textarea>
+
+        <label class="kbd">Ґрунт — що допомагає розвиватись (люди, умови, підтримка)</label>
+        <textarea id="soil"></textarea>
+
+        <label class="kbd">Сонце — що надихає, дає енергію</label>
+        <textarea id="sun"></textarea>
+
+        <label class="kbd">Вода — які знання або навички хочу отримати</label>
+        <textarea id="water"></textarea>
+
+        <label class="kbd">Плоди — ким хочу стати через 3–4 роки</label>
+        <textarea id="fruits"></textarea>
+      </div>
+
+      <!-- Редагована схема -->
+      <div>
+        <div class="toolbar" style="margin-bottom:8px">
+          <span class="chip">Перо <input type="range" id="penSize" min="1" max="10" value="3"><input type="color" id="penColor" value="#60a5fa"></span>
+          <span class="chip">Ластик <input type="range" id="eraserSize" min="5" max="30" value="14"></span>
+          <button class="btn" id="modePen">✏️ Перо</button>
+          <button class="btn" id="modeEraser">🧽 Ластик</button>
+          <button class="btn" id="clearSketch">♻️ Очистити штрих</button>
         </div>
-      </div>
-    </section>
 
-    <!-- 1. Вступ -->
-    <section class="card">
-      <h2>1) Вступ (2 хв)</h2>
-      <p class="hint">Мета: підвести до метафори, близької агрономам.</p>
-      <div class="script">
-        <p class="kbd">«Ви обрали професію, пов’язану з ростом і доглядом. Сьогодні подивимось на себе як на насіння, яке проростає: що вже є, що живить, що треба додати, і якими будуть плоди».</p>
-      </div>
-    </section>
+        <!-- SVG-схема з підписами -->
+        <svg id="seedSvg" viewBox="0 0 600 420" style="width:100%;background:#081322;border:1px solid var(--border);border-radius:12px">
+          <!-- небо і сонце -->
+          <rect x="0" y="0" width="600" height="220" fill="#0b1f3a"/>
+          <circle cx="520" cy="60" r="30" fill="#fbbf24"/>
+          <!-- земля -->
+          <rect x="0" y="220" width="600" height="200" fill="#1a3b1f"/>
+          <rect x="0" y="220" width="600" height="24" fill="#274d29"/>
+          <!-- коріння -->
+          <g stroke="#966a3a" stroke-width="4" fill="none">
+            <path d="M300,240 C290,260 295,280 290,300"/>
+            <path d="M300,240 C305,260 312,276 320,292"/>
+            <path d="M300,255 C285,275 275,290 270,305"/>
+          </g>
+          <!-- насіння -->
+          <ellipse cx="300" cy="240" rx="16" ry="10" fill="#c79f62" stroke="#8b6b3f"/>
+          <!-- паросток -->
+          <path d="M300,220 C300,200 315,185 330,176" stroke="#4ade80" stroke-width="4" fill="none"/>
+          <circle cx="330" cy="176" r="10" fill="#4ade80"/>
+          <!-- краплі води -->
+          <path d="M110,70 q10,-20 20,0 q-10,8 -20,0" fill="#60a5fa"/><path d="M140,55 q8,-16 16,0 q-8,6 -16,0" fill="#60a5fa"/>
+          <!-- фрукти/плоди -->
+          <g>
+            <circle cx="420" cy="150" r="8" fill="#f87171"/><rect x="418" y="140" width="4" height="6" fill="#166534"/>
+            <circle cx="450" cy="130" r="8" fill="#f87171"/><rect x="448" y="120" width="4" height="6" fill="#166534"/>
+          </g>
 
-    <!-- 2. Індивідуальне завдання -->
-    <section class="card">
-      <h2>2) Індивідуальне завдання (10 хв)</h2>
-      <p class="hint">Накресли просту схему 🌱 і підпиши елементи в 1–4 слова.</p>
-      <ul class="list">
-        <li><strong>Насіння</strong> — мої здібності, що вже є (що виходить добре).</li>
-        <li><strong>Ґрунт</strong> — що допомагає розвиватись (люди, умови, підтримка).</li>
-        <li><strong>Сонце</strong> — що надихає, дає енергію.</li>
-        <li><strong>Вода</strong> — які знання або навички хочу отримати.</li>
-        <li><strong>Плоди</strong> — ким хочу стати через 3–4 роки навчання.</li>
-      </ul>
-      <div class="script">
-        <p class="kbd">Підказки: «насіння = мої сильні сторони», «вода = конкретні курси/практики», «сонце = мотивація», «ґрунт = оточення і режим», «плоди = роль/посада/компетенції».</p>
-      </div>
-      <p class="small">Можна малювати у зошиті або на аркуші й показати в камеру; або швидко відтворити в Jamboard/Miro/Google Drawings.</p>
-    </section>
+          <!-- ПІДПИСИ (оновлюються з полів) -->
+          <g id="labels" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="12" fill="#e6eefc">
+            <text id="l_seed"  x="300" y="262" text-anchor="middle">насіння: …</text>
+            <text id="l_soil"  x="12" y="342">ґрунт: …</text>
+            <text id="l_sun"   x="470" y="30">сонце: …</text>
+            <text id="l_water" x="90"  y="48">вода: …</text>
+            <text id="l_fruits" x="380" y="176">плоди: …</text>
+          </g>
+        </svg>
 
-    <!-- 3. Обмін у групі -->
-    <section class="card">
-      <h2>3) Обмін у групі (5–7 хв)</h2>
-      <p class="hint">3–4 добровольці коротко показують або описують свою схему.</p>
-      <div class="script">
-        <p class="kbd">«Бачите, навіть якщо ми малюємо по-різному, ми ростемо у спільному полі. Кожен має свій ресурс, і разом ми — поле, що дає врожай».</p>
+        <!-- Штрих-канва над схемою -->
+        <canvas id="sketch" class="sketch" width="600" height="420" style="width:100%;margin-top:8px"></canvas>
+        <div class="hint">Намалюй стрілки/рамки пером (тач/миша). Ластик стирає штрих.</div>
       </div>
-      <div class="btn-row">
-        <span class="btn">Показати свій «ґрунт»</span>
-        <span class="btn">Назвати «воду» (навички)</span>
-        <span class="btn">Озвучити «плоди»</span>
+    </div>
+
+    <div class="script" style="margin-top:10px">
+      <p class="kbd">Підказки: «насіння = сильні сторони», «вода = конкретні курси/практики», «сонце = мотивація», «ґрунт = оточення/режим», «плоди = роль/посада/компетенції».</p>
+    </div>
+  </section>
+
+  <!-- 3. Обмін у групі -->
+  <section class="card">
+    <h2>3) Обмін у групі (5–7 хв)</h2>
+    <div class="btn-row">
+      <button class="btn" id="shareSoil">Показати «ґрунт»</button>
+      <button class="btn" id="shareWater">Назвати «воду»</button>
+      <button class="btn" id="shareFruits">Озвучити «плоди»</button>
+      <span class="badge" id="shareOut">—</span>
+    </div>
+    <div class="hint">Клікни на кнопку — отримаєш короткий текст для озвучення/чату.</div>
+  </section>
+
+  <!-- 4. Рефлексія -->
+  <section class="card">
+    <h2>4) Рефлексія (5 хв)</h2>
+    <div class="two">
+      <div>
+        <label class="kbd">Що було найцікавіше усвідомити?</label>
+        <textarea id="ref1"></textarea>
       </div>
-    </section>
-
-    <!-- 4. Рефлексія -->
-    <section class="card">
-      <h2>4) Рефлексія (5 хв)</h2>
-      <ul class="list">
-        <li>Що було найцікавіше усвідомити?</li>
-        <li>Що спільного ми маємо як група агрономів?</li>
-        <li>Як сьогоднішній малюнок допоможе тримати фокус у навчанні?</li>
-      </ul>
-      <details>
-        <summary>Чому це працює</summary>
-        <div class="script">
-          <p class="kbd">• Вмикає образне мислення, а не лише логіку.  
-• Метафора з аграрної практики — зрозуміло і «своє».  
-• Є командність: обмін посилює відчуття «ми — поле, а не окремі зерна».  
-• У Google Meet проводиться просто: інструкції + показ у камеру/чат.</p>
-        </div>
-      </details>
-    </section>
-
-    <!-- Матеріал для курсу -->
-    <section class="card">
-      <h2>Матеріал для збереження в курсі</h2>
-      <p class="hint">Збережи цей файл у репозиторії та вбудуй у Moodle через <span class="kbd">&lt;iframe&gt;</span>. Студенти матимуть «конспект вправи» і зможуть повертатись до неї.</p>
-      <div class="btn-row">
-        <span class="btn">Мої «плоди» на 3–4 роки</span>
-        <span class="btn">Що додати як «воду»</span>
-        <span class="btn">Як підсилити «сонце»</span>
-        <span class="btn">Хто мій «ґрунт» підтримки</span>
+      <div>
+        <label class="kbd">Що спільного ми маємо як група агрономів?</label>
+        <textarea id="ref2"></textarea>
       </div>
-    </section>
+    </div>
+    <div class="two" style="margin-top:10px">
+      <div>
+        <label class="kbd">Як сьогоднішній малюнок допоможе тримати фокус?</label>
+        <textarea id="ref3"></textarea>
+      </div>
+      <div>
+        <label class="kbd">Перший крок (дієслово + коли + як довго)</label>
+        <textarea id="ref4"></textarea>
+      </div>
+    </div>
+  </section>
 
-    <footer>
-      <div>© Тренінговий конспект для дистанційних занять. Спеціально для спеціальності «Агрономія».</div>
-    </footer>
-  </main>
+  <!-- Матеріал -->
+  <section class="card">
+    <h2>Матеріал для збереження в курсі</h2>
+    <p class="hint">Збережи файл у репозиторії та вбудуй у Moodle через <span class="kbd">&lt;iframe&gt;</span>. Студенти зможуть повертатися й оновлювати свій план.</p>
+    <div class="btn-row">
+      <span class="btn">Мої «плоди» на 3–4 роки</span>
+      <span class="btn">Що додати як «воду»</span>
+      <span class="btn">Як підсилити «сонце»</span>
+      <span class="btn">Хто мій «ґрунт» підтримки</span>
+    </div>
+  </section>
+
+  <footer class="card">
+    <div class="hint">© Вправа для спеціальності «Агрономія». Дані зберігаються локально (localStorage).</div>
+  </footer>
+</main>
+
+<script>
+  // ===== УТИЛІТИ
+  const $=(s,ctx=document)=>ctx.querySelector(s);
+  const $$=(s,ctx=document)=>Array.from(ctx.querySelectorAll(s));
+  const KEY='seed_growth_agro_v1';
+
+  function fmt(s){const m=String(Math.floor(s/60)).padStart(2,'0');const ss=String(s%60).padStart(2,'0');return `${m}:${ss}`;}
+  function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();const g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=880;g.gain.value=0.05;o.start();setTimeout(()=>{o.stop();c.close();},300);}catch(e){}}
+
+  // ===== ТАЙМЕР 10 хв
+  let timer=null,sec=0,limit=600;
+  $('#startTimer').addEventListener('click',()=>{
+    if(timer){clearInterval(timer); timer=null; sec=0; $('#t1').textContent='00:00'; return;}
+    timer=setInterval(()=>{sec++; $('#t1').textContent=fmt(sec); if(sec>=limit){clearInterval(timer); timer=null; beep();}},1000);
+  });
+
+  // ===== ОНОВЛЕННЯ ПІДПИСІВ НА SVG
+  const fields=['seed','soil','sun','water','fruits','ref1','ref2','ref3','ref4'];
+  fields.forEach(id=>{
+    $('#'+id).addEventListener('input',()=>{ updateLabels(); save(); });
+  });
+  function updateLabels(){
+    $('#l_seed').textContent = 'насіння: ' + ($('#seed').value.trim()||'…');
+    $('#l_soil').textContent = 'ґрунт: ' + ($('#soil').value.trim()||'…');
+    $('#l_sun').textContent = 'сонце: ' + ($('#sun').value.trim()||'…');
+    $('#l_water').textContent = 'вода: ' + ($('#water').value.trim()||'…');
+    $('#l_fruits').textContent = 'плоди: ' + ($('#fruits').value.trim()||'…');
+  }
+
+  // ===== ЛАЙТ-СКЕТЧ ПОВЕРХ СХЕМИ
+  const sketch = $('#sketch'); const ctx = sketch.getContext('2d');
+  let mode='pen'; // 'pen' | 'eraser'
+  let drawing=false, last=[0,0];
+  function pos(e){
+    const r=sketch.getBoundingClientRect();
+    const x = (e.touches?e.touches[0].clientX:e.clientX) - r.left;
+    const y = (e.touches?e.touches[0].clientY:e.clientY) - r.top;
+    const scaleX = sketch.width / r.width, scaleY = sketch.height / r.height;
+    return [x*scaleX, y*scaleY];
+  }
+  function start(e){ drawing=true; last=pos(e); e.preventDefault(); }
+  function move(e){
+    if(!drawing) return;
+    const [x,y]=pos(e);
+    ctx.lineCap='round'; ctx.lineJoin='round';
+    if(mode==='pen'){
+      ctx.globalCompositeOperation='source-over';
+      ctx.strokeStyle=$('#penColor').value; ctx.lineWidth=Number($('#penSize').value);
+    }else{
+      ctx.globalCompositeOperation='destination-out';
+      ctx.strokeStyle='rgba(0,0,0,1)'; ctx.lineWidth=Number($('#eraserSize').value);
+    }
+    ctx.beginPath(); ctx.moveTo(last[0],last[1]); ctx.lineTo(x,y); ctx.stroke(); last=[x,y];
+  }
+  function end(){ drawing=false; save(); }
+  sketch.addEventListener('mousedown',start); sketch.addEventListener('mousemove',move); window.addEventListener('mouseup',end);
+  sketch.addEventListener('touchstart',start,{passive:false}); sketch.addEventListener('touchmove',move,{passive:false}); sketch.addEventListener('touchend',end);
+  $('#modePen').addEventListener('click',()=>mode='pen');
+  $('#modeEraser').addEventListener('click',()=>mode='eraser');
+  $('#clearSketch').addEventListener('click',()=>{ ctx.clearRect(0,0,sketch.width,sketch.height); save(); });
+
+  // ===== ОБМІН: ШВИДКІ ФРАЗИ
+  function clip(text){ navigator.clipboard?.writeText(text).catch(()=>{}); $('#shareOut').textContent=text; }
+  $('#shareSoil').addEventListener('click',()=> clip('Мій «ґрунт»: '+($('#soil').value.trim()||'—')));
+  $('#shareWater').addEventListener('click',()=> clip('Моя «вода» (навыки/знання): '+($('#water').value.trim()||'—')));
+  $('#shareFruits').addEventListener('click',()=> clip('Мої «плоди» через 3–4 роки: '+($('#fruits').value.trim()||'—')));
+
+  // ===== ЗБЕРЕЖЕННЯ
+  function save(){
+    const d={};
+    fields.forEach(id=> d[id]=$('#'+id).value);
+    // збережемо також ескіз як dataURL (легко відновити)
+    try{ d.sketch = sketch.toDataURL('image/png'); }catch(e){}
+    localStorage.setItem(KEY, JSON.stringify(d));
+  }
+  function load(){
+    const raw=localStorage.getItem(KEY); if(!raw){ updateLabels(); return; }
+    try{
+      const d=JSON.parse(raw);
+      fields.forEach(id=>{ if(d[id]!=null) $('#'+id).value=d[id]; });
+      updateLabels();
+      if(d.sketch){
+        const img=new Image(); img.onload=()=>{ ctx.clearRect(0,0,sketch.width,sketch.height); ctx.drawImage(img,0,0); }; img.src=d.sketch;
+      }
+    }catch(e){ updateLabels(); }
+  }
+
+  // ===== ЕКСПОРТ У TXT
+  $('#exportTxt').addEventListener('click',()=>{
+    const d=fields.reduce((o,id)=>(o[id]=$('#'+id).value,o),{});
+    const txt=[
+'ВПРАВА «НАСІННЯ МОГО РОЗВИТКУ» — ПІДСУМОК',
+'',
+'НАСІННЯ (здібності):', d.seed,
+'',
+'ҐРУНТ (що допомагає):', d.soil,
+'',
+'СОНЦЕ (що надихає):', d.sun,
+'',
+'ВОДА (знання/навички):', d.water,
+'',
+'ПЛОДИ (через 3–4 роки):', d.fruits,
+'',
+'[РЕФЛЕКСІЯ]',
+'Цікаво усвідомив(ла): '+(d.ref1||'-'),
+'Групова спільність: '+(d.ref2||'-'),
+'Фокус у навчанні: '+(d.ref3||'-'),
+'Перший крок: '+(d.ref4||'-')
+    ].join('\n');
+    const a=document.createElement('a');
+    const stamp=new Date().toISOString().slice(0,16).replace('T','_').replace(':','-');
+    a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
+    a.download=`seed_growth_${stamp}.txt`; document.body.appendChild(a); a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},0);
+  });
+
+  // ===== ЕКСПОРТ СХЕМИ В PNG (SVG + ескіз зверху)
+  $('#savePng').addEventListener('click',()=>{
+    const svgNode=$('#seedSvg');
+    const s = new XMLSerializer().serializeToString(svgNode);
+    const svg64 = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+    const img=new Image();
+    img.onload=()=>{
+      const can=document.createElement('canvas'); can.width=svgNode.viewBox.baseVal.width; can.height=svgNode.viewBox.baseVal.height;
+      const c=can.getContext('2d');
+      c.drawImage(img,0,0);
+      // домалювати штрих
+      c.drawImage(sketch,0,0);
+      const a=document.createElement('a');
+      a.href=can.toDataURL('image/png'); const stamp=new Date().toISOString().slice(0,16).replace('T','_').replace(':','-');
+      a.download=`seed_diagram_${stamp}.png`; document.body.appendChild(a); a.click();
+      setTimeout(()=>a.remove(),0);
+    };
+    img.src=svg64;
+  });
+
+  // ===== ДРУК / ОЧИСТКА
+  $('#printPage').addEventListener('click',()=>window.print());
+  $('#clearAll').addEventListener('click',()=>{ if(confirm('Очистити всі локальні дані цієї сторінки?')){ localStorage.removeItem(KEY); location.reload(); }});
+
+  // ===== СТАРТ
+  window.addEventListener('load', load);
+</script>
 </body>
 </html>
