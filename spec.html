@@ -170,6 +170,13 @@ const SECTION_META = {
 };
 const SECTION_KEYS = Object.keys(SECTION_META);
 
+  // ось так виглядає buildSection
+async function buildSection(key){
+  const meta = SECTION_META[key] || SECTION_META.coach; // запасний тайтл (тільки для текстів)
+  document.getElementById('specTitle').textContent = meta.title;
+  document.getElementById('specDesc').textContent  = meta.desc;
+  document.getElementById('listTitle').textContent = meta.title + ' — матеріали';
+
 // ===== Звідки беремо ключ секції (URL-параметр або hash)
 function getSpecKey(){
   const sp = new URLSearchParams(location.search).get('spec');
@@ -333,16 +340,45 @@ document.addEventListener('click', (e)=>{
 });
 
 // ===== Ініціалізація
+// Дозволені ключі розділів (додай g19, якщо потрібно)
+const SECTION_KEYS = ['coach','electric','agro','mech','tech'];
+
+function getSpecKey(){
+  const sp = new URLSearchParams(location.search).get('spec');
+  if (sp && SECTION_KEYS.includes(sp.toLowerCase())) return sp.toLowerCase();
+  // також підтримуємо #spec=... на випадок якорів
+  const h = (location.hash||'').replace(/^#/, '').trim();
+  if (h.startsWith('spec=')) {
+    const v = h.slice(5).toLowerCase();
+    if (SECTION_KEYS.includes(v)) return v;
+  }
+  return null; // НІЯКОГО дефолту на coach
+}
+
 (async function init(){
   if (window.self !== window.top) document.documentElement.classList.add('embedded');
 
   const key = getSpecKey();
   if(!key){
-    renderSelector(); // Немає spec → покажи вибір, НЕ коуч
+    // Показуємо вибір розділів замість падіння в coach
+    document.getElementById('specTitle').textContent = 'Вибери розділ';
+    document.getElementById('specDesc').textContent  = 'Оберіть напрям із переліку нижче.';
+    document.getElementById('listTitle').textContent = 'Доступні розділи';
+    document.getElementById('lessons').innerHTML = `
+      <div class="selector" style="display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:12px">
+        <a href="spec.html?spec=agro">🌾 Агрономія</a>
+        <a href="spec.html?spec=mech">🚜 Механізація (механіки)</a>
+        <a href="spec.html?spec=tech">🐄 Технології тваринництва</a>
+        <a href="spec.html?spec=electric">⚡ Електроенергетика/електрика</a>
+        <a href="spec.html?spec=coach">🧠 Coach</a>
+      </div>`;
     return;
   }
+
+  // Викликаємо твою існуючу buildSection саме з ключем (без жодних назв/текстів тут)
   await buildSection(key);
 })();
+
 </script>
 </body>
 </html>
