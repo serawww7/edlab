@@ -2,20 +2,19 @@
 <html lang="uk">
 <head>
   <meta charset="utf-8">
-  <title>Інтерактив «Цифровий острів» — онлайн-тренінг</title>
+  <title>Інтерактив «Цифровий острів» — онлайн-тренінг (інтерактив)</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Командний інтерактив: розподіл ролей, співпраця, системне мислення. План 25–30 хв із чіткими інструкціями.">
+  <meta name="description" content="Командний інтерактив: розподіл ролей, співпраця, системне мислення. Таймери, автозбереження, експорт у .txt, друк.">
   <style>
     :root{
-      --bg:#0b1220; --card:#0f172a; --muted:#93a4bf; --fg:#e6eefc; --accent:#60a5fa; --ok:#34d399; --warn:#fbbf24; --danger:#f87171; --border:#1f2a44;
-      --code:#0b132b;
+      --bg:#0b1220; --card:#0f172a; --muted:#93a4bf; --fg:#e6eefc; --accent:#60a5fa; --ok:#34d399; --warn:#fbbf24; --danger:#f87171; --border:#1f2a44; --ink:#0a1020;
     }
     *{box-sizing:border-box}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,'Apple Color Emoji','Segoe UI Emoji';line-height:1.6}
     a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
-    .wrap{max-width:980px;margin:0 auto;padding:20px}
-    header{background:linear-gradient(180deg,#0d1b2a, #0b1220);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
-    .head{max-width:980px;margin:0 auto;padding:16px 20px}
+    .wrap{max-width:1080px;margin:0 auto;padding:20px}
+    header{background:linear-gradient(180deg,#0d1b2a,#0b1220);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+    .head{max-width:1080px;margin:0 auto;padding:16px 20px}
     .title{margin:0;font-size:28px;letter-spacing:.2px}
     .subtitle{margin:6px 0 0 0;color:var(--muted);font-size:15px}
     .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin:14px 0}
@@ -23,10 +22,9 @@
     h3{margin:12px 0 8px 0;font-size:18px}
     .pill{display:inline-block;padding:4px 10px;border:1px solid var(--border);border-radius:999px;font-size:12px;color:var(--muted);margin-right:6px}
     .grid{display:grid;gap:12px}
-    @media(min-width:840px){.grid.cols-2{grid-template-columns:1fr 1fr}}
-    .list{margin:8px 0 0 18px}
-    .list li{margin:6px 0}
-    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;background:#0a1020;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:#dbeafe}
+    @media(min-width:900px){.grid.cols-2{grid-template-columns:1fr 1fr}}
+    .list{margin:8px 0 0 18px}.list li{margin:6px 0}
+    .kbd{font-family:ui-monospace,Menlo,Consolas,monospace;background:#0a1020;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:#dbeafe}
     .script{background:#0a1020;border:1px dashed var(--border);border-radius:10px;padding:12px;margin-top:10px}
     .hint{color:var(--muted);font-size:14px}
     .badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted);margin-left:8px}
@@ -36,26 +34,51 @@
     .time{color:var(--warn);font-weight:600}
     footer{color:var(--muted);font-size:13px;margin:24px 0}
     .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-    .btn{display:inline-block;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:#0c1426;color:var(--fg);text-decoration:none}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:#0c1426;color:#e6eefc;text-decoration:none;cursor:pointer}
     .btn:hover{background:#0e1a32}
     .agenda{display:grid;gap:8px}
     .agenda .item{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:#0b1528}
     .agenda .item span{font-size:14px;color:var(--muted)}
     .divider{height:1px;background:var(--border);margin:12px 0}
-    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace}
+    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+    input[type="text"],textarea,select{width:100%;background:#0b1528;color:#e6eefc;border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+    textarea{min-height:64px;resize:vertical}
+    .two{display:grid;gap:10px} @media(min-width:760px){.two{grid-template-columns:1fr 1fr}}
     /* Таблиця предметів */
-    table{width:100%;border-collapse:collapse;margin-top:8px;background:#0b1528;border:1px solid var(--border);border-radius:12px;overflow:hidden}
-    th,td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top}
+    table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    th,td{padding:10px;border:1px solid var(--border)}
     th{font-weight:700;text-align:left;color:#dbeafe;background:#0a1426}
-    tr:last-child td{border-bottom:none}
-    .small{font-size:13px;color:var(--muted)}
+    tr{background:#0b1528;border-radius:12px}
+    /* Ранг-лист перетягування */
+    .rank{display:grid;gap:8px}
+    .rank .item{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);border-radius:10px;padding:8px 10px;background:#0b162a;cursor:grab}
+    .dragging{opacity:.6;outline:1px dashed var(--accent)}
+    /* План-кроки */
+    .steps{display:grid;gap:8px}
+    .step{border:1px solid var(--border);border-radius:10px;padding:10px;background:#0b162a}
+    .step .row{display:grid;gap:8px} @media(min-width:920px){.step .row{grid-template-columns:2fr 1fr 1fr 1fr}}
+    .row small{color:var(--muted)}
+    .timer{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+    /* Print */
+    @media print{
+      header,.btn,.hint{display:none !important}
+      body{background:#fff;color:#000}
+      .card{border:0;background:#fff}
+      input,textarea,select{border:0}
+    }
   </style>
 </head>
 <body>
   <header>
     <div class="head">
       <h1 class="title">Інтерактив «Цифровий острів» — онлайн-тренінг</h1>
-      <p class="subtitle">Google Meet • формат: командна гра + планування • тривалість ≈ 25–30 хв</p>
+      <p class="subtitle">Команда • розподіл ролей • 5–7 кроків плану • рефлексія • 25–30 хв</p>
+      <div class="btn-row">
+        <button class="btn" id="exportTxt">⬇️ Експорт .txt</button>
+        <button class="btn" id="printPage">🖨️ Друк</button>
+        <button class="btn" id="clearAll">🗑️ Очистити</button>
+        <span class="hint">Автозбереження у localStorage цього пристрою.</span>
+      </div>
     </div>
   </header>
 
@@ -65,26 +88,26 @@
         <div>
           <h2>Мета заняття</h2>
           <ul class="list">
-            <li>Включити співпрацю та взаємну підтримку в групі.</li>
-            <li>Потренувати слухання, домовленості та розподіл ролей.</li>
-            <li>Розвинути системне мислення в «цифровому» контексті.</li>
+            <li>Включити співпрацю та взаємну підтримку.</li>
+            <li>Потренувати слухання, домовленості та ролі.</li>
+            <li>Розвинути системне мислення в цифровому контексті.</li>
           </ul>
           <div class="divider"></div>
           <h3>Правила роботи</h3>
           <ul class="list">
             <li>Кожен ресурс — цінний. Кожен учасник — потрібний.</li>
-            <li>Говоримо по суті, короткими фразами. Поважаємо час.</li>
-            <li>Рішення — колегіальні. Фіксація — публічна.</li>
+            <li>Коротко і по суті. Повага до часу.</li>
+            <li>Рішення — колегіальні. План — публічний.</li>
           </ul>
         </div>
         <div>
           <h2>План і таймінг</h2>
           <div class="agenda">
-            <div class="item"><strong>1. Занурення</strong> <span class="time">3 хв</span></div>
-            <div class="item"><strong>2. Поділ ролей</strong> <span class="time">2 хв</span></div>
-            <div class="item"><strong>3. Групове завдання</strong> <span class="time">15 хв</span></div>
-            <div class="item"><strong>4. Презентація</strong> <span class="time">3–5 хв</span></div>
-            <div class="item"><strong>5. Рефлексія</strong> <span class="time">5 хв</span></div>
+            <div class="item"><strong>1. Занурення</strong> <span class="time">3 хв · <span id="t1">00:00</span> <button class="btn" data-timer="t1" data-secs="180">▶</button></span></div>
+            <div class="item"><strong>2. Поділ ролей</strong> <span class="time">2 хв · <span id="t2">00:00</span> <button class="btn" data-timer="t2" data-secs="120">▶</button></span></div>
+            <div class="item"><strong>3. Групове завдання</strong> <span class="time">15 хв · <span id="t3">00:00</span> <button class="btn" data-timer="t3" data-secs="900">▶</button></span></div>
+            <div class="item"><strong>4. Презентація</strong> <span class="time">3–5 хв · <span id="t4">00:00</span> <button class="btn" data-timer="t4" data-secs="300">▶</button></span></div>
+            <div class="item"><strong>5. Рефлексія</strong> <span class="time">5 хв · <span id="t5">00:00</span> <button class="btn" data-timer="t5" data-secs="300">▶</button></span></div>
           </div>
         </div>
       </div>
@@ -93,41 +116,48 @@
     <!-- 1. Занурення -->
     <section class="card">
       <h2>1) Занурення</h2>
-      <p class="hint">Мета: створити спільний сюжет і мотивацію до співпраці.</p>
+      <p class="hint">Мета: спільний сюжет і мотивація до співпраці.</p>
       <div class="script">
-        <p class="mono">«Уявіть, що ми — команда, яка потрапила на віртуальний острів. Єдиний зв’язок — інтернет. Завдання — побудувати міні-цифрове селище, щоб вижити й розвиватися. Ресурси розподілені між вами випадково.»</p>
+        <p class="mono">«Уявіть, що ми — команда на віртуальному острові. Єдиний зв’язок — інтернет. Завдання — побудувати міні-цифрове селище. Ресурси розподілені випадково.»</p>
       </div>
-    </section>
-
-    <!-- 2. Поділ ролей -->
-    <section class="card">
-      <h2>2) Поділ ролей</h2>
-      <p class="hint">Мета: зробити видимими сильні сторони учасників.</p>
-      <ul class="list">
-        <li>Випадково роздай «ресурси» (усно або через чат):</li>
-      </ul>
-      <div class="kbd">
-        Google/YouTube — знання • Excel/Canva/PowerPoint — інструменти • Мотивація/креатив — енергія • Уміння домовлятися — зв’язки • Структурування даних — аналітика
+      <div class="two" style="margin-top:10px">
+        <div>
+          <label class="kbd">Список учасників (по одному в рядку)</label>
+          <textarea id="names" placeholder="Ім'я 1&#10;Ім'я 2&#10;Ім'я 3"></textarea>
+        </div>
+        <div>
+          <label class="kbd">Нотатки фасилітатора</label>
+          <textarea id="notesIntro"></textarea>
+        </div>
       </div>
-      <ul class="list">
-        <li>Кожен учасник <strong>називає свій ресурс уголос</strong>.</li>
-      </ul>
+      <div class="btn-row">
+        <button class="btn" id="assign">🎲 Роздати ролі випадково</button>
+        <button class="btn" id="addEmpty">➕ Додати порожній рядок</button>
+      </div>
+      <div class="callout"><strong>Ролі/ресурси:</strong> Знання (Google/YouTube) • Інструменти (Excel/Canva/PowerPoint) • Енергія (мотивація/креатив) • Зв’язки (домовленості) • Аналітика (структурування даних)</div>
+      <div class="card" style="margin-top:12px">
+        <h3>Розподіл ролей</h3>
+        <div id="roster"></div>
+      </div>
     </section>
 
     <!-- 3. Групове завдання -->
     <section class="card">
       <h2>3) Групове завдання (15 хв)</h2>
-      <p class="hint">Мета: спроєктувати «цифрове селище» та зафіксувати узгоджений план.</p>
-      <div class="script">
-        <p class="mono">«За 15 хв як команда створіть план розвитку цифрового селища. Умови: використати ресурси кожного; домовитись про ролі; зафіксувати 5–7 кроків у Google Docs/Jamboard або озвучити структуровано.»</p>
+      <p class="hint">Завдання: погодити 5–7 кроків розвитку «цифрового селища».</p>
+      <div class="btn-row">
+        <button class="btn" id="addStep">➕ Додати крок</button>
+        <button class="btn" id="clearSteps">♻️ Скинути кроки</button>
       </div>
-      <details>
-        <summary>Підказки до плану (можна озвучити або вписати)</summary>
+      <div id="steps" class="steps" style="margin-top:8px"></div>
+
+      <details style="margin-top:10px">
+        <summary>Підказки до плану</summary>
         <div class="callout">
           <ul class="list">
             <li><strong>Інфраструктура:</strong> спільний Google Диск, папки, доступи.</li>
             <li><strong>Комунікація:</strong> канал оголошень, правила синхрон/асинхрон.</li>
-            <li><strong>Аналітика:</strong> таблиця ресурсів/задач із дедлайнами.</li>
+            <li><strong>Аналітика:</strong> таблиця задач із дедлайнами та відповідальними.</li>
             <li><strong>Контент:</strong> шаблони у Canva/Docs для швидких оновлень.</li>
             <li><strong>Безпека:</strong> резервні копії, права доступу, історія змін.</li>
           </ul>
@@ -138,34 +168,50 @@
     <!-- 4. Презентація -->
     <section class="card">
       <h2>4) Презентація (3–5 хв)</h2>
-      <ul class="list">
-        <li>Кожна команда коротко озвучує 5–7 кроків.</li>
-        <li><span class="small">Формула: «Крок → відповідальний → ресурс → дедлайн».</span></li>
-      </ul>
-      <div class="btn-row">
-        <span class="btn">Озвучити 7 кроків</span>
-        <span class="btn">Назвати відповідальних</span>
-        <span class="btn">Погодити дедлайни</span>
+      <div class="kbd">Формула озвучення: «Крок → відповідальний → ресурс → дедлайн».</div>
+      <div class="two" style="margin-top:10px">
+        <div>
+          <label class="kbd">Ключові рішення</label>
+          <textarea id="present"></textarea>
+        </div>
+        <div>
+          <label class="kbd">Ризики та як їх зменшити</label>
+          <textarea id="risks"></textarea>
+        </div>
       </div>
     </section>
 
     <!-- 5. Рефлексія -->
     <section class="card">
       <h2>5) Рефлексія (5 хв)</h2>
-      <ul class="list">
-        <li>Що було найскладніше домовитись?</li>
-        <li>Який ресурс виявився найціннішим?</li>
-        <li>Як це схоже на реальну роботу в ІТ/навчанні?</li>
-        <li>Яку роль бачиш у майбутніх командних проєктах?</li>
-      </ul>
-      <details>
+      <div class="two">
+        <div>
+          <label class="kbd">Що було найскладніше домовитись?</label>
+          <textarea id="refl1"></textarea>
+        </div>
+        <div>
+          <label class="kbd">Найцінніший ресурс команди</label>
+          <textarea id="refl2"></textarea>
+        </div>
+      </div>
+      <div class="two" style="margin-top:10px">
+        <div>
+          <label class="kbd">Що схоже на реальну роботу в ІТ/навчанні?</label>
+          <textarea id="refl3"></textarea>
+        </div>
+        <div>
+          <label class="kbd">Моя роль у наступному проєкті</label>
+          <textarea id="refl4"></textarea>
+        </div>
+      </div>
+      <details style="margin-top:10px">
         <summary>Чому це працює?</summary>
         <div class="callout">
           <ul class="list">
             <li><strong>Свідомість:</strong> кожен осмислює себе як ресурс.</li>
             <li><strong>Тімбілдинг:</strong> домовленості, щоб задіяти всіх.</li>
             <li><strong>Коучинг:</strong> ведучий не дає відповідей — створює середовище.</li>
-            <li><strong>Інформатика:</strong> модель реальної цифрової системи в ігровій формі.</li>
+            <li><strong>Інформатика:</strong> модель цифрової системи в ігровій формі.</li>
           </ul>
         </div>
       </details>
@@ -173,32 +219,36 @@
 
     <!-- Додатковий модуль: предмети для «виживання» -->
     <section class="card">
-      <h2>Додатковий модуль: предмети для «виживання»</h2>
-      <p class="hint">Використай як швидкий брейнсторм: що взяти в «експедицію» й чому.</p>
-      <table>
-        <thead>
-          <tr><th>№</th><th>Предмет</th><th>Коментар</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>1</td><td>Ніж</td><td>Класика виживання. Але чи безпечний у групі?</td></tr>
-          <tr><td>2</td><td>Пляшка води (1 л)</td><td>Життєво необхідна, але вистачить лише на одного.</td></tr>
-          <tr><td>3</td><td>Телефон без сигналу</td><td>Камера, ліхтарик, нотатки — але без зв’язку.</td></tr>
-          <tr><td>4</td><td>Сонцезахисний крем</td><td>Комфорт чи марна розкіш?</td></tr>
-          <tr><td>5</td><td>Пластиковий тент</td><td>Захист від дощу або парус?</td></tr>
-          <tr><td>6</td><td>Запальничка</td><td>Вогонь = тепло, їжа, сигнал.</td></tr>
-          <tr><td>7</td><td>Книга «Як вижити на острові»</td><td>Теорія vs практика.</td></tr>
-          <tr><td>8</td><td>Компас</td><td>Орієнтація навіть на маленькому острові.</td></tr>
-          <tr><td>9</td><td>Пакет сухого пайка</td><td>Їжа на 1 день. Ділити чи ні?</td></tr>
-          <tr><td>10</td><td>Дзеркальце</td><td>Сигнал допомоги або психологічна підтримка 😄</td></tr>
-        </tbody>
-      </table>
-      <div class="small" style="margin-top:8px">Запитання до дискусії: що критично зараз, а що — пізніше? як розподілити ризики?</div>
+      <h2>Додатковий модуль: пріоритезація предметів «виживання»</h2>
+      <p class="hint">Перетягніть предмети в порядку важливості (1 — найважливіший). Рейтинг збережеться й потрапить в експорт.</p>
+      <div id="rank" class="rank"></div>
+      <div class="btn-row">
+        <button class="btn" id="resetRank">♻️ Скинути рейтинг</button>
+      </div>
+      <details style="margin-top:10px">
+        <summary>Список і коментарі</summary>
+        <table>
+          <thead><tr><th>№</th><th>Предмет</th><th>Коментар</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Ніж</td><td>Класика виживання. Але чи безпечний у групі?</td></tr>
+            <tr><td>2</td><td>Пляшка води (1 л)</td><td>Життєво необхідна, але вистачить лише на одного.</td></tr>
+            <tr><td>3</td><td>Телефон без сигналу</td><td>Камера, ліхтарик, нотатки — без зв’язку.</td></tr>
+            <tr><td>4</td><td>Сонцезахисний крем</td><td>Комфорт чи марна розкіш?</td></tr>
+            <tr><td>5</td><td>Пластиковий тент</td><td>Захист від дощу або парус?</td></tr>
+            <tr><td>6</td><td>Запальничка</td><td>Вогонь = тепло, їжа, сигнал.</td></tr>
+            <tr><td>7</td><td>Книга «Як вижити на острові»</td><td>Теорія vs практика.</td></tr>
+            <tr><td>8</td><td>Компас</td><td>Орієнтація навіть на маленькому острові.</td></tr>
+            <tr><td>9</td><td>Пакет сухого пайка</td><td>Їжа на 1 день. Ділити чи ні?</td></tr>
+            <tr><td>10</td><td>Дзеркальце</td><td>Сигнал допомоги або психологічна підтримка 😄</td></tr>
+          </tbody>
+        </table>
+      </details>
     </section>
 
     <!-- Матеріал для курсу -->
     <section class="card">
       <h2>Матеріал для збереження в курсі</h2>
-      <p class="hint">Збережи цей файл у репозиторії та вбудуй у Moodle через <span class="mono">&lt;iframe&gt;</span>. Так студенти матимуть «конспект інтерактиву».</p>
+      <p class="hint">Збережи файл у репозиторії та вбудуй у Moodle через <span class="mono">&lt;iframe&gt;</span>. Студенти матимуть «живий» конспект.</p>
       <div class="btn-row">
         <span class="btn">Ролі та ресурси</span>
         <span class="btn">5–7 кроків розвитку</span>
@@ -208,8 +258,232 @@
     </section>
 
     <footer>
-      <div>© Тренінговий конспект для дистанційних занять. Інтерактив «Цифровий острів» — співпраця, системне мислення, домовленості.</div>
+      <div class="hint">© Інтерактив «Цифровий острів». Дані зберігаються локально на цьому пристрої.</div>
     </footer>
   </main>
+
+  <script>
+    // ========= УТИЛІТИ
+    const $=(s,ctx=document)=>ctx.querySelector(s);
+    const $$=(s,ctx=document)=>Array.from(ctx.querySelectorAll(s));
+    const KEY='digital_island_v1';
+
+    function fmt(s){const m=String(Math.floor(s/60)).padStart(2,'0');const ss=String(s%60).padStart(2,'0');return `${m}:${ss}`;}
+    function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();const g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=880;g.gain.value=0.05;o.start();setTimeout(()=>{o.stop();c.close();},300);}catch(e){}}
+
+    // ========= ТАЙМЕРИ
+    const timers={};
+    $$('.btn[data-timer]').forEach(b=>{
+      b.addEventListener('click',()=>{
+        const id=b.getAttribute('data-timer'); const secs=Number(b.getAttribute('data-secs'))||120;
+        if(timers[id]){clearInterval(timers[id]); delete timers[id];}
+        let s=0; timers[id]=setInterval(()=>{ s++; $('#'+id).textContent=fmt(s); if(s>=secs){clearInterval(timers[id]); delete timers[id]; beep();}},1000);
+      });
+    });
+
+    // ========= РОЛІ ТА РОЗПОДІЛ
+    const ROLES=['Знання','Інструменти','Енергія','Зв’язки','Аналітика'];
+    function renderRoster(list){
+      const root=$('#roster'); root.innerHTML='';
+      list.forEach((row,i)=>{
+        const wrap=document.createElement('div'); wrap.className='step';
+        wrap.innerHTML=`
+          <div class="row">
+            <div><small>Учасник</small><input type="text" data-k="name" data-i="${i}" value="${row.name}"></div>
+            <div><small>Роль/ресурс</small>
+              <select data-k="role" data-i="${i}">
+                ${ROLES.map(r=>`<option ${row.role===r?'selected':''}>${r}</option>`).join('')}
+              </select>
+            </div>
+            <div><small>Сильна сторона (1–2 слова)</small><input type="text" data-k="strength" data-i="${i}" value="${row.strength||''}"></div>
+            <div><small>Коментар</small><input type="text" data-k="note" data-i="${i}" value="${row.note||''}"></div>
+          </div>`;
+        root.appendChild(wrap);
+      });
+      $$('[data-k]').forEach(inp=> inp.addEventListener('input', save));
+    }
+    function parseNames(){ return $('#names').value.split('\n').map(s=>s.trim()).filter(Boolean); }
+    function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+    function assignRoles(){
+      const names=parseNames(); if(!names.length){alert('Додай учасників зліва.'); return;}
+      const roles=[]; const base=[...ROLES]; while(roles.length<names.length){roles.push(...base);}
+      shuffle(roles);
+      const roster = names.map((n,i)=>({name:n, role:roles[i], strength:'', note:''}));
+      state.roster=roster; renderRoster(roster); save();
+    }
+
+    // ========= КРОКИ ПЛАНУ
+    function newStep(){
+      return { title:'', owner:'', resource:'', deadline:'' };
+    }
+    function renderSteps(){
+      const root=$('#steps'); root.innerHTML='';
+      state.steps.forEach((s,i)=>{
+        const el=document.createElement('div'); el.className='step';
+        el.innerHTML=`
+          <div class="row">
+            <div><small>Крок</small><input type="text" data-k="title" data-i="${i}" value="${s.title}"></div>
+            <div><small>Відповідальний</small><input type="text" data-k="owner" data-i="${i}" value="${s.owner}"></div>
+            <div><small>Ресурс</small><input type="text" data-k="resource" data-i="${i}" value="${s.resource}"></div>
+            <div><small>Дедлайн</small><input type="text" data-k="deadline" data-i="${i}" value="${s.deadline}" placeholder="напр., 15.11"></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn" data-up="${i}">⬆️</button>
+            <button class="btn" data-down="${i}">⬇️</button>
+            <button class="btn danger" data-del="${i}">🗑️ Видалити</button>
+          </div>`;
+        root.appendChild(el);
+      });
+      $$('[data-k]').forEach(inp=> inp.addEventListener('input', e=>{
+        const i=Number(e.target.getAttribute('data-i')); const k=e.target.getAttribute('data-k'); state.steps[i][k]=e.target.value; save();
+      }));
+      $$('[data-up]').forEach(b=> b.addEventListener('click',e=>{ const i=Number(e.target.getAttribute('data-up')); if(i>0){ [state.steps[i-1],state.steps[i]]=[state.steps[i],state.steps[i-1]]; renderSteps(); save(); }}));
+      $$('[data-down]').forEach(b=> b.addEventListener('click',e=>{ const i=Number(e.target.getAttribute('data-down')); if(i<state.steps.length-1){ [state.steps[i+1],state.steps[i]]=[state.steps[i],state.steps[i+1]]; renderSteps(); save(); }}));
+      $$('[data-del]').forEach(b=> b.addEventListener('click',e=>{ const i=Number(e.target.getAttribute('data-del')); state.steps.splice(i,1); renderSteps(); save(); }));
+    }
+
+    // ========= РАНЖУВАННЯ ПРЕДМЕТІВ
+    const ITEMS=[
+      {id:1,t:'Ніж'},{id:2,t:'Пляшка води (1 л)'},{id:3,t:'Телефон без сигналу'},{id:4,t:'Сонцезахисний крем'},
+      {id:5,t:'Пластиковий тент'},{id:6,t:'Запальничка'},{id:7,t:'Книга «Як вижити на острові»'},
+      {id:8,t:'Компас'},{id:9,t:'Пакет сухого пайка'},{id:10,t:'Дзеркальце'}
+    ];
+    function renderRank(){
+      const root=$('#rank'); root.innerHTML='';
+      state.rank.forEach((id,idx)=>{
+        const item=ITEMS.find(x=>x.id===id);
+        const el=document.createElement('div'); el.className='item'; el.draggable=true; el.dataset.id=id;
+        el.innerHTML=`<div>${idx+1}. ${item.t}</div><div class="hint">Перетягни</div>`;
+        el.addEventListener('dragstart',()=>{ el.classList.add('dragging'); });
+        el.addEventListener('dragend',()=>{ el.classList.remove('dragging'); save(); });
+        root.appendChild(el);
+      });
+      root.addEventListener('dragover',e=>{
+        e.preventDefault();
+        const dragging = $('.dragging'); if(!dragging) return;
+        const afterEl = getDragAfterElement(root, e.clientY);
+        if(afterEl==null){ root.appendChild(dragging); }
+        else{ root.insertBefore(dragging, afterEl); }
+        // оновити state.rank по DOM
+        state.rank = $$('.rank .item').map(x=>Number(x.dataset.id));
+      }, {once:false});
+    }
+    function getDragAfterElement(container, y){
+      const els=[...container.querySelectorAll('.item:not(.dragging)')];
+      return els.reduce((closest,child)=>{
+        const box=child.getBoundingClientRect(); const offset=y - box.top - box.height/2;
+        if(offset<0 && offset>closest.offset){ return {offset:offset, element:child}; } else { return closest; }
+      }, {offset:Number.NEGATIVE_INFINITY}).element;
+    }
+
+    // ========= СТАН / ЗБЕРЕЖЕННЯ
+    const state = {
+      notesIntro:'',
+      roster:[],
+      steps:[],
+      rank: ITEMS.map(x=>x.id), // за замовчуванням вихідний порядок
+      names:''
+    };
+    function collect(){
+      return {
+        names: $('#names').value,
+        notesIntro: $('#notesIntro').value,
+        roster: state.roster,
+        steps: state.steps,
+        rank: state.rank,
+        present: $('#present').value,
+        risks: $('#risks').value,
+        refl1: $('#refl1').value, refl2: $('#refl2').value, refl3: $('#refl3').value, refl4: $('#refl4').value
+      };
+    }
+    function save(){ localStorage.setItem(KEY, JSON.stringify(collect())); }
+    function load(){
+      const raw=localStorage.getItem(KEY);
+      if(!raw){ // 3 кроки заготовки
+        state.steps=[newStep(), newStep(), newStep()];
+        renderSteps(); renderRank(); renderRoster([]);
+        return;
+      }
+      try{
+        const data=JSON.parse(raw);
+        $('#names').value=data.names||'';
+        $('#notesIntro').value=data.notesIntro||'';
+        state.roster=data.roster||[];
+        state.steps=data.steps||[newStep(),newStep()];
+        state.rank=Array.isArray(data.rank)&&data.rank.length?data.rank:ITEMS.map(x=>x.id);
+        $('#present').value=data.present||'';
+        $('#risks').value=data.risks||'';
+        $('#refl1').value=data.refl1||'';
+        $('#refl2').value=data.refl2||'';
+        $('#refl3').value=data.refl3||'';
+        $('#refl4').value=data.refl4||'';
+        renderRoster(state.roster);
+        renderSteps();
+        renderRank();
+      }catch(e){
+        state.steps=[newStep(),newStep()];
+        renderSteps(); renderRank(); renderRoster([]);
+      }
+    }
+    $$('textarea,input,select').forEach(el=> el.addEventListener('input', save));
+
+    // ========= ЕКСПОРТ / ДРУК / ОЧИСТКА
+    function exportTxt(){
+      const d=collect();
+      const rosterLines = (d.roster||[]).map(r=>`- ${r.name}: ${r.role} (сила: ${r.strength||'-'}, коментар: ${r.note||'-'})`).join('\n');
+      const stepsLines = (d.steps||[]).map((s,i)=>`${i+1}) ${s.title} — відп.: ${s.owner||'-'} — ресурс: ${s.resource||'-'} — дедлайн: ${s.deadline||'-'}`).join('\n');
+      const rankLines = (d.rank||state.rank).map((id,i)=>`${i+1}. ${ITEMS.find(x=>x.id===id).t}`).join('\n');
+      const txt=[
+'ІНТЕРАКТИВ «ЦИФРОВИЙ ОСТРІВ» — ПІДСУМКИ',
+'',
+'[УЧАСНИКИ]',
+(d.names||'').trim(),
+'',
+'[РОЗПОДІЛ РОЛЕЙ]',
+rosterLines||'(не заповнено)',
+'',
+'[ПЛАН 5–7 КРОКІВ]',
+stepsLines||'(не заповнено)',
+'',
+'[ПРІОРИТЕТИ ПРЕДМЕТІВ]',
+rankLines,
+'',
+'[ПРЕЗЕНТАЦІЯ]',
+(d.present||'-'),
+'',
+'[РИЗИКИ]',
+(d.risks||'-'),
+'',
+'[РЕФЛЕКСІЯ]',
+'Складно домовитись: '+(d.refl1||'-'),
+'Цінний ресурс: '+(d.refl2||'-'),
+'Схожість з ІТ/навчанням: '+(d.refl3||'-'),
+'Моя роль далі: '+(d.refl4||'-')
+      ].join('\n');
+      const a=document.createElement('a');
+      const stamp=new Date().toISOString().slice(0,16).replace('T','_').replace(':','-');
+      a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
+      a.download=`digital_island_${stamp}.txt`;
+      document.body.appendChild(a); a.click();
+      setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},0);
+    }
+
+    // ========= ПОДІЇ КНОПОК
+    $('#assign').addEventListener('click', assignRoles);
+    $('#addEmpty').addEventListener('click', ()=>{
+      state.roster.push({name:'',role:ROLES[state.roster.length%ROLES.length],strength:'',note:''});
+      renderRoster(state.roster); save();
+    });
+    $('#addStep').addEventListener('click', ()=>{ if(state.steps.length>=7){alert('Достатньо: максимум 7 кроків.'); return;} state.steps.push(newStep()); renderSteps(); save();});
+    $('#clearSteps').addEventListener('click', ()=>{ if(confirm('Скинути всі кроки?')){ state.steps=[newStep(),newStep(),newStep()]; renderSteps(); save(); }});
+    $('#resetRank').addEventListener('click', ()=>{ state.rank=ITEMS.map(x=>x.id); renderRank(); save(); });
+
+    $('#exportTxt').addEventListener('click', exportTxt);
+    $('#printPage').addEventListener('click',()=>window.print());
+    $('#clearAll').addEventListener('click',()=>{ if(confirm('Очистити всі локальні дані цієї сторінки?')){ localStorage.removeItem(KEY); location.reload(); }});
+
+    // ========= СТАРТ
+    window.addEventListener('load', load);
+  </script>
 </body>
 </html>
