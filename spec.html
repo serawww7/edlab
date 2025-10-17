@@ -146,18 +146,18 @@ const GH_OWNER = 'serawww7';
 const GH_REPO  = 'edlab';
 const GH_REF   = 'main';
 
-// ========= Метадані секцій =========
+// ========= Метадані секцій (ТВОЇ назви папок!) =========
 const SECTION_META = {
   coach:   { title:"🧠 Психологічні тренінги (coach)", desc:"Коучингові практики, рефлексія, soft skills, робота в групах.", folder:'coach' },
   electric:{ title:"⚡ Електроенергетика/електрика",    desc:"Вимірювання, маркування, ППР, калькулятори перерізів, журнали ОП.", folder:'elect_II_kyrs' },
-  agro:    { title:"🌾 Агрономія",                      desc:"Польові журнали, планування, моніторинги, QR/NFC.", folder:'agro' },
-  mech:    { title:"🚜 Механізація (механіки)",         desc:"ТО/ППР, облік пального, заявки, діагностика, безпека.", folder:'mech' },
-  tech:    { title:"🐄 Технології тваринництва",        desc:"HACCP/FSMS, SPC, простежуваність, аудит, CAPA.", folder:'tech' }
+  agro:    { title:"🌾 Агрономія",                      desc:"Польові журнали, планування, моніторинги, QR/NFC.", folder:'agro_II_kyrs' },
+  mech:    { title:"🚜 Механізація (механіки)",         desc:"ТО/ППР, облік пального, заявки, діагностика, безпека.", folder:'mech_II_kyrs' },
+  tech:    { title:"🐄 Технології тваринництва",        desc:"HACCP/FSMS, SPC, простежуваність, аудит, CAPA.", folder:'tech_II_kyrs' }
 };
 const SECTION_KEYS = Object.keys(SECTION_META);
 
 // ========= Кеш (7 днів) =========
-const CACHE_KEY = 'edlab_manifest_cache_v2';
+const CACHE_KEY = 'edlab_manifest_cache_v3';
 const CACHE_TTL_MS = 7*24*60*60*1000;
 function readCache(){ try{ return JSON.parse(localStorage.getItem(CACHE_KEY)||'{}'); }catch{ return {}; } }
 function writeCache(obj){ localStorage.setItem(CACHE_KEY, JSON.stringify(obj)); }
@@ -219,22 +219,20 @@ async function getFullTree(treeSha){
   return Array.isArray(j.tree) ? j.tree : [];
 }
 
-// **АВТОДЕТЕКТ префікса у дереві ('', 'edlab/')**
+// Автодетект префікса у дереві ('', 'edlab/')
 function detectTreePrefix(tree){
-  const has = pfx => tree.some(n => n.type==='blob' && n.path.startsWith(pfx+'coach/'));
+  const has = pfx => tree.some(n => n.type==='blob' && n.path.startsWith(pfx + 'coach/'));
   if (has('edlab/')) return 'edlab/';
-  return ''; // файли лежать з кореня репозиторію
+  return '';
 }
 
-// Побудувати список за деревом з урахуванням префікса
+// Побудувати список з урахуванням префікса в дереві
 function buildListFromTree(tree, key, treePrefix){
   const meta = SECTION_META[key];
-  const sectionPrefix = `${treePrefix}${meta.folder}/`;  // 'edlab/coach/' або 'coach/'
+  const sectionPrefix = `${treePrefix}${meta.folder}/`; // напр., 'edlab/agro_II_kyrs/' або 'agro_II_kyrs/'
   const files = tree
     .filter(n => n.type === 'blob' && n.path.startsWith(sectionPrefix) && /\.html?$/i.test(n.path))
-    .map(n => '/' + ( // публічний URL завжди під /edlab/...
-      n.path.startsWith('edlab/') ? n.path : ('edlab/' + n.path)
-    ));
+    .map(n => '/' + (n.path.startsWith('edlab/') ? n.path : ('edlab/' + n.path))); // публічний URL під /edlab/...
   files.sort((a,b)=>a.localeCompare(b,'uk'));
   return files.map(url => ({ url, title: humanizeFromPath(url), desc: url }));
 }
@@ -292,15 +290,15 @@ async function buildSection(key, forceRefresh=false){
   }
 
   try{
-    const treeSha = await getTreeSha();
-    const tree    = await getFullTree(treeSha);
-    const treePrefix = detectTreePrefix(tree); // '' або 'edlab/'
-    const list    = buildListFromTree(tree, key, treePrefix);
+    const treeSha   = await getTreeSha();
+    const tree      = await getFullTree(treeSha);
+    const treePref  = detectTreePrefix(tree); // '' або 'edlab/'
+    const list      = buildListFromTree(tree, key, treePref);
 
     __lastUrls = list.map(i=>i.url);
 
     if(!list.length){
-      hint.textContent = `У розділі "${key}" HTML-файлів не знайдено (за GitHub API). Переконайся, що файли лежать у /${treePrefix}${meta.folder}/ та мають розширення .html/.htm`;
+      hint.textContent = `У розділі "${key}" HTML-файлів не знайдено (за GitHub API). Переконайся, що файли лежать у /${treePref}${meta.folder}/ та мають .html/.htm`;
       hint.classList.add('error'); hint.style.display='';
       byId('lessons').innerHTML = '';
       byId('debugBox').style.display = '';
