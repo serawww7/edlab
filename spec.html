@@ -11,7 +11,7 @@
 .header-mini{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .grid2{display:grid;gap:16px;grid-template-columns:2fr 1fr}
 @media(max-width:980px){.grid2{grid-template-columns:1fr}}
-.lesson-list .lesson{position:relative}
+.lesson-list .lesson{position:relative;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
 .lesson-list .btn{position:relative;z-index:2}
 .tester-toolbar{display:flex;justify-content:space-between;gap:8px;align-items:center;background:#0d1a2e;color:#e6eef9;border:1px solid #223049;border-bottom:0;border-radius:12px 12px 0 0;padding:8px 12px}
 .tester{border:1px solid #223049;border-radius:0 0 12px 12px;overflow:hidden;background:#0b1220}
@@ -24,6 +24,21 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
 .selector{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:12px}
 .selector a{display:block;padding:16px;border:1px solid #223049;border-radius:12px;background:#0b1220;text-decoration:none}
 .selector a:hover{background:#0f1f39}
+
+/* === Анімована абстракція (іконка) === */
+.lesson .thumb{
+  width:44px;height:44px;
+  display:grid;place-items:center;
+  border-radius:12px;
+  background:linear-gradient(135deg,#0b1220,#0f1f39);
+  border:1px solid #223049;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.02), 0 4px 14px rgba(0,0,0,.25);
+}
+.lesson .thumb svg{width:24px;height:24px;display:block}
+@media (prefers-reduced-motion:no-preference){
+  .lesson .thumb .spin{animation:spin 6s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+}
 </style>
 </head>
 <body>
@@ -116,7 +131,7 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
 </footer>
 
 <script>
-  // ——— кольори для секцій
+// ===== Кольори для секцій + поточний ключ
 const THEME_COLORS = {
   coach:   {accent:'#a855f7', ring:'#7c3aed'},
   electric:{accent:'#22d3ee', ring:'#0891b2'},
@@ -124,14 +139,11 @@ const THEME_COLORS = {
   mech:    {accent:'#f59e0b', ring:'#b45309'},
   tech:    {accent:'#ef4444', ring:'#b91c1c'}
 };
-let CURRENT_SPEC = ''; // встановлюється в init()
+let CURRENT_SPEC = ''; // виставимо в init()
 
+// === SVG-іконка (абстракція з орбітою)
 function iconSvgForCurrent(){
-
-  CURRENT_SPEC = key || '';
-await buildSection(key);
-
-  // абстрактне «ядро» + орбіта, крапка обертається
+  const c = THEME_COLORS[CURRENT_SPEC] || {accent:'#60a5fa', ring:'#1d4ed8'};
   return `
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <defs>
@@ -140,25 +152,23 @@ await buildSection(key);
         <stop offset="100%" stop-color="${c.ring}"/>
       </linearGradient>
     </defs>
-    <!-- кільце -->
     <circle cx="12" cy="12" r="8.5" fill="none" stroke="url(#g1)" stroke-width="1.5" opacity="0.9"/>
-    <!-- ядро -->
     <circle cx="12" cy="12" r="3.2" fill="${c.accent}" opacity="0.9"/>
-    <!-- орбіта з крапкою (крутиться) -->
     <g class="spin" style="transform-origin:12px 12px">
       <circle cx="12" cy="3.2" r="2" fill="${c.ring}" />
     </g>
   </svg>`;
 }
-// ===== Без GitHub API — локальні маніфести + авто- назви з HTML
+
+// ===== Утиліти
 const byId = (id)=>document.getElementById(id);
 const SECTION_KEYS = ['coach','electric','agro','mech','tech'];
 const SECTION_META = {
   coach:   { title:"🧠 Психологічні тренінги (coach)", desc:"Коучингові практики, рефлексія, soft skills, робота в групах." },
-  electric:{ title:"⚡ Електроенергетика",    desc:"Вимірювання, маркування, ППР, калькулятори перерізів, журнали ОП." },
-  agro:    { title:"🌾 Агрономія",                      desc:"Польові журнали, планування, моніторинги, QR/NFC." },
-  mech:    { title:"🚜 Агроінженерія (механіки)",         desc:"ТО/ППР, облік пального, заявки, діагностика, безпека." },
-  tech:    { title:"🐄 Технологи",        desc:"HACCP/FSMS, SPC, простежуваність, аудит, CAPA." }
+  electric:{ title:"⚡ Електроенергетика",             desc:"Вимірювання, маркування, ППР, калькулятори перерізів, журнали ОП." },
+  agro:    { title:"🌾 Агрономія",                     desc:"Польові журнали, планування, моніторинги, QR/NFC." },
+  mech:    { title:"🚜 Агроінженерія (механіки)",      desc:"ТО/ППР, облік пального, заявки, діагностика, безпека." },
+  tech:    { title:"🐄 Технологи",                     desc:"HACCP/FSMS, SPC, простежуваність, аудит, CAPA." }
 };
 const SECTION_TO_DIR = {
   coach:'coach',
@@ -193,7 +203,6 @@ function lessonCard(item){
       </div>
     </div>`;
 }
-
 
 // ——— Витяг <title> і description з HTML (з кешем)
 function extractTitleDescFromHTML(html){
@@ -238,7 +247,7 @@ async function loadManifestFor(key){
   const dir = SECTION_TO_DIR[key];
   if(!dir) return null;
 
-  // 1) глобальний маніфест (твій)
+  // 1) глобальний маніфест
   const global = await tryFetchJson(absoluteUrl('/assets/manifest.json'));
   if(global && Array.isArray(global[dir])) return { src:'/assets/manifest.json#'+dir, data: global[dir] };
 
@@ -289,7 +298,6 @@ async function buildSection(key){
     const betterTitle = (meta.title || '').trim();
     const betterDesc  = (meta.desc  || '').trim();
     if (betterTitle || betterDesc){
-      // заміна DOM-картки
       const cards = byId('lessons').querySelectorAll('.lesson');
       const card = cards[idx];
       if (card){
@@ -311,9 +319,9 @@ function renderSelector(){
   byId('lessons').innerHTML = `
     <div class="selector">
       <a href="spec.html?spec=agro">🌾 Агрономія</a>
-      <a href="spec.html?spec=mech">🚜 Механізація (механіки)</a>
-      <a href="spec.html?spec=tech">🐄 Технології тваринництва</a>
-      <a href="spec.html?spec=electric">⚡ Електроенергетика/електрика</a>
+      <a href="spec.html?spec=mech">🚜 Агроінженерія (механіки)</a>
+      <a href="spec.html?spec=tech">🐄 Технологи</a>
+      <a href="spec.html?spec=electric">⚡ Електроенергетика</a>
       <a href="spec.html?spec=coach">🧠 Психологічні тренінги (coach)</a>
     </div>`;
 }
@@ -384,6 +392,10 @@ document.addEventListener('click', (e)=>{
   })();
 
   if(!key){ renderSelector(); return; }
+
+  // ВАЖЛИВО: виставляємо поточну секцію для кольорів іконки
+  CURRENT_SPEC = key;
+
   await buildSection(key);
 })();
 </script>
