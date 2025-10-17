@@ -1,4 +1,4 @@
-name: Build edlab manifest
+name: Build EDLab manifests
 
 on:
   push:
@@ -9,49 +9,101 @@ permissions:
   contents: write
 
 jobs:
-  build-manifest:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: Generate coach list
+      - name: Generate manifests with Node (no deps)
         run: |
+          set -euo pipefail
           mkdir -p assets
-          if [ -d "coach" ]; then
-            find coach -maxdepth 1 -type f -name "*.html" | sed 's#^#/#' | sort > /tmp/coach.txt || true
-          else
-            : > /tmp/coach.txt
-          fi
 
-      - name: Generate electric list
-        run: |
-          if [ -d "elect_II_kyrs" ]; then
-            find elect_II_kyrs -maxdepth 1 -type f -name "*.html" | sed 's#^#/#' | sort > /tmp/electric.txt || true
-          else
-            : > /tmp/electric.txt
-          fi
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
 
-      - name: Build assets/edlab-manifest.json
-        run: |
-          COACH_JSON=$(jq -R -s 'split("\n")[:-1]' /tmp/coach.txt)
-          ELECT_JSON=$(jq -R -s 'split("\n")[:-1]' /tmp/electric.txt)
-          jq -n --argjson coach "$COACH_JSON" --argjson electric "$ELECT_JSON" \
-            '{coach:$coach, electric:$electric}' > assets/edlab-manifest.json
-          echo "Generated assets/edlab-manifest.json:"
-          cat assets/edlab-manifest.json
+          const SECTIONS = {
+            coach: 'coach',
+            electric: 'elect_II_kyrs',
+            agro: 'agro',
+            mech: 'mech',
+            tech: 'tech',
+          };
 
-      - name: Commit manifest if changed
+          // Рекурсивний обхід без сторонніх бібліотек
+          function walk(dir) {
+            const out = [];
+            if (!fs.existsSync(dir)) return out;
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              const p = path.join(dir, entry.name);
+              if (entry.isDirectory()) out.push(...walk(p));
+              else if (entry.isFile() && /\.html?$/i.test(entry.name)) out.push(p);
+            }
+            return out;
+          }
+
+          // Витяг <title> (fallback: ім'я файлу)
+          function extractTitle(filePath) {
+            try {
+              const html = fs.readFileSync(filePath, 'utf8');
+              const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+              if (m && m[1]) {
+                return m[1].replace(/\s+/g, ' ').trim().slice(0, 200);
+              }
+            } catch {}
+            const base = path.basename(filePath).replace(/\.html?$/i,'');
+            return base.replace(/[-_]/g,' ').trim();
+          }
+
+          function toUrl(p) {
+            // Перетворюємо відносний шлях у URL із початковим слешем
+            return '/' + p.split(path.sep).join('/');
+          }
+
+          // Глобальний маніфест: об'єкт {section:[{url,title,desc}]}
+          const global = {};
+          for (const [key, folder] of Object.entries(SECTIONS)) {
+            const files = walk(folder).sort();
+            global[key] = files.map(fp => {
+              const url = toUrl(fp);
+              const title = extractTitle(fp);
+              return { url, title, desc: url };
+            });
+          }
+
+          fs.writeFileSync(
+            path.join('assets','edlab-manifest.json'),
+            JSON.stringify(global, null, 2),
+            'utf8'
+          );
+
+          // Локальні маніфести (опціонально): прості масиви URL у кожній папці
+          for (const [key, folder] of Object.entries(SECTIONS)) {
+            if (fs.existsSync(folder)) {
+              const files = walk(folder).sort().map(toUrl);
+              const localPath = path.join(folder, 'manifest.json');
+              fs.writeFileSync(localPath, JSON.stringify(files, null, 2), 'utf8');
+            }
+          }
+
+          // Вивід для логів
+          console.log('Generated assets/edlab-manifest.json with sections:');
+          for (const k of Object.keys(global)) {
+            console.log(k, global[k].length, 'items');
+          }
+          NODE
+
+      - name: Commit manifests if changed
         run: |
-          if ! git diff --quiet -- assets/edlab-manifest.json; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add assets/edlab-manifest.json
-            git commit -m "chore: update edlab-manifest.json"
+          set -e
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/edlab-manifest.json coach/manifest.json elect_II_kyrs/manifest.json agro/manifest.json mech/manifest.json tech/manifest.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: auto-build manifests"
             git push
           else
-            echo "No changes in manifest"
+            echo "No changes to commit"
           fi
