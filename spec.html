@@ -25,6 +25,9 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
 .debugbox table{width:100%;border-collapse:collapse;font-size:13px}
 .debugbox th,.debugbox td{border-bottom:1px solid #243b55;padding:6px 8px;text-align:left;vertical-align:top;word-break:break-all}
 .debug-actions{margin-top:8px;display:flex;gap:8px;align-items:center}
+.selector{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:12px}
+.selector a{display:block;padding:16px;border:1px solid #223049;border-radius:12px;background:#0b1220;text-decoration:none}
+.selector a:hover{background:#0f1f39}
 </style>
 </head>
 <body>
@@ -126,10 +129,9 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
 </footer>
 
 <script>
-// ——— Утиліти
-const byId = (id)=>document.getElementById(id);
-const params = new URLSearchParams(location.search);
-const SPEC = (params.get('spec')||'coach').toLowerCase();
+// ===== Утиліти
+const $ = s => document.querySelector(s);
+const byId = id => document.getElementById(id);
 
 function absoluteUrl(relative){
   if(/^https?:\/\//i.test(relative)) return relative;
@@ -137,13 +139,10 @@ function absoluteUrl(relative){
   const base = location.origin + location.pathname.replace('spec.html','');
   return base + relative;
 }
-function clip140(s){ return s.length>140 ? s.slice(0,140).trimEnd()+'…' : s; }
-function normalizeSpaces(s){ return s.replace(/\s+/g,' ').trim(); }
 function humanizeFromPath(p){
   const name = (p||'').split('/').pop() || p;
   return name.replace(/[-_]/g,' ').replace(/\.html?$/i,'').trim();
 }
-
 function lessonCard(item){
   return `
     <div class="lesson">
@@ -161,15 +160,7 @@ function lessonCard(item){
     </div>`;
 }
 
-// ——— Завантаження маніфестів (без сканування сторінок)
-async function tryFetchJson(url){
-  try{
-    const res = await fetch(url,{method:'GET',cache:'no-store'});
-    if(!res.ok) return null;
-    return await res.json();
-  }catch(_e){ return null; }
-}
-
+// ===== Метадані секцій
 const SECTION_META = {
   coach:   { title:"🧠 Психологічні тренінги (coach)", desc:"Коучингові практики, рефлексія, soft skills, робота в групах." },
   electric:{ title:"⚡ Електроенергетика/електрика",    desc:"Вимірювання, маркування, ППР, калькулятори перерізів, журнали ОП." },
@@ -177,14 +168,42 @@ const SECTION_META = {
   mech:    { title:"🚜 Механізація (механіки)",         desc:"ТО/ППР, облік пального, заявки, діагностика, безпека." },
   tech:    { title:"🐄 Технології тваринництва",        desc:"HACCP/FSMS, SPC, простежуваність, аудит, CAPA." }
 };
+const SECTION_KEYS = Object.keys(SECTION_META);
 
+// ===== Звідки беремо ключ секції (URL-параметр або hash)
+function getSpecKey(){
+  const sp = new URLSearchParams(location.search).get('spec');
+  if (sp && SECTION_KEYS.includes(sp.toLowerCase())) return sp.toLowerCase();
+  const h = (location.hash||'').replace(/^#/, '').trim();
+  if (h.startsWith('spec=')){
+    const v = h.slice(5).toLowerCase();
+    if (SECTION_KEYS.includes(v)) return v;
+  }
+  return null; // НІЯКОГО дефолту на coach
+}
+
+// ===== Маніфести
+async function tryFetchJson(url){
+  try{
+    const r = await fetch(url,{method:'GET',cache:'no-store'});
+    if(!r.ok) return null;
+    return await r.json();
+  }catch(_){ return null; }
+}
 async function loadManifestFor(key){
-  // 1) глобальний
+  // Глобальний (рекомендований)
   const global = await tryFetchJson(absoluteUrl('/assets/edlab-manifest.json'));
   if(global && Array.isArray(global[key])) return { src:'/assets/edlab-manifest.json#'+key, data: global[key] };
-  // 2) локальні (звичні місця)
-  const localCandidates = ['/coach/manifest.json','/elect_II_kyrs/manifest.json','/agro/manifest.json','/mech/manifest.json','/tech/manifest.json'];
-  for(const u of localCandidates){
+
+  // Локальні як fallback
+  const candidates = [
+    '/coach/manifest.json',
+    '/elect_II_kyrs/manifest.json',
+    '/agro/manifest.json',
+    '/mech/manifest.json',
+    '/tech/manifest.json'
+  ];
+  for(const u of candidates){
     const j = await tryFetchJson(absoluteUrl(u));
     if(!j) continue;
     const data = Array.isArray(j) ? j : (Array.isArray(j[key]) ? j[key] : []);
@@ -193,38 +212,43 @@ async function loadManifestFor(key){
   return null;
 }
 
-function renderDebug(list){
+// ===== Рендер «вибору розділу», якщо spec не заданий
+function renderSelector(){
+  $('#specTitle').textContent = 'Вибери розділ';
+  $('#specDesc').textContent  = 'Оберіть потрібний напрям із переліку нижче.';
+  $('#listTitle').textContent = 'Доступні розділи';
+
+  const list = `
+    <div class="selector">
+      <a href="spec.html?spec=agro">🌾 Агрономія</a>
+      <a href="spec.html?spec=mech">🚜 Механізація (механіки)</a>
+      <a href="spec.html?spec=tech">🐄 Технології тваринництва</a>
+      <a href="spec.html?spec=electric">⚡ Електроенергетика/електрика</a>
+      <a href="spec.html?spec=coach">🧠 Психологічні тренінги (coach)</a>
+    </div>`;
+  byId('lessons').innerHTML = list;
+}
+
+// ===== Діагностика (не блокує рендер)
+function renderDebug(urls){
   const wrap = byId('debugTableWrap');
-  if(!Array.isArray(list) || !list.length){
+  if(!Array.isArray(urls) || !urls.length){
     wrap.innerHTML = '<div class="muted">Дані відсутні.</div>';
     return;
   }
-  const rows = list.map(raw=>{
+  const rows = urls.map(raw=>{
     const abs = absoluteUrl(raw);
-    return `
-      <tr>
-        <td><small class="mono">${raw}</small></td>
-        <td><small class="mono"><a href="${abs}" target="_blank" rel="noopener">${abs}</a></small></td>
-      </tr>`;
+    return `<tr><td><small class="mono">${raw}</small></td><td><small class="mono"><a href="${abs}" target="_blank" rel="noopener">${abs}</a></small></td></tr>`;
   }).join('');
-  wrap.innerHTML = `
-    <table>
-      <thead>
-        <tr>
-          <th>RAW</th>
-          <th>absolute</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
+  wrap.innerHTML = `<table><thead><tr><th>RAW</th><th>absolute</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-// ——— Побудова списку (миттєво, без мережевих перевірок)
+// ===== Побудова секції (миттєво, без перевірок сторінок)
 async function buildSection(key){
-  const meta = SECTION_META[key] || SECTION_META.coach;
+  const meta = SECTION_META[key];
   byId('specTitle').textContent = meta.title;
   byId('specDesc').textContent  = meta.desc;
-  byId('listTitle').textContent = meta.title + " — матеріали";
+  byId('listTitle').textContent = meta.title + ' — матеріали';
 
   const hint = byId('hintBox');
   hint.style.display = 'none';
@@ -239,25 +263,21 @@ async function buildSection(key){
     return;
   }
 
-  // Приймаємо пункти як рядки або як об’єкти {url,title,desc}
-  const list = man.data.map(x=>{
-    if(typeof x==='string') return { url:x, title:humanizeFromPath(x), desc:x };
+  const list = man.data.map(x => {
+    if (typeof x === 'string') return { url:x, title: humanizeFromPath(x), desc: x };
     return { url:x.url, title:(x.title||humanizeFromPath(x.url)), desc:(x.desc||x.url) };
   });
 
-  // Рендер
   byId('lessons').innerHTML = list.map(lessonCard).join('');
 
-  // Перший URL для iFrame
-  const firstAbs = list[0]?.url ? absoluteUrl(list[0].url) : "";
+  const firstAbs = list[0]?.url ? absoluteUrl(list[0].url) : '';
   byId('url').value = firstAbs; gen();
 
-  // Діагностика — показуємо список «як є»
   byId('debugBox').style.display = 'none';
   renderDebug(list.map(i=>i.url));
 }
 
-// ——— Прев’ю + генератор
+// ===== Прев’ю + iFrame-генератор
 function openPreview(u){
   const abs = absoluteUrl(u);
   byId('previewUrl').textContent = abs;
@@ -295,7 +315,7 @@ function copyCode(){
   setTimeout(()=>document.title=old,900);
 }
 
-// ——— Події
+// ===== Події
 document.addEventListener('click', (e)=>{
   const p = e.target.closest('.js-preview');
   if(p){ openPreview(p.dataset.url); return; }
@@ -308,15 +328,19 @@ document.addEventListener('click', (e)=>{
   if(e.target.id==='toggleDebug'){
     const box = byId('debugBox');
     box.style.display = (box.style.display==='none'||!box.style.display) ? '' : 'none';
-    if(box.style.display!=='none') renderDebug([]); // заповниться buildSection після ініціалізації
+    if(box.style.display!=='none') renderDebug([]); // наповниться при buildSection
   }
 });
 
-// ——— Ініціалізація
+// ===== Ініціалізація
 (async function init(){
   if (window.self !== window.top) document.documentElement.classList.add('embedded');
-  const allowed = ['coach','electric','agro','mech','tech'];
-  const key = allowed.includes(SPEC) ? SPEC : 'coach';
+
+  const key = getSpecKey();
+  if(!key){
+    renderSelector(); // Немає spec → покажи вибір, НЕ коуч
+    return;
+  }
   await buildSection(key);
 })();
 </script>
