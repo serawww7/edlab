@@ -54,7 +54,7 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
         <button class="btn ghost" type="button" id="toggleDebug">🔍 Показати деталі маніфесту</button>
       </div>
       <div id="debugBox" class="debugbox">
-        <div><b>Діагностика маніфесту</b> — RAW → absolute</div>
+        <div><b>Діагностика маніфесту</b> — RAW → абсолютний URL</div>
         <div id="debugTableWrap" style="margin-top:8px"></div>
       </div>
 
@@ -129,16 +129,19 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
 </footer>
 
 <script>
-// ===== Утиліти
+// ========== БАЗА ШЛЯХІВ (сайт під /edlab) ==========
+const APP_BASE = location.pathname.replace(/\/spec\.html.*$/,''); // напр. '/edlab'
+function withBase(p){
+  if(/^https?:\/\//i.test(p)) return p;                 // зовнішні URL без змін
+  if(p.startsWith(APP_BASE + '/')) return location.origin + p; // вже має /edlab/...
+  if(p.startsWith('/')) return location.origin + APP_BASE + p; // '/coach/x' -> '/edlab/coach/x'
+  return location.origin + APP_BASE + '/' + p;                 // 'coach/x' -> '/edlab/coach/x'
+}
+
+// ========== УТИЛІТИ ==========
 const $ = s => document.querySelector(s);
 const byId = id => document.getElementById(id);
 
-function absoluteUrl(relative){
-  if(/^https?:\/\//i.test(relative)) return relative;
-  if(relative.startsWith('/')) return location.origin + relative;
-  const base = location.origin + location.pathname.replace('spec.html','');
-  return base + relative;
-}
 function humanizeFromPath(p){
   const name = (p||'').split('/').pop() || p;
   return name.replace(/[-_]/g,' ').replace(/\.html?$/i,'').trim();
@@ -152,7 +155,7 @@ function lessonCard(item){
         <small class="mono">${item.url}</small>
         <p class="muted" style="margin-top:4px">${item.desc||""}</p>
         <div class="row" style="margin-top:8px">
-          <a class="btn" href="${absoluteUrl(item.url)}" target="_blank" rel="noopener">Відкрити</a>
+          <a class="btn" href="${withBase(item.url)}" target="_blank" rel="noopener">Відкрити</a>
           <button class="btn secondary js-preview" type="button" data-url="${item.url}">Швидке прев’ю</button>
           <button class="btn secondary js-iframe"  type="button" data-url="${item.url}">Згенерувати iFrame</button>
         </div>
@@ -160,7 +163,7 @@ function lessonCard(item){
     </div>`;
 }
 
-// ===== Метадані секцій
+// ========== МЕТАДАНІ РОЗДІЛІВ ==========
 const SECTION_META = {
   coach:   { title:"🧠 Психологічні тренінги (coach)", desc:"Коучингові практики, рефлексія, soft skills, робота в групах." },
   electric:{ title:"⚡ Електроенергетика/електрика",    desc:"Вимірювання, маркування, ППР, калькулятори перерізів, журнали ОП." },
@@ -170,10 +173,10 @@ const SECTION_META = {
 };
 const SECTION_KEYS = Object.keys(SECTION_META);
 
-// зберігаємо останній список для діагностики
+// ========== СТАН ДЛЯ ДІАГНОСТИКИ ==========
 let __lastUrls = [];
 
-// ===== читання ключа з URL (без дефолту «coach»)
+// ========== ЧИТАННЯ КЛЮЧА РОЗДІЛУ З URL ==========
 function getSpecKey(){
   const sp = new URLSearchParams(location.search).get('spec');
   if (sp && SECTION_KEYS.includes(sp.toLowerCase())) return sp.toLowerCase();
@@ -182,10 +185,10 @@ function getSpecKey(){
     const v = h.slice(5).toLowerCase();
     if (SECTION_KEYS.includes(v)) return v;
   }
-  return null;
+  return null; // без дефолту — якщо немає, покажемо селектор
 }
 
-// ===== Завантаження маніфесту
+// ========== РОБОТА З МАНІФЕСТАМИ ==========
 async function tryFetchJson(url){
   try{
     const r = await fetch(url,{method:'GET',cache:'no-store'});
@@ -194,13 +197,13 @@ async function tryFetchJson(url){
   }catch(_){ return null; }
 }
 async function loadManifestFor(key){
-  // 1) ГЛОБАЛЬНИЙ: приймаємо ТІЛЬКИ об'єкт {coach:[], electric:[], ...}
-  const global = await tryFetchJson(absoluteUrl('/assets/edlab-manifest.json'));
+  // 1) ГЛОБАЛЬНИЙ: edlab/assets/edlab-manifest.json (ОБ’ЄКТ з ключами)
+  const global = await tryFetchJson(withBase('/assets/edlab-manifest.json'));
   if (global && !Array.isArray(global) && typeof global === 'object' && Array.isArray(global[key])) {
-    return { src:'/assets/edlab-manifest.json#'+key, data: global[key] };
+    return { src: withBase('/assets/edlab-manifest.json#'+key), data: global[key] };
   }
 
-  // 2) ЛОКАЛЬНИЙ: тягнемо рівно один маніфест під конкретний key
+  // 2) ЛОКАЛЬНИЙ: edlab/<секція>/manifest.json (масив рядків або об’єкт)
   const map = {
     coach:   '/coach/manifest.json',
     electric:'/elect_II_kyrs/manifest.json',
@@ -208,28 +211,23 @@ async function loadManifestFor(key){
     mech:    '/mech/manifest.json',
     tech:    '/tech/manifest.json'
   };
-  const path = map[key];
-  if (path) {
-    const j = await tryFetchJson(absoluteUrl(path));
-    if (j) {
-      // локальний допускає як масив, так і об'єкт
+  const localPath = map[key];
+  if (localPath){
+    const j = await tryFetchJson(withBase(localPath));
+    if (j){
       const data = Array.isArray(j) ? j : (Array.isArray(j[key]) ? j[key] : []);
-      if (Array.isArray(data) && data.length) return { src:path, data };
-      if (Array.isArray(data)) return { src:path, data }; // навіть порожній масив ок
+      if (Array.isArray(data)) return { src: withBase(localPath), data };
     }
   }
-
-  // 3) нічого не знайшли
   return null;
 }
 
-// ===== Рендер «вибору розділу», якщо spec не заданий/невірний
+// ========== РЕНДЕР ВИБОРУ РОЗДІЛІВ ==========
 function renderSelector(){
   byId('specTitle').textContent = 'Вибери розділ';
   byId('specDesc').textContent  = 'Оберіть потрібний напрям із переліку нижче.';
   byId('listTitle').textContent = 'Доступні розділи';
-
-  const list = `
+  byId('lessons').innerHTML = `
     <div class="selector">
       <a href="spec.html?spec=agro">🌾 Агрономія</a>
       <a href="spec.html?spec=mech">🚜 Механізація (механіки)</a>
@@ -237,10 +235,9 @@ function renderSelector(){
       <a href="spec.html?spec=electric">⚡ Електроенергетика/електрика</a>
       <a href="spec.html?spec=coach">🧠 Психологічні тренінги (coach)</a>
     </div>`;
-  byId('lessons').innerHTML = list;
 }
 
-// ===== Діагностика (кнопка показує останній список URL)
+// ========== ДІАГНОСТИКА МАНІФЕСТУ ==========
 function renderDebug(urls){
   const wrap = byId('debugTableWrap');
   if(!Array.isArray(urls) || !urls.length){
@@ -248,13 +245,13 @@ function renderDebug(urls){
     return;
   }
   const rows = urls.map(raw=>{
-    const abs = absoluteUrl(raw);
+    const abs = withBase(raw);
     return `<tr><td><small class="mono">${raw}</small></td><td><small class="mono"><a href="${abs}" target="_blank" rel="noopener">${abs}</a></small></td></tr>`;
   }).join('');
   wrap.innerHTML = `<table><thead><tr><th>RAW</th><th>absolute</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-// ===== Побудова секції
+// ========== ОСНОВНЕ: ПОБУДОВА СЕКЦІЇ ==========
 async function buildSection(key){
   const meta = SECTION_META[key];
   byId('specTitle').textContent = meta.title;
@@ -266,9 +263,8 @@ async function buildSection(key){
   hint.classList.remove('error');
 
   const man = await loadManifestFor(key);
-
   if(!man){
-    hint.textContent = `Маніфест не знайдено для "${key}". Рекомендовано вести /assets/edlab-manifest.json.`;
+    hint.textContent = `Маніфест не знайдено для "${key}". Рекомендовано вести /edlab/assets/edlab-manifest.json.`;
     hint.classList.add('error'); hint.style.display='';
     __lastUrls = [];
     byId('debugBox').style.display = '';
@@ -276,7 +272,6 @@ async function buildSection(key){
     return;
   }
 
-  // приймаємо рядки або об'єкти
   const list = (man.data||[]).map(x => {
     if (typeof x === 'string') return { url:x, title: humanizeFromPath(x), desc: x };
     return { url:x.url, title:(x.title||humanizeFromPath(x.url)), desc:(x.desc||x.url) };
@@ -295,15 +290,15 @@ async function buildSection(key){
 
   byId('lessons').innerHTML = list.map(lessonCard).join('');
 
-  const firstAbs = list[0]?.url ? absoluteUrl(list[0].url) : '';
+  const firstAbs = withBase(list[0].url);
   byId('url').value = firstAbs; gen();
 
   byId('debugBox').style.display = 'none';
 }
 
-// ===== Прев’ю + iFrame-генератор
+// ========== ПРЕВ’Ю + ГЕНЕРАТОР iFrame ==========
 function openPreview(u){
-  const abs = absoluteUrl(u);
+  const abs = withBase(u);
   byId('previewUrl').textContent = abs;
   byId('previewFrame').src = abs;
   byId('previewBox').style.display = '';
@@ -339,12 +334,12 @@ function copyCode(){
   setTimeout(()=>document.title=old,900);
 }
 
-// ===== Події
+// ========== ПОДІЇ ==========
 document.addEventListener('click', (e)=>{
   const p = e.target.closest('.js-preview');
   if(p){ openPreview(p.dataset.url); return; }
   const i = e.target.closest('.js-iframe');
-  if(i){ const u = i.dataset.url; const abs = absoluteUrl(u); byId('url').value = abs; gen(); openPreview(u); return; }
+  if(i){ const u = i.dataset.url; byId('url').value = withBase(u); gen(); openPreview(u); return; }
   if(e.target.id==='closePrev'){ closePreview(); }
   if(e.target.id==='toGen'){ document.getElementById('generator').scrollIntoView({behavior:'smooth',block:'start'}); }
   if(e.target.id==='btnGen'){ gen(); }
@@ -356,15 +351,12 @@ document.addEventListener('click', (e)=>{
   }
 });
 
-// ===== Ініціалізація (без дефолту coach)
+// ========== ІНІЦІАЛІЗАЦІЯ ==========
 (async function init(){
   if (window.self !== window.top) document.documentElement.classList.add('embedded');
 
   const key = getSpecKey();
-  if(!key){
-    renderSelector(); // немає/невірний spec → показати вибір
-    return;
-  }
+  if(!key){ renderSelector(); return; }
   await buildSection(key);
 })();
 </script>
