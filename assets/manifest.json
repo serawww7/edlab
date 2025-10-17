@@ -1,15 +1,23 @@
 {
   "coach": [
-    "/coach/Prevention_of_academic_stress.html",
-    "/coach/Self-awareness.html",
     "/coach/Digital_Island.html",
-    "/coach/Seed.html",
     "/coach/My_raw_product.html",
-    "/coach/Sentence_continuation.html",
-    "/coach/Positive_thinking.html"
+    "/coach/Positive_thinking.html",
+    "/coach/Prevention_of_academic_stress.html",
+    "/coach/Seed.html",
+    "/coach/Self-awareness.html",
+    "/coach/Sentence_continuation.html"
   ],
   "elect_II_kyrs": [
     "/elect_II_kyrs/electric_para1.html",
+    "/elect_II_kyrs/electric_para2.html",
+    "/elect_II_kyrs/electric_para3.html",
+    "/elect_II_kyrs/electric_para4.html",
+    "/elect_II_kyrs/electric_para5.html",
+    "/elect_II_kyrs/electric_para6.html",
+    "/elect_II_kyrs/electric_para7.html",
+    "/elect_II_kyrs/electric_para8.html",
+    "/elect_II_kyrs/electric_para9.html",
     "/elect_II_kyrs/electric_para10.html",
     "/elect_II_kyrs/electric_para11.html",
     "/elect_II_kyrs/electric_para12.html",
@@ -20,24 +28,10 @@
     "/elect_II_kyrs/electric_para17.html",
     "/elect_II_kyrs/electric_para18.html",
     "/elect_II_kyrs/electric_para19.html",
-    "/elect_II_kyrs/electric_para2.html",
-    "/elect_II_kyrs/electric_para20.html",
-    "/elect_II_kyrs/electric_para3.html",
-    "/elect_II_kyrs/electric_para4.html",
-    "/elect_II_kyrs/electric_para5.html",
-    "/elect_II_kyrs/electric_para6.html",
-    "/elect_II_kyrs/electric_para7.html",
-    "/elect_II_kyrs/electric_para8.html",
-    "/elect_II_kyrs/electric_para9.html"
+    "/elect_II_kyrs/electric_para20.html"
   ],
   "agro_II_kyrs": [
     "/agro_II_kyrs/agro_para1.html",
-    "/agro_II_kyrs/agro_para10.html",
-    "/agro_II_kyrs/agro_para11.html",
-    "/agro_II_kyrs/agro_para12.html",
-    "/agro_II_kyrs/agro_para13.html",
-    "/agro_II_kyrs/agro_para14.html",
-    "/agro_II_kyrs/agro_para15.html",
     "/agro_II_kyrs/agro_para2.html",
     "/agro_II_kyrs/agro_para3.html",
     "/agro_II_kyrs/agro_para4.html",
@@ -45,16 +39,16 @@
     "/agro_II_kyrs/agro_para6.html",
     "/agro_II_kyrs/agro_para7.html",
     "/agro_II_kyrs/agro_para8.html",
-    "/agro_II_kyrs/agro_para9.html"
+    "/agro_II_kyrs/agro_para9.html",
+    "/agro_II_kyrs/agro_para10.html",
+    "/agro_II_kyrs/agro_para11.html",
+    "/agro_II_kyrs/agro_para12.html",
+    "/agro_II_kyrs/agro_para13.html",
+    "/agro_II_kyrs/agro_para14.html",
+    "/agro_II_kyrs/agro_para15.html"
   ],
   "mech_II_kyrs": [
     "/mech_II_kyrs/mechanic_para1.html",
-    "/mech_II_kyrs/mechanic_para10.html",
-    "/mech_II_kyrs/mechanic_para11.html",
-    "/mech_II_kyrs/mechanic_para12.html",
-    "/mech_II_kyrs/mechanic_para13.html",
-    "/mech_II_kyrs/mechanic_para14.html",
-    "/mech_II_kyrs/mechanic_para15.html",
     "/mech_II_kyrs/mechanic_para2.html",
     "/mech_II_kyrs/mechanic_para3.html",
     "/mech_II_kyrs/mechanic_para4.html",
@@ -62,16 +56,16 @@
     "/mech_II_kyrs/mechanic_para6.html",
     "/mech_II_kyrs/mechanic_para7.html",
     "/mech_II_kyrs/mechanic_para8.html",
-    "/mech_II_kyrs/mechanic_para9.html"
+    "/mech_II_kyrs/mechanic_para9.html",
+    "/mech_II_kyrs/mechanic_para10.html",
+    "/mech_II_kyrs/mechanic_para11.html",
+    "/mech_II_kyrs/mechanic_para12.html",
+    "/mech_II_kyrs/mechanic_para13.html",
+    "/mech_II_kyrs/mechanic_para14.html",
+    "/mech_II_kyrs/mechanic_para15.html"
   ],
   "tech_II_kyrs": [
     "/tech_II_kyrs/tech_para1.html",
-    "/tech_II_kyrs/tech_para10.html",
-    "/tech_II_kyrs/tech_para11.html",
-    "/tech_II_kyrs/tech_para12.html",
-    "/tech_II_kyrs/tech_para13.html",
-    "/tech_II_kyrs/tech_para14.html",
-    "/tech_II_kyrs/tech_para15.html",
     "/tech_II_kyrs/tech_para2.html",
     "/tech_II_kyrs/tech_para3.html",
     "/tech_II_kyrs/tech_para4.html",
@@ -79,6 +73,12 @@
     "/tech_II_kyrs/tech_para6.html",
     "/tech_II_kyrs/tech_para7.html",
     "/tech_II_kyrs/tech_para8.html",
-    "/tech_II_kyrs/tech_para9.html"
+    "/tech_II_kyrs/tech_para9.html",
+    "/tech_II_kyrs/tech_para10.html",
+    "/tech_II_kyrs/tech_para11.html",
+    "/tech_II_kyrs/tech_para12.html",
+    "/tech_II_kyrs/tech_para13.html",
+    "/tech_II_kyrs/tech_para14.html",
+    "/tech_II_kyrs/tech_para15.html"
   ]
 }
