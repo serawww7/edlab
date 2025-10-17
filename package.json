@@ -1,0 +1,15 @@
+{
+  "name": "edlab-seo-autofix",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Автовиправлення SEO-тегів для EDLab (GitHub Pages)",
+  "scripts": {
+    "fix-meta": "node scripts/fix-meta.js",
+    "generate-sitemap": "node scripts/generate-sitemap.js",
+    "build": "npm run fix-meta && npm run generate-sitemap"
+  },
+  "dependencies": {
+    "cheerio": "1.0.0-rc.12",
+    "glob": "10.3.10"
+  }
+}
