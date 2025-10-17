@@ -43,7 +43,6 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
     <div class="card lesson-list" id="listCard">
       <h2 id="listTitle">Матеріали</h2>
       <div id="lessons"></div>
-
       <div id="hintBox" class="note" style="display:none">—</div>
 
       <div id="previewBox" style="display:none;margin-top:14px">
@@ -117,7 +116,7 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
 </footer>
 
 <script>
-// ===== Без GitHub API — лише локальні маніфести
+// ===== Без GitHub API — локальні маніфести + авто- назви з HTML
 const byId = (id)=>document.getElementById(id);
 const SECTION_KEYS = ['coach','electric','agro','mech','tech'];
 const SECTION_META = {
@@ -161,6 +160,38 @@ function lessonCard(item){
     </div>`;
 }
 
+// ——— Витяг <title> і description з HTML (з кешем)
+function extractTitleDescFromHTML(html){
+  try{
+    const doc = new DOMParser().parseFromString(html,'text/html');
+    const t1 = doc.querySelector('title')?.textContent || '';
+    const t2 = doc.querySelector('meta[name="title"]')?.getAttribute('content') || '';
+    const t3 = doc.querySelector('meta[property="og:title"]')?.getAttribute('content') || '';
+    const d1 = doc.querySelector('meta[name="description"]')?.getAttribute('content') || '';
+    const title = (t1||t2||t3||'').trim();
+    const desc  = (d1||'').trim();
+    return {title, desc};
+  }catch(_){ return {title:'',desc:''}; }
+}
+async function fetchTitleDesc(url){
+  const cacheKey = 'titlecache:'+url;
+  const cached = localStorage.getItem(cacheKey);
+  if(cached){
+    try{ return JSON.parse(cached); }catch{}
+  }
+  try{
+    const abs = absoluteUrl(url);
+    const r = await fetch(abs,{method:'GET',cache:'force-cache',mode:'cors'});
+    if(!r.ok) return {title:'',desc:''};
+    const html = await r.text();
+    const {title,desc} = extractTitleDescFromHTML(html);
+    const val = {title,desc,ts:Date.now()};
+    localStorage.setItem(cacheKey, JSON.stringify(val));
+    return val;
+  }catch(_){ return {title:'',desc:''}; }
+}
+
+// === Локальні маніфести
 async function tryFetchJson(url){
   try{
     const r = await fetch(url,{method:'GET',cache:'no-store'});
@@ -168,24 +199,11 @@ async function tryFetchJson(url){
     return await r.json();
   }catch(_){ return null; }
 }
-
-function getSpecKey(){
-  const sp = new URLSearchParams(location.search).get('spec');
-  if (sp && SECTION_KEYS.includes(sp.toLowerCase())) return sp.toLowerCase();
-  const h = (location.hash||'').replace(/^#/, '').trim();
-  if (h.startsWith('spec=')){
-    const v = h.slice(5).toLowerCase();
-    if (SECTION_KEYS.includes(v)) return v;
-  }
-  return null;
-}
-
-// === Локальні маніфести
 async function loadManifestFor(key){
   const dir = SECTION_TO_DIR[key];
   if(!dir) return null;
 
-  // 1) глобальний маніфест (твій вірний шлях)
+  // 1) глобальний маніфест (твій)
   const global = await tryFetchJson(absoluteUrl('/assets/manifest.json'));
   if(global && Array.isArray(global[dir])) return { src:'/assets/manifest.json#'+dir, data: global[dir] };
 
@@ -196,7 +214,7 @@ async function loadManifestFor(key){
   return null;
 }
 
-// === Побудова секції
+// === Побудова секції (з автозаголовками)
 async function buildSection(key){
   const meta = SECTION_META[key];
   byId('specTitle').textContent = meta.title;
@@ -214,15 +232,40 @@ async function buildSection(key){
     return;
   }
 
-  const list = man.data.map(x => {
-    if (typeof x === 'string') return { url:x, title: humanizeFromPath(x), desc: x };
-    return { url:x.url, title:(x.title||humanizeFromPath(x.url)), desc:(x.desc||x.url) };
-  });
+  // Нормалізуємо записи: або рядок, або {url,title,desc}
+  const rawList = man.data.map(x => (typeof x==='string' ? {url:x} : x));
 
-  byId('lessons').innerHTML = list.map(lessonCard).join('');
+  // Спершу грубо рендеримо humanized, а потім додаємо справжні title/desc асинхронно
+  const initial = rawList.map(x => ({
+    url: x.url,
+    title: (x.title && x.title.trim()) || humanizeFromPath(x.url),
+    desc: (x.desc && x.desc.trim()) || ''
+  }));
+  byId('lessons').innerHTML = initial.map(lessonCard).join('');
 
-  const firstAbs = list[0]?.url ? absoluteUrl(list[0].url) : '';
+  // iFrame генератор одразу на перший
+  const firstAbs = initial[0]?.url ? absoluteUrl(initial[0].url) : '';
   byId('url').value = firstAbs; gen();
+
+  // Дотягуємо заголовки з HTML (тільки для тих, де title не задано явно)
+  const promises = initial.map(async (it, idx) => {
+    if (rawList[idx].title) return it; // явний title залишаємо
+    const meta = await fetchTitleDesc(it.url);
+    const betterTitle = (meta.title || '').trim();
+    const betterDesc  = (meta.desc  || '').trim();
+    if (betterTitle || betterDesc){
+      // заміна DOM-картки
+      const cards = byId('lessons').querySelectorAll('.lesson');
+      const card = cards[idx];
+      if (card){
+        if (betterTitle) card.querySelector('.meta b').textContent = betterTitle;
+        const p = card.querySelector('.meta p.muted');
+        if (betterDesc) p.textContent = betterDesc;
+      }
+    }
+    return it;
+  });
+  await Promise.allSettled(promises);
 }
 
 // === Рендер «вибору розділу», якщо spec не заданий
