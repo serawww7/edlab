@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ук">
+<html lang="uk">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -170,7 +170,7 @@ const SECTION_META = {
 };
 const SECTION_KEYS = Object.keys(SECTION_META);
 
-// ===== де зберігати останній список для діагностики
+// зберігаємо останній список для діагностики
 let __lastUrls = [];
 
 // ===== читання ключа з URL (без дефолту «coach»)
@@ -194,21 +194,36 @@ async function tryFetchJson(url){
   }catch(_){ return null; }
 }
 async function loadManifestFor(key){
-  // 1) глобальний
+  // 1) ГЛОБАЛЬНИЙ: приймаємо ТІЛЬКИ об'єкт {coach:[], electric:[], ...}
   const global = await tryFetchJson(absoluteUrl('/assets/edlab-manifest.json'));
-  if(global && Array.isArray(global[key])) return { src:'/assets/edlab-manifest.json#'+key, data: global[key] };
-  // 2) локальні як fallback
-  const candidates = ['/coach/manifest.json','/elect_II_kyrs/manifest.json','/agro/manifest.json','/mech/manifest.json','/tech/manifest.json'];
-  for(const u of candidates){
-    const j = await tryFetchJson(absoluteUrl(u));
-    if(!j) continue;
-    const data = Array.isArray(j) ? j : (Array.isArray(j[key]) ? j[key] : []);
-    if(Array.isArray(data) && data.length) return { src:u, data };
+  if (global && !Array.isArray(global) && typeof global === 'object' && Array.isArray(global[key])) {
+    return { src:'/assets/edlab-manifest.json#'+key, data: global[key] };
   }
+
+  // 2) ЛОКАЛЬНИЙ: тягнемо рівно один маніфест під конкретний key
+  const map = {
+    coach:   '/coach/manifest.json',
+    electric:'/elect_II_kyrs/manifest.json',
+    agro:    '/agro/manifest.json',
+    mech:    '/mech/manifest.json',
+    tech:    '/tech/manifest.json'
+  };
+  const path = map[key];
+  if (path) {
+    const j = await tryFetchJson(absoluteUrl(path));
+    if (j) {
+      // локальний допускає як масив, так і об'єкт
+      const data = Array.isArray(j) ? j : (Array.isArray(j[key]) ? j[key] : []);
+      if (Array.isArray(data) && data.length) return { src:path, data };
+      if (Array.isArray(data)) return { src:path, data }; // навіть порожній масив ок
+    }
+  }
+
+  // 3) нічого не знайшли
   return null;
 }
 
-// ===== Рендер «вибору розділу», якщо spec не заданий
+// ===== Рендер «вибору розділу», якщо spec не заданий/невірний
 function renderSelector(){
   byId('specTitle').textContent = 'Вибери розділ';
   byId('specDesc').textContent  = 'Оберіть потрібний напрям із переліку нижче.';
@@ -239,7 +254,7 @@ function renderDebug(urls){
   wrap.innerHTML = `<table><thead><tr><th>RAW</th><th>absolute</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-// ===== Побудова секції (ОСНОВНЕ)
+// ===== Побудова секції
 async function buildSection(key){
   const meta = SECTION_META[key];
   byId('specTitle').textContent = meta.title;
@@ -251,7 +266,8 @@ async function buildSection(key){
   hint.classList.remove('error');
 
   const man = await loadManifestFor(key);
-  if(!man || !Array.isArray(man.data)){
+
+  if(!man){
     hint.textContent = `Маніфест не знайдено для "${key}". Рекомендовано вести /assets/edlab-manifest.json.`;
     hint.classList.add('error'); hint.style.display='';
     __lastUrls = [];
@@ -261,7 +277,7 @@ async function buildSection(key){
   }
 
   // приймаємо рядки або об'єкти
-  const list = man.data.map(x => {
+  const list = (man.data||[]).map(x => {
     if (typeof x === 'string') return { url:x, title: humanizeFromPath(x), desc: x };
     return { url:x.url, title:(x.title||humanizeFromPath(x.url)), desc:(x.desc||x.url) };
   });
@@ -283,7 +299,6 @@ async function buildSection(key){
   byId('url').value = firstAbs; gen();
 
   byId('debugBox').style.display = 'none';
-  // renderDebug(__lastUrls); // за замовчуванням не показуємо
 }
 
 // ===== Прев’ю + iFrame-генератор
