@@ -2,233 +2,390 @@
 <html lang="uk">
 <head>
   <meta charset="utf-8">
-  <title>Самоусвідомлення за пірамідою Ділтса — онлайн-тренінг</title>
+  <title>Самоусвідомлення за пірамідою Ділтса — інтерактивний тренінг</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Онлайн-тренінг: швидкі письмові вправи за пірамідою Ділтса. Короткі фрази, 1–2 хв на блок, міні-рефлексія.">
+  <meta name="description" content="Інтерактив: короткі письмові відповіді по рівнях Ділтса, таймери, автозбереження, експорт у .txt і друк.">
   <style>
     :root{
-      --bg:#0b1220; --card:#0f172a; --muted:#93a4bf; --fg:#e6eefc; --accent:#60a5fa; --ok:#34d399; --warn:#fbbf24; --danger:#f87171; --border:#1f2a44;
-      --code:#0b132b;
+      --bg:#0b1220; --card:#0f172a; --muted:#93a4bf; --fg:#e6eefc; --accent:#60a5fa; --ok:#34d399; --warn:#fbbf24; --danger:#f87171; --border:#1f2a44; --ink:#0a1020;
     }
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,'Apple Color Emoji','Segoe UI Emoji';line-height:1.6}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,'Apple Color Emoji','Segoe UI Emoji';line-height:1.6}
     a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
-    .wrap{max-width:980px;margin:0 auto;padding:20px}
-    header{background:linear-gradient(180deg,#0d1b2a, #0b1220);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+    header{background:linear-gradient(180deg,#0d1b2a,#0b1220);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:30}
     .head{max-width:980px;margin:0 auto;padding:16px 20px}
     .title{margin:0;font-size:28px;letter-spacing:.2px}
     .subtitle{margin:6px 0 0 0;color:var(--muted);font-size:15px}
+    .wrap{max-width:980px;margin:0 auto;padding:20px}
     .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin:14px 0}
     h2{margin:0 0 10px 0;font-size:22px}
     h3{margin:12px 0 8px 0;font-size:18px}
-    .pill{display:inline-block;padding:4px 10px;border:1px solid var(--border);border-radius:999px;font-size:12px;color:var(--muted);margin-right:6px}
     .grid{display:grid;gap:12px}
     @media(min-width:840px){.grid.cols-2{grid-template-columns:1fr 1fr}}
-    .list{margin:8px 0 0 18px}
-    .list li{margin:6px 0}
-    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;background:#0a1020;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:#dbeafe}
+    .list{margin:8px 0 0 18px} .list li{margin:6px 0}
+    .kbd{font-family:ui-monospace,Menlo,Consolas,monospace;background:#0a1020;border:1px solid var(--border);
+      border-radius:8px;padding:10px 12px;color:#dbeafe}
     .script{background:#0a1020;border:1px dashed var(--border);border-radius:10px;padding:12px;margin-top:10px}
     .hint{color:var(--muted);font-size:14px}
-    .bullet{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:8px}
-    .badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted);margin-left:8px}
     .callout{border-left:3px solid var(--accent);padding:10px 12px;background:#0d152b;border-radius:8px}
-    details{background:#0b1528;border:1px solid var(--border);border-radius:12px;padding:10px 12px}
-    summary{cursor:pointer;font-weight:600}
-    .time{color:var(--warn);font-weight:600}
-    footer{color:var(--muted);font-size:13px;margin:24px 0}
-    .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-    .btn{display:inline-block;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:#0c1426;color:var(--fg);text-decoration:none}
-    .btn:hover{background:#0e1a32}
-    .ok{color:var(--ok)} .warn{color:var(--warn)} .danger{color:var(--danger)}
     .agenda{display:grid;gap:8px}
     .agenda .item{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:#0b1528}
     .agenda .item span{font-size:14px;color:var(--muted)}
-    .divider{height:1px;background:var(--border);margin:12px 0}
-    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace}
+    .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:#0c1426;color:#e6eefc;cursor:pointer}
+    .btn:hover{background:#0e1a32}
+    .pill{display:inline-block;padding:4px 10px;border:1px solid var(--border);border-radius:999px;font-size:12px;color:var(--muted);margin-right:6px}
     .lvl{display:flex;align-items:center;gap:8px}
     .lvl .dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
-    .tips{display:grid;gap:8px}
-    .tips .tip{border:1px dashed var(--border);border-radius:10px;padding:8px 10px;background:#0b162a}
+    .two{display:grid;gap:10px} @media(min-width:760px){.two{grid-template-columns:1fr 1fr}}
+    textarea,input[type="text"]{width:100%;background:#0b1528;color:#e6eefc;border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+    textarea{min-height:64px;resize:vertical}
+    .timer{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+    .badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted);margin-left:8px}
+    .beacons{display:grid;gap:8px}
+    .b-row{display:flex;gap:8px;align-items:center}
+    /* Print tweaks */
+    @media print{
+      header,.btn,.hint,.badge{display:none !important}
+      body{background:#fff;color:#000}
+      .card{border:0;background:#fff}
+      textarea,input{border:0}
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div class="head">
-      <h1 class="title">Самоусвідомлення за пірамідою Ділтса — онлайн-тренінг</h1>
-      <p class="subtitle">Google Meet • формат: індивідуальні короткі відповіді + міні-обговорення • тривалість ≈ 50 хв</p>
+<header>
+  <div class="head">
+    <h1 class="title">Самоусвідомлення за пірамідою Ділтса — інтерактив</h1>
+    <p class="subtitle">Короткі відповіді (1–2 хв/блок) • збереження локально • експорт .txt • друк</p>
+    <div class="btn-row">
+      <button class="btn" id="exportTxt">⬇️ Експорт .txt</button>
+      <button class="btn" id="copyAll">📋 Копіювати все</button>
+      <button class="btn" id="printPage">🖨️ Друк</button>
+      <button class="btn" id="clearAll">🗑️ Очистити</button>
+      <span class="hint">Автозбереження: localStorage цього пристрою.</span>
     </div>
-  </header>
+  </div>
+</header>
 
-  <main class="wrap">
-    <section class="card">
-      <div class="grid cols-2">
-        <div>
-          <h2>Мета заняття</h2>
-          <ul class="list">
-            <li>Швидко пропрацювати 6 рівнів піраміди Ділтса письмовими відповідями.</li>
-            <li>Виділити 1–2 «маячки» з кожного рівня для наступного місяця.</li>
-            <li>Побачити зв’язок між середовищем, діями, стратегіями, цінностями, ідентичністю та покликанням.</li>
-          </ul>
-          <div class="divider"></div>
-          <h3>Правила роботи</h3>
-          <ul class="list">
-            <li>Короткі фрази. 1–2 хв на блок.</li>
-            <li>Це не оцінка — лише самоусвідомлення.</li>
-            <li>Ділитися вголос — за бажанням. Повага і конфіденційність.</li>
-          </ul>
-        </div>
-        <div>
-          <h2>План і таймінг</h2>
-          <div class="agenda">
-            <div class="item"><strong>1. Привітання</strong> <span class="time">4 хв</span></div>
-            <div class="item"><strong>2. Вступ і інструкція</strong> <span class="time">4 хв</span></div>
-            <div class="item"><strong>3. Середовище</strong> <span class="time">7 хв</span></div>
-            <div class="item"><strong>4. Поведінка</strong> <span class="time">6 хв</span></div>
-            <div class="item"><strong>5. Здібності/Стратегії</strong> <span class="time">6 хв</span></div>
-            <div class="item"><strong>6. Переконання і цінності</strong> <span class="time">7 хв</span></div>
-            <div class="item"><strong>7. Ідентичність</strong> <span class="time">6 хв</span></div>
-            <div class="item"><strong>8. Місія/Покликання + рефлексія</strong> <span class="time">10 хв</span></div>
-          </div>
+<main class="wrap">
+  <section class="card">
+    <div class="grid cols-2">
+      <div>
+        <h2>Мета заняття</h2>
+        <ul class="list">
+          <li>Швидко пропрацювати 6 рівнів піраміди Ділтса письмовими відповідями.</li>
+          <li>Виділити 1–2 «маячки» з кожного рівня на місяць.</li>
+          <li>Побачити зв’язок: середовище → дії → стратегії → цінності → ідентичність → місія.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>План і таймінг</h2>
+        <div class="agenda">
+          <div class="item"><strong>1. Привітання</strong> <span>4 хв · <span id="t1">00:00</span> <button class="btn" data-timer="t1" data-secs="240">▶</button></span></div>
+          <div class="item"><strong>2. Вступ</strong> <span>4 хв · <span id="t2">00:00</span> <button class="btn" data-timer="t2" data-secs="240">▶</button></span></div>
+          <div class="item"><strong>3. Середовище</strong> <span>7 хв · <span id="t3">00:00</span> <button class="btn" data-timer="t3" data-secs="420">▶</button></span></div>
+          <div class="item"><strong>4. Поведінка</strong> <span>6 хв · <span id="t4">00:00</span> <button class="btn" data-timer="t4" data-secs="360">▶</button></span></div>
+          <div class="item"><strong>5. Здібності/Стратегії</strong> <span>6 хв · <span id="t5">00:00</span> <button class="btn" data-timer="t5" data-secs="360">▶</button></span></div>
+          <div class="item"><strong>6. Переконання і цінності</strong> <span>7 хв · <span id="t6">00:00</span> <button class="btn" data-timer="t6" data-secs="420">▶</button></span></div>
+          <div class="item"><strong>7. Ідентичність</strong> <span>6 хв · <span id="t7">00:00</span> <button class="btn" data-timer="t7" data-secs="360">▶</button></span></div>
+          <div class="item"><strong>8. Місія + рефлексія</strong> <span>10 хв · <span id="t8">00:00</span> <button class="btn" data-timer="t8" data-secs="600">▶</button></span></div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- 1. Привітання -->
-    <section class="card">
-      <h2>1) Привітання</h2>
-      <p class="hint">Мета: легкий старт, включення у письмову роботу.</p>
-      <div class="script">
-        <p class="mono">Викладач: «Хелоу, команда! Сьогодні працюємо коротко і змістовно. На кожен блок — максимум дві хвилини. Починаємо!»</p>
+  <!-- 1 -->
+  <section class="card">
+    <h2>1) Привітання</h2>
+    <div class="script"><p class="mono">«Хелоу, команда! Працюємо коротко і по суті. На кожен блок — максимум дві хвилини».</p></div>
+    <div class="two" style="margin-top:10px">
+      <div>
+        <label class="kbd">Мій настрій одним словом</label>
+        <input id="mood" type="text">
       </div>
-    </section>
-
-    <!-- 2. Вступ -->
-    <section class="card">
-      <h2>2) Короткий вступ і інструкція</h2>
-      <div class="script">
-        <p class="mono">«Відповідайте письмово короткими фразами. 1–2 хв на кожен блок. Це не оцінка — лише самоусвідомлення. Наприкінці підкресліть 1–2 фрази з кожного рівня — це ваші “маячки” на місяць.»</p>
+      <div>
+        <label class="kbd">Очікування від заняття</label>
+        <textarea id="goal"></textarea>
       </div>
-      <details>
-        <summary>Міні-довідка: піраміда Ділтса</summary>
-        <div class="callout">
-          <p>Шість рівнів: <strong>Середовище</strong> (де/з ким), <strong>Поведінка</strong> (що роблю), <strong>Здібності</strong> (як), <strong>Переконання і цінності</strong> (чому), <strong>Ідентичність</strong> (хто я), <strong>Місія/Покликання</strong> (для чого). Відповіді короткі, конкретні.</p>
-        </div>
-      </details>
-    </section>
+    </div>
+  </section>
 
-    <!-- 3. Середовище -->
-    <section class="card">
-      <div class="lvl"><span class="dot"></span><h2>3) Середовище (де / з ким)</h2></div>
-      <p class="hint">Пишемо коротко. Максимум 2 хв.</p>
-      <ol class="list">
-        <li>Коли я був дитиною, моя родина …</li>
-        <li>Моя родина поводиться зі мною як з …</li>
-        <li>Люблю вчитися (працювати) з людьми, які …</li>
-        <li>Не люблю людей, які …</li>
-        <li>Коли мені не таланить, я …</li>
-        <li>Якщо всі проти мене, то …</li>
-      </ol>
-      <div class="tips">
-        <div class="tip">Формулюй у теперішньому або минулому часі, без пояснень. Приклад: «Люблю працювати з людьми, які домовляються чітко».</div>
+  <!-- 2 -->
+  <section class="card">
+    <h2>2) Вступ і коротка інструкція</h2>
+    <div class="script">
+      <p class="mono">«Відповідаємо письмово короткими фразами. Це не оцінка — лише самоусвідомлення. Наприкінці вибери 1–2 “маячки” з кожного рівня».</p>
+    </div>
+  </section>
+
+  <!-- 3 Середовище -->
+  <section class="card" id="L1">
+    <div class="lvl"><span class="dot"></span><h2>3) Середовище (де/з ким)</h2></div>
+    <p class="hint">До 2 хв на блок.</p>
+    <div class="two">
+      <div>
+        <label class="kbd">Коли я був дитиною, моя родина …</label>
+        <textarea id="env1"></textarea>
+        <label class="kbd">Моя родина поводиться зі мною як з …</label>
+        <textarea id="env2"></textarea>
+        <label class="kbd">Люблю вчитися (працювати) з людьми, які …</label>
+        <textarea id="env3"></textarea>
       </div>
-    </section>
-
-    <!-- 4. Поведінка -->
-    <section class="card">
-      <div class="lvl"><span class="dot"></span><h2>4) Поведінка (що роблю)</h2></div>
-      <p class="hint">Короткі факти. 1–2 хв.</p>
-      <ol class="list">
-        <li>Саме гірше, що мені траплялося робити, це …</li>
-        <li>Коли я був дитиною, то відчував … (і діяв так: …)</li>
-      </ol>
-      <div class="script">
-        <p class="mono">«Опиши дію одним реченням: дієслово + об’єкт + обставина»</p>
+      <div>
+        <label class="kbd">Не люблю людей, які …</label>
+        <textarea id="env4"></textarea>
+        <label class="kbd">Коли мені не таланить, я …</label>
+        <textarea id="env5"></textarea>
+        <label class="kbd">Якщо всі проти мене, то …</label>
+        <textarea id="env6"></textarea>
       </div>
-    </section>
+    </div>
+    <div class="beacons">
+      <div class="b-row"><input type="checkbox" id="b_env1"> <label for="b_env1">Обрати як «маячок»</label></div>
+      <div class="b-row"><input type="checkbox" id="b_env2"> <label for="b_env2">Другий «маячок»</label></div>
+    </div>
+  </section>
 
-    <!-- 5. Здібності / Стратегії -->
-    <section class="card">
-      <div class="lvl"><span class="dot"></span><h2>5) Здібності / Стратегії (як)</h2></div>
-      <p class="hint">Фокус на кроках і прийомах. До 2 хв.</p>
-      <ol class="list">
-        <li>Щоб туди дійти, мені потрібно в першу чергу …</li>
-        <li>Якщо хтось із колег/керівників помічає мене, то він/вона скаже, що я …</li>
-      </ol>
-      <div class="tips">
-        <div class="tip">Використовуй конструкції: «спершу… потім… далі…»</div>
+  <!-- 4 Поведінка -->
+  <section class="card" id="L2">
+    <div class="lvl"><span class="dot"></span><h2>4) Поведінка (що роблю)</h2></div>
+    <div class="two">
+      <div>
+        <label class="kbd">Саме гірше, що мені траплялося робити, це …</label>
+        <textarea id="beh1"></textarea>
       </div>
-    </section>
-
-    <!-- 6. Переконання і цінності -->
-    <section class="card">
-      <div class="lvl"><span class="dot"></span><h2>6) Переконання і цінності (чому)</h2></div>
-      <p class="hint">Про сенси. До 2 хв.</p>
-      <ol class="list">
-        <li>Думаю, що мій батько … (навчив мене важливому: …)</li>
-        <li>Я міг би бути дуже щасливим, якби …</li>
-      </ol>
-      <div class="script">
-        <p class="mono">«Назви 1–2 цінності одним словом: чесність, відповідальність, свобода, взаємоповага…»</p>
+      <div>
+        <label class="kbd">Коли я був дитиною, то відчував … (і діяв так: …)</label>
+        <textarea id="beh2"></textarea>
       </div>
-    </section>
+    </div>
+    <div class="beacons">
+      <div class="b-row"><input type="checkbox" id="b_beh1"> <label for="b_beh1">«Маячок»</label></div>
+      <div class="b-row"><input type="checkbox" id="b_beh2"> <label for="b_beh2">Другий «маячок»</label></div>
+    </div>
+  </section>
 
-    <!-- 7. Ідентичність -->
-    <section class="card">
-      <div class="lvl"><span class="dot"></span><h2>7) Ідентичність (хто я)</h2></div>
-      <p class="hint">Бачення себе. 1–2 хв.</p>
-      <ol class="list">
-        <li>Через 5 років я бачу себе …</li>
-      </ol>
-      <div class="tips">
-        <div class="tip">Формула: «Я — … , який/яка … , для …»</div>
+  <!-- 5 Здібності -->
+  <section class="card" id="L3">
+    <div class="lvl"><span class="dot"></span><h2>5) Здібності / Стратегії (як)</h2></div>
+    <div class="two">
+      <div>
+        <label class="kbd">Щоб туди дійти, мені потрібно в першу чергу …</label>
+        <textarea id="cap1"></textarea>
       </div>
-    </section>
-
-    <!-- 8. Місія / Покликання -->
-    <section class="card">
-      <div class="lvl"><span class="dot"></span><h2>8) Місія / Покликання (для чого)</h2></div>
-      <p class="hint">Ширший сенс. До 2 хв.</p>
-      <ol class="list">
-        <li>Якби я мав необмежений ресурс (час, кошти, знання), я б зробив …</li>
-        <li>Більше за все я хотів би в житті …</li>
-      </ol>
-      <div class="callout">
-        <strong>Порада:</strong> після заповнення підкресли 1–2 фрази з кожного рівня — це твої «маячки» на наступний місяць.
+      <div>
+        <label class="kbd">Якщо хтось із колег/керівників помічає мене, то він/вона скаже, що я …</label>
+        <textarea id="cap2"></textarea>
       </div>
-    </section>
+    </div>
+    <div class="beacons">
+      <div class="b-row"><input type="checkbox" id="b_cap1"> <label for="b_cap1">«Маячок»</label></div>
+      <div class="b-row"><input type="checkbox" id="b_cap2"> <label for="b_cap2">Другий «маячок»</label></div>
+    </div>
+  </section>
 
-    <!-- Рефлексія -->
-    <section class="card">
-      <h2>Міні-рефлексія і завершення</h2>
-      <ul class="list">
-        <li>Що здивувало у відповідях?</li>
-        <li>Який «маячок» застосуєш уже цього тижня?</li>
-        <li>Що підтримати в середовищі, щоб не зірвати план?</li>
-      </ul>
-      <div class="btn-row">
-        <span class="btn">Мій головний «маячок» тижня</span>
-        <span class="btn">Перший крок завтра о 10:00</span>
-        <span class="btn">Кому скажу про свій план</span>
+  <!-- 6 Переконання -->
+  <section class="card" id="L4">
+    <div class="lvl"><span class="dot"></span><h2>6) Переконання і цінності (чому)</h2></div>
+    <div class="two">
+      <div>
+        <label class="kbd">Думаю, що мій батько … (навчив мене важливому: …)</label>
+        <textarea id="val1"></textarea>
       </div>
-    </section>
-
-    <!-- Матеріал -->
-    <section class="card">
-      <h2>Матеріал для збереження в курсі</h2>
-      <p class="hint">Збережіть цей файл у репозиторії та вбудуйте в Moodle через <span class="mono">&lt;iframe&gt;</span>. Студенти зможуть відкривати «конспект тренінгу» самостійно.</p>
-      <div class="btn-row">
-        <span class="btn">Середовище → підтримуючі люди</span>
-        <span class="btn">Поведінка → конкретні дії</span>
-        <span class="btn">Стратегії → 3 кроки</span>
-        <span class="btn">Цінності → 2 слова</span>
-        <span class="btn">Ідентичність → формула</span>
-        <span class="btn">Місія → користь іншим</span>
+      <div>
+        <label class="kbd">Я міг би бути дуже щасливим, якби …</label>
+        <textarea id="val2"></textarea>
       </div>
-    </section>
+    </div>
+    <div class="beacons">
+      <div class="b-row"><input type="checkbox" id="b_val1"> <label for="b_val1">«Маячок»</label></div>
+      <div class="b-row"><input type="checkbox" id="b_val2"> <label for="b_val2">Другий «маячок»</label></div>
+    </div>
+  </section>
 
-    <footer>
-      <div>© Тренінговий конспект для дистанційних занять. Рівні Ділтса: практичний формат коротких відповідей.</div>
-    </footer>
-  </main>
+  <!-- 7 Ідентичність -->
+  <section class="card" id="L5">
+    <div class="lvl"><span class="dot"></span><h2>7) Ідентичність (хто я)</h2></div>
+    <label class="kbd">Через 5 років я бачу себе …</label>
+    <textarea id="idn1"></textarea>
+    <div class="beacons">
+      <div class="b-row"><input type="checkbox" id="b_idn1"> <label for="b_idn1">Позначити як «маячок»</label></div>
+    </div>
+  </section>
+
+  <!-- 8 Місія -->
+  <section class="card" id="L6">
+    <div class="lvl"><span class="dot"></span><h2>8) Місія / Покликання (для чого)</h2></div>
+    <div class="two">
+      <div>
+        <label class="kbd">Якби я мав необмежений ресурс (час, кошти, знання), я б зробив …</label>
+        <textarea id="mis1"></textarea>
+      </div>
+      <div>
+        <label class="kbd">Більше за все я хотів би в житті …</label>
+        <textarea id="mis2"></textarea>
+      </div>
+    </div>
+    <div class="beacons">
+      <div class="b-row"><input type="checkbox" id="b_mis1"> <label for="b_mis1">«Маячок»</label></div>
+      <div class="b-row"><input type="checkbox" id="b_mis2"> <label for="b_mis2">Другий «маячок»</label></div>
+    </div>
+    <div class="callout"><strong>Порада:</strong> вибери 1–2 фрази з кожного рівня — це твої «маячки» на місяць.</div>
+  </section>
+
+  <!-- Рефлексія -->
+  <section class="card">
+    <h2>Міні-рефлексія і завершення</h2>
+    <div class="two">
+      <div>
+        <label class="kbd">Що здивувало у відповідях?</label>
+        <textarea id="ref1"></textarea>
+      </div>
+      <div>
+        <label class="kbd">Головний «маячок» тижня + перший крок</label>
+        <textarea id="ref2"></textarea>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="makeSummary">🧾 Згенерувати підсумок</button>
+      <button class="btn" id="exportSummary">⬇️ Експорт підсумку</button>
+    </div>
+    <div id="summary" class="kbd" style="margin-top:10px;white-space:pre-wrap;display:none"></div>
+  </section>
+
+  <!-- Матеріал -->
+  <section class="card">
+    <h2>Матеріал для збереження в курсі</h2>
+    <p class="hint">Збережи файл у репозиторії й вбудуй у Moodle через <span class="kbd">&lt;iframe&gt;</span> — студенти зможуть працювати самостійно.</p>
+    <div class="btn-row">
+      <span class="btn">Середовище → підтримуючі люди</span>
+      <span class="btn">Поведінка → конкретні дії</span>
+      <span class="btn">Стратегії → 3 кроки</span>
+      <span class="btn">Цінності → 2 слова</span>
+      <span class="btn">Ідентичність → формула</span>
+      <span class="btn">Місія → користь іншим</span>
+    </div>
+  </section>
+
+  <footer class="card">
+    <div class="hint">© Рівні Ділтса: практичний формат коротких відповідей. Дані зберігаються локально на цьому пристрої.</div>
+  </footer>
+</main>
+
+<script>
+  // ===== УТИЛІТИ
+  const $=(s,ctx=document)=>ctx.querySelector(s);
+  const $$=(s,ctx=document)=>Array.from(ctx.querySelectorAll(s));
+  const KEY='dilts_interactive_v1';
+
+  function fmt(s){const m=String(Math.floor(s/60)).padStart(2,'0');const ss=String(s%60).padStart(2,'0');return `${m}:${ss}`;}
+  function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();const g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=880;g.gain.value=0.05;o.start();setTimeout(()=>{o.stop();c.close();},300);}catch(e){}}
+
+  function collect(){
+    const ids=['mood','goal','env1','env2','env3','env4','env5','env6','beh1','beh2','cap1','cap2','val1','val2','idn1','mis1','mis2','ref1','ref2'];
+    const o={}; ids.forEach(id=>o[id]=($('#'+id)?.value||'').trim());
+    o.beacons = selBeacons();
+    return o;
+  }
+  function save(){ localStorage.setItem(KEY, JSON.stringify(collect())); }
+  function load(){
+    try{
+      const d=JSON.parse(localStorage.getItem(KEY)||'{}');
+      Object.entries(d).forEach(([k,v])=>{const el=$('#'+k); if(el) el.value=v;});
+      if(d.beacons) restoreBeacons(d.beacons);
+    }catch(e){}
+  }
+  function downloadTxt(name,text){
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));
+    a.download=name; document.body.appendChild(a); a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},0);
+  }
+
+  // ===== ТАЙМЕРИ
+  const timers={};
+  $$('.btn[data-timer]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const id=b.getAttribute('data-timer'); const secs=Number(b.getAttribute('data-secs'))||120;
+      if(timers[id]){clearInterval(timers[id]); delete timers[id];}
+      let s=0; timers[id]=setInterval(()=>{ s++; $('#'+id).textContent=fmt(s); if(s>=secs){clearInterval(timers[id]); delete timers[id]; beep();}},1000);
+    });
+  });
+
+  // ===== БІЗНЕС-ЛОГІКА «МАЯЧКІВ»
+  const beaconIds=['b_env1','b_env2','b_beh1','b_beh2','b_cap1','b_cap2','b_val1','b_val2','b_idn1','b_mis1','b_mis2'];
+  function selBeacons(){ const o={}; beaconIds.forEach(id=> o[id]=$('#'+id)?.checked||false); return o; }
+  function restoreBeacons(o){ beaconIds.forEach(id=>{ const el=$('#'+id); if(el && id in o) el.checked=o[id]; }); }
+
+  // ===== ПОДІЇ
+  $$('textarea,input[type="text"]').forEach(el=> el.addEventListener('input', save));
+  beaconIds.forEach(id=> $('#'+id).addEventListener('change', save));
+
+  // Експорт усіх відповідей
+  $('#exportTxt').addEventListener('click',()=>{
+    const d=collect();
+    const txt=[
+'Самоусвідомлення за пірамідою Ділтса — відповіді',
+'',
+`Настрій: ${d.mood}`,`Очікування: ${d.goal}`,'',
+'[СЕРЕДОВИЩЕ]', d.env1, d.env2, d.env3, d.env4, d.env5, d.env6,'',
+'[ПОВЕДІНКА]', d.beh1, d.beh2,'',
+'[ЗДІБНОСТІ/СТРАТЕГІЇ]', d.cap1, d.cap2,'',
+'[ЦІННОСТІ]', d.val1, d.val2,'',
+'[ІДЕНТИЧНІСТЬ]', d.idn1,'',
+'[МІСІЯ]', d.mis1, d.mis2,'',
+'[РЕФЛЕКСІЯ]', d.ref1, d.ref2
+    ].join('\n');
+    const stamp=new Date().toISOString().slice(0,16).replace('T','_').replace(':','-');
+    downloadTxt(`dilts_answers_${stamp}.txt`, txt);
+  });
+
+  // Копіювання всього
+  $('#copyAll').addEventListener('click', async ()=>{
+    const d=collect();
+    const text=JSON.stringify(d,null,2);
+    try{ await navigator.clipboard.writeText(text); flash('#copyAll','Скопійовано!'); }catch(e){ flash('#copyAll','Помилка копіювання',true); }
+  });
+
+  // Друк / Очистити
+  $('#printPage').addEventListener('click',()=>window.print());
+  $('#clearAll').addEventListener('click',()=>{ if(confirm('Очистити всі локальні дані цієї сторінки?')){ localStorage.removeItem(KEY); location.reload(); }});
+
+  // Підсумок
+  function beaconText(id, textId){ return ($('#'+id).checked ? ($('#'+textId).value.trim()||'—') : null); }
+  function makeSummaryText(){
+    const parts=[];
+    const add=(h,items)=>{ parts.push(h); items.filter(Boolean).forEach(x=>parts.push('• '+x)); parts.push(''); };
+    add('СЕРЕДОВИЩЕ:', [beaconText('b_env1','env1'), beaconText('b_env2','env3') ?? beaconText('b_env2','env4')]);
+    add('ПОВЕДІНКА:', [beaconText('b_beh1','beh1'), beaconText('b_beh2','beh2')]);
+    add('ЗДІБНОСТІ/СТРАТЕГІЇ:', [beaconText('b_cap1','cap1'), beaconText('b_cap2','cap2')]);
+    add('ЦІННОСТІ:', [beaconText('b_val1','val1'), beaconText('b_val2','val2')]);
+    add('ІДЕНТИЧНІСТЬ:', [beaconText('b_idn1','idn1')]);
+    add('МІСІЯ:', [beaconText('b_mis1','mis1'), beaconText('b_mis2','mis2')]);
+    parts.push('ГОЛОВНИЙ МАЯЧОК ТИЖНЯ:'); parts.push(($('#ref2').value.trim()||'—')); parts.push('');
+    parts.push('Перший крок (коли/де/як довго):'); parts.push('— запиши поруч у «Головний маячок»');
+    return parts.join('\n');
+  }
+  $('#makeSummary').addEventListener('click',()=>{
+    const out = makeSummaryText();
+    const box = $('#summary'); box.textContent = out; box.style.display='block'; box.scrollIntoView({behavior:'smooth'});
+    save();
+  });
+  $('#exportSummary').addEventListener('click', ()=>{
+    if($('#summary').style.display==='none'){ $('#makeSummary').click(); }
+    const stamp=new Date().toISOString().slice(0,16).replace('T','_').replace(':','-');
+    downloadTxt(`dilts_summary_${stamp}.txt`, $('#summary').textContent);
+  });
+
+  function flash(sel,msg,err=false){
+    const el=$(sel); const old=el.textContent; el.textContent=msg; el.style.borderColor= err?'var(--danger)':'var(--ok)';
+    setTimeout(()=>{ el.textContent=old; el.style.borderColor='var(--border)'; },1200);
+  }
+
+  // Старт
+  window.addEventListener('load', load);
+</script>
 </body>
 </html>
