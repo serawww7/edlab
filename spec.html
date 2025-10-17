@@ -116,15 +116,49 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
 </footer>
 
 <script>
+  // ——— кольори для секцій
+const THEME_COLORS = {
+  coach:   {accent:'#a855f7', ring:'#7c3aed'},
+  electric:{accent:'#22d3ee', ring:'#0891b2'},
+  agro:    {accent:'#22c55e', ring:'#15803d'},
+  mech:    {accent:'#f59e0b', ring:'#b45309'},
+  tech:    {accent:'#ef4444', ring:'#b91c1c'}
+};
+let CURRENT_SPEC = ''; // встановлюється в init()
+
+function iconSvgForCurrent(){
+  const c = THEME_COLORS[CURRENT_SPEC] || {accent:'#60a5fa', ring:'#1d4ed8'};
+  CURRENT_SPEC = key || '';
+await buildSection(key);
+
+  // абстрактне «ядро» + орбіта, крапка обертається
+  return `
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <defs>
+      <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%"  stop-color="${c.accent}"/>
+        <stop offset="100%" stop-color="${c.ring}"/>
+      </linearGradient>
+    </defs>
+    <!-- кільце -->
+    <circle cx="12" cy="12" r="8.5" fill="none" stroke="url(#g1)" stroke-width="1.5" opacity="0.9"/>
+    <!-- ядро -->
+    <circle cx="12" cy="12" r="3.2" fill="${c.accent}" opacity="0.9"/>
+    <!-- орбіта з крапкою (крутиться) -->
+    <g class="spin" style="transform-origin:12px 12px">
+      <circle cx="12" cy="3.2" r="2" fill="${c.ring}" />
+    </g>
+  </svg>`;
+}
 // ===== Без GitHub API — локальні маніфести + авто- назви з HTML
 const byId = (id)=>document.getElementById(id);
 const SECTION_KEYS = ['coach','electric','agro','mech','tech'];
 const SECTION_META = {
   coach:   { title:"🧠 Психологічні тренінги (coach)", desc:"Коучингові практики, рефлексія, soft skills, робота в групах." },
-  electric:{ title:"⚡ Електроенергетика/електрика",    desc:"Вимірювання, маркування, ППР, калькулятори перерізів, журнали ОП." },
+  electric:{ title:"⚡ Електроенергетика",    desc:"Вимірювання, маркування, ППР, калькулятори перерізів, журнали ОП." },
   agro:    { title:"🌾 Агрономія",                      desc:"Польові журнали, планування, моніторинги, QR/NFC." },
-  mech:    { title:"🚜 Механізація (механіки)",         desc:"ТО/ППР, облік пального, заявки, діагностика, безпека." },
-  tech:    { title:"🐄 Технології тваринництва",        desc:"HACCP/FSMS, SPC, простежуваність, аудит, CAPA." }
+  mech:    { title:"🚜 Агроінженерія (механіки)",         desc:"ТО/ППР, облік пального, заявки, діагностика, безпека." },
+  tech:    { title:"🐄 Технологи",        desc:"HACCP/FSMS, SPC, простежуваність, аудит, CAPA." }
 };
 const SECTION_TO_DIR = {
   coach:'coach',
@@ -146,7 +180,7 @@ function humanizeFromPath(p){
 function lessonCard(item){
   return `
     <div class="lesson">
-      <div class="thumb">📄</div>
+      <div class="thumb" aria-hidden="true">${iconSvgForCurrent()}</div>
       <div class="meta">
         <b>${item.title}</b>
         <small class="mono">${item.url}</small>
@@ -159,6 +193,7 @@ function lessonCard(item){
       </div>
     </div>`;
 }
+
 
 // ——— Витяг <title> і description з HTML (з кешем)
 function extractTitleDescFromHTML(html){
