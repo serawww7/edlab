@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>Піраміда Ділтса — інтерактив продовження речень</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Інтерактив для великої групи: продовж речення по рівнях Ділтса. Автозбереження, експорт у .txt, друк.">
+  <style>
+    :root{
+      --bg:#0b1220; --card:#0f172a; --muted:#93a4bf; --fg:#e6eefc; --accent:#60a5fa; --ok:#34d399; --warn:#fbbf24; --danger:#f87171; --border:#1f2a44; --ink:#0a1020;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,'Apple Color Emoji','Segoe UI Emoji';line-height:1.6}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:980px;margin:0 auto;padding:20px}
+    header{background:linear-gradient(180deg,#0d1b2a,#0b1220);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+    .head{max-width:980px;margin:0 auto;padding:16px 20px}
+    .title{margin:0;font-size:28px;letter-spacing:.2px}
+    .subtitle{margin:6px 0 0 0;color:var(--muted);font-size:15px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin:14px 0}
+    h2{margin:0 0 10px 0;font-size:22px}
+    h3{margin:12px 0 8px 0;font-size:18px}
+    .grid{display:grid;gap:12px}
+    @media(min-width:840px){.grid.cols-2{grid-template-columns:1fr 1fr}}
+    .list{margin:8px 0 0 18px}
+    .list li{margin:6px 0}
+    .hint{color:var(--muted);font-size:14px}
+    .divider{height:1px;background:var(--border);margin:12px 0}
+    .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:#0c1426;color:var(--fg);text-decoration:none;cursor:pointer}
+    .btn:hover{background:#0e1a32}
+    .ok{color:var(--ok)} .warn{color:var(--warn)} .danger{color:var(--danger)}
+    .kbd{font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:#dbeafe}
+    .field{margin-top:8px}
+    .q{font-weight:600;margin:10px 0 6px 0}
+    textarea{width:100%;min-height:64px;resize:vertical;background:#0b1528;color:#e6eefc;border:1px solid var(--border);border-radius:10px;padding:10px 12px;line-height:1.5}
+    .topbar{display:flex;gap:10px;flex-wrap:wrap}
+    .badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted);margin-left:8px}
+    .level{border:1px solid var(--border);border-radius:12px;padding:12px;background:#0b162a}
+    .row{display:grid;gap:10px}
+    @media(min-width:840px){.row{grid-template-columns:1.2fr 1fr}}
+    .timer{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+    .timer .dot{width:8px;height:8px;border-radius:50%;background:var(--warn)}
+    .pill{display:inline-block;padding:4px 10px;border:1px solid var(--border);border-radius:999px;font-size:12px;color:var(--muted);margin-right:6px}
+    .stack{display:grid;gap:8px}
+    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+    /* Print */
+    @media print{
+      header,.controls,.hint,.badge,.timer,.btn,.topbar{display:none !important}
+      body{background:#fff;color:#000}
+      .card,.level{border:0;background:#fff}
+      textarea{border:0;min-height:auto}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="head">
+      <h1 class="title">Піраміда логічних рівнів Ділтса — інтерактив</h1>
+      <p class="subtitle">Заповни продовження речень (1–2 хв на блок) → збережи, експортуй у .txt або надрукуй.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="row">
+        <div>
+          <h2>Інструкція</h2>
+          <ul class="list">
+            <li>Рухаємося <strong>знизу вгору</strong>: від <em>Середовища</em> до <em>Місії</em>.</li>
+            <li>Пиши <strong>короткими фразами</strong> (1–3 рядки на питання).</li>
+            <li>Автозбереження працює автоматично (локально на цьому пристрої).</li>
+          </ul>
+          <div class="hint">Порада: після заповнення підкресли 1–2 фрази з кожного рівня — це твої «маячки» на місяць.</div>
+        </div>
+        <div class="controls">
+          <h3>Експорт / Друк</h3>
+          <div class="btn-row">
+            <button class="btn" id="exportTxt">⬇️ Експорт .txt</button>
+            <button class="btn" id="printPage">🖨️ Друк</button>
+            <button class="btn" id="copyAll">📋 Копіювати все</button>
+            <button class="btn" id="clearAll">🗑️ Очистити</button>
+          </div>
+          <div style="margin-top:8px" class="timer"><span class="dot"></span><span id="timerNote">Таймери блоків: 1–2 хв кожен</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Піраміда: знизу вгору -->
+    <section class="card">
+      <h2>Піраміда (знизу вгору) <span class="badge">Середовище → Місія</span></h2>
+      <div class="stack">
+
+        <!-- 1. Середовище -->
+        <div class="level" data-level="Середовище" data-min="60" data-max="120">
+          <div class="topbar">
+            <span class="pill">1. Середовище (де / з ким)</span>
+            <span class="timer">⏱ <span class="t" id="t-env">00:00</span></span>
+          </div>
+          <div class="q">Коли я був дитиною, моя родина …</div>
+          <textarea id="env1" placeholder="Продовж фразу…"></textarea>
+          <div class="q">Моя родина поводиться зі мною як з …</div>
+          <textarea id="env2" placeholder="Продовж фразу…"></textarea>
+          <div class="q">Люблю вчитися (працювати) з людьми, які …</div>
+          <textarea id="env3" placeholder="Продовж фразу…"></textarea>
+          <div class="q">Не люблю людей, які …</div>
+          <textarea id="env4" placeholder="Продовж фразу…"></textarea>
+          <div class="q">Коли мені не таланить, я …</div>
+          <textarea id="env5" placeholder="Продовж фразу…"></textarea>
+          <div class="q">Якщо всі проти мене, то …</div>
+          <textarea id="env6" placeholder="Продовж фразу…"></textarea>
+          <div class="q">Найбільший вплив на мене зараз має … <span class="badge">додаткове</span></div>
+          <textarea id="env7" placeholder="Коротко…"></textarea>
+          <div class="btn-row">
+            <button class="btn" data-timer="t-env">▶️ Старт 2 хв</button>
+            <button class="btn" data-next="#beh">Далі → Поведінка</button>
+          </div>
+        </div>
+
+        <!-- 2. Поведінка -->
+        <div class="level" id="beh" data-level="Поведінка" data-min="60" data-max="120">
+          <div class="topbar">
+            <span class="pill">2. Поведінка (що роблю)</span>
+            <span class="timer">⏱ <span class="t" id="t-beh">00:00</span></span>
+          </div>
+          <div class="q">Саме гірше, що мені траплялося робити, це …</div>
+          <textarea id="beh1" placeholder="Продовж фразу…"></textarea>
+          <div class="q">Коли я був дитиною, то відчував … (і діяв так: …)</div>
+          <textarea id="beh2" placeholder="Продовж фразу…"></textarea>
+          <div class="q">Те, що я роблю регулярно і чим пишаюсь — це … <span class="badge">додаткове</span></div>
+          <textarea id="beh3" placeholder="Коротко…"></textarea>
+          <div class="btn-row">
+            <button class="btn" data-timer="t-beh">▶️ Старт 2 хв</button>
+            <button class="btn" data-next="#cap">Далі → Здібності/Стратегії</button>
+          </div>
+        </div>
+
+        <!-- 3. Здібності / Стратегії -->
+        <div class="level" id="cap" data-level="Здібності / Стратегії" data-min="60" data-max="120">
+          <div class="topbar">
+            <span class="pill">3. Здібності / Стратегії (як)</span>
+            <span class="timer">⏱ <span class="t" id="t-cap">00:00</span></span>
+          </div>
+          <div class="q">Щоб туди дійти, мені потрібно в першу чергу …</div>
+          <textarea id="cap1" placeholder="Продовж фразу…"></textarea>
+          <div class="q">Якщо хтось із колег/керівників помічає мене, то він/вона скаже, що я …</div>
+          <textarea id="cap2" placeholder="Продовж фразу…"></textarea>
+          <div class="q">Моє сильне вміння, яке допомагає іншим — це … <span class="badge">додаткове</span></div>
+          <textarea id="cap3" placeholder="Коротко…"></textarea>
+          <div class="btn-row">
+            <button class="btn" data-timer="t-cap">▶️ Старт 2 хв</button>
+            <button class="btn" data-next="#val">Далі → Переконання і Цінності</button>
+          </div>
+        </div>
+
+        <!-- 4. Переконання і Цінності -->
+        <div class="level" id="val" data-level="Переконання і Цінності" data-min="60" data-max="120">
+          <div class="topbar">
+            <span class="pill">4. Переконання і Цінності (чому)</span>
+            <span class="timer">⏱ <span class="t" id="t-val">00:00</span></span>
+          </div>
+          <div class="q">Думаю, що мій батько … (навчив мене важливому: …)</div>
+          <textarea id="val1" placeholder="Продовж фразу…"></textarea>
+          <div class="q">Я міг би бути дуже щасливим, якби …</div>
+          <textarea id="val2" placeholder="Продовж фразу…"></textarea>
+          <div class="q">Найважливіше, що я хочу передати іншим через свою роботу — це … <span class="badge">додаткове</span></div>
+          <textarea id="val3" placeholder="Коротко…"></textarea>
+          <div class="btn-row">
+            <button class="btn" data-timer="t-val">▶️ Старт 2 хв</button>
+            <button class="btn" data-next="#idn">Далі → Ідентичність</button>
+          </div>
+        </div>
+
+        <!-- 5. Ідентичність -->
+        <div class="level" id="idn" data-level="Ідентичність" data-min="60" data-max="120">
+          <div class="topbar">
+            <span class="pill">5. Ідентичність (хто я)</span>
+            <span class="timer">⏱ <span class="t" id="t-idn">00:00</span></span>
+          </div>
+          <div class="q">Через 5 років я бачу себе …</div>
+          <textarea id="idn1" placeholder="Продовж фразу…"></textarea>
+          <div class="q">Я вважаю себе людиною, яка … <span class="badge">додаткове</span></div>
+          <textarea id="idn2" placeholder="Коротко…"></textarea>
+          <div class="btn-row">
+            <button class="btn" data-timer="t-idn">▶️ Старт 2 хв</button>
+            <button class="btn" data-next="#mis">Далі → Місія / Покликання</button>
+          </div>
+        </div>
+
+        <!-- 6. Місія / Покликання -->
+        <div class="level" id="mis" data-level="Місія / Покликання" data-min="60" data-max="120">
+          <div class="topbar">
+            <span class="pill">6. Місія / Покликання (для чого)</span>
+            <span class="timer">⏱ <span class="t" id="t-mis">00:00</span></span>
+          </div>
+          <div class="q">Якби я мав необмежений ресурс (час, кошти, знання), я б зробив …</div>
+          <textarea id="mis1" placeholder="Продовж фразу…"></textarea>
+          <div class="q">Більше за все я хотів би в житті …</div>
+          <textarea id="mis2" placeholder="Продовж фразу…"></textarea>
+          <div class="q">Я роблю це, щоб … (для кого / для чого) <span class="badge">додаткове</span></div>
+          <textarea id="mis3" placeholder="Коротко…"></textarea>
+          <div class="btn-row">
+            <button class="btn" data-timer="t-mis">▶️ Старт 2 хв</button>
+            <button class="btn" id="toTop">⏫ До початку</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Підсумок -->
+    <section class="card">
+      <h2>Як використовувати завтра</h2>
+      <ul class="list">
+        <li>Рухайся знизу вгору (Середовище → Місія), 1–2 хв/блок.</li>
+        <li>Після кожного рівня — коротка пауза: хто хоче — ділиться.</li>
+        <li>У фіналі підкресли: «Від зовнішнього — до внутрішнього і далі — до сенсу».</li>
+      </ul>
+      <div class="btn-row">
+        <button class="btn" id="makeSummary">🧾 Згенерувати підсумок</button>
+        <button class="btn" id="exportTxt2">⬇️ Експорт підсумку</button>
+      </div>
+      <div id="summary" class="kbd" style="margin-top:10px;display:none;white-space:pre-wrap"></div>
+    </section>
+
+    <footer class="card" style="text-align:center">
+      <div class="hint">Дані зберігаються локально на цьому пристрої (localStorage). Для анонімності очисть після уроку.</div>
+    </footer>
+  </main>
+
+  <script>
+    // ---------- УТИЛІТИ ----------
+    const $ = (sel, ctx=document)=>ctx.querySelector(sel);
+    const $$ = (sel, ctx=document)=>Array.from(ctx.querySelectorAll(sel));
+
+    const STORAGE_KEY = 'dilts_form_v1';
+
+    function collectData(){
+      const fields = [
+        'env1','env2','env3','env4','env5','env6','env7',
+        'beh1','beh2','beh3',
+        'cap1','cap2','cap3',
+        'val1','val2','val3',
+        'idn1','idn2',
+        'mis1','mis2','mis3'
+      ];
+      const data = {};
+      fields.forEach(id => data[id] = (document.getElementById(id)?.value || '').trim());
+      return data;
+    }
+
+    function renderTxt(data){
+      const lines = [];
+      const add = (t)=>lines.push(t);
+
+      add('🔹 Піраміда логічних рівнів Ділтса — Мої відповіді');
+      add('');
+      add('1) Середовище (де / з ким)');
+      add('- Коли я був дитиною, моя родина … ' + (data.env1||''));
+      add('- Моя родина поводиться зі мною як з … ' + (data.env2||''));
+      add('- Люблю вчитися (працювати) з людьми, які … ' + (data.env3||''));
+      add('- Не люблю людей, які … ' + (data.env4||''));
+      add('- Коли мені не таланить, я … ' + (data.env5||''));
+      add('- Якщо всі проти мене, то … ' + (data.env6||''));
+      add('- Додаткове: Найбільший вплив на мене зараз має … ' + (data.env7||''));
+      add('');
+      add('2) Поведінка (що роблю)');
+      add('- Саме гірше, що мені траплялося робити, це … ' + (data.beh1||''));
+      add('- Коли я був дитиною, то відчував … (і діяв так: …) ' + (data.beh2||''));
+      add('- Додаткове: Те, що я роблю регулярно і чим пишаюсь — це … ' + (data.beh3||''));
+      add('');
+      add('3) Здібності / Стратегії (як)');
+      add('- Щоб туди дійти, мені потрібно в першу чергу … ' + (data.cap1||''));
+      add('- Якщо хтось із колег/керівників помічає мене, то він/вона скаже, що я … ' + (data.cap2||''));
+      add('- Додаткове: Моє сильне вміння, яке допомагає іншим — це … ' + (data.cap3||''));
+      add('');
+      add('4) Переконання і Цінності (чому)');
+      add('- Думаю, що мій батько … (навчив мене важливому: …) ' + (data.val1||''));
+      add('- Я міг би бути дуже щасливим, якби … ' + (data.val2||''));
+      add('- Додаткове: Найважливіше, що я хочу передати іншим через свою роботу — це … ' + (data.val3||''));
+      add('');
+      add('5) Ідентичність (хто я)');
+      add('- Через 5 років я бачу себе … ' + (data.idn1||''));
+      add('- Додаткове: Я вважаю себе людиною, яка … ' + (data.idn2||''));
+      add('');
+      add('6) Місія / Покликання (для чого)');
+      add('- Якби я мав необмежений ресурс (час, кошти, знання), я б зробив … ' + (data.mis1||''));
+      add('- Більше за все я хотів би в житті … ' + (data.mis2||''));
+      add('- Додаткове: Я роблю це, щоб … (для кого / для чого) ' + (data.mis3||''));
+      add('');
+      add('— Кінець —');
+      return lines.join('\n');
+    }
+
+    function download(filename, text){
+      const blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
+    }
+
+    function saveLocal(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(collectData()));
+    }
+
+    function loadLocal(){
+      try{
+        const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        Object.entries(data).forEach(([id,val])=>{
+          const el = document.getElementById(id);
+          if(el) el.value = val;
+        });
+      }catch(e){}
+    }
+
+    function clearLocal(){
+      localStorage.removeItem(STORAGE_KEY);
+      $$('textarea').forEach(t=>t.value='');
+    }
+
+    // ---------- ТАЙМЕРИ ----------
+    const timers = {};
+    function startTimer(id, seconds=120){
+      stopTimer(id);
+      const el = document.getElementById(id);
+      if(!el) return;
+      let remaining = seconds;
+      el.textContent = formatTime(0);
+      timers[id] = setInterval(()=>{
+        const spent = seconds - --remaining;
+        el.textContent = formatTime(spent);
+        if(remaining<=0){ clearInterval(timers[id]); beep(); }
+      }, 1000);
+    }
+    function stopTimer(id){
+      if(timers[id]){ clearInterval(timers[id]); delete timers[id]; }
+    }
+    function formatTime(s){
+      const m = Math.floor(s/60).toString().padStart(2,'0');
+      const ss = (s%60).toString().padStart(2,'0');
+      return `${m}:${ss}`;
+    }
+    function beep(){
+      try{
+        const ctx = new (window.AudioContext||window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type='sine'; o.frequency.value=880; g.gain.value=0.05;
+        o.start(); setTimeout(()=>{ o.stop(); ctx.close(); }, 350);
+      }catch(e){}
+    }
+
+    // ---------- ПОДІЇ ----------
+    window.addEventListener('load', ()=>{
+      loadLocal();
+      // Автозбереження
+      $$('textarea').forEach(t=>{
+        t.addEventListener('input', saveLocal);
+      });
+
+      // Кнопки таймерів у кожному блоці
+      $$('[data-timer]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const id = btn.getAttribute('data-timer');
+          startTimer(id, 120); // 2 хв
+        });
+      });
+
+      // Навігація "Далі"
+      $$('[data-next]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const target = btn.getAttribute('data-next');
+          const el = document.querySelector(target);
+          if(el){ el.scrollIntoView({behavior:'smooth', block:'start'}); }
+        });
+      });
+
+      // До верху
+      $('#toTop')?.addEventListener('click', ()=>{
+        window.scrollTo({top:0, behavior:'smooth'});
+      });
+
+      // Експорт TXT
+      $('#exportTxt').addEventListener('click', ()=>{
+        const data = collectData();
+        const txt = renderTxt(data);
+        const stamp = new Date().toISOString().slice(0,16).replace('T','_').replace(':','-');
+        download(`dilts_answers_${stamp}.txt`, txt);
+      });
+      $('#exportTxt2').addEventListener('click', ()=>{
+        const summary = $('#summary');
+        if(summary.style.display==='none' || !summary.textContent.trim()){
+          // якщо ще не згенерували — згенерувати автоматично
+          $('#makeSummary').click();
+        }
+        const stamp = new Date().toISOString().slice(0,16).replace('T','_').replace(':','-');
+        download(`dilts_summary_${stamp}.txt`, summary.textContent);
+      });
+
+      // Друк
+      $('#printPage').addEventListener('click', ()=>window.print());
+
+      // Копіювати все
+      $('#copyAll').addEventListener('click', async ()=>{
+        const txt = renderTxt(collectData());
+        try{
+          await navigator.clipboard.writeText(txt);
+          flash('#copyAll','Скопійовано!');
+        }catch(e){
+          flash('#copyAll','Не вдалося скопіювати', true);
+        }
+      });
+
+      // Очистити
+      $('#clearAll').addEventListener('click', ()=>{
+        if(confirm('Очистити всі відповіді і локальне збереження?')){ clearLocal(); }
+      });
+
+      // Згенерувати підсумок (коротко)
+      $('#makeSummary').addEventListener('click', ()=>{
+        const d = collectData();
+        const pick = (v)=>v && v.trim() ? v.trim() : '—';
+        const out = [
+`Мої «маячки» за рівнями Ділтса
+— — — — — — — — — — — — — — — —`,
+`СЕРЕДОВИЩЕ: ${pick(d.env3)}`,
+`ПОВЕДІНКА: ${pick(d.beh3)}`,
+`ЗДІБНОСТІ: ${pick(d.cap3)}`,
+`ЦІННОСТІ: ${pick(d.val3)}`,
+`ІДЕНТИЧНІСТЬ: ${pick(d.idn2)}`,
+`МІСІЯ: ${pick(d.mis3)}`,
+'',
+'Ключові кроки (заповни самостійно):',
+'1) ',
+'2) ',
+'3) '
+        ].join('\n');
+        const box = $('#summary');
+        box.textContent = out;
+        box.style.display = 'block';
+        box.scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    });
+
+    function flash(sel, msg, warn=false){
+      const btn = $(sel);
+      const old = btn.textContent;
+      btn.textContent = msg;
+      btn.style.borderColor = warn ? 'var(--danger)' : 'var(--ok)';
+      setTimeout(()=>{
+        btn.textContent = old;
+        btn.style.borderColor = 'var(--border)';
+      }, 1200);
+    }
+  </script>
+</body>
+</html>
