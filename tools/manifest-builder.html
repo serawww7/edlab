@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>EDLab — Генератор маніфестів</title>
+<title>EDLab — Генератор маніфестів (автопрефікс)</title>
 <meta name="color-scheme" content="light dark">
 <style>
 :root{color-scheme:light dark}
@@ -12,7 +12,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto S
 h1{font-size:22px;margin:0 0 12px}
 .card{border:1px solid #223049;background:#0c182a;border-radius:12px;padding:16px}
 label{display:block;margin:10px 0 6px}
-input,textarea{width:100%;box-sizing:border-box;background:#0b1220;border:1px solid #223049;color:#e6eef9;border-radius:8px;padding:8px}
+input{width:100%;box-sizing:border-box;background:#0b1220;border:1px solid #223049;color:#e6eef9;border-radius:8px;padding:8px}
 .row{display:flex;gap:12px;flex-wrap:wrap}
 .col{flex:1 1 260px}
 .btn{background:#1b3a6b;color:#e6eef9;border:1px solid #274364;border-radius:10px;padding:10px 14px;cursor:pointer}
@@ -21,14 +21,16 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
 .note{background:#0c182a;border:1px dashed #274364;border-radius:10px;padding:10px;margin-top:10px}
 .ok{color:#9ef59e}
 .err{color:#ffb1b1}
-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
-th,td{border-bottom:1px solid #223049;padding:6px 8px;text-align:left;vertical-align:top;word-break:break-all}
+pre.dump{max-height:260px;overflow:auto;background:#0b1220;border:1px solid #223049;border-radius:10px;padding:10px}
 .badge{display:inline-block;font-size:12px;border:1px solid #274364;border-radius:999px;padding:2px 8px;margin-left:8px}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:6px}
+.kv b{color:#a8d1ff}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>EDLab — Генератор маніфестів <span class="badge">працює локально в браузері</span></h1>
+  <h1>EDLab — Генератор маніфестів <span class="badge">автопрефікс + діагностика</span></h1>
+
   <div class="card">
     <div class="row">
       <div class="col">
@@ -46,31 +48,35 @@ th,td{border-bottom:1px solid #223049;padding:6px 8px;text-align:left;vertical-a
     </div>
     <div class="row">
       <div class="col">
-        <label>Коренева папка сайту</label>
-        <input id="rootDir" value="edlab">
-      </div>
-      <div class="col">
         <label>Секції (через кому)</label>
         <input id="sections" value="coach,elect_II_kyrs,agro_II_kyrs,mech_II_kyrs,tech_II_kyrs">
       </div>
-    </div>
-    <div class="row">
       <div class="col">
-        <label>GitHub Token (необов’язково, але знімає ліміти 60/год)</label>
-        <input id="token" placeholder="ghp_... або пусто">
+        <label>GitHub Token (рекомендовано)</label>
+        <input id="token" placeholder="ghp_... або github_pat_...">
       </div>
     </div>
     <div class="row" style="margin-top:8px">
       <button class="btn" id="btnGen">🔧 Generate manifests</button>
+      <button class="btn" id="btnOnlyScan">👀 Лише скан дерева (без завантаження)</button>
     </div>
 
     <div class="note" id="status">Статус: чекаю на запуск…</div>
+    <div id="diag" class="note" style="display:none">
+      <div class="kv">
+        <b>Знайдений префікс:</b><span id="pf"></span>
+        <b>Матчі (секції):</b><span id="hits"></span>
+        <b>Усього HTML:</b><span id="total"></span>
+      </div>
+      <div style="margin-top:8px"><b>Перші 200 шляхів у дереві (для дебагу):</b></div>
+      <pre class="dump" id="dump"></pre>
+    </div>
+
     <div id="out"></div>
   </div>
 </div>
 
 <script>
-// ——— утиліта звантаження файла
 function download(filename, text){
   const blob = new Blob([text], {type:'application/json;charset=utf-8'});
   const url = URL.createObjectURL(blob);
@@ -79,102 +85,122 @@ function download(filename, text){
   document.body.appendChild(a); a.click();
   setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
 }
-function log(html){
-  const out = document.getElementById('out');
-  out.insertAdjacentHTML('beforeend', html);
-}
-function toTitleFromPath(p){
-  const name = (p||'').split('/').pop()||p;
-  return name.replace(/[-_]/g,' ').replace(/\.html?$/i,'').trim();
-}
+function txt(x){ return document.createTextNode(x); }
+function el(id){ return document.getElementById(id); }
 
 async function fetchJson(u, token){
   const headers = token ? {Authorization: `Bearer ${token}`} : {};
   const r = await fetch(u, {headers, cache:'no-store'});
   if(!r.ok){
     const body = await r.text().catch(()=> '');
-    throw new Error(`HTTP ${r.status} on ${u}\n${body.slice(0,300)}`);
+    throw new Error(`HTTP ${r.status} on ${u}\n${body.slice(0,500)}`);
   }
   return r.json();
 }
 
-async function run(){
-  const owner = document.getElementById('owner').value.trim();
-  const repo  = document.getElementById('repo').value.trim();
-  const branch= document.getElementById('branch').value.trim();
-  const root  = document.getElementById('rootDir').value.trim().replace(/\/+$/,'');
-  const secs  = document.getElementById('sections').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const token = document.getElementById('token').value.trim();
+// Автовизначення префікса: '' або 'edlab/'
+function detectPrefix(tree, sections){
+  const cand = ['', 'edlab/'];
+  const report = [];
+  for(const p of cand){
+    let hits = 0;
+    for(const s of sections){
+      const pref = `${p}${s}/`;
+      if (tree.some(n => n.type==='blob' && n.path.startsWith(pref))) hits++;
+    }
+    report.push({prefix:p, hits});
+  }
+  // вибираємо з найбільшою кількістю збігів
+  report.sort((a,b)=>b.hits - a.hits);
+  return {prefix: report[0].prefix, report};
+}
 
-  const status = document.getElementById('status');
-  status.innerHTML = 'Статус: отримую SHA дерева…';
+function buildLists(tree, prefix, sections){
+  const global = {}; let total=0;
+  for(const s of sections){
+    const matchPrefix = `${prefix}${s}/`;
+    const files = tree
+      .filter(n => n.type==='blob' && n.path.startsWith(matchPrefix) && /\.html?$/i.test(n.path))
+      .map(n => '/' + n.path);
+    files.sort((a,b)=>a.localeCompare(b,'uk'));
+    global[s] = files;
+    total += files.length;
+  }
+  return {global,total};
+}
 
-  // 1) sha дерева
+async function scan(onlyScan=false){
+  const owner = el('owner').value.trim();
+  const repo  = el('repo').value.trim();
+  const branch= el('branch').value.trim();
+  const secs  = el('sections').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const token = el('token').value.trim();
+
+  el('status').innerHTML = 'Статус: отримую SHA дерева…';
+  el('diag').style.display='none'; el('out').innerHTML='';
+
   const brUrl = `https://api.github.com/repos/${owner}/${repo}/branches/${branch}`;
   const br = await fetchJson(brUrl, token);
   const sha = br?.commit?.commit?.tree?.sha;
   if(!sha) throw new Error('Не вдалося отримати tree.sha');
 
-  status.innerHTML = 'Статус: вантажу повне дерево…';
+  el('status').innerHTML = 'Статус: вантажу повне дерево…';
 
-  // 2) повне дерево
   const treeUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${sha}?recursive=1`;
   const treeResp = await fetchJson(treeUrl, token);
   const tree = Array.isArray(treeResp.tree) ? treeResp.tree : [];
 
-  // 3) зібрати шляхи
-  const resultGlobal = {};
-  const resultLocal  = {};
-  for(const sec of secs){
-    const prefix = `${root}/${sec}/`;
-    const files = tree
-      .filter(n => n.type === 'blob' && n.path.startsWith(prefix) && /\.html?$/i.test(n.path))
-      .map(n => '/' + n.path); // публічний URL
+  // Діагностика: покажемо перші 200 шляхів
+  const sample = tree.slice(0,200).map(n=>n.path).join('\n');
 
-    files.sort((a,b)=>a.localeCompare(b,'uk'));
+  // Автопрефікс
+  const {prefix, report} = detectPrefix(tree, secs);
+  const {global,total}   = buildLists(tree, prefix, secs);
 
-    resultGlobal[sec] = files;
-    resultLocal[sec]  = files;
-  }
+  // Показати діагностику
+  el('pf').textContent   = prefix || '(порожньо)';
+  el('hits').textContent = report.map(r=>`${r.prefix||'(порож.)'}: ${r.hits}`).join('  |  ');
+  el('total').textContent= String(total);
+  el('dump').textContent = sample;
+  el('diag').style.display='';
 
-  // 4) показати зведення
-  const total = Object.values(resultGlobal).reduce((acc,arr)=>acc+arr.length,0);
-  status.innerHTML = `✅ Готово. Знайдено HTML: <b>${total}</b> файлів. Завантаж маніфести нижче і завантаж їх у репозиторій.`;
+  el('status').innerHTML = total>0
+    ? `✅ Готово. Знайдено HTML: <b>${total}</b> файлів.`
+    : `⚠️ HTML-файлів не знайдено (за поточним префіксом). Перевір список шляхів у дампі вище — чи бачиш там, наприклад, "coach/..." або "edlab/coach/..."?`;
 
-  // 5) згенерувати файли для завантаження
-  const globalJson = JSON.stringify(resultGlobal, null, 2);
-  download(`${root}/assets/edlab-manifest.json`, globalJson);
-  log(`<div class="note ok"><b>Завантажено:</b> ${root}/assets/edlab-manifest.json</div>`);
+  if (onlyScan) return;
 
-  for(const sec of secs){
-    const arr = resultLocal[sec] || [];
+  // Глобальний JSON
+  const globalJson = JSON.stringify(global, null, 2);
+  download(`assets/edlab-manifest.json`, globalJson);
+  el('out').insertAdjacentHTML('beforeend', `<div class="note ok"><b>Завантажено:</b> /assets/edlab-manifest.json</div>`);
+
+  // Локальні JSON
+  for(const s of secs){
+    const arr = global[s] || [];
     const localJson = JSON.stringify(arr, null, 2);
-    download(`${root}/${sec}/manifest.json`, localJson);
-    log(`<div class="note ok"><b>Завантажено:</b> ${root}/${sec}/manifest.json <small class="mono">(${arr.length} файлів)</small></div>`);
-    if(arr.length){
-      const sample = arr.slice(0,5).map(s=>`• <small class="mono">${s}</small>`).join('<br>');
-      log(`<div class="note">${sample}</div>`);
-    }
+    download(`${s}/manifest.json`, localJson);
+    el('out').insertAdjacentHTML('beforeend', `<div class="note ok"><b>Завантажено:</b> /${s}/manifest.json <small class="mono">(${arr.length} файлів)</small></div>`);
   }
 
-  log(`<div class="note">Далі зайди у GitHub → папки:<br>
-  — <b>${root}/assets/</b> → додай <code>edlab-manifest.json</code><br>
-  — <b>${root}/coach/</b> → додай <code>manifest.json</code><br>
-  — <b>${root}/elect_II_kyrs/</b> → додай <code>manifest.json</code><br>
-  — <b>${root}/agro_II_kyrs/</b> → додай <code>manifest.json</code><br>
-  — <b>${root}/mech_II_kyrs/</b> → додай <code>manifest.json</code><br>
-  — <b>${root}/tech_II_kyrs/</b> → додай <code>manifest.json</code><br>
-  Commit → відкрий сторінки spec.html?spec=…</div>`);
+  el('out').insertAdjacentHTML('beforeend', `<div class="note">Далі зайди в GitHub та завантаж файли саме у ці папки:
+  <br>— <b>edlab/assets/</b> → <code>edlab-manifest.json</code>
+  <br>— <b>edlab/coach/</b> → <code>manifest.json</code>
+  <br>— <b>edlab/elect_II_kyrs/</b> → <code>manifest.json</code>
+  <br>— <b>edlab/agro_II_kyrs/</b> → <code>manifest.json</code>
+  <br>— <b>edlab/mech_II_kyrs/</b> → <code>manifest.json</code>
+  <br>— <b>edlab/tech_II_kyrs/</b> → <code>manifest.json</code>
+  <br>Потім відкрий <code>https://edlab.pp.ua/edlab/spec.html?spec=...</code> і, за потреби, натисни «Оновити список».</div>`);
 }
 
-document.getElementById('btnGen').addEventListener('click', async ()=>{
-  const status = document.getElementById('status');
-  try{
-    status.innerHTML = '⏳ Працюю…';
-    document.getElementById('out').innerHTML = '';
-    await run();
-  }catch(e){
-    status.innerHTML = `<span class="err">❌ Помилка:</span> <pre class="mono" style="white-space:pre-wrap">${e?.message||e}</pre>`;
+el('btnGen').addEventListener('click', async ()=>{
+  try{ await scan(false); }catch(e){
+    el('status').innerHTML = `<span class="err">❌ Помилка:</span> <pre class="mono" style="white-space:pre-wrap">${e?.message||e}</pre>`;
+  }
+});
+el('btnOnlyScan').addEventListener('click', async ()=>{
+  try{ await scan(true); }catch(e){
+    el('status').innerHTML = `<span class="err">❌ Помилка:</span> <pre class="mono" style="white-space:pre-wrap">${e?.message||e}</pre>`;
   }
 });
 </script>
