@@ -262,109 +262,64 @@ function setSpecMetaStatic(key){
 }
 
 // ——— Узагальнений динамічний побудовник (coach/electric)
+<script>
 async function buildDynamic(cfg){
   byId('specTitle').textContent = cfg.title;
   byId('specDesc').textContent  = cfg.desc;
   byId('listTitle').textContent = cfg.title + " — матеріали";
 
-  const found=[];
-  for(const rel of cfg.candidates()){
-    const url = absoluteUrl(rel);
-    try{
-      const res = await fetch(url,{method:'GET',cache:'no-store'});
-      if(!res.ok) continue;
-      const html = await res.text();
-      const meta = extractTitleAndDesc(html);
-      const niceTitle = meta.title || humanize(rel.replace(cfg.base,''));
-      const niceDesc  = meta.title ? (meta.desc ? meta.desc : `Сторінка: ${rel.replace(cfg.base,'')}`) 
-                                   : `Матеріал: ${rel.replace(cfg.base,'')}`;
-      found.push({title: niceTitle, url: rel, desc: niceDesc});
-    }catch(_e){/* ігноруємо 404/мережеві */}
+  let files = [];
+  // 1) Пробуємо manifest.json у папці розділу
+  try { files = await readManifestIfAny(cfg.base); } catch(_){}
+
+  // 2) Якщо маніфесту нема — GitHub API (список файлів директорії)
+  if (!files.length){
+    try { files = await listDirViaGitHubAPI(cfg.base); } catch(_){}
   }
 
-  if(!found.length){
+  // 3) Якщо й API не дав результат — перебираємо заготовлені кандидати
+  let items = [];
+  if (files.length){
+    for (const rel of files){
+      const url = absoluteUrl(rel);
+      try{
+        const res = await fetch(url, { cache:'no-store' });
+        if(!res.ok) continue;
+        const html = await res.text();
+        const meta = extractTitleAndDesc(html);
+        const niceTitle = meta.title || humanize(rel.replace(cfg.base,''));
+        const niceDesc  = meta.title ? (meta.desc ? meta.desc : `Сторінка: ${rel.replace(cfg.base,'')}`)
+                                     : `Матеріал: ${rel.replace(cfg.base,'')}`;
+        items.push({ title:niceTitle, url:rel, desc:niceDesc });
+      }catch(_){}
+    }
+  } else {
+    items = await tryCandidates(cfg);
+  }
+
+  if(!items.length){
     byId('lessons').innerHTML = "";
-    const msg = (cfg.key==='coach')
-      ? "У папці coach/ не знайдено тренінг-сторінок з типових назв. Додай coach_intro.html або coach_para1.html тощо."
-      : "У папці elect_II_kyrs/ не знайдено файлів із типових назв. Додай elect_para1.html або electric_para1.html тощо.";
-    const hint = byId('hintBox'); hint.textContent = msg; hint.style.display = '';
-    byId('url').value = ""; gen(); return;
+    const hint = byId('hintBox');
+    const folder = cfg.base.replace(/\/$/,'');
+    hint.innerHTML = `У папці <b>${folder}/</b> не знайдено HTML-сторінок.
+      <ul style="margin:6px 0 0 18px">
+        <li>Перевір точну назву папки у <code>cfg.base</code> (нині: <b>${cfg.base}</b>)</li>
+        <li>Додай <code>${folder}/manifest.json</code> із масивом імен файлів у потрібному порядку</li>
+        <li>Або назви файлів під один із шаблонів, які перебираються в коді</li>
+      </ul>`;
+    hint.style.display = '';
+    byId('url').value = ""; gen();
+    return;
   }
 
+  // стабільне сортування
+  items.sort((a,b)=> a.url.localeCompare(b.url, 'uk'));
   byId('hintBox').style.display='none';
-  byId('lessons').innerHTML = found.map(lessonCard).join('');
-  const firstUrl = absoluteUrl(found[0].url);
+  byId('lessons').innerHTML = items.map(lessonCard).join('');
+  const firstUrl = absoluteUrl(items[0].url);
   byId('url').value = firstUrl; gen();
 }
-
-// ——— Олюднення імені файлу (якщо title відсутній)
-function humanize(name){
-  const base = name.replace(/\.html$/i,'');
-  if(/intro/i.test(base)) return "Вступ — " + base;
-  const m = base.match(/(\d+)/);
-  if(m) return `Матеріал ${Number(m[1])} — ${base}`;
-  return base;
-}
-
-// ——— Прев’ю + генератор
-function openPreview(u){
-  const abs = absoluteUrl(u);
-  byId('previewUrl').textContent = abs;
-  byId('previewFrame').src = abs;
-  byId('previewBox').style.display = '';
-  byId('previewNote').style.display = '';
-  window.scrollTo({top: byId('previewBox').getBoundingClientRect().top + window.scrollY - 20, behavior:'smooth'});
-}
-function closePreview(){
-  byId('previewFrame').src = 'about:blank';
-  byId('previewBox').style.display = 'none';
-  byId('previewNote').style.display = 'none';
-}
-function gen(){
-  const url = byId('url').value.trim();
-  const h   = parseInt(byId('height').value,10) || 1600;
-  const sb  = byId('sandbox').value.trim();
-  const html =
-`<div style="max-width:980px;margin:0 auto;position:relative;z-index:1;">
-  <iframe
-    src="${url}"
-    style="width:100%;height:${h}px;border:0;display:block;pointer-events:auto;background:#fff;"
-    loading="eager"
-    referrerpolicy="no-referrer"
-    sandbox="${sb}">
-  </iframe>
-</div>`;
-  byId('code').value = html;
-}
-function copyCode(){
-  const ta = byId('code');
-  ta.select(); ta.setSelectionRange(0, ta.value.length);
-  document.execCommand('copy');
-  const old = document.title; document.title='✅ HTML скопійовано';
-  setTimeout(()=>document.title=old,900);
-}
-
-// ——— Події
-document.addEventListener('click', (e)=>{
-  const p = e.target.closest('.js-preview');
-  if(p){ openPreview(p.dataset.url); return; }
-  const i = e.target.closest('.js-iframe');
-  if(i){ const u = absoluteUrl(i.dataset.url); byId('url').value = u; gen(); openPreview(u); return; }
-  if(e.target.id==='closePrev'){ closePreview(); }
-  if(e.target.id==='toGen'){ byId('generator').scrollIntoView({behavior:'smooth',block:'start'}); }
-  if(e.target.id==='btnGen'){ gen(); }
-  if(e.target.id==='btnCopy'){ copyCode(); }
-});
-
-// ——— Ініціалізація
-(async function init(){
-  if (window.self !== window.top) document.documentElement.classList.add('embedded');
-  if(SPEC==='coach'){ await buildDynamic(COACH); return; }
-  if(SPEC==='electric'){ await buildDynamic(ELECT); return; }
-  if(['agro','mech','tech'].includes(SPEC)){ setSpecMetaStatic(SPEC); return; }
-  // можна так само зробити динамічний G19 — скажи, підключу
-  await buildDynamic(COACH); // fallback
-})();
 </script>
+
 </body>
 </html>
