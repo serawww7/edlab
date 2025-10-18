@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 20 (технологи) — Холодовий ланцюг: імпорт термологів, інциденти, MKT, чек/CSV/QR</title>
+<meta name="description" content="Імпорт CSV з термологерів, живий графік температури, виявлення інцидентів (вихід за допуск, відкривання дверей), час поза зоною, MKT, експорт CSV/TXT, чек 58 мм, QR."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1240px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:90px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.grid{display:grid;gap:14px;grid-template-columns:1.35fr 1fr}
+@media(max-width:1120px){.grid{grid-template-columns:1fr}}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:300px}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">❄️</span>
+      <div>
+        <b>Пара 20 — Холодовий ланцюг</b><br/>
+        <span class="badge">імпорт CSV → графік T(t) → інциденти (T-вікна/двері) → час поза зоною → MKT → чек/QR/CSV</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">Мета: оцінити **холодовий ланцюг** поставки/складу. Імпортувати термолог (**CSV**), побудувати **живий графік**, виявити **інциденти** (перевищення/переохолодження із мінімальною тривалістю, «відкривання дверей» за <span class="mono">dT/dt</span>), підрахувати **MKT**, згенерувати **чек 58 мм/QR/CSV/TXT**.</p>
+
+  <div class="grid">
+    <!-- ЛІВО -->
+    <div class="card">
+      <h2>📥 Імпорт/емуляція даних</h2>
+      <div class="row">
+        <input id="file" class="input" type="file" accept=".csv"/>
+        <button class="btn" id="load">📄 Імпортувати CSV</button>
+        <button class="btn secondary" id="demo">🎲 Демо-траса</button>
+        <span id="status" class="badge">Статус: чекаю CSV</span>
+      </div>
+      <small class="muted">Формати: <span class="mono">iso8601,TempC</span> або <span class="mono">t_sec,TempC</span>. Десяткова крапка, роздільник — кома/крапка з комою/таб.</small>
+
+      <h3 style="margin-top:10px">🧰 Параметри контролю</h3>
+      <div class="row">
+        <select id="product" class="input" style="max-width:260px">
+          <option value="dairy" selected>Молочні (0…+4 °C)</option>
+          <option value="meat">М’ясо (0…+2 °C)</option>
+          <option value="egg">Яйця (+2…+8 °C)</option>
+          <option value="cheese">Сири дозрівання (+2…+6 °C)</option>
+          <option value="custom">Кастом</option>
+        </select>
+        <label>Tmin °C<input id="tmin" class="input" type="number" step="0.1" value="0"/></label>
+        <label>Tmax °C<input id="tmax" class="input" type="number" step="0.1" value="4"/></label>
+        <label>Мін. тривалість інциденту, хв<input id="minDur" class="input" type="number" step="1" value="5"/></label>
+      </div>
+      <div class="row">
+        <label>Поріг «дверей», °C/хв (|dT/dt|) <input id="doorThr" class="input" type="number" step="0.1" value="1.5"/></label>
+        <label>MKT: Ea, кДж/моль<input id="ea" class="input" type="number" step="1" value="83"/></label>
+        <label>Інтервал, с<input id="dt" class="input" type="number" step="1" value="60"/></label>
+        <button class="btn" id="recalc">♻️ Перерахувати</button>
+      </div>
+
+      <h3 style="margin-top:10px">📈 Живий графік T(t)</h3>
+      <div class="canvasWrap"><canvas id="chart" width="980" height="300"></canvas></div>
+      <small class="muted">Синя — T(t). Жовта зона — допуск; червоні смуги — інциденти; червоні точки — «двері».</small>
+
+      <h3 style="margin-top:10px">🛎️ Журнал подій</h3>
+      <pre id="alog" class="note" style="max-height:180px;overflow:auto">// Поки без подій</pre>
+
+      <h3 style="margin-top:10px">💾 Експорт/друк</h3>
+      <div class="row">
+        <input id="route" class="input" placeholder="Маршрут/лот (напр. РЦ→Склад #3, 2025-10-18)"/>
+        <button class="btn" id="saveCsv">📄 CSV (інциденти)</button>
+        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+      <small class="muted">QR генерується через <span class="mono">api.qrserver.com</span>; офлайн — виведеться текст.</small>
+    </div>
+
+    <!-- ПРАВО -->
+    <div class="card">
+      <h2>📊 Показники</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Профіль продукту</th><td id="m_prof">Молочні (0…+4 °C)</td></tr>
+          <tr><th>Записів</th><td id="m_n">0</td></tr>
+          <tr><th>Час у зоні (год)</th><td id="m_in">0.00</td></tr>
+          <tr><th>Час поза зоною (год)</th><td id="m_out">0.00</td></tr>
+          <tr><th>К-сть інцидентів</th><td id="m_inc">0</td></tr>
+          <tr><th>Відкривання дверей</th><td id="m_doors">0</td></tr>
+          <tr><th>MKT, °C</th><td id="m_mkt">—</td></tr>
+          <tr><th>Макс/Мін T, °C</th><td id="m_ext">—</td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">🔌 Схема процесу (SVG)</h2>
+      <svg viewBox="0 0 820 280" role="img" aria-label="Термологер → Холодова камера/авто → Аналіз → Звіт">
+        <rect x="40" y="40" width="170" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <text x="125" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Термологер</text>
+        <text x="125" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">CSV/USB</text>
+
+        <rect x="230" y="40" width="170" height="120" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <text x="315" y="80" fill="#dcfce7" font-size="14" text-anchor="middle">Холодова зона</text>
+        <text x="315" y="100" fill="#a7f3d0" font-size="12" text-anchor="middle">камера/рефрижератор</text>
+
+        <rect x="420" y="40" width="170" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <text x="505" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Аналіз</text>
+        <text x="505" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">інциденти/MKT</text>
+
+        <rect x="610" y="40" width="170" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+        <text x="695" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Звіт</text>
+        <text x="695" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">чек/CSV/QR</text>
+
+        <line x1="210" y1="100" x2="230" y2="100" stroke="#93c5fd" stroke-width="3"/>
+        <line x1="400" y1="100" x2="420" y2="100" stroke="#22c55e" stroke-width="3"/>
+        <line x1="590" y1="100" x2="610" y2="100" stroke="#64748b" stroke-width="3"/>
+      </svg>
+
+      <h2 style="margin-top:10px">🎯 Завдання для студентів</h2>
+      <ol>
+        <li>Імпортуй лог із доставки. Оціни **час поза зоною** і **MKT**. Збережи <b>TXT</b>.</li>
+        <li>Налаштуй «двері» так, щоб система виявила ≥ 3 події. Експортуй <b>CSV інцидентів</b>.</li>
+        <li>Зроби <b>QR</b> на папку з фото пломб та термологера, роздрукуй <b>чек 58 мм</b> для приймання.</li>
+      </ol>
+
+      <h2 style="margin-top:10px">📜 Історична нотатка</h2>
+      <p class="muted small">Перші реєстратори температури з’явилися ще на паперових стрічках. Сьогодні аналіз **логів** і метрик на кшталт **MKT** — стандарт для холодового ланцюга в молоці/м’ясі/рибі/вакцинах.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s);
+const $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString();const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+function parseCSV(text){
+  // Підтримка роздільників: , ; \t
+  const sep = text.includes('\t')?'\t':(text.split('\n')[0].includes(';')?';':',');
+  const rows = text.trim().split(/\r?\n/).map(r=>r.split(sep));
+  // Виявимо заголовок
+  const head = rows[0].map(s=>s.trim().toLowerCase());
+  let tIdx=head.findIndex(h=>/(^t$|t_sec|time|timestamp|iso)/.test(h));
+  let cIdx=head.findIndex(h=>/(temp|t_c|tempc)/.test(h));
+  let start=1;
+  if(tIdx<0||cIdx<0){ // без заголовка
+    tIdx=0; cIdx=1; start=0;
+  }
+  const out=[];
+  for(let i=start;i<rows.length;i++){
+    const a=rows[i]; if(a.length<2) continue;
+    const tt=a[tIdx].trim(); const tc=parseFloat((a[cIdx]||'').toString().replace(',', '.'));
+    if(!isFinite(tc)) continue;
+    let ts;
+    if(/^\d+(\.\d+)?$/.test(tt)){ ts=+tt*1000; } // t_sec
+    else { const d=new Date(tt); if(isNaN(d)) continue; ts=d.getTime(); }
+    out.push({ts, T:tc});
+  }
+  out.sort((a,b)=>a.ts-b.ts);
+  return out;
+}
+
+// ===== Стани =====
+let SERIES=[];          // {ts, T}
+let INCIDENTS=[];       // {type:'high'|'low'|'door', t0, t1, dur_s, Tmax, Tmin}
+let DOORS=0;
+
+// ===== Профілі =====
+const PROFILES={
+  dairy:{name:'Молочні (0…+4 °C)', tmin:0, tmax:4},
+  meat:{name:'М’ясо (0…+2 °C)', tmin:0, tmax:2},
+  egg:{name:'Яйця (+2…+8 °C)', tmin:2, tmax:8},
+  cheese:{name:'Сири (+2…+6 °C)', tmin:2, tmax:6},
+  custom:{name:'Кастом', tmin:0, tmax:4}
+};
+function applyProfile(){
+  const p=$('#product').value;
+  const s=PROFILES[p];
+  $('#m_prof').textContent=s.name;
+  if(p!=='custom'){ $('#tmin').value=s.tmin; $('#tmax').value=s.tmax; }
+}
+$('#product').addEventListener('change', applyProfile);
+applyProfile();
+
+// ===== Малювання графіка =====
+const cvs=$('#chart'), ctx=cvs.getContext('2d');
+function draw(){
+  const W=cvs.width,H=cvs.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,W-1,H-1);
+  if(SERIES.length<2){ ctx.fillStyle='#94a3b8'; ctx.fillText('Імпортуй CSV або згенеруй демо', 14,20); return; }
+
+  const Tmin = Math.min(...SERIES.map(p=>p.T), parseFloat($('#tmin').value)-2);
+  const Tmax = Math.max(...SERIES.map(p=>p.T), parseFloat($('#tmax').value)+2);
+  const t0 = SERIES[0].ts, t1 = SERIES[SERIES.length-1].ts;
+  const left=50, right=W-10, top=20, bottom=H-20;
+  const xOf = ts => left + ( (ts - t0) / (t1 - t0 || 1) ) * (right-left);
+  const yOf = T  => bottom - ( (T - Tmin) / (Tmax - Tmin || 1) ) * (bottom-top);
+
+  // Зона допуску (жовтим)
+  const zMin = parseFloat($('#tmin').value), zMax=parseFloat($('#tmax').value);
+  ctx.fillStyle='rgba(251,191,36,0.12)';
+  ctx.fillRect(left, yOf(zMax), right-left, yOf(zMin)-yOf(zMax));
+
+  // Крива T(t)
+  ctx.beginPath(); ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2;
+  SERIES.forEach((p,i)=>{ const x=xOf(p.ts), y=yOf(p.T); i?ctx.lineTo(x,y):ctx.moveTo(x,y);}); ctx.stroke();
+
+  // Інциденти (червоні смуги)
+  ctx.fillStyle='rgba(248,113,113,0.18)';
+  INCIDENTS.filter(e=>e.type!=='door').forEach(e=>{
+    const xA=xOf(e.t0), xB=xOf(e.t1);
+    ctx.fillRect(xA, top, xB-xA, bottom-top);
+  });
+
+  // Позначки «дверей»
+  ctx.fillStyle='#f87171';
+  INCIDENTS.filter(e=>e.type==='door').forEach(e=>{
+    const x=xOf(e.t0), y=yOf(e.Tmax||SERIES[0].T);
+    ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI*2); ctx.fill();
+  });
+
+  // Ось/підписи
+  ctx.fillStyle='#94a3b8'; ctx.font='12px ui-monospace';
+  ctx.fillText('T, °C', 8, 14);
+  ctx.fillText(new Date(t0).toLocaleString(), left, H-4);
+  ctx.fillText(new Date(t1).toLocaleString(), right-160, H-4);
+}
+
+// ===== Обчислення KPI, інциденти, MKT =====
+function analyze(){
+  INCIDENTS.length=0; DOORS=0;
+  if(SERIES.length<2){ updateKPIs(); draw(); return; }
+
+  const zMin=parseFloat($('#tmin').value), zMax=parseFloat($('#tmax').value);
+  const minDurMin=parseFloat($('#minDur').value)||5;
+  const doorThr=(parseFloat($('#doorThr').value)||1.5) / 60; // °C/сек
+  const dtDefault=parseFloat($('#dt').value)||60;
+
+  // Виявлення інцидентів по зонам
+  let cur=null; // поточний інцидент
+  for(let i=1;i<SERIES.length;i++){
+    const a=SERIES[i-1], b=SERIES[i];
+    const dt=(b.ts-a.ts)/1000 || dtDefault;
+    const inZone = (a.T>=zMin && a.T<=zMax);
+    // двері: |dT/dt|
+    const dtdt=Math.abs((b.T-a.T)/dt);
+    if(dtdt>doorThr){
+      INCIDENTS.push({type:'door', t0:b.ts, t1:b.ts, dur_s:0, Tmax:b.T, Tmin:b.T});
+      DOORS++;
+      log(`Door event: |dT/dt|=${(dtdt*60).toFixed(2)} °C/хв`);
+    }
+    // високий/низький
+    const state = (a.T>zMax)?'high':(a.T<zMin?'low':'ok');
+    if(state!=='ok'){
+      if(!cur){ cur={type:state, t0:a.ts, t1:a.ts, dur_s:0, Tmax:a.T, Tmin:a.T}; }
+      cur.t1=b.ts; cur.dur_s += dt; cur.Tmax=Math.max(cur.Tmax,b.T); cur.Tmin=Math.min(cur.Tmin,b.T);
+    }else{
+      if(cur){
+        if(cur.dur_s >= minDurMin*60){ INCIDENTS.push(cur); log(`INC ${cur.type.toUpperCase()}: ${secs(cur.dur_s)}, Tmax=${cur.Tmax.toFixed(1)} °C, Tmin=${cur.Tmin.toFixed(1)} °C`); }
+        cur=null;
+      }
+    }
+  }
+  if(cur && cur.dur_s >= minDurMin*60){ INCIDENTS.push(cur); log(`INC ${cur.type.toUpperCase()}: ${secs(cur.dur_s)}, Tmax=${cur.Tmax.toFixed(1)} °C, Tmin=${cur.Tmin.toFixed(1)} °C`); }
+
+  // Час в/поза зоною
+  let inS=0, outS=0, tmin=SERIES[0].ts, tmax=SERIES[SERIES.length-1].ts;
+  for(let i=1;i<SERIES.length;i++){
+    const a=SERIES[i-1], b=SERIES[i];
+    const dt=(b.ts-a.ts)/1000 || dtDefault;
+    const midT=(a.T+b.T)/2;
+    if(midT>=zMin && midT<=zMax) inS+=dt; else outS+=dt;
+  }
+
+  // MKT
+  const Ea_kJ=parseFloat($('#ea').value)||83; // кДж/моль
+  const Ea=Ea_kJ*1000; // Дж/моль
+  const R=8.314; // Дж/(моль·K)
+  // Дискретно: T в K
+  let sumExp=0, N=0;
+  for(let i=0;i<SERIES.length;i++){
+    const Tkel=SERIES[i].T + 273.15;
+    sumExp += Math.exp(-Ea/(R*Tkel));
+    N++;
+  }
+  const MKT_K = -Ea/R / Math.log( (sumExp/N) );
+  const MKT_C = MKT_K - 273.15;
+
+  // Екстремуми
+  const Tmax = Math.max(...SERIES.map(p=>p.T));
+  const Tmin2= Math.min(...SERIES.map(p=>p.T));
+
+  updateKPIs({
+    n:SERIES.length,
+    inH: inS/3600,
+    outH: outS/3600,
+    inc: INCIDENTS.filter(e=>e.type!=='door').length,
+    doors: DOORS,
+    mkt: MKT_C,
+    ext: `${Tmax.toFixed(1)} / ${Tmin2.toFixed(1)}`
+  });
+  draw();
+}
+
+function updateKPIs(k={n:0,inH:0,outH:0,inc:0,doors:0,mkt:NaN,ext:'—'}){
+  $('#m_n').textContent = k.n;
+  $('#m_in').textContent = k.inH.toFixed(2);
+  $('#m_out').textContent= k.outH.toFixed(2);
+  $('#m_inc').textContent = k.inc;
+  $('#m_doors').textContent= k.doors;
+  $('#m_mkt').textContent = isFinite(k.mkt)? k.mkt.toFixed(2) : '—';
+  $('#m_ext').textContent = k.ext;
+}
+
+// ===== Завантаження CSV / Демо =====
+$('#load').addEventListener('click', ()=>{
+  const f=$('#file').files[0];
+  if(!f) return alert('Оберіть CSV');
+  const r=new FileReader();
+  r.onload=()=>{ SERIES = parseCSV(r.result); $('#status').textContent=`Статус: завантажено ${SERIES.length} точок`; log(`CSV: ${SERIES.length} записів`); analyze(); };
+  r.readAsText(f);
+});
+
+$('#demo').addEventListener('click', ()=>{
+  // Згенеруємо синтетику: 8 год, базово 3°C, двері кожні ~45 хв
+  const now=Date.now();
+  const N=8*60; // крок 1 хв
+  SERIES.length=0;
+  let T=3;
+  for(let i=0;i<=N;i++){
+    const ts=now - (N-i)*60000;
+    // випадкове коливання
+    T += (Math.random()-0.5)*0.15;
+    // події дверей
+    if(i%45===0 && i>0){
+      for(let k=0;k<5;k++){ // 5 хв відкриття
+        T += 0.6; SERIES.push({ts: ts+k*60000, T});
+      }
+    }
+    // повернення холоду
+    if(T>3) T -= 0.12;
+    SERIES.push({ts, T});
+  }
+  $('#status').textContent=`Статус: демо ${SERIES.length} точок`;
+  log('Згенеровано демо-трасу (8 год)');
+  analyze();
+});
+
+$('#recalc').addEventListener('click', analyze);
+
+// ===== Експорт / чек / QR =====
+function secs(s){ const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=Math.floor(s%60); return `${h}г ${m}х ${ss}с`; }
+
+$('#saveCsv').addEventListener('click', ()=>{
+  if(!INCIDENTS.length){ alert('Немає інцидентів'); return; }
+  let csv='type,start_iso,end_iso,duration_s,Tmax,Tmin,route\n';
+  const route=$('#route').value||'';
+  INCIDENTS.forEach(e=>{
+    if(e.type==='door') return;
+    csv+=`${e.type},${new Date(e.t0).toISOString()},${new Date(e.t1).toISOString()},${Math.round(e.dur_s)},${(e.Tmax??'')},${(e.Tmin??'')},${route.replace(/"/g,'""')}\n`;
+  });
+  download('tech_para20_incidents_'+stamp()+'.csv', csv, 'text/csv');
+});
+
+$('#saveTxt').addEventListener('click', ()=>{
+  const zMin=parseFloat($('#tmin').value), zMax=parseFloat($('#tmax').value);
+  const incs=INCIDENTS.filter(e=>e.type!=='door');
+  const doors=INCIDENTS.filter(e=>e.type==='door').length;
+  const txt=[
+    'Пара 20 — Холодовий ланцюг: підсумок',
+    `Профіль: ${$('#m_prof').textContent} (допуск ${zMin}…${zMax} °C)`,
+    `Маршрут/лот: ${$('#route').value||'—'}`,
+    `Записів: ${SERIES.length}`,
+    `Час у зоні: ${$('#m_in').textContent} год`,
+    `Час поза зоною: ${$('#m_out').textContent} год`,
+    `Інцидентів: ${incs.length} | Дверей: ${doors}`,
+    `MKT: ${$('#m_mkt').textContent} °C`,
+    `Екстремуми: ${$('#m_ext').textContent} °C`,
+    '--- Перелік інцидентів ---',
+    ...incs.map(e=>`${e.type.toUpperCase()} | ${new Date(e.t0).toLocaleString()} → ${new Date(e.t1).toLocaleString()} | ${secs(e.dur_s)} | Tmax=${(e.Tmax??'').toFixed?e.Tmax.toFixed(1):e.Tmax} °C`)
+  ].join('\n');
+  download('tech_para20_summary_'+stamp()+'.txt', txt);
+});
+
+$('#print58').addEventListener('click', ()=>{
+  const incs=INCIDENTS.filter(e=>e.type!=='door').length;
+  const doors=INCIDENTS.filter(e=>e.type==='door').length;
+  const lines=[
+    '=== ЧЕК ХОЛОДОВОГО ЛАНЦЮГА (58мм) ===',
+    'Маршрут: '+($('#route').value||'—'),
+    `В зоні: ${$('#m_in').textContent} год`,
+    `Поза зоною: ${$('#m_out').textContent} год`,
+    `MKT: ${$('#m_mkt').textContent} °C`,
+    `Інциденти: ${incs} | Двері: ${doors}`,
+    `Допуск: ${$('#tmin').value}…${$('#tmax').value} °C`,
+    '-----------------------------'
+  ];
+  const rc=$('#rc'); rc.hidden=false; rc.textContent=lines.join('\n');
+  download('tech_para20_receipt_'+stamp()+'.txt', rc.textContent);
+});
+
+// QR
+$('#qrGen').addEventListener('click', ()=>{
+  const data = prompt('Встав URL/текст (папка з актами/фото):', $('#route').value || 'cold-chain-evidence');
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url;
+});
+
+// ===== Ініціалізація =====
+draw();
+</script>
+</body>
+</html>
