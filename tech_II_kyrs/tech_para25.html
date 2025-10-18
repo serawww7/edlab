@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 25 (технологи) — ШІ для аудиту санітарії: NLP SSOP/журнали → невідповідності → CAPA → графіки → чек/CSV/QR</title>
+<meta name="description" content="Фінальна: вставляй тексти SSOP/журналів, AI витягає сутності, класифікує невідповідності (Minor/Major/Critical), генерує CAPA, веде журнал, будує графіки, чек 58 мм, експорт CSV/QR."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1260px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:14px;grid-template-columns:1.35fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:110px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+canvas{display:block;width:100%;height:280px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+.canvasWrap{overflow:hidden;border-radius:12px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre}
+.ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.small{font-size:.9rem}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🧼</span>
+      <div>
+        <b>Пара 25 — ШІ для аудиту санітарії (фінал)</b><br/>
+        <span class="badge">SSOP/журнали → витяг сутностей → ризик → CAPA → графіки → чек/CSV/QR</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <!-- ВВІДНІ ДАНІ / МЕТА / КОНТЕКСТ -->
+  <div class="card">
+    <h2>📚 Ввідні для студентів (контекст і що тут відбувається)</h2>
+    <p>
+      Ти&nbsp;— технолог зміни на молокопереробному цеху. У тебе є <b>SSOP</b> (санітарні операційні процедури) і добові <b>журнали прибирання/дезінфекції</b>.
+      Завдання: забрати з текстів ключові факти (<b>хто, де, коли, чим, у&nbsp;яких параметрах</b>), визначити <b>невідповідності</b> (Minor/Major/Critical), 
+      згенерувати <b>CAPA-план</b> (утримання/корінна причина/коригуючі/запобіжні/верифікація/перевірка ефективності), зробити <b>звіт</b> з 
+      <b>живими графіками</b>, <b>чеком 58&nbsp;мм</b>, <b>CSV</b> та <b>QR</b>-посиланням на докази.
+    </p>
+    <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+      <div class="note">
+        <b>📌 Дані</b><br/>Беремо сирі тексти SSOP/журналів: наприклад, «Зона фасування, мийка лінії С, 
+        лужний 2.0 %, 55 °C, контакт 12 хв, валідація ОК». Вставляємо нижче.
+      </div>
+      <div class="note">
+        <b>🔎 NLP</b><br/>Браузер витягає сутності: <span class="mono">ZONE, TOOL, CHEM, CONC, TEMP, TIME, ALLERGEN, BIO, DATE, PERSON</span>, 
+        перевіряє ліміти і шукає тригери ризику.
+      </div>
+      <div class="note">
+        <b>🧠 Класифікація</b><br/>Правила + скоринг: <i>Minor</i> (косметичне), <i>Major</i> (можливий вплив на якість), 
+        <i>Critical</i> (ризик безпеки харчів: алергени/патогени/стекло/метал/герметичність/аномально низькі параметри).
+      </div>
+    </div>
+  </div>
+
+  <!-- ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="tbl">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Коректно витягнуті сутності (≥ 5 типів) та заповнений <b>CSV</b></td><td>3</td></tr>
+        <tr><td>Вірна класифікація ≥ 3 кейсів з поясненням (Minor/Major/Critical)</td><td>3</td></tr>
+        <tr><td>Згенерований <b>CAPA-план</b> із 5 кроків + терміни/відповідальні</td><td>3</td></tr>
+        <tr><td>Чек 58 мм + QR на папку доказів</td><td>1</td></tr>
+      </tbody>
+    </table>
+    <p class="muted small">Підказка: скористайся кнопкою «🧪 Приклади» для старту і «AI-CAPA» для авто-заповнення.</p>
+  </div>
+
+  <div class="grid">
+    <!-- ЛІВО: ІНТЕРАКТИВ -->
+    <div class="card">
+      <h2>🧾 Ввід текстів SSOP/журналів</h2>
+      <div class="row">
+        <button class="btn" id="ex1">🧪 Приклади (3 кейси)</button>
+        <button class="btn secondary" id="clr">🧹 Очистити</button>
+        <span class="badge" id="count">Записів: 0</span>
+      </div>
+      <textarea id="txt" placeholder="Встав сюди кілька записів (по одному в рядок або розділяй пустим рядком). Приклад: 
+2025-10-18 06:40 · Зона фасування (йогурт): CIP лінії С. Лужний 2.0 %, 55 °C, 12 хв, валідація ОК. Оператор: Пилипчук.
+"></textarea>
+      <div class="row">
+        <label>Ліміт концентрації, % (лужні/кислотні)<input id="limConc" class="input" type="number" step="0.1" value="1.5"></label>
+        <label>Ліміт температури, °C<input id="limT" class="input" type="number" step="0.1" value="50"></label>
+        <label>Ліміт часу контакту, хв<input id="limMin" class="input" type="number" step="0.5" value="10"></label>
+        <button class="btn good" id="an">🔎 Проаналізувати NLP</button>
+      </div>
+
+      <h3 style="margin-top:10px">🔬 Витягнуті сутності</h3>
+      <table class="tbl" id="entTbl">
+        <thead>
+          <tr>
+            <th>#</th><th>Дата</th><th>Зона</th><th>Інвентар/лінія</th><th>Засіб</th>
+            <th>Конц., %</th><th>T, °C</th><th>Контакт, хв</th><th>Алергени/Біо</th><th>Особа</th>
+          </tr>
+        </thead>
+        <tbody id="entBody"><tr><td colspan="10" class="muted">— результат з’явиться тут —</td></tr></tbody>
+      </table>
+
+      <h3 style="margin-top:10px">⚠️ Невідповідності та ризик</h3>
+      <table class="tbl" id="ncTbl">
+        <thead>
+          <tr><th>#</th><th>Тип</th><th>Опис</th><th>Ризик</th><th>Ступінь</th></tr>
+        </thead>
+        <tbody id="ncBody"><tr><td colspan="5" class="muted">— ще порожньо —</td></tr></tbody>
+      </table>
+
+      <h3 style="margin-top:10px">🧠 CAPA-план (авто/ручний)</h3>
+      <div class="row">
+        <button class="btn" id="genCapa">🤖 AI-CAPA з невідповідностей</button>
+        <input id="lot" class="input" placeholder="Лот/лінія (напр. SSOP_йогурт_2025-10-18_B)"/>
+      </div>
+      <textarea id="capa" placeholder="1) Утримання/containment: ...
+2) Корінна причина (5 чому): ...
+3) Коригуючі дії (що і до коли): ...
+4) Запобіжні дії (стандарти/навчання/контроль): ...
+5) Верифікація (аналізи/ATP/алергени) + Перевірка ефективності (через N днів): ..."></textarea>
+
+      <h3 style="margin-top:10px">🛎️ Журнал подій</h3>
+      <pre id="alog" class="note" style="max-height:170px;overflow:auto">// Поки без подій</pre>
+
+      <h3 style="margin-top:10px">💾 Експорт / друк</h3>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV (сутності + невідповідності)</button>
+        <button class="btn" id="saveTxt">💾 TXT (звіт + CAPA)</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+      <small class="muted">QR генерується через <span class="mono">api.qrserver.com</span>; офлайн буде текст.</small>
+    </div>
+
+    <!-- ПРАВО: МЕТРИКИ / ГРАФІКИ / СХЕМА -->
+    <div class="card">
+      <h2>📊 Метрики і підсумки</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Записів</th><td id="mN">—</td></tr>
+          <tr><th>Minor / Major / Critical</th><td id="mMMC">—</td></tr>
+          <tr><th>Найчастіші причини</th><td id="mTop">—</td></tr>
+          <tr><th>Стан</th><td id="mState">—</td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">📈 Частоти категорій</h2>
+      <div class="canvasWrap"><canvas id="bar" width="520" height="220"></canvas></div>
+
+      <h2 style="margin-top:10px">🕒 Таймлайн (дати/кластери подій)</h2>
+      <div class="canvasWrap"><canvas id="timeline" width="520" height="220"></canvas></div>
+
+      <h2 style="margin-top:10px">🔌 Схема процесу (SVG)</h2>
+      <svg viewBox="0 0 820 260" role="img" aria-label="SSOP → NLP → Ризик → CAPA → Звіт">
+        <rect x="40" y="40" width="160" height="110" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <text x="120" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">SSOP / Журнали</text>
+        <text x="120" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">вільний текст</text>
+
+        <rect x="220" y="40" width="170" height="110" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <text x="305" y="80" fill="#dcfce7" font-size="14" text-anchor="middle">NLP витяг</text>
+        <text x="305" y="100" fill="#a7f3d0" font-size="12" text-anchor="middle">ZONE/CHEM/TIME/…</text>
+
+        <rect x="410" y="40" width="150" height="110" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <text x="485" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Оцінка ризику</text>
+        <text x="485" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">Minor/Major/Critical</text>
+
+        <rect x="580" y="40" width="180" height="110" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+        <text x="670" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">CAPA-план</text>
+        <text x="670" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">утримання/5Why/дії</text>
+
+        <line x1="200" y1="95" x2="220" y2="95" stroke="#93c5fd" stroke-width="3"/>
+        <line x1="390" y1="95" x2="410" y2="95" stroke="#22c55e" stroke-width="3"/>
+        <line x1="560" y1="95" x2="580" y2="95" stroke="#64748b" stroke-width="3"/>
+      </svg>
+
+      <h2 style="margin-top:10px">🎯 Завдання для студентів</h2>
+      <ol>
+        <li>Встав щонайменше <b>6 реалістичних записів</b> із різних зон (фасування/розруб/миття інвентарю/CIP/шокохолод).</li>
+        <li>Натисни «Проаналізувати NLP», перевір <b>сутності</b> і <b>невідповідності</b>, відредагуй ліміти за потреби.</li>
+        <li>Згенеруй <b>CAPA</b> і уточни терміни та відповідальних.</li>
+        <li>Експортуй <b>CSV/TXT</b>, надрукуй <b>чек 58 мм</b>, створи <b>QR</b> на папку з доказами.</li>
+      </ol>
+
+      <h2 style="margin-top:10px">📜 Історична нотатка</h2>
+      <p class="muted small">Контроль санітарії еволюціонував від паперових журналів до ATP/алерген-тестів і цифрових аудитів. Навіть «легкий» браузерний NLP допомагає закрити 80% рутини: структуризація фактів, пріоритизація ризиків, швидкий CAPA.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString();const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+function num(x){const v=parseFloat(x); return Number.isFinite(v)?v:NaN;}
+
+// ===== Приклади =====
+$('#ex1').addEventListener('click',()=>{
+  $('#txt').value = [
+'2025-10-18 06:40 · Зона фасування (йогурт): CIP лінії С. Лужний 2.0 %, 55 °C, 12 хв, валідація ОК. Оператор: Пилипчук.',
+'2025-10-18 07:10 · Розруб: ручний інвентар. Кислотний 0.8 %, 42 °C, контакт 6 хв — позначено «поспіх». Виявлено алерген: сліди арахісу на столику.',
+'2025-10-18 08:05 · Мийка ванн: Санітайзер QAC 150 ppm, 20 °C, 15 хв. Примітка: рН 9. Оператор: Коваль.',
+'2025-10-18 08:40 · Пакувальна: камера MAP, виявлено конденсат на лотках. Протиалергенна зміна: етикетки без «молоко».',
+'2025-10-18 09:15 · Шокохолод: наліт льоду на випарнику, дренаж забитий. Пест-моніторинг: сліди гризунів біля дверей.',
+'2025-10-18 10:00 · CIP сирної лінії А: Лужний 1.0 %, 48 °C, 9 хв. Відсутній запис про верифікацію. Оператор: Романенко.'
+  ].join('\n');
+  updCount();
+  log('Підставлено 6 прикладів записів');
+});
+$('#clr').addEventListener('click',()=>{ $('#txt').value=''; updCount(); $('#entBody').innerHTML='<tr><td colspan="10" class="muted">— результат з’явиться тут —</td></tr>'; $('#ncBody').innerHTML='<tr><td colspan="5" class="muted">— ще порожньо —</td></tr>'; drawBars([]); drawTimeline([]); setMetrics([],[]); });
+
+function updCount(){ const lines=splitRecs($('#txt').value).length; $('#count').textContent='Записів: '+lines; }
+$('#txt').addEventListener('input', updCount);
+
+// ===== Розбір записів і NLP-витяг =====
+function splitRecs(text){
+  // розбиваємо по рядках/порожніх рядках
+  return text.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+}
+
+const RX={
+  date: /\b(20\d{2}[-./]\d{1,2}[-./]\d{1,2}(?:[ T]\d{1,2}:\d{2})?|\d{1,2}\.\d{1,2}\.\d{2,4})\b/i,
+  zone: /(зона|пакувальна|розруб|мийка|фасування|CIP|шокохолод|камера|ванн[аи]|ванна|склад|термообробка|лінії?\s*[A-ЯA-Z])/i,
+  tool: /(лінії?\s*[A-ЯA-Z]|інвентар|нож[і]|ванна|камер[аы]|випарник|лотк(и|ах)|дренаж|CIP)/i,
+  chem: /(лужн(ий|а)|кислотн(ий|а)|санітайзер|QAC|гіпохлорит|пероксид|лужна піна|каустик|ПАР)/i,
+  concPct: /(\d+(?:[.,]\d+)?)\s?%/,
+  ppm: /(\d+(?:[.,]\d+)?)\s?ppm/i,
+  temp: /(\d+(?:[.,]\d+)?)\s?(?:°\s?C|C|°)/i,
+  timeMin: /(\d+(?:[.,]\d+)?)\s?(?:хв|min)/i,
+  allerg: /(алерген|арахіс|gluten|молоко|лактоза|соєв(ий|і)|яйц[я]|горіх)/i,
+  bio: /(Listeria|Сальмонел|E\.?coli|кампілобактер|цвіл(ь|)/i,
+  person: /(Оператор|майстер|контролер)\s*:\s*([A-ЯІЇЄҐ][а-яіїєґ']+)/,
+  neg: /(відсутн(ій|є)|бракує|н/д|без запису|поспіх|порушення|забитий|конденсат|сліди гризунів|наліт|текти|протік)/i
+};
+
+function parseRec(text){
+  const mDate = text.match(RX.date);
+  const date = mDate? mDate[1] : '';
+  const zone = (text.match(RX.zone)||['',''])[0];
+  const tool = (text.match(RX.tool)||['',''])[0];
+  const chem = (text.match(RX.chem)||['',''])[0];
+  const conc = (text.match(RX.concPct)||[])[1];
+  const ppm  = (text.match(RX.ppm)||[])[1];
+  const temp = (text.match(RX.temp)||[])[1];
+  const tmin = (text.match(RX.timeMin)||[])[1];
+  const allerg = (text.match(RX.allerg)||[])[0] || '';
+  const bio = (text.match(RX.bio)||[])[0] || '';
+  const person = (text.match(RX.person)||[])[2] || '';
+  const neg = RX.neg.test(text);
+  // нормалізація чисел
+  const concN = conc? parseFloat(String(conc).replace(',','.')): NaN;
+  const ppmN = ppm? parseFloat(String(ppm).replace(',','.')): NaN;
+  const tempN = temp? parseFloat(String(temp).replace(',','.')): NaN;
+  const tminN = tmin? parseFloat(String(tmin).replace(',','.')): NaN;
+
+  return {raw:text, date, zone, tool, chem, conc:concN, ppm:ppmN, temp:tempN, tmin:tminN, allerg, bio, person};
+}
+
+// ===== Оцінка ризику (Minor/Major/Critical) =====
+function assess(rec, limits){
+  // тригери
+  const issues=[];
+  // параметри нижче лімітів
+  if(Number.isFinite(rec.conc) && rec.conc < limits.conc) issues.push('низька концентрація');
+  if(Number.isFinite(rec.temp) && rec.temp < limits.temp) issues.push('низька температура');
+  if(Number.isFinite(rec.tmin) && rec.tmin < limits.tmin) issues.push('недостатній час контакту');
+  if(Number.isFinite(rec.ppm) && rec.ppm < 100) issues.push('занизький QAC ppm');
+  // тригери ключових ризиків
+  if(rec.allerg) issues.push('алергенний ризик');
+  if(rec.bio) issues.push('потенційна біонебезпека');
+  if(/конденсат/i.test(rec.raw)) issues.push('конденсат на упаковці/обладнанні');
+  if(/гризун/i.test(rec.raw)) issues.push('сліди шкідників');
+  if(/забит/i.test(rec.raw)) issues.push('забитий дренаж');
+  if(/без\s*запису|відсутн/i.test(rec.raw)) issues.push('відсутній запис/верифікація');
+
+  // правило ступеня
+  let degree='Minor';
+  const hasCritical = ['алергенний ризик','потенційна біонебезпека','сліди шкідників'].some(x=>issues.includes(x));
+  const bigProcess = ['низька температура','недостатній час контакту','низька концентрація','занизький QAC ppm'].some(x=>issues.includes(x));
+  if(hasCritical) degree='Critical';
+  else if(bigProcess || issues.length>=2) degree='Major';
+  // пояснення
+  const reason = issues.length? issues.join('; '): 'відхилень не знайдено';
+  return {degree, reason, issues};
+}
+
+// ===== Аналіз натиском =====
+$('#an').addEventListener('click', ()=>{
+  const recs = splitRecs($('#txt').value).map(parseRec);
+  if(!recs.length){ alert('Немає записів'); return; }
+  const limits = {conc: +$('#limConc').value, temp: +$('#limT').value, tmin: +$('#limMin').value};
+  const entsBody=$('#entBody'); entsBody.innerHTML='';
+  recs.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${i+1}</td><td>${escapeHtml(r.date||'—')}</td><td>${escapeHtml(r.zone||'—')}</td><td>${escapeHtml(r.tool||'—')}</td>
+      <td>${escapeHtml(r.chem||'—')}</td><td>${Number.isFinite(r.conc)?r.conc.toFixed(2):'—'}</td>
+      <td>${Number.isFinite(r.temp)?r.temp.toFixed(1):'—'}</td><td>${Number.isFinite(r.tmin)?r.tmin.toFixed(1):'—'}</td>
+      <td>${escapeHtml((r.allerg+' '+r.bio).trim()||'—')}</td><td>${escapeHtml(r.person||'—')}</td>`;
+    entsBody.appendChild(tr);
+  });
+
+  const ncs=[]; const ncBody=$('#ncBody'); ncBody.innerHTML='';
+  recs.forEach((r,i)=>{
+    const a=assess(r,limits);
+    if(a.reason!=='відхилень не знайдено'){
+      ncs.push({idx:i+1, type:firstType(a), desc:a.reason, degree:a.degree});
+      const tr=document.createElement('tr');
+      tr.innerHTML = `<td>${i+1}</td><td>${escapeHtml(firstType(a))}</td><td>${escapeHtml(a.reason)}</td>
+      <td>${escapeHtml(r.zone||'—')}</td><td class="${a.degree==='Critical'?'bad':a.degree==='Major'?'warn':'ok'}"><b>${a.degree}</b></td>`;
+      ncBody.appendChild(tr);
+    }
+  });
+  if(!ncs.length) ncBody.innerHTML = '<tr><td colspan="5" class="ok">🎉 Невідповідностей не виявлено</td></tr>';
+
+  drawBars(ncs);
+  drawTimeline(recs);
+  setMetrics(recs,ncs);
+  log(`Проаналізовано ${recs.length} запис(ів), знайдено невідповідностей: ${ncs.length}`);
+});
+
+function firstType(a){
+  const pri=['алергенний ризик','потенційна біонебезпека','сліди шкідників','конденсат на упаковці/обладнанні','забитий дренаж','низька температура','недостатній час контакту','низька концентрація','занизький QAC ppm','відсутній запис/верифікація'];
+  for(const p of pri) if(a.issues.includes(p)) return p;
+  return 'загальне';
+}
+
+function setMetrics(recs,ncs){
+  $('#mN').textContent = recs.length;
+  const mmc = {Minor:0,Major:0,Critical:0};
+  ncs.forEach(n=>mmc[n.degree]++);
+  $('#mMMC').textContent = `Minor ${mmc.Minor} / Major ${mmc.Major} / Critical ${mmc.Critical}`;
+  const causes = {};
+  ncs.forEach(n=>{ causes[n.type]=(causes[n.type]||0)+1; });
+  const top = Object.entries(causes).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>`${k}×${v}`).join(', ') || '—';
+  $('#mTop').textContent = top;
+  $('#mState').innerHTML = (mmc.Critical>0? `<b class="bad">Потрібна негайна дія (є Critical)</b>`:
+                           mmc.Major>0? `<b class="warn">Є Major — потрібна CAPA</b>`:
+                           `<b class="ok">Суттєвих ризиків не виявлено</b>`);
+}
+
+// ===== Візуалізації =====
+const bar=$('#bar'), gb=bar.getContext('2d');
+function drawBars(ncs){
+  const W=bar.width,H=bar.height; gb.clearRect(0,0,W,H);
+  gb.strokeStyle='#223049'; gb.strokeRect(0.5,0.5,W-1,H-1);
+  const cats=['низька концентрація','низька температура','недостатній час контакту','занизький QAC ppm','алергенний ризик','потенційна біонебезпека','сліди шкідників','конденсат на упаковці/обладнанні','забитий дренаж','відсутній запис/верифікація'];
+  const cnt = cats.map(c=> ncs.filter(n=>n.type===c).length);
+  const max = Math.max(1,...cnt);
+  const left=40,right=W-10,top=20,bottom=H-24; const bw=(right-left)/cats.length;
+  for(let i=0;i<cats.length;i++){
+    const x=left+i*bw+4; const h=(cnt[i]/max)*(bottom-top);
+    gb.fillStyle='#38bdf8'; gb.fillRect(x, bottom-h, bw-8, h);
+  }
+  gb.fillStyle='#94a3b8'; gb.font='11px ui-monospace';
+  gb.fillText('Категорії (Top-10)', left, 14);
+}
+
+const tl=$('#timeline'), gt=tl.getContext('2d');
+function drawTimeline(recs){
+  const W=tl.width,H=tl.height; gt.clearRect(0,0,W,H);
+  gt.strokeStyle='#223049'; gt.strokeRect(0.5,0.5,W-1,H-1);
+  if(!recs.length){ gt.fillStyle='#94a3b8'; gt.fillText('Немає записів',14,20); return; }
+  // нормалізуємо дати
+  const toTs=d=>{ const m=(d||'').replace('·',' ').trim(); const t=Date.parse(m)||Date.parse(m.replace(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/,'$3-$2-$1')); return isNaN(t)?null:t; };
+  const arr = recs.map(r=>({t:toTs(r.date), raw:r.raw})).filter(o=>o.t!=null).sort((a,b)=>a.t-b.t);
+  const t0=arr[0]?.t||Date.now(), t1=arr[arr.length-1]?.t||t0+1;
+  const left=40,right=W-10,top=24,bottom=H-30;
+  function xOf(t){ return left + (t-t0)/(t1-t0||1)*(right-left); }
+  // вісь
+  gt.strokeStyle='#334155'; gt.beginPath(); gt.moveTo(left,bottom); gt.lineTo(right,bottom); gt.stroke();
+  // точки
+  arr.forEach((o,i)=>{
+    const x=xOf(o.t); const y=bottom - 10 - (i%3)*18;
+    gt.fillStyle='#22c55e'; gt.fillRect(x-3,y-3,6,6);
+  });
+  gt.fillStyle='#94a3b8'; gt.font='11px ui-monospace';
+  const fmt=d=>new Date(d).toISOString().slice(0,16).replace('T',' ');
+  gt.fillText(fmt(t0), left, H-8); gt.fillText(fmt(t1), right-120, H-8);
+}
+
+// ===== CAPA-генератор =====
+$('#genCapa').addEventListener('click', ()=>{
+  const rows=$$('#ncBody tr');
+  const items=[];
+  rows.forEach(r=>{
+    const cells=r.querySelectorAll('td');
+    if(!cells.length) return;
+    const idx=cells[0].textContent.trim();
+    const type=cells[1]?.textContent.trim()||'';
+    const desc=cells[2]?.textContent.trim()||'';
+    const zone=cells[3]?.textContent.trim()||'';
+    const deg=cells[4]?.textContent.trim()||'';
+    if(idx) items.push({idx,type,desc,zone,deg});
+  });
+  if(!items.length){ alert('Немає невідповідностей'); return; }
+  const today=new Date();
+  const addDays=(n)=>{const d=new Date(today); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10);}
+  const lines=[];
+  items.forEach((it,k)=>{
+    lines.push(`Кейс #${it.idx} (${it.deg}): ${it.type} — ${it.zone}`);
+    lines.push(`1) Утримання: ізолювати зону/партію; повторна санітарія; заборона пуску до верифікації (дедлайн ${addDays(0)}).`);
+    lines.push(`2) 5 чому: чому сталося? → процедура? → навчання? → обладнання? → контроль? (відповідальний: майстер зміни).`);
+    lines.push(`3) Коригуючі: відновити параметри (конц./T/час), усунути причину (${addDays(2)}).`);
+    lines.push(`4) Запобіжні: оновити SSOP/чек-лист, тренінг операторів, додати контрольний пункт (${addDays(7)}).`);
+    lines.push(`5) Верифікація: ATP/алерген-тест/мікробіологія; Перевірка ефективності через 14 днів (${addDays(14)}).`);
+    lines.push('');
+  });
+  $('#capa').value = lines.join('\n').trim();
+  log('Згенеровано CAPA-план');
+});
+
+// ===== Експорт =====
+$('#saveCsv').addEventListener('click', ()=>{
+  const entRows=$$('#entBody tr'); let csv='idx,date,zone,tool,chem,conc_pct,temp_c,contact_min,allergen_bio,person\n';
+  entRows.forEach((tr,i)=>{
+    const tds=tr.querySelectorAll('td'); if(!tds.length) return;
+    csv+=`${i+1},${clean(tds[1].innerText)},${clean(tds[2].innerText)},${clean(tds[3].innerText)},${clean(tds[4].innerText)},${clean(tds[5].innerText)},${clean(tds[6].innerText)},${clean(tds[7].innerText)},${clean(tds[8].innerText)},${clean(tds[9].innerText)}\n`;
+  });
+  csv+='\n# nonconformities\nidx,type,desc,zone,degree\n';
+  const ncRows=$$('#ncBody tr');
+  ncRows.forEach(tr=>{
+    const tds=tr.querySelectorAll('td'); if(tds.length<5) return;
+    csv+=`${clean(tds[0].innerText)},${clean(tds[1].innerText)},${clean(tds[2].innerText)},${clean(tds[3].innerText)},${clean(tds[4].innerText)}\n`;
+  });
+  download('tech_para25_nlp_'+stamp()+'.csv', csv, 'text/csv');
+});
+$('#saveTxt').addEventListener('click', ()=>{
+  const lines=[
+    'Пара 25 — ШІ для аудиту санітарії: підсумок',
+    'Лот/лінія: '+($('#lot').value||'—'),
+    'Записів: '+($('#mN').textContent||'—'),
+    'Minor/Major/Critical: '+($('#mMMC').textContent||'—'),
+    'Найчастіші причини: '+($('#mTop').textContent||'—'),
+    'Стан: '+($('#mState').innerText||'—'),
+    '',
+    '--- CAPA ---',
+    $('#capa').value.trim()||'(не заповнено)'
+  ];
+  download('tech_para25_summary_'+stamp()+'.txt', lines.join('\n'));
+});
+$('#print58').addEventListener('click', ()=>{
+  const rc=$('#rc'); rc.hidden=false;
+  const lines=[
+'=== SSOP AUDIT (58мм) ===',
+'Лот: '+($('#lot').value||'—'),
+'Записів: '+($('#mN').textContent||'—'),
+$('#mMMC').textContent||'—',
+($('#mState').innerText||'—'),
+'--- TOP ---',
+$('#mTop').textContent||'—',
+'--------------------------'
+  ];
+  rc.textContent = lines.join('\n');
+  download('tech_para25_receipt_'+stamp()+'.txt', rc.textContent);
+});
+$('#qrGen').addEventListener('click', ()=>{
+  const data = prompt('Встав URL/текст (папка з актами/фото):', $('#lot').value || 'ssop-evidence');
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url;
+});
+
+// ===== Допоміжні =====
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
+function clean(s){return String(s).replace(/\s+/g,' ').trim();}
+
+// ===== Початкове налаштування =====
+updCount();
+
+// Вбудоване відображення (Moodle/iFrame)
+(function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+</script>
+</body>
+</html>
