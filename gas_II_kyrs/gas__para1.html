@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 1 (газовики) — Ввідна: цифровий інструментарій газовика</title>
+<meta name="description" content="Ввідне заняття: створення міні-наряду, фото до/після, голосова нотатка, емульований датчик тиску, NFC-ідентифікація об’єкта, QR, чек 58 мм, експорт CSV/TXT."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1280px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:14px;grid-template-columns:1.2fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:110px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+canvas.chart{display:block;width:100%;height:220px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+.canvasWrap{overflow:hidden;border-radius:12px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre;min-height:140px}
+.ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.small{font-size:.9rem}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.photo{width:100%;max-width:280px;border:1px solid var(--line);border-radius:12px;display:block}
+.gallery{display:flex;gap:8px;flex-wrap:wrap}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🛠️</span>
+      <div>
+        <b>Пара 1 — Ввідна: цифровий інструментарій газовика</b><br/>
+        <span class="badge">Міні-наряд → NFC/код об’єкта → фото до/після → голосова нотатка → датчик тиску → чек 58 мм → CSV/QR</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <!-- ВВІДНІ ДАНІ -->
+  <div class="card">
+    <h2>📚 Контекст: що ми робимо</h2>
+    <p>Ти в ролі слюсаря/майстра дільниці. Сьогодні відпрацюємо «цифрову рутину»: створити міні-наряд, зафіксувати об’єкт (через NFC або код),
+      зробити фото <b>до/після</b>, записати <b>голосову нотатку</b>, перевірити «датчик тиску» (емулятор), зібрати доказову базу й видати <b>чек 58 мм</b> + <b>QR</b>.</p>
+    <div class="note">
+      <b>Завдання на 10 балів:</b> коректний наряд (2), ідентифікація об’єкта (2), фото до/після (2), голосова нотатка (1), симуляція тиску + графік (2), чек/QR (1).
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- ЛІВА КОЛОНКА: Інтерактив -->
+    <div class="card">
+      <h2>🧾 Міні-наряд</h2>
+      <div class="row">
+        <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. Шевченка, 10, кв. 12"/></label>
+        <label style="flex:1">Тип робіт
+          <select id="job" class="input">
+            <option value="Огляд лічильника">Огляд лічильника</option>
+            <option value="Усунення витоку">Усунення витоку</option>
+            <option value="Заміна крана/шланга">Заміна крана/шланга</option>
+            <option value="Опломбування">Опломбування</option>
+            <option value="Пуск газу після сервісу">Пуск газу після сервісу</option>
+          </select>
+        </label>
+        <label style="flex:1">Контакт абонента<input id="phone" class="input" placeholder="+380680094244"/></label>
+      </div>
+      <div class="row">
+        <button class="btn good" id="mkOrder">🧰 Створити наряд</button>
+        <span class="badge" id="oid">Наряд: —</span>
+      </div>
+
+      <h2 style="margin-top:10px">📍 Ідентифікація об’єкта (NFC/код)</h2>
+      <div class="row">
+        <button class="btn" id="nfcBtn">📶 Сканувати NFC</button>
+        <input id="asset" class="input" placeholder="Введи код/ID об’єкта, якщо NFC недоступний"/>
+        <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
+        <span class="badge" id="nfcs">Статус: очікується</span>
+      </div>
+
+      <h2 style="margin-top:10px">📸 Фото до/після</h2>
+      <div class="row">
+        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <div>
+          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button class="btn" id="shotBefore">📷 Фото «до»</button>
+          <button class="btn" id="shotAfter">📷 Фото «після»</button><br/>
+          <small class="muted">Камера працює локально в браузері; фото збережуться у «Галереї доказів».</small>
+        </div>
+      </div>
+      <div class="gallery" id="gal"></div>
+
+      <h2 style="margin-top:10px">🎙️ Голосова нотатка</h2>
+      <div class="row">
+        <button class="btn" id="recStart">⏺️ Запис</button>
+        <button class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
+        <span class="badge" id="rstat">Немає запису</span>
+      </div>
+      <audio id="player" controls style="margin-top:8px;max-width:100%"></audio>
+
+      <h2 style="margin-top:10px">🧪 «Датчик тиску» (емулятор)</h2>
+      <div class="row">
+        <input type="range" id="pVal" min="0" max="6" step="0.1" value="2.5" style="width:260px"/>
+        <span class="badge">Тиск: <b id="pNum">2.5</b> кПа</span>
+        <button class="btn" id="pMark">📍 Позначити точку</button>
+        <button class="btn secondary" id="pClear">🧹 Очистити графік</button>
+      </div>
+      <div class="canvasWrap"><canvas id="pChart" class="chart" width="520" height="220"></canvas></div>
+
+      <h2 style="margin-top:10px">💾 Експорт / друк</h2>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV (журнал)</button>
+        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (посилання/ID)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+      <small class="muted">QR генерується через <span class="mono">api.qrserver.com</span>; якщо офлайн — з’явиться текст.</small>
+    </div>
+
+    <!-- ПРАВА КОЛОНКА: Метрики/Оцінка/Логи -->
+    <div class="card">
+      <h2>📊 Метрики й оцінювання (10 балів)</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Наряд</th><td id="mOrder">—</td></tr>
+          <tr><th>ID об’єкта</th><td id="mAsset">—</td></tr>
+          <tr><th>Фото «до/після»</th><td id="mPhotos">0 / 0</td></tr>
+          <tr><th>Голосова нотатка</th><td id="mAudio">—</td></tr>
+          <tr><th>Позначок тиску</th><td id="mPMarks">0</td></tr>
+          <tr><th>Статус</th><td id="mState"><b class="warn">Потрібно виконати кроки</b></td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">🧠 Критерії</h2>
+      <ul>
+        <li>Заповнено наряд (адреса/тип/контакт) — <b>2</b></li>
+        <li>NFC/код об’єкта — <b>2</b></li>
+        <li>Фото «до» і «після» — <b>2</b></li>
+        <li>Голосова нотатка — <b>1</b></li>
+        <li>Симульований тиск + ≥3 точки на графіку — <b>2</b></li>
+        <li>Чек 58 мм + QR — <b>1</b></li>
+      </ul>
+
+      <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
+      <pre id="alog" class="note" style="max-height:220px;overflow:auto">// Поки без подій</pre>
+
+      <h2 style="margin-top:10px">📜 Нотатка</h2>
+      <p class="muted small">Це відправна точка. На наступних парах додаємо пломбування, аварійні сценарії, датчики Arduino та повні акти.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString();const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+function clean(s){return String(s).replace(/\s+/g,' ').trim();}
+
+$('#upd').textContent = new Date().toLocaleDateString('uk-UA');
+
+// ===== Міні-наряд =====
+let ORDER_ID = null;
+$('#mkOrder').addEventListener('click',()=>{
+  const addr=clean($('#addr').value||'');
+  const job=$('#job').value;
+  const phone=clean($('#phone').value||'');
+  if(!addr||!job||!phone){ alert('Заповни адресу, тип робіт і контакт'); return; }
+  ORDER_ID = 'ORD-'+Math.random().toString(36).slice(2,8).toUpperCase();
+  $('#oid').textContent = 'Наряд: '+ORDER_ID;
+  $('#mOrder').textContent = `${job} @ ${addr}`;
+  log(`Створено наряд ${ORDER_ID} (${job}, ${addr}, ${phone})`);
+  updState();
+});
+
+// ===== NFC / код об'єкта =====
+let ASSET_ID = null;
+async function tryNFC(){
+  if('NDEFReader' in window){
+    const reader = new NDEFReader();
+    try{
+      await reader.scan();
+      $('#nfcs').textContent = 'Статус: сканування...';
+      reader.addEventListener('reading', ({message, serialNumber})=>{
+        let text=''; for(const rec of message.records){ if(rec.recordType==='text'){ const dec=new TextDecoder(rec.encoding||'utf-8'); text = dec.decode(rec.data); } }
+        ASSET_ID = (text||serialNumber||'NFC-'+Math.random().toString(36).slice(2,7)).toString();
+        $('#asset').value = ASSET_ID;
+        $('#nfcs').textContent = 'Статус: зчитано NFC';
+        $('#mAsset').textContent = ASSET_ID;
+        log(`NFC прочитано: ${ASSET_ID}`);
+        updState();
+      });
+    }catch(e){
+      $('#nfcs').textContent = 'Статус: помилка NFC';
+      alert('NFC недоступний або заборонений у цьому браузері/пристрої.');
+    }
+  }else{
+    alert('Web NFC не підтримується. Введи код вручну.');
+  }
+}
+$('#nfcBtn').addEventListener('click', tryNFC);
+$('#saveAsset').addEventListener('click',()=>{
+  const v=clean($('#asset').value||'');
+  if(!v){ alert('Введи код/ID об’єкта'); return; }
+  ASSET_ID = v;
+  $('#mAsset').textContent = ASSET_ID;
+  $('#nfcs').textContent = 'Статус: застосовано вручну';
+  log(`Об’єкт (ручний ввід): ${ASSET_ID}`);
+  updState();
+});
+
+// ===== Камера / фото =====
+let stream=null; let beforeImg=null; let afterImg=null;
+async function startCam(){
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+    $('#vid').srcObject = stream;
+    log('Камеру увімкнено');
+  }catch(e){ alert('Камеру заблоковано або недоступно'); }
+}
+$('#camOn').addEventListener('click', startCam);
+
+function takeShot(kind){
+  const video=$('#vid'); if(!video.srcObject){ alert('Спершу увімкни камеру'); return; }
+  const c=document.createElement('canvas'); c.width=video.videoWidth||640; c.height=video.videoHeight||480;
+  const g=c.getContext('2d'); g.drawImage(video,0,0,c.width,c.height);
+  const url=c.toDataURL('image/png');
+  const img=document.createElement('img'); img.src=url; img.alt=kind; img.className='photo';
+  $('#gal').appendChild(img);
+  if(kind==='до') beforeImg=url; else afterImg=url;
+  const bp = $('#mPhotos'); const parts=bp.textContent.split('/').map(s=>parseInt(s)||0);
+  if(kind==='до') parts[0]=1; else parts[1]=1;
+  bp.textContent = parts[0]+' / '+parts[1];
+  log(`Зроблено фото «${kind}»`);
+  updState();
+}
+$('#shotBefore').addEventListener('click',()=>takeShot('до'));
+$('#shotAfter').addEventListener('click',()=>takeShot('після'));
+
+// ===== Аудіозапис =====
+let mediaRec=null; let chunks=[];
+$('#recStart').addEventListener('click', async ()=>{
+  try{
+    const s = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+    mediaRec = new MediaRecorder(s);
+    chunks=[];
+    mediaRec.ondataavailable = e=>{ if(e.data.size>0) chunks.push(e.data); };
+    mediaRec.onstop = ()=>{
+      const blob=new Blob(chunks,{type:'audio/webm'});
+      const url=URL.createObjectURL(blob);
+      $('#player').src=url;
+      $('#rstat').textContent='Запис готовий';
+      log('Голосову нотатку збережено (webm)');
+      // збереження файлу
+      const a=document.createElement('a'); a.href=url; a.download='voice_'+stamp()+'.webm'; document.body.appendChild(a); a.click(); a.remove();
+      updState();
+    };
+    mediaRec.start();
+    $('#recStart').disabled=true; $('#recStop').disabled=false;
+    $('#rstat').textContent='Йде запис...';
+    log('Почато аудіозапис');
+  }catch(e){ alert('Мікрофон недоступний'); }
+});
+$('#recStop').addEventListener('click', ()=>{
+  if(mediaRec && mediaRec.state!=='inactive'){ mediaRec.stop(); }
+  $('#recStart').disabled=false; $('#recStop').disabled=true;
+});
+
+// ===== Емулятор тиску + графік =====
+const pRange=$('#pVal'), pNum=$('#pNum'), pChart=$('#pChart'), pg=pChart.getContext('2d');
+let pMarks=[];
+function drawChart(){
+  const W=pChart.width,H=pChart.height; pg.clearRect(0,0,W,H);
+  pg.strokeStyle='#223049'; pg.strokeRect(0.5,0.5,W-1,H-1);
+  pg.fillStyle='#94a3b8'; pg.font='11px ui-monospace';
+  pg.fillText('Тиск (кПа), мітки по часу', 12, 16);
+  // осі
+  const left=40,right=W-10,top=24,bottom=H-30;
+  pg.strokeStyle='#334155'; pg.beginPath(); pg.moveTo(left,bottom); pg.lineTo(right,bottom); pg.stroke();
+  // горизонтальні лінії 0..6
+  for(let k=0;k<=6;k++){
+    const y=bottom - (k/6)*(bottom-top);
+    pg.strokeStyle='#1f2a44'; pg.beginPath(); pg.moveTo(left,y); pg.lineTo(right,y); pg.stroke();
+    pg.fillStyle='#94a3b8'; pg.fillText(String(k), 10, y+4);
+  }
+  if(!pMarks.length) return;
+  const t0=pMarks[0].t, t1=pMarks[pMarks.length-1].t;
+  const span=Math.max(1,(t1-t0));
+  function xOf(t){ return left + (t-t0)/span*(right-left); }
+  pMarks.forEach(m=>{
+    const x=xOf(m.t), y=bottom - (m.p/6)*(bottom-top);
+    pg.fillStyle='#38bdf8'; pg.fillRect(x-3,y-3,6,6);
+  });
+}
+pRange.addEventListener('input',()=>{ pNum.textContent=pRange.value; });
+$('#pMark').addEventListener('click',()=>{
+  const p=parseFloat(pRange.value); pMarks.push({t:Date.now(), p});
+  drawChart();
+  $('#mPMarks').textContent = String(pMarks.length);
+  log(`Мітка тиску: ${p.toFixed(1)} кПа`);
+  updState();
+});
+$('#pClear').addEventListener('click',()=>{ pMarks=[]; drawChart(); $('#mPMarks').textContent='0'; log('Очищено графік тиску'); });
+
+// ===== Експорт / чек / QR =====
+function currentSummary(){
+  const photos=$$('#gal img').map(i=>i.alt).reduce((acc,a)=>{ if(a==='до')acc[0]=1; if(a==='після')acc[1]=1; return acc; },[0,0]);
+  const audioStat=$('#rstat').textContent.includes('готовий')?'є':'немає';
+  return {
+    order: ORDER_ID||'—',
+    job: $('#job').value,
+    addr: $('#addr').value,
+    phone: $('#phone').value,
+    asset: ASSET_ID||($('#asset').value||'—'),
+    photos: photos[0]+' / '+photos[1],
+    audio: audioStat,
+    pmarks: pMarks.length
+  };
+}
+$('#saveCsv').addEventListener('click',()=>{
+  const s=currentSummary();
+  let csv='field,value\n';
+  for(const [k,v] of Object.entries(s)){ csv+=`${k},${String(v).replace(/,/g,';')}\n`; }
+  csv+='\n# pressure_marks\ntime,value_kpa\n';
+  pMarks.forEach(m=>{ csv+=`${new Date(m.t).toISOString()},${m.p}\n`; });
+  download('gas_para01_'+stamp()+'.csv', csv, 'text/csv');
+  log('Експортовано CSV');
+});
+$('#saveTxt').addEventListener('click',()=>{
+  const s=currentSummary();
+  const lines=[
+    'Пара 1 — Ввідна: підсумок',
+    `Наряд: ${s.order}`,
+    `Робота: ${s.job}`,
+    `Адреса: ${s.addr}`,
+    `Контакт: ${s.phone}`,
+    `Об’єкт: ${s.asset}`,
+    `Фото до/після: ${s.photos}`,
+    `Голосова нотатка: ${s.audio}`,
+    `Міток тиску: ${s.pmarks}`,
+  ];
+  download('gas_para01_'+stamp()+'.txt', lines.join('\n'));
+  log('Експортовано TXT');
+});
+$('#print58').addEventListener('click',()=>{
+  const rc=$('#rc'); rc.hidden=false;
+  const s=currentSummary();
+  const lines=[
+'=== GAS SERVICE (58мм) ===',
+'Наряд: '+s.order,
+'Робота: '+s.job,
+'Адреса: '+s.addr,
+'Абонент: '+s.phone,
+'Об’єкт: '+s.asset,
+'Фото до/після: '+s.photos,
+'Аудіо: '+s.audio,
+'Міток тиску: '+s.pmarks,
+'--------------------------'
+  ];
+  rc.textContent=lines.join('\n');
+  download('gas_para01_receipt_'+stamp()+'.txt', rc.textContent);
+  log('Згенеровано чек 58мм');
+});
+$('#qrGen').addEventListener('click',()=>{
+  const def = (ASSET_ID||ORDER_ID||'gas-evidence');
+  const data = prompt('Встав URL/ID (наприклад, папка доказів або ID об’єкта):', def);
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url;
+  log('Згенеровано QR');
+});
+
+// ===== Метрики / стан =====
+function updState(){
+  const orderOk = !!ORDER_ID;
+  const assetOk = !!ASSET_ID || !!clean($('#asset').value||'');
+  const photosOk = $('#mPhotos').textContent.trim()==='1 / 1';
+  const audioOk  = $('#rstat').textContent.includes('готовий');
+  const pOK = (pMarks.length>=3);
+  let score=0; if(orderOk)score+=2;if(assetOk)score+=2;if(photosOk)score+=2;if(audioOk)score+=1;if(pOK)score+=2;
+  const text = score>=9? `<b class="ok">Готово (≈${score}/10) — супер!</b>`:
+               score>=6? `<b class="warn">Більшість кроків виконано (≈${score}/10)</b>`:
+                         `<b class="bad">Потрібно доробити (≈${score}/10)</b>`;
+  $('#mState').innerHTML = text;
+}
+drawChart();
+
+// Вбудоване відображення
+(function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+</script>
+</body>
+</html>
