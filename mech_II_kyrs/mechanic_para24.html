@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 24 (механіки) — ШІ#4: Класифікація фото дефектів (ISO-чек-лист, heatmap, навчання)</title>
+<meta name="description" content="Фото/камера → ROI → класифікація дефектів: витік/масло, корозія, тріщина, знос/піттінг, перекіс, послаблене кріплення. Heatmap-пояснення, навчання на своїх прикладах, ISO-чек-лист, експорт CSV/TXT/58мм."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1220px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:100px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+video,canvas{display:block;max-width:100%}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.grid{display:grid;gap:14px;grid-template-columns:1.35fr 1fr}
+@media(max-width:1120px){.grid{grid-template-columns:1fr}}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🧠</span>
+      <div>
+        <b>Пара 24 — Класифікація фото дефектів (ШІ у браузері)</b><br/>
+        <span class="badge">ROI → класи → heatmap → ISO-чек-лист → навчання → експорт</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">Мета: навчити студентів **правильно бачити дефекти** на фото вузлів і застосовувати **спрощені ознаки CV** для класифікації та пояснень. Класи: <b>oil</b> (витік/масло), <b>rust</b> (корозія), <b>crack</b> (тріщина/скол), <b>wear</b> (знос/піттінг), <b>misalign</b> (перекіс/невирівняння), <b>loose</b> (послаблене кріплення).</p>
+
+  <div class="grid">
+    <!-- ЛІВО: камера/фото + полотно + аналітика -->
+    <div class="card">
+      <h2>🎥 Джерело зображення</h2>
+      <div class="row">
+        <select id="src" class="input" style="max-width:220px">
+          <option value="cam" selected>Вебкамера</option>
+          <option value="img">Фото (завантажити)</option>
+        </select>
+        <select id="camSel" class="input" style="max-width:260px"></select>
+        <select id="res" class="input" style="max-width:160px">
+          <option>640x480</option><option selected>1280x720</option><option>1920x1080</option>
+        </select>
+        <input id="file" class="input" type="file" accept="image/*" style="display:none"/>
+        <button class="btn good" id="start">▶️ Старт</button>
+        <button class="btn secondary" id="shot">📸 Знімок</button>
+        <button class="btn secondary" id="stop">⏹️ Стоп</button>
+        <span id="stat" class="badge">Статус: idle</span>
+      </div>
+
+      <div class="row" style="margin-top:6px">
+        <label>Heatmap<span class="mono"> α</span><input id="alpha" class="input" type="range" min="0" max="1" step="0.05" value="0.6"/></label>
+        <label>Edge thr<input id="thrE" class="input" type="range" min="8" max="80" step="1" value="26"/></label>
+        <label>Shiny V%<input id="thrV" class="input" type="range" min="40" max="95" step="1" value="75"/></label>
+        <label>Low-Sat S%<input id="thrS" class="input" type="range" min="5" max="60" step="1" value="18"/></label>
+      </div>
+
+      <div class="canvasWrap" style="margin-top:8px">
+        <canvas id="view" width="960" height="540"></canvas>
+      </div>
+      <small class="muted">Побудуй **ROI**: мишею потягни по зображенню прямокутник. <b>Shift+клік ×2</b> — контрольна лінія для оцінки перекосу (кут).</small>
+
+      <h3 style="margin-top:10px">📊 Метрики ROI</h3>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Edge density</th><td id="m_edge">—</td></tr>
+          <tr><th>Specular/oil ratio</th><td id="m_oil">—</td></tr>
+          <tr><th>Brown (rust) ratio</th><td id="m_rust">—</td></tr>
+          <tr><th>Low-sat ratio</th><td id="m_lowS">—</td></tr>
+          <tr><th>Misalign angle</th><td id="m_ang">—</td></tr>
+          <tr><th>Клас (k-NN)</th><td id="m_cls">—</td></tr>
+        </tbody>
+      </table>
+
+      <div class="row" style="margin-top:6px">
+        <button class="btn" id="analyze">🔍 Проаналізувати ROI</button>
+        <button class="btn secondary" id="overlay">🧩 Heatmap on/off</button>
+        <button class="btn secondary" id="savePng">🖼️ PNG (кадр+heatmap)</button>
+        <button class="btn secondary" id="saveCsv">📄 CSV (метрики+клас)</button>
+      </div>
+    </div>
+
+    <!-- ПРАВО: навчання, чек-лист, журнал, експорт -->
+    <div class="card">
+      <h2>🧠 Навчання на своїх прикладах (k-NN)</h2>
+      <div class="row">
+        <select id="label" class="input" style="max-width:200px">
+          <option value="oil">oil</option>
+          <option value="rust">rust</option>
+          <option value="crack">crack</option>
+          <option value="wear">wear</option>
+          <option value="misalign">misalign</option>
+          <option value="loose">loose</option>
+        </select>
+        <button class="btn" id="addShot">➕ Додати приклад з поточного ROI</button>
+        <button class="btn secondary" id="exportShots">💾 Експорт JSON</button>
+        <button class="btn secondary" id="importShots">📥 Імпорт JSON</button>
+      </div>
+      <pre id="shotsBox" class="code small" style="max-height:160px;overflow:auto">// Поки без прикладів (додай 3–5 на кожен клас)</pre>
+
+      <h2 style="margin-top:10px">📋 ISO-чек-лист огляду вузла</h2>
+      <div id="checklist" class="note small">
+        <label><input type="checkbox"/> Очистити вузол (безпека: LOTO, ЗІЗ), повторити фото.</label><br/>
+        <label><input type="checkbox"/> Перевірити витоки/масло навколо прокладок/швів (ISO 4406 контамін.).</label><br/>
+        <label><input type="checkbox"/> Оцінити корозію (ступінь покриття, лусочки/іржа, підфарбувати/заміна).</label><br/>
+        <label><input type="checkbox"/> Перевірити тріщини/сколи (збільшення, барвник-проникник, NDT за потреби).</label><br/>
+        <label><input type="checkbox"/> Знос/піттінг на зубах/роликах (шорсткість, підвищений люфт).</label><br/>
+        <label><input type="checkbox"/> Перекіс/невирівняння (кут &lt; 2° від контрольної лінії).</label><br/>
+        <label><input type="checkbox"/> Кріплення: момент затягування за мануалом, маркер-фарба.</label>
+      </div>
+
+      <h2 style="margin-top:10px">📜 Журнал та експорт</h2>
+      <div class="row">
+        <button class="btn" id="mark">📌 Позначити подію</button>
+        <select id="lab2" class="input" style="max-width:200px">
+          <option>ok</option><option>oil</option><option>rust</option><option>crack</option><option>wear</option><option>misalign</option><option>loose</option>
+        </select>
+      </div>
+      <pre id="alog" class="code small" style="max-height:160px;overflow:auto">// Поки без записів</pre>
+
+      <div class="row">
+        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button class="btn" id="saveTasks">📝 TXT (завдання студента)</button>
+        <button class="btn" id="receipt">🖨️ 58 мм чек</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📚 Завдання для студентів (вбудовано)</h2>
+    <ol>
+      <li>Зроби **2 фото «до/після» очищення**. Для кожного збережи <b>PNG</b> (з heatmap) та <b>CSV</b> (метрики+клас).</li>
+      <li>Побудуй **контрольну лінію** (<kbd>Shift</kbd>+клік ×2) і добийся |кут| &lt; <span class="mono">2°</span> для валів/шківів. Додай запис у журнал.</li>
+      <li>Навчи k-NN: додай **по 3–5 прикладів** на клас (oil/rust/…). Повтори класифікацію і порівняй зміни. Експортуй JSON із прикладами.</li>
+      <li>Заповни **ISO-чек-лист** (галочки), сформуй **TXT-звіт** та **чек 58 мм**.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>🔌 Схема (SVG)</h2>
+    <svg viewBox="0 0 980 260" role="img" aria-label="Фото → ROI → ознаки → k-NN → клас/heatmap">
+      <rect x="40" y="60" width="220" height="100" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <text x="150" y="92" fill="#e5e7eb" font-size="14" text-anchor="middle">Фото/камера</text>
+      <text x="150" y="112" fill="#93c5fd" font-size="12" text-anchor="middle">ROI + контрольна лінія</text>
+
+      <rect x="290" y="50" width="220" height="120" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <text x="400" y="90" fill="#dcfce7" font-size="14" text-anchor="middle">Ознаки</text>
+      <text x="400" y="108" fill="#a7f3d0" font-size="12" text-anchor="middle">edge, oil, rust, low-sat, angle</text>
+
+      <rect x="540" y="50" width="220" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+      <text x="650" y="90" fill="#e5e7eb" font-size="14" text-anchor="middle">k-NN класифікатор</text>
+      <text x="650" y="108" fill="#93c5fd" font-size="12" text-anchor="middle">навчання на своїх прикладах</text>
+
+      <rect x="790" y="50" width="150" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+      <text x="865" y="90" fill="#e5e7eb" font-size="14" text-anchor="middle">Клас + Heatmap</text>
+      <text x="865" y="108" fill="#93c5fd" font-size="12" text-anchor="middle">експорт CSV/PNG</text>
+
+      <line x1="260" y1="110" x2="290" y2="110" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="510" y1="110" x2="540" y2="110" stroke="#22c55e" stroke-width="3"/>
+      <line x1="760" y1="110" x2="790" y2="110" stroke="#64748b" stroke-width="3"/>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h2>📜 Історична нотатка</h2>
+    <p class="muted small">Ще до нейромереж заводи застосовували «кольорові карти дефектів» — за маскою іржі/масла вирішували, чи треба ремонт. Ми відтворюємо цей підхід у браузері й додаємо навчання на своїх прикладах.</p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+
+// ===== Камера/зображення =====
+let stream=null, video=null;
+const camSel=$('#camSel'), resSel=$('#res'), srcSel=$('#src');
+const view=$('#view'), vctx=view.getContext('2d');
+let overlayOn=true;
+
+async function listCams(){
+  try{
+    const devs=await navigator.mediaDevices.enumerateDevices();
+    const cams=devs.filter(d=>d.kind==='videoinput');
+    camSel.innerHTML=''; cams.forEach((c,i)=>{const o=document.createElement('option'); o.value=c.deviceId; o.textContent=c.label||('Камера '+(i+1)); camSel.appendChild(o);});
+  }catch{}
+}
+listCams();
+
+async function startCam(){
+  try{
+    const [w,h]=resSel.value.split('x').map(Number);
+    stream = await navigator.mediaDevices.getUserMedia({video:{deviceId: camSel.value?{exact:camSel.value}:undefined, width:{ideal:w}, height:{ideal:h}}, audio:false});
+    video=document.createElement('video'); video.srcObject=stream; video.muted=true; await video.play();
+    view.width=video.videoWidth; view.height=video.videoHeight;
+    $('#stat').textContent='Статус: camera ok';
+    loop();
+  }catch(err){ alert('Помилка камери: '+err.message); $('#stat').textContent='Статус: помилка'; }
+}
+function stopCam(){
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  video=null; $('#stat').textContent='Статус: idle';
+}
+
+$('#src').addEventListener('change', ()=>{
+  const useImg = ($('#src').value==='img');
+  $('#file').style.display = useImg?'block':'none';
+  if(useImg){ stopCam(); $('#stat').textContent='Статус: фото'; }
+});
+$('#start').addEventListener('click', ()=>{
+  if($('#src').value==='cam'){ startCam(); }
+  else { $('#file').click(); }
+});
+$('#file').addEventListener('change', (e)=>{
+  const f=e.target.files[0]; if(!f) return;
+  const img=new Image();
+  img.onload=()=>{ view.width=img.width; view.height=img.height; vctx.drawImage(img,0,0); $('#stat').textContent='Статус: фото завантажено'; };
+  img.src=URL.createObjectURL(f);
+});
+$('#shot').addEventListener('click', ()=>{
+  if(!video){ log('Знімок: немає відео'); return; }
+  vctx.drawImage(video,0,0,view.width,view.height);
+  log('Кадр зафіксовано');
+});
+$('#stop').addEventListener('click', ()=>{ stopCam(); });
+
+// ===== ROI (мишкою) =====
+let roi=null, dragging=false, startPt=null;
+view.addEventListener('mousedown', (e)=>{
+  const r=view.getBoundingClientRect();
+  startPt={x:(e.clientX-r.left)*(view.width/r.width), y:(e.clientY-r.top)*(view.height/r.height)};
+  dragging=true;
+});
+view.addEventListener('mousemove', (e)=>{
+  if(!dragging) return;
+  const r=view.getBoundingClientRect();
+  const x=(e.clientX-r.left)*(view.width/r.width), y=(e.clientY-r.top)*(view.height/r.height);
+  roi = normRect(startPt.x,startPt.y,x,y);
+});
+view.addEventListener('mouseup', ()=>{ dragging=false; });
+function normRect(x1,y1,x2,y2){
+  const x=Math.min(x1,x2), y=Math.min(y1,y2), w=Math.abs(x2-x1), h=Math.abs(y2-y1);
+  return {x,y,w,h};
+}
+
+// ===== Контрольна лінія (Shift+клік ×2) для перекосу =====
+let aline=null;
+view.addEventListener('click',(e)=>{
+  if(!e.shiftKey) return;
+  const r=view.getBoundingClientRect();
+  const x=(e.clientX-r.left)*(view.width/r.width);
+  const y=(e.clientY-r.top)*(view.height/r.height);
+  if(!aline){ aline={x1:x,y1:y,x2:x,y2:y}; }
+  else if(aline && (aline.x1===aline.x2 && aline.y1===aline.y2)){ aline.x2=x; aline.y2=y; }
+  else { aline={x1:x,y1:y,x2:x,y2:y}; }
+});
+
+// ===== Обчислення ознак =====
+function getROIimage(){
+  const W=view.width,H=view.height; if(!W||!H) return null;
+  const r = roi? {...roi} : {x:0,y:0,w:W,h:H};
+  const x=clamp(Math.floor(r.x),0,W-1), y=clamp(Math.floor(r.y),0,H-1);
+  const w=clamp(Math.floor(r.w||W),1,W-x), h=clamp(Math.floor(r.h||H),1,H-y);
+  return {img:vctx.getImageData(x,y,w,h), x,y,w,h};
+}
+function rgb2hsv(r,g,b){
+  r/=255; g/=255; b/=255;
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b); const d=mx-mn;
+  let h=0;
+  if(d!==0){
+    if(mx===r) h=((g-b)/d)%6;
+    else if(mx===g) h=(b-r)/d+2;
+    else h=(r-g)/d+4;
+    h*=60; if(h<0) h+=360;
+  }
+  const s = mx===0?0:d/mx, v=mx;
+  return {h,s,v};
+}
+function features(){
+  const R=getROIimage(); if(!R) return null;
+  const {img,w,h}=R, data=img.data;
+  const thrE=parseInt($('#thrE').value,10), thrV=parseInt($('#thrV').value,10)/100, thrS=parseInt($('#thrS').value,10)/100;
+  let eCount=0, shiny=0, lowS=0, brown=0;
+  for(let y=1;y<h-1;y++){
+    for(let x=1;x<w-1;x++){
+      const k=(y*w+x)*4;
+      const r=data[k], g=data[k+1], b=data[k+2];
+      const gx = (data[k+4]-data[k-4]) + (data[k+4*w]-data[k-4*w])*0.5;
+      const gy = (data[k+4*w]-data[k-4*w]) + (data[k+4]-data[k-4])*0.5;
+      const m=Math.sqrt(gx*gx+gy*gy);
+      if(m>thrE) eCount++;
+      const {h:hh,s,v}=rgb2hsv(r,g,b);
+      if(v>thrV && s<thrS) shiny++;
+      if(s<thrS) lowS++;
+      // корозія ~ коричневі/іржаві тони 10..40° або 15..35° + середня V
+      if( (hh>10 && hh<40) && v>0.2 && s>0.3 ) brown++;
+    }
+  }
+  const N=w*h;
+  // Перекіс — кут до контрольної лінії (якщо задана)
+  let ang=null;
+  if(aline && (aline.x1!==aline.x2 || aline.y1!==aline.y2)){
+    const ax=aline.x2-aline.x1, ay=aline.y2-aline.y1;
+    const aang=Math.atan2(ay,ax);
+    // Орієнтація ребер за структурним тензором
+    let Sxx=0,Syy=0,Sxy=0;
+    for(let y=2;y<h-2;y+=2){
+      for(let x=2;x<w-2;x+=2){
+        const k=(y*w+x)*4;
+        const gx=(data[k+4]-data[k-4]) + (data[k+4*w]-data[k-4*w])*0.5;
+        const gy=(data[k+4*w]-data[k-4*w]) + (data[k+4]-data[k-4])*0.5;
+        Sxx+=gx*gx; Syy+=gy*gy; Sxy+=gx*gy;
+      }
+    }
+    const theta=0.5*Math.atan2(2*Sxy, Sxx-Syy);
+    let d=Math.abs(theta-aang)*180/Math.PI; if(d>90) d=180-d; ang=d;
+  }
+  return {
+    edge:eCount/N,
+    oil:shiny/N,
+    rust:brown/N,
+    lowsat:lowS/N,
+    angle: ang
+  };
+}
+
+// ===== Heatmap (пояснення) =====
+let lastMasks=null;
+function makeHeatmap(){
+  const R=getROIimage(); if(!R) return null;
+  const {img,w,h,x:ox,y:oy}=R, data=img.data;
+  const thrE=parseInt($('#thrE').value,10), thrV=parseInt($('#thrV').value,10)/100, thrS=parseInt($('#thrS').value,10)/100;
+  const edges=new Uint8ClampedArray(w*h);
+  const oilM=new Uint8ClampedArray(w*h);
+  const rustM=new Uint8ClampedArray(w*h);
+  for(let y=1;y<h-1;y++){
+    for(let x=1;x<w-1;x++){
+      const k=(y*w+x)*4;
+      const r=data[k], g=data[k+1], b=data[k+2];
+      const gx=(data[k+4]-data[k-4]) + (data[k+4*w]-data[k-4*w])*0.5;
+      const gy=(data[k+4*w]-data[k-4*w]) + (data[k+4]-data[k-4])*0.5;
+      const m=Math.sqrt(gx*gx+gy*gy);
+      if(m>thrE) edges[y*w+x]=255;
+      const {h:hh,s,v}=rgb2hsv(r,g,b);
+      const shiny=(v>thrV && s<thrS);
+      if(shiny) oilM[y*w+x]=255;
+      const br=((hh>10 && hh<40) && v>0.2 && s>0.3);
+      if(br) rustM[y*w+x]=255;
+    }
+  }
+  lastMasks={edges,oilM,rustM,w,h,ox,oy};
+  return lastMasks;
+}
+
+// ===== k-NN навчання =====
+const SHOTS=[]; // {y, feat:{edge,oil,rust,lowsat,angle}}
+function renderShots(){ $('#shotsBox').textContent = SHOTS.length? SHOTS.map((r,i)=> `${i+1}. [${r.y}] edge=${r.feat.edge.toFixed(3)} oil=${r.feat.oil.toFixed(3)} rust=${r.feat.rust.toFixed(3)} lowS=${r.feat.lowsat.toFixed(3)} ang=${r.feat.angle==null?'—':r.feat.angle.toFixed(1)}°`).join('\n') : '// Поки без прикладів (додай 3–5 на кожен клас)'; }
+function dist(a,b){
+  const wa=1, wo=1, wr=1, wl=0.5, wang=0.2;
+  const da=a.edge-b.edge, db=a.oil-b.oil, dc=a.rust-b.rust, dd=a.lowsat-b.lowsat, de=( (a.angle??0)-(b.angle??0) )/90;
+  return Math.sqrt(wa*da*da+wo*db*db+wr*dc*dc+wl*dd*dd+wang*de*de);
+}
+function knn(feat,k=5){
+  if(!SHOTS.length) return {y:'unknown', conf:0};
+  const sims=SHOTS.map(s=>({y:s.y, d:dist(feat,s.feat)})).sort((a,b)=>a.d-b.d).slice(0,k);
+  const votes=new Map();
+  sims.forEach(o=>votes.set(o.y,(votes.get(o.y)||0)+(1/(o.d+1e-6))));
+  let best='unknown', v=-1; votes.forEach((val,key)=>{ if(val>v){v=val; best=key;} });
+  const tot=[...votes.values()].reduce((s,x)=>s+x,0)||1;
+  return {y:best, conf:v/tot};
+}
+
+// ===== Класифікація та UI =====
+let lastFeat=null;
+function analyze(){
+  // оновимо кадр якщо з відео
+  if(video){ vctx.drawImage(video,0,0,view.width,view.height); }
+  const feat=features(); if(!feat) return alert('Немає зображення/ROI');
+  lastFeat=feat;
+  $('#m_edge').textContent=(feat.edge*100).toFixed(1)+' %';
+  $('#m_oil').textContent=(feat.oil*100).toFixed(1)+' %';
+  $('#m_rust').textContent=(feat.rust*100).toFixed(1)+' %';
+  $('#m_lowS').textContent=(feat.lowsat*100).toFixed(1)+' %';
+  $('#m_ang').textContent= feat.angle==null? '—' : (feat.angle.toFixed(2)+' °');
+  const pred=knn(feat,5);
+  $('#m_cls').textContent = `${pred.y} (conf ${(pred.conf*100).toFixed(0)}%)`;
+  makeHeatmap();
+  drawFrame();
+}
+
+// ===== Малювання кадру/heatmap/ROI/ліній =====
+function drawFrame(){
+  const W=view.width,H=view.height;
+  if(video){ vctx.drawImage(video,0,0,W,H); }
+  // heatmap
+  if(overlayOn && lastMasks){
+    const img=vctx.getImageData(0,0,W,H);
+    const a=parseFloat($('#alpha').value);
+    const {edges,oilM,rustM,w,h,ox,oy}=lastMasks;
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        const i=( (y+oy)*W + (x+ox) )*4;
+        const e=edges[y*w+x], o=oilM[y*w+x], r=rustM[y*w+x];
+        if(e){ img.data[i+1]=Math.max(img.data[i+1], 220*a); }       // зелений — краї (тріщини/знос)
+        if(o){ img.data[i+0]=Math.max(img.data[i+0], 220*a); }       // червоний — масло
+        if(r){ img.data[i+2]=Math.max(img.data[i+2], 220*a); }       // синій — корозія (для контрасту)
+      }
+    }
+    vctx.putImageData(img,0,0);
+  }
+  // ROI
+  if(roi){ vctx.strokeStyle='#38bdf8'; vctx.lineWidth=2; vctx.strokeRect(roi.x+0.5,roi.y+0.5,roi.w,roi.h); }
+  // Лінія
+  if(aline){ vctx.beginPath(); vctx.strokeStyle='#fbbf24'; vctx.lineWidth=3; vctx.moveTo(aline.x1,aline.y1); vctx.lineTo(aline.x2,aline.y2); vctx.stroke(); }
+}
+function loop(){ if(video){ drawFrame(); } requestAnimationFrame(loop); }
+loop();
+
+function log(msg){ const t=new Date().toLocaleTimeString(); const box=$('#alog'); if(box.textContent.startsWith('//')) box.textContent=''; box.textContent+=`[${t}] ${msg}\n`; box.scrollTop=box.scrollHeight; }
+
+// ===== Події =====
+$('#overlay').addEventListener('click', ()=>{ overlayOn=!overlayOn; log('Heatmap: '+(overlayOn?'on':'off')); drawFrame(); });
+$('#analyze').addEventListener('click', analyze);
+$('#savePng').addEventListener('click', ()=>{
+  const a=document.createElement('a'); view.toBlob(b=>{ a.href=URL.createObjectURL(b); a.download='mech_para24_frame_'+stamp()+'.png'; a.click(); }, 'image/png'); 
+});
+$('#saveCsv').addEventListener('click', ()=>{
+  if(!lastFeat) return alert('Немає метрик');
+  const head='t_iso,edge,oil,rust,low_sat,angle_deg,class,conf\n';
+  const pred=knn(lastFeat,5);
+  const row=`${new Date().toISOString()},${lastFeat.edge.toFixed(4)},${lastFeat.oil.toFixed(4)},${lastFeat.rust.toFixed(4)},${lastFeat.lowsat.toFixed(4)},${(lastFeat.angle??NaN).toFixed?.(2)??''},${pred.y},${pred.conf.toFixed(3)}\n`;
+  download('mechanic_para24_metrics_'+stamp()+'.csv', head+row,'text/csv');
+});
+
+// Навчання
+$('#addShot').addEventListener('click', ()=>{
+  if(!lastFeat) return alert('Спершу «Проаналізувати ROI»');
+  SHOTS.push({y:$('#label').value, feat:{...lastFeat}});
+  renderShots(); log('Додано приклад для '+$('#label').value);
+});
+$('#exportShots').addEventListener('click', ()=> download('mechanic_para24_shots_'+stamp()+'.json', JSON.stringify(SHOTS,null,2)));
+$('#importShots').addEventListener('click', ()=>{
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='application/json';
+  inp.onchange=async e=>{ const f=e.target.files[0]; if(!f) return; const js=JSON.parse(await f.text()); if(Array.isArray(js)){ js.forEach(x=>{ if(x.y && x.feat) SHOTS.push(x); }); renderShots(); log('Імпортовано '+js.length+' прикл.'); } };
+  inp.click();
+});
+renderShots();
+
+// Журнал/експорти
+$('#mark').addEventListener('click', ()=>{
+  const lab=$('#lab2').value;
+  const pred= lastFeat? knn(lastFeat,5) : {y:'n/a',conf:0};
+  log(`Позначка: ${lab} | cls=${pred.y} conf=${(pred.conf*100).toFixed(0)}%`);
+});
+$('#saveTxt').addEventListener('click', ()=>{
+  const pred= lastFeat? knn(lastFeat,5) : {y:'—',conf:0};
+  const lines=[
+    'Пара 24 — Класифікація дефектів (ШІ#4)',
+    lastFeat?`edge=${lastFeat.edge.toFixed(4)} | oil=${lastFeat.oil.toFixed(4)} | rust=${lastFeat.rust.toFixed(4)} | lowS=${lastFeat.lowsat.toFixed(4)} | ang=${(lastFeat.angle??NaN).toFixed?.(2)??'N/A'}°`:'(без метрик)',
+    `клас=${pred.y} conf=${(pred.conf*100).toFixed(0)}%`,
+    '--- ISO-чек-лист ---',
+    ...Array.from($('#checklist').querySelectorAll('label')).map((el,i)=>`${i+1}. ${el.textContent.trim()} [${el.querySelector('input').checked?'x':' '}]`),
+    '--- Журнал ---',
+    ...($('#alog').textContent.startsWith('//')?[]:$('#alog').textContent.trim().split('\n'))
+  ];
+  download('mechanic_para24_summary_'+stamp()+'.txt', lines.join('\n'));
+});
+$('#saveTasks').addEventListener('click', ()=>{
+  const tasks=[
+    '1) Зробити 2 фото «до/після», зберегти PNG+CSV.',
+    '2) Використати контрольну лінію, досягти |кут| < 2°.',
+    '3) Додати 3–5 прикладів на клас (навчання k-NN), повторити класифікацію.',
+    '4) Заповнити ISO-чек-лист, сформувати TXT-звіт і чек 58 мм.'
+  ];
+  download('mechanic_para24_tasks_'+stamp()+'.txt', tasks.join('\n'));
+});
+$('#receipt').addEventListener('click', ()=>{
+  const pred= lastFeat? knn(lastFeat,5) : {y:'—',conf:0};
+  const lines=[
+    '=== ЧЕК ВІЗ.ДЕФЕКТІВ (58мм) ===',
+    'Дата: '+new Date().toISOString().slice(0,10),
+    lastFeat?('edge='+lastFeat.edge.toFixed(3)+' | oil='+lastFeat.oil.toFixed(3)):'edge=?, oil=?',
+    lastFeat?('rust='+lastFeat.rust.toFixed(3)+' | lowS='+lastFeat.lowsat.toFixed(3)):'rust=?, lowS=?',
+    lastFeat?('ang='+(lastFeat.angle?.toFixed(1)??'N/A')+'°'):'ang=?',
+    'Клас: '+pred.y+' ('+(pred.conf*100).toFixed(0)+'%)'
+  ];
+  const el=$('#rc'); el.hidden=false; el.textContent=lines.join('\n');
+  download('para24_receipt_'+stamp()+'.txt', lines.join('\n'));
+});
+
+// Рендер-цикл
+function tick(){ drawFrame(); requestAnimationFrame(tick); }
+tick();
+
+// LMS-friendly
+if (window.self !== window.top) document.documentElement.classList.add('embedded');
+</script>
+</body>
+</html>
