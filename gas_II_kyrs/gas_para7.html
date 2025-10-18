@@ -500,7 +500,7 @@ $('#saveCsv').addEventListener('click',()=>{
   s.points.draft.forEach(p=>{ csv+=`${p.t},${p.v}\n`; });
   csv+='\n# co_points\niso_time,ppm\n';
   s.points.co.forEach(p=>{ csv+=`${p.t},${p.v}\n`; });
-  download('gas_para07_flue_'+stamp()+'.csv', csv, 'text/csv'); log('Експортовано CSV');
+  download('gas_para7_flue_'+stamp()+'.csv', csv, 'text/csv'); log('Експортовано CSV');
 });
 $('#saveTxt').addEventListener('click',()=>{
   const s=summary();
@@ -518,7 +518,7 @@ $('#saveTxt').addEventListener('click',()=>{
   s.steps.forEach((st,i)=> lines.push(`${i+1}) ${st.name} — ${st.duration_s}s — ${st.done?'DONE':'…'}`));
   lines.push('--- Точки ---');
   lines.push(`Draft points: ${s.points.draft.length}, CO points: ${s.points.co.length}`);
-  download('gas_para07_flue_'+stamp()+'.txt', lines.join('\n')); log('Експортовано TXT');
+  download('gas_para7_flue_'+stamp()+'.txt', lines.join('\n')); log('Експортовано TXT');
 });
 $('#print58').addEventListener('click',()=>{
   const s=summary(); const rc=$('#rc'); rc.hidden=false;
@@ -537,7 +537,7 @@ $('#print58').addEventListener('click',()=>{
 '--------------------------'
   ];
   rc.textContent=lines.join('\n');
-  download('gas_para07_receipt_'+stamp()+'.txt', rc.textContent);
+  download('gas_para7_receipt_'+stamp()+'.txt', rc.textContent);
   log('Згенеровано чек 58мм');
 });
 $('#qrGen').addEventListener('click',()=>{
