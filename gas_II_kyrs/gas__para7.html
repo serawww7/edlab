@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 7 (газовики) — Огляд димовентканалів: чек-лист, тяга/CO, графік, фото, чек 58 мм, CSV/TXT, QR</title>
+<meta name="description" content="Практика огляду димових і вентиляційних каналів: чек-лист з таймерами, емульовані виміри тяги (Па) і CO (ppm) з порогами, живий графік, фото, NFC/ID, аудіо, чек 58 мм, експорт CSV/TXT, QR."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1280px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:14px;grid-template-columns:1.25fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:90px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:#e6eef9;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+.canvasWrap{overflow:hidden;border-radius:12px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre;min-height:140px}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.photo{width:100%;max-width:240px;border:1px solid var(--line);border-radius:12px;display:block}
+.gallery{display:flex;gap:8px;flex-wrap:wrap}
+.block{border:1px dashed var(--line);border-radius:12px;padding:10px;margin-top:10px;background:#0c182a}
+hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
+.kpi{display:flex;gap:8px;flex-wrap:wrap}
+.kpi .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 10px;color:#e5e7eb}
+.tag.ok{border-color:#1d3e2a;background:#0f2f1e}
+.tag.warn{border-color:#4a3b13;background:#2b2310}
+.tag.bad{border-color:#5a1f1f;background:#2a1212}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🌫️</span>
+      <div>
+        <b>Пара 7 — Огляд димовентканалів</b><br/>
+        <span class="badge">Чек-лист → тяга/CO → графік → фото → NFC/ID → чек 58 мм → CSV/TXT → QR</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <!-- Ввідні -->
+  <div class="card">
+    <h2>📚 Сценарій</h2>
+    <p>Оглядаємо <b>димовий/вентканал</b>: прохідність/засмічення, наявність тяги (Па), рівень <b>CO</b> у приміщенні під час роботи приладу, 
+      дефекти (сажa, конденсат, підсмоктування). Записуємо чек-лист з таймерами, ведемо <b>живий графік</b> (тяга/CO), робимо <b>фото</b> і <b>аудіо</b>, 
+      прив’язуємо <b>NFC/ID</b>, формуємо <b>чек 58 мм</b>, <b>CSV/TXT</b>, <b>QR</b>.</p>
+    <div class="row">
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., кв. ..."/></label>
+      <label style="flex:1">Тип приладу
+        <select id="appliance" class="input">
+          <option>Колонка</option><option selected>Котел</option><option>Плита</option><option>Інше</option>
+        </select>
+      </label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+    </div>
+    <div class="row">
+      <button class="btn good" id="mkCase">🧰 Створити кейс</button>
+      <span class="badge" id="cid">Кейс: —</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Ліва колонка: Чек-лист / Сенсори / Камера / Аудіо / NFC -->
+    <div class="card">
+      <h2>📝 Чек-лист з таймерами</h2>
+      <div id="steps" class="block"></div>
+
+      <h2 style="margin-top:10px">🛰️ Виміри (емулятор): Тяга (Па) і CO (ppm)</h2>
+      <div class="row">
+        <label style="flex:1">Тяга, Па
+          <input type="range" id="draft" class="input" min="-10" max="40" step="1" value="8"/>
+        </label>
+        <span class="badge">Поточне: <b id="draftNum">8</b> Па</span>
+        <button class="btn" id="markDraft">📍 Додати точку</button>
+      </div>
+      <div class="row">
+        <label style="flex:1">CO, ppm
+          <input type="range" id="co" class="input" min="0" max="400" step="5" value="15"/>
+        </label>
+        <span class="badge">Поточне: <b id="coNum">15</b> ppm</span>
+        <button class="btn" id="markCO">📍 Додати точку</button>
+      </div>
+      <div class="row">
+        <label>Мін. тяга OK (Па)<input id="thDraft" type="number" class="input" step="1" value="5"/></label>
+        <label>CO Warn (ppm)<input id="thCOWarn" type="number" class="input" step="5" value="50"/></label>
+        <label>CO Alarm (ppm)<input id="thCOAlarm" type="number" class="input" step="5" value="200"/></label>
+        <button class="btn secondary" id="applyTh">⚙️ Застосувати пороги</button>
+      </div>
+      <div class="kpi" style="margin-top:6px">
+        <span class="tag ok">⏱️ Час тяги <b>&ge;</b> OK: <b id="tDraftOk">0</b> с</span>
+        <span class="tag warn">⏱️ Час CO > Warn: <b id="tCOWarn">0</b> с</span>
+        <span class="tag bad">⏱️ Час CO > Alarm: <b id="tCOAlarm">0</b> с</span>
+      </div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="chart" class="chart" width="520" height="240"></canvas></div>
+      <div class="row">
+        <button class="btn secondary" id="clearSeries">🧹 Очистити графік</button>
+      </div>
+
+      <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
+      <div class="row">
+        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <div>
+          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button class="btn" data-kind="inlet">📷 Вхід у канал (решітка/патрубок)</button>
+          <button class="btn" data-kind="outlet">📷 Вихід на даху/шахті</button>
+          <button class="btn" data-kind="defect">📷 Дефект/сажa/конденсат</button><br/>
+          <small class="muted">Фото зберігаються у «Галереї доказів».</small>
+        </div>
+      </div>
+      <div class="gallery" id="gal"></div>
+
+      <h2 style="margin-top:10px">🎙️ Аудіо-нотатка</h2>
+      <div class="row">
+        <button class="btn" id="recStart">⏺️ Запис</button>
+        <button class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
+        <span class="badge" id="rstat">Немає запису</span>
+      </div>
+      <audio id="player" controls style="margin-top:8px;max-width:100%"></audio>
+
+      <h2 style="margin-top:10px">📶 NFC / ID об’єкта</h2>
+      <div class="block">
+        <div class="row">
+          <button class="btn" id="nfcBtn">📶 NFC</button>
+          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)"/>
+          <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
+          <span class="badge" id="nfcs">Статус NFC: очікується</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Права колонка: Прогрес/Метрики/Експорт -->
+    <div class="card">
+      <h2>📈 Прогрес та метрики</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Кейс</th><td id="mCase">—</td></tr>
+          <tr><th>ID об’єкта</th><td id="mAsset">—</td></tr>
+          <tr><th>Прилад</th><td id="mApp">—</td></tr>
+          <tr><th>Кроки Done</th><td id="mSteps">0/6</td></tr>
+          <tr><th>Точок (тяга/CO)</th><td id="mPts">0 / 0</td></tr>
+          <tr><th>Фото (вхід/вихід/дефект)</th><td id="mPhotos">0 / 0 / 0</td></tr>
+          <tr><th>Аудіо</th><td id="mAudio">—</td></tr>
+          <tr><th>Пороги</th><td id="mThr">Draft≥<span id="mTD">5</span>Pa; CO W<span id="mTCW">50</span>/A<span id="mTCA">200</span></td></tr>
+          <tr><th>Статус</th><td id="mState"><b class="warn">Потрібно виконати кроки</b></td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">✅ Оцінювання (10 балів)</h2>
+      <ul>
+        <li>Кейс створено (адреса/прилад/виконавець/дата) — <b>2</b></li>
+        <li>ID об’єкта (NFC/код) — <b>2</b></li>
+        <li>Чек-лист: усі кроки з таймерами — <b>2</b></li>
+        <li>Графік: ≥8 точок сумарно — <b>1</b></li>
+        <li>Фото (всі три) — <b>2</b></li>
+        <li>Аудіо-нотатка — <b>1</b></li>
+      </ul>
+
+      <h2 style="margin-top:10px">💾 Експорт / друк</h2>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV</button>
+        <button class="btn" id="saveTxt">💾 TXT</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+
+      <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
+      <pre id="alog" class="card" style="max-height:240px;overflow:auto;margin-top:6px">// Поки без подій</pre>
+    </div>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString();const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+function clean(s){return String(s).replace(/\s+/g,' ').trim();}
+$('#upd').textContent = new Date().toLocaleDateString('uk-UA');
+(function(){ const d=new Date(); $('#day').value=d.toISOString().slice(0,10); })();
+
+// ===== Стан кейсу
+let CASE_ID=null, ASSET_ID=null;
+let photos={inlet:null,outlet:null,defect:null};
+let audioUrl=null;
+
+// ===== Кейс
+$('#mkCase').addEventListener('click',()=>{
+  const addr=clean($('#addr').value||''); const tech=clean($('#tech').value||''); const day=$('#day').value; 
+  if(!addr||!tech||!day){ alert('Вкажи адресу, виконавця та дату'); return; }
+  CASE_ID='F-'+Math.random().toString(36).slice(2,8).toUpperCase();
+  $('#cid').textContent='Кейс: '+CASE_ID;
+  log(`Кейс ${CASE_ID}: ${addr}, ${$('#appliance').value}, ${tech}, ${day}`);
+  updateMetrics();
+});
+
+// ===== NFC / ID
+async function tryNFC(){
+  if('NDEFReader' in window){
+    try{
+      const reader=new NDEFReader(); await reader.scan();
+      $('#nfcs').textContent='Статус NFC: сканування...';
+      reader.addEventListener('reading', ({message, serialNumber})=>{
+        let text=''; for(const rec of message.records){ if(rec.recordType==='text'){ const dec=new TextDecoder(rec.encoding||'utf-8'); text = dec.decode(rec.data); } }
+        ASSET_ID = (text||serialNumber||'NFC-'+Math.random().toString(36).slice(2,7)).toString();
+        $('#asset').value=ASSET_ID; $('#nfcs').textContent='Статус NFC: зчитано';
+        log('NFC: '+ASSET_ID); updateMetrics();
+      });
+    }catch(e){ $('#nfcs').textContent='Статус NFC: помилка'; alert('NFC недоступний/заборонений'); }
+  }else{ alert('Web NFC не підтримується. Введи код вручну.'); }
+}
+$('#nfcBtn').addEventListener('click', tryNFC);
+$('#saveAsset').addEventListener('click',()=>{ const v=clean($('#asset').value||''); if(!v){ alert('Введи ID об’єкта'); return; } ASSET_ID=v; $('#nfcs').textContent='Статус NFC: застосовано вручну'; log('ID об’єкта: '+ASSET_ID); updateMetrics(); });
+
+// ===== Чек-лист
+const STEPS_DEF = [
+  {k:'access',  name:'Доступ до каналу/ревізії'},
+  {k:'visual',  name:'Візуальний огляд (сажa/засмічення/конденсат)'},
+  {k:'draft',   name:'Вимір тяги (Па) у режимі роботи приладу'},
+  {k:'co',      name:'Вимір CO (ppm) у приміщенні'},
+  {k:'seal',    name:'Герметичність стиків/патрубків'},
+  {k:'restore', name:'Відновлення облицювання/кришок/решіток'}
+];
+let STEPS = STEPS_DEF.map(s=>({...s, tsStart:null, tsStop:null, dur:0, ok:false}));
+
+function renderSteps(){
+  const box=$('#steps'); box.innerHTML='';
+  STEPS.forEach((s,idx)=>{
+    const d=document.createElement('div'); d.className='block'; d.dataset.key=s.k;
+    d.innerHTML = `
+      <b>${idx+1}. ${s.name}</b> <span class="badge mono">${s.k}</span><br/>
+      <div class="row" style="margin-top:6px">
+        <button class="btn btn-start">▶️ Start</button>
+        <button class="btn secondary btn-stop">⏹️ Stop</button>
+        <button class="btn good btn-done">✅ Done</button>
+        <span class="badge">Тривалість: <b class="dur">0</b> с</span>
+      </div>
+    `;
+    box.appendChild(d);
+  });
+}
+renderSteps();
+
+function stepByKey(k){ return STEPS.find(x=>x.k===k); }
+
+$('#steps').addEventListener('click',(e)=>{
+  const wrap=e.target.closest('.block'); if(!wrap) return;
+  const key=wrap.dataset.key; const s=stepByKey(key); const now=Date.now();
+
+  if(e.target.classList.contains('btn-start')){ s.tsStart=now; s.tsStop=null; s.ok=false; log(`Крок ${key}: Start`); }
+  if(e.target.classList.contains('btn-stop')){
+    if(s.tsStart){ s.tsStop=now; s.dur += Math.max(0, Math.round((s.tsStop - s.tsStart)/1000)); s.tsStart=null; wrap.querySelector('.dur').textContent=String(s.dur); log(`Крок ${key}: Stop (+${s.dur}s)`); }
+  }
+  if(e.target.classList.contains('btn-done')){
+    if(s.tsStart){ s.tsStop=now; s.dur += Math.max(0, Math.round((s.tsStop - s.tsStart)/1000)); s.tsStart=null; wrap.querySelector('.dur').textContent=String(s.dur); }
+    s.ok=true; log(`Крок ${key}: Done (total ${s.dur}s)`);
+  }
+  updateMetrics();
+});
+
+// авто-оновлення тривалості активних кроків
+setInterval(()=>{
+  const now=Date.now();
+  STEPS.forEach(s=>{
+    if(s.tsStart){ const curr=Math.max(0, Math.round((now - s.tsStart)/1000)); const wrap=$(`[data-key="${s.k}"]`); if(wrap){ wrap.querySelector('.dur').textContent = String(s.dur + curr); } }
+  });
+},1000);
+
+// ===== Сенсори: тяга/CO з графіком
+const chart=$('#chart'), gc=chart.getContext('2d');
+let t0=null;
+let seriesDraft=[]; // {t, v}
+let seriesCO=[];    // {t, v}
+let thr = { draftOK:5, coWarn:50, coAlarm:200 };
+let acc = { draftOk:0, coWarn:0, coAlarm:0 };
+
+function applyThresh(){
+  thr.draftOK = parseFloat($('#thDraft').value)||5;
+  thr.coWarn  = Math.max(0, parseFloat($('#thCOWarn').value)||50);
+  thr.coAlarm = Math.max(thr.coWarn, parseFloat($('#thCOAlarm').value)||200);
+  $('#mTD').textContent=String(thr.draftOK);
+  $('#mTCW').textContent=String(thr.coWarn);
+  $('#mTCA').textContent=String(thr.coAlarm);
+  log(`Пороги: Draft≥${thr.draftOK}Pa; CO Warn ${thr.coWarn}/Alarm ${thr.coAlarm}`);
+  drawChart();
+  updateMetrics();
+}
+$('#applyTh').addEventListener('click', applyThresh);
+applyThresh();
+
+function addPoint(series, val){
+  const now=Date.now(); if(!t0) t0=now;
+  series.push({t:now, v:val});
+  // акумулятори часу (груба аппроксимація по кроках)
+  const lastOther = (series===seriesDraft? seriesCO: seriesDraft);
+  const prevT = Math.max(series.length>1?series[series.length-2].t:t0, lastOther.length? lastOther[lastOther.length-1].t : t0);
+  const dt = (now - prevT)/1000;
+  // правила
+  const draft = (series===seriesDraft? val : (seriesDraft[seriesDraft.length-1]?.v ?? 0));
+  const co    = (series===seriesCO?    val : (seriesCO[seriesCO.length-1]?.v    ?? 0));
+  if(draft>=thr.draftOK) acc.draftOk += Math.max(0,dt);
+  if(co>thr.coWarn)  acc.coWarn  += Math.max(0,dt);
+  if(co>thr.coAlarm) acc.coAlarm += Math.max(0,dt);
+  $('#tDraftOk').textContent = String(Math.round(acc.draftOk));
+  $('#tCOWarn').textContent  = String(Math.round(acc.coWarn));
+  $('#tCOAlarm').textContent = String(Math.round(acc.coAlarm));
+  drawChart();
+  updateMetrics();
+}
+
+$('#draft').addEventListener('input',()=>$('#draftNum').textContent=$('#draft').value);
+$('#co').addEventListener('input',()=>$('#coNum').textContent=$('#co').value);
+$('#markDraft').addEventListener('click',()=>{ addPoint(seriesDraft, parseFloat($('#draft').value)); log('Точка тяги: '+$('#draft').value+' Па'); });
+$('#markCO').addEventListener('click',()=>{ addPoint(seriesCO, parseFloat($('#co').value)); log('Точка CO: '+$('#co').value+' ppm'); });
+$('#clearSeries').addEventListener('click',()=>{ seriesDraft=[]; seriesCO=[]; t0=null; acc={draftOk:0,coWarn:0,coAlarm:0}; $('#tDraftOk').textContent='0'; $('#tCOWarn').textContent='0'; $('#tCOAlarm').textContent='0'; drawChart(); updateMetrics(); log('Очищено графік'); });
+
+function drawChart(){
+  const W=chart.width,H=chart.height; gc.clearRect(0,0,W,H);
+  gc.strokeStyle='#223049'; gc.strokeRect(0.5,0.5,W-1,H-1);
+  const left=40,right=W-50,top=24,bottom=H-30;
+
+  // сітка
+  gc.strokeStyle='#1f2a44';
+  for(let y=0;y<5;y++){ const yy=top+y*(bottom-top)/4; gc.beginPath(); gc.moveTo(left,yy); gc.lineTo(right,yy); gc.stroke(); }
+
+  // якщо мало точок
+  if(seriesDraft.length+seriesCO.length<2){
+    gc.fillStyle='#94a3b8'; gc.fillText('Додайте точки тяги/CO', left+8, top+14); return;
+  }
+
+  const all = [...seriesDraft, ...seriesCO].sort((a,b)=>a.t-b.t);
+  const tMin=all[0].t, tMax=all[all.length-1].t, span=tMax-tMin||1;
+
+  const draftMax=Math.max(thr.draftOK+5, ...seriesDraft.map(p=>p.v), 10);
+  const coMax=Math.max(thr.coAlarm+50, ...seriesCO.map(p=>p.v), 100);
+
+  function X(t){ return left + (t - tMin)/span*(right-left); }
+  // дві шкали: зліва Па, справа ppm
+  function Yd(v){ return bottom - (v/draftMax)*(bottom-top); }
+  function Yc(v){ return bottom - (v/coMax)*(bottom-top); }
+
+  // лінія тяги
+  if(seriesDraft.length){
+    gc.beginPath(); gc.strokeStyle='#38bdf8';
+    seriesDraft.forEach((p,i)=>{ const x=X(p.t), y=Yd(p.v); if(i===0) gc.moveTo(x,y); else gc.lineTo(x,y); }); gc.stroke();
+    seriesDraft.forEach(p=>{ const x=X(p.t), y=Yd(p.v); gc.fillStyle='#38bdf8'; gc.fillRect(x-2,y-2,4,4); });
+  }
+  // лінія CO
+  if(seriesCO.length){
+    gc.beginPath(); gc.strokeStyle='#fbbf24';
+    seriesCO.forEach((p,i)=>{ const x=X(p.t), y=Yc(p.v); if(i===0) gc.moveTo(x,y); else gc.lineTo(x,y); }); gc.stroke();
+    seriesCO.forEach(p=>{ const x=X(p.t), y=Yc(p.v); gc.fillStyle='#fbbf24'; gc.fillRect(x-2,y-2,4,4); });
+  }
+
+  // пороги
+  // тяга OK
+  gc.strokeStyle='#22c55e'; gc.beginPath(); gc.moveTo(left, Yd(thr.draftOK)); gc.lineTo(right, Yd(thr.draftOK)); gc.stroke();
+  // CO warn/alarm
+  gc.strokeStyle='#fbbf24'; gc.beginPath(); gc.moveTo(left, Yc(thr.coWarn)); gc.lineTo(right, Yc(thr.coWarn)); gc.stroke();
+  gc.strokeStyle='#f87171'; gc.beginPath(); gc.moveTo(left, Yc(thr.coAlarm)); gc.lineTo(right, Yc(thr.coAlarm)); gc.stroke();
+
+  // підписи осей
+  gc.fillStyle='#94a3b8'; gc.font='11px ui-monospace';
+  gc.fillText('Па (ліва вісь) / ppm (права вісь)', left, top-6);
+  // легенда
+  gc.fillStyle='#38bdf8'; gc.fillRect(right+4, top, 12, 4); gc.fillStyle='#e5e7eb'; gc.fillText('Тяга', right+20, top+4);
+  gc.fillStyle='#fbbf24'; gc.fillRect(right+4, top+16, 12, 4); gc.fillStyle='#e5e7eb'; gc.fillText('CO', right+20, top+20);
+}
+
+// ===== Камера / фото
+let stream=null;
+async function startCam(){
+  try{ stream = await navigator.mediaDevices.getUserMedia({video:true,audio:false}); $('#vid').srcObject=stream; log('Камеру увімкнено'); }
+  catch(e){ alert('Камеру заблоковано або недоступно'); }
+}
+$('#camOn').addEventListener('click', startCam);
+
+function takeShot(kind){
+  const video=$('#vid'); if(!video.srcObject){ alert('Спершу увімкни камеру'); return; }
+  const c=document.createElement('canvas'); c.width=video.videoWidth||640; c.height=video.videoHeight||480;
+  c.getContext('2d').drawImage(video,0,0,c.width,c.height);
+  const url=c.toDataURL('image/png'); photos[kind]=url; renderGallery(); log(`Фото: ${kind}`); updateMetrics();
+}
+$$('button[data-kind]').forEach(b=>b.addEventListener('click',()=>takeShot(b.dataset.kind)));
+function renderGallery(){
+  const gal=$('#gal'); gal.innerHTML='';
+  if(photos.inlet){ const i=document.createElement('img'); i.className='photo'; i.src=photos.inlet; i.alt='вхід'; gal.appendChild(i); }
+  if(photos.outlet){ const i=document.createElement('img'); i.className='photo'; i.src=photos.outlet; i.alt='вихід'; gal.appendChild(i); }
+  if(photos.defect){ const i=document.createElement('img'); i.className='photo'; i.src=photos.defect; i.alt='дефект'; gal.appendChild(i); }
+}
+
+// ===== Аудіо
+let mediaRec=null; let chunks=[]; 
+$('#recStart').addEventListener('click', async ()=>{
+  try{
+    const st = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+    mediaRec = new MediaRecorder(st);
+    chunks=[];
+    mediaRec.ondataavailable = e=>{ if(e.data.size>0) chunks.push(e.data); };
+    mediaRec.onstop = ()=>{
+      const blob=new Blob(chunks,{type:'audio/webm'});
+      audioUrl = URL.createObjectURL(blob);
+      $('#player').src=audioUrl;
+      $('#rstat').textContent='Запис готовий';
+      const a=document.createElement('a'); a.href=audioUrl; a.download='voice_'+(CASE_ID||'case')+'_'+stamp()+'.webm'; document.body.appendChild(a); a.click(); a.remove();
+      log('Аудіо збережено (webm)'); updateMetrics();
+    };
+    mediaRec.start();
+    $('#recStart').disabled=true; $('#recStop').disabled=false;
+    $('#rstat').textContent='Йде запис...'; log('Почато аудіозапис');
+  }catch(e){ alert('Мікрофон недоступний'); }
+});
+$('#recStop').addEventListener('click', ()=>{
+  if(mediaRec && mediaRec.state!=='inactive'){ mediaRec.stop(); }
+  $('#recStart').disabled=false; $('#recStop').disabled=true;
+});
+
+// ===== Метрики / статус
+function updateMetrics(){
+  $('#mCase').textContent = CASE_ID || '—';
+  $('#mAsset').textContent = ASSET_ID || ($('#asset').value||'—');
+  $('#mApp').textContent   = $('#appliance').value;
+  $('#mSteps').textContent = `${STEPS.filter(s=>s.ok).length}/${STEPS.length}`;
+  $('#mPts').textContent   = `${seriesDraft.length} / ${seriesCO.length}`;
+  $('#mPhotos').textContent = `${photos.inlet?1:0} / ${photos.outlet?1:0} / ${photos.defect?1:0}`;
+  $('#mAudio').textContent = audioUrl?'є':'—';
+
+  // скоринг
+  let score=0;
+  const caseOk=!!CASE_ID, assetOk=!!(ASSET_ID||clean($('#asset').value||'')); 
+  const stepsOk=STEPS.every(s=>s.ok) && STEPS.every(s=>s.dur>0);
+  const pointsOk=(seriesDraft.length + seriesCO.length) >= 8;
+  const photosOk=!!photos.inlet && !!photos.outlet && !!photos.defect;
+  const audioOk=!!audioUrl;
+  if(caseOk)score+=2; if(assetOk)score+=2; if(stepsOk)score+=2; if(pointsOk)score+=1; if(photosOk)score+=2; if(audioOk)score+=1;
+
+  const html = score>=9? `<b class="ok">Готово (≈${score}/10)</b>`:
+               score>=6? `<b class="warn">Більшість виконано (≈${score}/10)</b>`:
+                         `<b class="bad">Потрібно доробити (≈${score}/10)</b>`;
+  $('#mState').innerHTML = html;
+}
+drawChart();
+
+// ===== Експорт / чек / QR
+function summary(){
+  const addr=$('#addr').value||'—', app=$('#appliance').value||'—', tech=$('#tech').value||'—', day=$('#day').value||'—';
+  return {
+    case: CASE_ID||'—', addr, appliance: app, tech, day,
+    asset: ASSET_ID||($('#asset').value||'—'),
+    thresholds: {...thr},
+    time_acc_s: {draft_ok:Math.round(acc.draftOk), co_warn:Math.round(acc.coWarn), co_alarm:Math.round(acc.coAlarm)},
+    steps: STEPS.map(s=>({key:s.k, name:s.name, duration_s:s.dur, done:s.ok})),
+    points: {
+      draft: seriesDraft.map(p=>({t:new Date(p.t).toISOString(), v:p.v})),
+      co:    seriesCO.map(p=>({t:new Date(p.t).toISOString(), v:p.v}))
+    },
+    photos: {inlet:!!photos.inlet, outlet:!!photos.outlet, defect:!!photos.defect},
+    audio: !!audioUrl
+  };
+}
+$('#saveCsv').addEventListener('click',()=>{
+  const s=summary();
+  let csv='field,value\n';
+  for(const [k,v] of Object.entries(s)){
+    if(k==='steps'||k==='points') continue;
+    if(typeof v==='object'){ csv+=`${k},${JSON.stringify(v).replace(/,/g,';')}\n`; }
+    else csv+=`${k},${String(v).replace(/,/g,';')}\n`;
+  }
+  csv+='\n# steps\nkey,name,duration_s,done\n';
+  s.steps.forEach(st=>{ csv+=`${st.key},"${st.name.replace(/"/g,'""')}",${st.duration_s},${st.done?1:0}\n`; });
+  csv+='\n# draft_points\niso_time,Pa\n';
+  s.points.draft.forEach(p=>{ csv+=`${p.t},${p.v}\n`; });
+  csv+='\n# co_points\niso_time,ppm\n';
+  s.points.co.forEach(p=>{ csv+=`${p.t},${p.v}\n`; });
+  download('gas_para07_flue_'+stamp()+'.csv', csv, 'text/csv'); log('Експортовано CSV');
+});
+$('#saveTxt').addEventListener('click',()=>{
+  const s=summary();
+  const lines=[
+    'Пара 7 — Огляд димовентканалів: підсумок',
+    `Кейс: ${s.case}`, `Адреса: ${s.addr}`, `Прилад: ${s.appliance}`,
+    `Виконавець: ${s.tech}`, `Дата: ${s.day}`,
+    `Об’єкт (ID): ${s.asset}`,
+    `Пороги: Draft≥${s.thresholds.draftOK} Pa; CO Warn ${s.thresholds.coWarn}/Alarm ${s.thresholds.coAlarm} ppm`,
+    `Час: Draft OK ${s.time_acc_s.draft_ok}s; CO >Warn ${s.time_acc_s.co_warn}s; CO >Alarm ${s.time_acc_s.co_alarm}s`,
+    `Фото (вхід/вихід/дефект): ${s.photos.inlet?'1':'0'} / ${s.photos.outlet?'1':'0'} / ${s.photos.defect?'1':'0'}`,
+    `Аудіо: ${s.audio?'є':'—'}`,
+    '--- Кроки ---'
+  ];
+  s.steps.forEach((st,i)=> lines.push(`${i+1}) ${st.name} — ${st.duration_s}s — ${st.done?'DONE':'…'}`));
+  lines.push('--- Точки ---');
+  lines.push(`Draft points: ${s.points.draft.length}, CO points: ${s.points.co.length}`);
+  download('gas_para07_flue_'+stamp()+'.txt', lines.join('\n')); log('Експортовано TXT');
+});
+$('#print58').addEventListener('click',()=>{
+  const s=summary(); const rc=$('#rc'); rc.hidden=false;
+  const lines=[
+'=== FLUE/VENT CHECK (58мм) ===',
+'Case: '+s.case,
+'Date: '+s.day,
+'Addr: '+s.addr,
+'App:  '+s.appliance,
+'Tech: '+s.tech,
+'Asset:'+s.asset,
+'Pts:  D'+s.points.draft.length+' / CO'+s.points.co.length,
+'Thr:  D≥'+s.thresholds.draftOK+'Pa CO W'+s.thresholds.coWarn+'/A'+s.thresholds.coAlarm,
+'Time: DOK '+s.time_acc_s.draft_ok+'s; COW '+s.time_acc_s.co_warn+'s; COA '+s.time_acc_s.co_alarm+'s',
+'Photos:'+(s.photos.inlet?1:0)+'/'+(s.photos.outlet?1:0)+'/'+(s.photos.defect?1:0)+' Audio:'+(s.audio?'Y':'N'),
+'--------------------------'
+  ];
+  rc.textContent=lines.join('\n');
+  download('gas_para07_receipt_'+stamp()+'.txt', rc.textContent);
+  log('Згенеровано чек 58мм');
+});
+$('#qrGen').addEventListener('click',()=>{
+  const def = CASE_ID || ASSET_ID || 'flue-vent';
+  const data = prompt('Встав URL/ID (Case або Asset):', def);
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url; log('Згенеровано QR');
+});
+
+// ===== Камера ініт
+function renderGallery(){/* уже визначено вище */}
+// ===== Ініт метрик
+updateMetrics();
+(function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+</script>
+</body>
+</html>
