@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 18 (технологи) — EAN-13: генератор/верифікатор + тест друку + журнал сканувань (графіки) + чек/CSV</title>
+<meta name="description" content="Генерація та перевірка EAN-13, рендер у Canvas з параметрами друку, тест-шаблон принтера, журнал сканувань, живі графіки успішності/часу, експорт CSV/TXT, чек 58 мм."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1240px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:90px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.grid{display:grid;gap:14px;grid-template-columns:1.35fr 1fr}
+@media(max-width:1120px){.grid{grid-template-columns:1fr}}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:280px}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🏷️</span>
+      <div>
+        <b>Пара 18 — Етикетка/друк: EAN-13</b><br/>
+        <span class="badge">генератор → верифікатор → Canvas-рендер → тест друку → журнал сканувань → графіки → чек/CSV</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">Мета: навчитися створювати **правильні штрих-коди EAN-13** (харчова продукція), контролювати **якість друку** (модуль, контраст, «тиха зона»), перевіряти коди **сканером/клавіатурою**, вести **журнал сканувань** і **бачити живу статистику**.</p>
+
+  <div class="grid">
+    <!-- ЛІВО: конструктор + рендер + графіки -->
+    <div class="card">
+      <h2>🔧 Конструктор EAN-13</h2>
+      <div class="row">
+        <label style="flex:1">Префікс країни (3)<input id="pfx" class="input" maxlength="3" value="482"/></label>
+        <label style="flex:1">Код виробника (4–5)<input id="man" class="input" maxlength="5" value="1234"/></label>
+        <label style="flex:1">Код товару (3–5)<input id="item" class="input" maxlength="5" value="5678"/></label>
+        <label style="flex:1">Автоконтрольна<input id="autoChk" type="checkbox" checked/></label>
+      </div>
+      <div class="row">
+        <label style="flex:2">Повний код (13 цифр, якщо вручну)<input id="full" class="input" placeholder="482123456789?"/></label>
+        <button class="btn good" id="gen">⚙️ Згенерувати</button>
+        <button class="btn secondary" id="val">✅ Перевірити</button>
+        <span id="res" class="badge">Готовність: —</span>
+      </div>
+
+      <h3 style="margin-top:10px">🖨️ Параметри друку/рендера</h3>
+      <div class="row">
+        <label>Масштаб (magnification, ×)<input id="mag" class="input" type="number" min="0.8" step="0.05" value="1.00"/></label>
+        <label>Модуль (X, мм)<input id="mod" class="input" type="number" step="0.01" value="0.33"/></label>
+        <label>DPI принтера<input id="dpi" class="input" type="number" step="1" value="203"/></label>
+        <label>Темрява (симуляція)%<input id="dark" class="input" type="range" min="0" max="100" value="85"/></label>
+        <label>Тиха зона (мм)<input id="quiet" class="input" type="number" step="0.5" value="3.0"/></label>
+        <button class="btn" id="draw">🎨 Намалювати</button>
+      </div>
+
+      <div class="canvasWrap"><canvas id="barcode" width="980" height="180"></canvas></div>
+      <small class="muted">Порада: для EAN-13 рекомендовано X≈0.33 мм, magnification ≥ 80%, quiet zone ≥ 3.63 мм кожного боку; застосуй запас ≥ 4 мм.</small>
+
+      <h3 style="margin-top:10px">📈 Живі графіки (скани)</h3>
+      <div class="canvasWrap"><canvas id="chart" width="980" height="280"></canvas></div>
+      <small class="muted">Синій — відсоток успішних сканів (ковзне вікно 20 подій); Зелений — час до скану (мс); Червоні точки — помилки контрольної цифри/тихої зони.</small>
+
+      <h3 style="margin-top:10px">🧪 Верифікатор/сканер</h3>
+      <div class="row">
+        <input id="scan" class="input" placeholder="Фокусуйся тут і скануй EAN-13 (або введи з клавіатури)"/>
+        <button class="btn secondary" id="clearScan">🧹 Очистити журнал</button>
+        <span id="scanStat" class="badge">Сканів: 0 | Успішність: 0%</span>
+      </div>
+      <pre id="alog" class="note" style="max-height:200px;overflow:auto">// Поки без подій</pre>
+
+      <h3 style="margin-top:10px">💾 Експорт/друк</h3>
+      <div class="row">
+        <input id="lot" class="input" placeholder="Лот/партія або назва SKU"/>
+        <button class="btn" id="saveCsv">📄 CSV (журнал сканів)</button>
+        <button class="btn" id="saveTxt">💾 TXT (зведення)</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="printPage">🖨️ Тест-сторінка принтера</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+    </div>
+
+    <!-- ПРАВО: показники + схема + завдання -->
+    <div class="card">
+      <h2>📊 Показники друку</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>EAN-13</th><td id="m_code">—</td></tr>
+          <tr><th>Контрольна цифра</th><td id="m_chk">—</td></tr>
+          <tr><th>Ширина коду (мм)</th><td id="m_wmm">—</td></tr>
+          <tr><th>Тиха зона (мм)</th><td id="m_qz">—</td></tr>
+          <tr><th>Піксель на модуль</th><td id="m_ppm">—</td></tr>
+          <tr><th>Оцінка друку</th><td id="m_grade">—</td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">🔌 Схема (SVG)</h2>
+      <svg viewBox="0 0 820 260" role="img" aria-label="Генератор → Принтер → Продукт → Сканер → Журнал">
+        <rect x="40" y="40" width="180" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <text x="130" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Генератор EAN-13</text>
+        <text x="130" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">контр. цифра</text>
+
+        <rect x="250" y="40" width="160" height="120" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <text x="330" y="80" fill="#dcfce7" font-size="14" text-anchor="middle">Принтер</text>
+        <text x="330" y="100" fill="#a7f3d0" font-size="12" text-anchor="middle">DPI/темрява</text>
+
+        <rect x="430" y="40" width="140" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <text x="500" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Етикетка</text>
+        <text x="500" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">quiet zone</text>
+
+        <rect x="590" y="40" width="170" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+        <text x="675" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Сканер/Журнал</text>
+        <text x="675" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">графіки/CSV</text>
+
+        <line x1="220" y1="100" x2="250" y2="100" stroke="#93c5fd" stroke-width="3"/>
+        <line x1="410" y1="100" x2="430" y2="100" stroke="#22c55e" stroke-width="3"/>
+        <line x1="570" y1="100" x2="590" y2="100" stroke="#64748b" stroke-width="3"/>
+      </svg>
+
+      <h2 style="margin-top:10px">🎯 Завдання для студентів</h2>
+      <ol>
+        <li>Згенеруй **EAN-13** для двох SKU (молоко/сир). Надрукуй тест-сторінку, оціни **модуль, quiet zone** та **DPI→ppm**.</li>
+        <li>Виконай ≥ 30 сканів (різні відстані/кути). Експортуй **CSV**, побудуй **успішність** та **час**; зроби висновки у <b>TXT</b>.</li>
+        <li>Зміни «Темряву»/«Модуль» так, щоб зменшилась успішність: зафіксуй **червоні події** (помилки) та сформуй <b>чек 58 мм</b> з інструкцією для налаштування принтера.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📜 Історична нотатка</h2>
+    <p class="muted small">Перші EAN-коди з’явилися у 1970-х — і з того часу штрих-код став «паспортом» продукту. Якість друку й правильна контрольна цифра — запорука того, що склад/магазин не «зависне» на рампі.</p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString(); const box=$('#alog'); if(box.textContent.startsWith('//')) box.textContent=''; box.textContent+=`[${t}] ${msg}\n`; box.scrollTop=box.scrollHeight;}
+function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+function csvEsc(s){return `"${(s??'').toString().replace(/"/g,'""')}"`;}
+
+// ===== EAN-13 кодер =====
+const L={0:'0001101',1:'0011001',2:'0010011',3:'0111101',4:'0100011',5:'0110001',6:'0101111',7:'0111011',8:'0110111',9:'0001011'};
+const G={0:'0100111',1:'0110011',2:'0011011',3:'0100001',4:'0011101',5:'0111001',6:'0000101',7:'0010001',8:'0001001',9:'0010111'};
+const R={0:'1110010',1:'1100110',2:'1101100',3:'1000010',4:'1011100',5:'1001110',6:'1010000',7:'1000100',8:'1001000',9:'1110100'};
+const PARITY={
+  0:['L','L','L','L','L','L'],
+  1:['L','L','G','L','G','G'],
+  2:['L','L','G','G','L','G'],
+  3:['L','L','G','G','G','L'],
+  4:['L','G','L','L','G','G'],
+  5:['L','G','G','L','L','G'],
+  6:['L','G','G','G','L','L'],
+  7:['L','G','L','G','L','G'],
+  8:['L','G','L','G','G','L'],
+  9:['L','G','G','L','G','L']
+};
+function checksum12(s12){ // повертає контрольну цифру для 12 цифр
+  const d=s12.split('').map(x=>+x);
+  const sum = d.reduce((acc, val, idx)=> acc + val * ( (idx%2)?3:1 ), 0);
+  return (10 - (sum % 10)) % 10;
+}
+function validateEAN13(code){
+  if(!/^\d{13}$/.test(code)) return {ok:false, reason:'Не 13 цифр'};
+  const chk=+code[12], need=checksum12(code.slice(0,12));
+  return {ok: chk===need, chk, need};
+}
+function buildEAN13(code12or13){
+  let s=code12or13.replace(/\D/g,'');
+  if(s.length===12){ s += checksum12(s); }
+  if(s.length!==13) throw new Error('Потрібно 12 або 13 цифр');
+  return s;
+}
+
+// ===== Рендер штрих-коду =====
+const bc=$('#barcode'), bctx=bc.getContext('2d');
+function drawBarcode(){
+  let code;
+  try{
+    const full=$('#full').value.trim();
+    if(full){ code=buildEAN13(full); }
+    else{
+      const base=($('#pfx').value+$('#man').value+$('#item').value).replace(/\D/g,'');
+      code=buildEAN13(base.padEnd(12,'0').slice(0,12));
+    }
+  }catch(e){ alert(e.message); return; }
+
+  const mag=parseFloat($('#mag').value)||1;
+  const modmm=parseFloat($('#mod').value)||0.33; // модуль X (мм)
+  const dpi=parseInt($('#dpi').value,10)||203;
+  const dark=parseInt($('#dark').value,10)||80;
+  const qzmm=parseFloat($('#quiet').value)||3.0;
+
+  // Шаблони
+  const first=+code[0];
+  const leftPar = PARITY[first];
+  const digits = code.split('').map(x=>+x);
+
+  // Побудова бітового рядка (з охоронцями)
+  let bits='101'; // start guard
+  for(let i=1;i<=6;i++){
+    const d=digits[i];
+    const p=leftPar[i-1];
+    bits += (p==='L'?L[d]:G[d]);
+  }
+  bits += '01010'; // middle guard
+  for(let i=7;i<=12;i++){
+    const d=digits[i];
+    bits += R[d];
+  }
+  bits += '101'; // end guard
+
+  // Розрахунок піксель/мм
+  const pxPerMM = dpi/25.4;
+  const pxPerModule = pxPerMM * modmm * mag;
+  const quietPx = Math.round(pxPerMM * qzmm);
+
+  const barW = Math.round(pxPerModule); // квантування під принтер
+  const height = bc.height-40;
+  const codeW = bits.length * barW;
+  const totalW = codeW + quietPx*2;
+
+  // Очищення та фон
+  bctx.clearRect(0,0,bc.width,bc.height);
+  bctx.fillStyle='#0b1220'; bctx.fillRect(0,0,bc.width,bc.height);
+  // Поле малювання по центру
+  const x0 = Math.floor( (bc.width - totalW)/2 );
+  const y0 = 20;
+
+  // Малювання штрихів
+  bctx.fillStyle=`rgba(230,238,249,${clamp(dark/100,0.15,1)})`; // "темрява" = альфа
+  let x=x0+quietPx;
+  for(let i=0;i<bits.length;i++){
+    if(bits[i]==='1'){ bctx.fillRect(x,y0,barW,height); }
+    x+=barW;
+  }
+
+  // Текст цифр
+  bctx.fillStyle='#e6eef9'; bctx.font='16px ui-monospace';
+  bctx.fillText(String(digits[0]), x0+quietPx-14, y0+height+16);
+  const leftTxt = digits.slice(1,7).join('');
+  const rightTxt = digits.slice(7,13).join('');
+  bctx.fillText(leftTxt, x0+quietPx+barW*3, y0+height+16);
+  bctx.fillText(rightTxt, x0+quietPx+barW*(3+7*6+5), y0+height+16);
+
+  // Оцінка друку (спрощена евристика)
+  const ppm = pxPerModule.toFixed(2);
+  const okQZ = qzmm>=3.63 ? 'ok':'warn';
+  const okPPM = pxPerModule>=1.2 ? 'ok' : (pxPerModule>=1.0?'warn':'bad');
+  const grade = (okQZ==='ok' && okPPM!=='bad') ? '≥ B (умовно)' : (okPPM==='bad'?'D':'C');
+  $('#m_code').textContent=code;
+  $('#m_chk').textContent=code[12]+' (очікувана '+checksum12(code.slice(0,12))+')';
+  $('#m_wmm').textContent=( (codeW)/pxPerMM ).toFixed(2)+' мм';
+  $('#m_qz').innerHTML=`${qzmm.toFixed(2)} мм <b class="${okQZ}">(${okQZ==='ok'?'OK':'мало'})</b>`;
+  $('#m_ppm').innerHTML=`${ppm} px/модуль <b class="${okPPM}">${okPPM.toUpperCase()}</b>`;
+  $('#m_grade').textContent=grade;
+
+  // Статус
+  $('#res').textContent='Готовність: рендер OK';
+}
+
+// ===== Генерація/перевірка =====
+$('#gen').addEventListener('click', ()=>{
+  try{
+    const base=($('#pfx').value+$('#man').value+$('#item').value).replace(/\D/g,'');
+    const s12=base.padEnd(12,'0').slice(0,12);
+    const chk=checksum12(s12);
+    const code = $('#autoChk').checked ? s12+chk : s12+'?';
+    $('#full').value = code;
+    $('#res').textContent='Згенеровано: '+( $('#autoChk').checked? 'повний код' : 'додай контрольну' );
+  }catch(e){ alert(e.message); }
+});
+$('#val').addEventListener('click', ()=>{
+  const code=$('#full').value.trim();
+  const v=validateEAN13(code);
+  if(!v.ok){ $('#res').textContent='Помилка: '+(v.reason||('очік. '+v.need+', є '+v.chk)); }
+  else { $('#res').textContent='Перевірка: OK'; }
+});
+$('#draw').addEventListener('click', drawBarcode);
+
+// ===== Сканування / Журнал =====
+let SCANS=[]; // {ts, code, ok, ms, reason}
+let lastScanStart=null;
+const chart=$('#chart'), ctx=chart.getContext('2d');
+
+function pushScan(code, ok, ms, reason=''){
+  SCANS.push({ts:Date.now(), code, ok, ms, reason});
+  updateScanStat(); drawCharts();
+  log(`${ok?'OK':'ERR'} | ${code} | ${ms} мс ${reason?('| '+reason):''}`);
+}
+function updateScanStat(){
+  const okc=SCANS.filter(s=>s.ok).length, all=SCANS.length;
+  const pct=all? (okc/all*100).toFixed(1):'0.0';
+  $('#scanStat').textContent=`Сканів: ${all} | Успішність: ${pct}%`;
+}
+function drawCharts(){
+  const W=chart.width,H=chart.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,W-1,H-1);
+  if(!SCANS.length){ ctx.fillStyle='#94a3b8'; ctx.fillText('Немає даних', 14,20); return; }
+  const N=SCANS.length;
+  const windowN=20;
+  const pctSeries=[];
+  for(let i=1;i<=N;i++){
+    const win=SCANS.slice(Math.max(0,i-windowN), i);
+    const p=win.filter(s=>s.ok).length / win.length * 100;
+    pctSeries.push({i,p});
+  }
+  const msSeries=SCANS.map((s,i)=>({i:i+1,ms:s.ms||0,err:!s.ok}));
+  const left=40, right=W-10, top=20, mid=H*0.55, bottom=H-20;
+  const gx=(right-left)/Math.max(1,N-1);
+
+  // Успішність (верх)
+  ctx.fillStyle='#94a3b8'; ctx.font='12px ui-monospace'; ctx.fillText('Успішність % (ковзне вікно 20)', 8, top+12);
+  const yP=v=> (mid-10) - (v/100)*(mid-top-20);
+  ctx.beginPath(); ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2;
+  pctSeries.forEach((v,k)=>{ const x=left+k*gx; const y=yP(v.p); k?ctx.lineTo(x,y):ctx.moveTo(x,y);}); ctx.stroke();
+  // 100/80/60 лінії
+  ctx.strokeStyle='#64748b'; [100,80,60].forEach(val=>{ ctx.beginPath(); ctx.setLineDash([4,4]); ctx.moveTo(left,yP(val)); ctx.lineTo(right,yP(val)); ctx.stroke(); ctx.setLineDash([]); });
+
+  // Час до скану (низ)
+  ctx.fillStyle='#94a3b8'; ctx.fillText('Час до скану, мс', 8, mid+16);
+  const maxMS=Math.max(1000, ...msSeries.map(v=>v.ms));
+  const yM=v=> bottom - (v/maxMS)*(bottom-(mid+24));
+  ctx.beginPath(); ctx.strokeStyle='#22c55e'; ctx.lineWidth=2;
+  msSeries.forEach((v,k)=>{ const x=left+k*gx; const y=yM(v.ms); k?ctx.lineTo(x,y):ctx.moveTo(x,y);}); ctx.stroke();
+  // Помилки як червоні точки
+  ctx.fillStyle='#f87171';
+  msSeries.forEach((v,k)=>{ if(SCANS[k].ok) return; const x=left+k*gx; const y=yM(v.ms); ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill(); });
+}
+
+$('#scan').addEventListener('focus',()=>{ lastScanStart=performance.now(); });
+$('#scan').addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ handleScan($('#scan').value.trim()); $('#scan').value=''; }});
+function handleScan(raw){
+  if(!raw) return;
+  const ms = lastScanStart? Math.max(1, Math.round(performance.now()-lastScanStart)) : 0;
+  lastScanStart=null;
+  // Перевірка: контрольна цифра та відповідність "очікуваному" (якщо згенерований)
+  const v=validateEAN13(raw);
+  let reason='';
+  let ok=v.ok;
+  // Перевірка тихої зони/ppm формально неможлива зі скану — симулюємо через поточні налаштування друку:
+  const qz=parseFloat($('#quiet').value)||3.0;
+  const dpi=parseInt($('#dpi').value,10)||203;
+  const modmm=parseFloat($('#mod').value)||0.33;
+  const ppm=(dpi/25.4)*modmm;
+  if(qz<3.0){ ok=false; reason+='quiet<3mm '; }
+  if(ppm<1.0){ ok=false; reason+='ppm<1 '; }
+  pushScan(raw, ok, ms, reason.trim());
+}
+
+$('#clearScan').addEventListener('click',()=>{ SCANS.length=0; updateScanStat(); drawCharts(); $('#alog').textContent='// Поки без подій'; });
+
+// ===== Експорт/друк =====
+$('#saveCsv').addEventListener('click', ()=>{
+  if(!SCANS.length) return alert('Немає сканів');
+  let csv='ts_iso,code,ok,ms,reason,lot\n';
+  const lot=$('#lot').value||'';
+  SCANS.forEach(s=>{ csv+=`${new Date(s.ts).toISOString()},${csvEsc(s.code)},${s.ok?1:0},${s.ms},${csvEsc(s.reason)},${csvEsc(lot)}\n`; });
+  download('tech_para18_scans_'+stamp()+'.csv', csv, 'text/csv');
+});
+$('#saveTxt').addEventListener('click', ()=>{
+  const lot=$('#lot').value||'—';
+  const okc=SCANS.filter(s=>s.ok).length, all=SCANS.length, pct=all?(okc/all*100).toFixed(1):'0.0';
+  const txt=[
+    'Пара 18 — EAN-13: верифікація і друк',
+    `EAN: ${$('#m_code').textContent||'—'}`,
+    `Модуль X=${$('#mod').value} мм; DPI=${$('#dpi').value}; Quiet=${$('#quiet').value} мм`,
+    `Сканів=${all}; Успішність=${pct}%`,
+    `Лот/SKU: ${lot}`,
+    '--- Журнал ---',
+    ...($('#alog').textContent.startsWith('//')?[]:$('#alog').textContent.trim().split('\n'))
+  ].join('\n');
+  download('tech_para18_summary_'+stamp()+'.txt', txt);
+});
+$('#print58').addEventListener('click', ()=>{
+  const lot=$('#lot').value||'—';
+  const okc=SCANS.filter(s=>s.ok).length, all=SCANS.length, pct=all?(okc/all*100).toFixed(1):'0.0';
+  const lines=[
+    '=== ЧЕК EAN-13 (58мм) ===',
+    'EAN: '+($('#m_code').textContent||'—'),
+    `Успішність: ${pct}% з ${all}`,
+    `X=${$('#mod').value} мм | DPI=${$('#dpi').value}`,
+    `Quiet=${$('#quiet').value} мм`,
+    'SKU/Лот: '+lot,
+    '-----------------------------'
+  ];
+  const rc=$('#rc'); rc.hidden=false; rc.textContent=lines.join('\n');
+  download('tech_para18_receipt_'+stamp()+'.txt', rc.textContent);
+});
+
+// ===== Тест-сторінка принтера =====
+$('#printPage').addEventListener('click', ()=>{
+  // Відкриємо нове вікно з чистим canvas та лінійками
+  const w=window.open('', '_blank', 'width=860,height=1100');
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Тест-сторінка друку</title>
+  <style>body{margin:20px;font-family:ui-monospace;background:white;color:black}</style></head>
+  <body><h3>Тест-сторінка друку (EAN-13, лінійки, градієнти)</h3>
+  <canvas id="p" width="780" height="1040" style="border:1px solid #999"></canvas>
+  <script>
+  const c=document.getElementById('p'),x=c.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#000';x.font='12px monospace';
+  // Лінійки по мм (96dpi приблизно; тестова, для зсуву — не метрологічна)
+  x.fillText('Лінійка (10 мм крок) — перевір масштаби/зсув', 10,20);
+  for(let i=0;i<=720;i+=10){x.strokeStyle='#ccc';x.beginPath();x.moveTo(40+i,30);x.lineTo(40+i,60);x.stroke(); if(i%50===0){x.fillText(String(i)+'мм', 36+i,72);}}
+  // Штрих-сітка різних частот
+  x.fillText('Штрих-сітка (1..4 px) — перевір «злипання» штрихів',10,100);
+  for(let w=1;w<=4;w++){ for(let i=0;i<700;i+=w*2){ x.fillRect(40+i,110+(w-1)*16,w,12);} x.fillText(String(w)+'px', 750, 120+(w-1)*16); }
+  // Градієнти сірого — для «темряви»
+  x.fillText('Градієнти (0..100%) — підбери темряву друку',10,190);
+  for(let g=0; g<10; g++){ const p=g/10; x.fillStyle='rgba(0,0,0,'+p+')'; x.fillRect(40+g*70,200,60,30); x.fillStyle='#000'; x.strokeRect(40+g*70,200,60,30); x.fillText((g*10)+'%', 55+g*70, 245); }
+  // Місце під EAN-13 з полями тиші (намалюємо рамку)
+  x.strokeRect(40,300,700,160); x.fillText('Поле для EAN-13 (врахуй quiet zone ≥4 мм)', 40,295);
+  x.fillText('Підпис/Лот: ___________________________', 40, 500);
+  window.print();
+  <\/script></body></html>`;
+  w.document.write(html); w.document.close();
+});
+
+// ===== Авто-ініціалізація =====
+window.addEventListener('load', ()=>{
+  $('#scan').placeholder='Фокусуйся тут і скануй…';
+  drawBarcode();
+});
+</script>
+</body>
+</html>
