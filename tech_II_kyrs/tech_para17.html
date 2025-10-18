@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 17 (технологи) — Вага → порції → усушка → SPC X̄–R, чек/CSV</title>
+<meta name="description" content="Емулятор дозування: маса порцій, усушка, специфікації LSL/USL. SPC X̄–R (A2/D3/D4), графіки, відповідність, giveaway/short, журнал, експорт CSV/TXT, чек 58 мм."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1220px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:100px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.grid{display:grid;gap:14px;grid-template-columns:1.35fr 1fr}
+@media(max-width:1120px){.grid{grid-template-columns:1fr}}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:320px}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">⚖️</span>
+      <div>
+        <b>Пара 17 — Дозування/усушка + SPC X̄–R</b><br/>
+        <span class="badge">емулятор ваги → підгрупи → X̄–R → відповідність LSL/USL → giveaway/short → чек/CSV</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">Мета: змоделювати **дозування порцій** (сир/м’ясо/масло), оцінити **усушку** під час термообробки, побудувати **SPC X̄–R** з межами керованості (<span class="mono">A₂, D₃, D₄</span>), перевірити **відповідність специфікаціям** (<span class="mono">LSL/USL</span>) та порахувати **giveaway/short** у грошах.</p>
+
+  <div class="grid">
+    <!-- ЛІВО: налаштування + графіки + журнал -->
+    <div class="card">
+      <h2>🔧 Налаштування емулятора ваги</h2>
+      <div class="row">
+        <label>Ціль, г<input id="target" class="input" type="number" step="0.1" value="200"/></label>
+        <label>LSL, г<input id="lsl" class="input" type="number" step="0.1" value="195"/></label>
+        <label>USL, г<input id="usl" class="input" type="number" step="0.1" value="205"/></label>
+        <label>σ (розкид), г<input id="sigma" class="input" type="number" step="0.1" value="1.5"/></label>
+      </div>
+      <div class="row">
+        <label>Дрейф/100 порцій, г<input id="drift" class="input" type="number" step="0.1" value="0.8"/></label>
+        <label>Підгрупа n<input id="n" class="input" type="number" min="2" max="10" step="1" value="5"/></label>
+        <label>Усушка, % (після варки/коптіння)<input id="shrink" class="input" type="number" step="0.1" value="3.0"/></label>
+        <label>Ціна продукту, грн/кг<input id="price" class="input" type="number" step="0.1" value="220"/></label>
+      </div>
+      <div class="row">
+        <button class="btn good" id="start">▶️ Старт</button>
+        <button class="btn" id="tick">➕ 1 порція</button>
+        <button class="btn" id="tick10">➕ 10 порцій</button>
+        <button class="btn secondary" id="reset">🧹 Скинути</button>
+        <span id="stat" class="badge">Статус: idle</span>
+      </div>
+
+      <h3 style="margin-top:10px">📈 SPC Графіки (X̄–R)</h3>
+      <div class="canvasWrap"><canvas id="chart" width="980" height="320"></canvas></div>
+      <small class="muted">Синій — X̄; Зелений — R; Жовті — межі керованості; Сірі — межі специфікацій LSL/USL (проектуються на X̄).</small>
+
+      <h3 style="margin-top:10px">🛎️ Журнал</h3>
+      <pre id="alog" class="note" style="max-height:180px;overflow:auto">// Поки без подій</pre>
+
+      <h3 style="margin-top:10px">💾 Експорт</h3>
+      <div class="row">
+        <input id="lot" class="input" placeholder="Лот/партія (напр. 2025-10-18-02)"/>
+        <button class="btn" id="saveCsv">📄 CSV (усі зразки + X̄–R)</button>
+        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+      </div>
+      <div class="receipt" id="rc" hidden></div>
+    </div>
+
+    <!-- ПРАВО: показники + схема + завдання -->
+    <div class="card">
+      <h2>📊 Показники</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Виготовлено порцій</th><td id="m_cnt">0</td></tr>
+          <tr><th>Відповідність LSL/USL</th><td id="m_conform">—</td></tr>
+          <tr><th>X̄ (середнє всіх)</th><td id="m_xbar">—</td></tr>
+          <tr><th>R̄ (середнє діапазонів)</th><td id="m_rbar">—</td></tr>
+          <tr><th>UCL/LCL для X̄</th><td id="m_xlim">—</td></tr>
+          <tr><th>UCL/LCL для R</th><td id="m_rlim">—</td></tr>
+          <tr><th>Усушка, %</th><td id="m_shrink">—</td></tr>
+          <tr><th>Giveaway (г/порцію)</th><td id="m_give">—</td></tr>
+          <tr><th>Втрати/надлишки, грн (всього)</th><td id="m_loss">—</td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">🔌 Схема процесу (SVG)</h2>
+      <svg viewBox="0 0 820 260" role="img" aria-label="Дозатор → Вага → Усушка → Контроль якості">
+        <rect x="40" y="40" width="200" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <text x="140" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Дозатор</text>
+        <text x="140" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">тарування, ціль</text>
+
+        <rect x="280" y="40" width="200" height="120" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <text x="380" y="80" fill="#dcfce7" font-size="14" text-anchor="middle">Вага</text>
+        <text x="380" y="100" fill="#a7f3d0" font-size="12" text-anchor="middle">підгрупа n</text>
+
+        <rect x="520" y="40" width="120" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <text x="580" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Усушка</text>
+        <text x="580" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">%, після Т/обробки</text>
+
+        <rect x="660" y="40" width="120" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+        <text x="720" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">SPC X̄–R</text>
+        <text x="720" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">A₂/D₃/D₄</text>
+
+        <line x1="240" y1="100" x2="280" y2="100" stroke="#93c5fd" stroke-width="3"/>
+        <line x1="480" y1="100" x2="520" y2="100" stroke="#22c55e" stroke-width="3"/>
+        <line x1="640" y1="100" x2="660" y2="100" stroke="#64748b" stroke-width="3"/>
+      </svg>
+
+      <h2 style="margin-top:10px">🎯 Завдання для студентів</h2>
+      <ol>
+        <li>Налаштуй <b>LSL/USL</b> для продукту 200 г (напр. 195–205 г). Згенеруй ≥ 50 порцій. Експортуй <b>CSV</b>.</li>
+        <li>Підбери <b>n</b> і оціни X̄–R: чи потрапляють точки в межі керованості? Додай коментар у <b>TXT</b>.</li>
+        <li>Задай <b>усушку 3–5%</b> і порахуй <b>giveaway</b> у грн. Роздрукуй <b>чек 58 мм</b> для бригади.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📜 Історична нотатка</h2>
+    <p class="muted small">SPC зародилась у 1920-х (Шухарт), а сьогодні контроль порціонування в м’ясній/молочній галузі — це поєднання ваг, статистики та вартості відхилень. Ми відтворюємо це просто у браузері.</p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s);
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function rndNorm(){ // Box–Muller
+  let u=0,v=0; while(u===0)u=Math.random(); while(v===0)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+function mean(a){return a.reduce((s,x)=>s+x,0)/Math.max(1,a.length);}
+function range(a){return Math.max(...a)-Math.min(...a);}
+
+// ===== Константи SPC (для підгруп n=2..10) =====
+const A2={2:1.880,3:1.023,4:0.729,5:0.577,6:0.483,7:0.419,8:0.373,9:0.337,10:0.308};
+const D3={2:0.000,3:0.000,4:0.000,5:0.000,6:0.000,7:0.076,8:0.136,9:0.184,10:0.223};
+const D4={2:3.267,3:2.574,4:2.282,5:2.114,6:2.004,7:1.924,8:1.864,9:1.816,10:1.777};
+
+// ===== Стан емулятора =====
+let samples=[];    // усі сирі зразки (до усушки)
+let groups=[];     // [{xs:[], xbar, r}]
+let driftBase=0;   // накопичений дрейф
+let tickCount=0;
+
+const chart=$('#chart'), ctx=chart.getContext('2d');
+
+// ===== Події керування =====
+$('#start').addEventListener('click', ()=>{ tickBatch(10); $('#stat').textContent='Статус: працює'; });
+$('#tick').addEventListener('click', ()=> tickBatch(1));
+$('#tick10').addEventListener('click', ()=> tickBatch(10));
+$('#reset').addEventListener('click', resetAll);
+
+function resetAll(){
+  samples.length=0; groups.length=0; driftBase=0; tickCount=0;
+  $('#stat').textContent='Статус: idle';
+  $('#rc').hidden=true;
+  $('#alog').textContent='// Поки без подій';
+  renderKPIs(); draw();
+}
+
+// ===== Генерація вимірювань =====
+function tickBatch(k){
+  const target=parseFloat($('#target').value)||200;
+  const sigma=parseFloat($('#sigma').value)||1.5;
+  const n=parseInt($('#n').value,10)||5;
+  const drift=parseFloat($('#drift').value)||0; // г/100 порцій
+  for(let i=0;i<k;i++){
+    // дрейф зростає плавно
+    const driftNow = driftBase + (drift/100)*tickCount;
+    const x = target + driftNow + sigma * rndNorm();
+    samples.push(x);
+    tickCount++;
+    if(samples.length % n === 0){
+      const xs=samples.slice(samples.length-n);
+      const xbar=mean(xs), r=range(xs);
+      groups.push({xs,xbar,r});
+      log(`Підгрупа #${groups.length}: X̄=${xbar.toFixed(2)} г, R=${r.toFixed(2)} г`);
+    }
+  }
+  renderKPIs(); draw();
+}
+
+function log(msg){
+  const t=new Date().toLocaleTimeString();
+  const box=$('#alog');
+  if(box.textContent.startsWith('//')) box.textContent='';
+  box.textContent+=`[${t}] ${msg}\n`;
+  box.scrollTop=box.scrollHeight;
+}
+
+// ===== KPI =====
+function renderKPIs(){
+  const LSL=parseFloat($('#lsl').value), USL=parseFloat($('#usl').value);
+  $('#m_cnt').textContent = samples.length;
+
+  if(samples.length){
+    const xb = mean(samples);
+    $('#m_xbar').textContent = xb.toFixed(3)+' г';
+  } else { $('#m_xbar').textContent='—'; }
+
+  if(groups.length){
+    const rbar = mean(groups.map(g=>g.r));
+    $('#m_rbar').textContent = rbar.toFixed(3)+' г';
+
+    const n=parseInt($('#n').value,10);
+    const a2=A2[n], d3=D3[n], d4=D4[n];
+    const xbarbar = mean(groups.map(g=>g.xbar));
+
+    const UCLx = xbarbar + a2*rbar;
+    const LCLx = xbarbar - a2*rbar;
+    const UCLr = d4*rbar;
+    const LCLr = d3*rbar;
+
+    $('#m_xlim').textContent = `LCL=${LCLx.toFixed(2)}; UCL=${UCLx.toFixed(2)}`;
+    $('#m_rlim').textContent = `LCL=${LCLr.toFixed(2)}; UCL=${UCLr.toFixed(2)}`;
+
+    const conf = samples.filter(x=>x>=LSL && x<=USL).length / samples.length * 100;
+    $('#m_conform').textContent = samples.length? conf.toFixed(1)+' %' : '—';
+
+    const shrink = parseFloat($('#shrink').value)||0;
+    $('#m_shrink').textContent = shrink.toFixed(1)+' %';
+
+    // Giveaway / short після усушки відносно таргета
+    const price = parseFloat($('#price').value)||0;  // грн/кг
+    const tgt = parseFloat($('#target').value)||200;
+    const netMean = mean(samples) * (1 - shrink/100); // середня маса після усушки
+    const givePer = (netMean - tgt); // г/порцію (+ надлишок, – недовкладення)
+    const lossTotalUAH = (givePer/1000) * price * samples.length; // грн
+    $('#m_give').textContent = givePer.toFixed(2)+' г/порцію';
+    const cls = lossTotalUAH>=0 ? 'warn' : 'bad';
+    $('#m_loss').innerHTML = `<b class="${cls}">${lossTotalUAH.toFixed(2)} грн</b>`;
+  }else{
+    $('#m_rbar').textContent='—';
+    $('#m_xlim').textContent='—';
+    $('#m_rlim').textContent='—';
+    $('#m_conform').textContent='—';
+    $('#m_shrink').textContent='—';
+    $('#m_give').textContent='—';
+    $('#m_loss').textContent='—';
+  }
+}
+
+// ===== Малювання X̄–R =====
+function draw(){
+  const W=chart.width,H=chart.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,W-1,H-1);
+
+  if(!groups.length) return;
+
+  const n=parseInt($('#n').value,10);
+  const a2=A2[n], d3=D3[n], d4=D4[n];
+  const xs=groups.map((g,i)=>i+1);
+  const xbars=groups.map(g=>g.xbar);
+  const rs=groups.map(g=>g.r);
+  const xbarbar=mean(xbars), rbar=mean(rs);
+
+  const UCLx=xbarbar+a2*rbar, LCLx=xbarbar-a2*rbar;
+  const UCLr=d4*rbar, LCLr=d3*rbar;
+
+  const LSL=parseFloat($('#lsl').value), USL=parseFloat($('#usl').value);
+
+  const left=60, right=W-20, top=20, mid=H*0.52, bottom=H-20;
+  const gxW=(right-left)/Math.max(1,groups.length-1);
+
+  // Верхній — X̄
+  const minX = Math.min(LCLx, LSL, ...xbars);
+  const maxX = Math.max(UCLx, USL, ...xbars);
+  ctx.fillStyle='#94a3b8'; ctx.font='12px ui-monospace';
+  ctx.fillText('X̄ (г)', 8, top+12);
+
+  // осі
+  ctx.strokeStyle='#223049';
+  ctx.beginPath(); ctx.moveTo(left, top); ctx.lineTo(left, mid-10); ctx.lineTo(right, mid-10); ctx.stroke();
+
+  // межі керованості (жовті)
+  const yX = val => (mid-10) - (val-minX)/(maxX-minX||1)*(mid-top-20);
+  ctx.strokeStyle='#fbbf24'; ctx.setLineDash([6,6]);
+  ctx.beginPath(); ctx.moveTo(left,yX(UCLx)); ctx.lineTo(right,yX(UCLx)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(left,yX(LCLx)); ctx.lineTo(right,yX(LCLx)); ctx.stroke();
+  ctx.setLineDash([]);
+  // центр
+  ctx.strokeStyle='#64748b'; ctx.beginPath(); ctx.moveTo(left,yX(xbarbar)); ctx.lineTo(right,yX(xbarbar)); ctx.stroke();
+
+  // специфікації (сірі)
+  ctx.strokeStyle='#9ca3af'; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(left,yX(USL)); ctx.lineTo(right,yX(USL)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(left,yX(LSL)); ctx.lineTo(right,yX(LSL)); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // лінія X̄
+  ctx.beginPath(); ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2;
+  xbars.forEach((v,i)=>{ const x=left+i*gxW, y=yX(v); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+  ctx.stroke();
+
+  // Нижній — R
+  const minR = Math.min(LCLr, ...rs, 0);
+  const maxR = Math.max(UCLr, ...rs);
+  ctx.fillStyle='#94a3b8'; ctx.fillText('R (г)', 8, mid+16);
+
+  ctx.strokeStyle='#223049';
+  ctx.beginPath(); ctx.moveTo(left, mid+10); ctx.lineTo(left, bottom); ctx.lineTo(right, bottom); ctx.stroke();
+
+  const yR = val => bottom - (val-minR)/(maxR-minR||1)*(bottom-(mid+20));
+
+  // межі керованості
+  ctx.strokeStyle='#fbbf24'; ctx.setLineDash([6,6]);
+  ctx.beginPath(); ctx.moveTo(left,yR(UCLr)); ctx.lineTo(right,yR(UCLr)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(left,yR(LCLr)); ctx.lineTo(right,yR(LCLr)); ctx.stroke();
+  ctx.setLineDash([]);
+  // центр
+  ctx.strokeStyle='#64748b'; ctx.beginPath(); ctx.moveTo(left,yR(rbar)); ctx.lineTo(right,yR(rbar)); ctx.stroke();
+
+  // лінія R
+  ctx.beginPath(); ctx.strokeStyle='#22c55e'; ctx.lineWidth=2;
+  rs.forEach((v,i)=>{ const x=left+i*gxW, y=yR(v); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+  ctx.stroke();
+
+  // маркери виходу за межі
+  ctx.fillStyle='#f87171';
+  xbars.forEach((v,i)=>{ if(v>UCLx||v<LCLx){ const x=left+i*gxW, y=yX(v); ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill(); }});
+  rs.forEach((v,i)=>{ if(v>UCLr||v<LCLr){ const x=left+i*gxW, y=yR(v); ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill(); }});
+}
+
+// ===== Експорт =====
+$('#saveCsv').addEventListener('click', ()=>{
+  if(!samples.length) return alert('Немає даних');
+  const n=parseInt($('#n').value,10);
+  const LSL=parseFloat($('#lsl').value), USL=parseFloat($('#usl').value);
+  let csv='idx,group,x(g),in_spec\n';
+  samples.forEach((x,i)=>{
+    const g=Math.floor(i/n)+1;
+    csv += `${i+1},${g},${x.toFixed(3)},${(x>=LSL && x<=USL)?1:0}\n`;
+  });
+  csv += '\n# Xbar-R summary\n';
+  csv += 'group,xbar(g),R(g)\n';
+  groups.forEach((g,i)=>{ csv += `${i+1},${g.xbar.toFixed(3)},${g.r.toFixed(3)}\n`; });
+  download('tech_para17_spc_'+stamp()+'.csv', csv, 'text/csv');
+});
+
+$('#saveTxt').addEventListener('click', ()=>{
+  const n=parseInt($('#n').value,10);
+  const LSL=parseFloat($('#lsl').value), USL=parseFloat($('#usl').value);
+  const shrink=parseFloat($('#shrink').value)||0;
+  const price=parseFloat($('#price').value)||0;
+  const tgt=parseFloat($('#target').value)||200;
+  const conf = samples.length? (samples.filter(x=>x>=LSL && x<=USL).length/samples.length*100) : 0;
+  const xb = samples.length? mean(samples) : NaN;
+  const rbar = groups.length? mean(groups.map(g=>g.r)) : NaN;
+  const givePer = samples.length? (xb*(1-shrink/100) - tgt) : 0;
+  const lossUAH = (givePer/1000) * price * samples.length;
+
+  const nstr = [
+    'Пара 17 — Дозування/усушка + SPC X̄–R',
+    `Лот: ${$('#lot').value||'—'}`,
+    `Ціль=${tgt} г; LSL=${LSL} г; USL=${USL} г; n=${n}`,
+    `σ(модель)=${$('#sigma').value} г; дрейф/100=${$('#drift').value} г`,
+    `Виготовлено: ${samples.length} порцій; Підгруп: ${groups.length}`,
+    `X̄=${isNaN(xb)?'—':xb.toFixed(3)} г; R̄=${isNaN(rbar)?'—':rbar.toFixed(3)} г`,
+    `Відповідність: ${conf.toFixed(1)} %`,
+    `Усушка=${shrink.toFixed(1)} %; Giveaway=${givePer.toFixed(2)} г/порцію`,
+    `Втрати/надлишки: ${lossUAH.toFixed(2)} грн`,
+    '--- Журнал ---',
+    ...($('#alog').textContent.startsWith('//')?[]:$('#alog').textContent.trim().split('\n'))
+  ];
+  download('tech_para17_summary_'+stamp()+'.txt', nstr.join('\n'));
+});
+
+$('#print58').addEventListener('click', ()=>{
+  const LSL=parseFloat($('#lsl').value), USL=parseFloat($('#usl').value);
+  const shrink=parseFloat($('#shrink').value)||0;
+  const price=parseFloat($('#price').value)||0;
+  const tgt=parseFloat($('#target').value)||200;
+  const xb = samples.length? mean(samples) : NaN;
+  const givePer = samples.length? (xb*(1-shrink/100) - tgt) : 0;
+  const lossUAH = (givePer/1000) * price * samples.length;
+  const conf = samples.length? (samples.filter(x=>x>=LSL && x<=USL).length/samples.length*100) : 0;
+
+  const lines=[
+    '=== ЧЕК ДОЗУВАННЯ (58мм) ===',
+    'Лот: '+($('#lot').value||'—'),
+    `Ціль ${tgt} г | LSL ${LSL} г | USL ${USL} г`,
+    `Виготовлено: ${samples.length}`,
+    `Відповідність: ${conf.toFixed(1)} %`,
+    `X̄=${isNaN(xb)?'—':xb.toFixed(2)} г | shrink ${shrink.toFixed(1)} %`,
+    `Giveaway: ${givePer.toFixed(2)} г/порц`,
+    `Втрати/надлишки: ${lossUAH.toFixed(2)} грн`,
+    '-----------------------------'
+  ];
+  const rc=$('#rc'); rc.hidden=false; rc.textContent=lines.join('\n');
+  download('tech_para17_receipt_'+stamp()+'.txt', lines.join('\n'));
+});
+
+// ===== Стартова ініціалізація =====
+resetAll();
+</script>
+</body>
+</html>
