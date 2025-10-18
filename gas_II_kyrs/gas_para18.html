@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 18 (газовики) — Баланс/втрати: добові надходження/відбори, аномалії, what-if, графіки, експорт</title>
+<meta name="description" content="Інтерактивний баланс газу: добові надходження/відбори, корекції T/P, похибки лічильників, технічні втрати, виявлення аномалій (Z-score), графіки, what-if моделювання потенційних втрат, санкі, експорт CSV/TXT."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1320px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.grid{display:grid;gap:14px;grid-template-columns:1.25fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:#e6eef9}
+textarea{min-height:110px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:#e6eef9;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:#e5e7eb;margin-right:6px;margin-top:6px}
+.muted{color:var(--muted)}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+svg{width:100%;height:auto;display:block;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;padding:10px}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 10px;color:#e5e7eb}
+.tag.ok{border-color:#1d3e2a;background:#0f2f1e}
+.tag.warn{border-color:#4a3b13;background:#2b2310}
+.tag.bad{border-color:#5a1f1f;background:#2a1212}
+.footer{margin-top:20px;color:#94a3b8;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">⚖️🔥</span>
+      <div>
+        <b>Пара 18 — Баланс/втрати газу</b><br/>
+        <span class="badge">Добові дані → корекції → технічні втрати → аномалії → графіки → what-if → експорт</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <div class="card">
+    <h2>📚 Контекст</h2>
+    <p>Встав або згенеруй <b>добові</b> значення <b>Надходження (In)</b> та <b>Відбору (Out)</b>, задай корекції <b>температура/тиск</b> та <b>похибки лічильників</b>. Система оцінить <b>технічні втрати</b>, порахує <b>баланс</b> і виділить <b>аномалії</b> (Z-score). Далі змоделюй сценарій <b>“що-якщо”</b> для можливих (необлікованих) втрат — побачиш вплив на графіки та санкі-схему.</p>
+    <div class="row">
+      <button class="btn" id="gen">🧪 Згенерувати 30 днів</button>
+      <button class="btn secondary" id="clr">🧹 Очистити</button>
+      <button class="btn good" id="an">🔎 Аналізувати</button>
+      <span class="badge">Записів: <b id="count">0</b></span>
+    </div>
+    <textarea id="txt" placeholder="Формат: YYYY-MM-DD; In_m3; Out_m3; Примітка (опц.)
+2025-09-01; 12000; 11850; базове споживання
+2025-09-02; 12150; 12090; похолодання
+..."></textarea>
+
+    <div class="row">
+      <label>Корекція T/P (коеф. до Out) <input id="kTP" class="input" type="number" step="0.001" value="1.010"><small class="muted">Напр., +1.0% до відбору</small></label>
+      <label>Похибка ліч. вузла In, % <input id="errIn" class="input" type="number" step="0.1" value="0.5"></label>
+      <label>Похибка ліч. вузла Out, % <input id="errOut" class="input" type="number" step="0.1" value="1.0"></label>
+      <label>Поріг аномалії (σ) <input id="zThr" class="input" type="number" step="0.1" value="2.5"></label>
+    </div>
+
+    <div class="row">
+      <label style="flex:1">What-if: потенційні втрати, % від Out<input id="whatPct" class="input" type="range" min="0" max="5" step="0.1" value="1.2"><small class="muted">Прокрути повзунок — вплине на графіки і санкі</small></label>
+      <span class="badge">Втрати what-if: <b id="whatLbl">1.2%</b></span>
+      <button class="btn" id="applyWhat">▶️ Застосувати</button>
+      <button class="btn secondary" id="resetWhat">↩️ Скинути</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>📈 Графік 1 — Добовий баланс (In − Out′), м³</h2>
+      <canvas id="cBal" class="chart" width="560" height="240"></canvas>
+
+      <h2 style="margin-top:10px">📈 Графік 2 — Кумулятивний дисбаланс, тис. м³</h2>
+      <canvas id="cCum" class="chart" width="560" height="240"></canvas>
+
+      <h2 style="margin-top:10px">📈 Графік 3 — What-if: баланс зі штучними втратами, м³</h2>
+      <canvas id="cWhat" class="chart" width="560" height="240"></canvas>
+    </div>
+
+    <div class="card">
+      <h2>📊 Метрики та аномалії</h2>
+      <div class="row">
+        <span class="tag ok">ΣIn: <b id="mIn">—</b> м³</span>
+        <span class="tag ok">ΣOut′: <b id="mOut">—</b> м³</span>
+        <span class="tag warn">ΣТехвтрати: <b id="mTech">—</b> м³</span>
+        <span class="tag bad">ΣДисбаланс: <b id="mDiff">—</b> м³</span>
+      </div>
+      <table class="tbl" style="margin-top:8px">
+        <thead><tr><th>#</th><th>Дата</th><th>In</th><th>Out′</th><th>Баланс</th><th>Z</th><th>Ступінь</th></tr></thead>
+        <tbody id="tblAnom"><tr><td colspan="7" class="muted">— ще порожньо —</td></tr></tbody>
+      </table>
+
+      <h2 style="margin-top:10px">🔀 Санкі (потоки за період)</h2>
+      <svg id="sk" viewBox="0 0 520 220" role="img" aria-label="Sankey: In → Consumption/Technical/Potential">
+        <!-- Прямокутники -->
+        <rect id="rIn"  x="20"  y="40" width="40" height="140" rx="6" fill="#14532d" stroke="#22c55e"/>
+        <rect id="rCons" x="420" y="30" width="40" height="110" rx="6" fill="#0b1a2f" stroke="#93c5fd"/>
+        <rect id="rTech" x="420" y="150" width="40" height="40"  rx="6" fill="#1f2937" stroke="#fbbf24"/>
+        <rect id="rPot"  x="420" y="195" width="40" height="0"   rx="6" fill="#2a1212" stroke="#f87171"/>
+        <!-- Підписи -->
+        <text x="20" y="28" fill="#e5e7eb" font-size="12">Надходження</text>
+        <text x="410" y="20" fill="#e5e7eb" font-size="12">Споживання / Втрати</text>
+        <!-- Потоки (малюємо скриптом) -->
+      </svg>
+
+      <h2 style="margin-top:10px">🛎️ Журнал</h2>
+      <pre id="alog" class="log">// Поки без подій</pre>
+
+      <h2 style="margin-top:10px">💾 Експорт</h2>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV (ряд за днем + аномалії)</button>
+        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Завдання для студентів</h2>
+    <ol>
+      <li>Згенеруй 30 днів і знайди <b>топ-5 аномалій</b>. Поясни можливі причини.</li>
+      <li>Підібрай корекції T/P та похибки так, щоб <b>ΣДисбаланс → мінімум</b>, але <b>аномалії</b> лишились видимими.</li>
+      <li>Постав what-if = <b>2.5%</b> і порівняй кумулятивний дисбаланс до/після. Опиши вплив.</li>
+      <li>Експортуй CSV/TXT і зроби висновки щодо **пріоритетів пошуку втрат** (ділянки/дати).</li>
+    </ol>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+/* ===== Утиліти ===== */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString('uk-UA');const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+$('#upd').textContent=new Date().toLocaleDateString('uk-UA');
+
+/* ===== Джерело даних ===== */
+$('#txt').addEventListener('input',()=>$('#count').textContent=String(splitRows($('#txt').value).length));
+$('#clr').addEventListener('click',()=>{ $('#txt').value=''; $('#count').textContent='0'; resetAll(); });
+
+function splitRows(text){
+  return text.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+}
+function parseRows(text){
+  const rows=splitRows(text).map(line=>{
+    const [d,inm,outm,...note]=line.split(';').map(s=>s.trim());
+    const dt = new Date(d); const In=+inm, Out=+outm;
+    if(!isFinite(dt.getTime())||!isFinite(In)||!isFinite(Out)) return null;
+    return {date:d, In, Out, note:note.join('; ')||''};
+  }).filter(Boolean);
+  return rows;
+}
+
+function gen30(){
+  const today=new Date(); const start=new Date(today); start.setDate(start.getDate()-29);
+  const ar=[];
+  let base=12000;
+  for(let i=0;i<30;i++){
+    const d=new Date(start); d.setDate(start.getDate()+i);
+    // сезонність/шум
+    const seas = 400*Math.sin(i/6)+ (i>20? 600:0);
+    const In = Math.round(base + seas + (Math.random()*300-150));
+    let Out = Math.round(In - 80 + (Math.random()*240-120));
+    // інжектуємо 4 аномалії
+    if([5,12,18,27].includes(i)) Out += (i%2? -800: +900);
+    ar.push(`${d.toISOString().slice(0,10)}; ${In}; ${Out}; автоген`);
+  }
+  return ar.join('\n');
+}
+$('#gen').addEventListener('click',()=>{ $('#txt').value=gen30(); $('#count').textContent='30'; log('Згенеровано 30 днів'); });
+
+/* ===== Розрахунки ===== */
+let lastResult=null, whatPct=+$('#whatPct').value;
+$('#whatPct').addEventListener('input',()=>$('#whatLbl').textContent=$('#whatPct').value+'%');
+$('#applyWhat').addEventListener('click',()=>{ whatPct=+$('#whatPct').value; if(lastResult) { drawAll(lastResult); log('Застосовано what-if: '+whatPct+'%'); }});
+$('#resetWhat').addEventListener('click',()=>{ whatPct=0; $('#whatPct').value='0'; $('#whatLbl').textContent='0%'; if(lastResult){ drawAll(lastResult); log('Скинуто what-if'); }});
+
+$('#an').addEventListener('click',()=>{
+  const rows=parseRows($('#txt').value);
+  if(!rows.length){ alert('Немає валідних рядків'); return; }
+  const kTP = +$('#kTP').value || 1.0;
+  const errIn = (+$('#errIn').value||0)/100;
+  const errOut = (+$('#errOut').value||0)/100;
+  const zThr = +$('#zThr').value||2.5;
+
+  // нормалізація In/Out з похибками
+  const data = rows.map(r=>{
+    const InCorr  = r.In * (1 + errIn);
+    const OutCorr = r.Out * (1 + errOut) * kTP;
+    const TechLoss = Math.max(0, 0.005*OutCorr + 0.00002*OutCorr*OutCorr/20000); // умовна техвтрата (нелінійний компонент)
+    const Balance = InCorr - OutCorr - TechLoss; // позитивне → надлишок, від’ємне → нестача
+    return {...r, InCorr, OutCorr, TechLoss, Balance};
+  });
+
+  // Z-score по ряду Balance
+  const mean = data.reduce((a,b)=>a+b.Balance,0)/data.length;
+  const sd = Math.sqrt(data.reduce((a,b)=>a+(b.Balance-mean)**2,0)/Math.max(1,data.length-1));
+  data.forEach(d=>{
+    d.Z = sd>0? (d.Balance-mean)/sd : 0;
+    d.level = Math.abs(d.Z)>=zThr? 'P1' : (Math.abs(d.Z)>=zThr*0.6? 'P2':'OK');
+  });
+
+  // Кумулятив
+  let c=0; data.forEach(d=>{ c+=d.Balance; d.Cum=c; });
+
+  // Підсумки
+  const sumIn = data.reduce((a,b)=>a+b.InCorr,0);
+  const sumOut= data.reduce((a,b)=>a+b.OutCorr,0);
+  const sumTech=data.reduce((a,b)=>a+b.TechLoss,0);
+  const sumBal=data.reduce((a,b)=>a+b.Balance,0);
+
+  lastResult={data, mean, sd, sums:{sumIn,sumOut,sumTech,sumBal}};
+  drawAll(lastResult);
+  log(`Аналіз: μ=${mean.toFixed(1)} м³, σ=${sd.toFixed(1)} м³, аномалій P1=${data.filter(x=>x.level==='P1').length}`);
+});
+
+function resetAll(){
+  lastResult=null; ['mIn','mOut','mTech','mDiff'].forEach(id=>$('#'+id).textContent='—');
+  $('#tblAnom').innerHTML='<tr><td colspan="7" class="muted">— ще порожньо —</td></tr>';
+  [gb, gc, gw].forEach(ctx=>{ ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height); ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,ctx.canvas.width-1,ctx.canvas.height-1); });
+  drawSankey(0,0,0,0);
+}
+
+/* ===== Графіки ===== */
+const cBal=$('#cBal'), gb=cBal.getContext('2d');
+const cCum=$('#cCum'), gc=cCum.getContext('2d');
+const cWhat=$('#cWhat'), gw=cWhat.getContext('2d');
+
+function drawAll(res){
+  const {data, sums}=res;
+  // Метрики
+  $('#mIn').textContent = Math.round(sums.sumIn).toLocaleString('uk-UA');
+  $('#mOut').textContent = Math.round(sums.sumOut).toLocaleString('uk-UA');
+  $('#mTech').textContent = Math.round(sums.sumTech).toLocaleString('uk-UA');
+  $('#mDiff').textContent = Math.round(sums.sumBal).toLocaleString('uk-UA');
+
+  // Таблиця аномалій (топ-10 за |Z|)
+  const body=$('#tblAnom'); body.innerHTML='';
+  data.slice().sort((a,b)=>Math.abs(b.Z)-Math.abs(a.Z)).slice(0,10).forEach((d,i)=>{
+    const tr=document.createElement('tr');
+    const cls = d.level==='P1'?'bad':(d.level==='P2'?'warn':'');
+    tr.innerHTML = `<td>${i+1}</td><td>${d.date}</td><td>${d.InCorr.toFixed(0)}</td><td>${d.OutCorr.toFixed(0)}</td><td class="${cls}">${d.Balance.toFixed(0)}</td><td>${d.Z.toFixed(2)}</td><td><b>${d.level}</b></td>`;
+    body.appendChild(tr);
+  });
+
+  // Графік 1 — добовий баланс
+  drawBars(gb, data.map(x=>x.Balance), data.map(x=>x.date), 'м³');
+
+  // Графік 2 — кумулятив
+  drawLine(gc, data.map(x=>x.Cum/1000), data.map(x=>x.date), 'тис. м³');
+
+  // What-if: додамо потенційні втрати від Out
+  const what = data.map(x=> x.Balance - x.OutCorr*(whatPct/100) );
+  drawBars(gw, what, data.map(x=>x.date), 'м³ (what-if)');
+
+  // Санкі
+  const sumPot = data.reduce((a,b)=>a + b.OutCorr*(whatPct/100),0);
+  drawSankey(sums.sumIn, sums.sumOut, sums.sumTech, sumPot);
+}
+
+function drawBars(ctx, vals, labels, unit){
+  const W=ctx.canvas.width,H=ctx.canvas.height;
+  ctx.clearRect(0,0,W,H); ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,W-1,H-1);
+  const left=40,right=W-10,top=20,bottom=H-26;
+  const maxAbs=Math.max(100, ...vals.map(v=>Math.abs(v)));
+  const bw=(right-left)/vals.length;
+  // сітка
+  ctx.strokeStyle='#1f2a44';
+  for(let i=0;i<=4;i++){ const y=top+i*(bottom-top)/4; ctx.beginPath(); ctx.moveTo(left,y); ctx.lineTo(right,y); ctx.stroke(); }
+  // нуль
+  const y0=bottom - (0.5*(bottom-top)); // перерахунок нижче:
+  function Y(v){ return bottom - ((v+maxAbs)/(2*maxAbs))*(bottom-top); } // -max..+max → top..bottom
+  // стовпчики
+  vals.forEach((v,i)=>{
+    const x=left+i*bw+4; const y=Y(v); const yBase=Y(0);
+    ctx.fillStyle = v>=0? '#22c55e' : '#f87171';
+    ctx.fillRect(x, Math.min(y,yBase), bw-8, Math.abs(y-yBase));
+  });
+  // легенда
+  ctx.fillStyle='#e5e7eb'; ctx.font='11px ui-monospace';
+  ctx.fillText(`Амплітуда ±${maxAbs.toFixed(0)} ${unit}`, right-160, top+12);
+}
+
+function drawLine(ctx, vals, labels, unit){
+  const W=ctx.canvas.width,H=ctx.canvas.height;
+  ctx.clearRect(0,0,W,H); ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,W-1,H-1);
+  const left=40,right=W-10,top=20,bottom=H-26;
+  const max=Math.max(1, ...vals.map(v=>Math.abs(v)));
+  const X=i=> left + i/(Math.max(1,vals.length-1))*(right-left);
+  const Y=v=> bottom - (v/max)*(bottom-top);
+  // сітка
+  ctx.strokeStyle='#1f2a44'; for(let i=0;i<=4;i++){ const y=top+i*(bottom-top)/4; ctx.beginPath(); ctx.moveTo(left,y); ctx.lineTo(right,y); ctx.stroke(); }
+  // крива
+  ctx.beginPath(); ctx.strokeStyle='#38bdf8';
+  vals.forEach((v,i)=>{ const x=X(i), y=Y(v); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+  ctx.stroke();
+  ctx.fillStyle='#e5e7eb'; ctx.font='11px ui-monospace';
+  ctx.fillText(`Макс ${max.toFixed(2)} ${unit}`, right-120, top+12);
+}
+
+/* ===== Санкі (спрощений) ===== */
+function drawSankey(sumIn, sumOut, sumTech, sumPot){
+  const svg=$('#sk');
+  // очистимо потоки (залишимо прямокутники/підписи)
+  [...svg.querySelectorAll('path.flow, text.lbl')].forEach(n=>n.remove());
+  const hUnit = 140 / Math.max(1, sumIn); // висота на одиницю (нормалізація до стовпчика In)
+  const hCons = Math.max(2, (sumOut)*hUnit);
+  const hTech = Math.max(2, (sumTech)*hUnit);
+  const hPot  = Math.max(0, (sumPot)*hUnit);
+
+  // висоти прямокутників справа
+  const rCons=$('#rCons'), rTech=$('#rTech'), rPot=$('#rPot');
+  rCons.setAttribute('height', hCons); rCons.setAttribute('y', 30 + (110-hCons));
+  rTech.setAttribute('height', Math.max(2,hTech));
+  rPot.setAttribute('height', hPot>0?hPot:0); rPot.setAttribute('y', 195 - hPot);
+
+  // функція малювання кривої
+  const mk = (y0,y1,color,label,val)=>{
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('class','flow');
+    p.setAttribute('fill',color); p.setAttribute('fill-opacity','0.35'); p.setAttribute('stroke',color); p.setAttribute('stroke-opacity','0.8');
+    const x0=60, x1=420, w=Math.max(4, val*hUnit); // товщина потоку
+    const d=`M ${x0},${y0} C ${x0+140},${y0} ${x1-140},${y1} ${x1},${y1} 
+             L ${x1},${y1+w} C ${x1-140},${y1+w} ${x0+140},${y0+w} ${x0},${y0+w} Z`;
+    p.setAttribute('d', d); svg.appendChild(p);
+    const tx=document.createElementNS('http://www.w3.org/2000/svg','text');
+    tx.setAttribute('class','lbl'); tx.setAttribute('x', (x0+x1)/2); tx.setAttribute('y', (y0+y1)/2 - 6);
+    tx.setAttribute('fill','#e5e7eb'); tx.setAttribute('font-size','11'); tx.setAttribute('text-anchor','middle');
+    tx.textContent = `${label}: ${Math.round(val).toLocaleString('uk-UA')} м³`; svg.appendChild(tx);
+  };
+  // позиції джерела (ліве)
+  let yStart=40; // верх In
+  // розкладаємо на 3 потоки
+  mk(yStart+10, (parseFloat(rCons.getAttribute('y'))||30)+4,  '#93c5fd', 'Споживання', sumOut);
+  mk(yStart+60, (parseFloat(rTech.getAttribute('y'))||150)+4,  '#fbbf24', 'Технічні',  sumTech);
+  if(sumPot>0) mk(yStart+110, (parseFloat(rPot.getAttribute('y'))||195)+4, '#f87171', 'Потенційні', sumPot);
+}
+
+/* ===== Експорт ===== */
+$('#saveCsv').addEventListener('click',()=>{
+  if(!lastResult){ alert('Спершу аналіз'); return; }
+  const {data}=lastResult;
+  let csv='date,in_corr,out_corr,tech_loss,balance,z,level,cum\n';
+  data.forEach(d=>{ csv+=`${d.date},${d.InCorr.toFixed(0)},${d.OutCorr.toFixed(0)},${d.TechLoss.toFixed(0)},${d.Balance.toFixed(0)},${d.Z.toFixed(3)},${d.level},${d.Cum.toFixed(0)}\n`; });
+  download('gas_para18_balance_'+stamp()+'.csv', csv, 'text/csv'); log('CSV збережено');
+});
+$('#saveTxt').addEventListener('click',()=>{
+  if(!lastResult){ alert('Спершу аналіз'); return; }
+  const {sums, data}=lastResult;
+  const top = data.slice().sort((a,b)=>Math.abs(b.Z)-Math.abs(a.Z)).slice(0,5);
+  const lines=[
+    'Пара 18 — Баланс/втрати: підсумок',
+    `ΣIn: ${Math.round(sums.sumIn)} м³`,
+    `ΣOut′: ${Math.round(sums.sumOut)} м³`,
+    `ΣТехвтрати: ${Math.round(sums.sumTech)} м³`,
+    `ΣДисбаланс: ${Math.round(sums.sumBal)} м³`,
+    `What-if втрати: ${whatPct}% від Out`,
+    '--- Топ-5 аномалій (|Z|) ---',
+    ...top.map(x=>`${x.date} Bal=${x.Balance.toFixed(0)} м³ Z=${x.Z.toFixed(2)} → ${x.level}`),
+  ];
+  download('gas_para18_summary_'+stamp()+'.txt', lines.join('\n')); log('TXT збережено');
+});
+
+/* ===== Ініт ===== */
+function initFrames(){
+  [gb, gc, gw].forEach(ctx=>{ ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height); ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,ctx.canvas.width-1,ctx.canvas.height-1); });
+  drawSankey(0,0,0,0);
+}
+initFrames();
+</script>
+</body>
+</html>
