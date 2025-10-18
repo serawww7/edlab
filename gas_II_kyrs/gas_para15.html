@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 15 (газовики) — Акт перевірки автоматики безпеки: датчики/термостати/тяга/іонізація, графіки, фото/аудіо, підпис, 58 мм, CSV/TXT, QR</title>
+<meta name="description" content="Інтерактивна перевірка автоматики безпеки: тести датчиків (витоку, тяги, перегріву, іонізації, тиску води), таймери і KPI для часу спрацювання, графіки, камера, аудіо, підпис, чек 58 мм, CSV/TXT, QR, журнал подій."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1280px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:14px;grid-template-columns:1.25fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:#e6eef9}
+textarea{min-height:90px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:#e6eef9;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+.canvasWrap{overflow:hidden;border-radius:12px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre;min-height:140px}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:#e5e7eb;margin-right:6px;margin-top:6px}
+.ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.photo{width:100%;max-width:240px;border:1px solid var(--line);border-radius:12px;display:block}
+.gallery{display:flex;gap:8px;flex-wrap:wrap}
+.block{border:1px dashed var(--line);border-radius:12px;padding:10px;margin-top:10px;background:#0c182a}
+.sigWrap{border:1px dashed var(--line);border-radius:12px;padding:8px;background:#0c182a}
+#sig{background:#0b1220;border:1px solid var(--line);border-radius:8px;touch-action:none}
+.kpi{display:flex;gap:8px;flex-wrap:wrap}
+.kpi .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 10px;color:#e5e7eb}
+.tag.ok{border-color:#1d3e2a;background:#0f2f1e}
+.tag.warn{border-color:#4a3b13;background:#2b2310}
+.tag.bad{border-color:#5a1f1f;background:#2a1212}
+.test{border:1px solid var(--line);border-radius:12px;padding:8px;margin:6px 0;background:#0c182a;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.test[data-pass="true"]{border-color:#1d3e2a;background:#0f2f1e22}
+.test .actions{display:flex;gap:6px;flex-wrap:wrap}
+audio{width:100%}
+hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🛡️🔥</span>
+      <div>
+        <b>Пара 15 — Акт перевірки автоматики безпеки</b><br/>
+        <span class="badge">Датчики → таймери → KPI → графіки → камера/аудіо → підпис → 58 мм → CSV/TXT → QR</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <!-- Ввідні -->
+  <div class="card">
+    <h2>📚 Сценарій</h2>
+    <p>Виконуємо <b>послідовну перевірку</b> автоматики безпеки побутового котла/ВБД: газ-детектор (витік), датчик тяги, термостат перегріву, іонізаційний контроль полум’я, 
+      пресостат/датчик низького тиску води, відключення газ-клапана. Для кожного тесту фіксуємо <b>час спрацювання</b> і порівнюємо з <b>KPI</b>.</p>
+    <div class="row">
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котельня"/></label>
+      <label style="flex:1">Обладнання
+        <select id="equip" class="input">
+          <option selected>Котел атмосферний</option><option>Котел турбований</option><option>ВБД (водонагрівач)</option><option>Інше</option>
+        </select>
+      </label>
+      <label style="flex:1">Модель/серійний<input id="model" class="input" placeholder="Напр. AOGV 11, S/N 12345..."/></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+    </div>
+    <div class="row">
+      <button class="btn good" id="mkCase">🧰 Створити кейс</button>
+      <span class="badge" id="cid">Кейс: —</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Ліва: Тести + графіки + камера/аудіо/підпис -->
+    <div class="card">
+      <h2>🧪 Тести автоматики (таймери, KPI)</h2>
+      <div class="block">
+        <div class="row">
+          <label>Макс. час спрацювання (KPI), сек<input id="kpiTime" class="input" type="number" step="0.1" value="5.0"/></label>
+          <label>Макс. CO для приміщення, ppm<input id="kpiCO" class="input" type="number" step="1" value="50"/></label>
+          <button class="btn secondary" id="applyKPI">⚙️ Застосувати KPI</button>
+        </div>
+        <div class="kpi" style="margin-top:6px">
+          <span class="tag ok">KPI час: <b id="kTime">≤ 5.0 c</b></span>
+          <span class="tag warn">KPI CO: <b id="kCO">≤ 50 ppm</b></span>
+          <span class="tag bad">Загальний статус: <b id="kAll">—</b></span>
+        </div>
+      </div>
+
+      <div id="tests"></div>
+
+      <h2 style="margin-top:10px">📈 Графік 1 — час спрацювання (с)</h2>
+      <div class="canvasWrap"><canvas id="bar" class="chart" width="520" height="240"></canvas></div>
+
+      <h2 style="margin-top:10px">🕒 Графік 2 — таймлайн подій</h2>
+      <div class="canvasWrap"><canvas id="timeline" class="chart" width="520" height="240"></canvas></div>
+
+      <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
+      <div class="row">
+        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <div>
+          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button class="btn" data-kind="sensor">📷 Датчик (тяги/газу)</button>
+          <button class="btn" data-kind="wiring">📷 Підключення/клеми</button>
+          <button class="btn" data-kind="valve">📷 Газ-клапан</button><br/>
+          <small class="muted">Фото зберігаються у «Галереї доказів».</small>
+        </div>
+      </div>
+      <div class="gallery" id="gal"></div>
+
+      <h2 style="margin-top:10px">🎙️ Аудіо-коментар (резюме випробувань)</h2>
+      <div class="block">
+        <div class="row">
+          <button class="btn" id="audStart">⏺️ Запис</button>
+          <button class="btn secondary" id="audStop">⏹️ Стоп</button>
+          <button class="btn" id="audSave">💾 Зберегти</button>
+          <span class="badge" id="audStat">Немає запису</span>
+        </div>
+        <audio id="audPlay" controls></audio>
+      </div>
+
+      <h2 style="margin-top:10px">✍️ Підпис абонента</h2>
+      <div class="sigWrap">
+        <canvas id="sig" width="520" height="200"></canvas>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" id="sigClear">🧹 Очистити</button>
+          <button class="btn" id="sigSave">💾 Зберегти підпис</button>
+          <span class="badge" id="sigStat">Підпису немає</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Права: Метрики / Експорт -->
+    <div class="card">
+      <h2>📊 Метрики та стан</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Кейс</th><td id="mCase">—</td></tr>
+          <tr><th>Обладнання</th><td id="mEquip">—</td></tr>
+          <tr><th>Тестів виконано</th><td id="mDone">0 / 6</td></tr>
+          <tr><th>Середній час спрацювання</th><td id="mAvg">—</td></tr>
+          <tr><th>CO контроль</th><td id="mCO">—</td></tr>
+          <tr><th>Фото (sensor/wiring/valve)</th><td id="mPhotos">0 / 0 / 0</td></tr>
+          <tr><th>Аудіо</th><td id="mAud">—</td></tr>
+          <tr><th>Підпис</th><td id="mSig">—</td></tr>
+          <tr><th>Статус</th><td id="mState"><b class="warn">Потрібно виконати тести</b></td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">✅ Оцінювання (10 балів)</h2>
+      <ul>
+        <li>Кейс + параметри обладнання — <b>2</b></li>
+        <li>Виконані всі 6 тестів — <b>3</b></li>
+        <li>Середній час ≤ KPI — <b>2</b></li>
+        <li>CO ≤ KPI — <b>2</b></li>
+        <li>Фото (3) або аудіо + підпис — <b>1</b></li>
+      </ul>
+
+      <h2 style="margin-top:10px">💾 Експорт / друк</h2>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV</button>
+        <button class="btn" id="saveTxt">💾 TXT</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (Case)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+
+      <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
+      <pre id="alog" class="card" style="max-height:240px;overflow:auto;margin-top:6px">// Поки без подій</pre>
+    </div>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString();const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+function clean(s){return String(s).replace(/\s+/g,' ').trim();}
+$('#upd').textContent=new Date().toLocaleDateString('uk-UA');
+(function(){ const d=new Date(); $('#day').value=d.toISOString().slice(0,10); })();
+
+// ===== Стан
+let CASE_ID=null;
+let photos={sensor:null, wiring:null, valve:null};
+let sigUrl=null;
+let audBlob=null, audUrl=null;
+let coRoom=0; // ppm (емуляція контролю середовища)
+
+// ===== Кейс
+$('#mkCase').addEventListener('click',()=>{
+  const addr=clean($('#addr').value||''); const tech=clean($('#tech').value||''); const day=$('#day').value;
+  if(!addr||!tech||!day){ alert('Вкажи адресу, виконавця та дату'); return; }
+  CASE_ID='A-'+Math.random().toString(36).slice(2,8).toUpperCase();
+  $('#cid').textContent='Кейс: '+CASE_ID;
+  log(`Кейс ${CASE_ID}: ${addr}, ${$('#equip').value}, ${$('#model').value||'-'}, ${tech}, ${day}`);
+  renderTests(); drawBars(); drawTimeline(); updateMetrics(); computeKPI();
+});
+
+// ===== KPI
+let KPI={tMax:5.0, coMax:50};
+$('#applyKPI').addEventListener('click',()=>{
+  KPI.tMax = Math.max(0.5, parseFloat($('#kpiTime').value)||5);
+  KPI.coMax = Math.max(1, parseFloat($('#kpiCO').value)||50);
+  $('#kTime').textContent = `≤ ${KPI.tMax} c`;
+  $('#kCO').textContent   = `≤ ${KPI.coMax} ppm`;
+  computeKPI(); updateMetrics(); log(`KPI оновлено: час≤${KPI.tMax}s, CO≤${KPI.coMax}ppm`);
+});
+
+// ===== Перелік тестів
+const TEST_DEF=[
+  {k:'gas',   name:'Газ-детектор (витік) → сигнал/відключення', hint:'Імітація витоку — очікуємо сигнал і блокування'},
+  {k:'draft', name:'Датчик тяги → зупинка пальника', hint:'Імітуємо відсутність тяги'},
+  {k:'over',  name:'Термостат перегріву → зупинка', hint:'Імітуємо перегрів теплообмінника'},
+  {k:'ion',   name:'Іонізаційний контроль → відсічення газу', hint:'Імітуємо зникнення полум’я'},
+  {k:'press', name:'Пресостат/датчик низького тиску води', hint:'Імітуємо низький тиск у системі'},
+  {k:'valve', name:'Газ-клапан (швидкість закриття)', hint:'Вимірюємо час до повного закриття'}
+];
+
+let TESTS = TEST_DEF.map(t=>({...t, tStart:null, tStop:null, dur:NaN, pass:false, notes:''}));
+
+function renderTests(){
+  const box=$('#tests'); box.innerHTML='';
+  TESTS.forEach((t,i)=>{
+    const el=document.createElement('div'); el.className='test'; el.dataset.key=t.k; el.dataset.pass=t.pass;
+    el.innerHTML = `
+      <div>
+        <div class="row" style="justify-content:space-between">
+          <div><span class="badge mono">${t.k}</span> <b>${i+1}. ${t.name}</b></div>
+          <div class="badge muted">${t.hint}</div>
+        </div>
+        <div class="row">
+          <span class="badge">Старт: <b class="s">—</b></span>
+          <span class="badge">Стоп: <b class="e">—</b></span>
+          <span class="badge">Час: <b class="d">—</b> c</span>
+          <span class="badge">Статус: <b class="st">—</b></span>
+        </div>
+        <textarea class="input notes" placeholder="Нотатки/спостереження"></textarea>
+      </div>
+      <div class="actions">
+        <button class="btn btn-start">▶️ Start</button>
+        <button class="btn secondary btn-stop">⏹️ Stop</button>
+        <button class="btn good btn-pass">✅ Pass</button>
+        <button class="btn secondary btn-fail">❌ Fail</button>
+      </div>
+    `;
+    box.appendChild(el);
+  });
+}
+renderTests();
+
+function testByKey(k){ return TESTS.find(x=>x.k===k); }
+$('#tests').addEventListener('click',(e)=>{
+  const wrap=e.target.closest('.test'); if(!wrap) return; const key=wrap.dataset.key; const t=testByKey(key);
+  if(e.target.classList.contains('btn-start')){
+    t.tStart=Date.now(); t.tStop=null; t.dur=NaN; t.pass=false;
+    wrap.querySelector('.s').textContent=new Date(t.tStart).toLocaleTimeString();
+    wrap.querySelector('.e').textContent='—'; wrap.querySelector('.d').textContent='—';
+    wrap.querySelector('.st').textContent='в процесі'; wrap.dataset.pass='false';
+    log(`Тест ${key}: Start`);
+  }
+  if(e.target.classList.contains('btn-stop')){
+    if(!t.tStart){ alert('Спершу Start'); return; }
+    t.tStop=Date.now(); t.dur=((t.tStop-t.tStart)/1000).toFixed(2);
+    wrap.querySelector('.e').textContent=new Date(t.tStop).toLocaleTimeString();
+    wrap.querySelector('.d').textContent=String(t.dur);
+    log(`Тест ${key}: Stop (${t.dur}s)`);
+    addTimelinePoint(key, parseFloat(t.dur));
+    drawBars(); drawTimeline(); updateMetrics(); computeKPI();
+  }
+  if(e.target.classList.contains('btn-pass')){
+    const ok = isFinite(parseFloat(t.dur)) ? parseFloat(t.dur) <= KPI.tMax : true;
+    t.pass = ok; wrap.dataset.pass=String(t.pass);
+    wrap.querySelector('.st').textContent = ok?'OK':'Поза KPI';
+    t.notes = wrap.querySelector('.notes').value;
+    log(`Тест ${key}: ${t.pass?'PASS':'FAIL'} (dur=${t.dur||'—'})`);
+    drawBars(); updateMetrics(); computeKPI();
+  }
+  if(e.target.classList.contains('btn-fail')){
+    t.pass=false; wrap.dataset.pass='false';
+    wrap.querySelector('.st').textContent='Fail';
+    t.notes = wrap.querySelector('.notes').value;
+    log(`Тест ${key}: FAIL`);
+    drawBars(); updateMetrics(); computeKPI();
+  }
+});
+
+// ===== Таймлайн подій (масив точок)
+let TL=[]; // {key, t:timestamp, dur:number}
+function addTimelinePoint(key,dur){ TL.push({key, t:Date.now(), dur}); }
+
+// ===== Графік 1 (стовпчики часу)
+const bar=$('#bar'), gb=bar.getContext('2d');
+function drawBars(){
+  const W=bar.width,H=bar.height; gb.clearRect(0,0,W,H);
+  gb.strokeStyle='#223049'; gb.strokeRect(0.5,0.5,W-1,H-1);
+  const left=40,right=W-10,top=20,bottom=H-26;
+  const labels=TESTS.map(t=>t.k.toUpperCase());
+  const vals=TESTS.map(t=>isFinite(parseFloat(t.dur))?parseFloat(t.dur):0);
+  const max=Math.max(5, ...vals, KPI.tMax);
+  const bw=(right-left)/labels.length;
+  // Сітка
+  gb.strokeStyle='#1f2a44';
+  for(let i=0;i<=4;i++){const y=top+i*(bottom-top)/4; gb.beginPath(); gb.moveTo(left,y); gb.lineTo(right,y); gb.stroke();}
+  // Барчики
+  labels.forEach((lab,i)=>{
+    const v=vals[i], x=left+i*bw+6; const h=(v/max)*(bottom-top);
+    gb.fillStyle= v>0 ? (v<=KPI.tMax? '#22c55e' : '#f87171') : '#334155';
+    gb.fillRect(x, bottom-h, bw-12, h);
+    gb.fillStyle='#94a3b8'; gb.font='10px ui-monospace'; gb.fillText(lab, x+2, bottom+12);
+  });
+  // Лінія KPI
+  const yK=bottom - (KPI.tMax/max)*(bottom-top);
+  gb.strokeStyle='#fbbf24'; gb.beginPath(); gb.moveTo(left,yK); gb.lineTo(right,yK); gb.stroke();
+  gb.fillStyle='#e5e7eb'; gb.font='11px ui-monospace'; gb.fillText('KPI час', right-68, yK-4);
+}
+
+// ===== Графік 2 (таймлайн)
+const tl=$('#timeline'), gt=tl.getContext('2d');
+function drawTimeline(){
+  const W=tl.width,H=tl.height; gt.clearRect(0,0,W,H);
+  gt.strokeStyle='#223049'; gt.strokeRect(0.5,0.5,W-1,H-1);
+  const left=40,right=W-10,top=24,bottom=H-28;
+  gt.strokeStyle='#1f2a44'; gt.beginPath(); gt.moveTo(left,bottom); gt.lineTo(right,bottom); gt.stroke();
+  if(!TL.length){ gt.fillStyle='#94a3b8'; gt.fillText('Події з’являються після Stop кожного тесту', left+8, top+14); return; }
+  const tMin=TL[0].t, tMax=TL[TL.length-1].t, span=(tMax-tMin)||1;
+  TL.forEach((p,i)=>{
+    const x=left + (p.t-tMin)/span*(right-left);
+    const y=bottom - 8 - (i%3)*16;
+    gt.strokeStyle='#38bdf8'; gt.beginPath(); gt.moveTo(x,bottom); gt.lineTo(x,y); gt.stroke();
+    gt.fillStyle='#22c55e'; if(p.dur>KPI.tMax) gt.fillStyle='#f87171';
+    gt.fillRect(x-3,y-3,6,6);
+    gt.fillStyle='#e5e7eb'; gt.font='10px ui-monospace';
+    gt.fillText(p.key.toUpperCase()+' '+p.dur.toFixed(2)+'c', x-24, y-6);
+  });
+}
+
+// ===== Камера / фото
+let stream=null;
+async function startCam(){
+  try{ stream = await navigator.mediaDevices.getUserMedia({video:true,audio:false}); $('#vid').srcObject=stream; log('Камеру увімкнено'); }
+  catch(e){ alert('Камеру заблоковано або недоступно'); }
+}
+$('#camOn').addEventListener('click', startCam);
+function takeShot(kind){
+  const video=$('#vid'); if(!video.srcObject){ alert('Спершу увімкни камеру'); return; }
+  const c=document.createElement('canvas'); c.width=video.videoWidth||640; c.height=video.videoHeight||480;
+  c.getContext('2d').drawImage(video,0,0,c.width,c.height);
+  const url=c.toDataURL('image/png'); photos[kind]=url; renderGallery(); log(`Фото: ${kind}`); updateMetrics();
+}
+$$('button[data-kind]').forEach(b=>b.addEventListener('click',()=>takeShot(b.dataset.kind)));
+function renderGallery(){
+  const gal=$('#gal'); gal.innerHTML='';
+  if(photos.sensor){ const i=document.createElement('img'); i.className='photo'; i.src=photos.sensor; i.alt='sensor'; gal.appendChild(i); }
+  if(photos.wiring){ const i=document.createElement('img'); i.className='photo'; i.src=photos.wiring; i.alt='wiring'; gal.appendChild(i); }
+  if(photos.valve){ const i=document.createElement('img'); i.className='photo'; i.src=photos.valve; i.alt='valve'; gal.appendChild(i); }
+}
+
+// ===== Аудіо
+let mediaStream=null, mediaRec=null, chunks=[];
+$('#audStart').addEventListener('click', async ()=>{
+  try{
+    mediaStream = await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRec = new MediaRecorder(mediaStream); chunks=[];
+    mediaRec.ondataavailable = e=>{ if(e.data.size>0) chunks.push(e.data); };
+    mediaRec.onstop = ()=>{ audBlob=new Blob(chunks,{type:'audio/webm'}); audUrl=URL.createObjectURL(audBlob); $('#audPlay').src=audUrl; $('#audStat').textContent='Є запис'; log('Аудіо: готово'); updateMetrics(); };
+    mediaRec.start(); $('#audStat').textContent='Йде запис...'; log('Аудіо: старт');
+  }catch(e){ alert('Мікрофон недоступний'); }
+});
+$('#audStop').addEventListener('click',()=>{
+  if(mediaRec && mediaRec.state!=='inactive'){ mediaRec.stop(); mediaStream.getTracks().forEach(t=>t.stop()); $('#audStat').textContent='Зупинено'; log('Аудіо: стоп'); }
+});
+$('#audSave').addEventListener('click',()=>{
+  if(!audBlob){ alert('Немає запису'); return; }
+  const a=document.createElement('a'); a.href=audUrl; a.download='audio_'+(CASE_ID||'case')+'_'+stamp()+'.webm'; document.body.appendChild(a); a.click(); a.remove(); log('Аудіо: збережено');
+});
+
+// ===== Підпис
+const sig=$('#sig'), ctx=sig.getContext('2d');
+let drawing=false, last=null, hasInk=false;
+function xy(e){ const r=sig.getBoundingClientRect(); const t=e.touches? e.touches[0]:e; return {x:(t.clientX-r.left)*sig.width/r.width, y:(t.clientY-r.top)*sig.height/r.height}; }
+function line(a,b){ ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.strokeStyle='#e5e7eb'; ctx.lineWidth=2; ctx.lineCap='round'; ctx.stroke(); }
+sig.addEventListener('pointerdown',e=>{ drawing=true; last=xy(e); hasInk=true; });
+sig.addEventListener('pointermove',e=>{ if(!drawing) return; const p=xy(e); line(last,p); last=p; });
+sig.addEventListener('pointerup',()=>{ drawing=false; last=null; });
+sig.addEventListener('pointerleave',()=>{ drawing=false; last=null; });
+$('#sigClear').addEventListener('click',()=>{ ctx.clearRect(0,0,sig.width,sig.height); hasInk=false; $('#sigStat').textContent='Підпису немає'; updateMetrics(); });
+$('#sigSave').addEventListener('click',()=>{ if(!hasInk){ alert('Немає підпису'); return; } sigUrl=sig.toDataURL('image/png'); $('#sigStat').textContent='Підпис збережено'; const a=document.createElement('a'); a.href=sigUrl; a.download='signature_'+(CASE_ID||'case')+'_'+stamp()+'.png'; document.body.appendChild(a); a.click(); a.remove(); log('Підпис збережено (png)'); updateMetrics(); });
+
+// ===== Обчислення стану/KPI
+function computeKPI(){
+  const done=TESTS.filter(t=>t.pass).length;
+  const durs=TESTS.map(t=>parseFloat(t.dur)).filter(Number.isFinite);
+  const avg = durs.length? (durs.reduce((a,b)=>a+b,0)/durs.length) : NaN;
+  const coOk = coRoom <= KPI.coMax;
+  $('#kAll').textContent = (done===TESTS.length && (isFinite(avg)? avg<=KPI.tMax : true) && coOk) ? 'OK' : 'Не виконано';
+  $('#mAvg').textContent = isFinite(avg)? `${avg.toFixed(2)} c` : '—';
+  $('#mCO').textContent  = `${coRoom} ppm (${coOk?'OK':'HIGH'})`;
+  updateState();
+}
+
+// Емулятор CO (крутилка через prompt для простоти)
+document.addEventListener('keydown',(e)=>{
+  if(e.key.toLowerCase()==='c'){ 
+    const v = prompt('Вкажи CO в приміщенні, ppm (для журналу/KPI):', String(coRoom));
+    if(v!==null){ const n=parseInt(v); if(Number.isFinite(n)){ coRoom=n; log('CO room оновлено: '+coRoom+' ppm'); computeKPI(); } }
+  }
+});
+
+// ===== Метрики / стан
+function updateState(){
+  let score=0;
+  const caseOk=!!CASE_ID;
+  const allTestsOk=TESTS.every(t=>t.pass);
+  const durs=TESTS.map(t=>parseFloat(t.dur)).filter(Number.isFinite);
+  const avg = durs.length? (durs.reduce((a,b)=>a+b,0)/durs.length) : Infinity;
+  const kpiTimeOk = avg<=KPI.tMax;
+  const coOk = coRoom<=KPI.coMax;
+  const mediaOk = (photos.sensor && photos.wiring && photos.valve) || !!audBlob;
+  const signOk = !!sigUrl;
+
+  if(caseOk)score+=2;
+  if(allTestsOk)score+=3;
+  if(kpiTimeOk)score+=2;
+  if(coOk)score+=2;
+  if(mediaOk && signOk)score+=1;
+
+  const html = score>=9? `<b class="ok">Готово (≈${score}/10)</b>`:
+               score>=6? `<b class="warn">Більшість виконано (≈${score}/10)</b>`:
+                         `<b class="bad">Потрібно доробити (≈${score}/10)</b>`;
+  $('#mState').innerHTML=html;
+}
+function updateMetrics(){
+  $('#mCase').textContent = CASE_ID||'—';
+  $('#mEquip').textContent = `${$('#equip').value||'—'} (${($('#model').value||'—')})`;
+  $('#mDone').textContent = `${TESTS.filter(t=>t.pass).length} / ${TESTS.length}`;
+  $('#mPhotos').textContent = `${photos.sensor?1:0} / ${photos.wiring?1:0} / ${photos.valve?1:0}`;
+  $('#mAud').textContent = audBlob?'є':'—';
+  $('#mSig').textContent = sigUrl?'є':'—';
+  computeKPI(); drawBars(); drawTimeline();
+}
+
+// ===== Експорт / чек / QR
+function summary(){
+  const addr=$('#addr').value||'—', tech=$('#tech').value||'—', day=$('#day').value||'—';
+  return {
+    case: CASE_ID||'—', addr, tech, day,
+    equip: {type: $('#equip').value||'—', model: $('#model').value||'—'},
+    tests: TESTS.map(t=>({key:t.k, name:t.name, dur:isFinite(parseFloat(t.dur))?parseFloat(t.dur):null, pass:t.pass, notes:t.notes})),
+    kpi: {tMax: KPI.tMax, coMax: KPI.coMax, coRoom},
+    media: {photos: {sensor:!!photos.sensor, wiring:!!photos.wiring, valve:!!photos.valve}, audio: !!audBlob},
+    signature: !!sigUrl
+  };
+}
+$('#saveCsv').addEventListener('click',()=>{
+  const s=summary(); let csv='field,value\n';
+  csv+=`case,${s.case}\naddr,${s.addr}\ntech,${s.tech}\nday,${s.day}\n`;
+  csv+=`equip_type,${s.equip.type}\nequip_model,${s.equip.model}\n`;
+  csv+='# tests\nkey,name,dur_s,pass,notes\n';
+  s.tests.forEach(t=>{ csv+=`${t.key},${t.name.replace(/,/g,';')},${t.dur??''},${t.pass},${(t.notes||'').replace(/,/g,';')}\n`; });
+  csv+='# kpi\nkpi_time_max_s,'+s.kpi.tMax+'\nco_room_ppm,'+s.kpi.coRoom+'\nco_max_ppm,'+s.kpi.coMax+'\n';
+  csv+='# media\nphotos_sensor,'+(s.media.photos.sensor?1:0)+'\nphotos_wiring,'+(s.media.photos.wiring?1:0)+'\nphotos_valve,'+(s.media.photos.valve?1:0)+'\naudio,'+(s.media.audio?1:0)+'\nsignature,'+(s.signature?1:0)+'\n';
+  download('gas_para15_safety_auto_'+stamp()+'.csv', csv, 'text/csv'); log('Експортовано CSV');
+});
+$('#saveTxt').addEventListener('click',()=>{
+  const s=summary();
+  const done=s.tests.filter(t=>t.pass).length;
+  const avg = (()=>{
+    const d=s.tests.map(x=>x.dur).filter(v=>Number.isFinite(v));
+    return d.length? (d.reduce((a,b)=>a+b,0)/d.length).toFixed(2)+' c' : '—';
+  })();
+  const lines=[
+    'Пара 15 — Акт перевірки автоматики безпеки: підсумок',
+    `Кейс: ${s.case}`, `Адреса: ${s.addr}`, `Обладнання: ${s.equip.type} (${s.equip.model})`,
+    `Виконавець: ${s.tech}`, `Дата: ${s.day}`,
+    `Тести: ${done}/${s.tests.length} PASS`,
+    `Середній час: ${avg}; KPI час ≤ ${s.kpi.tMax} c`,
+    `CO: ${s.kpi.coRoom} ppm (KPI ≤ ${s.kpi.coMax})`,
+    '--- Перелік тестів ---',
+    ...s.tests.map(t=>`${t.key.toUpperCase()}: ${t.name} — ${t.pass?'PASS':'FAIL'}; t=${t.dur??'—'} c; notes: ${(t.notes||'-')}`),
+    `Фото (sensor/wiring/valve): ${s.media.photos.sensor?'1':'0'} / ${s.media.photos.wiring?'1':'0'} / ${s.media.photos.valve?'1':'0'}; Аудіо: ${s.media.audio?'є':'—'}`,
+    `Підпис: ${s.signature?'є':'—'}`
+  ];
+  download('gas_para15_safety_auto_'+stamp()+'.txt', lines.join('\n')); log('Експортовано TXT');
+});
+$('#print58').addEventListener('click',()=>{
+  const s=summary(); const rc=$('#rc'); rc.hidden=false;
+  const done=s.tests.filter(t=>t.pass).length;
+  const avg = (()=>{
+    const d=s.tests.map(x=>x.dur).filter(v=>Number.isFinite(v));
+    return d.length? (d.reduce((a,b)=>a+b,0)/d.length).toFixed(2) : '—';
+  })();
+  const lines=[
+'=== SAFETY AUTO (58мм) ===',
+'Case: '+s.case,
+'Date: '+s.day,
+'Equip:'+s.equip.type,
+'Model:'+s.equip.model,
+'PASS: '+done+'/'+s.tests.length+' Avg:'+avg+'s',
+'CO: '+s.kpi.coRoom+'ppm (≤'+s.kpi.coMax+')',
+'Photos:'+(s.media.photos.sensor?1:0)+'/'+(s.media.photos.wiring?1:0)+'/'+(s.media.photos.valve?1:0)+' Aud:'+(s.media.audio?'Y':'N')+' Sign:'+(s.signature?'Y':'N'),
+'--------------------------'
+  ];
+  rc.textContent=lines.join('\n');
+  download('gas_para15_receipt_'+stamp()+'.txt', rc.textContent);
+  log('Згенеровано чек 58мм');
+});
+$('#qrGen').addEventListener('click',()=>{
+  const def=CASE_ID||'safety-auto';
+  const data=prompt('Встав URL/ID (Case):', def);
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url; log('Згенеровано QR');
+});
+
+// ===== Ініт/технічне
+function init(){ const d=new Date(); $('#day').value=d.toISOString().slice(0,10); }
+init(); updateMetrics(); drawBars(); drawTimeline();
+
+// Вбудоване відображення (Moodle/iFrame)
+(function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+</script>
+</body>
+</html>
