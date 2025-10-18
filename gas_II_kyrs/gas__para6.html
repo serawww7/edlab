@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 6 (газовики) — Заміна крана/шланга: чек-лист з таймерами, фото, підпис абонента, чек 58 мм, CSV/TXT, QR</title>
+<meta name="description" content="Практика заміни крана/шланга: покроковий чек-лист з таймерами, фото до/вузла/після, підпис абонента, NFC/ID, чек 58 мм, експорт CSV/TXT, QR."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1280px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:14px;grid-template-columns:1.25fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:90px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:#e6eef9;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+canvas.chart{display:block;width:100%;height:220px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+.canvasWrap{overflow:hidden;border-radius:12px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre;min-height:140px}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.photo{width:100%;max-width:240px;border:1px solid var(--line);border-radius:12px;display:block}
+.gallery{display:flex;gap:8px;flex-wrap:wrap}
+.block{border:1px dashed var(--line);border-radius:12px;padding:10px;margin-top:10px;background:#0c182a}
+hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
+.sigWrap{border:1px dashed var(--line);border-radius:12px;padding:8px;background:#0c182a}
+#sig{background:#0b1220;border:1px solid var(--line);border-radius:8px;touch-action:none}
+.step{border:1px dashed var(--line);border-radius:12px;padding:10px;margin-top:10px;background:#0c182a}
+.step h3{margin:0 0 8px 0;font-size:1.05rem}
+.step .minirow{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.kpi{display:flex;gap:8px;flex-wrap:wrap}
+.kpi .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 10px;color:#e5e7eb}
+.tag.ok{border-color:#1d3e2a;background:#0f2f1e}
+.tag.warn{border-color:#4a3b13;background:#2b2310}
+.tag.bad{border-color:#5a1f1f;background:#2a1212}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🔧</span>
+      <div>
+        <b>Пара 6 — Заміна крана/шланга</b><br/>
+        <span class="badge">Чек-лист із таймерами → фото → підпис → NFC/ID → чек 58 мм → CSV/TXT → QR</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <!-- Ввідні -->
+  <div class="card">
+    <h2>📚 Сценарій</h2>
+    <p>Виконуємо заміну газового <b>крана/шланга</b> за чек-листом: <i>ізоляція → скидання тиску → демонтаж → монтаж нового вузла → ущільнення → SOAP-тест → пуск газу/перевірка</i>. 
+    Фіксуємо час кожного кроку, робимо <b>фото</b> (до/вузол/після), збираємо <b>підпис абонента</b>, ідентифікуємо об’єкт через <b>NFC/ID</b>, формуємо <b>чек 58 мм</b>, <b>CSV/TXT</b>, <b>QR</b>.</p>
+    <div class="row">
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., кв. ..."/></label>
+      <label style="flex:1">Тип вузла
+        <select id="nodeType" class="input">
+          <option value="valve" selected>Кран</option>
+          <option value="hose">Шланг</option>
+          <option value="valve+hose">Кран + шланг</option>
+        </select>
+      </label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+    </div>
+    <div class="row">
+      <button class="btn good" id="mkCase">🧰 Створити кейс</button>
+      <span class="badge" id="cid">Кейс: —</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Ліва колонка: Чек-лист/Камера/Підпис/NFC -->
+    <div class="card">
+      <h2>📝 Чек-лист операцій із таймерами</h2>
+      <div id="steps"></div>
+
+      <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
+      <div class="row">
+        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <div>
+          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button class="btn" data-kind="before">📷 До</button>
+          <button class="btn" data-kind="work">📷 Вузол/монтаж</button>
+          <button class="btn" data-kind="after">📷 Після</button><br/>
+          <small class="muted">Фото зберігаються у «Галереї доказів».</small>
+        </div>
+      </div>
+      <div class="gallery" id="gal"></div>
+
+      <h2 style="margin-top:10px">✍️ Підпис абонента</h2>
+      <div class="sigWrap">
+        <canvas id="sig" width="520" height="200"></canvas>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" id="sigClear">🧹 Очистити</button>
+          <button class="btn" id="sigSave">💾 Зберегти підпис</button>
+          <span class="badge" id="sigStat">Підпису немає</span>
+        </div>
+      </div>
+
+      <h2 style="margin-top:10px">📶 NFC / ID об’єкта</h2>
+      <div class="block">
+        <div class="row">
+          <button class="btn" id="nfcBtn">📶 NFC</button>
+          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)"/>
+          <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
+          <span class="badge" id="nfcs">Статус NFC: очікується</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Права колонка: Прогрес/Метрики/Експорт -->
+    <div class="card">
+      <h2>📈 Прогрес (кроки)</h2>
+      <div class="canvasWrap"><canvas id="progress" class="chart" width="520" height="220"></canvas></div>
+
+      <div class="kpi" style="margin-top:8px">
+        <span class="tag ok">✔️ Виконано кроків: <b id="kDone">0</b>/7</span>
+        <span class="tag warn">⏱️ Сумарний час: <b id="kDur">0</b> с</span>
+        <span class="tag bad">🫧 SOAP-тест: <b id="kSoap">—</b></span>
+      </div>
+
+      <table class="tbl" style="margin-top:8px">
+        <tbody>
+          <tr><th>Кейс</th><td id="mCase">—</td></tr>
+          <tr><th>ID об’єкта</th><td id="mAsset">—</td></tr>
+          <tr><th>Тип вузла</th><td id="mNode">—</td></tr>
+          <tr><th>Фото (до/робота/після)</th><td id="mPhotos">0 / 0 / 0</td></tr>
+          <tr><th>Підпис абонента</th><td id="mSig">—</td></tr>
+          <tr><th>Статус</th><td id="mState"><b class="warn">Потрібно виконати кроки</b></td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">✅ Оцінювання (10 балів)</h2>
+      <ul>
+        <li>Кейс створено (адреса/тип вузла/виконавець/дата) — <b>2</b></li>
+        <li>ID об’єкта (NFC/код) — <b>2</b></li>
+        <li>Чек-лист: усі кроки з таймерами — <b>2</b></li>
+        <li>SOAP-тест підтверджено — <b>1</b></li>
+        <li>Фото (всі три) — <b>2</b></li>
+        <li>Підпис абонента — <b>1</b></li>
+      </ul>
+
+      <h2 style="margin-top:10px">💾 Експорт / друк</h2>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV</button>
+        <button class="btn" id="saveTxt">💾 TXT</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+
+      <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
+      <pre id="alog" class="card" style="max-height:240px;overflow:auto;margin-top:6px">// Поки без подій</pre>
+    </div>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString();const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+function clean(s){return String(s).replace(/\s+/g,' ').trim();}
+$('#upd').textContent = new Date().toLocaleDateString('uk-UA');
+(function(){ const d=new Date(); $('#day').value=d.toISOString().slice(0,10); })();
+
+// ===== Стан
+let CASE_ID=null, ASSET_ID=null, NODE_TYPE='valve';
+let photos={before:null, work:null, after:null};
+let sigUrl=null;
+
+// ===== Кейс
+$('#mkCase').addEventListener('click',()=>{
+  const addr=clean($('#addr').value||''); const tech=clean($('#tech').value||''); const day=$('#day').value;
+  NODE_TYPE = $('#nodeType').value;
+  if(!addr||!tech||!day){ alert('Вкажи адресу, виконавця та дату'); return; }
+  CASE_ID='R-'+Math.random().toString(36).slice(2,8).toUpperCase();
+  $('#cid').textContent='Кейс: '+CASE_ID;
+  log(`Кейс ${CASE_ID}: ${addr}, ${NODE_TYPE}, ${tech}, ${day}`);
+  updateMetrics(); drawProgress();
+});
+$('#nodeType').addEventListener('change',()=>{ NODE_TYPE=$('#nodeType').value; updateMetrics(); });
+
+// ===== NFC / ID
+async function tryNFC(){
+  if('NDEFReader' in window){
+    try{
+      const reader=new NDEFReader(); await reader.scan();
+      $('#nfcs').textContent='Статус NFC: сканування...';
+      reader.addEventListener('reading', ({message, serialNumber})=>{
+        let text=''; for(const rec of message.records){ if(rec.recordType==='text'){ const dec=new TextDecoder(rec.encoding||'utf-8'); text = dec.decode(rec.data); } }
+        ASSET_ID = (text||serialNumber||'NFC-'+Math.random().toString(36).slice(2,7)).toString();
+        $('#asset').value=ASSET_ID; $('#nfcs').textContent='Статус NFC: зчитано';
+        log('NFC: '+ASSET_ID); updateMetrics();
+      });
+    }catch(e){ $('#nfcs').textContent='Статус NFC: помилка'; alert('NFC недоступний/заборонений'); }
+  }else{ alert('Web NFC не підтримується. Введи код вручну.'); }
+}
+$('#nfcBtn').addEventListener('click', tryNFC);
+$('#saveAsset').addEventListener('click',()=>{ const v=clean($('#asset').value||''); if(!v){ alert('Введи ID об’єкта'); return; } ASSET_ID=v; $('#nfcs').textContent='Статус NFC: застосовано вручну'; log('ID об’єкта: '+ASSET_ID); updateMetrics(); });
+
+// ===== Чек-лист
+const STEPS_DEF = [
+  {k:'isolate',   name:'Ізоляція газу (перекриття крана/стояка)'},
+  {k:'depress',   name:'Скидання тиску/продувка зони робіт'},
+  {k:'demont',    name:'Демонтаж старого вузла'},
+  {k:'mont',      name:'Монтаж нового крана/шланга'},
+  {k:'sealant',   name:'Ущільнення/герметизація різьб'},
+  {k:'soap',      name:'SOAP-тест (піна)'},
+  {k:'startgas',  name:'Пуск газу, перевірка герметичності'}
+];
+// кожен крок: {k,name,tsStart,tsStop,dur,ok,soapResult?}
+let STEPS = STEPS_DEF.map(s=>({...s, tsStart:null, tsStop:null, dur:0, ok:false, soapResult:null}));
+
+function renderSteps(){
+  const box=$('#steps'); box.innerHTML='';
+  STEPS.forEach((s,idx)=>{
+    const d=document.createElement('div'); d.className='step'; d.dataset.key=s.k;
+    d.innerHTML = `
+      <h3>${idx+1}. ${s.name} <span class="badge mono">${s.k}</span></h3>
+      <div class="minirow">
+        <button class="btn btn-start">▶️ Start</button>
+        <button class="btn secondary btn-stop">⏹️ Stop</button>
+        <button class="btn good btn-done">✅ Done</button>
+        <span class="badge">Тривалість: <b class="dur">0</b> с</span>
+        ${s.k==='soap' ? `
+          <select class="input soapSel" style="max-width:220px">
+            <option value="none" selected>— Результат SOAP —</option>
+            <option value="bubbles">Видимі бульбашки</option>
+            <option value="no-bubbles">Бульбашок немає</option>
+          </select>
+          <button class="btn secondary btn-soap">✅ Підтвердити SOAP</button>
+          <span class="badge soapState">—</span>
+        `:''}
+      </div>
+    `;
+    box.appendChild(d);
+  });
+}
+renderSteps();
+
+function stepByKey(k){ return STEPS.find(x=>x.k===k); }
+
+$('#steps').addEventListener('click',(e)=>{
+  const wrap=e.target.closest('.step'); if(!wrap) return;
+  const key=wrap.dataset.key; const s=stepByKey(key);
+  const now=Date.now();
+
+  if(e.target.classList.contains('btn-start')){
+    s.tsStart = now; s.tsStop=null; s.ok=false; log(`Крок ${key}: Start`);
+  }
+  if(e.target.classList.contains('btn-stop')){
+    if(s.tsStart){ s.tsStop = now; s.dur += Math.max(0, Math.round((s.tsStop - s.tsStart)/1000)); s.tsStart=null; wrap.querySelector('.dur').textContent=String(s.dur); log(`Крок ${key}: Stop (+${s.dur}s)`); }
+  }
+  if(e.target.classList.contains('btn-done')){
+    if(s.tsStart){ // авто-стоп
+      s.tsStop = now; s.dur += Math.max(0, Math.round((s.tsStop - s.tsStart)/1000)); s.tsStart=null; wrap.querySelector('.dur').textContent=String(s.dur);
+    }
+    s.ok=true; log(`Крок ${key}: Done (total ${s.dur}s)`);
+  }
+  if(e.target.classList.contains('btn-soap')){
+    const val = wrap.querySelector('.soapSel').value;
+    if(val==='none'){ alert('Обери результат SOAP-тесту'); return; }
+    s.soapResult = val;
+    wrap.querySelector('.soapState').textContent = (val==='bubbles'?'Бульбашки ВИЯВЛЕНО':'Бульбашок немає');
+    log(`SOAP: ${wrap.querySelector('.soapState').textContent}`);
+    $('#kSoap').textContent = (val==='bubbles'?'BUBBLES':'NO');
+  }
+
+  updateMetrics(); drawProgress();
+});
+
+$('#steps').addEventListener('change',(e)=>{
+  const wrap=e.target.closest('.step'); if(!wrap) return;
+  const key=wrap.dataset.key; const s=stepByKey(key);
+  if(e.target.classList.contains('soapSel')){
+    s.soapResult = e.target.value==='none'? null : e.target.value;
+  }
+});
+
+// ===== Камера / фото
+let stream=null;
+async function startCam(){
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+    $('#vid').srcObject=stream; log('Камеру увімкнено');
+  }catch(e){ alert('Камеру заблоковано або недоступно'); }
+}
+$('#camOn').addEventListener('click', startCam);
+
+function takeShot(kind){
+  const video=$('#vid'); if(!video.srcObject){ alert('Спершу увімкни камеру'); return; }
+  const c=document.createElement('canvas'); c.width=video.videoWidth||640; c.height=video.videoHeight||480;
+  c.getContext('2d').drawImage(video,0,0,c.width,c.height);
+  const url=c.toDataURL('image/png'); photos[kind]=url; renderGallery(); log(`Фото: ${kind}`); updateMetrics();
+}
+$$('button[data-kind]').forEach(b=>b.addEventListener('click',()=>takeShot(b.dataset.kind)));
+
+function renderGallery(){
+  const gal=$('#gal'); gal.innerHTML='';
+  if(photos.before){ const i=document.createElement('img'); i.className='photo'; i.src=photos.before; i.alt='до'; gal.appendChild(i); }
+  if(photos.work){ const i=document.createElement('img'); i.className='photo'; i.src=photos.work; i.alt='вузол'; gal.appendChild(i); }
+  if(photos.after){ const i=document.createElement('img'); i.className='photo'; i.src=photos.after; i.alt='після'; gal.appendChild(i); }
+}
+
+// ===== Підпис
+const sig=$('#sig'); const ctx=sig.getContext('2d');
+let drawing=false, last=null, hasInk=false;
+function xy(e){ const r=sig.getBoundingClientRect(); const t=e.touches? e.touches[0]:e; return {x:(t.clientX-r.left)*sig.width/r.width, y:(t.clientY-r.top)*sig.height/r.height}; }
+function line(a,b){ ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.strokeStyle='#e5e7eb'; ctx.lineWidth=2; ctx.lineCap='round'; ctx.stroke(); }
+sig.addEventListener('pointerdown',e=>{ drawing=true; last=xy(e); hasInk=true; });
+sig.addEventListener('pointermove',e=>{ if(!drawing) return; const p=xy(e); line(last,p); last=p; });
+sig.addEventListener('pointerup',()=>{ drawing=false; last=null; });
+sig.addEventListener('pointerleave',()=>{ drawing=false; last=null; });
+$('#sigClear').addEventListener('click',()=>{ ctx.clearRect(0,0,sig.width,sig.height); hasInk=false; $('#sigStat').textContent='Підпису немає'; updateMetrics(); });
+let sigUrl=null;
+$('#sigSave').addEventListener('click',()=>{ if(!hasInk){ alert('Немає підпису'); return; } sigUrl=sig.toDataURL('image/png'); $('#sigStat').textContent='Підпис збережено'; const a=document.createElement('a'); a.href=sigUrl; a.download='signature_'+(CASE_ID||'case')+'_'+stamp()+'.png'; document.body.appendChild(a); a.click(); a.remove(); log('Підпис збережено (png)'); updateMetrics(); });
+
+// ===== Прогрес-діаграма
+const pc=$('#progress'), pg=pc.getContext('2d');
+function drawProgress(){
+  const W=pc.width,H=pc.height; pg.clearRect(0,0,W,H);
+  pg.strokeStyle='#223049'; pg.strokeRect(0.5,0.5,W-1,H-1);
+  const left=40,right=W-10,top=24,bottom=H-30;
+
+  const done=STEPS.filter(s=>s.ok).length;
+  const total=STEPS.length;
+  const sumDur=STEPS.reduce((a,s)=>a+(s.dur||0),0);
+
+  // смуга прогресу
+  const frac=done/total;
+  pg.fillStyle='#0b1220'; pg.fillRect(left, top, right-left, 24);
+  pg.fillStyle='#38bdf8'; pg.fillRect(left, top, (right-left)*frac, 24);
+  pg.fillStyle='#e5e7eb'; pg.font='12px ui-monospace';
+  pg.fillText(`Готово: ${done}/${total} • ${sumDur}s`, left+8, top+16);
+
+  // список
+  let y=top+52;
+  STEPS.forEach((s,i)=>{
+    const t = `${i+1}. ${s.name}`; pg.fillStyle = s.ok ? '#22c55e' : (s.dur>0?'#94a3b8':'#6b7280');
+    pg.fillText((s.ok?'✔ ':'• ')+t, left+8, y);
+    y+=18;
+  });
+
+  // KPI на панелі
+  $('#kDone').textContent = String(done);
+  $('#kDur').textContent = String(sumDur);
+}
+drawProgress();
+
+// ===== Метрики / стан
+function updateMetrics(){
+  $('#mCase').textContent = CASE_ID || '—';
+  $('#mAsset').textContent = ASSET_ID || ($('#asset').value||'—');
+  $('#mNode').textContent = NODE_TYPE;
+  $('#mPhotos').textContent = `${photos.before?1:0} / ${photos.work?1:0} / ${photos.after?1:0}`;
+  $('#mSig').textContent = sigUrl?'є':'—';
+  // SOAP KPI
+  const soapStep = stepByKey('soap'); $('#kSoap').textContent = soapStep.soapResult ? (soapStep.soapResult==='bubbles'?'BUBBLES':'NO') : '—';
+
+  // скоринг (10)
+  let score=0;
+  const caseOk=!!CASE_ID, assetOk=!!(ASSET_ID||clean($('#asset').value||'')); 
+  const stepsOk=STEPS.every(s=>s.ok) && STEPS.every(s=>s.dur>0);
+  const soapOk=!!soapStep.soapResult && soapStep.soapResult!=='none';
+  const photosOk=!!photos.before && !!photos.work && !!photos.after;
+  const sigOk=!!sigUrl;
+  if(caseOk)score+=2; if(assetOk)score+=2; if(stepsOk)score+=2; if(soapOk)score+=1; if(photosOk)score+=2; if(sigOk)score+=1;
+
+  const html = score>=9? `<b class="ok">Готово (≈${score}/10)</b>`:
+               score>=6? `<b class="warn">Більшість виконано (≈${score}/10)</b>`:
+                         `<b class="bad">Потрібно доробити (≈${score}/10)</b>`;
+  $('#mState').innerHTML = html;
+}
+
+// авто-оновлення тривалості активних кроків кожні 1с
+setInterval(()=>{
+  const now=Date.now(); let changed=false;
+  STEPS.forEach(s=>{
+    if(s.tsStart){ const curr=Math.max(0, Math.round((now - s.tsStart)/1000)); const wrap=$(`[data-key="${s.k}"]`); if(wrap){ wrap.querySelector('.dur').textContent = String(s.dur + curr); } changed=true; }
+  });
+  if(changed) drawProgress();
+}, 1000);
+
+// ===== Експорт / чек / QR
+function header(){
+  const addr=$('#addr').value||'—', tech=$('#tech').value||'—', day=$('#day').value||'—';
+  return {
+    case: CASE_ID||'—',
+    addr, tech, day,
+    node_type: NODE_TYPE,
+    asset: ASSET_ID||($('#asset').value||'—'),
+    photos: {before:!!photos.before, work:!!photos.work, after:!!photos.after},
+    signature: !!sigUrl,
+    steps: STEPS.map(s=>({key:s.k, name:s.name, duration_s:s.dur, done:s.ok, soap:s.k==='soap'?(s.soapResult||'—'):undefined}))
+  };
+}
+$('#saveCsv').addEventListener('click',()=>{
+  const h=header();
+  let csv='field,value\n';
+  Object.entries(h).forEach(([k,v])=>{
+    if(k==='steps') return;
+    if(typeof v==='object'){ csv+=`${k},${JSON.stringify(v).replace(/,/g,';')}\n`; }
+    else { csv+=`${k},${String(v).replace(/,/g,';')}\n`; }
+  });
+  csv+='\n# steps\nkey,name,duration_s,done,soap\n';
+  h.steps.forEach(s=>{ csv+=`${s.key},"${s.name.replace(/"/g,'""')}",${s.duration_s},${s.done?1:0},${s.soap||''}\n`; });
+  download('gas_para06_replace_'+stamp()+'.csv', csv, 'text/csv'); log('Експортовано CSV');
+});
+$('#saveTxt').addEventListener('click',()=>{
+  const h=header();
+  const lines=[
+    'Пара 6 — Заміна крана/шланга: підсумок',
+    `Кейс: ${h.case}`, `Адреса: ${h.addr}`, `Тип вузла: ${h.node_type}`,
+    `Виконавець: ${h.tech}`, `Дата: ${h.day}`, `Об’єкт (ID): ${h.asset}`,
+    `Фото (до/вузол/після): ${h.photos.before?'1':'0'} / ${h.photos.work?'1':'0'} / ${h.photos.after?'1':'0'}`,
+    `Підпис абонента: ${h.signature?'є':'—'}`,
+    '--- Кроки ---'
+  ];
+  h.steps.forEach((s,i)=>{ lines.push(`${i+1}) ${s.name} — ${s.duration_s}s — ${s.done?'DONE':'…'}${(s.key==='soap'?' — SOAP: '+(s.soap==='bubbles'?'бульбашки ВИЯВЛЕНО':s.soap==='no-bubbles'?'бульбашок немає':'—'):'')}`); });
+  download('gas_para06_replace_'+stamp()+'.txt', lines.join('\n')); log('Експортовано TXT');
+});
+$('#print58').addEventListener('click',()=>{
+  const h=header(); const rc=$('#rc'); rc.hidden=false;
+  const sumDur = h.steps.reduce((a,s)=>a+(s.duration_s||0),0);
+  const soap = h.steps.find(s=>s.key==='soap')?.soap || '—';
+  const lines=[
+'=== GAS REPLACE (58мм) ===',
+'Case: '+h.case,
+'Date: '+h.day,
+'Addr: '+h.addr,
+'Node: '+h.node_type,
+'Tech: '+h.tech,
+'Asset:'+h.asset,
+'Steps:'+h.steps.filter(s=>s.done).length+'/'+h.steps.length,
+'Time: '+sumDur+'s',
+'SOAP: '+(soap==='bubbles'?'BUBBLES':'NO'),
+'Photos:'+(h.photos.before?1:0)+'/'+(h.photos.work?1:0)+'/'+(h.photos.after?1:0),
+'Signed:'+(h.signature?'Y':'N'),
+'--------------------------'
+  ];
+  rc.textContent=lines.join('\n');
+  download('gas_para06_receipt_'+stamp()+'.txt', rc.textContent);
+  log('Згенеровано чек 58мм');
+});
+$('#qrGen').addEventListener('click',()=>{
+  const def = CASE_ID || ASSET_ID || 'gas-replace';
+  const data = prompt('Встав URL/ID (Case або Asset):', def);
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url; log('Згенеровано QR');
+});
+
+// ===== Ініт
+updateMetrics();
+(function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+</script>
+</body>
+</html>
