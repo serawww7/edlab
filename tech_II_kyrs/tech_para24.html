@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 24 (технологи) — Комп'ютерний зір у QC: дефекти пакування, вебкамера, анотації, ML, графіки, журнал, чек/CSV/QR</title>
+<meta name="description" content="Вебкамера → анотації (OK/дефекти) → витяг фіч → k-NN/логістична регресія → метрики/графіки → чек/CSV/QR. Працює локально в браузері."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1260px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.grid{display:grid;gap:14px;grid-template-columns:1.45fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas, video{display:block;width:100%;height:300px;background:#000}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.small{font-size:.9rem}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">👁️</span>
+      <div>
+        <b>Пара 24 — Комп'ютерний зір у QC</b><br/>
+        <span class="badge">камера → анотації → фічі → k-NN/LogReg → метрики/графіки → журнал → чек/CSV/QR</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <!-- МЕТА + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🎯 Мета заняття</h2>
+    <p>Навчити студентів будувати мінімальний QC-пайплайн комп’ютерного зору: <b>захоплення кадрів</b> з конвеєра (вебкамера), <b>розмітка класів</b>, <b>витяг фіч</b> у браузері та навчання простої моделі для <b>виявлення дефектів пакування/етикетки</b>.</p>
+    <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+      <div class="note"><b>📷 Камера</b><br/>Візьмемо кадри фронтальної/USB-камери. Кожен кадр — PNG + вектор фіч.</div>
+      <div class="note"><b>🧬 Фічі</b><br/>Яскравість, контраст, різкість (Лаплас), насиченість, «краєвість» (Собель), дисбаланс кольору.</div>
+      <div class="note"><b>🧠 Модель</b><br/>k-NN (k=5) або логістична регресія (one-vs-rest) з ROC (OK vs defect).</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- ЛІВА КОЛОНКА -->
+    <div class="card">
+      <h2>📥 Камера та анотації</h2>
+      <div class="row">
+        <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
+        <button class="btn secondary" id="snap">📸 Зняти кадр</button>
+        <label>Клас
+          <select id="label" class="input">
+            <option value="OK" selected>OK (придатно)</option>
+            <option value="NO_LABEL">Немає/з'їхала етикетка</option>
+            <option value="DENT">Вм'ятина/зморшка</option>
+            <option value="STAIN">Пляма/бруд</option>
+            <option value="SEAL">Проблема герметичності</option>
+          </select>
+        </label>
+        <button class="btn" id="clear">🧹 Очистити датасет</button>
+        <span id="stat" class="badge">Кадрів: 0 | OK: 0 | DEF: 0</span>
+      </div>
+      <div class="canvasWrap"><video id="v" playsinline muted></video></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="c" width="980" height="300"></canvas></div>
+      <small class="muted">Вгорі — прев'ю камери; нижче — збережений кадр/ROI для перевірки та для обчислення фіч.</small>
+
+      <h2 style="margin-top:10px">🧠 Навчання</h2>
+      <div class="row">
+        <label>Модель
+          <select id="modelType" class="input">
+            <option value="knn" selected>k-NN (k=5)</option>
+            <option value="logreg">Логістична регресія (1-vs-rest)</option>
+          </select>
+        </label>
+        <label>Train/Test, %<input id="split" class="input" type="number" min="50" max="90" step="5" value="70"/></label>
+        <label>Seed<input id="seed" class="input" type="number" step="1" value="24"/></label>
+        <button class="btn good" id="train">🚀 Навчити</button>
+      </div>
+
+      <h3 style="margin-top:8px">🧪 Прогноз (живий)</h3>
+      <div class="row">
+        <button class="btn" id="predictLive">🔮 Прогноз з камери</button>
+        <span id="predStat" class="badge">P(OK)=— | Рішення: —</span>
+      </div>
+
+      <h3 style="margin-top:10px">📈 Скатерплот (2 фічі)</h3>
+      <div class="row">
+        <label>X
+          <select id="fx" class="input"></select>
+        </label>
+        <label>Y
+          <select id="fy" class="input"></select>
+        </label>
+        <button class="btn secondary" id="redraw">🔁 Перемалювати</button>
+      </div>
+      <div class="canvasWrap"><canvas id="plot" width="980" height="300"></canvas></div>
+
+      <h3 style="margin-top:10px">🛎️ Журнал</h3>
+      <pre id="alog" class="note" style="max-height:170px;overflow:auto">// Поки без подій</pre>
+
+      <h3 style="margin-top:10px">💾 Експорт / друк</h3>
+      <div class="row">
+        <input id="lot" class="input" placeholder="Лот/лінія (напр. MAP_йогурт_2025-10-18_B)"/>
+        <button class="btn" id="saveCsv">📄 CSV (фічі + клас)</button>
+        <button class="btn" id="saveTxt">💾 TXT (звіт/метрики)</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+      <small class="muted">QR генерується через <span class="mono">api.qrserver.com</span>; офлайн — текстовий фолбек.</small>
+    </div>
+
+    <!-- ПРАВА КОЛОНКА -->
+    <div class="card">
+      <h2>📊 Метрики</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Train/Test</th><td id="m_split">—</td></tr>
+          <tr><th>Accuracy (multi)</th><td id="m_acc">—</td></tr>
+          <tr><th>F1 (macro)</th><td id="m_f1">—</td></tr>
+          <tr><th>ROC AUC (OK vs DEF)</th><td id="m_auc">—</td></tr>
+          <tr><th>Матриця помилок</th><td id="m_cm">—</td></tr>
+          <tr><th>Коефіцієнти (LogReg)</th><td id="m_w">—</td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">🔌 Схема (SVG)</h2>
+      <svg viewBox="0 0 820 280" role="img" aria-label="Камера → Фічі → Модель → Рішення/Звіт">
+        <rect x="40" y="40" width="160" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <text x="120" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Камера</text>
+        <text x="120" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">кадри PNG</text>
+
+        <rect x="220" y="40" width="180" height="120" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <text x="310" y="80" fill="#dcfce7" font-size="14" text-anchor="middle">Фічі</text>
+        <text x="310" y="100" fill="#a7f3d0" font-size="12" text-anchor="middle">яскр./контраст/різкість/краї</text>
+
+        <rect x="420" y="40" width="160" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <text x="500" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Модель</text>
+        <text x="500" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">k-NN / LogReg</text>
+
+        <rect x="600" y="40" width="180" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+        <text x="690" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Рішення</text>
+        <text x="690" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">чек/CSV/QR</text>
+
+        <line x1="200" y1="100" x2="220" y2="100" stroke="#93c5fd" stroke-width="3"/>
+        <line x1="400" y1="100" x2="420" y2="100" stroke="#22c55e" stroke-width="3"/>
+        <line x1="580" y1="100" x2="600" y2="100" stroke="#64748b" stroke-width="3"/>
+      </svg>
+
+      <h2 style="margin-top:10px">🎯 Завдання для студентів</h2>
+      <ol>
+        <li>Збери ≥ 40 кадрів (баланс класів), натренуй **k-NN** і досягни <b>F1 macro ≥ 0.8</b>.</li>
+        <li>Порівняй з **LogReg** та збережи <b>TXT</b> зі скрінами графіків/матриці.</li>
+        <li>Зроби **прогноз у живому режимі** для 5 різних зразків, роздрукуй **чек 58 мм** і згенеруй **QR**.</li>
+      </ol>
+
+      <h2 style="margin-top:10px">✅ Оцінювання (10 балів)</h2>
+      <table class="tbl">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Датасет (≥40) із балансом класів + коректний CSV</td><td>4</td></tr>
+          <tr><td>F1 macro ≥ 0.8 на тесті (будь-яка модель)</td><td>3</td></tr>
+          <tr><td>Матриця помилок та коментар щодо помилкових класів</td><td>2</td></tr>
+          <tr><td>Чек 58 мм + QR до доказів</td><td>1</td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">📜 Історична нотатка</h2>
+      <p class="muted small">Перші візуальні інспекції у харчтехі (1980-ті) були порогові й чутливі до освітлення. Сьогодні навіть прості фічі та базові моделі у браузері вже дають стабільний QC на навчальних стендах.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти та константи =====
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString();const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+
+const LABELS=['OK','NO_LABEL','DENT','STAIN','SEAL'];
+const DEF_LABELS=new Set(['NO_LABEL','DENT','STAIN','SEAL']);
+
+// ===== Камера =====
+const v=$('#v'), canvas=$('#c'), ctx=canvas.getContext('2d');
+let stream=null;
+$('#camOn').addEventListener('click', async()=>{
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:{width:980,height:300}, audio:false});
+    v.srcObject=stream; await v.play(); log('Камеру увімкнено');
+  }catch(e){ alert('Не вдалося увімкнути камеру: '+e); }
+});
+
+function drawFromVideo(){
+  if(!v.videoWidth) return;
+  const W=canvas.width, H=canvas.height;
+  ctx.drawImage(v, 0, 0, W, H);
+}
+
+setInterval(()=>{ if(stream) drawFromVideo(); }, 80);
+
+// ===== Обчислення фіч із canvas =====
+function getImageData(){ return ctx.getImageData(0,0,canvas.width,canvas.height); }
+
+function computeFeatures(){
+  const {data,width,height}=getImageData();
+  const N=width*height;
+  let sumL=0,sumR=0,sumG=0,sumB=0;
+  for(let i=0;i<data.length;i+=4){
+    const r=data[i], g=data[i+1], b=data[i+2];
+    const l=0.299*r+0.587*g+0.114*b;
+    sumL+=l; sumR+=r; sumG+=g; sumB+=b;
+  }
+  const avgL=sumL/N, avgR=sumR/N, avgG=sumG/N, avgB=sumB/N;
+
+  // Контраст (std яркості)
+  let varL=0;
+  for(let i=0;i<data.length;i+=4){
+    const l=0.299*data[i]+0.587*data[i+1]+0.114*data[i+2];
+    varL+=(l-avgL)*(l-avgL);
+  }
+  const stdL=Math.sqrt(varL/N);
+
+  // Насиченість (HSV approx: mean(|Cmax-Cmin|))
+  let satSum=0;
+  for(let i=0;i<data.length;i+=4){
+    const r=data[i]/255,g=data[i+1]/255,b=data[i+2]/255;
+    const cmax=Math.max(r,g,b), cmin=Math.min(r,g,b);
+    satSum += (cmax-cmin);
+  }
+  const sat = (satSum/N);
+
+  // Різкість (Лаплас), Краєвість (Собель)
+  function conv3x3(kernel){
+    const out=new Float32Array(N), k=kernel;
+    for(let y=1;y<height-1;y++){
+      for(let x=1;x<width-1;x++){
+        let acc=0;
+        for(let dy=-1;dy<=1;dy++){
+          for(let dx=-1;dx<=1;dx++){
+            const ix=4*((y+dy)*width+(x+dx));
+            const l=0.299*data[ix]+0.587*data[ix+1]+0.114*data[ix+2];
+            acc += l * k[(dy+1)*3+(dx+1)];
+          }
+        }
+        out[y*width+x]=acc;
+      }
+    }
+    return out;
+  }
+  const lap=conv3x3([0,1,0,1,-4,1,0,1,0]);
+  const sobX=conv3x3([-1,0,1,-2,0,2,-1,0,1]);
+  const sobY=conv3x3([-1,-2,-1,0,0,0,1,2,1]);
+
+  let sharp=0, edge=0;
+  for(let i=0;i<N;i++){
+    sharp += Math.abs(lap[i]);
+    edge  += Math.abs(sobX[i]) + Math.abs(sobY[i]);
+  }
+  sharp/=N; edge/=N;
+
+  // Дисбаланс кольору (R-G, Y-B)
+  const rg = (avgR-avgG)/255;
+  const yb = ((avgR+avgG)/2 - avgB)/255;
+
+  return {
+    avgL, stdL, sat, sharp, edge, rg, yb,
+    r:avgR/255, g:avgG/255, b:avgB/255
+  };
+}
+
+const FEAT_ORDER=['avgL','stdL','sat','sharp','edge','rg','yb','r','g','b'];
+function featVector(f){ return FEAT_ORDER.map(k=>f[k]); }
+
+// ===== Датасет =====
+let DS=[]; // {feat:[], label, png}
+$('#snap').addEventListener('click', ()=>{
+  if(!v.videoWidth) return alert('Спочатку увімкни камеру');
+  drawFromVideo();
+  const f=computeFeatures();
+  const label=$('#label').value;
+  const png=canvas.toDataURL('image/png');
+  DS.push({feat:featVector(f), label, png});
+  updateStats();
+  drawScatter();
+  log(`Кадр додано: ${label} | фіч=${FEAT_ORDER.length}`);
+});
+
+$('#clear').addEventListener('click', ()=>{ DS=[]; updateStats(); drawScatter(); log('Датасет очищено'); });
+
+function updateStats(){
+  const n=DS.length;
+  const ok=DS.filter(x=>x.label==='OK').length;
+  const def=n-ok;
+  $('#stat').textContent=`Кадрів: ${n} | OK: ${ok} | DEF: ${def}`;
+}
+
+// ===== Скатерплот =====
+const plot=$('#plot'), gp=plot.getContext('2d');
+function fillFeatSelects(){
+  const fx=$('#fx'), fy=$('#fy');
+  fx.innerHTML=''; fy.innerHTML='';
+  FEAT_ORDER.forEach((k,i)=>{
+    const o1=document.createElement('option'); o1.value=i; o1.textContent=`${i+1}. ${k}`; fx.appendChild(o1);
+    const o2=document.createElement('option'); o2.value=i; o2.textContent=`${i+1}. ${k}`; fy.appendChild(o2);
+  });
+  fx.value=0; fy.value=1;
+}
+fillFeatSelects();
+$('#redraw').addEventListener('click', drawScatter);
+
+function drawScatter(){
+  const W=plot.width,H=plot.height; gp.clearRect(0,0,W,H);
+  gp.strokeStyle='#223049'; gp.strokeRect(0.5,0.5,W-1,H-1);
+  if(DS.length<1){ gp.fillStyle='#94a3b8'; gp.fillText('Зніми кілька кадрів і натисни «Навчити»',14,20); return; }
+  const fx=+$('#fx').value, fy=+$('#fy').value;
+  const xs=DS.map(d=>d.feat[fx]), ys=DS.map(d=>d.feat[fy]);
+  const minX=Math.min(...xs), maxX=Math.max(...xs);
+  const minY=Math.min(...ys), maxY=Math.max(...ys);
+  const left=50,right=W-10,top=20,bottom=H-30;
+  const xOf=v=> left + (v-minX)/(maxX-minX||1)*(right-left);
+  const yOf=v=> bottom - (v-minY)/(maxY-minY||1)*(bottom-top);
+
+  for(const d of DS){
+    const x=xOf(d.feat[fx]), y=yOf(d.feat[fy]);
+    gp.beginPath();
+    const col = d.label==='OK' ? '#22c55e' :
+                (d.label==='NO_LABEL' ? '#60a5fa' :
+                 d.label==='DENT' ? '#f59e0b' :
+                 d.label==='STAIN' ? '#f87171' : '#a78bfa');
+    gp.strokeStyle=col;
+    if(d.label==='OK'){ gp.arc(x,y,4,0,Math.PI*2); gp.stroke(); }
+    else { gp.moveTo(x-4,y-4); gp.lineTo(x+4,y+4); gp.moveTo(x-4,y+4); gp.lineTo(x+4,y-4); gp.stroke(); }
+  }
+  gp.fillStyle='#94a3b8'; gp.font='12px ui-monospace';
+  gp.fillText(FEAT_ORDER[fx], left, H-8);
+  gp.save(); gp.translate(10,(top+bottom)/2); gp.rotate(-Math.PI/2); gp.fillText(FEAT_ORDER[fy], 0,0); gp.restore();
+}
+
+// ===== Розбиття / Метрики =====
+function rand(seed){ let x=seed%2147483647; if(x<=0) x+=2147483646; return ()=> (x=(x*16807)%2147483647)/2147483647; }
+function shuffleInPlace(a,R=Math.random){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(R()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function splitTrainTest(arr, ratio=0.7, seed=42){
+  const idx=[...arr.keys()]; const R=rand(seed); shuffleInPlace(idx,R);
+  const nTr=Math.floor(ratio*arr.length); const tr=idx.slice(0,nTr), te=idx.slice(nTr);
+  return {train:tr.map(i=>arr[i]), test:te.map(i=>arr[i])};
+}
+function cmatrix(yTrue, yPred, labels){
+  const m=labels.length; const M=Array.from({length:m},()=>Array(m).fill(0));
+  const idx=Object.fromEntries(labels.map((l,i)=>[l,i]));
+  for(let i=0;i<yTrue.length;i++) M[idx[yTrue[i]]][idx[yPred[i]]]++;
+  return M;
+}
+function f1macro(yTrue, yPred, labels){
+  const idx=Object.fromEntries(labels.map((l,i)=>[l,i]));
+  let sum=0,cnt=0;
+  for(const l of labels){
+    const i=idx[l];
+    let TP=0,FP=0,FN=0;
+    for(let r=0;r<labels.length;r++){
+      for(let c=0;c<labels.length;c++){
+        const v = cm[i?i:0]; // placeholder, we will compute differently
+      }
+    }
+  }
+  // Реалізуємо напряму на основі M:
+  const M=cmatrix(yTrue,yPred,labels);
+  for(let i=0;i<labels.length;i++){
+    const TP=M[i][i];
+    const FP = M.reduce((a,row,ri)=> ri===i ? a : a+row[i], 0);
+    const FN = M[i].reduce((a,v,ci)=> ci===i ? a : a+v, 0);
+    const prec = TP/(TP+FP||1);
+    const rec  = TP/(TP+FN||1);
+    const f1 = (prec+rec)? 2*prec*rec/(prec+rec):0;
+    sum+=f1; cnt++;
+  }
+  return {f1: sum/(cnt||1), M};
+}
+function auc_ok_vs_def(probOK, yTrue){
+  // yTrue: true if OK else DEF
+  const pairs = probOK.map((p,i)=>({p, y: yTrue[i]})).sort((a,b)=>b.p-a.p);
+  let TP=0,FP=0,TN=0,FN=0;
+  const P=pairs.filter(o=>o.y).length, N=pairs.length-P;
+  let auc=0, prevTPR=0, prevFPR=0;
+  let tp=0, fp=0;
+  let lastP=null;
+  for(const o of pairs){
+    if(lastP!==null && o.p!==lastP){
+      const TPR=tp/(P||1), FPR=fp/(N||1);
+      auc += (FPR-prevFPR)*(TPR+prevTPR)/2;
+      prevTPR=TPR; prevFPR=FPR;
+    }
+    if(o.y) tp++; else fp++;
+    lastP=o.p;
+  }
+  const TPR=tp/(P||1), FPR=fp/(N||1);
+  auc += (FPR-prevFPR)*(TPR+prevTPR)/2;
+  return Math.abs(auc);
+}
+
+// ===== Моделі =====
+// k-NN multi-class
+function predictKNN(trainX, trainY, X, k=5){
+  function d(a,b){let s=0; for(let j=0;j<a.length;j++){ const t=a[j]-b[j]; s+=t*t; } return Math.sqrt(s);}
+  const uniq=[...new Set(trainY)];
+  const outProb=[];
+  for(const x of X){
+    const nn=trainX.map((r,i)=>({i,dist:d(r,x)})).sort((a,b)=>a.dist-b.dist).slice(0,k);
+    const counts=Object.fromEntries(uniq.map(u=>[u,0]));
+    nn.forEach(n=>counts[trainY[n.i]]++);
+    const probs=Object.fromEntries(uniq.map(u=>[u,counts[u]/k]));
+    outProb.push(probs);
+  }
+  return {labels:uniq, prob:outProb};
+}
+
+// Логістична регресія 1-vs-rest (градієнтний спуск)
+function trainLogRegOVR(X,y,labels,lr=0.1,epochs=400,l2=0.001){
+  // стандартизуємо
+  const mu=new Array(X[0].length).fill(0), sd=new Array(X[0].length).fill(0);
+  for(let j=0;j<X[0].length;j++){
+    const col=X.map(r=>r[j]); const m=col.reduce((a,b)=>a+b,0)/col.length;
+    const s=Math.sqrt(col.reduce((a,b)=>a+(b-m)*(b-m),0)/col.length)||1;
+    mu[j]=m; sd[j]=s;
+  }
+  const Z=X.map(r=>r.map((v,j)=>(v-mu[j])/sd[j]));
+  const addBias=A=>A.map(r=>[1,...r]);
+  const Zb=addBias(Z);
+
+  const W=labels.map(()=> new Array(Zb[0].length).fill(0));
+
+  function sigm(z){return 1/(1+Math.exp(-z));}
+
+  for(let c=0;c<labels.length;c++){
+    const yc = y.map(t=> t===labels[c]?1:0);
+    let w=W[c].slice();
+    for(let ep=0;ep<epochs;ep++){
+      const grad=new Array(w.length).fill(0);
+      for(let i=0;i<Zb.length;i++){
+        const z=Zb[i].reduce((s,v,j)=>s+v*w[j],0);
+        const p=sigm(z); const e=p - yc[i];
+        for(let j=0;j<w.length;j++) grad[j]+= e*Zb[i][j];
+      }
+      for(let j=1;j<w.length;j++) grad[j]+= l2*w[j];
+      for(let j=0;j<w.length;j++) w[j]-= lr*grad[j]/Zb.length;
+    }
+    W[c]=w;
+  }
+
+  function predictProba(Xnew){
+    const Z=Xnew.map(r=>r.map((v,j)=>(v-mu[j])/sd[j]));
+    const Zb=Z.map(r=>[1,...r]);
+    return Zb.map(r=>{
+      const scores=W.map(w=> r.reduce((s,v,j)=>s+v*w[j],0));
+      // стабілізуємо softmax
+      const m=Math.max(...scores); const ex=scores.map(s=>Math.exp(s-m)); const sum=ex.reduce((a,b)=>a+b,0);
+      const probs=ex.map(e=>e/sum);
+      const obj={}; labels.forEach((lab,i)=> obj[lab]=probs[i]);
+      return obj;
+    });
+  }
+  return {labels, W, mu, sd, predictProba};
+}
+
+// ===== Тренування / Прогноз / Метрики =====
+let MODEL=null; // {type, labels, predictProba, (W,mu,sd)}
+$('#train').addEventListener('click', ()=>{
+  if(DS.length<10) return alert('Додай хоча б 10 кадрів');
+  const split=+$('#split').value/100, seed=+$('#seed').value;
+  const {train,test}=splitTrainTest(DS, split, seed);
+  const Xtr=train.map(d=>d.feat), ytr=train.map(d=>d.label);
+  const Xte=test.map(d=>d.feat), yte=test.map(d=>d.label);
+  const labels=[...new Set(DS.map(d=>d.label))];
+
+  let predictProba, coefText='—';
+  if($('#modelType').value==='knn'){
+    const k=5;
+    predictProba=(X)=> {
+      const R=predictKNN(Xtr,ytr,X,k);
+      // Повертаємо ймовірності як object[label]=p
+      return R.prob.map(pr=>{
+        const obj={}; labels.forEach(l=>obj[l]=pr[l]||0); return obj;
+      });
+    };
+    coefText='(k-NN не має коефіцієнтів)';
+  }else{
+    const M=trainLogRegOVR(Xtr,ytr,labels,0.15,500,0.001);
+    predictProba=M.predictProba;
+    coefText = 'Коефіцієнти на класів: ' + labels.map((lab,i)=>`${lab}[${M.W[i].map((w,j)=> (j===0?'b=':'')+M.W[i][j].toFixed(2)).slice(0,5).join(', ')} …]`).join(' | ');
+  }
+
+  // Прогноз на тесті
+  const P = predictProba(Xte);
+  const yPred = P.map(probs=>{
+    let bestL=labels[0], bestP=-1;
+    for(const l of labels){ if(probs[l]>bestP){bestP=probs[l]; bestL=l;} }
+    return bestL;
+  });
+
+  const acc = yPred.filter((p,i)=>p===yte[i]).length/(yte.length||1);
+  const f1M = f1macro(yte, yPred, labels);
+  // AUC OK vs DEF (бінаризація)
+  const probOK = P.map(probs=> probs['OK']||0);
+  const yBin = yte.map(l=> l==='OK');
+  const auc = auc_ok_vs_def(probOK, yBin);
+
+  $('#m_split').textContent=`Train ${Math.round(split*100)}% / Test ${Math.round(100-split*100)}%`;
+  $('#m_acc').textContent=acc.toFixed(3);
+  $('#m_f1').textContent=f1M.f1.toFixed(3);
+  $('#m_auc').textContent=auc.toFixed(3);
+  $('#m_cm').textContent = renderCM(f1M.M, labels);
+  $('#m_w').textContent = coefText;
+
+  MODEL={labels, predictProba};
+  log(`Навчено ${$('#modelType').value}: acc=${acc.toFixed(3)} F1=${f1M.f1.toFixed(3)} AUC=${auc.toFixed(3)}`);
+});
+
+function renderCM(M, labels){
+  const head='\\ '+labels.map(l=>l.slice(0,7)).join(' | ');
+  const rows=M.map((row,i)=> labels[i].slice(0,7)+': '+row.map(v=>String(v).padStart(3,' ')).join(' '));
+  return head+'\n'+rows.join('\n');
+}
+
+// Живий прогноз
+$('#predictLive').addEventListener('click', ()=>{
+  if(!MODEL) return alert('Спочатку натренуй модель');
+  drawFromVideo();
+  const f=computeFeatures();
+  const probs = MODEL.predictProba([featVector(f)])[0];
+  let bestL=MODEL.labels[0], bestP=-1;
+  for(const l of MODEL.labels){ if((probs[l]||0)>bestP){bestP=probs[l]; bestL=l;} }
+  const pOK = probs['OK']||0;
+  $('#predStat').textContent = `P(OK)=${pOK.toFixed(3)} | Рішення: ${bestL}`;
+});
+
+// ===== Експорт / Звіт / Чек / QR =====
+$('#saveCsv').addEventListener('click', ()=>{
+  if(!DS.length) return alert('Немає даних');
+  let csv='avgL,stdL,sat,sharp,edge,rg,yb,r,g,b,label\n';
+  for(const d of DS){ csv += d.feat.join(',')+','+d.label+'\n'; }
+  download('tech_para24_cv_dataset_'+stamp()+'.csv', csv, 'text/csv');
+});
+$('#saveTxt').addEventListener('click', ()=>{
+  const lines=[
+    'Пара 24 — Комп\'ютерний зір у QC: підсумок',
+    'Лот/лінія: '+($('#lot').value||'—'),
+    'Кадрів: '+DS.length,
+    `Train/Test: ${$('#m_split').textContent}`,
+    `Accuracy: ${$('#m_acc').textContent}`,
+    `F1 macro: ${$('#m_f1').textContent}`,
+    `ROC AUC (OK vs DEF): ${$('#m_auc').textContent}`,
+    'Матриця помилок:\n'+$('#m_cm').textContent
+  ];
+  download('tech_para24_summary_'+stamp()+'.txt', lines.join('\n'));
+});
+$('#print58').addEventListener('click', ()=>{
+  const rc=$('#rc'); rc.hidden=false;
+  const lines=[
+    '=== QC CV (58мм) ===',
+    'Лот: '+($('#lot').value||'—'),
+    `Acc=${$('#m_acc').textContent} F1=${$('#m_f1').textContent}`,
+    $('#predStat').textContent.replace(/\|/g,'|').trim(),
+    '---------------------'
+  ];
+  rc.textContent=lines.join('\n');
+  download('tech_para24_receipt_'+stamp()+'.txt', rc.textContent);
+});
+$('#qrGen').addEventListener('click', ()=>{
+  const data = prompt('Встав URL/текст (папка з актами/фото):', $('#lot').value || 'cv-evidence');
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url;
+});
+
+// ===== Ініціалізація =====
+updateStats(); drawScatter();
+</script>
+</body>
+</html>
