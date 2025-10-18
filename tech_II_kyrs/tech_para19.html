@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 19 (технологи) — Санітарія/SSOP: календар, ATP/змиви, тренди, чек/CSV/QR</title>
+<meta name="description" content="План мийки/дезінфекції (SSOP), журнал ATP (RLU), змиви (CFU/см²), алергени; живі графіки трендів, попередження, чек 58 мм, експорт CSV/TXT, QR на папку з доказами."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1240px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:90px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.grid{display:grid;gap:14px;grid-template-columns:1.35fr 1fr}
+@media(max-width:1120px){.grid{grid-template-columns:1fr}}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:280px}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.day{border:1px solid var(--line);border-radius:10px;padding:6px;min-height:74px}
+.day .d{font-size:.9rem;color:#a5b4fc}
+.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 6px;margin:2px;font-size:.75rem}
+.pill.shift{border-color:#38bdf8}
+.pill.daily{border-color:#22c55e}
+.pill.weekly{border-color:#fbbf24}
+.pill.over{border-color:#f87171;color:#f87171}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🧼</span>
+      <div>
+        <b>Пара 19 — Санітарія/SSOP: календар, ATP/змиви, тренди</b><br/>
+        <span class="badge">план мийки/дезінфекції → журнал ATP/CFU/алергени → живі графіки → чек/CSV/QR</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">Мета: спланувати <b>мийку/дезінфекцію</b> за <b>SSOP</b>, вести <b>журнал чистоти</b> з вимірюваннями <b>ATP (RLU)</b>, <b>змивів (CFU/см²)</b> і <b>алергенних тестів</b>, відслідковувати <b>тренди</b>, видавати <b>попередження</b> та формувати <b>чек/CSV/TXT/QR</b>.</p>
+
+  <div class="grid">
+    <!-- ЛІВО: план/календар + журнал + графіки -->
+    <div class="card">
+      <h2>🗓️ План-календар SSOP</h2>
+      <div class="row">
+        <select id="area" class="input" style="max-width:220px">
+          <option value="milk" selected>Цех пастеризації</option>
+          <option value="cut">Коптильне/нарізка</option>
+          <option value="pack">Пакування (MAP)</option>
+          <option value="brine">Розсільне відділення</option>
+          <option value="egg">Яєчний відділ</option>
+        </select>
+        <label>Зміни/добу<input id="shifts" class="input" type="number" min="1" max="4" value="2"/></label>
+        <label>ATP поріг (RLU)<input id="rluThr" class="input" type="number" min="10" step="10" value="150"/></label>
+        <label>CFU поріг (напр., 10/см²)<input id="cfuThr" class="input" type="number" min="1" step="1" value="10"/></label>
+        <label>Алерген (порог., ppm)<input id="algThr" class="input" type="number" min="1" step="1" value="2"/></label>
+        <button class="btn good" id="mkPlan">⚙️ Згенерувати план</button>
+      </div>
+
+      <div id="cal" class="cal" style="margin-top:8px"></div>
+      <small class="muted">Кольори: <span class="pill shift">щозміни</span> <span class="pill daily">щодня</span> <span class="pill weekly">щотижня</span>. Червона рамка — <span class="pill over">протерм.</span></small>
+
+      <h3 style="margin-top:12px">📝 Журнал чистоти (ATP/змиви/алергени)</h3>
+      <div class="row">
+        <select id="station" class="input" style="max-width:220px">
+          <option>Ніж/стіл</option><option>Транспортер</option><option>Фасувальник</option><option>Пастеризатор</option><option>Шприц/шприц-насадка</option>
+        </select>
+        <label>ATP, RLU<input id="rlu" class="input" type="number" step="1" value="120"/></label>
+        <label>Змив, CFU/см²<input id="cfu" class="input" type="number" step="1" value="6"/></label>
+        <label>Алерген, ppm<input id="alg" class="input" type="number" step="1" value="0"/></label>
+      </div>
+      <div class="row">
+        <input id="operator" class="input" placeholder="Оператор/зміна (ПІБ)"/>
+        <input id="lot" class="input" placeholder="Лот/партія (необов.)"/>
+        <button class="btn" id="addRec">➕ Додати запис</button>
+        <button class="btn secondary" id="clearRec">🧹 Очистити журнал</button>
+        <span id="kpi" class="badge">PASS: — % | Всього: 0</span>
+      </div>
+      <pre id="alog" class="note" style="max-height:160px;overflow:auto">// Поки без подій</pre>
+
+      <h3 style="margin-top:12px">📈 Живі графіки</h3>
+      <div class="canvasWrap"><canvas id="chart" width="980" height="280"></canvas></div>
+      <small class="muted">Синя — ATP (RLU), зелена — %PASS (ковзне вікно 10), червоні точки — порушення порогів.</small>
+
+      <h3 style="margin-top:12px">💾 Експорт / друк</h3>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV журнал</button>
+        <button class="btn" id="saveTxt">💾 TXT підсумок</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (папка з актами/фото)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+      <small class="muted">QR генерується через <span class="mono">api.qrserver.com</span>; офлайн-фолбек — текст.</small>
+    </div>
+
+    <!-- ПРАВО: KPI + схема + завдання -->
+    <div class="card">
+      <h2>📊 Показники</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Локація</th><td id="m_area">—</td></tr>
+          <tr><th>Планових точок/мiсяць</th><td id="m_plan">—</td></tr>
+          <tr><th>Виконано / Протерміновано</th><td id="m_done">—</td></tr>
+          <tr><th>ATP поріг</th><td id="m_rlu">—</td></tr>
+          <tr><th>CFU поріг</th><td id="m_cfu">—</td></tr>
+          <tr><th>Алерген поріг</th><td id="m_alg">—</td></tr>
+          <tr><th>PASS, % (усього)</th><td id="m_pass">—</td></tr>
+          <tr><th>Остання тривога</th><td id="m_alarm">—</td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">🔌 Схема процесу (SVG)</h2>
+      <svg viewBox="0 0 820 280" role="img" aria-label="Мийка/Дез → Інспекція ATP/Змиви → Журнал → Аналіз → Дії">
+        <rect x="40" y="40" width="160" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <text x="120" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Мийка / Дез</text>
+        <text x="120" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">SSOP</text>
+
+        <rect x="220" y="40" width="170" height="120" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <text x="305" y="80" fill="#dcfce7" font-size="14" text-anchor="middle">ATP / Змиви</text>
+        <text x="305" y="100" fill="#a7f3d0" font-size="12" text-anchor="middle">RLU / CFU / алергени</text>
+
+        <rect x="410" y="40" width="160" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <text x="490" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Журнал</text>
+        <text x="490" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">CSV/TXT/чек</text>
+
+        <rect x="590" y="40" width="170" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+        <text x="675" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Аналіз/Дії</text>
+        <text x="675" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">тренди/аларми</text>
+
+        <line x1="200" y1="100" x2="220" y2="100" stroke="#93c5fd" stroke-width="3"/>
+        <line x1="390" y1="100" x2="410" y2="100" stroke="#22c55e" stroke-width="3"/>
+        <line x1="570" y1="100" x2="590" y2="100" stroke="#64748b" stroke-width="3"/>
+      </svg>
+
+      <h2 style="margin-top:10px">🎯 Завдання для студентів</h2>
+      <ol>
+        <li>Згенеруй план для «Цех пастеризації»: <span class="mono">ATP≤150 RLU</span>, <span class="mono">CFU≤10/см²</span>, <span class="mono">алерген≤2 ppm</span>. Заповни ≥ 12 записів, експортуй <b>CSV</b>.</li>
+        <li>Досягни ≤ 2 тривог у ковзному вікні 10 вимірів, зроби скрін графіка, підсумуй у <b>TXT</b>.</li>
+        <li>Згенеруй <b>QR</b> на папку з фото до/після мийки, роздрукуй <b>чек 58 мм</b> для зміни.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📜 Історична нотатка</h2>
+    <p class="muted small">HACCP народився в аерокосмічній програмі США (1960-ті). Сьогодні <b>SSOP</b> і швидкі тести на кшталт <b>ATP</b> — стандартний інструмент контролю чистоти. Наш симулятор відтворює логіку моніторингу/верифікації просто у браузері.</p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s);
+const $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString();const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+
+// ===== План-календар =====
+const cal=$('#cal');
+let PLAN=[]; // {dateISO, type:'shift'|'daily'|'weekly', area, done:boolean}
+
+function monthGrid(date=new Date()){
+  const y=date.getFullYear(), m=date.getMonth();
+  const first=new Date(y,m,1);
+  const start=new Date(y,m,1-first.getDay()+1); // початок з понеділка
+  const days=[];
+  for(let i=0;i<42;i++){
+    const d=new Date(start); d.setDate(start.getDate()+i);
+    days.push(d);
+  }
+  return days;
+}
+
+function renderCal(){
+  cal.innerHTML='';
+  const days=monthGrid(new Date());
+  const todayISO=new Date().toISOString().slice(0,10);
+  days.forEach(d=>{
+    const iso=d.toISOString().slice(0,10);
+    const box=document.createElement('div');
+    box.className='day';
+    if(iso===todayISO) box.style.borderColor='#38bdf8';
+    const h=document.createElement('div'); h.className='d'; h.textContent=iso.slice(8,10)+'.'+iso.slice(5,7);
+    box.appendChild(h);
+    const items=PLAN.filter(p=>p.dateISO===iso);
+    items.forEach(p=>{
+      const span=document.createElement('span');
+      span.className='pill '+p.type+(p.overdue?' over':'');
+      span.textContent=(p.done?'✅ ':'◻️ ')+p.area;
+      span.title = p.type+' | '+(p.done?'Done':'Due');
+      span.style.cursor='pointer';
+      span.addEventListener('click',()=>{ p.done=!p.done; updateKPIs(); renderCal(); });
+      box.appendChild(span);
+    });
+    cal.appendChild(box);
+  });
+}
+
+function genPlan(){
+  const area=$('#area').value;
+  const shifts=+$('#shifts').value||2;
+  const base=new Date(); base.setDate(1);
+  PLAN.length=0;
+  const days=monthGrid(base);
+  for(const d of days){
+    const iso=d.toISOString().slice(0,10);
+    // щозміни
+    for(let s=0;s<shifts;s++) PLAN.push({dateISO:iso,type:'shift',area,done:false});
+    // щоденне
+    PLAN.push({dateISO:iso,type:'daily',area,done:false});
+    // щотижневе — неділя
+    if(d.getDay()===0) PLAN.push({dateISO:iso,type:'weekly',area,done:false});
+  }
+  markOverdue();
+  updateKPIs(); renderCal();
+  log('Згенеровано план SSOP для: '+area);
+}
+
+function markOverdue(){
+  const todayISO=new Date().toISOString().slice(0,10);
+  PLAN.forEach(p=>{ p.overdue = (p.dateISO<todayISO && !p.done); });
+}
+
+// ===== Журнал вимірювань =====
+let LOG=[]; // {ts, area, station, rlu, cfu, alg, pass, operator, lot}
+
+function addRecord(){
+  const area=$('#area').value;
+  const station=$('#station').value;
+  const rlu=+$('#rlu').value;
+  const cfu=+$('#cfu').value;
+  const alg=+$('#alg').value;
+  const op=($('#operator').value||'').trim()||'Оператор';
+  const lot=($('#lot').value||'').trim();
+
+  const thrR=+$('#rluThr').value, thrC=+$('#cfuThr').value, thrA=+$('#algThr').value;
+  const pass = (rlu<=thrR && cfu<=thrC && alg<=thrA);
+
+  LOG.push({ts:Date.now(), area, station, rlu, cfu, alg, pass, operator:op, lot});
+  if(!pass){
+    const msg=`АЛАРМ: ${station} | RLU=${rlu} (≤${thrR}), CFU=${cfu} (≤${thrC}), ALG=${alg} (≤${thrA})`;
+    log(msg); $('#m_alarm').innerHTML=`<b class="bad">${msg}</b>`;
+    // авто-позначка найближчого due як протермінований
+    markOverdue(); renderCal();
+  }else{
+    log(`PASS: ${station} | RLU=${rlu}, CFU=${cfu}, ALG=${alg}`);
+  }
+  updateKPIs(); drawCharts();
+}
+
+function clearLog(){
+  LOG.length=0; updateKPIs(); drawCharts(); $('#alog').textContent='// Поки без подій'; $('#m_alarm').textContent='—';
+}
+
+// ===== KPI + оновлення правої панелі =====
+function updateKPIs(){
+  const area=$('#area').value;
+  $('#m_area').textContent=area;
+  $('#m_rlu').textContent=$('#rluThr').value+' RLU';
+  $('#m_cfu').textContent=$('#cfuThr').value+' /см²';
+  $('#m_alg').textContent=$('#algThr').value+' ppm';
+
+  const total=PLAN.length;
+  const done=PLAN.filter(p=>p.done).length;
+  const overdue=PLAN.filter(p=>p.overdue).length;
+  $('#m_plan').textContent=total;
+  $('#m_done').innerHTML=`<b class="${overdue?'bad':''}">${done} / ${overdue} простр.</b>`;
+
+  const passPct = LOG.length? (LOG.filter(r=>r.pass).length/LOG.length*100):0;
+  $('#m_pass').textContent=passPct.toFixed(1)+' %';
+
+  $('#kpi').textContent=`PASS: ${passPct.toFixed(1)} % | Всього: ${LOG.length}`;
+}
+
+// ===== Графіки =====
+const chart=$('#chart'), ctx=chart.getContext('2d');
+
+function drawCharts(){
+  const W=chart.width,H=chart.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,W-1,H-1);
+  if(!LOG.length){ ctx.fillStyle='#94a3b8'; ctx.fillText('Немає даних',14,20); return; }
+
+  const left=50, right=W-12, top=20, mid=H*0.56, bottom=H-20;
+  const xs=LOG.map((_,i)=>i);
+  const gx=(right-left)/Math.max(1,LOG.length-1);
+
+  // Верх: ATP (RLU)
+  const rlus=LOG.map(r=>r.rlu);
+  const rMax=Math.max(...rlus, +$('#rluThr').value*1.2, 200);
+  const yR=v=> (mid-10) - (v/rMax)*(mid-top-20);
+  ctx.fillStyle='#94a3b8'; ctx.font='12px ui-monospace'; ctx.fillText('ATP, RLU', 8, top+12);
+  ctx.beginPath(); ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2;
+  rlus.forEach((v,i)=>{ const x=left+i*gx, y=yR(v); i?ctx.lineTo(x,y):ctx.moveTo(x,y);}); ctx.stroke();
+  // поріг
+  const thrR=+$('#rluThr').value;
+  ctx.strokeStyle='#fbbf24'; ctx.setLineDash([6,4]); ctx.beginPath(); ctx.moveTo(left,yR(thrR)); ctx.lineTo(right,yR(thrR)); ctx.stroke(); ctx.setLineDash([]);
+
+  // Маркери аварій (червоні точки)
+  ctx.fillStyle='#f87171';
+  LOG.forEach((r,i)=>{ if(r.rlu>thrR||!r.pass){ const x=left+i*gx, y=yR(r.rlu); ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill(); }});
+
+  // Низ: %PASS (ковзне вікно 10)
+  const windowN=10, pct=[];
+  for(let i=1;i<=LOG.length;i++){
+    const win=LOG.slice(Math.max(0,i-windowN), i);
+    pct.push(win.filter(r=>r.pass).length/win.length*100);
+  }
+  const yP=v=> bottom - (v/100)*(bottom-(mid+24));
+  ctx.fillStyle='#94a3b8'; ctx.fillText('%PASS (ковзне N=10)', 8, mid+16);
+  ctx.beginPath(); ctx.strokeStyle='#22c55e'; ctx.lineWidth=2;
+  pct.forEach((v,i)=>{ const x=left+i*gx, y=yP(v); i?ctx.lineTo(x,y):ctx.moveTo(x,y);}); ctx.stroke();
+  // 100/80/60 лінії
+  ctx.strokeStyle='#64748b'; [100,80,60].forEach(val=>{ ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(left,yP(val)); ctx.lineTo(right,yP(val)); ctx.stroke(); ctx.setLineDash([]); });
+}
+
+// ===== Експорт / друк =====
+function saveCSV(){
+  if(!LOG.length) return alert('Немає записів');
+  let csv='ts_iso,area,station,RLU,CFU,ALG_ppm,PASS,operator,lot\n';
+  LOG.forEach(r=>{
+    csv+=`${new Date(r.ts).toISOString()},${r.area},${r.station},${r.rlu},${r.cfu},${r.alg},${r.pass?1:0},${r.operator||''},${(r.lot||'').replace(/"/g,'""')}\n`;
+  });
+  download('tech_para19_ssop_'+stamp()+'.csv', csv, 'text/csv');
+}
+function saveTXT(){
+  const passPct=LOG.length? (LOG.filter(r=>r.pass).length/LOG.length*100):0;
+  const overdue=PLAN.filter(p=>p.overdue).length;
+  const done=PLAN.filter(p=>p.done).length;
+  const txt=[
+    'Пара 19 — Санітарія/SSOP: підсумок',
+    `Локація: ${$('#area').value}`,
+    `Планових точок/міс: ${PLAN.length}; Виконано: ${done}; Протерміновано: ${overdue}`,
+    `Пороги: ATP≤${$('#rluThr').value} RLU; CFU≤${$('#cfuThr').value}/см²; Алерген≤${$('#algThr').value} ppm`,
+    `Записів у журналі: ${LOG.length}; PASS: ${passPct.toFixed(1)} %`,
+    '--- Журнал подій ---',
+    ...($('#alog').textContent.startsWith('//')?[]:$('#alog').textContent.trim().split('\n'))
+  ].join('\n');
+  download('tech_para19_summary_'+stamp()+'.txt', txt);
+}
+function print58(){
+  const passPct=LOG.length? (LOG.filter(r=>r.pass).length/LOG.length*100):0;
+  const overdue=PLAN.filter(p=>p.overdue).length;
+  const done=PLAN.filter(p=>p.done).length;
+  const lines=[
+    '=== ЧЕК SSOP (58мм) ===',
+    'Локація: '+$('#area').value,
+    `ATP≤${$('#rluThr').value} | CFU≤${$('#cfuThr').value} | ALG≤${$('#algThr').value}`,
+    `План: ${PLAN.length} | Done: ${done} | Over: ${overdue}`,
+    `PASS: ${passPct.toFixed(1)} % | Записів: ${LOG.length}`,
+    '-----------------------------'
+  ];
+  const rc=$('#rc'); rc.hidden=false; rc.textContent=lines.join('\n');
+  download('tech_para19_receipt_'+stamp()+'.txt', rc.textContent);
+}
+
+// ===== QR =====
+$('#qrGen').addEventListener('click', ()=>{
+  const data = prompt('Встав URL/текст (папка з актами/фото):', $('#lot').value || 'ssop-evidence');
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url;
+});
+
+// ===== Події UI =====
+$('#mkPlan').addEventListener('click', ()=>{ genPlan(); });
+$('#addRec').addEventListener('click', addRecord);
+$('#clearRec').addEventListener('click', clearLog);
+$('#saveCsv').addEventListener('click', saveCSV);
+$('#saveTxt').addEventListener('click', saveTXT);
+$('#print58').addEventListener('click', print58);
+
+// ===== Ініціалізація =====
+genPlan(); drawCharts(); updateKPIs(); renderCal();
+</script>
+</body>
+</html>
