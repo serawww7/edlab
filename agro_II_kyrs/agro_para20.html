@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 20 — CO₂-збагачення + безпека персоналу (сирена, RGB-індикатор, журнал тривог)</title>
+<meta name="description" content="MH-Z19B (UART): керуємо збагаченням CO₂ (клапан/генератор) і вентиляцією з гістерезисом та мінімальним часом увімкнення. Безпека: сирена/буззер, RGB-індикатор зон (зелена/жовта/червона), журнал тривог. Емулятор CO₂, графік, експорт CSV/TXT, генератор прошивки."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Inter,Roboto,Arial,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+small.mono,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace}
+.grid{display:grid;gap:14px;grid-template-columns:1.2fr 1fr}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+svg{max-width:100%;height:auto;display:block}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:260px}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.badge{display:inline-block;border:1px solid #334155;border-radius:999px;padding:2px 8px}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.log{max-height:160px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;background:#0b1220;font-family:ui-monospace,monospace;font-size:13px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🧪</span>
+      <div>
+        <b>Пара 20 — CO₂-збагачення + безпека персоналу</b><br/>
+        <span class="badge">MH-Z19B → керування збагаченням/вентиляцією · сирена · RGB-індикатор · журнал</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">
+    Мета: тримати CO₂ у цільовому коридорі для підвищення фотосинтезу (напр., <b>800–1000 ppm</b>), 
+    автоматично вмикати <b>збагачення</b> (клапан/генератор CO₂) і <b>вентиляцію</b> при перевищенні, 
+    а також <b>сповіщати персонал</b> сиреною та <b>RGB-індикатором зон</b> (зелена/жовта/червона). Є <b>емулятор</b>, живий графік, журнал тривог і генератор повної прошивки.
+  </p>
+
+  <div class="grid">
+    <!-- ЛІВА КОЛОНКА -->
+    <div class="card">
+      <h2>🔧 Налаштування контролю</h2>
+      <div class="row">
+        <div style="flex:1">
+          <label for="period">Період опитування, мс</label>
+          <input id="period" class="input" type="number" min="1000" step="500" value="2000"/>
+        </div>
+        <div style="flex:1">
+          <label for="alpha">EMA згладжування α</label>
+          <input id="alpha" class="input" type="number" min="0" max="1" step="0.05" value="0.2"/>
+        </div>
+      </div>
+
+      <h3 style="margin-top:12px">🌿 Цільовий коридор CO₂ (ppm)</h3>
+      <div class="row">
+        <div style="flex:1">
+          <label for="setLow">Нижня межа (вмикає збагачення)</label>
+          <input id="setLow" class="input" type="number" step="25" value="800"/>
+        </div>
+        <div style="flex:1">
+          <label for="setHigh">Верхня межа (вмикає вентиляцію)</label>
+          <input id="setHigh" class="input" type="number" step="25" value="1000"/>
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label for="hyst">Гістерезис, ppm</label>
+          <input id="hyst" class="input" type="number" step="10" value="60"/>
+        </div>
+        <div style="flex:1">
+          <label for="minOn">Мін. час увімкнення реле, с</label>
+          <input id="minOn" class="input" type="number" step="5" value="20"/>
+        </div>
+      </div>
+
+      <h3 style="margin-top:12px">🚨 Пороги безпеки персоналу</h3>
+      <div class="row">
+        <div style="flex:1">
+          <label for="warn">Увага (жовта зона), ppm</label>
+          <input id="warn" class="input" type="number" step="50" value="1200"/>
+        </div>
+        <div style="flex:1">
+          <label for="alarm">Тривога (червона), ppm</label>
+          <input id="alarm" class="input" type="number" step="50" value="2000"/>
+        </div>
+      </div>
+      <div class="row">
+        <span id="badgeCO2" class="badge">CO₂(EMA)=— ppm</span>
+        <span id="badgeState" class="badge">Стан: —</span>
+      </div>
+
+      <h3 style="margin-top:12px">🧪 Емулятор CO₂</h3>
+      <div class="row">
+        <input id="emu" type="checkbox"/><label for="emu">Увімкнути емулятор</label>
+      </div>
+      <div class="row" style="width:100%">
+        <label style="flex:1">CO₂, ppm
+          <input id="emuCO2" class="input" type="range" min="400" max="4000" step="10" value="750" disabled/>
+        </label>
+        <label style="flex:1">Збагачення (імітація)
+          <select id="emuEnr" class="input" disabled>
+            <option value="0" selected>OFF</option>
+            <option value="1">ON</option>
+          </select>
+        </label>
+        <label style="flex:1">Вентиляція (імітація)
+          <select id="emuVent" class="input" disabled>
+            <option value="0" selected>OFF</option>
+            <option value="1">ON</option>
+          </select>
+        </label>
+      </div>
+
+      <h3 style="margin-top:12px">📈 Живий графік</h3>
+      <div class="canvasWrap"><canvas id="chart" width="900" height="260"></canvas></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="tick">➕ Додати точку</button>
+        <button class="btn secondary" id="clear">🧹 Очистити</button>
+        <span class="muted mono" id="lastVal">CO₂=—, EMA=—, enr=0, vent=0</span>
+      </div>
+
+      <h3 style="margin-top:12px">🧩 Генератор прошивки (Arduino .ino)</h3>
+      <div class="row">
+        <div style="flex:1">
+          <label for="rxPin">RX (Arduino читає)</label>
+          <select id="rxPin" class="input">
+            <option value="10">D10</option><option value="11" selected>D11</option>
+            <option value="12">D12</option><option value="13">D13</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label for="txPin">TX (Arduino передає)</label>
+          <select id="txPin" class="input">
+            <option value="9">D9</option><option value="8" selected>D8</option>
+            <option value="7">D7</option><option value="6">D6</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label for="pinEnr">Пін реле збагачення</label>
+          <select id="pinEnr" class="input">
+            <option value="5">D5</option><option value="6" selected>D6</option><option value="7">D7</option><option value="8">D8</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label for="pinVent">Пін реле вентиляції</label>
+          <select id="pinVent" class="input">
+            <option value="3">D3</option><option value="4" selected>D4</option><option value="9">D9</option><option value="10">D10</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label for="pinBuz">Пін буззера (сирена)</label>
+          <select id="pinBuz" class="input">
+            <option value="2" selected>D2</option><option value="3">D3</option><option value="9">D9</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label for="pinRGB">Піни RGB (R,G,B)</label>
+          <input id="pinRGB" class="input" type="text" value="A0,A1,3" />
+          <small class="muted">Через резистори 220–330Ω, спільний катод/анод — підлаштуєш у коді.</small>
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn good" id="gen">⚙️ Згенерувати прошивку</button>
+        <button class="btn secondary" id="copy">📋 Копіювати</button>
+        <button class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
+      </div>
+      <pre class="code"><code id="code">// Натисни «Згенерувати прошивку» ↑</code></pre>
+
+      <h3 style="margin-top:12px">💾 Протокол і журнал</h3>
+      <div class="row">
+        <input id="fio" class="input" placeholder="ПІБ студента"/>
+        <button class="btn" id="saveTxt">💾 TXT</button>
+        <button class="btn" id="saveCsv">📄 CSV</button>
+        <button class="btn secondary" id="saveLog">🧷 Експорт журналу</button>
+      </div>
+      <div id="log" class="log" aria-live="polite"></div>
+    </div>
+
+    <!-- ПРАВА КОЛОНКА -->
+    <div class="card">
+      <h2>🔌 Схема підключення (SVG)</h2>
+      <svg viewBox="0 0 780 520" role="img" aria-label="Arduino + MH-Z19B + 2 реле + буззер + RGB LED">
+        <!-- Arduino -->
+        <rect x="40" y="40" width="250" height="180" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <text x="165" y="65" fill="#e5e7eb" font-size="16" text-anchor="middle">Arduino UNO/Nano</text>
+        <text x="55" y="95" fill="#93c5fd" font-size="12">5V</text>
+        <text x="55" y="115" fill="#93c5fd" font-size="12">GND</text>
+        <text x="55" y="135" fill="#93c5fd" font-size="12">D11 (RX)</text>
+        <text x="55" y="155" fill="#93c5fd" font-size="12">D8  (TX)</text>
+        <text x="220" y="185" fill="#93c5fd" font-size="12">D6 → RELAY_CO₂</text>
+        <text x="220" y="205" fill="#93c5fd" font-size="12">D4 → RELAY_VENT</text>
+
+        <!-- MH-Z19B -->
+        <rect x="340" y="40" width="210" height="120" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <text x="445" y="64" fill="#dcfce7" font-size="16" text-anchor="middle">MH-Z19B (UART)</text>
+        <text x="445" y="84" fill="#a7f3d0" font-size="12" text-anchor="middle">VCC — GND — TX — RX</text>
+
+        <!-- Relays -->
+        <rect x="340" y="180" width="210" height="90" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+        <text x="445" y="204" fill="#fed7aa" font-size="16" text-anchor="middle">2× Реле</text>
+        <text x="445" y="224" fill="#fed7aa" font-size="12" text-anchor="middle">IN_CO₂ — IN_VENT — VCC — GND</text>
+
+        <!-- Buzzer -->
+        <rect x="340" y="290" width="210" height="70" rx="12" fill="#3b0764" stroke="#a78bfa"/>
+        <text x="445" y="315" fill="#ddd6fe" font-size="16" text-anchor="middle">Буззер</text>
+        <text x="445" y="333" fill="#ddd6fe" font-size="12" text-anchor="middle">D2 — VCC — GND</text>
+
+        <!-- RGB LED -->
+        <rect x="340" y="380" width="210" height="90" rx="12" fill="#0b3f5a" stroke="#22d3ee"/>
+        <text x="445" y="405" fill="#a5f3fc" font-size="16" text-anchor="middle">RGB LED</text>
+        <text x="445" y="425" fill="#a5f3fc" font-size="12" text-anchor="middle">R=A0 · G=A1 · B=D3 (через резистори)</text>
+
+        <!-- Lines -->
+        <line x1="290" y1="90"  x2="340" y2="60"  stroke="#93c5fd" stroke-width="3"/><text x="305" y="78" fill="#93c5fd" font-size="12">5V → VCC</text>
+        <line x1="290" y1="110" x2="340" y2="80"  stroke="#64748b" stroke-width="3"/><text x="305" y="96" fill="#94a3b8" font-size="12">GND → GND</text>
+        <line x1="290" y1="130" x2="340" y2="90"  stroke="#22c55e" stroke-width="3"/><text x="305" y="116" fill="#86efac" font-size="12">D11(RX) ← TX</text>
+        <line x1="290" y1="150" x2="340" y2="100" stroke="#22c55e" stroke-width="3" opacity=".5"/><text x="305" y="136" fill="#86efac" font-size="12" opacity=".8">D8(TX) → RX</text>
+
+        <line x1="290" y1="190" x2="340" y2="205" stroke="#fb923c" stroke-width="3"/><text x="305" y="195" fill="#fdba74" font-size="12">D6 → IN_CO₂</text>
+        <line x1="290" y1="210" x2="340" y2="215" stroke="#fb923c" stroke-width="3"/><text x="305" y="215" fill="#fdba74" font-size="12">D4 → IN_VENT</text>
+
+        <line x1="290" y1="300" x2="340" y2="320" stroke="#a78bfa" stroke-width="3"/><text x="305" y="310" fill="#ddd6fe" font-size="12">D2 → BUZZER</text>
+
+        <line x1="290" y1="410" x2="340" y2="410" stroke="#22d3ee" stroke-width="3"/><text x="305" y="402" fill="#67e8f9" font-size="12">A0 → R</text>
+        <line x1="290" y1="430" x2="340" y2="430" stroke="#22d3ee" stroke-width="3"/><text x="305" y="422" fill="#67e8f9" font-size="12">A1 → G</text>
+        <line x1="290" y1="450" x2="340" y2="450" stroke="#22d3ee" stroke-width="3"/><text x="305" y="442" fill="#67e8f9" font-size="12">D3 → B</text>
+      </svg>
+
+      <div class="note" style="margin-top:10px">
+        <b>Безпека:</b> CO₂ важчий за повітря — датчик розміщуй на висоті 1–1,5 м. 
+        Збагачення (клапан/генератор) живи через <b>окремий блок живлення та реле</b> з гальванічною розв’язкою.
+        Встанови <b>попереджувальні таблички</b> й інструктаж персоналу: при червоній зоні — негайно провітрити та покинути теплицю.
+      </div>
+
+      <h3 style="margin-top:12px">🧷 Корисні теги</h3>
+      <div>
+        <span class="tag">#CO2_enrichment</span>
+        <span class="tag">#безпека</span>
+        <span class="tag">#сирена</span>
+        <span class="tag">#RGB_indicator</span>
+        <span class="tag">#гістерезис</span>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h3>📜 Історична нотатка для дискусії</h3>
+        <p class="muted">
+          У 1960–70-х промислове збагачення CO₂ дало тепличникам +10–30% врожайності. 
+          Але зросли інциденти з персоналом — так народилися <b>двохконтурні системи</b>: один контур підвищує CO₂ для рослин, а другий 
+          суворо контролює пороги безпеки для людей (сирени, світлова індикація, журнали). Сьогодні таку систему можна зібрати на Arduino.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="sep"/>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>Фото макета Arduino + MH-Z19B + 2 реле + буззер + RGB LED.</li>
+      <li>CSV-лог (5–10 хв): <span class="mono">millis,CO2_raw,CO2_EMA,enrich,vent,buzzer,zone</span>.</li>
+      <li>Експорт «Журнал тривог»: події входу/виходу із жовтої/червоної зон та спрацювання сирени.</li>
+      <li>Поясни вибір коридору CO₂, гістерезису й мінімального часу увімкнення.</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// Утиліти
+const $=(s)=>document.querySelector(s);
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+const LogEl = $('#log');
+function log(msg){const t=new Date().toLocaleTimeString(); LogEl.textContent += `[${t}] ${msg}\n`; LogEl.scrollTop = LogEl.scrollHeight;}
+
+// Емулятор
+const emu=$('#emu'), emuCO2=$('#emuCO2'), emuEnr=$('#emuEnr'), emuVent=$('#emuVent');
+emu.addEventListener('change',()=>{emuCO2.disabled=emuEnr.disabled=emuVent.disabled=!emu.checked;});
+
+// Графік
+const cvs=$('#chart'), ctx=cvs.getContext('2d');
+const series=[]; // {t,co2,ema,enr,vent,buzz,zone}
+let emaVal=NaN, lastTs=null, enr=0, vent=0, buzz=0, zone='green';
+let enrOnAt=0, ventOnAt=0;
+
+function draw(){
+  const W=cvs.width,H=cvs.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#223049';ctx.strokeRect(0.5,0.5,W-1,H-1);
+  if(series.length<2) return;
+  const maxN=160, s=series.slice(-maxN), xs=s.map((_,i)=> i*(W/(maxN-1)));
+
+  // CO₂ raw
+  ctx.beginPath();ctx.strokeStyle='#38bdf8';ctx.lineWidth=2;
+  xs.forEach((x,i)=>{const y=H-10-(Math.min(3500,s[i].co2)/3500)*(H-20);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+
+  // EMA
+  ctx.beginPath();ctx.strokeStyle='#22c55e';ctx.lineWidth=2;
+  xs.forEach((x,i)=>{const y=H-10-(Math.min(3500,s[i].ema)/3500)*(H-20);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+
+  // Маркери реле/сирени
+  s.forEach((p,i)=>{ if(p.enr){ctx.fillStyle='#60a5fa';ctx.fillRect(xs[i]-1,H-26,2,8);} if(p.vent){ctx.fillStyle='#fbbf24';ctx.fillRect(xs[i]-1,H-16,2,8);} if(p.buzz){ctx.fillStyle='#f87171';ctx.fillRect(xs[i]-1,H-36,2,8);} });
+}
+
+function zoneOf(v,warn,alarm){
+  if(v>=alarm) return 'red';
+  if(v>=warn)  return 'yellow';
+  return 'green';
+}
+
+function addPoint(){
+  const a=Math.min(1,Math.max(0,parseFloat($('#alpha').value)));
+  const setLow=parseFloat($('#setLow').value), setHigh=parseFloat($('#setHigh').value);
+  const hyst=parseFloat($('#hyst').value), minOn=parseFloat($('#minOn').value);
+  const warn=parseFloat($('#warn').value), alarm=parseFloat($('#alarm').value);
+
+  let co2;
+  if(emu.checked){ co2=parseFloat(emuCO2.value); } else {
+    const v=prompt('Введи CO₂ ppm (із Serial Monitor прошивки):','820');
+    if(v===null) return; co2=parseFloat(v);
+    if(Number.isNaN(co2)) return alert('Некоректне число');
+  }
+
+  const now=Date.now();
+  if(lastTs==null) lastTs=now;
+  const dt=(now-lastTs)/1000; lastTs=now;
+
+  if(Number.isNaN(emaVal)) emaVal=co2; else emaVal=a*co2+(1-a)*emaVal;
+
+  // Контур керування
+  // Збагачення
+  if(!enr && emaVal <= (setLow - hyst)){ enr=1; enrOnAt=now; log(`CO₂ низький → Збагачення ON (${Math.round(emaVal)} ppm)`); }
+  if(enr){
+    const onSecs=(now-enrOnAt)/1000;
+    if(emaVal >= (setLow + hyst) && onSecs>=minOn){ enr=0; log(`Досягнуто коридору → Збагачення OFF (${Math.round(emaVal)} ppm)`); }
+  }
+  // Вентиляція
+  if(!vent && emaVal >= (setHigh + hyst)){ vent=1; ventOnAt=now; log(`CO₂ високий → Вентиляція ON (${Math.round(emaVal)} ppm)`); }
+  if(vent){
+    const onSecs=(now-ventOnAt)/1000;
+    if(emaVal <= (setHigh - hyst) && onSecs>=minOn){ vent=0; log(`Опустилися нижче верхньої межі → Вентиляція OFF (${Math.round(emaVal)} ppm)`); }
+  }
+
+  // Безпека/сирена
+  const z = zoneOf(emaVal,warn,alarm);
+  let buz = 0;
+  if(z==='red'){ buz=1; if(zone!=='red') log(`🚨 Червона зона! Сирена ON (${Math.round(emaVal)} ppm)`); }
+  else if(z==='yellow'){ buz=0; if(zone!=='yellow') log(`⚠️ Жовта зона (${Math.round(emaVal)} ppm)`); }
+  else { if(zone!=='green') log(`✅ Зелена зона (${Math.round(emaVal)} ppm)`); }
+  zone=z;
+
+  if(emu.checked){ enr=parseInt(emuEnr.value,10); vent=parseInt(emuVent.value,10); } // ручна імітація
+  buzz=buz;
+
+  series.push({t:now, co2, ema:emaVal, enr, vent, buzz, zone});
+  $('#lastVal').textContent=`CO₂=${Math.round(co2)}, EMA=${Math.round(emaVal)}, enr=${enr}, vent=${vent}, buzz=${buzz}, zone=${zone}`;
+  $('#badgeCO2').textContent=`CO₂(EMA)=${Math.round(emaVal)} ppm`;
+  $('#badgeState').textContent=`Стан: enr=${enr} vent=${vent} zone=${zone}`;
+  draw();
+}
+$('#tick').addEventListener('click', addPoint);
+$('#clear').addEventListener('click', ()=>{ series.length=0; emaVal=NaN; lastTs=null; enr=vent=buzz=0; zone='green'; LogEl.textContent=''; $('#lastVal').textContent='CO₂=—, EMA=—, enr=0, vent=0'; $('#badgeCO2').textContent='CO₂(EMA)=— ppm'; $('#badgeState').textContent='Стан: —'; draw(); });
+
+// Генератор прошивки
+function makeSketch(){
+  const period = Math.max(1000, parseInt($('#period').value,10));
+  const alpha  = Math.min(1,Math.max(0,parseFloat($('#alpha').value)));
+  const setLow = parseInt($('#setLow').value,10);
+  const setHigh= parseInt($('#setHigh').value,10);
+  const hyst   = parseInt($('#hyst').value,10);
+  const minOnS = Math.max(0, parseInt($('#minOn').value,10));
+  const warn   = parseInt($('#warn').value,10);
+  const alarm  = parseInt($('#alarm').value,10);
+  const rxPin  = parseInt($('#rxPin').value,10);
+  const txPin  = parseInt($('#txPin').value,10);
+  const pinEnr = parseInt($('#pinEnr').value,10);
+  const pinVent= parseInt($('#pinVent').value,10);
+  const pinBuz = parseInt($('#pinBuz').value,10);
+  let [pinR,pinG,pinB] = $('#pinRGB').value.split(',').map(s=>s.trim());
+
+  const code = `/*
+  Пара 20 — CO₂-збагачення + безпека персоналу
+  Контролер: Arduino UNO/Nano + MH-Z19B (UART)
+  Можливості:
+    • Цільовий коридор: ${setLow}..${setHigh} ppm, гістерезис ${hyst} ppm, мін. час реле ${minOnS}s
+    • Керування: реле збагачення (CO₂) на D${pinEnr}, реле вентиляції на D${pinVent}
+    • Безпека: буззер D${pinBuz}, RGB-індикатор (R=${pinR}, G=${pinG}, B=${pinB})
+    • Пороги персоналу: ⚠️ ${warn} ppm, 🚨 ${alarm} ppm
+    • EMA α=${alpha.toFixed(2)}, лог CSV і текстові повідомлення у Serial
+*/
+#include <SoftwareSerial.h>
+
+const int RX_PIN = ${rxPin}; // ← TX датчика
+const int TX_PIN = ${txPin}; // → RX датчика
+SoftwareSerial mhz(RX_PIN, TX_PIN);
+
+const unsigned long PERIOD_MS = ${period};
+const float ALPHA = ${alpha.toFixed(3)};
+const int SET_LOW  = ${setLow};
+const int SET_HIGH = ${setHigh};
+const int HYST     = ${hyst};
+const unsigned long MIN_ON_MS = ${minOnS}UL * 1000UL;
+const int WARN_PPM  = ${warn};
+const int ALARM_PPM = ${alarm};
+
+const int RELAY_ENR = ${pinEnr};
+const int RELAY_VENT= ${pinVent};
+const int BUZZER    = ${pinBuz};
+// RGB — вкажи тип світлодіода (true=спільний анод, false=спільний катод)
+const bool RGB_COMMON_ANODE = false;
+const int RGB_R = ${pinR};
+const int RGB_G = ${pinG};
+const int RGB_B = ${pinB};
+
+unsigned long tPrev=0;
+float ema = NAN;
+bool enr=false, vent=false, buzz=false;
+unsigned long enrOnAt=0, ventOnAt=0;
+
+uint8_t cmdRead[9] = {0xFF,0x01,0x86,0,0,0,0,0,0};
+uint8_t checksum(uint8_t *b){ uint16_t s=0; for(int i=1;i<8;i++) s+=b[i]; return 0xFF - (s % 256) + 1; }
+
+int readCO2(){
+  cmdRead[8]=checksum(cmdRead);
+  mhz.write(cmdRead,9); mhz.flush();
+  unsigned long t0=millis();
+  while(millis()-t0<50){
+    if(mhz.available()>=9){
+      uint8_t r[9]; mhz.readBytes(r,9);
+      if(r[0]==0xFF && r[1]==0x86 && checksum(r)==r[8]){
+        return (int)r[2]*256 + (int)r[3];
+      }
+    }
+  }
+  return -1;
+}
+
+void rgbWrite(uint8_t rr,uint8_t gg,uint8_t bb){
+  if(RGB_COMMON_ANODE){ rr=255-rr; gg=255-gg; bb=255-bb; }
+  analogWrite(RGB_R, rr); analogWrite(RGB_G, gg); analogWrite(RGB_B, bb);
+}
+
+void setZone(int ppm){
+  if(ppm>=ALARM_PPM){ rgbWrite(255,0,0); buzz=true; }
+  else if(ppm>=WARN_PPM){ rgbWrite(255,140,0); buzz=false; }
+  else { rgbWrite(0,220,0); buzz=false; }
+}
+
+void setup(){
+  pinMode(RELAY_ENR, OUTPUT); digitalWrite(RELAY_ENR, LOW);
+  pinMode(RELAY_VENT,OUTPUT); digitalWrite(RELAY_VENT,LOW);
+  pinMode(BUZZER, OUTPUT); digitalWrite(BUZZER, LOW);
+  pinMode(RGB_R, OUTPUT); pinMode(RGB_G, OUTPUT); pinMode(RGB_B, OUTPUT);
+  rgbWrite(0,0,0);
+
+  mhz.begin(9600);
+  Serial.begin(115200);
+  delay(500);
+  Serial.println(F("millis,CO2_raw,CO2_EMA,enrich,vent,buzzer,zone"));
+}
+
+void loop(){
+  if(millis()-tPrev >= PERIOD_MS){
+    unsigned long now = millis();
+    int co2 = readCO2();
+
+    if(co2<0){
+      Serial.print(now); Serial.println(",NaN,NaN,0,0,0,err");
+      tPrev=now; return;
+    }
+
+    if(isnan(ema)) ema = co2; else ema = ALPHA*co2 + (1.0-ALPHA)*ema;
+
+    // Зона безпеки + індикатор
+    setZone((int)ema);
+
+    // Контур керування коридором CO2
+    // Збагачення
+    if(!enr && ema <= (SET_LOW - HYST)){ enr=true; enrOnAt=now; Serial.println(F("#event: enrich_on")); }
+    if(enr){
+      unsigned long onFor = now - enrOnAt;
+      if(ema >= (SET_LOW + HYST) && onFor >= MIN_ON_MS){ enr=false; Serial.println(F("#event: enrich_off")); }
+    }
+    // Вентиляція
+    if(!vent && ema >= (SET_HIGH + HYST)){ vent=true; ventOnAt=now; Serial.println(F("#event: vent_on")); }
+    if(vent){
+      unsigned long onFor = now - ventOnAt;
+      if(ema <= (SET_HIGH - HYST) && onFor >= MIN_ON_MS){ vent=false; Serial.println(F("#event: vent_off")); }
+    }
+
+    // Виходи
+    digitalWrite(RELAY_ENR, enr ? HIGH : LOW);
+    digitalWrite(RELAY_VENT,vent? HIGH : LOW);
+    digitalWrite(BUZZER,    buzz? HIGH : LOW);
+
+    // CSV
+    Serial.print(now); Serial.print(',');
+    Serial.print(co2); Serial.print(',');
+    Serial.print(ema,0); Serial.print(',');
+    Serial.print(enr?1:0); Serial.print(',');
+    Serial.print(vent?1:0); Serial.print(',');
+    Serial.print(buzz?1:0); Serial.print(',');
+    if(ema>=ALARM_PPM) Serial.println(F("red"));
+    else if(ema>=WARN_PPM) Serial.println(F("yellow"));
+    else Serial.println(F("green"));
+
+    tPrev=now;
+  }
+}
+`;
+  return code;
+}
+
+$('#gen').addEventListener('click', ()=>{ const txt=makeSketch(); $('#code').textContent=txt; window.scrollTo({top: $('#code').parentElement.getBoundingClientRect().top + window.scrollY - 20, behavior:'smooth'}); });
+$('#copy').addEventListener('click', ()=>{ const ta=document.createElement('textarea'); ta.value=$('#code').textContent; document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, ta.value.length); document.execCommand('copy'); ta.remove(); const old=document.title; document.title='✅ Код скопійовано'; setTimeout(()=>document.title=old,900); });
+$('#dl').addEventListener('click', ()=>{ const txt=$('#code').textContent||makeSketch(); download('agro_para20_co2_enrichment_safety.ino',txt,'text/x-arduino'); });
+
+// Підсумкові файли
+$('#saveTxt').addEventListener('click', ()=>{
+  const fio=($('#fio').value||'').trim();
+  const lines=[
+    'Пара 20 — CO₂-збагачення + безпека персоналу',
+    'Студент: '+fio,
+    `Період: ${$('#period').value} мс, EMA α=${$('#alpha').value}`,
+    `Коридор: ${$('#setLow').value}..${$('#setHigh').value} ppm, гістерезис ${$('#hyst').value} ppm, minOn=${$('#minOn').value}s`,
+    `Пороги персоналу: warn=${$('#warn').value} ppm, alarm=${$('#alarm').value} ppm`,
+    'Журнал: див. секцію нижче.',
+    'Коментар: ...'
+  ].join('\n');
+  download('agro_para20_'+stamp()+'.txt',lines);
+});
+$('#saveCsv').addEventListener('click', ()=>{
+  const fio=($('#fio').value||'').replace(/"/g,'""');
+  const csv='"Пара","Студент","Period_ms","Alpha","Low","High","Hyst","MinOn_s","Warn","Alarm"\n'
+          + `"20","${fio}",${$('#period').value},${$('#alpha').value},${$('#setLow').value},${$('#setHigh').value},${$('#hyst').value},${$('#minOn').value},${$('#warn').value},${$('#alarm').value}\n`;
+  download('agro_para20_'+stamp()+'.csv',csv,'text/csv');
+});
+$('#saveLog').addEventListener('click', ()=>{
+  const txt = ($('#log').textContent||'').trim()||'Лог подій порожній.';
+  download('agro_para20_log_'+stamp()+'.txt', txt);
+});
+
+// Демонстраційна ініціалізація
+log('UI ініціалізовано. Додайте точки або прошийте й знімайте реальні дані.');
+function init(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); draw(); }
+init();
+</script>
+</body>
+</html>
