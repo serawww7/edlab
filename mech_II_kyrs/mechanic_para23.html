@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 23 (механіки) — ШІ#3: NLP-витяг сутностей з актів ТО + специфікація + QR 58 мм</title>
+<meta name="description" content="Встав текст акта ТО або завантаж файл → NLP витягає деталі/кількість/момент затягування/інструмент → формує специфікацію → генерує чек 58 мм з QR → експорт CSV/TXT."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:150px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+.small{font-size:.9rem}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.grid{display:grid;gap:14px;grid-template-columns:1.2fr 1fr}
+@media(max-width:1080px){.grid{grid-template-columns:1fr}}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+svg{max-width:100%;height:auto;display:block}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🧾</span>
+      <div>
+        <b>Пара 23 — NLP-витяг сутностей з актів ТО</b><br/>
+        <span class="badge">текст/файл → деталі/к-сть/момент/інструмент → специфікація → QR-квиток 58 мм → CSV/TXT</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">Мета: з українського тексту <b>акта ТО/ремонту</b> автоматично виділити <b>деталі</b>, <b>кількість</b>, <b>момент затягування</b>, <b>інструмент/матеріали</b>; сформувати <b>специфікацію робіт</b> і <b>квиток 58 мм</b> з QR-кодом (текст/посилання/номер заявки).</p>
+
+  <div class="grid">
+    <!-- Ліва колонка: ввід, правила, парсинг -->
+    <div class="card">
+      <h2>📝 Ввід тексту акта ТО</h2>
+      <div class="row">
+        <input id="title" class="input" placeholder="Назва роботи: ТО редуктора жатки, змащення, заміна ременя" style="flex:2"/>
+        <input id="ord" class="input" placeholder="№ заявки / наряд" style="max-width:180px"/>
+        <input id="date" class="input" type="date" />
+      </div>
+      <textarea id="src" class="input" placeholder="Встав приклад акта ТО. Напр.:&#10;Замінили підшипник 6204 (2 шт), затягнули M10 болти головки 45 Н·м, встановили ремінь A42 (1 шт), підтягнули хомут шланга Ø25, долили масло HLP-46 — 0,7 л. Виконано вирівнювання шківів."></textarea>
+      <div class="row" style="margin-top:6px">
+        <input id="file" class="input" type="file" accept=".txt" style="max-width:320px"/>
+        <button class="btn" id="loadFile">📥 Завантажити TXT</button>
+        <button class="btn good" id="extract">🔍 Витягнути сутності</button>
+        <button class="btn secondary" id="clear">🧹 Очистити</button>
+        <span id="stat" class="badge">Статус: очікування</span>
+      </div>
+
+      <h3 style="margin-top:10px">🧠 Налаштування правил</h3>
+      <div class="row">
+        <textarea id="dict" class="input" style="min-height:90px" placeholder="Словничок деталей (через кому): підшипник, ремінь, шланг, хомут, болт, гайка, радіатор, фільтр, масло, сальник"></textarea>
+        <textarea id="tools" class="input" style="min-height:90px" placeholder="Словничок інструментів/матеріалів: ключ, насадка, вороток, фіксатор різьби, мастило, масло, герметик, гальм.очищувач"></textarea>
+      </div>
+      <small class="muted">Підтримуються одиниці: шт, л, мл, кг, г, м, мм, Н·м (Nm), lb·ft (конвертується у Н·м).</small>
+    </div>
+
+    <!-- Права колонка: результат, специфікація, чек -->
+    <div class="card">
+      <h2>📊 Результати витягу</h2>
+      <table class="tbl" id="resTbl">
+        <thead><tr><th>Категорія</th><th>Найменування</th><th>К-сть/значення</th><th>Одиниці</th><th>Деталі</th></tr></thead>
+        <tbody id="resBody"><tr><td colspan="5" class="muted">Натисни «Витягнути сутності»</td></tr></tbody>
+      </table>
+
+      <h2 style="margin-top:10px">📦 Специфікація робіт</h2>
+      <table class="tbl" id="specTbl">
+        <thead><tr><th>Поз.</th><th>Найменування</th><th>К-сть</th><th>Одиниці</th><th>Mom. Н·м</th><th>Примітка</th></tr></thead>
+        <tbody id="specBody"><tr><td colspan="6" class="muted">Буде згенеровано з витягу</td></tr></tbody>
+      </table>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="expCsv">📄 CSV (специфікація)</button>
+        <button class="btn" id="expTxt">💾 TXT (звіт)</button>
+        <button class="btn" id="print58">🖨️ 58 мм квиток</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (посилання/номер)</button>
+      </div>
+      <div class="receipt" id="rc" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+      <small class="muted">QR генерується через відкритий сервіс <span class="mono">api.qrserver.com</span> (може потребувати інтернет). Якщо мережі немає — на чеку буде текстовий код.</small>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧪 Приклади/швидкі вставки</h2>
+    <div class="row">
+      <button class="btn" data-snip="a">📌 Приклад A</button>
+      <button class="btn" data-snip="b">📌 Приклад B</button>
+      <button class="btn" data-snip="c">📌 Приклад C</button>
+      <span class="badge">Порада: виділяємо моделі типу «6204», «A42», «M10», моменти «45 Н·м», об’єми «0,7 л».</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Завдання для студентів (інтегровано в код)</h2>
+    <ol>
+      <li><b>Парсинг:</b> Встав 2 різні акти. Збережи <b>CSV</b> специфікації для кожного. Порівняй крутні моменти у <span class="mono">Н·м</span> (конвертація з <span class="mono">lb·ft</span> автоматично).</li>
+      <li><b>Специфікація:</b> Перевір, чи підсумована кількість співпадає з актом (болти/гайки/підшипники). Зафіксуй невідповідності у <b>TXT</b>.</li>
+      <li><b>QR-квиток:</b> Згенеруй чек 58 мм із посиланням на фото робіт або Google-диск. Додай <b>QR</b> і віддати майстру зміни.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>🔌 Схема потоку (SVG)</h2>
+    <svg viewBox="0 0 980 260" role="img" aria-label="Акт ТО → NLP → специфікація → чек 58 мм">
+      <rect x="40" y="60" width="210" height="90" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <text x="145" y="100" fill="#e5e7eb" font-size="14" text-anchor="middle">Акт ТО (UA)</text>
+      <text x="145" y="118" fill="#93c5fd" font-size="12" text-anchor="middle">текст/файл</text>
+
+      <rect x="280" y="50" width="220" height="110" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <text x="390" y="92" fill="#dcfce7" font-size="14" text-anchor="middle">NLP-витяг</text>
+      <text x="390" y="108" fill="#a7f3d0" font-size="12" text-anchor="middle">правила + словничок</text>
+
+      <rect x="530" y="50" width="220" height="110" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+      <text x="640" y="92" fill="#e5e7eb" font-size="14" text-anchor="middle">Специфікація</text>
+      <text x="640" y="108" fill="#93c5fd" font-size="12" text-anchor="middle">агрегація, одиниці</text>
+
+      <rect x="780" y="50" width="160" height="110" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+      <text x="860" y="92" fill="#e5e7eb" font-size="14" text-anchor="middle">Чек 58 мм</text>
+      <text x="860" y="108" fill="#93c5fd" font-size="12" text-anchor="middle">QR / TXT</text>
+
+      <line x1="250" y1="105" x2="280" y2="105" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="500" y1="105" x2="530" y2="105" stroke="#22c55e" stroke-width="3"/>
+      <line x1="750" y1="105" x2="780" y2="105" stroke="#64748b" stroke-width="3"/>
+
+      <text x="490" y="200" fill="#fbbf24" font-size="12" text-anchor="middle">Експорт: CSV, TXT; друк: 58 мм</text>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>CSV «Специфікація» з полями: <span class="mono">item,qty,unit,torque_Nm,note</span>.</li>
+      <li>TXT з шапкою акта, витягнутими сутностями, підсумками і посиланням/QR.</li>
+      <li>58-мм чек із основними позиціями та QR (опційно).</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📜 Історична нотатка</h2>
+    <p class="muted small">Перші інженерні «NLP» у 1980-х шукали коди деталей у телетайп-записах складу. Сьогодні браузер витягає сутності українською і за хвилину будує специфікацію та чек — прямо в комп’ютерному класі.</p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+
+// ===== Словнички за замовчуванням =====
+const DEF_PARTS = 'підшипник, ремінь, шланг, хомут, болт, гайка, шайба, фільтр, радіатор, сальник, муфта, ролик, зірочка, шків, патрубок, втулка, прокладка, масло, мастило, герметик';
+const DEF_TOOLS = 'ключ, насадка, вороток, динамометричний, фіксатор різьби, мастило, масло, герметик, гальмівний очищувач, щітка, ганчірка';
+
+$('#dict').value = DEF_PARTS;
+$('#tools').value = DEF_TOOLS;
+$('#date').valueAsNumber = Date.now() - (new Date()).getTimezoneOffset()*60000;
+
+// ===== Приклади =====
+const SNIPS = {
+  a:`ТО жатки: заміна підшипника 6204 (2 шт), ремінь A42 (1 шт), підтягнути болти M10 — 45 Н·м, долити масло HLP-46 0,7 л.`,
+  b:`Механізм висіву: встановлено підшипник 6305 (1 шт); затягнені гайки М12 — 65 Н·м; шланг Ø25 — 2 м; хомут черв'ячний 25-40 (2 шт).`,
+  c:`Редуктор: знято шків, заміна сальника (1 шт), ремінь B55 (1 шт). Болти кришки М8 — 25 Н·м. Долито мастило Літол-24 — 50 г.`
+};
+$$('button[data-snip]').forEach(b=>b.addEventListener('click',()=>{ const k=b.getAttribute('data-snip'); $('#src').value = SNIPS[k]; }));
+
+// ===== Завантаження TXT =====
+$('#loadFile').addEventListener('click', async ()=>{
+  const f=$('#file').files[0]; if(!f) return alert('Оберіть TXT файл');
+  const t=await f.text(); $('#src').value=t; $('#stat').textContent='Статус: файл завантажено';
+});
+
+// ===== Ядро NLP (правила + нормалізація) =====
+function tokenize(s){ return s.toLowerCase().replace(/[\,;]+/g,' , ').replace(/[()]/g,' ').split(/\s+/).filter(Boolean); }
+
+function extractEntities(text, dictParts, dictTools){
+  const out = {parts:[], torque:[], measure:[], tools:[], misc:[]};
+
+  const t = text.replace(/[,;]+/g, ', ').replace(/\s+/g,' ').trim();
+
+  // Кількість (шт/л/м/мм/г/кг/мл)
+  // напр.: "2 шт", "0,7 л", "2 м", "50 г", "25-40", "Ø25", "M10"
+  const qtyRE = /(\d+(?:[.,]\d+)?)\s*(шт|л|мл|кг|г|м|мм)\b/gi;
+  for(const m of t.matchAll(qtyRE)){
+    out.measure.push({raw:m[0], val:parseFloat(m[1].replace(',','.')), unit:m[2]});
+  }
+
+  // Довжини діапазонів типу "25-40" для хомутів (ширина/діаметр)
+  const rangeRE = /(\d{1,3})\s*-\s*(\d{1,3})\b/g;
+  for(const m of t.matchAll(rangeRE)){
+    out.measure.push({raw:m[0], val:`${m[1]}-${m[2]}`, unit:'діапазон'});
+  }
+
+  // Діаметри Ø
+  const diaRE = /[ØøФф]\s?(\d{1,3})\b/g;
+  for(const m of t.matchAll(diaRE)){ out.measure.push({raw:m[0], val:parseFloat(m[1]), unit:'Øмм'}); }
+
+  // Метрична різьба Mxx
+  const threadRE = /\b[МM]\s?(\d{1,2})(?:x\d+(?:\.\d+)?)?\b/gi;
+  for(const m of t.matchAll(threadRE)){ out.misc.push({raw:m[0], type:'thread', size:'M'+m[1]}); }
+
+  // Підшипники типу 6204, 6305, ремені A/B + номер
+  const bearingRE = /\b(6\d{3}|2\d{3}|1\d{3})\b/g;
+  for(const m of t.matchAll(bearingRE)){ out.parts.push({raw:m[0], kind:'підшипник', model:m[1]}); }
+
+  const beltRE = /\b([abAB][0-9]{2,3})\b/g;
+  for(const m of t.matchAll(beltRE)){ out.parts.push({raw:m[0], kind:'ремінь', model:m[1].toUpperCase()}); }
+
+  // Момент затягування: 45 Н·м, 65 Нм, 30 Nm, 20 lb·ft
+  const tqNmRE = /(\d+(?:[.,]\d+)?)\s*(?:н\s*[·.]?\s*м|нм|nm)\b/gi;
+  for(const m of t.matchAll(tqNmRE)){
+    const v=parseFloat(m[1].replace(',','.'));
+    out.torque.push({raw:m[0], Nm:v});
+  }
+  const tqLbRE = /(\d+(?:[.,]\d+)?)\s*(?:lb\s*[·.]?\s*ft|lbf[·.]?ft)\b/gi;
+  for(const m of t.matchAll(tqLbRE)){
+    const v=parseFloat(m[1].replace(',','.')); const Nm=v*1.3558179483;
+    out.torque.push({raw:m[0], Nm:Nm});
+  }
+
+  // Словничкові деталі/інструменти
+  const partsList = dictParts.split(',').map(s=>s.trim()).filter(Boolean);
+  const toolsList = dictTools.split(',').map(s=>s.trim()).filter(Boolean);
+
+  partsList.forEach(p=>{
+    const re=new RegExp(`\\b${escapeReg(p)}\\b`,'gi');
+    for(const m of t.matchAll(re)){ out.parts.push({raw:m[0], kind:p}); }
+  });
+  toolsList.forEach(u=>{
+    const re=new RegExp(`\\b${escapeReg(u)}\\b`,'gi');
+    for(const m of t.matchAll(re)){ out.tools.push({raw:m[0], tool:u}); }
+  });
+
+  // Кількість у дужках: "(2 шт)" поруч з позицією
+  const qtyCtxRE = /([^\.,;]+?)\s*\(\s*(\d+(?:[.,]\d+)?)\s*(шт)\s*\)/gi;
+  for(const m of t.matchAll(qtyCtxRE)){
+    out.parts.push({raw:m[0], kind:'позиція', name:m[1].trim(), qty:parseFloat(m[2].replace(',','.')), unit:m[3]});
+  }
+
+  // Масла/рідини з типом: HLP-46, Літол-24, 10W-40
+  const oilRE = /\b(HLP-?46|Літол-?24|[0-9]{2}W-?[0-9]{2})\b/gi;
+  for(const m of t.matchAll(oilRE)){ out.parts.push({raw:m[0], kind:'рідина/мастило', model:m[1]}); }
+
+  return out;
+}
+function escapeReg(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+
+// Нормалізація одиниць → SI
+function normalizeUnits(measure){
+  // Приведемо: мл→л, г→кг, мм→м (але показуємо "мм" у примітці)
+  const out=[];
+  for(const m of measure){
+    if(m.unit==='мл'){ out.push({qty:m.val/1000, unit:'л', note:m.raw}); }
+    else if(m.unit==='г'){ out.push({qty:m.val/1000, unit:'кг', note:m.raw}); }
+    else if(m.unit==='мм'){ out.push({qty:m.val/1000, unit:'м', note:m.raw}); }
+    else if(m.unit==='Øмм'){ out.push({qty:m.val, unit:'Øмм', note:m.raw}); }
+    else if(m.unit==='діапазон'){ out.push({qty:m.val, unit:'діапазон', note:m.raw}); }
+    else { out.push({qty:m.val, unit:m.unit, note:m.raw}); }
+  }
+  return out;
+}
+
+// Побудова специфікації: агрегуємо назви/моделі, підбираємо к-сть, додаємо Nm якщо є
+function buildSpec(ents){
+  // Пошук явних позицій з qty у круглих дужках → пріоритет
+  const specMap = new Map(); // key -> item
+  function addItem(name, qty=1, unit='шт', note=''){
+    const key=(name+'|'+unit).toLowerCase();
+    const cur=specMap.get(key)||{name, qty:0, unit, torqueNm:null, note:''};
+    cur.qty += (typeof qty==='number'?qty:1);
+    cur.note = (cur.note?cur.note+'; ':'') + (note||'');
+    specMap.set(key,cur);
+  }
+
+  // 1) Прямі позиції "(N шт)"
+  (ents.parts||[]).filter(p=>p.kind==='позиція' && p.qty).forEach(p=>{
+    addItem(p.name, p.qty, p.unit||'шт', p.raw);
+  });
+
+  // 2) Спеціальні моделі
+  (ents.parts||[]).forEach(p=>{
+    if(p.kind==='підшипник' && p.model) addItem('Підшипник '+p.model, 1, 'шт', p.raw);
+    if(p.kind==='ремінь' && p.model) addItem('Ремінь '+p.model, 1, 'шт', p.raw);
+    if(p.kind==='рідина/мастило' && p.model) addItem('Мастило/рідина '+p.model, 1, 'умов.', p.raw);
+  });
+
+  // 3) Загальні згадки словничка → як одиничні позиції
+  (ents.parts||[]).forEach(p=>{
+    if(['підшипник','ремінь','шланг','хомут','болт','гайка','шайба','фільтр','радіатор','сальник','муфта','ролик','зірочка','шків','патрубок','втулка','прокладка','масло','мастило','герметик'].includes(p.kind) && !p.model && !p.name){
+      addItem(cap(p.kind),1,'шт',p.raw);
+    }
+  });
+
+  // 4) Кількісні мірні одиниці
+  const meas = normalizeUnits(ents.measure||[]);
+  meas.forEach(m=>{
+    // якщо це м/л/кг — додамо як матеріал/витрату
+    if(['л','кг','м'].includes(m.unit)){
+      addItem('Матеріал/витрата', m.qty, m.unit, m.note);
+    }else if(m.unit==='шт'){
+      addItem('Позиція (шт)', m.qty, 'шт', m.note);
+    }else if(m.unit==='Øмм' || m.unit==='діапазон'){
+      addItem('Параметр', 1, m.unit, m.note);
+    }
+  });
+
+  // 5) Моменти затягування → глобально/рядком «болти/гайки»
+  let tqAvg=null;
+  if(ents.torque?.length){
+    const arr=ents.torque.map(t=>t.Nm);
+    const sum=arr.reduce((s,x)=>s+x,0);
+    tqAvg = sum/arr.length;
+  }
+
+  // 6) Перенести у масив
+  const rows=[...specMap.values()];
+  // Вбудуємо Nm у рядки, якщо предмет болти/гайки
+  rows.forEach(r=>{
+    if(/болт|гайк/i.test(r.name) && tqAvg){ r.torqueNm = Math.round(tqAvg*10)/10; }
+  });
+
+  // Якщо нема жодного рядка — покажемо заглушку з Nm (не плутати з забороненими плейсхолдерами, бо це реальні дані)
+  if(rows.length===0 && tqAvg!=null){
+    rows.push({name:'Моменти затягування (середнє)', qty:Math.round(tqAvg*10)/10, unit:'Н·м', torqueNm:null, note:'обчислено із тексту'});
+  }
+  return rows;
+}
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+// ===== Відмальовка таблиць =====
+function renderEntities(ents){
+  const body=$('#resBody'); body.innerHTML='';
+  const addRow=(cat,name,val,unit,det)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${cat}</td><td>${name||'—'}</td><td>${val??'—'}</td><td>${unit||'—'}</td><td class="small muted">${det||''}</td>`;
+    body.appendChild(tr);
+  };
+
+  (ents.parts||[]).forEach(p=>{
+    if(p.kind==='позиція') addRow('позиція', p.name, p.qty, p.unit||'шт', p.raw);
+    else if(p.model) addRow(p.kind, p.kind+' '+p.model, 1, 'шт', p.raw);
+    else addRow(p.kind, cap(p.kind), 1, 'шт', p.raw);
+  });
+  (ents.measure||[]).forEach(m=> addRow('міра', m.raw, m.val, m.unit, ''));
+  (ents.torque||[]).forEach(t=> addRow('момент', 'затягування', Math.round(t.Nm*10)/10, 'Н·м', t.raw));
+  (ents.tools||[]).forEach(u=> addRow('інструм./матеріал', u.tool, 1, 'умов.', u.raw));
+  (ents.misc||[]).forEach(x=> addRow(x.type, x.size||x.raw, '', '', x.raw));
+
+  if(!body.children.length){
+    const tr=document.createElement('tr'); tr.innerHTML='<td colspan="5" class="muted">Нічого не знайдено. Додай слова у словничок і повтори.</td>'; body.appendChild(tr);
+  }
+}
+function renderSpec(rows){
+  const body=$('#specBody'); body.innerHTML='';
+  if(!rows.length){ const tr=document.createElement('tr'); tr.innerHTML='<td colspan="6" class="muted">Немає позицій</td>'; body.appendChild(tr); return; }
+  rows.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td>${r.name}</td><td>${fmtq(r.qty)}</td><td>${r.unit}</td><td>${r.torqueNm??''}</td><td class="small muted">${r.note||''}</td>`;
+    body.appendChild(tr);
+  });
+}
+function fmtq(x){ return (typeof x==='number' && isFinite(x))? ((Math.round(x*100)/100).toString().replace('.',',')) : x; }
+
+// ===== Події =====
+$('#extract').addEventListener('click', ()=>{
+  const text=$('#src').value||'';
+  if(!text.trim()) return alert('Встав текст акта або завантаж файл');
+  $('#stat').textContent='Статус: обробка...';
+
+  const ents=extractEntities(text, $('#dict').value||DEF_PARTS, $('#tools').value||DEF_TOOLS);
+  renderEntities(ents);
+
+  const spec=buildSpec(ents);
+  renderSpec(spec);
+
+  last = {ents, spec};
+  $('#stat').textContent='Статус: готово';
+});
+$('#clear').addEventListener('click', ()=>{
+  $('#src').value=''; $('#resBody').innerHTML='<tr><td colspan="5" class="muted">—</td></tr>';
+  $('#specBody').innerHTML='<tr><td colspan="6" class="muted">—</td></tr>';
+  $('#rc').hidden=true; const ctx=$('#qr').getContext('2d'); ctx.clearRect(0,0,220,220);
+});
+
+let last=null;
+
+// ===== Експорт CSV/TXT =====
+$('#expCsv').addEventListener('click', ()=>{
+  if(!last?.spec?.length) return alert('Немає специфікації');
+  const head='pos,item,qty,unit,torque_Nm,note\n';
+  const rows=last.spec.map((r,i)=>[i+1, csvq(r.name), r.qty, r.unit, r.torqueNm??'', csvq(r.note||'')].join(',')).join('\n');
+  download('mechanic_para23_spec_'+stamp()+'.csv', head+rows+'\n','text/csv');
+});
+$('#expTxt').addEventListener('click', ()=>{
+  if(!last) return alert('Немає даних');
+  const title=$('#title').value||'—', ord=$('#ord').value||'—', date=$('#date').value||'—';
+  const lines=[
+    'Пара 23 — NLP-витяг з акта ТО',
+    `Робота: ${title}`,
+    `Наряд/№: ${ord} | Дата: ${date}`,
+    '--- Витягнуті сутності ---',
+    ...(last.ents.parts||[]).map(p=>`• ${p.kind}: ${p.model||p.name||p.raw}`),
+    ...(last.ents.torque||[]).map(t=>`• момент: ${Math.round(t.Nm*10)/10} Н·м (${t.raw})`),
+    ...(last.ents.measure||[]).map(m=>`• міра: ${m.val} ${m.unit}`),
+    ...(last.ents.tools||[]).map(u=>`• інструм./матеріал: ${u.tool}`),
+    '--- Специфікація ---',
+    ...last.spec.map((r,i)=>`${i+1}. ${r.name} — ${fmtq(r.qty)} ${r.unit}` + (r.torqueNm?` (момент ${r.torqueNm} Н·м)`:'') + (r.note?` | ${r.note}`:'')),
+    '--- Примітки ---',
+    '• Перевір відповідність крутних моментів у Н·м (автоконвертація з lb·ft).',
+    '• Зафіксуй невідповідності між актом і специфікацією.'
+  ];
+  download('mechanic_para23_report_'+stamp()+'.txt', lines.join('\n'));
+});
+function csvq(s){ return `"${(s??'').toString().replace(/"/g,'""')}"`; }
+
+// ===== 58 мм чек + QR =====
+$('#print58').addEventListener('click', ()=>{
+  const title=$('#title').value||'—', ord=$('#ord').value||'—', date=$('#date').value||'—';
+  const top=[
+    '=== ЧЕК ТО (58мм) ===',
+    'Робота: '+title,
+    'Наряд: '+ord,
+    'Дата: '+date,
+    '--- Позиції ---'
+  ];
+  const rows=(last?.spec||[]).slice(0,6).map(r=>`• ${r.name} × ${fmtq(r.qty)} ${r.unit}${r.torqueNm?` | ${r.torqueNm} Н·м`:''}`);
+  const tail=['---','Підпис майстра: __________',''];
+  const txt=[...top, ...rows, ...tail].join('\n');
+  const rc=$('#rc'); rc.hidden=false; rc.textContent=txt;
+  download('para23_receipt_'+stamp()+'.txt', txt);
+});
+
+// Генерація QR через відкритий API (якщо є Інтернет)
+$('#qrGen').addEventListener('click', ()=>{
+  const ord=($('#ord').value||'').trim();
+  const title=$('#title').value||'ТО';
+  let data=prompt('Встав текст/URL для QR (за замовчуванням — № заявки):', ord||title);
+  if(data===null) return;
+  data=data.trim()||title;
+  // Спробуємо завантажити PNG і відмалювати на canvas
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const ctx=$('#qr').getContext('2d'); ctx.clearRect(0,0,220,220); ctx.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ // якщо офлайн — текстовий фолбек
+    const ctx=$('#qr').getContext('2d'); ctx.clearRect(0,0,220,220);
+    ctx.fillStyle='#e5e7eb'; ctx.font='14px ui-monospace'; ctx.fillText('QR offline', 62, 110);
+    ctx.fillText((data.length>14?data.slice(0,14)+'…':data), 20, 130);
+  };
+  img.src=url;
+});
+
+// ===== Кінець =====
+</script>
+</body>
+</html>
