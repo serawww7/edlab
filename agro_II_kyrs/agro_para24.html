@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 24 — Діагностика за фото + доказовість (LLM-шаблони + чекер джерел)</title>
+<meta name="description" content="Завантаження фото симптомів, анотації на знімку, генератор промпта до LLM для диференційної діагностики з джерелами, чекер відповіді ШІ, журнал рішень, експорт і збереження розміченого знімка."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Inter,Roboto,Arial,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+small.mono,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace}
+.grid{display:grid;gap:14px;grid-template-columns:1.35fr 1fr}
+@media(max-width:1040px){.grid{grid-template-columns:1fr}}
+hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+svg{max-width:100%;height:auto;display:block}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220;display:grid;grid-template-columns:1fr}
+canvas{display:block;width:100%;height:auto;image-rendering:auto}
+.badge{display:inline-block;border:1px solid #334155;border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.log{max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;background:#0b1220;font-family:ui-monospace,monospace;font-size:13px;white-space:pre-wrap}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.small{font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🖼️</span>
+      <div>
+        <b>Пара 24 — Діагностика за фото + доказовість</b><br/>
+        <span class="badge">Фото → анотації → дифдіагноз → промпт до LLM → чекер джерел → рішення</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">
+    Мета: навчитися <b>структуровано описувати знімки</b>, робити <b>диференційну діагностику</b> за ознаками, формулювати запит до ШІ з вимогою <b>джерел</b> та перевіряти відповідь за <b>чек-листом доказовості</b>. Є журнал рішень і експорт.
+  </p>
+
+  <div class="grid">
+    <!-- ЛІВА КОЛОНКА -->
+    <div class="card">
+      <h2>🖼️ Фото + анотації</h2>
+      <div class="row">
+        <input id="file" class="input" type="file" accept="image/*" multiple/>
+        <button class="btn secondary" id="demo">🎲 Демокейс</button>
+        <button class="btn secondary" id="clearImg">🧹 Очистити</button>
+        <span id="badgeImg" class="badge">Зображень: 0</span>
+      </div>
+
+      <div class="row">
+        <div style="flex:1">
+          <label for="crop">Культура</label>
+          <select id="crop" class="input">
+            <option>Пшениця озима</option><option>Картопля</option><option>Кукурудза</option><option>Соняшник</option><option>Соя</option><option>Ріпак</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label for="bbch">Фаза (BBCH)</label>
+          <input id="bbch" class="input" placeholder="напр. BBCH 37"/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div style="flex:1">
+          <label for="weather">Погода (ост. 3–5 днів)</label>
+          <input id="weather" class="input" placeholder="tмакс/мін, RH, опади, роса"/>
+        </div>
+        <div style="flex:1">
+          <label for="field">Поле/локація</label>
+          <input id="field" class="input" placeholder="Поле №3, Тальне"/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div style="flex:1">
+          <label for="suspects">Підозри</label>
+          <input id="suspects" class="input" placeholder="септоріоз / фітофтороз / борошниста роса / дефіцит N / шкідник"/>
+        </div>
+        <div style="flex:1">
+          <label for="prehistory">Передісторія</label>
+          <input id="prehistory" class="input" placeholder="попередня обробка, стреси, попередник, ґрунт"/>
+        </div>
+      </div>
+
+      <div class="note small" style="margin-top:6px">
+        <b>Анотації:</b> мишкою намалюй прямокутник, потім вибери тип ознаки. Зберігай розмічений знімок як PNG.
+      </div>
+
+      <div class="row" style="align-items:flex-start">
+        <div class="canvasWrap" style="flex:2">
+          <canvas id="cvs" width="900" height="560" aria-label="Полотно для анотацій"></canvas>
+        </div>
+        <div style="flex:1">
+          <label for="labelSel">Тип ознаки</label>
+          <select id="labelSel" class="input">
+            <option value="пляма">пляма</option>
+            <option value="наліт/міцелій">наліт/міцелій</option>
+            <option value="пустули/пікніди">пустули/пікніди</option>
+            <option value="шкідник/ходи">шкідник/ходи</option>
+            <option value="дефіцит/хлороз">дефіцит/хлороз</option>
+            <option value="механічне/опік">механічне/опік</option>
+          </select>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" id="undo">↩️ Скасувати останнє</button>
+            <button class="btn secondary" id="savePng">⬇️ Зберегти PNG</button>
+          </div>
+          <h3 style="margin-top:10px">📋 Докази (анотації)</h3>
+          <table class="tbl" id="evTbl">
+            <thead><tr><th>#</th><th>Тип</th><th>Координати</th><th>Опис (необов’язк.)</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="row" style="margin-top:8px">
+            <input id="evDesc" class="input" placeholder="Короткий опис виділеного фрагмента"/>
+            <button class="btn" id="attachDesc">➕ Додати опис до останнього</button>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:12px">🧩 Генератор промпта для LLM</h3>
+      <div class="row">
+        <button class="btn good" id="genPrompt">⚙️ Згенерувати</button>
+        <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+        <button class="btn secondary" id="dlPrompt">⬇️ TXT</button>
+      </div>
+      <pre class="code" id="prompt">// Зроби анотації або натисни «🎲 Демокейс»</pre>
+    </div>
+
+    <!-- ПРАВА КОЛОНКА -->
+    <div class="card">
+      <h2>🧪 Чекер відповіді ШІ (доказовість)</h2>
+      <p class="small muted">Встав відповідь LLM нижче — отримаєш оцінку джерел, ризиків і форматування.</p>
+      <textarea id="llm" class="input" rows="12" placeholder="Встав відповідь ШІ тут..."></textarea>
+      <div class="row" style="margin-top:6px">
+        <button class="btn" id="checkLLM">🔍 Перевірити</button>
+        <span id="badgeScore" class="badge">Score: —/100</span>
+      </div>
+      <table class="tbl" style="margin-top:8px">
+        <thead><tr><th>Критерій</th><th>Опис</th><th>Статус</th></tr></thead>
+        <tbody id="critTbl"></tbody>
+      </table>
+
+      <h2 style="margin-top:12px">🔁 Схема процесу (SVG)</h2>
+      <svg viewBox="0 0 760 420" role="img" aria-label="Процес діагностики за фото">
+        <rect x="40" y="40" width="170" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <text x="125" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Фото</text>
+        <text x="125" y="88" fill="#93c5fd" font-size="12" text-anchor="middle">якість/ракурс</text>
+
+        <rect x="240" y="40" width="200" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <text x="340" y="70" fill="#dcfce7" font-size="14" text-anchor="middle">Анотації</text>
+        <text x="340" y="88" fill="#a7f3d0" font-size="12" text-anchor="middle">ознаки/локалізація</text>
+
+        <rect x="480" y="40" width="240" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <text x="600" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">LLM-промпт</text>
+        <text x="600" y="88" fill="#94a3b8" font-size="12" text-anchor="middle">вимога джерел</text>
+
+        <line x1="210" y1="80" x2="240" y2="80" stroke="#93c5fd" stroke-width="3"/>
+        <line x1="440" y1="80" x2="480" y2="80" stroke="#93c5fd" stroke-width="3"/>
+
+        <rect x="40" y="170" width="240" height="90" rx="12" fill="#0b3f5a" stroke="#22d3ee"/>
+        <text x="160" y="200" fill="#a5f3fc" font-size="14" text-anchor="middle">Відповідь ШІ</text>
+        <text x="160" y="220" fill="#a5f3fc" font-size="12" text-anchor="middle">дифдіагноз</text>
+
+        <rect x="320" y="170" width="180" height="90" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+        <text x="410" y="200" fill="#fed7aa" font-size="14" text-anchor="middle">Чекер</text>
+        <text x="410" y="220" fill="#fed7aa" font-size="12" text-anchor="middle">джерела/ризики</text>
+
+        <rect x="540" y="170" width="180" height="90" rx="12" fill="#111827" stroke="#4b5563"/>
+        <text x="630" y="200" fill="#e5e7eb" font-size="14" text-anchor="middle">Рішення</text>
+        <text x="630" y="220" fill="#9ca3af" font-size="12" text-anchor="middle">IPM + безпека</text>
+      </svg>
+
+      <div class="card" style="margin-top:12px">
+        <h3>📜 Нотатка з історії</h3>
+        <p class="muted small">
+          У 1980-х експертні системи аналізували фото за наборами «якщо-то». 
+          Сучасні мультимодальні LLM розпізнають образи краще, але <b>доказовість</b> — на нас: потрібні анотації, порівняння альтернатив і <b>джерела</b>.
+        </p>
+      </div>
+
+      <h3 style="margin-top:12px">💾 Підсумок/журнал</h3>
+      <div class="row">
+        <input id="fio" class="input" placeholder="ПІБ студента"/>
+        <input id="decision" class="input" placeholder="Рішення (коротко)"/>
+        <button class="btn" id="addLog">➕ Додати</button>
+        <button class="btn secondary" id="saveTxt">💾 TXT</button>
+        <button class="btn secondary" id="saveCsv">📄 CSV</button>
+      </div>
+      <div id="log" class="log" aria-live="polite"></div>
+
+      <h3 style="margin-top:12px">🧷 Теги</h3>
+      <div>
+        <span class="tag">#photo_diagnostics</span>
+        <span class="tag">#differential</span>
+        <span class="tag">#evidence_based</span>
+        <span class="tag">#prompt_engineering</span>
+        <span class="tag">#IPM</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>Розмічений PNG + таблиця анотацій.</li>
+      <li>Промпт до LLM і вставлена відповідь.</li>
+      <li>Оцінка чекера (Score) та висновок/рішення.</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s);
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function log(msg){const t=new Date().toLocaleTimeString(); LOG.textContent+=`[${t}] ${msg}\n`; LOG.scrollTop=LOG.scrollHeight;}
+
+// ===== Зображення та полотно =====
+const cvs=$('#cvs'), ctx=cvs.getContext('2d',{alpha:false});
+const IMG_BADGE=$('#badgeImg'), LOG=$('#log');
+let img=null; // Image object
+let scale=1, offsetX=0, offsetY=0;
+
+function fitImage(w,h){
+  const W=cvs.width, H=cvs.height;
+  const s=Math.min(W/w, H/h);
+  const x=(W - w*s)/2, y=(H - h*s)/2;
+  return {s, x, y};
+}
+
+function drawAll(){
+  ctx.fillStyle='#0b1220'; ctx.fillRect(0,0,cvs.width,cvs.height);
+  if(img){
+    const f=fitImage(img.width,img.height); scale=f.s; offsetX=f.x; offsetY=f.y;
+    ctx.drawImage(img, offsetX, offsetY, img.width*scale, img.height*scale);
+  } else {
+    // Порожня сітка
+    ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,cvs.width-1,cvs.height-1);
+    for(let x=0;x<cvs.width;x+=40){ ctx.beginPath(); ctx.strokeStyle='#132037'; ctx.moveTo(x,0); ctx.lineTo(x,cvs.height); ctx.stroke(); }
+    for(let y=0;y<cvs.height;y+=40){ ctx.beginPath(); ctx.strokeStyle='#132037'; ctx.moveTo(0,y); ctx.lineTo(cvs.width,y); ctx.stroke(); }
+  }
+  // Анотації
+  drawBoxes();
+}
+
+// ===== Анотації =====
+let boxes=[]; // {x,y,w,h,label,desc}
+let drag=null; // {sx,sy}
+
+const COLORS={
+  'пляма':'#38bdf8','наліт/міцелій':'#22c55e','пустули/пікніди':'#fbbf24',
+  'шкідник/ходи':'#e879f9','дефіцит/хлороз':'#a3e635','механічне/опік':'#f87171'
+};
+
+function imgToCanvas(x,y){ return {x: Math.round(offsetX + x*scale), y: Math.round(offsetY + y*scale)} }
+function canvasToImg(x,y){ return {x: Math.round((x - offsetX)/scale), y: Math.round((y - offsetY)/scale)} }
+
+function drawBoxes(){
+  boxes.forEach((b,i)=>{
+    ctx.strokeStyle=COLORS[b.label]||'#fff'; ctx.lineWidth=2;
+    ctx.strokeRect(offsetX+b.x*scale, offsetY+b.y*scale, b.w*scale, b.h*scale);
+    ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.fillRect(offsetX+b.x*scale, offsetY+b.y*scale-18, Math.max(60, b.label.length*8), 18);
+    ctx.fillStyle='#e6eef9'; ctx.font='12px ui-monospace';
+    ctx.fillText(`${i+1}. ${b.label}`, offsetX+b.x*scale+4, offsetY+b.y*scale-5);
+  });
+  renderEvTable();
+}
+
+cvs.addEventListener('mousedown', (e)=>{
+  if(!img) return;
+  const rect=cvs.getBoundingClientRect();
+  const x=e.clientX-rect.left, y=e.clientY-rect.top;
+  drag={sx:x, sy:y};
+});
+cvs.addEventListener('mousemove', (e)=>{
+  if(!img || !drag) return;
+  drawAll();
+  const rect=cvs.getBoundingClientRect(), x=e.clientX-rect.left, y=e.clientY-rect.top;
+  const w=x-drag.sx, h=y-drag.sy;
+  ctx.setLineDash([6,4]); ctx.strokeStyle='#94a3b8'; ctx.strokeRect(drag.sx, drag.sy, w, h); ctx.setLineDash([]);
+});
+cvs.addEventListener('mouseup', (e)=>{
+  if(!img || !drag) return;
+  const rect=cvs.getBoundingClientRect(), x=e.clientX-rect.left, y=e.clientY-rect.top;
+  const p1=canvasToImg(drag.sx,drag.sy), p2=canvasToImg(x,y);
+  const bx=Math.min(p1.x,p2.x), by=Math.min(p1.y,p2.y), bw=Math.abs(p2.x-p1.x), bh=Math.abs(p2.y-p1.y);
+  drag=null;
+  if(bw<5 || bh<5) { drawAll(); return; }
+  const label=$('#labelSel').value;
+  boxes.push({x:bx,y:by,w:bw,h:bh,label,desc:''});
+  drawAll();
+});
+
+$('#undo').addEventListener('click', ()=>{ boxes.pop(); drawAll(); });
+
+function renderEvTable(){
+  const tb=$('#evTbl tbody'); tb.innerHTML='';
+  boxes.forEach((b,i)=>{
+    const tr=document.createElement('tr');
+    const coords=`x=${b.x},y=${b.y},w=${b.w},h=${b.h}`;
+    tr.innerHTML=`<td>${i+1}</td><td>${b.label}</td><td class="small">${coords}</td><td class="small">${b.desc||''}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+$('#attachDesc').addEventListener('click', ()=>{
+  if(boxes.length===0) return;
+  boxes[boxes.length-1].desc = ($('#evDesc').value||'').trim();
+  $('#evDesc').value=''; renderEvTable();
+});
+
+$('#savePng').addEventListener('click', ()=>{
+  const out=document.createElement('canvas');
+  out.width=cvs.width; out.height=cvs.height;
+  const octx=out.getContext('2d');
+  // фон + зображення + рамки
+  octx.fillStyle='#0b1220'; octx.fillRect(0,0,out.width,out.height);
+  if(img){ octx.drawImage(img, offsetX, offsetY, img.width*scale, img.height*scale); }
+  // перенамалюємо бокси
+  boxes.forEach((b,i)=>{
+    octx.strokeStyle=COLORS[b.label]||'#fff'; octx.lineWidth=2;
+    octx.strokeRect(offsetX+b.x*scale, offsetY+b.y*scale, b.w*scale, b.h*scale);
+    octx.fillStyle='rgba(0,0,0,0.5)'; octx.fillRect(offsetX+b.x*scale, offsetY+b.y*scale-18, Math.max(60, b.label.length*8), 18);
+    octx.fillStyle='#e6eef9'; octx.font='12px ui-monospace';
+    octx.fillText(`${i+1}. ${b.label}`, offsetX+b.x*scale+4, offsetY+b.y*scale-5);
+  });
+  const url=out.toDataURL('image/png');
+  const a=document.createElement('a'); a.href=url; a.download='para24_annotated_'+stamp()+'.png'; document.body.appendChild(a); a.click(); a.remove();
+});
+
+// Завантаження зображень
+$('#file').addEventListener('change', async (e)=>{
+  const files=[...e.target.files];
+  IMG_BADGE.textContent='Зображень: '+files.length;
+  if(files.length===0) { img=null; boxes=[]; drawAll(); return; }
+  const f=files[0]; const url=URL.createObjectURL(f);
+  img=new Image(); img.onload=()=>{ URL.revokeObjectURL(url); drawAll(); }; img.src=url;
+  boxes=[]; // нове фото — чисті анотації
+});
+
+// Демокейс — малюємо штучне листя з «плямами»
+$('#demo').addEventListener('click', ()=>{
+  img=null; boxes=[]; drawAll();
+  // Малюємо лист
+  ctx.fillStyle='#0b1220'; ctx.fillRect(0,0,cvs.width,cvs.height);
+  ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,cvs.width-1,cvs.height-1);
+  // лист
+  ctx.fillStyle='#0b3f24';
+  ctx.beginPath();
+  ctx.ellipse(460,300,280,140, -0.2, 0, Math.PI*2); ctx.fill();
+  // жилки
+  ctx.strokeStyle='#14532d'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(240,300); ctx.lineTo(680,300); ctx.stroke();
+  // «плями»
+  ctx.fillStyle='#6b7280'; ctx.beginPath(); ctx.ellipse(520,260,40,18,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#9ca3af'; ctx.beginPath(); ctx.ellipse(400,340,32,14,0,0,Math.PI*2); ctx.fill();
+  // «пікніди»
+  ctx.fillStyle='#1f2937'; for(let i=0;i<18;i++){ ctx.beginPath(); ctx.arc(505+Math.random()*26-13, 252+Math.random()*16-8, 2, 0, Math.PI*2); ctx.fill(); }
+  // Заповнюємо поля
+  $('#crop').value='Пшениця озима'; $('#bbch').value='BBCH 37'; $('#weather').value='t 24–27/10–12°C; RH 70–95%; роса зранку'; $('#field').value='Поле №3, Тальне'; $('#suspects').value='септоріоз / борошниста роса'; $('#prehistory').value='загущення на краї; без фунгіциду 18 днів';
+  // Анотації
+  boxes=[
+    {x:520-40,y:260-18,w:80,h:36,label:'пляма',desc:'овальна пляма зі світлішою серединою'},
+    {x:400-32,y:340-14,w:64,h:28,label:'пляма',desc:'подовжена пляма з жовтим ореолом'},
+    {x:492,y:244,w:26,h:16,label:'пустули/пікніди',desc:'точки в центрі плями (пікніди)'}
+  ];
+  IMG_BADGE.textContent='Зображень: 1 (демо-полотно)'; drawAll(); log('Демокейс завантажено');
+});
+
+$('#clearImg').addEventListener('click', ()=>{ img=null; boxes=[]; drawAll(); IMG_BADGE.textContent='Зображень: 0'; });
+
+// ===== Генератор промпта =====
+function buildPrompt(){
+  const crop=$('#crop').value.trim();
+  const bbch=$('#bbch').value.trim()||'не вказано';
+  const field=$('#field').value.trim()||'—';
+  const weather=$('#weather').value.trim()||'—';
+  const suspects=$('#suspects').value.trim()||'—';
+  const prehistory=$('#prehistory').value.trim()||'—';
+  // Стислий опис анотацій
+  const ev=boxes.map((b,i)=>({i:i+1,type:b.label,rect:{x:b.x,y:b.y,w:b.w,h:b.h},desc:b.desc||''}));
+  const evText=ev.map(e=>`#${e.i}: ${e.type}; rect(${e.rect.x},${e.rect.y},${e.rect.w}×${e.rect.h}); ${e.desc}`).join('\n');
+
+  return `Ти — агроном-консультант (IPM) з мультимодальними можливостями. Отримаєш фото листка/рослини (прикріплене), зроби диференційну діагностику.
+Контекст:
+• Культура: ${crop}; Фаза (BBCH): ${bbch}; Поле: ${field}
+• Погода (ост. 3–5 днів): ${weather}
+• Передісторія: ${prehistory}
+• Попередні підозри: ${suspects}
+
+Анотації на фото (ROI):
+${evText || '(анотації відсутні — попроси завантажити кращий ракурс/макро/білий фон)'}
+
+Вимоги:
+1) Визнач 2–4 найімовірніші причини (хвороба/шкідник/дефіцит) з обґрунтуванням «ознака → причина».
+2) Побудуй коротку таблицю дифдіагнозу: {причина | ознаки за/проти | що перевірити додатково}.
+3) Обов’язково наведи 3–6 <ДЖЕРЕЛА> (посилання на довідники/етикетки/наукові статті); чітко познач «факт» vs «гіпотеза».
+4) Дай план IPM: агротехнічний, біологічний, хімічний + «нічого не робити» з ризиками. Для хімії — АР та FRAC/HRAC, REI/PHI, ЗІЗ.
+5) Запроси уточнення, якщо критичних даних бракує (ракурс, масштаби, відсоток ураження, локація плям — нижній/верхній ярус, вегетативні/генеративні органи).
+Формат: заголовки, списки, в кінці розділ «ДЖЕРЕЛА».`;
+}
+
+$('#genPrompt').addEventListener('click', ()=>{ $('#prompt').textContent=buildPrompt(); log('Промпт згенеровано'); });
+$('#copyPrompt').addEventListener('click', ()=>{ const ta=document.createElement('textarea'); ta.value=$('#prompt').textContent; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); log('Промпт скопійовано'); });
+$('#dlPrompt').addEventListener('click', ()=>{ const txt=$('#prompt').textContent||buildPrompt(); download('para24_prompt_'+stamp()+'.txt',txt); });
+
+// ===== Чекер відповіді ШІ =====
+function checkLLMText(txt){
+  const lines=(txt||'').split(/\r?\n/);
+  const urlRE=/(https?:\/\/[^\s)]+|doi:\S+)/ig;
+  const urls=(txt.match(urlRE)||[]);
+  const hasSources=/джерела|sources|references/i.test(txt);
+  const tableLike=/(таблиц|table|\|.+\|.+\|)/i.test(txt);
+  const mentionsFRAC=/\bFRAC|HRAC|IRAC\b/i.test(txt);
+  const safety=/(REI|PHI|ЗІЗ|PPE)/i.test(txt);
+  const factsHypo=/(факт|гіпотез)/i.test(txt);
+  const asks=/\?/.test(txt) && /(уточн|питання|clarify|question)/i.test(txt);
+  const ipm=/агротехн|біологічн|хімічн|нічого не робити|IPM/i.test(txt);
+
+  // скоринг 0..100
+  let score=0;
+  if(urls.length>=3) score+=25; else if(urls.length>=1) score+=15;
+  if(hasSources) score+=10;
+  if(tableLike) score+=15;
+  if(ipm) score+=15;
+  if(mentionsFRAC) score+=10;
+  if(safety) score+=10;
+  if(factsHypo) score+=10;
+  if(asks) score+=5;
+
+  const crits=[
+    {name:'Джерела (посилання)', ok:urls.length>=3, msg:`знайдено ${urls.length}`},
+    {name:'Розділ «ДЖЕРЕЛА»', ok:hasSources, msg: hasSources?'є':'нема'},
+    {name:'Таблиця дифдіагнозу', ok:tableLike, msg: tableLike?'є':'нема'},
+    {name:'IPM (4 варіанти)', ok:ipm, msg: ipm?'є':'нема всіх блоків'},
+    {name:'FRAC/HRAC/IRAC', ok:mentionsFRAC, msg: mentionsFRAC?'є':'нема'},
+    {name:'REI/PHI/ЗІЗ', ok:safety, msg: safety?'є':'нема'},
+    {name:'Факт vs гіпотеза', ok:factsHypo, msg: factsHypo?'є':'нема'},
+    {name:'Уточнювальні питання', ok:asks, msg: asks?'є':'нема'}
+  ];
+  return {score:Math.min(100,score), urls, crits};
+}
+
+$('#checkLLM').addEventListener('click', ()=>{
+  const txt=$('#llm').value||'';
+  const res=checkLLMText(txt);
+  $('#badgeScore').textContent=`Score: ${res.score}/100`;
+  const tb=$('#critTbl'); tb.innerHTML='';
+  res.crits.forEach(c=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${c.name}</td><td class="small">${c.msg}</td><td class="${c.ok?'ok':'bad'}">${c.ok?'OK':'MISS'}</td>`;
+    tb.appendChild(tr);
+  });
+  log('Перевірено відповідь ШІ: Score '+res.score);
+});
+
+// ===== Журнал/звіти =====
+const rows=[]; // журнал
+$('#addLog').addEventListener('click', ()=>{
+  const fio=($('#fio').value||'').trim(), dec=($('#decision').value||'').trim();
+  rows.push({ts:new Date().toISOString(), fio, decision:dec, nBoxes:boxes.length});
+  log(`Журнал → ${fio}: ${dec} (анотацій: ${boxes.length})`);
+});
+$('#saveTxt').addEventListener('click', ()=>{
+  const lines=[
+    'Пара 24 — Діагностика за фото + доказовість',
+    'Студент: '+($('#fio').value||'').trim(),
+    'Культура/BBCH: '+$('#crop').value+' / '+($('#bbch').value||'—'),
+    'Локація/погода: '+($('#field').value||'—')+' / '+($('#weather').value||'—'),
+    'Підозри/історія: '+($('#suspects').value||'—')+' / '+($('#prehistory').value||'—'),
+    'Анотацій: '+boxes.length,
+    'Промпт:', $('#prompt').textContent||buildPrompt(),
+    'Відповідь ШІ:', ($('#llm').value||'—'),
+  ].join('\n');
+  download('agro_para24_'+stamp()+'.txt',lines);
+});
+$('#saveCsv').addEventListener('click', ()=>{
+  const evHeader='i,type,x,y,w,h,desc\n';
+  const evBody=boxes.map((b,i)=>`${i+1},"${b.label.replace(/"/g,'""')}",${b.x},${b.y},${b.w},${b.h},"${(b.desc||'').replace(/"/g,'""')}"`).join('\n');
+  download('agro_para24_annotations_'+stamp()+'.csv', evHeader+evBody, 'text/csv');
+});
+
+// Ініціалізація
+drawAll();
+if (window.self !== window.top) document.documentElement.classList.add('embedded'); // Moodle-friendly
+</script>
+</body>
+</html>
