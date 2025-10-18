@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 21 (Електрика) — Arduino: монітор енергоспоживання (SCT-013, кВт·год, сигналізація)</title>
+<meta name="description" content="Вимірюємо струм SCT-013, обчислюємо S/P, кВт·год, індикатори перевантаження (LED/бузер), калібрування, живий графік, журнал і експорт. Генератор прошивки для одного або двох сенсорів (I-only або I+U)."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+.grid{display:grid;gap:14px;grid-template-columns:1.35fr 1fr}
+@media(max-width:1040px){.grid{grid-template-columns:1fr}}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:260px}
+.log{max-height:160px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;background:#0b1220;font-family:ui-monospace,monospace;font-size:13px;white-space:pre-wrap}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.small{font-size:.9rem}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+svg{max-width:100%;height:auto;display:block}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🔌</span>
+      <div>
+        <b>Пара 21 — Arduino: монітор енергоспоживання</b><br/>
+        <span class="badge">SCT-013 → I<sub>rms</sub> → S/P → кВт·год → пороги → графік → експорт</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">
+    Мета: <b>безпечним</b> способом зняти струм із трансформатора струму <b>SCT-013</b>, оцінити <b>S</b> (повна потужність), за наявності сенсора напруги — <b>P</b> (активна) та <b>PF</b>, накопичити <b>кВт·год</b>, показати на графіку і подати сигналізацію перевищення. Є <b>емулятор</b> навантаження, <b>генератор .ino</b>, <b>SVG-схема</b> та експорт CSV/TXT.
+  </p>
+
+  <div class="grid">
+    <!-- ЛІВО -->
+    <div class="card">
+      <h2>🔧 Налаштування вимірювань</h2>
+      <div class="row">
+        <div style="flex:1">
+          <label for="mode">Режим</label>
+          <select id="mode" class="input">
+            <option value="I_ONLY" selected>Лише струм (S≈U·I)</option>
+            <option value="I_U">Струм + напруга (реальна P, PF)</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label for="mains">Мережа, В (RMS)</label>
+          <input id="mains" class="input" type="number" step="1" value="230"/>
+        </div>
+        <div style="flex:1">
+          <label for="freq">Частота, Гц</label>
+          <input id="freq" class="input" type="number" step="0.1" value="50.0"/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div style="flex:1">
+          <label for="apinI">A0 — SCT-013 (струм)</label>
+          <select id="apinI" class="input"><option>A0</option><option>A1</option><option>A2</option></select>
+        </div>
+        <div style="flex:1">
+          <label for="apinU">A1 — AC-адаптер (напруга)</label>
+          <select id="apinU" class="input"><option>A1</option><option selected>A2</option><option>A3</option></select>
+        </div>
+        <div style="flex:1">
+          <label for="nSamples">Вікно вибірки (мс)</label>
+          <input id="nSamples" class="input" type="number" step="5" value="500"/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div style="flex:1">
+          <label for="calI">Калібрування I (A/ADC)</label>
+          <input id="calI" class="input" type="number" step="0.0001" value="0.0500"/>
+        </div>
+        <div style="flex:1">
+          <label for="calU">Калібрування U (В/ADC)</label>
+          <input id="calU" class="input" type="number" step="0.001" value="1.100"/>
+        </div>
+        <div style="flex:1">
+          <label for="phase">Фазовий зсув (рад)</label>
+          <input id="phase" class="input" type="number" step="0.01" value="0.10"/>
+        </div>
+      </div>
+
+      <h3 style="margin-top:12px">🚨 Пороги/індикація</h3>
+      <div class="row">
+        <div style="flex:1">
+          <label for="pMax">Поріг перевантаження, Вт</label>
+          <input id="pMax" class="input" type="number" step="10" value="3000"/>
+        </div>
+        <div style="flex:1">
+          <label for="ledPin">LED пін</label>
+          <select id="ledPin" class="input"><option>3</option><option selected>5</option><option>6</option><option>9</option><option>10</option><option>11</option></select>
+        </div>
+        <div style="flex:1">
+          <label for="buzPin">Buzzer пін</label>
+          <select id="buzPin" class="input"><option>4</option><option selected>8</option><option>7</option><option>12</option><option>13</option></select>
+        </div>
+      </div>
+
+      <h3 style="margin-top:12px">🧪 Емулятор навантаження</h3>
+      <div class="row">
+        <input id="emu" type="checkbox"/><label for="emu">Увімкнути емуль</label>
+      </div>
+      <div class="row">
+        <label style="flex:1">Струм, A<sub>rms</sub> <input id="emuI" class="input" type="range" min="0" max="25" step="0.1" value="4" disabled/></label>
+        <label style="flex:1">PF (cos φ) <input id="emuPF" class="input" type="range" min="0" max="1" step="0.01" value="0.90" disabled/></label>
+      </div>
+
+      <h3 style="margin-top:12px">📈 Живий графік</h3>
+      <div class="canvasWrap"><canvas id="chart" width="900" height="260"></canvas></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="tick">➕ Зчитати</button>
+        <button class="btn secondary" id="clear">🧹 Очистити</button>
+        <span id="last" class="badge">I=— A | U=— V | P=— W | S=— VA | PF=— | ΣE=0.000 кВт·год</span>
+      </div>
+
+      <h3 style="margin-top:12px">🧩 Згенерований код (.ino)</h3>
+      <div class="row">
+        <button class="btn good" id="gen">⚙️ Згенерувати</button>
+        <button class="btn secondary" id="copy">📋 Копіювати</button>
+        <button class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
+      </div>
+      <pre class="code" id="code">// Натисни «Згенерувати» ↑</pre>
+
+      <h3 style="margin-top:12px">💾 Протокол/експорт</h3>
+      <div class="row">
+        <input id="fio" class="input" placeholder="ПІБ студента"/>
+        <button class="btn" id="saveTxt">💾 TXT</button>
+        <button class="btn" id="saveCsv">📄 CSV</button>
+      </div>
+      <div id="log" class="log" aria-live="polite"></div>
+    </div>
+
+    <!-- ПРАВО -->
+    <div class="card">
+      <h2>🔌 Схема підключення (SVG)</h2>
+      <svg viewBox="0 0 760 420" role="img" aria-label="Arduino + SCT-013 + AC-адаптер">
+        <!-- Arduino -->
+        <rect x="40" y="40" width="220" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <text x="150" y="66" fill="#e5e7eb" font-size="16" text-anchor="middle">Arduino UNO/Nano</text>
+        <text x="60" y="96" fill="#93c5fd" font-size="12">A0 — I</text>
+        <text x="60" y="116" fill="#93c5fd" font-size="12">A1/A2 — U (опц.)</text>
+        <text x="60" y="136" fill="#93c5fd" font-size="12">5V/3.3V — bias</text>
+
+        <!-- SCT -->
+        <rect x="320" y="40" width="200" height="100" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <text x="420" y="70" fill="#dcfce7" font-size="16" text-anchor="middle">SCT-013 (CT)</text>
+        <text x="420" y="90" fill="#a7f3d0" font-size="12" text-anchor="middle">I → A0 через шунт + bias</text>
+
+        <!-- Bias divider -->
+        <rect x="320" y="160" width="200" height="90" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <text x="420" y="190" fill="#e5e7eb" font-size="14" text-anchor="middle">Дільник 2×100кΩ</text>
+        <text x="420" y="210" fill="#9ca3af" font-size="12" text-anchor="middle">центр ~Vcc/2 → A0/A2</text>
+
+        <!-- AC adapter -->
+        <rect x="320" y="270" width="200" height="100" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+        <text x="420" y="300" fill="#fed7aa" font-size="16" text-anchor="middle">AC-адаптер 9V (опц.)</text>
+        <text x="420" y="320" fill="#fed7aa" font-size="12" text-anchor="middle">через дільник до A1/A2</text>
+
+        <!-- Connections -->
+        <line x1="260" y1="100" x2="320" y2="80" stroke="#93c5fd" stroke-width="3"/><text x="280" y="90" fill="#93c5fd" font-size="12">A0 ← CT</text>
+        <line x1="260" y1="120" x2="320" y2="300" stroke="#93c5fd" stroke-width="3"/><text x="280" y="210" fill="#93c5fd" font-size="12">A1/A2 ← AC</text>
+
+        <line x1="260" y1="140" x2="320" y2="200" stroke="#64748b" stroke-width="3"/><text x="280" y="170" fill="#94a3b8" font-size="12">Bias: Vcc/2</text>
+      </svg>
+
+      <div class="note small" style="margin-top:10px">
+        <b>Безпека:</b> первинна мережа 230 В ніколи не з’єднується з Arduino напряму. Використовуємо <b>трансформатор струму SCT-013</b> (із відповідним шунтом) та, за потреби, <b>ізольований AC-адаптер</b> для вимірювання напруги. Працюй лише під наглядом і з відключеним живленням під час монтажу.
+      </div>
+
+      <h3 style="margin-top:12px">🧷 Корисні теги</h3>
+      <div>
+        <span class="tag">#SCT013</span>
+        <span class="tag">#current_transformer</span>
+        <span class="tag">#power_factor</span>
+        <span class="tag">#kWh</span>
+        <span class="tag">#overload_alarm</span>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h3>📜 Історична нотатка</h3>
+        <p class="muted small">
+          Ідея побутового «енергометра» з CT стала масовою завдяки open-hardware спільнотам (типу проектів енергомоніторингу), 
+          які популяризували безпечний вимір змінного струму <i>без прямого контакту</i> із мережею.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>Фото схеми; пояснення, який SCT-013 (із/без шунта) і як підібраний дільник.</li>
+      <li>CSV-лог 2–3 хв із I, U (якщо є), P, S, PF, ΣE; скрін графіка.</li>
+      <li>Коротко: як впливають калібрування та фазова компенсація на PF та P.</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s);
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function log(msg){const t=new Date().toLocaleTimeString(); LOG.textContent+=`[${t}] ${msg}\n`; LOG.scrollTop=LOG.scrollHeight;}
+
+// ===== Стани =====
+const cvs=$('#chart'), ctx=cvs.getContext('2d');
+const series=[]; // {t,I,U,P,S,PF,E}
+let E_kWh=0, lastTs=null;
+
+// ===== Емулятор =====
+const emu=$('#emu'), emuI=$('#emuI'), emuPF=$('#emuPF');
+emu.addEventListener('change',()=>{emuI.disabled=emuPF.disabled=!emu.checked;});
+
+// ===== Графік =====
+function drawChart(){
+  const W=cvs.width,H=cvs.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,W-1,H-1);
+  if(series.length<2) return;
+  const maxN=140;
+  const s=series.slice(-maxN);
+  const xs=s.map((_,i)=> i*(W/(s.length-1)));
+
+  // P (Вт)
+  const maxP = Math.max(1000, Math.max(...s.map(v=>v.P||0))*1.2);
+  ctx.beginPath(); ctx.strokeStyle='#22c55e'; ctx.lineWidth=2;
+  xs.forEach((x,i)=>{const y=H-10-(Math.min(maxP,s[i].P)/maxP)*(H-20); i?ctx.lineTo(x,y):ctx.moveTo(x,y);}); ctx.stroke();
+
+  // S (ВА)
+  const maxS = Math.max(1000, Math.max(...s.map(v=>v.S||0))*1.2);
+  ctx.beginPath(); ctx.strokeStyle='#38bdf8'; ctx.lineWidth=1.5;
+  xs.forEach((x,i)=>{const y=H-10-(Math.min(maxS,s[i].S)/maxS)*(H-20); i?ctx.lineTo(x,y):ctx.moveTo(x,y);}); ctx.stroke();
+
+  ctx.fillStyle='#94a3b8'; ctx.font='12px ui-monospace';
+  ctx.fillText('P',W-28,14); ctx.fillText('S',W-12,14);
+}
+
+// ===== Розрахунок кроку =====
+function acquirePoint(){
+  const mode=$('#mode').value;
+  const Ugrid=parseFloat($('#mains').value)||230;
+  let I=0, PF=1, U=Ugrid;
+
+  if(emu.checked){
+    I=parseFloat(emuI.value)||0;
+    PF=parseFloat(emuPF.value)||1;
+  }else{
+    // У «живому» режимі тут могли б стояти зчитування з SerialMonitor:
+    // але для браузерної демо-сторінки запитуємо вручну
+    const i=prompt('Введи I_rms (A) зі свого скетча/Serial:', '3.2'); if(i===null) return;
+    const pf= (mode==='I_U') ? prompt('Введи PF (0..1):','0.85') : null;
+    I=parseFloat(i)||0; PF = pf==null?1:(parseFloat(pf)||1);
+    if(mode==='I_U'){ const u=prompt('Введи U_rms (В):','228'); if(u===null) return; U=parseFloat(u)||Ugrid; }
+  }
+
+  let P=0,S=0;
+  if(mode==='I_ONLY'){ S = U*I; P = S*PF; }
+  else{ S = U*I; P = U*I*PF; } // у генераторі .ino буде точніше через крос-добуток
+
+  const now=Date.now();
+  if(lastTs==null) lastTs=now;
+  const dt_h=(now-lastTs)/3600000;
+  lastTs=now;
+  E_kWh += (P/1000)*dt_h;
+
+  series.push({t:now,I,U,P,S,PF,E:E_kWh});
+  $('#last').textContent=`I=${I.toFixed(2)} A | U=${U.toFixed(0)} V | P=${P.toFixed(0)} W | S=${S.toFixed(0)} VA | PF=${PF.toFixed(2)} | ΣE=${E_kWh.toFixed(3)} кВт·год`;
+
+  // сигналізація
+  const pMax=parseFloat($('#pMax').value)||3000;
+  if(P>=pMax){ document.title='⚠️ Перевантаження!'; setTimeout(()=>document.title='Монітор енергоспоживання',1000); }
+  drawChart();
+}
+
+// Події графіка
+$('#tick').addEventListener('click', acquirePoint);
+$('#clear').addEventListener('click', ()=>{ series.length=0; E_kWh=0; lastTs=null; $('#last').textContent='I=— A | U=— V | P=— W | S=— VA | PF=— | ΣE=0.000 кВт·год'; drawChart(); });
+
+// ===== Генератор прошивки =====
+function genSketch(){
+  const mode=$('#mode').value;
+  const apinI=$('#apinI').value.replace('A','');
+  const apinU=$('#apinU').value.replace('A','');
+  const mains=parseFloat($('#mains').value)||230;
+  const freq=parseFloat($('#freq').value)||50;
+  const nms=parseInt($('#nSamples').value)||500;
+  const calI=parseFloat($('#calI').value)||0.05;
+  const calU=parseFloat($('#calU').value)||1.1;
+  const phase=parseFloat($('#phase').value)||0.1;
+  const led=parseInt($('#ledPin').value)||5;
+  const buz=parseInt($('#buzPin').value)||8;
+  const pMax=parseFloat($('#pMax').value)||3000;
+
+  const code = `/*
+  Пара 21 — Монітор енергоспоживання (SCT-013)
+  Режими:
+    - I_ONLY: лише струм (оцінка S≈Ugrid*Irms, P≈S*PF_approx)
+    - I_U: струм + напруга з AC-адаптера (реальна активна потужність P та PF через крос-добуток)
+  ⚠ Безпека: мережа 230В лише через ізольовані перетворювачі (CT/AC-адаптер). НІКОЛИ напряму в Arduino.
+*/
+
+#define MODE_${mode} 1
+#define PIN_I A${apinI}
+#define PIN_U A${apinU}   // використовується у I_U
+const float UGRID = ${mains};     // В
+const float FREQ  = ${freq};      // Гц
+const unsigned long WINDOW_MS = ${nms}; // тривалість набору зразків
+const float CAL_I = ${calI};      // A на 1 ADC-одиницю (після bias-віднімання)
+const float CAL_U = ${calU};      // В на 1 ADC-одиницю (після bias)
+const float PHASE = ${phase};     // фазова компенсація для I_U (радіани орієнтовно)
+const int   LED_PIN = ${led};
+const int   BUZ_PIN = ${buz};
+const float P_MAX_W = ${pMax};    // поріг сигналізації (Вт)
+
+float E_kWh = 0.0;
+unsigned long tPrev = 0;
+
+static inline int fastRead(int pin){ return analogRead(pin); } // 10-біт ADC
+
+void setup(){
+  Serial.begin(115200);
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(BUZ_PIN, OUTPUT);
+  analogReference(DEFAULT); // 5В для UNO (міняй за потреби)
+  delay(300);
+  Serial.println(F("millis,Irms,Urms,P,S,PF,E_kWh"));
+}
+
+void loop(){
+  const unsigned long tStart = millis();
+  const unsigned long tEnd   = tStart + WINDOW_MS;
+
+  // Центр зміщення (bias) — виміряємо
+  long sumI=0,sumU=0; int n0=0;
+  while(millis() < tStart + 50){ // 50 мс для оцінки bias
+    sumI += fastRead(PIN_I);
+    sumU += fastRead(PIN_U);
+    n0++;
+  }
+  const float biasI = (float)sumI / max(1,n0);
+  const float biasU = (float)sumU / max(1,n0);
+
+  // Акумулятори для RMS та крос-добутку
+  double accI2=0, accU2=0, accPU=0;
+  unsigned long n=0;
+
+  while(millis() < tEnd){
+    int ai = fastRead(PIN_I);
+    int au = fastRead(PIN_U);
+
+    float xi = (ai - biasI) * CAL_I;   // А миттєве
+    float xu = (au - biasU) * CAL_U;   // В миттєве
+
+    #ifdef MODE_I_U
+      // Просте фазове вирівнювання: U' = U*cosφ + (dU/dt)*sinφ/ω — наближення дискретним зсувом
+      // Для спрощення застосуємо фаз.корекцію на I: I' = I*cosφ (досить для учбової)
+      xi = xi * cos(PHASE);
+      accPU += (double)xi * (double)xu; // миттєва активна потужність
+      accU2 += (double)xu * (double)xu;
+    #endif
+
+    accI2 += (double)xi * (double)xi;
+    n++;
+  }
+
+  const float Irms = sqrt(accI2 / max(1UL,n));
+  #ifdef MODE_I_U
+    const float Urms = sqrt(accU2 / max(1UL,n));
+    const float P    = accPU / max(1UL,n);     // середня активна (Вт)
+    const float S    = Urms * Irms;            // повна (ВА)
+    const float PF   = (S>1e-3)? (P/S) : 1.0;  // коеф. потужності
+  #else
+    const float Urms = UGRID;
+    const float S    = Urms * Irms;
+    const float PF   = 0.95;                   // припущення (можна змінити)
+    const float P    = S * PF;
+  #endif
+
+  // Енергія
+  const unsigned long now = millis();
+  const float dt_h = (now - tPrev) / 3600000.0;
+  tPrev = now;
+  E_kWh += (P/1000.0) * max(0.0f, dt_h);
+
+  // Сигналізація
+  const bool overload = (P >= P_MAX_W);
+  digitalWrite(LED_PIN, overload?HIGH:LOW);
+  if(overload){ tone(BUZ_PIN, 2000, 80); }
+
+  Serial.print(now); Serial.print(',');
+  Serial.print(Irms,3); Serial.print(',');
+  Serial.print(Urms,1); Serial.print(',');
+  Serial.print(P,1);    Serial.print(',');
+  Serial.print(S,1);    Serial.print(',');
+  Serial.print(PF,2);   Serial.print(',');
+  Serial.println(E_kWh,3);
+
+  // Пауза до наступного вікна (необов’язково)
+  delay(50);
+}
+`;
+  return code;
+}
+
+$('#gen').addEventListener('click', ()=>{ const txt=genSketch(); $('#code').textContent=txt; log('Скетч згенеровано'); });
+$('#copy').addEventListener('click', ()=>{ const ta=document.createElement('textarea'); ta.value=$('#code').textContent; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); log('Код скопійовано'); });
+$('#dl').addEventListener('click', ()=>{ const txt=$('#code').textContent||genSketch(); download('electric_para21_energy_monitor.ino',txt,'text/x-ino'); });
+
+// ===== Експорт =====
+const LOG=$('#log');
+$('#saveTxt').addEventListener('click', ()=>{
+  const fio=($('#fio').value||'').trim();
+  const lines=[
+    'Пара 21 — Монітор енергоспоживання',
+    'Студент: '+fio,
+    `Режим: ${$('#mode').value}, Мережа: ${$('#mains').value} В @ ${$('#freq').value} Гц`,
+    `Вікно: ${$('#nSamples').value} мс; Калібр I=${$('#calI').value} A/ADC; U=${$('#calU').value} В/ADC; φ=${$('#phase').value} рад`,
+    `Поріг Pmax: ${$('#pMax').value} Вт; LED=${$('#ledPin').value}; Buzzer=${$('#buzPin').value}`,
+    `ΣE (сесія): ${E_kWh.toFixed(3)} кВт·год`,
+    'Коментар: ...'
+  ].join('\n');
+  download('electric_para21_'+stamp()+'.txt',lines);
+});
+$('#saveCsv').addEventListener('click', ()=>{
+  const fio=($('#fio').value||'').replace(/"/g,'""');
+  const csv='"Пара","Студент","Mode","Ugrid","Freq","Window_ms","CalI","CalU","Phase","Pmax","SumE_kWh"\n'
+          + `"21","${fio}","${$('#mode').value}",${$('#mains').value},${$('#freq').value},${$('#nSamples').value},${$('#calI').value},${$('#calU').value},${$('#phase').value},${$('#pMax').value},${E_kWh.toFixed(3)}\n`;
+  download('electric_para21_'+stamp()+'.csv',csv,'text/csv');
+});
+
+// ===== Ініціалізація =====
+drawChart();
+if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS/Moodle-friendly
+</script>
+</body>
+</html>
