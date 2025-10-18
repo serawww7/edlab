@@ -133,11 +133,12 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
 <script>
 // ===== Кольори для секцій + поточний ключ
 const THEME_COLORS = {
-  coach:   {accent:'#a855f7', ring:'#7c3aed'},
-  electric:{accent:'#22d3ee', ring:'#0891b2'},
-  agro:    {accent:'#22c55e', ring:'#15803d'},
-  mech:    {accent:'#f59e0b', ring:'#b45309'},
-  tech:    {accent:'#ef4444', ring:'#b91c1c'}
+coach:   {accent:'#a855f7', ring:'#7c3aed'},
+electric:{accent:'#22d3ee', ring:'#0891b2'},
+agro:    {accent:'#22c55e', ring:'#15803d'},
+mech:    {accent:'#f59e0b', ring:'#b45309'},
+tech:    {accent:'#ef4444', ring:'#b91c1c'},
+gas:     {accent:'#6b7280', ring:'#374151'}
 };
 let CURRENT_SPEC = ''; // виставимо в init()
 
@@ -162,12 +163,13 @@ function iconSvgForCurrent(){
 
 // ===== Утиліти
 const byId = (id)=>document.getElementById(id);
-const SECTION_KEYS = ['coach','electric','agro','mech','tech'];
+const SECTION_KEYS = ['coach','electric','agro','mech','gas','tech'];
 const SECTION_META = {
   coach:   { title:"🧠 Психологічні тренінги (coach)", desc:"Коучингові практики, рефлексія, soft skills, робота в групах." },
   electric:{ title:"⚡ Електроенергетика",             desc:"Вимірювання, маркування, ППР, калькулятори перерізів, журнали ОП." },
   agro:    { title:"🌾 Агрономія",                     desc:"Польові журнали, планування, моніторинги, QR/NFC." },
   mech:    { title:"🚜 Агроінженерія (механіки)",      desc:"ТО/ППР, облік пального, заявки, діагностика, безпека." },
+  gas:     { title:"🔥 Будівництво та цивільна інженерія (газовики)",      desc:"Цифровий інструментарій газовика" },
   tech:    { title:"🐄 Технологи",                     desc:"HACCP/FSMS, SPC, простежуваність, аудит, CAPA." }
 };
 const SECTION_TO_DIR = {
@@ -322,6 +324,7 @@ function renderSelector(){
       <a href="spec.html?spec=agro">🌾 Агрономія</a>
       <a href="spec.html?spec=mech">🚜 Агроінженерія (механіки)</a>
       <a href="spec.html?spec=tech">🐄 Технологи</a>
+      <a href="spec.html?spec=gas">🔥 Газовики</a>
       <a href="spec.html?spec=electric">⚡ Електроенергетика</a>
       <a href="spec.html?spec=coach">🧠 Психологічні тренінги (coach)</a>
     </div>`;
