@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 23 (Електрика) — ШІ-помічник техобслуговування: SOP → чек-листи, квіз, RAG</title>
+<meta name="description" content="Парсимо SOP/інструкції, формуємо чек-листи (58 мм), генеруємо квіз і перевіряємо відповіді, локальний RAG-пошук по базі SOP, експорт CSV/TXT/ICS."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+.small{font-size:.9rem}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+svg{max-width:100%;height:auto;display:block}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🧰</span>
+      <div>
+        <b>Пара 23 — ШІ-помічник техобслуговування</b><br/>
+        <span class="badge">SOP → чек-листи 58 мм → квіз → локальний RAG → експорт</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">
+    Мета: перетворити «сирий» SOP/інструкцію (копія з PDF) у <b>структуровану карту робіт</b>: <i>PPE/Інструменти/Підготовка/Кроки/Перевірка</i>, 
+    зробити <b>чек-листи</b> з тайм-штампами і підписом, згенерувати <b>квіз</b>, перевіряти <b>вільний текст відповіді</b>, 
+    а також відповіді на питання за допомогою <b>локального RAG</b> (без інтернету). Експорт у <b>CSV/TXT/ICS</b> і «чек 58 мм».
+  </p>
+
+  <div class="card">
+    <h2>📄 Ввід SOP (текст/копія з PDF)</h2>
+    <p class="small muted">Можна вставити розділи чи суцільний текст. Парсер шукає ключі: <span class="mono">PPE, Інструменти, Підготовка, Кроки, Перевірка</span>. Якщо ключів нема — розіб’є за імперативами («Вимкни», «Перевір», «Закріпи»...).</p>
+    <textarea id="sop" class="input" rows="8" placeholder="PPE: діелектричні рукавиці, каска, окуляри...
+Інструменти: мультиметр CAT III, індикатор напруги, ізоляційний покажчик...
+Підготовка:
+1) Відключити вводний автомат QF1; 2) Встановити LOTO; 3) Перевірити відсутність напруги;
+Кроки:
+1) Відкрити шафу; 2) Перевірити затяжку клем; 3) Очистити від пилу; 4) Замір опору ізоляції;
+Перевірка:
+1) Зняти LOTO; 2) Увімкнути QF1; 3) Записати покази у журнал;"></textarea>
+    <div class="row" style="margin-top:6px">
+      <button class="btn good" id="parse">🧩 Розпарсити</button>
+      <button class="btn secondary" id="demo">🎲 Демонстраційний SOP</button>
+      <button class="btn secondary" id="clear">🧹 Очистити</button>
+      <span id="badge" class="badge">Статус: —</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>✅ Чек-лист виконання</h2>
+    <div class="row">
+      <input id="jobTitle" class="input" placeholder="Назва роботи (напр. ТО щита ЩО-1)"/>
+      <input id="who" class="input" placeholder="Виконавець (ПІБ)"/>
+      <input id="super" class="input" placeholder="Контролер/допуск (ПІБ)"/>
+      <input id="start" class="input" type="datetime-local"/>
+      <input id="loc" class="input" placeholder="Місце/шафа/фідер"/>
+    </div>
+    <table class="tbl" id="tbl">
+      <thead><tr><th>#</th><th>Крок</th><th>Готово</th><th>Час</th><th>Коментар</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="row" style="margin-top:6px">
+      <button class="btn" id="stampAll">⏱️ Проставити час</button>
+      <button class="btn secondary" id="addStep">➕ Додати крок</button>
+      <button class="btn secondary" id="rmDone">🧽 Прибрати виконані</button>
+      <button class="btn" id="receipt">🖨️ 58 мм чек</button>
+      <button class="btn" id="exportCsv">📄 CSV</button>
+      <button class="btn" id="exportTxt">💾 TXT</button>
+      <button class="btn" id="exportIcs">🗓️ ICS</button>
+    </div>
+    <div class="receipt" id="rc" hidden></div>
+  </div>
+
+  <div class="card">
+    <h2>🧠 Квіз по SOP + «чекер» вільної відповіді</h2>
+    <div class="row">
+      <button class="btn good" id="genQuiz">📝 Згенерувати 6 питань</button>
+      <button class="btn secondary" id="clearQuiz">🧹 Очистити</button>
+      <span id="qBadge" class="badge">Питань: 0</span>
+    </div>
+    <table class="tbl" id="quizTbl">
+      <thead><tr><th>#</th><th>Питання</th><th>Відповідь</th><th>Перевірка</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <h3 style="margin-top:10px">✍️ Вільна відповідь на запуск/допуск</h3>
+    <textarea id="freeAns" class="input" rows="4" placeholder="Опиши усі кроки LOTO та перевірки відсутності напруги..."></textarea>
+    <div class="row" style="margin-top:6px">
+      <button class="btn" id="checkFree">✅ Перевірити</button>
+      <span id="freeScore" class="badge">Оцінка: —</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔎 Локальний RAG-помічник (без інтернету)</h2>
+    <p class="small muted">Задай питання, відповіді шукатимуться у тексті SOP (tf-idf/косинус). Відповідь міститиме посилання на релевантні фрагменти.</p>
+    <div class="row">
+      <input id="q" class="input" placeholder="Що робити перед замірами опору ізоляції?"/>
+      <button class="btn" id="ask">❓ Запитати</button>
+    </div>
+    <pre class="code" id="ragOut">// Відповідь з’явиться тут</pre>
+  </div>
+
+  <div class="card">
+    <h2>🔁 Схема процесу (SVG)</h2>
+    <svg viewBox="0 0 900 360" role="img" aria-label="SOP → Чек-лист → Квіз → RAG → Експорт">
+      <rect x="30" y="40" width="180" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <text x="120" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">SOP текст</text>
+      <text x="120" y="90" fill="#93c5fd" font-size="12" text-anchor="middle">вставка з PDF</text>
+
+      <rect x="240" y="40" width="180" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <text x="330" y="70" fill="#dcfce7" font-size="14" text-anchor="middle">Парсер</text>
+      <text x="330" y="90" fill="#a7f3d0" font-size="12" text-anchor="middle">рубрики/кроки</text>
+
+      <rect x="450" y="40" width="180" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+      <text x="540" y="70" fill="#fed7aa" font-size="14" text-anchor="middle">Чек-лист</text>
+      <text x="540" y="90" fill="#fed7aa" font-size="12" text-anchor="middle">тайм-штампи</text>
+
+      <rect x="660" y="40" width="200" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+      <text x="760" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Квіз + RAG</text>
+      <text x="760" y="90" fill="#9ca3af" font-size="12" text-anchor="middle">перевірка знань</text>
+
+      <line x1="210" y1="80" x2="240" y2="80" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="420" y1="80" x2="450" y2="80" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="630" y1="80" x2="660" y2="80" stroke="#93c5fd" stroke-width="3"/>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>Чек-лист (скрін) + TXT/CSV/ICS.</li>
+      <li>Квіз: результати перевірки (скрін) + коментарі.</li>
+      <li>Приклад відповіді RAG і посилання на фрагменти SOP.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📜 Нотатка з історії</h2>
+    <p class="muted small">
+      Паперові SOP десятиліттями були «мертвим знанням». Сьогодні ми перетворюємо їх на <b>активні сценарії</b> — чек-листи з тайм-штампами,
+      автоматичні питання та пошук фрагментів інструкцій. І навіть без «хмар» локальна модель подачі знань суттєво скорочує помилки.
+    </p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s); const $$=s=>Array.from(document.querySelectorAll(s));
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function nowLocal(){return new Date().toISOString().slice(0,16).replace('T',' ')}
+function uniq(arr){return Array.from(new Set(arr))}
+const STOPWORDS = new Set('і й та але або що щоб як у в на до з зі із за над під при по між про від без це цей ця ці того ті такий така такі для'.split(' '));
+
+// ===== Стан =====
+let RUB={PPE:[], TOOLS:[], PRE:[], STEPS:[], POST:[]};
+let RAW_TEXT='';
+let CHECKLIST=[]; // {i,text,done,ts,comment}
+let RAG_INDEX=[]; // {chunk, tokens, tf:Map, vec:Map}
+
+// ===== Демодані =====
+$('#demo').addEventListener('click', ()=>{
+  $('#sop').value=`PPE: діелектричні рукавиці, каска, окуляри, діелектричні килимки
+Інструменти: мультиметр CAT III, індикатор напруги, ізоляційний мегаомметр 500 В, викрутки з ізоляцією
+Підготовка:
+1) Відключити вводний автомат QF1; 2) Встановити LOTO (замок, бірка, журнал); 3) Перевірити відсутність напруги індикатором; 4) Перевірити справність ЗІЗ
+Кроки:
+1) Відкрити шафу; 2) Огляд на нагар/пил; 3) Очистити щіткою та пилососом; 4) Підтягнути клемні з’єднання моментним ключем; 5) Замір опору ізоляції 500 В між L–N, L–PE, N–PE (норма ≥1 МОм); 6) Перевірити роботу вентиляторів/фільтрів; 7) Закріпити кришку
+Перевірка:
+1) Зняти LOTO; 2) Увімкнути QF1; 3) Заміряти U, перевірити фазування; 4) Записати результати у журнал обслуговування (дата, підпис, ЗІЗ)`;
+});
+
+// ===== Парсер SOP =====
+function parseSOP(txt){
+  RAW_TEXT = (txt||'').trim();
+  RUB={PPE:[], TOOLS:[], PRE:[], STEPS:[], POST:[]};
+  if(!RAW_TEXT){ $('#badge').textContent='Статус: порожньо'; return; }
+
+  const lines = RAW_TEXT.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  const join = lines.join('\n');
+
+  function section(keyArr, fallback){
+    for(const key of keyArr){
+      const re = new RegExp(`${key}\\s*:\\s*([\\s\\S]*?)(?:\\n\\s*[A-ZА-ЯЇІЄҐ].*?:|$)`,'i');
+      const m = join.match(re);
+      if(m && m[1]) return m[1].trim();
+    }
+    return fallback? fallback.trim() : '';
+  }
+
+  const sPPE   = section(['PPE','ЗІЗ']);
+  const sTOOLS = section(['Інструменти','Інструменты','Tools']);
+  const sPRE   = section(['Підготовка','Preparation','Підготування'], '');
+  const sSTEPS = section(['Кроки','Steps','Виконання'], '');
+  const sPOST  = section(['Перевірка','Перевірити','Завершення','Post'], '');
+
+  function toList(s){ 
+    if(!s) return [];
+    // 1) номери 1) 2) ; 2) розділення крапкою з комою; 3) розбиття по рядках
+    return s.split(/\n|;|(?:\d+[\)\.]\s*)/).map(t=>t.trim()).filter(t=>t.length>1);
+  }
+
+  // Якщо ключі відсутні — спробуємо імперативи
+  let steps = toList(sSTEPS);
+  if(steps.length===0){
+    const imps = RAW_TEXT.match(/\b(Відключити|Встановити|Перевірити|Відкрити|Очистити|Підтягнути|Замір(яти)?|Закріпити|Увімкнути|Записати)\b[^.\n;]+/gi)||[];
+    steps = imps.map(s=>s.trim());
+  }
+
+  RUB.PPE   = uniq(toList(sPPE));
+  RUB.TOOLS = uniq(toList(sTOOLS));
+  RUB.PRE   = toList(sPRE);
+  RUB.STEPS = steps;
+  RUB.POST  = toList(sPOST);
+
+  $('#badge').textContent=`Статус: знайдено — PPE:${RUB.PPE.length}, Tools:${RUB.TOOLS.length}, PRE:${RUB.PRE.length}, Кроки:${RUB.STEPS.length}, POST:${RUB.POST.length}`;
+  buildChecklist();
+  buildRAG();
+}
+$('#parse').addEventListener('click', ()=>parseSOP($('#sop').value));
+$('#clear').addEventListener('click', ()=>{ $('#sop').value=''; $('#badge').textContent='Статус: —'; $('#tbl tbody').innerHTML=''; CHECKLIST.length=0; RAG_INDEX.length=0; $('#rc').hidden=true; $('#quizTbl tbody').innerHTML=''; $('#qBadge').textContent='Питань: 0'; $('#ragOut').textContent='// Відповідь з’явиться тут'; });
+
+// ===== Чек-лист =====
+function buildChecklist(){
+  CHECKLIST.length=0;
+  let idx=1;
+  const add=(arr)=>arr.forEach(t=>CHECKLIST.push({i:idx++, text:t, done:false, ts:'', comment:''}));
+  if(RUB.PRE.length) add(RUB.PRE.map(t=>'Підготовка: '+t));
+  if(RUB.STEPS.length) add(RUB.STEPS);
+  if(RUB.POST.length) add(RUB.POST.map(t=>'Перевірка: '+t));
+  renderChecklist();
+}
+
+function renderChecklist(){
+  const tb=$('#tbl tbody'); tb.innerHTML='';
+  CHECKLIST.forEach((r,ix)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.i}</td>
+      <td>${r.text}</td>
+      <td><input type="checkbox" ${r.done?'checked':''} data-ix="${ix}" class="chk"/></td>
+      <td class="mono">${r.ts||'—'}</td>
+      <td><input class="input cmt" data-ix="${ix}" placeholder="Коментар" value="${r.comment.replace(/"/g,'&quot;')}"/></td>`;
+    tb.appendChild(tr);
+  });
+  $$('.chk').forEach(ch=>ch.addEventListener('change', e=>{
+    const ix=parseInt(e.target.dataset.ix,10);
+    CHECKLIST[ix].done=e.target.checked;
+    CHECKLIST[ix].ts = e.target.checked ? nowLocal() : '';
+    renderChecklist();
+  }));
+  $$('.cmt').forEach(c=>c.addEventListener('input', e=>{
+    const ix=parseInt(e.target.dataset.ix,10);
+    CHECKLIST[ix].comment=e.target.value;
+  }));
+}
+
+// кнопки чек-листа
+$('#stampAll').addEventListener('click', ()=>{
+  const t=nowLocal();
+  CHECKLIST.forEach(r=>{ if(r.done && !r.ts) r.ts=t; });
+  renderChecklist();
+});
+$('#addStep').addEventListener('click', ()=>{
+  const txt=prompt('Текст кроку:','Перевірити маркування кабелів');
+  if(!txt) return;
+  const next=(CHECKLIST.at(-1)?.i||0)+1;
+  CHECKLIST.push({i:next,text:txt,done:false,ts:'',comment:''});
+  renderChecklist();
+});
+$('#rmDone').addEventListener('click', ()=>{
+  const left=CHECKLIST.filter(r=>!r.done);
+  left.forEach((r,i)=>r.i=i+1);
+  CHECKLIST.splice(0,CHECKLIST.length,...left);
+  renderChecklist();
+});
+
+// Експорти чек-листа
+function toCSV(){
+  const head='i,text,done,ts,comment,job,who,super,start,loc\n';
+  const job=$('#jobTitle').value||'', who=$('#who').value||'', sup=$('#super').value||'', start=$('#start').value||'', loc=$('#loc').value||'';
+  const rows=CHECKLIST.map(r=>[r.i, r.text, r.done?1:0, r.ts, r.comment, job, who, sup, start, loc]
+    .map(v=>typeof v==='string'?`"${v.replace(/"/g,'""')}"`:v).join(',')).join('\n');
+  return head+rows;
+}
+function toTXT(){
+  const hdr=[
+    'ЧЕК-ЛИСТ ТО',
+    'Робота: '+($('#jobTitle').value||''),
+    'Виконавець: '+($('#who').value||'')+' | Допуск: '+($('#super').value||''),
+    'Старт: '+($('#start').value||'')+' | Локація: '+($('#loc').value||''),
+    '--- КРОКИ ---'
+  ];
+  const body=CHECKLIST.map(r=>`${r.i}. [${r.done?'x':' '}] ${r.text} ${r.ts?(' @'+r.ts):''} ${r.comment?(' // '+r.comment):''}`);
+  return hdr.concat(body).join('\n');
+}
+function toICS(){
+  const job=$('#jobTitle').value||'ТО (за SOP)';
+  const start=$('#start').value? new Date($('#start').value): new Date();
+  const end=new Date(start.getTime()+ Math.max(30, CHECKLIST.length*3)*60000);
+  const dt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
+  const desc = 'Місце: '+($('#loc').value||'-')+'\\nВиконавець: '+($('#who').value||'-')
+    +'\\nКонтролер: '+($('#super').value||'-')+'\\nКількість кроків: '+CHECKLIST.length;
+  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//EDLab//SOP Assistant//UA',
+    'BEGIN:VEVENT','UID:'+('para23-'+Date.now())+'@edlab',
+    'DTSTART:'+dt(start),'DTEND:'+dt(end),'SUMMARY:'+job,'DESCRIPTION:'+desc,'END:VEVENT','END:VCALENDAR'].join('\r\n');
+}
+$('#exportCsv').addEventListener('click', ()=>download('electric_para23_checklist_'+stamp()+'.csv', toCSV(), 'text/csv'));
+$('#exportTxt').addEventListener('click', ()=>download('electric_para23_checklist_'+stamp()+'.txt', toTXT()));
+$('#exportIcs').addEventListener('click', ()=>download('electric_para23_'+stamp()+'.ics', toICS(), 'text/calendar'));
+
+// Чек 58 мм
+$('#receipt').addEventListener('click', ()=>{
+  const day=(new Date()).toISOString().slice(0,10);
+  const lines=[];
+  lines.push('=== ЧЕК ТО (58мм) ===');
+  lines.push('Дата: '+day);
+  lines.push(('Робота: '+($('#jobTitle').value||'')).slice(0,28));
+  lines.push(('Місце: '+($('#loc').value||'')).slice(0,28));
+  lines.push(('Виконавець: '+($('#who').value||'')).slice(0,28));
+  lines.push('---');
+  CHECKLIST.filter(r=>r.done).slice(0,12).forEach(r=>{
+    lines.push((r.i+'. '+r.text).slice(0,28));
+    if(r.ts) lines.push((r.ts).slice(11,16)+' '+(r.comment||''));
+  });
+  const txt=lines.join('\n');
+  const el=$('#rc'); el.hidden=false; el.textContent=txt;
+  download('para23_receipt_'+stamp()+'.txt', txt);
+});
+
+// ===== RAG: побудова індексу (tf-idf light) =====
+function tokenize(s){
+  return s.toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu,' ')
+    .split(/\s+/).filter(w=>w && !STOPWORDS.has(w));
+}
+function buildRAG(){
+  const chunks=[];
+  // Створимо фрагменти з рубрик
+  const pack = [
+    ['PPE', RUB.PPE.join(', ')],
+    ['Інструменти', RUB.TOOLS.join(', ')],
+    ['Підготовка', RUB.PRE.join('; ')],
+    ['Кроки', RUB.STEPS.map((t,i)=>`${i+1}) ${t}`).join(' ')],
+    ['Перевірка', RUB.POST.join('; ')]
+  ];
+  pack.forEach(([h,txt])=>{
+    if(!txt) return;
+    // ріжемо на куски ~200 символів
+    let cur=''; const parts=[];
+    txt.split(/\s+/).forEach(w=>{
+      if((cur+' '+w).length>200){ parts.push(cur); cur=w; } else { cur = cur ? cur+' '+w : w; }
+    });
+    if(cur) parts.push(cur);
+    parts.forEach(p=>chunks.push({chunk:`${h}: ${p}`}));
+  });
+  // tf та індекс
+  RAG_INDEX = chunks.map(c=>{
+    const tokens=tokenize(c.chunk);
+    const tf=new Map(); tokens.forEach(t=>tf.set(t,(tf.get(t)||0)+1));
+    return {chunk:c.chunk, tokens, tf};
+  });
+}
+
+// косинус
+function cosine(a,b){
+  let num=0,na=0,nb=0;
+  const keys=new Set([...a.keys(),...b.keys()]);
+  keys.forEach(k=>{
+    const va=a.get(k)||0, vb=b.get(k)||0;
+    num+=va*vb; na+=va*va; nb+=vb*vb;
+  });
+  return num / (Math.sqrt(na||1)*Math.sqrt(nb||1));
+}
+
+$('#ask').addEventListener('click', ()=>{
+  if(RAG_INDEX.length===0){ parseSOP($('#sop').value); if(RAG_INDEX.length===0){ alert('Спочатку встав SOP і натисни «Розпарсити».'); return; } }
+  const q=$('#q').value.trim(); if(!q){ return; }
+  const qTok=tokenize(q); const qTf=new Map(); qTok.forEach(t=>qTf.set(t,(qTf.get(t)||0)+1));
+  const scored=RAG_INDEX.map(o=>({chunk:o.chunk, score:cosine(o.tf,qTf)})).sort((a,b)=>b.score-a.score).slice(0,3);
+  const ans = scored.map((s,i)=>`${i+1}) ${s.chunk}  [score=${s.score.toFixed(2)}]`).join('\n');
+  $('#ragOut').textContent = `Питання: ${q}\n--- Релевантні фрагменти ---\n${ans}\n\nВідповідь (стисло):\n`+
+    (scored[0]? scored[0].chunk : 'Не знайдено в SOP. Уточни формулювання.');
+});
+
+// ===== Квіз і перевірка =====
+function imperativeOnly(arr){ return arr.filter(t=>/^(Від|Пере|За|Ув|Очист|Підтяг|Замір|Закріп|Знят|Встанов)/i.test(t)); }
+function generateQuiz(){
+  const base=imperativeOnly(RUB.STEPS);
+  const pre =imperativeOnly(RUB.PRE).slice(0,2);
+  const post=imperativeOnly(RUB.POST).slice(0,2);
+  const pool=uniq(base.concat(pre).concat(post));
+  const pick=(n)=>{const a=pool.slice(); const out=[]; while(out.length<n && a.length){ out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); } return out; }
+  const qs = pick(6).map((step,i)=>{
+    // варіанти: правильний + 3 випадкових з інших кроків
+    const distract = uniq(pick(6).filter(x=>x!==step)).slice(0,3);
+    const opts = uniq([step].concat(distract)).sort(()=>Math.random()-0.5).slice(0,4);
+    return {q:`Що з наступного відповідає SOP для даного етапу?`, ctx: step.replace(/\d+\)\s*/,'').trim(), opts, ans: step};
+  });
+  return qs;
+}
+
+function renderQuiz(list){
+  const tb=$('#quizTbl tbody'); tb.innerHTML='';
+  list.forEach((q,i)=>{
+    const tr=document.createElement('tr');
+    const selId='sel_'+i;
+    tr.innerHTML=`<td>${i+1}</td>
+      <td><b>${q.q}</b><br/><span class="muted small">Контекст: ${q.ctx}</span></td>
+      <td>
+        <select class="input" id="${selId}">
+          ${q.opts.map(o=>`<option>${o}</option>`).join('')}
+        </select>
+      </td>
+      <td><button class="btn checkOne" data-i="${i}">Перевірити</button><span class="badge" id="res_${i}">—</span></td>`;
+    tb.appendChild(tr);
+  });
+  $$('.checkOne').forEach(b=>b.addEventListener('click', e=>{
+    const i=parseInt(e.target.dataset.i,10);
+    const val=$('#sel_'+i).value;
+    const ok = (val.trim()===QUIZ[i].ans.trim());
+    $('#res_'+i).textContent = ok? 'OK' : 'Ні';
+    $('#res_'+i).className = 'badge '+(ok?'ok':'bad');
+  }));
+  $('#qBadge').textContent='Питань: '+list.length;
+}
+let QUIZ=[];
+$('#genQuiz').addEventListener('click', ()=>{
+  if(!RUB.STEPS.length){ parseSOP($('#sop').value); if(!RUB.STEPS.length){ alert('Додай SOP і натисни «Розпарсити».'); return; } }
+  QUIZ = generateQuiz();
+  renderQuiz(QUIZ);
+});
+$('#clearQuiz').addEventListener('click', ()=>{ QUIZ=[]; $('#quizTbl tbody').innerHTML=''; $('#qBadge').textContent='Питань: 0'; });
+
+// Вільна відповідь — «чекер»
+$('#checkFree').addEventListener('click', ()=>{
+  const ans=$('#freeAns').value.toLowerCase();
+  if(!ans.trim()){ $('#freeScore').textContent='Оцінка: 0%'; return; }
+  // Ключові леми з PRE: LOTO, відсутність напруги, індикатор, ЗІЗ
+  const keys=[
+    ['loto','замок','бірка','журнал'],
+    ['відсутн','напруг'],
+    ['індикатор','перевір'],
+    ['ЗІЗ','рукавиц','каск','окуляр']
+  ];
+  let hits=0; const need=keys.length;
+  keys.forEach(group=>{
+    if(group.some(k=>ans.includes(k.toLowerCase()))) hits++;
+  });
+  const extra = ['момент','ключ','ізоляц','1 мом','500 в','опір','вентилятор','фаза'];
+  extra.forEach(k=>{ if(ans.includes(k)) hits+=0.2; });
+  const score=Math.min(100, Math.round( (hits/need)*100 ));
+  $('#freeScore').textContent='Оцінка: '+score+'%';
+  $('#freeScore').className='badge '+(score>=80?'ok':(score>=50?'warn':'bad'));
+});
+
+// ===== Побудова таблиці після розбору SOP =====
+function fillTableFromSOP(){
+  const tb=$('#tbl tbody'); tb.innerHTML='';
+  buildChecklist();
+}
+$('#parse').addEventListener('click', fillTableFromSOP);
+
+// ===== Індекс одразу при парсі =====
+function afterParse(){ buildChecklist(); buildRAG(); }
+$('#parse').addEventListener('click', afterParse);
+
+// ===== Ініціалізація =====
+if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
+</script>
+</body>
+</html>
