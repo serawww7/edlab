@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 9 (газовики) — Перевірка пальників/форсунок: витратомір, CO₂/O₂ → λ, графік, фото, підпис, чек 58 мм, CSV/TXT, QR</title>
+<meta name="description" content="Практика перевірки пальників: емульований витратомір (м³/год), CO₂/O₂, розрахунок λ з порогами, живий графік (витрата/CO₂), фото, NFC/ID, підпис, чек 58 мм, експорт CSV/TXT, QR."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1280px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:14px;grid-template-columns:1.25fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:90px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:#e6eef9;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+.canvasWrap{overflow:hidden;border-radius:12px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre;min-height:140px}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.photo{width:100%;max-width:240px;border:1px solid var(--line);border-radius:12px;display:block}
+.gallery{display:flex;gap:8px;flex-wrap:wrap}
+.block{border:1px dashed var(--line);border-radius:12px;padding:10px;margin-top:10px;background:#0c182a}
+.sigWrap{border:1px dashed var(--line);border-radius:12px;padding:8px;background:#0c182a}
+#sig{background:#0b1220;border:1px solid var(--line);border-radius:8px;touch-action:none}
+.kpi{display:flex;gap:8px;flex-wrap:wrap}
+.kpi .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 10px;color:#e5e7eb}
+.tag.ok{border-color:#1d3e2a;background:#0f2f1e}
+.tag.warn{border-color:#4a3b13;background:#2b2310}
+.tag.bad{border-color:#5a1f1f;background:#2a1212}
+hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🔥</span>
+      <div>
+        <b>Пара 9 — Перевірка пальників/форсунок</b><br/>
+        <span class="badge">Витрата (м³/год) → CO₂/O₂ → λ → графік → фото → NFC/ID → підпис → чек 58 мм → CSV/TXT → QR</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <!-- Ввідні -->
+  <div class="card">
+    <h2>📚 Сценарій</h2>
+    <p>Перевіряємо пальник/форсунки: фіксуємо <b>витрату газу</b> (емулятор), <b>CO₂</b> і <b>O₂</b> у димових, рахуємо <b>λ</b> і порівнюємо з порогами.
+      Додаємо <b>фото</b> (до/форсунка/полум’я), <b>NFC/ID</b>, <b>підпис</b> абонента. Формуємо <b>чек 58 мм</b>, <b>CSV/TXT</b> і <b>QR</b>.</p>
+    <div class="row">
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., кв. ..."/></label>
+      <label style="flex:1">Прилад
+        <select id="appliance" class="input">
+          <option selected>Котел</option><option>Колонка</option><option>Плита</option><option>Інше</option>
+        </select>
+      </label>
+      <label style="flex:1">Паливо
+        <select id="fuel" class="input">
+          <option value="ng" selected>Природний газ</option>
+          <option value="lpg">LPG (пропан-бутан)</option>
+        </select>
+      </label>
+      <label style="flex:1">Номінальна потужність, кВт<input id="power" class="input" type="number" step="0.1" value="24.0"/></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+    </div>
+    <div class="row">
+      <button class="btn good" id="mkCase">🧰 Створити кейс</button>
+      <span class="badge" id="cid">Кейс: —</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Ліва: сенсори/графік/камера/підпис/NFC -->
+    <div class="card">
+      <h2>🛰️ Емулятори вимірів</h2>
+      <div class="block">
+        <div class="row">
+          <label style="flex:1">Витрата газу, м³/год
+            <input id="flow" type="range" class="input" min="0" max="6" step="0.1" value="1.8"/>
+          </label>
+          <span class="badge">Поточна: <b id="flowNum">1.8</b> м³/год</span>
+          <button class="btn" id="markFlow">📍 Додати точку</button>
+        </div>
+        <div class="row">
+          <label style="flex:1">CO₂, % (сухі димові)
+            <input id="co2" type="range" class="input" min="0" max="16" step="0.1" value="8.5"/>
+          </label>
+          <span class="badge">Поточна: <b id="co2Num">8.5</b> %</span>
+          <button class="btn" id="markCO2">📍 Додати точку</button>
+        </div>
+        <div class="row">
+          <label style="flex:1">O₂, % (димові)
+            <input id="o2" type="range" class="input" min="0" max="21" step="0.1" value="4.0"/>
+          </label>
+          <span class="badge">Поточна: <b id="o2Num">4.0</b> %</span>
+          <button class="btn" id="markO2">📍 Додати точку</button>
+        </div>
+        <div class="row">
+          <label>CO₂ при стех., %<input id="co2ref" type="number" class="input" step="0.1" value="9.5"/></label>
+          <label>ВТУ, кВт·год/м³<input id="hcv" type="number" class="input" step="0.1" value="9.5"/></label>
+          <button class="btn secondary" id="applyFuel">⚙️ Застосувати паливо</button>
+        </div>
+        <div class="kpi" style="margin-top:6px">
+          <span class="tag ok">λ(CO₂): <b id="lamCO2">—</b></span>
+          <span class="tag warn">λ(O₂): <b id="lamO2">—</b></span>
+          <span class="tag bad">Статус λ: <b id="lamState">—</b></span>
+        </div>
+        <div class="kpi" style="margin-top:6px">
+          <span class="tag ok">Очікувана витрата: <b id="qExp">—</b> м³/год</span>
+          <span class="tag warn">Відхилення: <b id="qDev">—</b>%</span>
+          <span class="tag bad">Статус витрати: <b id="qState">—</b></span>
+        </div>
+      </div>
+
+      <h2 style="margin-top:10px">📈 Графік (витрата / CO₂)</h2>
+      <div class="canvasWrap"><canvas id="chart" class="chart" width="520" height="240"></canvas></div>
+      <div class="row">
+        <button class="btn secondary" id="clearSeries">🧹 Очистити графік</button>
+      </div>
+
+      <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
+      <div class="row">
+        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <div>
+          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button class="btn" data-kind="before">📷 До</button>
+          <button class="btn" data-kind="nozzle">📷 Форсунка/жиклер</button>
+          <button class="btn" data-kind="flame">📷 Полум’я/факел</button><br/>
+          <small class="muted">Фото зберігаються у «Галереї доказів».</small>
+        </div>
+      </div>
+      <div class="gallery" id="gal"></div>
+
+      <h2 style="margin-top:10px">✍️ Підпис абонента</h2>
+      <div class="sigWrap">
+        <canvas id="sig" width="520" height="200"></canvas>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" id="sigClear">🧹 Очистити</button>
+          <button class="btn" id="sigSave">💾 Зберегти підпис</button>
+          <span class="badge" id="sigStat">Підпису немає</span>
+        </div>
+      </div>
+
+      <h2 style="margin-top:10px">📶 NFC / ID об’єкта</h2>
+      <div class="block">
+        <div class="row">
+          <button class="btn" id="nfcBtn">📶 NFC</button>
+          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)"/>
+          <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
+          <span class="badge" id="nfcs">Статус NFC: очікується</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Права: метрики/оцінювання/експорт -->
+    <div class="card">
+      <h2>📊 Метрики та стан</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Кейс</th><td id="mCase">—</td></tr>
+          <tr><th>ID об’єкта</th><td id="mAsset">—</td></tr>
+          <tr><th>Прилад</th><td id="mApp">—</td></tr>
+          <tr><th>Паливо</th><td id="mFuel">—</td></tr>
+          <tr><th>Ном. потужність, кВт</th><td id="mPower">—</td></tr>
+          <tr><th>Точок (Q/CO₂/O₂)</th><td id="mPts">0 / 0 / 0</td></tr>
+          <tr><th>Фото (до/форсунка/полум’я)</th><td id="mPhotos">0 / 0 / 0</td></tr>
+          <tr><th>Підпис</th><td id="mSig">—</td></tr>
+          <tr><th>λ(CO₂)/λ(O₂)</th><td id="mLam">— / —</td></tr>
+          <tr><th>Витрата (очікувана/факт)</th><td id="mQ">—</td></tr>
+          <tr><th>Статус</th><td id="mState"><b class="warn">Потрібно виконати кроки</b></td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">✅ Оцінювання (10 балів)</h2>
+      <ul>
+        <li>Кейс створено (адреса/прилад/паливо/потужність/виконавець/дата) — <b>2</b></li>
+        <li>ID об’єкта (NFC/код) — <b>2</b></li>
+        <li>Графік: ≥8 точок сумарно — <b>1</b></li>
+        <li>Розраховано λ і статус у допуску — <b>2</b></li>
+        <li>Фото (всі три) — <b>2</b></li>
+        <li>Підпис абонента — <b>1</b></li>
+      </ul>
+
+      <h2 style="margin-top:10px">💾 Експорт / друк</h2>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV</button>
+        <button class="btn" id="saveTxt">💾 TXT</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+
+      <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
+      <pre id="alog" class="card" style="max-height:240px;overflow:auto;margin-top:6px">// Поки без подій</pre>
+    </div>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString();const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+function clean(s){return String(s).replace(/\s+/g,' ').trim();}
+$('#upd').textContent=new Date().toLocaleDateString('uk-UA');
+(function(){ const d=new Date(); $('#day').value=d.toISOString().slice(0,10); })();
+
+// ===== Стан кейсу
+let CASE_ID=null, ASSET_ID=null, FUEL='ng';
+let photos={before:null, nozzle:null, flame:null};
+let sigUrl=null;
+
+// ===== Паливо: довідкові значення
+// CO2_ref — теоретичний CO₂ при стехіометрії для сухих димових (спрощено для навчання)
+// HCV — нижча теплота згоряння, кВт·год на 1 м³ (LPG — перераховано на м³ парової фази для навчальних розрахунків)
+const FUEL_REF={
+  ng:{name:'Природний газ', CO2_ref:9.5, HCV:9.5, qTol:0.15},
+  lpg:{name:'LPG',          CO2_ref:13.0, HCV:26.0, qTol:0.15}
+};
+
+// ===== Серії для графіка
+const chart=$('#chart'), gc=chart.getContext('2d');
+let t0=null;
+let sFlow=[]; // {t,q}
+let sCO2=[];  // {t,c}
+let sO2=[];   // {t,o}
+function addPoint(series, v){
+  const now=Date.now(); if(!t0) t0=now;
+  series.push({t:now, v});
+  drawChart(); updateMetrics();
+}
+function drawChart(){
+  const W=chart.width,H=chart.height; gc.clearRect(0,0,W,H);
+  gc.strokeStyle='#223049'; gc.strokeRect(0.5,0.5,W-1,H-1);
+  const left=40,right=W-50,top=24,bottom=H-30;
+  // сітка
+  gc.strokeStyle='#1f2a44'; for(let y=0;y<5;y++){ const yy=top+y*(bottom-top)/4; gc.beginPath(); gc.moveTo(left,yy); gc.lineTo(right,yy); gc.stroke(); }
+  // якщо мало точок
+  if((sFlow.length+sCO2.length)<2){
+    gc.fillStyle='#94a3b8'; gc.fillText('Додайте точки витрати та CO₂', left+8, top+14); return;
+  }
+  const all=[...sFlow.map(x=>x.t), ...sCO2.map(x=>x.t)].sort((a,b)=>a-b);
+  const tMin=all[0], tMax=all[all.length-1], span=tMax-tMin||1;
+  const qMax=Math.max(6, ...sFlow.map(p=>p.v), 1);
+  const cMax=Math.max(16, ...sCO2.map(p=>p.v), 1);
+  function X(t){ return left + (t - tMin)/span*(right-left); }
+  function Yq(v){ return bottom - (v/qMax)*(bottom-top); }
+  function Yc(v){ return bottom - (v/cMax)*(bottom-top); }
+
+  // витрата (ліва вісь)
+  if(sFlow.length){
+    gc.beginPath(); gc.strokeStyle='#38bdf8';
+    sFlow.forEach((p,i)=>{ const x=X(p.t), y=Yq(p.v); if(i===0) gc.moveTo(x,y); else gc.lineTo(x,y); }); gc.stroke();
+    sFlow.forEach(p=>{ const x=X(p.t), y=Yq(p.v); gc.fillStyle='#38bdf8'; gc.fillRect(x-2,y-2,4,4); });
+  }
+  // CO2 (права вісь)
+  if(sCO2.length){
+    gc.beginPath(); gc.strokeStyle='#fbbf24';
+    sCO2.forEach((p,i)=>{ const x=X(p.t), y=Yc(p.v); if(i===0) gc.moveTo(x,y); else gc.lineTo(x,y); }); gc.stroke();
+    sCO2.forEach(p=>{ const x=X(p.t), y=Yc(p.v); gc.fillStyle='#fbbf24'; gc.fillRect(x-2,y-2,4,4); });
+  }
+  // підписи
+  gc.fillStyle='#94a3b8'; gc.font='11px ui-monospace';
+  gc.fillText('м³/год (ліва) / CO₂ % (права)', left, top-6);
+  gc.fillStyle='#38bdf8'; gc.fillRect(right+4, top, 12, 4); gc.fillStyle='#e5e7eb'; gc.fillText('Витрата', right+20, top+4);
+  gc.fillStyle='#fbbf24'; gc.fillRect(right+4, top+16, 12, 4); gc.fillStyle='#e5e7eb'; gc.fillText('CO₂', right+20, top+20);
+}
+
+// ===== Обчислення λ і перевірки
+function calcLambdaCO2(co2, ref){ // спрощена оцінка λ за CO₂
+  if(!isFinite(co2)||co2<=0) return NaN;
+  return Math.max(0.5, Math.min(2.0, ref / co2));
+}
+function calcLambdaO2(o2){ // наближена оцінка λ за O₂ (навчальна модель)
+  if(!isFinite(o2)||o2<0||o2>=21) return NaN;
+  return Math.max(0.5, Math.min(2.0, 1 + o2/(21 - o2)));
+}
+function flowExpected(powerKW, hcv){ // м³/год
+  if(!isFinite(powerKW)||!isFinite(hcv)||hcv<=0) return NaN;
+  return powerKW / hcv;
+}
+function classifyLambda(l){
+  if(!isFinite(l)) return '—';
+  if(l>=0.95 && l<=1.15) return 'OK';
+  if(l>=0.9 && l<=1.25)  return 'Допуск';
+  return 'Alarm';
+}
+function classifyFlow(devPct){
+  if(!isFinite(devPct)) return '—';
+  const ad=Math.abs(devPct);
+  if(ad<=10) return 'OK';
+  if(ad<=20) return 'Допуск';
+  return 'Alarm';
+}
+
+// ===== UI оновлення розрахунків
+function applyFuel(){
+  const f=$('#fuel').value;
+  FUEL=f; 
+  $('#co2ref').value=FUEL_REF[f].CO2_ref.toFixed(1);
+  $('#hcv').value=FUEL_REF[f].HCV.toFixed(1);
+  log('Паливо: '+FUEL_REF[f].name+' / CO₂ref '+$('#co2ref').value+'% / ВТУ '+$('#hcv').value+' кВт·год/м³');
+  computeAll();
+}
+$('#applyFuel').addEventListener('click', applyFuel);
+applyFuel();
+
+function computeAll(){
+  const co2=parseFloat($('#co2').value);
+  const o2=parseFloat($('#o2').value);
+  const q =parseFloat($('#flow').value);
+  const ref=parseFloat($('#co2ref').value)||FUEL_REF[FUEL].CO2_ref;
+  const hcv=parseFloat($('#hcv').value)||FUEL_REF[FUEL].HCV;
+  const P  =parseFloat($('#power').value)||0;
+
+  const lamC=calcLambdaCO2(co2, ref);
+  const lamO=calcLambdaO2(o2);
+  $('#lamCO2').textContent = isFinite(lamC)? lamC.toFixed(2): '—';
+  $('#lamO2').textContent  = isFinite(lamO)? lamO.toFixed(2): '—';
+
+  const lState = classifyLambda(lamC);
+  $('#lamState').textContent = lState;
+
+  const qExp=flowExpected(P,hcv);
+  $('#qExp').textContent = isFinite(qExp)? qExp.toFixed(2): '—';
+  const devPct = isFinite(qExp)&&qExp>0? (q - qExp)/qExp*100 : NaN;
+  $('#qDev').textContent = isFinite(devPct)? devPct.toFixed(1): '—';
+  const qState = classifyFlow(devPct);
+  $('#qState').textContent = qState;
+
+  // правий інфо-блок
+  $('#mLam').textContent = `${$('#lamCO2').textContent} / ${$('#lamO2').textContent}`;
+  $('#mQ').textContent   = `${isFinite(qExp)?qExp.toFixed(2):'—'} / ${q.toFixed(2)} м³/год`;
+
+  // узагальнений статус
+  let score=0;
+  const pointsOk = (sFlow.length + sCO2.length + sO2.length) >= 8;
+  const photosOk = !!photos.before && !!photos.nozzle && !!photos.flame;
+  const sigOk    = !!sigUrl;
+  const caseOk   = !!CASE_ID;
+  const assetOk  = !!(ASSET_ID||clean($('#asset').value||''));
+  if(caseOk)score+=2; if(assetOk)score+=2; if(pointsOk)score+=1; if(lState!=='Alarm' && qState!=='Alarm')score+=2; if(photosOk)score+=2; if(sigOk)score+=1;
+  const html = score>=9? `<b class="ok">Готово (≈${score}/10)</b>`:
+               score>=6? `<b class="warn">Більшість виконано (≈${score}/10)</b>`:
+                         `<b class="bad">Потрібно доробити (≈${score}/10)</b>`;
+  $('#mState').innerHTML=html;
+}
+$('#flow').addEventListener('input',()=>{ $('#flowNum').textContent=$('#flow').value; computeAll(); });
+$('#co2').addEventListener('input',()=>{ $('#co2Num').textContent=$('#co2').value; computeAll(); });
+$('#o2').addEventListener('input', ()=>{ $('#o2Num').textContent=$('#o2').value; computeAll(); });
+
+// ===== Кейс
+$('#mkCase').addEventListener('click',()=>{
+  const addr=clean($('#addr').value||''); const tech=clean($('#tech').value||''); const day=$('#day').value;
+  if(!addr||!tech||!day){ alert('Вкажи адресу, виконавця та дату'); return; }
+  CASE_ID='B-'+Math.random().toString(36).slice(2,8).toUpperCase();
+  $('#cid').textContent='Кейс: '+CASE_ID;
+  log(`Кейс ${CASE_ID}: ${addr}, ${$('#appliance').value}, ${FUEL_REF[$('#fuel').value].name}, P=${$('#power').value}кВт, ${tech}, ${day}`);
+  updateMetrics(); computeAll();
+});
+
+// ===== Додавання точок
+$('#markFlow').addEventListener('click',()=>{ const v=parseFloat($('#flow').value); addPoint(sFlow, v); log('Точка витрати: '+v.toFixed(2)+' м³/год'); updateMetrics(); });
+$('#markCO2').addEventListener('click',()=>{ const v=parseFloat($('#co2').value); addPoint(sCO2, v); log('Точка CO₂: '+v.toFixed(1)+' %'); updateMetrics(); });
+$('#markO2').addEventListener('click',()=>{ const v=parseFloat($('#o2').value); addPoint(sO2, v); log('Точка O₂: '+v.toFixed(1)+' %'); updateMetrics(); });
+$('#clearSeries').addEventListener('click',()=>{ sFlow=[]; sCO2=[]; sO2=[]; t0=null; drawChart(); updateMetrics(); log('Очищено графік'); });
+
+// ===== Камера / фото
+let stream=null;
+async function startCam(){
+  try{ stream = await navigator.mediaDevices.getUserMedia({video:true,audio:false}); $('#vid').srcObject=stream; log('Камеру увімкнено'); }
+  catch(e){ alert('Камеру заблоковано або недоступно'); }
+}
+$('#camOn').addEventListener('click', startCam);
+function takeShot(kind){
+  const video=$('#vid'); if(!video.srcObject){ alert('Спершу увімкни камеру'); return; }
+  const c=document.createElement('canvas'); c.width=video.videoWidth||640; c.height=video.videoHeight||480;
+  c.getContext('2d').drawImage(video,0,0,c.width,c.height);
+  const url=c.toDataURL('image/png'); photos[kind]=url; renderGallery(); log(`Фото: ${kind}`); updateMetrics();
+}
+$$('button[data-kind]').forEach(b=>b.addEventListener('click',()=>takeShot(b.dataset.kind)));
+function renderGallery(){
+  const gal=$('#gal'); gal.innerHTML='';
+  if(photos.before){ const i=document.createElement('img'); i.className='photo'; i.src=photos.before; i.alt='до'; gal.appendChild(i); }
+  if(photos.nozzle){ const i=document.createElement('img'); i.className='photo'; i.src=photos.nozzle; i.alt='форсунка'; gal.appendChild(i); }
+  if(photos.flame){ const i=document.createElement('img'); i.className='photo'; i.src=photos.flame; i.alt='полум\'я'; gal.appendChild(i); }
+}
+
+// ===== Підпис
+const sig=$('#sig'); const ctx=sig.getContext('2d');
+let drawing=false, last=null, hasInk=false;
+function xy(e){ const r=sig.getBoundingClientRect(); const t=e.touches? e.touches[0]:e; return {x:(t.clientX-r.left)*sig.width/r.width, y:(t.clientY-r.top)*sig.height/r.height}; }
+function line(a,b){ ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.strokeStyle='#e5e7eb'; ctx.lineWidth=2; ctx.lineCap='round'; ctx.stroke(); }
+sig.addEventListener('pointerdown',e=>{ drawing=true; last=xy(e); hasInk=true; });
+sig.addEventListener('pointermove',e=>{ if(!drawing) return; const p=xy(e); line(last,p); last=p; });
+sig.addEventListener('pointerup',()=>{ drawing=false; last=null; });
+sig.addEventListener('pointerleave',()=>{ drawing=false; last=null; });
+$('#sigClear').addEventListener('click',()=>{ ctx.clearRect(0,0,sig.width,sig.height); hasInk=false; $('#sigStat').textContent='Підпису немає'; updateMetrics(); });
+$('#sigSave').addEventListener('click',()=>{ if(!hasInk){ alert('Немає підпису'); return; } sigUrl=sig.toDataURL('image/png'); $('#sigStat').textContent='Підпис збережено'; const a=document.createElement('a'); a.href=sigUrl; a.download='signature_'+(CASE_ID||'case')+'_'+stamp()+'.png'; document.body.appendChild(a); a.click(); a.remove(); log('Підпис збережено (png)'); updateMetrics(); });
+
+// ===== NFC / ID
+async function tryNFC(){
+  if('NDEFReader' in window){
+    try{
+      const reader=new NDEFReader(); await reader.scan();
+      $('#nfcs').textContent='Статус NFC: сканування...';
+      reader.addEventListener('reading', ({message, serialNumber})=>{
+        let text=''; for(const rec of message.records){ if(rec.recordType==='text'){ const dec=new TextDecoder(rec.encoding||'utf-8'); text = dec.decode(rec.data); } }
+        ASSET_ID = (text||serialNumber||'NFC-'+Math.random().toString(36).slice(2,7)).toString();
+        $('#asset').value=ASSET_ID; $('#nfcs').textContent='Статус NFC: зчитано';
+        log('NFC: '+ASSET_ID); updateMetrics();
+      });
+    }catch(e){ $('#nfcs').textContent='Статус NFC: помилка'; alert('NFC недоступний/заборонений'); }
+  }else{ alert('Web NFC не підтримується. Введи код вручну.'); }
+}
+$('#nfcBtn').addEventListener('click', tryNFC);
+$('#saveAsset').addEventListener('click',()=>{ const v=clean($('#asset').value||''); if(!v){ alert('Введи ID об’єкта'); return; } ASSET_ID=v; $('#nfcs').textContent='Статус NFC: застосовано вручну'; log('ID об’єкта: '+ASSET_ID); updateMetrics(); });
+
+// ===== Метрики/таблиця праворуч
+function updateMetrics(){
+  $('#mCase').textContent = CASE_ID||'—';
+  $('#mAsset').textContent = ASSET_ID||($('#asset').value||'—');
+  $('#mApp').textContent = $('#appliance').value;
+  $('#mFuel').textContent= FUEL_REF[$('#fuel').value].name;
+  $('#mPower').textContent= $('#power').value||'—';
+  $('#mPts').textContent = `${sFlow.length} / ${sCO2.length} / ${sO2.length}`;
+  $('#mPhotos').textContent = `${photos.before?1:0} / ${photos.nozzle?1:0} / ${photos.flame?1:0}`;
+  $('#mSig').textContent = sigUrl?'є':'—';
+  computeAll();
+}
+
+// ===== Експорт / чек / QR
+function summary(){
+  const addr=$('#addr').value||'—', app=$('#appliance').value||'—', tech=$('#tech').value||'—', day=$('#day').value||'—';
+  const refCO2=parseFloat($('#co2ref').value)||FUEL_REF[FUEL].CO2_ref;
+  const hcv=parseFloat($('#hcv').value)||FUEL_REF[FUEL].HCV;
+  const lamCO2=$('#lamCO2').textContent, lamO2=$('#lamO2').textContent;
+  const qExp=$('#qExp').textContent, qDev=$('#qDev').textContent;
+  return {
+    case: CASE_ID||'—', addr, appliance: app, fuel: FUEL_REF[$('#fuel').value].name,
+    power_kw: parseFloat($('#power').value)||0,
+    tech, day, asset: ASSET_ID||($('#asset').value||'—'),
+    co2_ref: refCO2, hcv,
+    lambda: {by_co2: lamCO2, by_o2: lamO2, status: $('#lamState').textContent},
+    flow_check: {expected_m3h: qExp, deviation_pct: qDev, status: $('#qState').textContent},
+    points: {
+      flow: sFlow.map(p=>({t:new Date(p.t).toISOString(), m3h:p.v})),
+      co2:  sCO2.map(p=>({t:new Date(p.t).toISOString(), pct:p.v})),
+      o2:   sO2.map(p=>({t:new Date(p.t).toISOString(), pct:p.v}))
+    },
+    photos: {before:!!photos.before, nozzle:!!photos.nozzle, flame:!!photos.flame},
+    signature: !!sigUrl
+  };
+}
+$('#saveCsv').addEventListener('click',()=>{
+  const s=summary();
+  let csv='field,value\n';
+  for(const [k,v] of Object.entries(s)){
+    if(k==='points') continue;
+    if(typeof v==='object'){ csv+=`${k},${JSON.stringify(v).replace(/,/g,';')}\n`; }
+    else csv+=`${k},${String(v).replace(/,/g,';')}\n`;
+  }
+  csv+='\n# flow_points\niso_time,m3h\n';
+  s.points.flow.forEach(p=>{ csv+=`${p.t},${p.m3h}\n`; });
+  csv+='\n# co2_points\niso_time,pct\n';
+  s.points.co2.forEach(p=>{ csv+=`${p.t},${p.pct}\n`; });
+  csv+='\n# o2_points\niso_time,pct\n';
+  s.points.o2.forEach(p=>{ csv+=`${p.t},${p.pct}\n`; });
+  download('gas_para9_'+stamp()+'.csv', csv, 'text/csv'); log('Експортовано CSV');
+});
+$('#saveTxt').addEventListener('click',()=>{
+  const s=summary();
+  const lines=[
+    'Пара 9 — Перевірка пальників/форсунок: підсумок',
+    `Кейс: ${s.case}`, `Адреса: ${s.addr}`, `Прилад: ${s.appliance}`, `Паливо: ${s.fuel}`,
+    `Ном. потужність: ${s.power_kw} кВт`,
+    `Виконавець: ${s.tech}`, `Дата: ${s.day}`, `Об’єкт (ID): ${s.asset}`,
+    `CO₂_ref: ${s.co2_ref}%`, `ВТУ: ${s.hcv} кВт·год/м³`,
+    `λ(CO₂)/λ(O₂): ${s.lambda.by_co2} / ${s.lambda.by_o2} (статус: ${s.lambda.status})`,
+    `Очікувана витрата: ${s.flow_check.expected_m3h} м³/год, відхилення: ${s.flow_check.deviation_pct}% (статус: ${s.flow_check.status})`,
+    `Фото (до/форсунка/полум’я): ${s.photos.before?'1':'0'} / ${s.photos.nozzle?'1':'0'} / ${s.photos.flame?'1':'0'}`,
+    `Підпис: ${s.signature?'є':'—'}`,
+    `--- Точки: витрата=${s.points.flow.length}, CO₂=${s.points.co2.length}, O₂=${s.points.o2.length} ---`
+  ];
+  download('gas_para9_'+stamp()+'.txt', lines.join('\n')); log('Експортовано TXT');
+});
+$('#print58').addEventListener('click',()=>{
+  const s=summary(); const rc=$('#rc'); rc.hidden=false;
+  const lines=[
+'=== BURNER CHECK (58мм) ===',
+'Case: '+s.case,
+'Date: '+s.day,
+'Addr: '+s.addr,
+'App:  '+s.appliance,
+'Fuel: '+s.fuel,
+'Pnom: '+s.power_kw+'kW',
+'Asset:'+s.asset,
+'Lam:  '+s.lambda.by_co2+'/'+s.lambda.by_o2+' '+s.lambda.status,
+'Flow: '+s.flow_check.expected_m3h+' -> dev '+s.flow_check.deviation_pct+'% '+s.flow_check.status,
+'Pts:  Q'+s.points.flow.length+' C'+s.points.co2.length+' O'+s.points.o2.length,
+'Photos:'+(s.photos.before?1:0)+'/'+(s.photos.nozzle?1:0)+'/'+(s.photos.flame?1:0)+' Sign:'+(s.signature?'Y':'N'),
+'--------------------------'
+  ];
+  rc.textContent=lines.join('\n');
+  download('gas_para09_receipt_'+stamp()+'.txt', rc.textContent);
+  log('Згенеровано чек 58мм');
+});
+$('#qrGen').addEventListener('click',()=>{
+  const def=CASE_ID||ASSET_ID||'burner-check';
+  const data=prompt('Встав URL/ID (Case або Asset):', def);
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url; log('Згенеровано QR');
+});
+
+// ===== Ініт полів і метрик
+updateMetrics(); computeAll();
+(function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+</script>
+</body>
+</html>
