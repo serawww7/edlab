@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 22 (технологи) — ШІ для рецептур: багатокритеріальна оптимізація, графіки, чек/CSV/QR</title>
+<meta name="description" content="AI-оптимізація рецептури: волога/жир/сіль/нітрит/собівартість, обмеження, ваги цілей, стек-діаграма, радар, журнал, чек/CSV/QR."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1260px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:90px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.grid{display:grid;gap:14px;grid-template-columns:1.35fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:300px}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🧪</span>
+      <div>
+        <b>Пара 22 — ШІ для рецептур</b><br/>
+        <span class="badge">волога/жир/сіль/нітрит/собівартість → обмеження → ваги цілей → оптимізація → графіки → чек/CSV/QR</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">Мета: побудувати **AI-помічник** для підбору рецептури (варена ковбаса/шинка, пастеризований виріб тощо). Інгредієнти мають **вмісти** (вода/жир/сіль/нітрит) і **ціну**. Оптимізуємо <b>багатокритеріально</b> (наблизити властивості до цілей, зменшити собівартість) з урахуванням **обмежень**. Сума часток = <span class="mono">100 %</span>.</p>
+
+  <div class="grid">
+    <!-- ЛІВО -->
+    <div class="card">
+      <h2>🧰 Інгредієнти</h2>
+      <small class="muted">Додай/редагуй. Вміст — у % від маси інгредієнта; нітрит — ppm у готовому продукті, який дає 1% цього інгредієнта (для спрощення).</small>
+      <div class="row">
+        <label>Назва<input id="i_name" class="input" value="М’ясо нежирне"/></label>
+        <label>Ціна, грн/кг<input id="i_price" class="input" type="number" step="0.1" value="140"/></label>
+        <label>Вода, %<input id="i_w" class="input" type="number" step="0.1" value="72"/></label>
+        <label>Жир, %<input id="i_f" class="input" type="number" step="0.1" value="6"/></label>
+        <label>Сіль, %<input id="i_s" class="input" type="number" step="0.1" value="0.3"/></label>
+        <label>Нітрит, ppm<input id="i_n" class="input" type="number" step="1" value="0"/></label>
+        <button class="btn" id="addIng">➕ Додати</button>
+        <button class="btn secondary" id="demo">🎲 Демо-набір</button>
+        <button class="btn secondary" id="clearIng">🧹 Очистити</button>
+      </div>
+
+      <table class="tbl" id="ingTbl">
+        <thead><tr><th>#</th><th>Назва</th><th>Ціна</th><th>Вода%</th><th>Жир%</th><th>Сіль%</th><th>Нітрит ppm</th><th>Дія</th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <h2 style="margin-top:10px">🎯 Цілі та обмеження</h2>
+      <div class="row">
+        <label>Ціль Волога, %<input id="t_w" class="input" type="number" step="0.1" value="72.0"/></label>
+        <label>Ціль Жир, %<input id="t_f" class="input" type="number" step="0.1" value="18.0"/></label>
+        <label>Ціль Сіль, %<input id="t_s" class="input" type="number" step="0.05" value="1.8"/></label>
+        <label>Макс Нітрит, ppm<input id="c_n_max" class="input" type="number" step="1" value="120"/></label>
+      </div>
+      <div class="row">
+        <label>Мін. Вода, %<input id="c_w_min" class="input" type="number" step="0.1" value="68"/></label>
+        <label>Макс. Вода, %<input id="c_w_max" class="input" type="number" step="0.1" value="76"/></label>
+        <label>Макс. Сіль, %<input id="c_s_max" class="input" type="number" step="0.05" value="2.2"/></label>
+        <label>Макс. Жир, %<input id="c_f_max" class="input" type="number" step="0.1" value="22"/></label>
+      </div>
+
+      <h3 style="margin-top:10px">⚖️ Ваги цілей (0…1)</h3>
+      <div class="row">
+        <label>w Волога<input id="w_w" class="input" type="number" step="0.05" value="0.35"/></label>
+        <label>w Жир<input id="w_f" class="input" type="number" step="0.05" value="0.25"/></label>
+        <label>w Сіль<input id="w_s" class="input" type="number" step="0.05" value="0.25"/></label>
+        <label>w Собівартість<input id="w_c" class="input" type="number" step="0.05" value="0.15"/></label>
+        <label>Крок %, для мутацій<input id="step" class="input" type="number" step="0.1" value="0.5"/></label>
+        <button class="btn good" id="opt">🚀 Оптимізувати</button>
+      </div>
+
+      <h3 style="margin-top:10px">📈 Візуалізація</h3>
+      <div class="canvasWrap"><canvas id="stack" width="980" height="220"></canvas></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="radar" width="980" height="260"></canvas></div>
+      <small class="muted">Горішня — стек-діаграма % інгредієнтів; нижня — радар «властивості vs цілі/обмеження».</small>
+
+      <h3 style="margin-top:10px">💾 Експорт/друк</h3>
+      <div class="row">
+        <input id="lot" class="input" placeholder="SKU/Лот (напр. Ковбаса варена 2025-10-18)"/>
+        <button class="btn" id="saveCsv">📄 CSV (рецепт)</button>
+        <button class="btn" id="saveTxt">💾 TXT (звіт)</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази/акти)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+      <small class="muted">QR генерується через <span class="mono">api.qrserver.com</span>; офлайн виведеться текст.</small>
+
+      <h3 style="margin-top:10px">🧾 Журнал</h3>
+      <pre id="alog" class="note" style="max-height:160px;overflow:auto">// Поки без подій</pre>
+    </div>
+
+    <!-- ПРАВО -->
+    <div class="card">
+      <h2>📊 Показники</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Σ часток, %</th><td id="m_sum">0.0</td></tr>
+          <tr><th>Волога, %</th><td id="m_w">—</td></tr>
+          <tr><th>Жир, %</th><td id="m_f">—</td></tr>
+          <tr><th>Сіль, %</th><td id="m_s">—</td></tr>
+          <tr><th>Нітрит, ppm</th><td id="m_n">—</td></tr>
+          <tr><th>Собівартість, грн/кг</th><td id="m_c">—</td></tr>
+          <tr><th>Скор моделі (0–1)</th><td id="m_score">—</td></tr>
+          <tr><th>Порушення</th><td id="m_viol">—</td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">🔌 Схема процесу (SVG)</h2>
+      <svg viewBox="0 0 820 280" role="img" aria-label="Інгредієнти → Обмеження/Цілі → Оптимізація → Рецепт → Звіт">
+        <rect x="40" y="40" width="170" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <text x="125" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Інгредієнти</text>
+        <text x="125" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">властивості/ціна</text>
+
+        <rect x="230" y="40" width="190" height="120" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <text x="325" y="80" fill="#dcfce7" font-size="14" text-anchor="middle">Цілі/Обмеження</text>
+        <text x="325" y="100" fill="#a7f3d0" font-size="12" text-anchor="middle">волога/жир/сіль/нітрит</text>
+
+        <rect x="440" y="40" width="150" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <text x="515" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Оптимізація</text>
+        <text x="515" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">AI-пошук</text>
+
+        <rect x="610" y="40" width="170" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+        <text x="695" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Рецепт/Звіт</text>
+        <text x="695" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">чек/CSV/QR</text>
+
+        <line x1="210" y1="100" x2="230" y2="100" stroke="#93c5fd" stroke-width="3"/>
+        <line x1="420" y1="100" x2="440" y2="100" stroke="#22c55e" stroke-width="3"/>
+        <line x1="590" y1="100" x2="610" y2="100" stroke="#64748b" stroke-width="3"/>
+      </svg>
+
+      <h2 style="margin-top:10px">🎯 Завдання для студентів</h2>
+      <ol>
+        <li>Збери ≥ 6 інгредієнтів, задай цілі: <span class="mono">В=72%</span>, <span class="mono">Ж=18%</span>, <span class="mono">Сіль=1.8%</span>, <span class="mono">Нітрит ≤120 ppm</span>. Досягни <b>Score ≥ 0.9</b>.</li>
+        <li>Змінюй ваги цілей і покажи вплив на <b>собівартість</b> (скрін радари + стек-діаграми).</li>
+        <li>Експортуй <b>CSV</b> рецепта, згенеруй <b>QR</b> на папку з актами, роздрукуй <b>чек 58 мм</b>.</li>
+      </ol>
+
+      <h2 style="margin-top:10px">📜 Історична нотатка</h2>
+      <p class="muted small">Перші підходи до автоматизованого підбору рецептур у харчовій промисловості з’явилися в 1960–70-х (лінійне програмування). Сьогодні легкі евристики + інтуїція технолога дають швидкий результат навіть у браузері.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString();const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+
+// ===== Дані інгредієнтів =====
+let ING=[]; // {name, price, w, f, s, n} (властивості)
+let BEST={mix:[], score:0, props:null, cost:0, nit:0};
+
+function renderTable(){
+  const tb=$('#ingTbl tbody'); tb.innerHTML='';
+  ING.forEach((g,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td>${g.name}</td><td>${g.price.toFixed(2)}</td>
+      <td>${g.w.toFixed(1)}</td><td>${g.f.toFixed(1)}</td><td>${g.s.toFixed(2)}</td><td>${g.n.toFixed(0)}</td>
+      <td><button class="btn secondary" data-i="${i}">🗑️</button></td>`;
+    tb.appendChild(tr);
+  });
+  tb.querySelectorAll('button[data-i]').forEach(b=>b.addEventListener('click', (e)=>{ ING.splice(+b.dataset.i,1); renderTable(); drawStack([]); drawRadar(null); updateKPIs(null,[]); }));
+}
+
+$('#addIng').addEventListener('click', ()=>{
+  const g={
+    name: $('#i_name').value.trim()||'Інгредієнт',
+    price:+$('#i_price').value,
+    w:+$('#i_w').value,
+    f:+$('#i_f').value,
+    s:+$('#i_s').value,
+    n:+$('#i_n').value
+  };
+  if(!isFinite(g.price)||!isFinite(g.w)||!isFinite(g.f)||!isFinite(g.s)||!isFinite(g.n)) return alert('Некоректні значення інгредієнта');
+  ING.push(g); renderTable();
+});
+
+$('#clearIng').addEventListener('click', ()=>{ ING.length=0; renderTable(); });
+
+// Демо-набір
+$('#demo').addEventListener('click', ()=>{
+  ING=[
+    {name:'М’ясо нежирне', price:140, w:72, f:6,  s:0.3, n:0},
+    {name:'Жир-сирець',    price:90,  w:10, f:90, s:0.2, n:0},
+    {name:'Лід/вода',      price:5,   w:100,f:0,  s:0,   n:0},
+    {name:'Сіль кухонна',  price:20,  w:0,  f:0,  s:100, n:0},
+    {name:'Посол. суміш',  price:25,  w:0,  f:0,  s:99.5,n:6000}, // умовно 6000 ppm на 1% у готовому
+    {name:'Фосфат',        price:120, w:0,  f:0,  s:0,   n:0},
+    {name:'Білок/зв’язка', price:80,  w:6,  f:1,  s:2,   n:0},
+    {name:'Цукор/спеції',  price:60,  w:0,  f:0,  s:0,   n:0}
+  ];
+  renderTable();
+});
+
+// ===== Розрахунок властивостей рецепта =====
+function mixProps(mix){ // mix[i] у %
+  if(!mix || !mix.length) return null;
+  const sum = mix.reduce((a,b)=>a+b,0) || 1;
+  const frac = mix.map(x=>x/sum); // нормалізуємо на всяк випадок
+  let W=0,F=0,S=0,N=0,C=0;
+  for(let i=0;i<ING.length;i++){
+    W+= frac[i]*ING[i].w;
+    F+= frac[i]*ING[i].f;
+    S+= frac[i]*ING[i].s;
+    N+= frac[i]*ING[i].n;
+    C+= frac[i]*ING[i].price;
+  }
+  return {W,F,S,N,C};
+}
+
+// ===== Оцінка (score) =====
+function scoreOf(props, targets, weights, cons){
+  if(!props) return -1e9;
+  // Відхилення по цілях (чим ближче — тим краще), МАЕ-нормування
+  const dW=Math.abs(props.W-targets.W)/Math.max(1,targets.W);
+  const dF=Math.abs(props.F-targets.F)/Math.max(1,targets.F);
+  const dS=Math.abs(props.S-targets.S)/Math.max(1,targets.S);
+  // Собівартість — мінімізуємо відносно «якоря» (середньої ціни інгредієнтів)
+  const avgPrice = ING.length? ING.reduce((a,b)=>a+b.price,0)/ING.length : 100;
+  const dC = props.C/Math.max(1,avgPrice);
+
+  // Штрафи за порушення обмежень (жорсткі)
+  let pen=0;
+  if(props.W<cons.Wmin) pen += (cons.Wmin-props.W)*10;
+  if(props.W>cons.Wmax) pen += (props.W-cons.Wmax)*10;
+  if(props.F>cons.Fmax) pen += (props.F-cons.Fmax)*10;
+  if(props.S>cons.Smax) pen += (props.S-cons.Smax)*10;
+  if(props.N>cons.Nmax) pen += (props.N-cons.Nmax)/5; // ppm іншим масштабом
+
+  const raw = 1 - (weights.wW*dW + weights.wF*dF + weights.wS*dS + weights.wC*dC);
+  return raw - pen; // більший = краще
+}
+
+// ===== Оптимізація (рандомний старт + локальне покращення) =====
+function optimize(){
+  if(ING.length<3) return alert('Додай щонайменше 3 інгредієнти');
+  const targets={W:+$('#t_w').value,F:+$('#t_f').value,S:+$('#t_s').value};
+  const cons={Wmin:+$('#c_w_min').value,Wmax:+$('#c_w_max').value,Smax:+$('#c_s_max').value,Fmax:+$('#c_f_max').value,Nmax:+$('#c_n_max').value};
+  const weights={wW:+$('#w_w').value,wF:+$('#w_f').value,wS:+$('#w_s').value,wC:+$('#w_c').value};
+  const STEP=+$('#step').value; // крок % для мутацій
+  const iters=2000, restarts=10;
+
+  let bestScore=-1e9, bestMix=null, bestProps=null;
+
+  for(let r=0;r<restarts;r++){
+    // випадковий старт (сума=100)
+    let mix=new Array(ING.length).fill(0);
+    let remain=100;
+    for(let i=0;i<ING.length-1;i++){ const x=Math.random()*remain; mix[i]=x; remain-=x; }
+    mix[ING.length-1]=remain;
+
+    let props=mixProps(mix);
+    let sc=scoreOf(props,targets,weights,cons);
+
+    for(let it=0;it<iters;it++){
+      // Локальна мутація: перекинемо STEP% від i до j
+      const i=Math.floor(Math.random()*ING.length);
+      let j=Math.floor(Math.random()*ING.length); if(j===i) j=(j+1)%ING.length;
+      const delta=Math.min(STEP, mix[i]);
+      if(delta<=0.0001) continue;
+      mix[i]-=delta; mix[j]+=delta;
+
+      const pNew=mixProps(mix);
+      const sNew=scoreOf(pNew,targets,weights,cons);
+      if(sNew>=sc){ // покращення або рівне — приймаємо
+        sc=sNew; props=pNew;
+      }else{
+        // відкат
+        mix[j]-=delta; mix[i]+=delta;
+      }
+      if(it%200===0){ log(`r${r+1}/${restarts}, it ${it}: score=${sc.toFixed(3)}`); }
+    }
+
+    if(sc>bestScore){ bestScore=sc; bestMix=mix.slice(); bestProps=props; }
+  }
+
+  BEST={mix:bestMix, score:bestScore, props:bestProps, cost:bestProps?.C||0, nit:bestProps?.N||0};
+  updateKPIs(bestProps, bestMix);
+  drawStack(bestMix);
+  drawRadar(bestProps);
+  log(`Готово: Score=${bestScore.toFixed(3)}; Σ=${bestMix.reduce((a,b)=>a+b,0).toFixed(2)}%`);
+}
+
+$('#opt').addEventListener('click', optimize);
+
+// ===== KPI / Візуалізація =====
+function updateKPIs(props, mix){
+  if(!props||!mix){ $('#m_sum').textContent='0.0'; $('#m_w').textContent='—'; $('#m_f').textContent='—'; $('#m_s').textContent='—'; $('#m_n').textContent='—'; $('#m_c').textContent='—'; $('#m_score').textContent='—'; $('#m_viol').textContent='—'; return; }
+  $('#m_sum').textContent = mix.reduce((a,b)=>a+b,0).toFixed(1);
+  $('#m_w').textContent = props.W.toFixed(2);
+  $('#m_f').textContent = props.F.toFixed(2);
+  $('#m_s').textContent = props.S.toFixed(2);
+  $('#m_n').textContent = props.N.toFixed(0);
+  $('#m_c').textContent = props.C.toFixed(2);
+  $('#m_score').textContent = BEST.score.toFixed(3);
+
+  const cons={Wmin:+$('#c_w_min').value,Wmax:+$('#c_w_max').value,Smax:+$('#c_s_max').value,Fmax:+$('#c_f_max').value,Nmax:+$('#c_n_max').value};
+  const viol=[];
+  if(props.W<cons.Wmin) viol.push('Волога < мін');
+  if(props.W>cons.Wmax) viol.push('Волога > макс');
+  if(props.F>cons.Fmax) viol.push('Жир > макс');
+  if(props.S>cons.Smax) viol.push('Сіль > макс');
+  if(props.N>cons.Nmax) viol.push('Нітрит > макс');
+  $('#m_viol').innerHTML = viol.length? `<b class="bad">${viol.join('; ')}</b>`:'нема';
+}
+
+const cvsS=$('#stack'), ctxS=cvsS.getContext('2d');
+function drawStack(mix){
+  const W=cvsS.width,H=cvsS.height;
+  ctxS.clearRect(0,0,W,H);
+  ctxS.strokeStyle='#223049'; ctxS.strokeRect(0.5,0.5,W-1,H-1);
+  if(!mix || !mix.length){ ctxS.fillStyle='#94a3b8'; ctxS.fillText('Додай інгредієнти та натисни «Оптимізувати»',14,20); return; }
+  const left=60, right=W-10, top=20, bottom=H-30;
+  // Стек по одному бару
+  let x0=left, barW=right-left, y0=bottom;
+  const sum=mix.reduce((a,b)=>a+b,0) || 1;
+  // Палітру лишаємо за замовчуванням канви (без специфічних кольорів), лише прозорість
+  let acc=0;
+  for(let i=0;i<ING.length;i++){
+    const h=(mix[i]/sum)*(bottom-top);
+    ctxS.fillStyle='rgba(56,189,248,'+(0.25+0.6*(i%5)/5)+')';
+    ctxS.fillRect(x0, y0-h, barW, h);
+    // підпис
+    ctxS.fillStyle='#e5e7eb';
+    if(h>18) ctxS.fillText(`${ING[i].name} ${mix[i].toFixed(1)}%`, x0+8, y0-h+14);
+    y0-=h; acc+=mix[i];
+  }
+  // осі
+  ctxS.fillStyle='#94a3b8'; ctxS.font='12px ui-monospace';
+  ctxS.fillText('Σ=100%', left, H-8);
+}
+
+const cvsR=$('#radar'), ctxR=cvsR.getContext('2d');
+function drawRadar(props){
+  const W=cvsR.width,H=cvsR.height;
+  ctxR.clearRect(0,0,W,H);
+  ctxR.strokeStyle='#223049'; ctxR.strokeRect(0.5,0.5,W-1,H-1);
+  if(!props){ ctxR.fillStyle='#94a3b8'; ctxR.fillText('Немає рецепта',14,20); return; }
+  // Вісі: Волога, Жир, Сіль, Нітрит, Собівартість
+  const cx=W/2, cy=H/2+10, r=Math.min(W,H)*0.34;
+  const axes=[ 'Волога %', 'Жир %', 'Сіль %', 'Нітрит ppm', 'Собівартість грн/кг' ];
+  const tgt=[ +$('#t_w').value, +$('#t_f').value, +$('#t_s').value, +$('#c_n_max').value, (ING.reduce((a,b)=>a+b.price,0)/Math.max(1,ING.length)) ];
+  const val=[ props.W, props.F, props.S, props.N, props.C ];
+  // масштаби (нормуємо у [0,1] відносно цілей/максимумів)
+  const lim=[ +$('#c_w_max').value, +$('#c_f_max').value, +$('#c_s_max').value, +$('#c_n_max').value, Math.max(tgt[4]*1.5, props.C*1.2, 100) ];
+
+  function pt(k, vNorm){
+    const ang = -Math.PI/2 + k*(2*Math.PI/axes.length);
+    return [ cx + r*vNorm*Math.cos(ang), cy + r*vNorm*Math.sin(ang) ];
+  }
+
+  // Сітка/мітки
+  ctxR.strokeStyle='#334155'; ctxR.fillStyle='#94a3b8'; ctxR.font='12px ui-monospace';
+  for(let g=0.25; g<=1.01; g+=0.25){
+    ctxR.beginPath();
+    for(let k=0;k<axes.length;k++){ const [x,y]=pt(k,g); k?ctxR.lineTo(x,y):ctxR.moveTo(x,y); }
+    ctxR.closePath(); ctxR.stroke();
+  }
+  axes.forEach((a,k)=>{ const [x,y]=pt(k,1.08); ctxR.fillText(a, x-36, y); });
+
+  // Цілі (як коло точок)
+  ctxR.beginPath(); ctxR.strokeStyle='#22c55e';
+  for(let k=0;k<axes.length;k++){ const g=clamp(tgt[k]/lim[k],0,1); const [x,y]=pt(k,g); k?ctxR.lineTo(x,y):ctxR.moveTo(x,y); }
+  ctxR.closePath(); ctxR.stroke();
+
+  // Поточне значення
+  ctxR.beginPath(); ctxR.strokeStyle='#38bdf8'; ctxR.fillStyle='rgba(56,189,248,0.18)';
+  for(let k=0;k<axes.length;k++){ const g=clamp(val[k]/lim[k],0,1); const [x,y]=pt(k,g); k?ctxR.lineTo(x,y):ctxR.moveTo(x,y); }
+  ctxR.closePath(); ctxR.fill(); ctxR.stroke();
+}
+
+// ===== Експорт / друк / QR =====
+$('#saveCsv').addEventListener('click', ()=>{
+  if(!BEST.mix.length) return alert('Спочатку оптимізуй рецепт');
+  let csv='ingredient,share_percent,price_per_kg,water%,fat%,salt%,nitrite_ppm\n';
+  for(let i=0;i<ING.length;i++){
+    csv+=`${ING[i].name.replace(/"/g,'""')},${BEST.mix[i].toFixed(2)},${ING[i].price},${ING[i].w},${ING[i].f},${ING[i].s},${ING[i].n}\n`;
+  }
+  csv+=`TOTAL,100,${BEST.cost.toFixed(2)},${BEST.props.W.toFixed(2)},${BEST.props.F.toFixed(2)},${BEST.props.S.toFixed(2)},${BEST.props.N.toFixed(0)}\n`;
+  download('tech_para22_recipe_'+stamp()+'.csv', csv, 'text/csv');
+});
+$('#saveTxt').addEventListener('click', ()=>{
+  if(!BEST.mix.length) return alert('Немає рецепта');
+  const lines=[
+    'Пара 22 — ШІ для рецептур: підсумок',
+    'Лот: '+($('#lot').value||'—'),
+    `Score: ${BEST.score.toFixed(3)}`,
+    `Волога=${BEST.props.W.toFixed(2)}% | Жир=${BEST.props.F.toFixed(2)}% | Сіль=${BEST.props.S.toFixed(2)}% | Нітрит=${BEST.props.N.toFixed(0)} ppm`,
+    `Собівартість: ${BEST.cost.toFixed(2)} грн/кг`,
+    '--- Рецепт ---',
+    ...ING.map((g,i)=>`${g.name}: ${BEST.mix[i].toFixed(2)} %`),
+  ];
+  download('tech_para22_summary_'+stamp()+'.txt', lines.join('\n'));
+});
+$('#print58').addEventListener('click', ()=>{
+  if(!BEST.mix.length) return alert('Немає рецепта');
+  const rc=$('#rc'); rc.hidden=false;
+  const lines=[
+    '=== РЕЦЕПТ (58мм) ===',
+    'Лот: '+($('#lot').value||'—'),
+    `Σ=100% | В=${BEST.props.W.toFixed(1)} Ж=${BEST.props.F.toFixed(1)} С=${BEST.props.S.toFixed(2)} | N=${BEST.props.N.toFixed(0)} ppm`,
+    `Собівартість: ${BEST.cost.toFixed(2)} грн/кг`,
+    ...ING.map((g,i)=>`${(g.name).slice(0,22)}: ${BEST.mix[i].toFixed(1)}%`),
+    '---------------------'
+  ];
+  rc.textContent=lines.join('\n');
+  download('tech_para22_receipt_'+stamp()+'.txt', rc.textContent);
+});
+$('#qrGen').addEventListener('click', ()=>{
+  const data = prompt('Встав URL/текст (папка з актами/фото):', $('#lot').value || 'recipe-evidence');
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url;
+});
+
+// ===== Ініціалізація =====
+renderTable();
+drawStack([]);
+drawRadar(null);
+</script>
+</body>
+</html>
