@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 25 — ШІ-планувальник робіт: нотатки → календар (SOP/REI/PHI/погода) + конфлікт-чекинґ</title>
+<meta name="description" content="Імпорт польових нотаток і погоди → автоплан робіт із урахуванням REI/PHI та погодних вікон → перевірка конфліктів ресурсів → Gantt, експорт ICS/CSV/TXT, 58-мм чек, промпт до LLM."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Inter,Roboto,Arial,sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+.grid{display:grid;gap:14px;grid-template-columns:1.2fr 1fr}
+@media(max-width:1080px){.grid{grid-template-columns:1fr}}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:260px}
+.log{max-height:160px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;background:#0b1220;font-family:ui-monospace,monospace;font-size:13px;white-space:pre-wrap}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.small{font-size:.9rem}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">📅</span>
+      <div>
+        <b>Пара 25 — ШІ-планувальник робіт</b><br/>
+        <span class="badge">Нотатки → календар → REI/PHI → вікна погоди → конфлікти → експорт</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">
+    Мета: перетворити польові нотатки в <b>виробничий календар</b> із урахуванням <b>REI</b> (ре-entry), <b>PHI</b> (період до збору), погодних вікон, ресурсів та <b>SOP</b>. 
+    Далі — <b>конфлікт-чекинґ</b>, Gantt-графік, експорт у <b>ICS/CSV/TXT</b>, «58-мм чек» і промпт до LLM для оптимізації.
+  </p>
+
+  <div class="grid">
+    <!-- ЛІВА КОЛОНКА -->
+    <div class="card">
+      <h2>🗂️ Нотатки про роботи (CSV)</h2>
+      <p class="small muted">Формат: <span class="mono">task,type,field,area_ha,product,REI_h,PHI_d,speed_ha_h,preferred_start,preferred_end</span> (дати у ISO, напр. <span class="mono">2025-05-20T08:00</span>)</p>
+      <textarea id="csvTasks" class="input" rows="6" placeholder="task,type,field,area_ha,product,REI_h,PHI_d,speed_ha_h,preferred_start,preferred_end
+Фунгіцид 1,обприскування,Поле 3,25,тебуконазол,24,35,12,2025-05-20T08:00,2025-05-22T20:00
+Підживлення КАС,підживлення,Поле 3,25,,0,0,15,2025-05-20T08:00,2025-05-23T20:00
+Скаутинг,скаутинг,Поле 3,25,,0,0,20,2025-05-19T08:00,2025-05-26T20:00"></textarea>
+      <div class="row">
+        <button class="btn good" id="loadTasks">📥 Імпорт</button>
+        <button class="btn secondary" id="demoTasks">🎲 Демонстраційні</button>
+        <button class="btn secondary" id="clearTasks">🧹 Очистити</button>
+        <span id="badgeTasks" class="badge">Завдань: 0</span>
+      </div>
+
+      <h2 style="margin-top:12px">🌤️ Погода (годинні дані CSV)</h2>
+      <p class="small muted">Формат: <span class="mono">timestamp,wind_ms,rain_mm,RH,T</span>. Для обприскування правила за замовч.: <span class="mono">wind≤5 м/с, rain=0, 8≤T≤28, 40≤RH≤95</span></p>
+      <textarea id="csvWx" class="input" rows="6" placeholder="timestamp,wind_ms,rain_mm,RH,T
+2025-05-20T06:00,2.1,0,92,12.4
+2025-05-20T07:00,2.5,0,90,13.1
+..."></textarea>
+      <div class="row">
+        <button class="btn" id="loadWx">📥 Імпорт</button>
+        <button class="btn secondary" id="demoWx">🎲 Згенерувати 5 діб</button>
+        <button class="btn secondary" id="clearWx">🧹 Очистити</button>
+        <span id="badgeWx" class="badge">Записів погоди: 0</span>
+      </div>
+
+      <h2 style="margin-top:12px">⚙️ Ресурси та обмеження</h2>
+      <div class="row">
+        <div style="flex:1">
+          <label for="sprayers">Кількість обприскувачів</label>
+          <input id="sprayers" class="input" type="number" min="0" value="1"/>
+        </div>
+        <div style="flex:1">
+          <label for="workStart">Робочий день з</label>
+          <input id="workStart" class="input" type="time" value="08:00"/>
+        </div>
+        <div style="flex:1">
+          <label for="workEnd">до</label>
+          <input id="workEnd" class="input" type="time" value="20:00"/>
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label for="harvest">Орієнтовна дата збору (PHI)</label>
+          <input id="harvest" class="input" type="datetime-local" value="2025-06-30T08:00"/>
+        </div>
+        <div style="flex:1">
+          <label for="windMax">Макс. вітер (м/с) для обпр.</label>
+          <input id="windMax" class="input" type="number" step="0.1" value="5"/>
+        </div>
+        <div style="flex:1">
+          <label for="rainMax">Макс. опади (мм/год)</label>
+          <input id="rainMax" class="input" type="number" step="0.1" value="0"/>
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label for="tMin">T мін (°C)</label>
+          <input id="tMin" class="input" type="number" step="0.5" value="8"/>
+        </div>
+        <div style="flex:1">
+          <label for="tMax">T макс (°C)</label>
+          <input id="tMax" class="input" type="number" step="0.5" value="28"/>
+        </div>
+        <div style="flex:1">
+          <label for="rhMin">RH мін (%)</label>
+          <input id="rhMin" class="input" type="number" step="1" value="40"/>
+        </div>
+        <div style="flex:1">
+          <label for="rhMax">RH макс (%)</label>
+          <input id="rhMax" class="input" type="number" step="1" value="95"/>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn good" id="plan">🧮 Автоплан</button>
+        <button class="btn secondary" id="check">🔎 Перевірки</button>
+        <button class="btn secondary" id="clearPlan">🧹 Очистити план</button>
+        <span id="badgePlan" class="badge">План: —</span>
+      </div>
+
+      <h3 style="margin-top:12px">📈 Gantt (добовий масштаб)</h3>
+      <div class="canvasWrap"><canvas id="gantt" width="900" height="260"></canvas></div>
+    </div>
+
+    <!-- ПРАВА КОЛОНКА -->
+    <div class="card">
+      <h2>🧾 План (таблиця)</h2>
+      <table class="tbl" id="tblPlan">
+        <thead><tr><th>#</th><th>Завдання</th><th>Поле</th><th>Початок</th><th>Кінець</th><th>Тривалість, год</th><th>REI</th><th>PHI</th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <h2 style="margin-top:12px">🚦 Конфлікти</h2>
+      <table class="tbl" id="tblConf">
+        <thead><tr><th>Тип</th><th>Деталі</th><th>Статус</th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="exportICS">🗓️ Експорт ICS</button>
+        <button class="btn" id="exportCSV">📄 Експорт CSV</button>
+        <button class="btn" id="exportTXT">💾 Підсумок TXT</button>
+        <button class="btn secondary" id="dayReceipt">🖨️ 58-мм чек (за день)</button>
+      </div>
+      <div class="receipt" id="receipt" hidden></div>
+
+      <h2 style="margin-top:12px">🤖 Промпт для LLM (оптимізація)</h2>
+      <div class="row">
+        <button class="btn" id="genPrompt">⚙️ Згенерувати</button>
+        <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+        <button class="btn secondary" id="savePrompt">⬇️ TXT</button>
+      </div>
+      <pre class="code" id="prompt">// Спочатку імпортуй нотатки/погоду й натисни «🧮 Автоплан»</pre>
+
+      <h2 style="margin-top:12px">🔁 Схема процесу (SVG)</h2>
+      <svg viewBox="0 0 760 420" role="img" aria-label="Пайплайн планування">
+        <rect x="40" y="40" width="200" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <text x="140" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Нотатки/CSV</text>
+        <text x="140" y="88" fill="#93c5fd" font-size="12" text-anchor="middle">task/REI/PHI/швидк.</text>
+
+        <rect x="280" y="40" width="200" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <text x="380" y="70" fill="#dcfce7" font-size="14" text-anchor="middle">Погодні вікна</text>
+        <text x="380" y="88" fill="#a7f3d0" font-size="12" text-anchor="middle">вітер/дощ/T/RH</text>
+
+        <rect x="520" y="40" width="200" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+        <text x="620" y="70" fill="#fed7aa" font-size="14" text-anchor="middle">Автоплан</text>
+        <text x="620" y="88" fill="#fed7aa" font-size="12" text-anchor="middle">ресурси/SOP</text>
+
+        <line x1="240" y1="80" x2="280" y2="80" stroke="#93c5fd" stroke-width="3"/>
+        <line x1="480" y1="80" x2="520" y2="80" stroke="#93c5fd" stroke-width="3"/>
+
+        <rect x="40" y="170" width="260" height="90" rx="12" fill="#0b3f5a" stroke="#22d3ee"/>
+        <text x="170" y="200" fill="#a5f3fc" font-size="14" text-anchor="middle">Перевірки</text>
+        <text x="170" y="220" fill="#a5f3fc" font-size="12" text-anchor="middle">REI/PHI/ресурси/погода</text>
+
+        <rect x="340" y="170" width="190" height="90" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <text x="435" y="200" fill="#e5e7eb" font-size="14" text-anchor="middle">Експорт</text>
+        <text x="435" y="220" fill="#9ca3af" font-size="12" text-anchor="middle">ICS/CSV/TXT/чек</text>
+
+        <rect x="560" y="170" width="160" height="90" rx="12" fill="#111827" stroke="#4b5563"/>
+        <text x="640" y="200" fill="#e5e7eb" font-size="14" text-anchor="middle">LLM</text>
+        <text x="640" y="220" fill="#9ca3af" font-size="12" text-anchor="middle">оптимізація</text>
+      </svg>
+
+      <div class="card" style="margin-top:12px">
+        <h3>📜 Нотатка з історії</h3>
+        <p class="muted small">
+          Перші агрокалендарі планували «по тижнях» і погоді з радіо. 
+          Сьогодні ми поєднуємо <b>REI/PHI/SOP</b>, часові вікна погоди і ресурси, а ШІ пропонує сценарії оптимізації безпеки й логістики.
+        </p>
+      </div>
+
+      <h3 style="margin-top:12px">🧷 Теги</h3>
+      <div>
+        <span class="tag">#planning</span>
+        <span class="tag">#REI_PHI</span>
+        <span class="tag">#weather_windows</span>
+        <span class="tag">#SOP</span>
+        <span class="tag">#ICS_export</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>Gantt та таблиця плану.</li>
+      <li>Конфлікти (скрін) + коментарі, як їх виправляли.</li>
+      <li>ICS/CSV/TXT і «58-мм чек» для однієї дати.</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s);
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function parseISO(s){const d=new Date(s); return isNaN(d)?null:d;}
+function fmt(dt){return new Date(dt).toISOString().slice(0,16).replace('T',' ')}
+
+// ===== Дані =====
+let tasks=[]; // {id,task,type,field,area,product,REI,PHI,speed,winStart,winEnd}
+let wx=[];    // {t,wind,rain,RH,T}
+let plan=[];  // {id, task, field, start, end, durH, REI, PHI, type, product}
+
+// ===== Імпорт завдань =====
+function parseTasks(txt){
+  tasks.length=0;
+  const lines=(txt||'').trim().split(/\r?\n/).filter(Boolean);
+  const head=lines.shift(); const cols=head.split(',').map(s=>s.trim());
+  const idx=n=>cols.indexOf(n);
+  const need=['task','type','field','area_ha','product','REI_h','PHI_d','speed_ha_h','preferred_start','preferred_end'];
+  for(const n of need){ if(idx(n)===-1) throw new Error('Відсутній стовпець: '+n); }
+  let i=1;
+  for(const line of lines){
+    const p=line.split(',');
+    const rec={
+      id:i++,
+      task:(p[idx('task')]||'').trim(),
+      type:(p[idx('type')]||'').trim().toLowerCase(),
+      field:(p[idx('field')]||'').trim(),
+      area: parseFloat(p[idx('area_ha')])||0,
+      product:(p[idx('product')]||'').trim(),
+      REI: parseFloat(p[idx('REI_h')])||0,
+      PHI: parseFloat(p[idx('PHI_d')])||0,
+      speed: parseFloat(p[idx('speed_ha_h')])||10,
+      winStart: parseISO(p[idx('preferred_start')]),
+      winEnd: parseISO(p[idx('preferred_end')])
+    };
+    tasks.push(rec);
+  }
+}
+
+$('#demoTasks').addEventListener('click', ()=>{
+  $('#csvTasks').value =
+`task,type,field,area_ha,product,REI_h,PHI_d,speed_ha_h,preferred_start,preferred_end
+Фунгіцид 1,обприскування,Поле 3,25,тебуконазол,24,35,12,2025-05-20T08:00,2025-05-22T20:00
+Підживлення КАС,підживлення,Поле 3,25,,0,0,15,2025-05-20T08:00,2025-05-23T20:00
+Скаутинг,скаутинг,Поле 3,25,,0,0,20,2025-05-19T08:00,2025-05-26T20:00`;
+});
+
+$('#loadTasks').addEventListener('click', ()=>{
+  try{ parseTasks($('#csvTasks').value); $('#badgeTasks').textContent='Завдань: '+tasks.length; log('Нотатки імпортовано'); }
+  catch(e){ alert('Помилка CSV завдань: '+e.message); }
+});
+$('#clearTasks').addEventListener('click', ()=>{ tasks.length=0; $('#badgeTasks').textContent='Завдань: 0'; });
+
+// ===== Імпорт погоди =====
+function parseWx(txt){
+  wx.length=0;
+  const lines=(txt||'').trim().split(/\r?\n/).filter(Boolean);
+  const head=lines.shift(); const cols=head.split(',').map(s=>s.trim());
+  const idx=n=>cols.indexOf(n);
+  const need=['timestamp','wind_ms','rain_mm','RH','T'];
+  for(const n of need){ if(idx(n)===-1) throw new Error('Відсутній стовпець: '+n); }
+  for(const line of lines){
+    const p=line.split(',');
+    const t=parseISO(p[idx('timestamp')]); if(!t) continue;
+    wx.push({
+      t, wind:parseFloat(p[idx('wind_ms')])||0,
+      rain:parseFloat(p[idx('rain_mm')])||0,
+      RH:parseFloat(p[idx('RH')])||0,
+      T:parseFloat(p[idx('T')])||0
+    });
+  }
+  wx.sort((a,b)=>a.t-b.t);
+}
+
+function genWx(){
+  wx.length=0;
+  const start=new Date(); start.setHours(start.getHours()-24,0,0,0);
+  for(let i=0;i<120;i++){ // 5 діб
+    const t=new Date(start.getTime()+i*3600000);
+    const h=t.getHours();
+    const wind=2+2*Math.abs(Math.sin((h-9)/7))+ (Math.random()*0.8-0.4);
+    let rain=0; if(h>=16 && h<=18 && Math.random()<0.2) rain=0.6;
+    let RH=60+25*Math.sin((h+2)/3.5) + (Math.random()*6-3); if(h>=21||h<=7) RH+=18;
+    let T=10+10*Math.sin((h-6)/3.8) + (Math.random()*1.2-0.6);
+    RH=Math.max(30,Math.min(100,RH));
+    wx.push({t, wind:parseFloat(wind.toFixed(1)), rain:parseFloat(rain.toFixed(1)), RH:Math.round(RH), T:parseFloat(T.toFixed(1))});
+  }
+}
+
+$('#demoWx').addEventListener('click', ()=>{ genWx(); $('#badgeWx').textContent='Записів погоди: '+wx.length; log('Погоду згенеровано'); drawGantt(); });
+$('#loadWx').addEventListener('click', ()=>{
+  try{ parseWx($('#csvWx').value); $('#badgeWx').textContent='Записів погоди: '+wx.length; log('Погоду імпортовано'); drawGantt(); }
+  catch(e){ alert('Помилка CSV погоди: '+e.message); }
+});
+$('#clearWx').addEventListener('click', ()=>{ wx.length=0; $('#badgeWx').textContent='Записів погоди: 0'; drawGantt(); });
+
+// ===== Правила погоди для обприскування =====
+function wxOK(r){
+  const windMax=parseFloat($('#windMax').value)||5;
+  const rainMax=parseFloat($('#rainMax').value)||0;
+  const tMin=parseFloat($('#tMin').value)||8, tMax=parseFloat($('#tMax').value)||28;
+  const rhMin=parseFloat($('#rhMin').value)||40, rhMax=parseFloat($('#rhMax').value)||95;
+  return r.wind<=windMax && r.rain<=rainMax && r.T>=tMin && r.T<=tMax && r.RH>=rhMin && r.RH<=rhMax;
+}
+
+// ===== Планувальник =====
+function planTasks(){
+  plan.length=0;
+  if(tasks.length===0 || wx.length===0) { alert('Потрібні нотатки та погода'); return; }
+
+  // робочі години
+  const [sh,sm]=($('#workStart').value||'08:00').split(':').map(Number);
+  const [eh,em]=($('#workEnd').value||'20:00').split(':').map(Number);
+  const harvest=parseISO($('#harvest').value)||new Date('2100-01-01T00:00');
+
+  // доступність обприскувачів
+  const sprayers = Math.max(0, parseInt($('#sprayers').value||'1',10));
+
+  // індексуємо погоду по годинах
+  const wxByHour = new Map(wx.map(r=>[r.t.toISOString().slice(0,13), r]));
+
+  // сорт: за типом (нехай обприскування пріоритет), далі за раннім дедлайном вікна
+  const priority=(t)=> t.type.includes('обпр')?0:(t.type.includes('піджив')?1:(t.type.includes('скаут')?2:3));
+  tasks.slice().sort((a,b)=> (priority(a)-priority(b)) || (a.winStart-b.winStart)).forEach(t=>{
+    const durH = t.area / Math.max(0.1, t.speed); // годин
+    // перебір кандидатних годин у вікні
+    const start = new Date(t.winStart||wx[0].t);
+    const end   = new Date(t.winEnd  ||wx[wx.length-1].t);
+    let used=0, block=[];
+    let currentDay=null, dayUsedSpr=0;
+
+    for(let dt=new Date(start); dt<=end && used<durH; dt=new Date(dt.getTime()+3600000)){
+      const hourKey=dt.toISOString().slice(0,13);
+      const r=wxByHour.get(hourKey); if(!r) continue;
+
+      // у межах робочого дня?
+      const hr=dt.getHours(), min=dt.getMinutes();
+      const inShift = (hr>sh || (hr===sh && min>=sm)) && (hr<eh || (hr===eh && min<em));
+      if(!inShift) continue;
+
+      // для обприскування потрібне wxOK і ресурс
+      if(t.type.includes('обпр')){
+        if(!wxOK(r)) continue;
+        // лічильник сприсів на годину — обмежимо кількістю машин
+        const key='spr_'+hourKey;
+        dayUsedSpr = (usage.get(key)||0);
+        if(dayUsedSpr>=sprayers) continue; // ресурс зайнятий
+        usage.set(key, dayUsedSpr+1);
+      }
+
+      block.push(new Date(dt));
+      used+=1;
+    }
+
+    if(used>=durH){
+      const startAt = block[0];
+      const endAt   = new Date(block[0].getTime()+durH*3600000);
+      // PHI: для обприскувань із продуктом
+      if(t.PHI>0 && t.type.includes('обпр')){
+        const phiOK = endAt.getTime() <= (new Date(harvest.getTime()-t.PHI*24*3600000)).getTime();
+        // якщо не ОК — позначимо, але все одно додамо для видимості
+        plan.push({id:t.id, task:t.task, field:t.field, start:startAt, end:endAt, durH:durH.toFixed(1), REI:t.REI, PHI:t.PHI, type:t.type, product:t.product, phiWarn:!phiOK});
+      }else{
+        plan.push({id:t.id, task:t.task, field:t.field, start:startAt, end:endAt, durH:durH.toFixed(1), REI:t.REI, PHI:t.PHI, type:t.type, product:t.product, phiWarn:false});
+      }
+    }
+  });
+
+  renderPlan();
+}
+
+const usage=new Map(); // використання обприскувачів по годинах
+
+function renderPlan(){
+  const tb=$('#tblPlan tbody'); tb.innerHTML='';
+  plan.sort((a,b)=>a.start-b.start);
+  plan.forEach((p,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td>${p.task}</td><td>${p.field}</td><td>${fmt(p.start)}</td><td>${fmt(p.end)}</td><td>${p.durH}</td><td>${p.REI||0} год</td><td>${p.PHI||0} дн</td>`;
+    if(p.phiWarn) tr.querySelectorAll('td')[7].classList.add('bad');
+    tb.appendChild(tr);
+  });
+  $('#badgePlan').textContent='План: '+plan.length+' задач';
+  drawGantt();
+}
+
+// ===== Конфлікти =====
+function checkConflicts(){
+  const tb=$('#tblConf tbody'); tb.innerHTML='';
+  function row(type,details,ok){ const tr=document.createElement('tr'); tr.innerHTML=`<td>${type}</td><td class="small">${details}</td><td class="${ok?'ok':'bad'}">${ok?'OK':'PROBLEM'}</td>`; tb.appendChild(tr); }
+
+  // 1) Перетин ресурсів для обприскувань: ліміт машин
+  let resOK=true;
+  const sprayers = Math.max(0, parseInt($('#sprayers').value||'1',10));
+  const occupancy=new Map();
+  plan.filter(p=>p.type.includes('обпр')).forEach(p=>{
+    for(let t=new Date(p.start); t<p.end; t=new Date(t.getTime()+3600000)){
+      const k=t.toISOString().slice(0,13);
+      occupancy.set(k,(occupancy.get(k)||0)+1);
+    }
+  });
+  const over=[...occupancy.entries()].filter(([k,v])=>v>sprayers).map(([k,v])=>`${k}: ${v}/${sprayers}`);
+  resOK = over.length===0;
+  row('Ресурси обприскувачів', resOK?'не перевищено':'перевищено у: '+over.join(', '), resOK);
+
+  // 2) REI: задачі (не скаутинг) на тому ж полі в REI після обприскування
+  let reiOK=true; const reiIssues=[];
+  plan.forEach(a=>{
+    if(!a.type.includes('обпр') || !a.REI) return;
+    const reiEnd=new Date(a.end.getTime()+a.REI*3600000);
+    plan.forEach(b=>{
+      if(b===a) return;
+      if(b.field===a.field && !b.type.includes('скаут') && b.start<reiEnd && b.start>=a.end){
+        reiOK=false; reiIssues.push(`${b.task} (${fmt(b.start)}) всередині REI після ${a.task} (до ${fmt(reiEnd)})`);
+      }
+    });
+  });
+  row('REI (ре-entry)', reiOK?'порушень немає':reiIssues.join('; '), reiOK);
+
+  // 3) PHI: обприскування ближче до збору, ніж дозволено
+  let phiOK=true; const phiIssues=[];
+  plan.forEach(p=>{ if(p.type.includes('обпр') && p.PHI>0 && p.phiWarn){ phiOK=false; phiIssues.push(`${p.task} → PHI=${p.PHI} дн не вкладається до збору`); } });
+  row('PHI (період до збору)', phiOK?'ок':'є порушення: '+phiIssues.join('; '), phiOK);
+
+  // 4) Погодні умови у планові години (лише для обприскувань)
+  let wxOk=true; const wxIssues=[];
+  const wxByHour = new Map(wx.map(r=>[r.t.toISOString().slice(0,13), r]));
+  plan.filter(p=>p.type.includes('обпр')).forEach(p=>{
+    for(let t=new Date(p.start); t<p.end; t=new Date(t.getTime()+3600000)){
+      const r=wxByHour.get(t.toISOString().slice(0,13));
+      if(!r || !wxOK(r)){ wxOk=false; wxIssues.push(`${p.task} @ ${fmt(t)}`); break; }
+    }
+  });
+  row('Погодні умови під час виконання', wxOk?'відповідають':'не відповідають у: '+wxIssues.slice(0,6).join(', ')+(wxIssues.length>6?'…':''), wxOk);
+}
+
+// ===== Gantt =====
+const g=$('#gantt'), gctx=g.getContext('2d');
+function drawGantt(){
+  const W=g.width,H=g.height;
+  gctx.clearRect(0,0,W,H);
+  gctx.strokeStyle='#223049'; gctx.strokeRect(0.5,0.5,W-1,H-1);
+
+  if(plan.length===0 && wx.length===0){ return; }
+
+  // часовий діапазон
+  const t0 = wx.length? wx[0].t : (plan.length? plan[0].start : new Date());
+  const t1 = wx.length? wx[wx.length-1].t : (plan.length? plan[plan.length-1].end : new Date(t0.getTime()+72*3600000));
+  const spanH = Math.max(24, Math.round((t1-t0)/3600000));
+
+  // сітка днів
+  const pxPerH = (W-80)/spanH; // лівий бордюр для підписів
+  for(let h=0; h<=spanH; h++){
+    const x=80+h*pxPerH;
+    gctx.strokeStyle= (h%24===0)? '#2a3a59':'#18243b';
+    gctx.beginPath(); gctx.moveTo(x,0); gctx.lineTo(x,H); gctx.stroke();
+    if(h%24===0){
+      const d=new Date(t0.getTime()+h*3600000);
+      gctx.fillStyle='#94a3b8'; gctx.font='12px ui-monospace';
+      gctx.fillText(d.toISOString().slice(5,10), x+4, 14);
+    }
+  }
+
+  // погода: придатні години для обприскування — підсвітимо
+  const yWx=24;
+  gctx.fillStyle='#0f1f39'; gctx.fillRect(80,yWx, W-90, 14);
+  wx.forEach(r=>{
+    const h=Math.round((r.t-t0)/3600000);
+    const x=80+h*pxPerH;
+    gctx.fillStyle = wxOK(r)? '#1f6feb' : '#5b2337';
+    gctx.fillRect(x, yWx, Math.max(1,pxPerH-1), 14);
+  });
+  gctx.fillStyle='#94a3b8'; gctx.fillText('Погода (окно для обпр.)', 4, yWx+11);
+
+  // план — рядки
+  const rowH=18; let row=0;
+  plan.forEach(p=>{
+    const y=60+row*rowH; row++;
+    const x0=80+ ((p.start - t0)/3600000)*pxPerH;
+    const x1=80+ ((p.end   - t0)/3600000)*pxPerH;
+    gctx.fillStyle = p.type.includes('обпр')? '#22c55e' : (p.type.includes('скаут')? '#38bdf8' : '#fbbf24');
+    gctx.fillRect(x0, y, Math.max(2,x1-x0), rowH-4);
+    gctx.fillStyle='#e6eef9'; gctx.font='12px ui-monospace';
+    gctx.fillText(p.task.slice(0,28), 6, y+12);
+  });
+}
+
+// ===== Експорти =====
+function toICS(){
+  if(plan.length===0) return '';
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//EDLab//Agro Planner//UA'];
+  plan.forEach((p,i)=>{
+    const dt=(d)=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:'+ ('para25-'+i+'-'+Date.now())+'@edlab');
+    lines.push('DTSTART:'+dt(p.start));
+    lines.push('DTEND:'+dt(p.end));
+    lines.push('SUMMARY:'+p.task+' — '+p.field);
+    lines.push('DESCRIPTION:Тип='+p.type+'; REI='+p.REI+'h; PHI='+p.PHI+'d; Препарат='+ (p.product||'-'));
+    lines.push('END:VEVENT');
+  });
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+}
+
+function toCSV(){
+  const head='id,task,field,type,product,start,end,duration_h,REI_h,PHI_d\n';
+  const body=plan.map((p,i)=>[i+1,p.task,p.field,p.type,p.product||'',p.start.toISOString(),p.end.toISOString(),p.durH,p.REI||0,p.PHI||0].map(v=>typeof v==='string'?`"${v.replace(/"/g,'""')}"`:v).join(',')).join('\n');
+  return head+body;
+}
+
+function toTXT(){
+  const lines=[
+    'Пара 25 — ШІ-планувальник робіт',
+    'Завдань у плані: '+plan.length,
+    '--- План ---'
+  ];
+  plan.forEach((p,i)=>lines.push(`${i+1}. ${p.task} (${p.field}) ${fmt(p.start)} → ${fmt(p.end)} | ${p.durH} год | REI=${p.REI}h | PHI=${p.PHI}d`));
+  lines.push('--- Кінець ---');
+  return lines.join('\n');
+}
+
+$('#exportICS').addEventListener('click', ()=>{ const ics=toICS(); if(!ics){alert('Спершу згенеруй план');return;} download('agro_para25_'+stamp()+'.ics', ics, 'text/calendar'); });
+$('#exportCSV').addEventListener('click', ()=>{ const csv=toCSV(); if(!csv){alert('Спершу згенеруй план');return;} download('agro_para25_'+stamp()+'.csv', csv, 'text/csv'); });
+$('#exportTXT').addEventListener('click', ()=>{ const txt=toTXT(); if(!txt){alert('Спершу згенеруй план');return;} download('agro_para25_'+stamp()+'.txt', txt); });
+
+// 58-мм чек на день (вибираємо дату першого івенту)
+$('#dayReceipt').addEventListener('click', ()=>{
+  if(plan.length===0){ alert('Немає плану'); return; }
+  const day = new Date(plan[0].start); day.setHours(0,0,0,0);
+  const lines=[];
+  lines.push('=== ЧЕК РОБІТ (58мм) ===');
+  lines.push('Дата: '+day.toISOString().slice(0,10));
+  plan.filter(p=>{const d=new Date(p.start); d.setHours(0,0,0,0); return d.getTime()===day.getTime();})
+      .forEach(p=>{
+        lines.push((p.task+' '+p.field).slice(0,28));
+        lines.push(fmt(p.start)+' → '+fmt(p.end));
+        lines.push('REI:'+ (p.REI||0)+'h PHI:'+ (p.PHI||0)+'d');
+        lines.push('---');
+      });
+  const el=$('#receipt'); el.hidden=false; el.textContent=lines.join('\n');
+  download('para25_receipt_'+stamp()+'.txt', lines.join('\n'));
+});
+
+// ===== Промпт до LLM =====
+function buildPrompt(){
+  if(plan.length===0) return '// Згенеруй план спочатку';
+  const sprayers = Math.max(0, parseInt($('#sprayers').value||'1',10));
+  const rules = `Обмеження: обприскувачів=${sprayers}, робочі години ${$('#workStart').value}-${$('#workEnd').value}, погода: wind≤${$('#windMax').value} м/с, rain≤${$('#rainMax').value} мм/год, ${$('#tMin').value}≤T≤${$('#tMax').value}°C, ${$('#rhMin').value}≤RH≤${$('#rhMax').value}%. Harvest=${$('#harvest').value}.`;
+  const items = plan.map(p=>({task:p.task, field:p.field, start:p.start.toISOString(), end:p.end.toISOString(), REI:p.REI, PHI:p.PHI, type:p.type, product:p.product||''}));
+  return `Ти — агроном-координатор. Перевір і, за потреби, переплануй операції з урахуванням REI/PHI, погодних вікон і ресурсів.
+Правила: ${rules}
+Поточний план (JSON):
+${JSON.stringify(items,null,2)}
+
+Що потрібно:
+1) Познач конфлікти (ресурси, REI, PHI, погода) та поясни як їх виправити.
+2) Дай 2 альтернативні розклади: a) мінімізація ризиків; b) мінімізація простоїв/переїздів.
+3) Для обприскувань — познач вікна з кращим покриттям (RH/вітер) і ZІЗ/REI/PHI.
+4) Покажи різницю в завершенні критичних задач по днях.
+Формат: таблиці + короткий план на день.`;
+}
+
+$('#genPrompt').addEventListener('click', ()=>{ $('#prompt').textContent=buildPrompt(); });
+$('#copyPrompt').addEventListener('click', ()=>{ const ta=document.createElement('textarea'); ta.value=$('#prompt').textContent; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); });
+$('#savePrompt').addEventListener('click', ()=>{ const txt=$('#prompt').textContent||buildPrompt(); download('para25_prompt_'+stamp()+'.txt',txt); });
+
+// ===== Події головні =====
+function log(msg){ const t=new Date().toLocaleTimeString(); const el=$('.log'); if(el){ el.textContent += `[${t}] ${msg}\n`; el.scrollTop=el.scrollHeight; } }
+$('#plan').addEventListener('click', ()=>{ usage.clear(); planTasks(); log('План сформовано'); });
+$('#check').addEventListener('click', ()=>{ checkConflicts(); log('Перевірки виконано'); });
+$('#clearPlan').addEventListener('click', ()=>{ plan.length=0; $('#tblPlan tbody').innerHTML=''; $('#tblConf tbody').innerHTML=''; $('#badgePlan').textContent='План: —'; drawGantt(); });
+
+// Ініціалізація
+drawGantt();
+if (window.self !== window.top) document.documentElement.classList.add('embedded'); // Moodle-friendly
+</script>
+</body>
+</html>
