@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 21 — ШІ-помічник агронома: scouting-промпти + валідація + журнал</title>
+<meta name="description" content="Генератор структурованих промптів для агроскаутингу: культура, фаза, симптоми, погода, ЕПШ/ПД, ресурси. Прев’ю, копіювання, експорт CSV/TXT, чек-лист оцінювання відповіді ШІ, журнал рішень. SVG-схема робочого циклу."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Inter,Roboto,Arial,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:14px;grid-template-columns:1.2fr 1fr}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+.small{font-size:.9rem}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted)}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+svg{max-width:100%;height:auto;display:block}
+.log{max-height:160px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;background:#0b1220;font-family:ui-monospace,monospace;font-size:13px;white-space:pre-wrap}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🤖</span>
+      <div>
+        <b>Пара 21 — ШІ-помічник агронома</b><br/>
+        <span class="badge">Scouting-промпти → відповідь ШІ → валідація → рішення → журнал</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">
+    Мета: навчитися формулювати <b>структуровані промпти</b> під конкретні агрозавдання (scouting), перевіряти якість відповідей ШІ за чек-листом і фіксувати рішення в журналі. Працюємо з вузькими контекстами: культура, фаза, симптоми, польові величини, ресурси та обмеження.
+  </p>
+
+  <div class="grid">
+    <!-- Ліва колонка: форма + прев’ю + дії -->
+    <div class="card">
+      <h2>🧩 Заповни кейс</h2>
+      <div class="row">
+        <div style="flex:1">
+          <label for="crop">Культура</label>
+          <select id="crop" class="input">
+            <option>Пшениця озима</option>
+            <option>Кукурудза</option>
+            <option>Соняшник</option>
+            <option>Соя</option>
+            <option>Ріпак озимий</option>
+            <option>Картопля</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label for="bbch">Фаза (BBCH)</label>
+          <input id="bbch" class="input" placeholder="напр. BBCH 37 — прапорцевий листок розгорнутий"/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div style="flex:1">
+          <label for="field">Поле/локація</label>
+          <input id="field" class="input" placeholder="Поле №3, Тальне, Черкаська обл."/>
+        </div>
+        <div style="flex:1">
+          <label for="area">Площа, га</label>
+          <input id="area" class="input" type="number" step="0.1" value="25"/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div style="flex:1">
+          <label for="symptoms">Симптоми (стисло)</label>
+          <textarea id="symptoms" class="input" rows="3" placeholder="плями на листі, жовтіння країв, уражені 8–12% рослин, осередки по низинах"></textarea>
+        </div>
+        <div style="flex:1">
+          <label for="pests">Підозри (шкідник/хвороба)</label>
+          <input id="pests" class="input" placeholder="септоріоз, борошниста роса; або шведська муха"/>
+          <small class="muted">Якщо нема підозр — залиш порожнім, нехай ШІ шукає диференціально.</small>
+        </div>
+      </div>
+
+      <div class="row">
+        <div style="flex:1">
+          <label for="weather">Погодні дані (останні 3–5 днів)</label>
+          <textarea id="weather" class="input" rows="3" placeholder="tмакс 22–26°C, tмін 10–12°C, опади 8 мм, RH 70–90%, вітер слабкий"></textarea>
+        </div>
+        <div style="flex:1">
+          <label for="soil">Ґрунт/попередник/особливості</label>
+          <textarea id="soil" class="input" rows="3" placeholder="суглинок, pH 6.7, попередник — соняшник, загущені посіви на краю"></textarea>
+        </div>
+      </div>
+
+      <div class="row">
+        <div style="flex:1">
+          <label for="eil">ЕПШ/ПД (якщо відомі)</label>
+          <input id="eil" class="input" placeholder="вкажи локальні пороги або напиши: «запитати в ШІ з посиланнями»"/>
+        </div>
+        <div style="flex:1">
+          <label for="constraints">Обмеження/ресурси</label>
+          <input id="constraints" class="input" placeholder="лише наземний обприскувач, робоче вікно 2 дні, бюджет 8000 грн/га"/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div style="flex:1">
+          <label for="format">Формат відповіді ШІ</label>
+          <select id="format" class="input">
+            <option>JSON для імпорту</option>
+            <option>Короткий план дій</option>
+            <option>Розгорнута поетапна інструкція</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label for="tone">Роль/тон ШІ</label>
+          <select id="tone" class="input">
+            <option>Агроном-консультант з IPM</option>
+            <option>Викладач, що пояснює кроки студенту</option>
+            <option>Менеджер операцій (час/ресурси)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn good" id="gen">⚙️ Згенерувати промпт</button>
+        <button class="btn secondary" id="emu">🎲 Емулятор кейсу</button>
+        <button class="btn secondary" id="copy">📋 Копіювати</button>
+        <button class="btn secondary" id="dlTxt">⬇️ Завантажити .txt</button>
+        <span id="status" class="badge">Готовність: очікує дані</span>
+      </div>
+
+      <h3 style="margin-top:12px">🖨️ Прев’ю промпта</h3>
+      <pre class="code" id="preview"></pre>
+
+      <h3 style="margin-top:12px">🧪 Чек-лист оцінювання відповіді ШІ</h3>
+      <div class="small">
+        <label><input type="checkbox" class="crit" value="sources"/> Є посилання на джерела/етикетки засобів</label><br/>
+        <label><input type="checkbox" class="crit" value="local"/> Ураховано локальні умови (погода, ґрунт, BBCH)</label><br/>
+        <label><input type="checkbox" class="crit" value="thresholds"/> Зіставлено з ЕПШ/ПД і вказано розрахунок</label><br/>
+        <label><input type="checkbox" class="crit" value="ops"/> Є операційні обмеження (вікно погоди, техніка, бюджет)</label><br/>
+        <label><input type="checkbox" class="crit" value="safety"/> Є техніка безпеки та ЗІЗ</label><br/>
+        <label><input type="checkbox" class="crit" value="alt"/> Є альтернативи: хімія/агротехніка/біо та «нічого не робити» з ризиками</label><br/>
+        <label><input type="checkbox" class="crit" value="format"/> Формат відповіді збігається з обраним</label>
+      </div>
+
+      <h3 style="margin-top:12px">💾 Журнал рішення</h3>
+      <div class="row">
+        <input id="fio" class="input" placeholder="ПІБ студента"/>
+        <input id="decision" class="input" placeholder="Прийняте рішення (коротко)"/>
+        <button class="btn" id="addLog">➕ Додати в журнал</button>
+        <button class="btn secondary" id="exportCsv">📄 Експорт CSV</button>
+      </div>
+      <div id="log" class="log" aria-live="polite"></div>
+    </div>
+
+    <!-- Права колонка: схема + правила -->
+    <div class="card">
+      <h2>🔌 Схема процесу (SVG)</h2>
+      <svg viewBox="0 0 760 420" role="img" aria-label="Цикл роботи з ШІ у полі">
+        <rect x="40" y="40" width="160" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <text x="120" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Польові</text>
+        <text x="120" y="88" fill="#e5e7eb" font-size="14" text-anchor="middle">спостереження</text>
+
+        <rect x="260" y="40" width="160" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <text x="340" y="70" fill="#dcfce7" font-size="14" text-anchor="middle">Структурований</text>
+        <text x="340" y="88" fill="#dcfce7" font-size="14" text-anchor="middle">промпт</text>
+
+        <rect x="480" y="40" width="240" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <text x="600" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Відповідь ШІ</text>
+        <text x="600" y="88" fill="#94a3b8" font-size="12" text-anchor="middle">план/JSON/інструкція</text>
+
+        <rect x="40" y="180" width="240" height="90" rx="12" fill="#0b3f5a" stroke="#22d3ee"/>
+        <text x="160" y="210" fill="#a5f3fc" font-size="14" text-anchor="middle">Чек-лист валідації</text>
+        <text x="160" y="230" fill="#a5f3fc" font-size="12" text-anchor="middle">джерела, ЕПШ, безпека</text>
+
+        <rect x="320" y="180" width="180" height="90" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+        <text x="410" y="212" fill="#fed7aa" font-size="14" text-anchor="middle">Рішення</text>
+        <text x="410" y="232" fill="#fed7aa" font-size="12" text-anchor="middle">дія/відкласти/змінити</text>
+
+        <rect x="540" y="180" width="180" height="90" rx="12" fill="#111827" stroke="#4b5563"/>
+        <text x="630" y="210" fill="#e5e7eb" font-size="14" text-anchor="middle">Журнал</text>
+        <text x="630" y="230" fill="#9ca3af" font-size="12" text-anchor="middle">прозорість і навчання</text>
+
+        <!-- arrows -->
+        <line x1="200" y1="80" x2="260" y2="80" stroke="#93c5fd" stroke-width="3"/>
+        <line x1="420" y1="80" x2="480" y2="80" stroke="#93c5fd" stroke-width="3"/>
+        <line x1="160" y1="220" x2="320" y2="220" stroke="#22d3ee" stroke-width="3"/>
+        <line x1="500" y1="220" x2="540" y2="220" stroke="#fdba74" stroke-width="3"/>
+        <line x1="630" y1="270" x2="120" y2="120" stroke="#64748b" stroke-width="2" stroke-dasharray="6 6"/>
+        <text x="385" y="310" fill="#94a3b8" font-size="12" text-anchor="middle">Зворотній зв’язок покращує промпти</text>
+      </svg>
+
+      <div class="card" style="margin-top:14px">
+        <h3>🛡️ Антигалюцинаційні правила для промпта</h3>
+        <ul class="small">
+          <li>Вимагай <b>посилання на джерела</b> та чіткий поділ «факт/припущення».</li>
+          <li>Проси <b>альтернативи</b> із ризиками та оцінкою вартості/ефекту.</li>
+          <li>Фіксуй <b>формат відповіді</b> (JSON/таблиця/план) та <b>ліміт невпевненості</b>.</li>
+          <li>Змушуй ШІ ставити <b>уточнювальні запитання</b>, якщо чогось бракує.</li>
+        </ul>
+      </div>
+
+      <h3 style="margin-top:12px">🧷 Корисні теги</h3>
+      <div>
+        <span class="tag">#prompt_engineering</span>
+        <span class="tag">#IPM</span>
+        <span class="tag">#EIL_ET</span>
+        <span class="tag">#ag_scouting</span>
+        <span class="tag">#safety_first</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>Скрін із сформованим промптом і позначеними пунктами чек-листу.</li>
+      <li>Скопійована відповідь ШІ та коротке порівняння з ЕПШ/ПД.</li>
+      <li>CSV-журнал із рішенням та причинами вибору.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📜 Нотатка з історії</h2>
+    <p class="muted small">
+      Перші «експертні системи» для агро з’явилися ще у 1980-х — правило-орієнтовані консультаційні програми для діагностики хвороб рослин. 
+      Сучасні LLM дають ширший контекст і пояснюваність, якщо дати їм правильну структуру вхідних даних і вимоги до виходу. 
+      Саме тому на парі ми тренуємо <b>структурування кейсу</b> і <b>валідацію відповіді</b>.
+    </p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// Утиліти
+const $=(s)=>document.querySelector(s);
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+
+// Єдина правда — структуровані дані
+function buildPrompt(){
+  const crop=$('#crop').value.trim();
+  const bbch=$('#bbch').value.trim();
+  const field=$('#field').value.trim();
+  const area=($('#area').value||'').trim();
+  const symptoms=$('#symptoms').value.trim();
+  const pests=$('#pests').value.trim();
+  const weather=$('#weather').value.trim();
+  const soil=$('#soil').value.trim();
+  const eil=$('#eil').value.trim();
+  const constraints=$('#constraints').value.trim();
+  const format=$('#format').value;
+  const tone=$('#tone').value;
+
+  // Формати виходу
+  let formatBlock='';
+  if(format==='JSON для імпорту'){
+    formatBlock =
+`Формат відповіді (JSON, валідний, без коментарів):
+{
+  "suspected_causes": [{"name": "…", "evidence": ["…"], "confidence": 0..1}],
+  "threshold_check": {"used_thresholds": ["…"], "status": "below|near|above"},
+  "actions": [{"type":"scouting|agrotechnical|chemical|biological|no_action","what":"…","why":"…","cost_per_ha": number,"risk":"…"}],
+  "safety": {"PPE":"…","reentry_interval":"…","notes":"…"},
+  "questions": ["уточнюючі питання якщо даних бракує"]
+}`;
+  } else if(format==='Короткий план дій'){
+    formatBlock =
+`Формат відповіді: маркований список 5–8 кроків: [дія] — [чому] — [джерело/посилання] — [ризик].`;
+  } else {
+    formatBlock =
+`Формат відповіді: поетапна інструкція (1–7), з посиланнями на джерела і оцінкою ризиків на кожному кроці.`;
+  }
+
+  const prompt =
+`Ти — ${tone}. Працюємо за принципами інтегрованого захисту рослин (IPM) і доказовості.
+Контекст:
+• Культура: ${crop}
+• Фаза (BBCH): ${bbch || "не вказано"}
+• Локація/поле: ${field}
+• Площа, га: ${area}
+• Симптоми: ${symptoms}
+• Підозри: ${pests || "не вказано"}
+• Погода (ост. 3–5 днів): ${weather}
+• Ґрунт/особливості: ${soil}
+• ЕПШ/ПД: ${eil || "запитай локальні пороги й наведи джерела"}
+• Обмеження/ресурси: ${constraints || "не вказано"}
+
+Вимоги до відповіді:
+1) Спочатку постав до 5 уточнюючих запитань, якщо критичних даних бракує.
+2) Поясни логіку диференційної діагностики: ознака → можливі причини → чому ця причина ймовірніша.
+3) Обов’язково звір із ЕПШ/ПД і вкажи, як поріг був перевірений (посилання на джерело).
+4) Дай щонайменше 3 альтернативи: агротехнічна, біологічна, хімічна, а також «нічого не робити» з наслідками.
+5) Познач ризики для довкілля і безпеки (ЗІЗ, REI/PHI), а також операційні обмеження (вікно погоди, техніка, бюджет).
+6) Не вигадуй даних, не цитуй без джерела. Якщо джерела відсутні — чесно познач відсутність.
+
+${formatBlock}
+Вивід — саме у визначеному форматі.`;
+
+  return prompt;
+}
+
+// Прев’ю
+function renderPreview(){
+  const txt=buildPrompt();
+  $('#preview').textContent=txt;
+  $('#status').textContent='Готовність: промпт сформовано';
+}
+$('#gen').addEventListener('click', renderPreview);
+
+// Емулятор кейсу (швидкий старт)
+$('#emu').addEventListener('click', ()=>{
+  $('#crop').value='Пшениця озима';
+  $('#bbch').value='BBCH 37 — прапорцевий листок розгорнутий';
+  $('#field').value='Поле №3, Тальне, Черкаська обл.';
+  $('#area').value='25';
+  $('#symptoms').value='подовжені овальні плями зі світлішою серединою, жовтий ореол; уражено ~10%; сильніше у загущених місцях';
+  $('#pests').value='септоріоз листя, борошниста роса';
+  $('#weather').value='tмакс 24–27°C; tмін 9–12°C; опади 6 мм; RH 65–90%; роса вранці';
+  $('#soil').value='суглинок; pH 6.7; попередник соняшник; загущення на 12% краєм поля';
+  $('#eil').value='перевірити локальні пороги у методичних рекомендаціях Мінагро або у довіднику IPM для пшениці — попросити ШІ навести джерело';
+  $('#constraints').value='вікно 48 год, наземний обприскувач, бюджет до 7000 грн/га';
+  $('#format').value='JSON для імпорту';
+  $('#tone').value='Агроном-консультант з IPM';
+  renderPreview();
+});
+
+// Копіювання і експорт
+$('#copy').addEventListener('click', ()=>{
+  const ta=document.createElement('textarea');
+  ta.value=$('#preview').textContent; document.body.appendChild(ta);
+  ta.select(); document.execCommand('copy'); ta.remove();
+  $('#status').textContent='Промпт скопійовано у буфер';
+});
+$('#dlTxt').addEventListener('click', ()=>{
+  const txt=$('#preview').textContent||buildPrompt();
+  download('agro_para21_prompt_'+stamp()+'.txt',txt);
+});
+
+// Журнал
+const logEl=$('#log'); const rows=[];
+function addLogLine(){
+  const fio=($('#fio').value||'').trim();
+  const decision=($('#decision').value||'').trim();
+  const crits=[...document.querySelectorAll('.crit')].filter(c=>c.checked).map(c=>c.value).join('|');
+  const line=`${new Date().toLocaleString()} | ${fio} | ${decision} | чек-лист: ${crits}`;
+  rows.push({ts:new Date().toISOString(), fio, decision, crits});
+  logEl.textContent+=line+'\n';
+}
+$('#addLog').addEventListener('click', addLogLine);
+$('#exportCsv').addEventListener('click', ()=>{
+  const csvHeader='ts,fio,decision,checklist\n';
+  const csvBody=rows.map(r=>`${r.ts},"${r.fio.replace(/"/g,'""')}","${r.decision.replace(/"/g,'""')}","${r.crits}"`).join('\n');
+  download('agro_para21_log_'+stamp()+'.csv', csvHeader+csvBody, 'text/csv');
+});
+
+// Авто-прев’ю при першому відкритті порожнє — не заважаємо. Кінець.
+</script>
+</body>
+</html>
