@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 2 (газовики) — Маршрут бригади: зупинки, NFC, фото/аудіо, таймлайн, чек 58 мм, CSV/QR</title>
+<meta name="description" content="Маршрутний лист бригади: додай зупинки, ідентифікуй об’єкти NFC/кодом, роби фото до/після і голосові нотатки, фіксуй тривалість, будуй графік таймлайн, друкуй чек 58 мм, експортуй CSV/QR."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1280px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:14px;grid-template-columns:1.25fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:90px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+canvas.chart{display:block;width:100%;height:220px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+.canvasWrap{overflow:hidden;border-radius:12px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre;min-height:140px}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.photo{width:100%;max-width:240px;border:1px solid var(--line);border-radius:12px;display:block}
+.gallery{display:flex;gap:8px;flex-wrap:wrap}
+.stop{border:1px dashed var(--line);border-radius:12px;padding:10px;margin-top:10px;background:#0c182a}
+.stop h3{margin:0 0 8px 0;font-size:1.05rem}
+.stop .minirow{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🧭</span>
+      <div>
+        <b>Пара 2 — Маршрут бригади</b><br/>
+        <span class="badge">Зупинки → NFC/код → фото до/після → аудіо → тривалість → таймлайн → чек 58 мм → CSV/QR</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <!-- Ввідні -->
+  <div class="card">
+    <h2>📚 Сценарій заняття</h2>
+    <p>Створюємо <b>маршрутний лист</b> на день: додаємо <b>зупинки</b> (адреси/типи робіт), ідентифікуємо кожен об’єкт через <b>NFC</b> або код, робимо <b>фото «до/після»</b> і <b>голосові нотатки</b>, фіксуємо <b>тривалість</b> робіт і отримуємо <b>таймлайн</b>. Наприкінці — <b>чек 58 мм</b>, <b>CSV/TXT</b>, <b>QR</b>.</p>
+    <div class="row">
+      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">Бригада (ПІБ)<input id="crew" class="input" placeholder="Славінський В., Кошута В."/></label>
+      <label style="flex:1">Диспетчер<input id="disp" class="input" placeholder="Баланчук О."/></label>
+    </div>
+    <div class="row">
+      <button class="btn good" id="mkRoute">🧰 Створити маршрут</button>
+      <button class="btn" id="addStop">➕ Додати зупинку</button>
+      <button class="btn secondary" id="addExamples">🧪 Приклади зупинок (3)</button>
+      <span class="badge" id="rid">Маршрут: —</span>
+      <span class="badge" id="sCount">Зупинок: 0</span>
+    </div>
+    <div class="row">
+      <div class="badge">Активна зупинка:</div>
+      <select id="activeSel" class="input" style="max-width:260px"></select>
+      <button class="btn secondary" id="delStop">🗑️ Видалити активну</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Ліва колонка: Зупинки + Камера + Аудіо -->
+    <div class="card">
+      <h2>🛑 Зупинки маршруту</h2>
+      <div id="stops"></div>
+
+      <hr class="sep"/>
+
+      <h2>🎥 Камера та фото «до/після» (для активної зупинки)</h2>
+      <div class="row">
+        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <div>
+          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button class="btn" id="shotBefore">📷 Фото «до»</button>
+          <button class="btn" id="shotAfter">📷 Фото «після»</button><br/>
+          <small class="muted">Фото прив’язуються до <b>активної</b> зупинки.</small>
+        </div>
+      </div>
+      <div class="gallery" id="gal"></div>
+
+      <h2 style="margin-top:10px">🎙️ Голосова нотатка (для активної зупинки)</h2>
+      <div class="row">
+        <button class="btn" id="recStart">⏺️ Запис</button>
+        <button class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
+        <span class="badge" id="rstat">Немає запису</span>
+      </div>
+      <audio id="player" controls style="margin-top:8px;max-width:100%"></audio>
+    </div>
+
+    <!-- Права колонка: Таймлайн/Оцінка/Експорт -->
+    <div class="card">
+      <h2>🕒 Таймлайн і метрики</h2>
+      <div class="canvasWrap"><canvas id="timeline" class="chart" width="520" height="220"></canvas></div>
+      <table class="tbl" style="margin-top:8px">
+        <tbody>
+          <tr><th>Зупинок</th><td id="mStops">0</td></tr>
+          <tr><th>Фото (до/після)</th><td id="mPhotos">0 / 0</td></tr>
+          <tr><th>Аудіо-нотаток</th><td id="mAud">0</td></tr>
+          <tr><th>Сума тривалості, хв</th><td id="mDur">0</td></tr>
+          <tr><th>Статус</th><td id="mState"><b class="warn">Потрібно виконати кроки</b></td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">✅ Оцінювання (10 балів)</h2>
+      <ul>
+        <li>Маршрут створено (дата/бригада/диспетчер) — <b>2</b></li>
+        <li>≥3 зупинки з адресою/типом робіт — <b>2</b></li>
+        <li>NFC/код на кожній зупинці — <b>2</b></li>
+        <li>Фото «до/після» ≥2 зупинки — <b>2</b></li>
+        <li>Аудіо-нотатки ≥1 зупинка — <b>1</b></li>
+        <li>Таймлайн (внесені тривалості) — <b>1</b></li>
+      </ul>
+
+      <h2 style="margin-top:10px">💾 Експорт / друк</h2>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV (маршрут+зупинки)</button>
+        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (Route ID/посилання)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+
+      <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
+      <pre id="alog" class="card" style="max-height:220px;overflow:auto;margin-top:6px">// Поки без подій</pre>
+    </div>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString();const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+function clean(s){return String(s).replace(/\s+/g,' ').trim();}
+
+$('#upd').textContent = new Date().toLocaleDateString('uk-UA');
+
+// ===== Дані маршруту =====
+let ROUTE_ID=null;
+let STOPS=[]; // {id, addr, job, contact, asset, beforeImg, afterImg, audioUrl, durMin}
+function uid(p='S'){ return p+'-'+Math.random().toString(36).slice(2,7).toUpperCase(); }
+
+function refreshStopsUI(){
+  $('#stops').innerHTML='';
+  const sel=$('#activeSel'); const had=sel.value;
+  sel.innerHTML='';
+  STOPS.forEach((s,i)=>{
+    // селектор
+    const opt=document.createElement('option'); opt.value=s.id; opt.textContent=`${i+1}. ${s.addr||'(без адреси)'} — ${s.job||'тип?'}`; sel.appendChild(opt);
+    // блок зупинки
+    const d=document.createElement('div'); d.className='stop'; d.dataset.sid=s.id;
+    d.innerHTML = `
+      <h3>Зупинка #${i+1} <span class="badge mono">${s.id}</span></h3>
+      <div class="minirow">
+        <label style="flex:2">Адреса<input class="input in-addr" value="${s.addr||''}" placeholder="м. Тальне, вул. Шевченка, 10"/></label>
+        <label style="flex:1">Тип робіт
+          <select class="input in-job">
+            <option ${s.job==='Огляд лічильника'?'selected':''}>Огляд лічильника</option>
+            <option ${s.job==='Усунення витоку'?'selected':''}>Усунення витоку</option>
+            <option ${s.job==='Заміна крана/шланга'?'selected':''}>Заміна крана/шланга</option>
+            <option ${s.job==='Опломбування'?'selected':''}>Опломбування</option>
+            <option ${s.job==='Пуск газу'?'selected':''}>Пуск газу</option>
+          </select>
+        </label>
+        <label style="flex:1">Контакт<input class="input in-contact" value="${s.contact||''}" placeholder="+380..."/></label>
+      </div>
+      <div class="minirow" style="margin-top:6px">
+        <button class="btn btn-nfc">📶 NFC</button>
+        <input class="input in-asset" placeholder="ID об’єкта (якщо NFC недоступний)" value="${s.asset||''}"/>
+        <button class="btn secondary btn-asset">💾 Застосувати</button>
+        <span class="badge">Фото: <b class="phc">${s.beforeImg?1:0} / ${s.afterImg?1:0}</b></span>
+        <span class="badge">Аудіо: <b class="audc">${s.audioUrl?'є':'немає'}</b></span>
+      </div>
+      <div class="minirow" style="margin-top:6px">
+        <label>Тривалість, хв<input type="number" min="0" step="1" class="input in-dur" value="${Number.isFinite(s.durMin)?s.durMin:0}"/></label>
+      </div>
+      <div class="gallery gal-stop">${s.beforeImg?`<img class="photo" src="${s.beforeImg}" alt="до"/>`:''}${s.afterImg?`<img class="photo" src="${s.afterImg}" alt="після"/>`:''}</div>
+    `;
+    $('#stops').appendChild(d);
+  });
+  // відновити активний вибір
+  const exists = STOPS.some(s=>s.id===had);
+  sel.value = exists? had : (STOPS[0]?.id || '');
+  updateMetrics();
+  drawTimeline();
+}
+
+function addStop(data={}){
+  STOPS.push({
+    id: uid(),
+    addr: data.addr||'',
+    job: data.job||'Огляд лічильника',
+    contact: data.contact||'',
+    asset: data.asset||'',
+    beforeImg: data.beforeImg||null,
+    afterImg: data.afterImg||null,
+    audioUrl: data.audioUrl||null,
+    durMin: Number.isFinite(data.durMin)?data.durMin:0
+  });
+  refreshStopsUI();
+  $('#sCount').textContent='Зупинок: '+STOPS.length;
+  log('Додано зупинку');
+}
+
+function removeActive(){
+  const sid=$('#activeSel').value;
+  if(!sid) return;
+  STOPS = STOPS.filter(s=>s.id!==sid);
+  refreshStopsUI();
+  $('#sCount').textContent='Зупинок: '+STOPS.length;
+  log('Видалено активну зупинку');
+}
+
+// події в списку зупинок (делегування)
+$('#stops').addEventListener('input',(e)=>{
+  const wrap=e.target.closest('.stop'); if(!wrap) return;
+  const sid=wrap.dataset.sid; const s=STOPS.find(x=>x.id===sid); if(!s) return;
+  if(e.target.classList.contains('in-addr')) s.addr = clean(e.target.value);
+  if(e.target.classList.contains('in-job')) s.job = e.target.value;
+  if(e.target.classList.contains('in-contact')) s.contact = clean(e.target.value);
+  if(e.target.classList.contains('in-asset')) { /* ручне поле, застосовуємо на кнопку */ }
+  if(e.target.classList.contains('in-dur')) { s.durMin = Math.max(0, parseInt(e.target.value)||0); drawTimeline(); updateMetrics(); }
+});
+
+$('#stops').addEventListener('click', async (e)=>{
+  const wrap=e.target.closest('.stop'); if(!wrap) return;
+  const sid=wrap.dataset.sid; const s=STOPS.find(x=>x.id===sid); if(!s) return;
+  if(e.target.classList.contains('btn-asset')){
+    const val = clean(wrap.querySelector('.in-asset').value||'');
+    if(!val){ alert('Введи ID об’єкта'); return; }
+    s.asset=val; updateMetrics(); log(`Зупинка ${sid}: застосовано ID об’єкта: ${val}`);
+  }
+  if(e.target.classList.contains('btn-nfc')){
+    if('NDEFReader' in window){
+      try{
+        const reader=new NDEFReader(); await reader.scan();
+        log('Сканування NFC...');
+        reader.addEventListener('reading', ({message, serialNumber})=>{
+          let text=''; for(const rec of message.records){ if(rec.recordType==='text'){ const dec=new TextDecoder(rec.encoding||'utf-8'); text = dec.decode(rec.data); } }
+          s.asset = (text||serialNumber||('NFC-'+uid().slice(2))).toString();
+          wrap.querySelector('.in-asset').value = s.asset;
+          log(`Зчитано NFC для зупинки ${sid}: ${s.asset}`);
+          updateMetrics();
+        });
+      }catch(err){ alert('NFC недоступний/заборонений'); }
+    }else{
+      alert('Web NFC не підтримується. Введи код вручну.');
+    }
+  }
+});
+
+// ===== Створення маршруту та приклади =====
+$('#mkRoute').addEventListener('click',()=>{
+  const day=$('#day').value, crew=clean($('#crew').value||''), disp=clean($('#disp').value||'');
+  if(!day||!crew||!disp){ alert('Вкажи дату, бригаду та диспетчера'); return; }
+  ROUTE_ID = 'R-'+Math.random().toString(36).slice(2,8).toUpperCase();
+  $('#rid').textContent = 'Маршрут: '+ROUTE_ID;
+  log(`Створено маршрут ${ROUTE_ID} (дата ${day}, бригада: ${crew}, диспетчер: ${disp})`);
+  updateMetrics();
+});
+$('#addStop').addEventListener('click',()=>addStop({}));
+$('#delStop').addEventListener('click', removeActive);
+$('#addExamples').addEventListener('click',()=>{
+  addStop({addr:'м. Тальне, вул. Соборна, 21', job:'Огляд лічильника', contact:'+38067...', durMin:25});
+  addStop({addr:'смт. Лисянка, вул. Шевченка, 8', job:'Опломбування', contact:'+38096...', durMin:18});
+  addStop({addr:'м. Маньківка, вул. Центральна, 3', job:'Усунення витоку', contact:'+38050...', durMin:40});
+  log('Додано 3 приклади зупинок');
+});
+
+// ===== Активна зупинка =====
+$('#activeSel').addEventListener('change', renderActiveArtifacts);
+function activeStop(){
+  const sid=$('#activeSel').value; return STOPS.find(s=>s.id===sid)||null;
+}
+
+// ===== Камера / фото для активної зупинки =====
+let stream=null;
+async function startCam(){
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+    $('#vid').srcObject = stream;
+    log('Камеру увімкнено');
+  }catch(e){ alert('Камеру заблоковано або недоступно'); }
+}
+$('#camOn').addEventListener('click', startCam);
+
+function takeShot(kind){
+  const s=activeStop(); if(!s){ alert('Немає активної зупинки'); return; }
+  const video=$('#vid'); if(!video.srcObject){ alert('Спершу увімкни камеру'); return; }
+  const c=document.createElement('canvas'); c.width=video.videoWidth||640; c.height=video.videoHeight||480;
+  const g=c.getContext('2d'); g.drawImage(video,0,0,c.width,c.height);
+  const url=c.toDataURL('image/png');
+  if(kind==='до') s.beforeImg=url; else s.afterImg=url;
+  renderStopGallery(s.id);
+  renderActiveArtifacts();
+  updateMetrics();
+  log(`Зупинка ${s.id}: знято фото «${kind}»`);
+}
+$('#shotBefore').addEventListener('click',()=>takeShot('до'));
+$('#shotAfter').addEventListener('click',()=>takeShot('після'));
+
+function renderStopGallery(sid){
+  const s=STOPS.find(x=>x.id===sid); if(!s) return;
+  const wrap=$(`[data-sid="${sid}"]`);
+  const gal=wrap.querySelector('.gal-stop'); gal.innerHTML='';
+  if(s.beforeImg){ const i=document.createElement('img'); i.className='photo'; i.src=s.beforeImg; i.alt='до'; gal.appendChild(i); }
+  if(s.afterImg){ const i=document.createElement('img'); i.className='photo'; i.src=s.afterImg; i.alt='після'; gal.appendChild(i); }
+  wrap.querySelector('.phc').textContent = (s.beforeImg?1:0)+' / '+(s.afterImg?1:0);
+}
+
+// Плитка під відео з активної зупинки
+function renderActiveArtifacts(){
+  const s=activeStop(); const box=$('#gal'); box.innerHTML='';
+  if(!s) return;
+  if(s.beforeImg){ const i=document.createElement('img'); i.className='photo'; i.src=s.beforeImg; i.alt='до'; box.appendChild(i); }
+  if(s.afterImg){ const i=document.createElement('img'); i.className='photo'; i.src=s.afterImg; i.alt='після'; box.appendChild(i); }
+  $('#rstat').textContent = s.audioUrl?'Запис готовий':'Немає запису';
+  $('#player').src = s.audioUrl||'';
+}
+
+// ===== Аудіо для активної зупинки =====
+let mediaRec=null; let chunks=[];
+$('#recStart').addEventListener('click', async ()=>{
+  const s=activeStop(); if(!s){ alert('Немає активної зупинки'); return; }
+  try{
+    const st = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+    mediaRec = new MediaRecorder(st);
+    chunks=[];
+    mediaRec.ondataavailable = e=>{ if(e.data.size>0) chunks.push(e.data); };
+    mediaRec.onstop = ()=>{
+      const blob=new Blob(chunks,{type:'audio/webm'});
+      const url=URL.createObjectURL(blob);
+      s.audioUrl = url;
+      $('#player').src=url;
+      $('#rstat').textContent='Запис готовий';
+      // автозбереження файлу
+      const a=document.createElement('a'); a.href=url; a.download=`voice_${s.id}_`+stamp()+'.webm'; document.body.appendChild(a); a.click(); a.remove();
+      updateMetrics();
+      log(`Зупинка ${s.id}: голосову нотатку збережено`);
+    };
+    mediaRec.start();
+    $('#recStart').disabled=true; $('#recStop').disabled=false;
+    $('#rstat').textContent='Йде запис...';
+    log('Почато аудіозапис');
+  }catch(e){ alert('Мікрофон недоступний'); }
+});
+$('#recStop').addEventListener('click', ()=>{
+  if(mediaRec && mediaRec.state!=='inactive'){ mediaRec.stop(); }
+  $('#recStart').disabled=false; $('#recStop').disabled=true;
+});
+
+// ===== Таймлайн (графік тривалостей) =====
+const tl=$('#timeline'), gt=tl.getContext('2d');
+function drawTimeline(){
+  const W=tl.width,H=tl.height; gt.clearRect(0,0,W,H);
+  gt.strokeStyle='#223049'; gt.strokeRect(0.5,0.5,W-1,H-1);
+  gt.fillStyle='#94a3b8'; gt.font='11px ui-monospace';
+  gt.fillText('Таймлайн робіт (послідовність зупинок, тривалість хв)', 12, 16);
+  const left=40,right=W-10,top=24,bottom=H-30;
+  gt.strokeStyle='#334155'; gt.beginPath(); gt.moveTo(left,bottom); gt.lineTo(right,bottom); gt.stroke();
+  const total = STOPS.reduce((sum,s)=>sum+(Number.isFinite(s.durMin)?s.durMin:0),0);
+  const span = Math.max(1,total||1);
+  // масштаб по X = накопичений час, по Y — рівні (рядок)
+  let acc=0; let y=bottom-10;
+  STOPS.forEach((s,i)=>{
+    const w = ((s.durMin||0)/span)*(right-left);
+    const x = left + (acc/span)*(right-left);
+    gt.fillStyle='#38bdf8'; gt.fillRect(x, y-12, Math.max(4,w), 12);
+    gt.fillStyle='#e5e7eb'; gt.fillText(String(i+1), x+2, y-2);
+    acc += (s.durMin||0);
+    y -= 16; if(y<top+16) y=bottom-10; // простий перенос рядка
+  });
+  // мітки низу: 0, 25%, 50%, 75%, 100%
+  gt.fillStyle='#94a3b8';
+  ['0%','25%','50%','75%','100%'].forEach((t,k)=>gt.fillText(t, left + k*(right-left)/4 -8, H-8));
+}
+
+function updateMetrics(){
+  const photos = STOPS.reduce((a,s)=>[a[0]+(s.beforeImg?1:0), a[1]+(s.afterImg?1:0)], [0,0]);
+  const aud = STOPS.reduce((a,s)=>a+(s.audioUrl?1:0), 0);
+  const dur = STOPS.reduce((a,s)=>a+(Number.isFinite(s.durMin)?s.durMin:0), 0);
+  $('#mStops').textContent = STOPS.length;
+  $('#mPhotos').textContent = `${photos[0]} / ${photos[1]}`;
+  $('#mAud').textContent = String(aud);
+  $('#mDur').textContent = String(dur);
+  // статус-оцінка
+  const hasRoute = !!ROUTE_ID;
+  const manyStops = STOPS.length>=3 && STOPS.every(s=>s.addr && s.job);
+  const allAssets = STOPS.length>0 && STOPS.every(s=> (s.asset && s.asset.trim().length>0) );
+  const imgOK = STOPS.filter(s=>s.beforeImg && s.afterImg).length>=2;
+  const audOK = aud>=1;
+  const tlOK = dur>0;
+  let score=0; if(hasRoute)score+=2; if(manyStops)score+=2; if(allAssets)score+=2; if(imgOK)score+=2; if(audOK)score+=1; if(tlOK)score+=1;
+  const state = score>=9? `<b class="ok">Готово (≈${score}/10)</b>`:
+                score>=6? `<b class="warn">Більшість виконано (≈${score}/10)</b>`:
+                          `<b class="bad">Потрібно доробити (≈${score}/10)</b>`;
+  $('#mState').innerHTML = state;
+  drawTimeline();
+}
+
+// ===== Експорт / чек / QR =====
+function routeHeader(){
+  return {
+    route: ROUTE_ID||'—',
+    day: $('#day').value||'—',
+    crew: $('#crew').value||'—',
+    dispatcher: $('#disp').value||'—',
+    stops: STOPS.length
+  };
+}
+$('#saveCsv').addEventListener('click',()=>{
+  const h=routeHeader();
+  let csv='field,value\n';
+  Object.entries(h).forEach(([k,v])=>{ csv+=`${k},${String(v).replace(/,/g,';')}\n`; });
+  csv+='\n# stops\nidx,id,address,job,contact,asset,dur_min,photo_before,photo_after,audio\n';
+  STOPS.forEach((s,i)=>{
+    csv+=`${i+1},${s.id},"${(s.addr||'').replace(/"/g,'""')}",${s.job},${s.contact||''},${s.asset||''},${s.durMin||0},${s.beforeImg?'yes':'no'},${s.afterImg?'yes':'no'},${s.audioUrl?'yes':'no'}\n`;
+  });
+  download('gas_para02_route_'+stamp()+'.csv', csv, 'text/csv');
+  log('Експортовано CSV');
+});
+$('#saveTxt').addEventListener('click',()=>{
+  const h=routeHeader();
+  const lines=[
+    'Пара 2 — Маршрут бригади: підсумок',
+    `Маршрут: ${h.route}`,
+    `Дата: ${h.day}`,
+    `Бригада: ${h.crew}`,
+    `Диспетчер: ${h.dispatcher}`,
+    `Зупинок: ${h.stops}`,
+    '--- Деталі зупинок ---'
+  ];
+  STOPS.forEach((s,i)=>{
+    lines.push(`#${i+1} ${s.addr} — ${s.job}`);
+    lines.push(`  Контакт: ${s.contact||'—'}`);
+    lines.push(`  Об’єкт: ${s.asset||'—'}`);
+    lines.push(`  Тривалість: ${s.durMin||0} хв`);
+    lines.push(`  Фото до/після: ${(s.beforeImg?'1':'0')} / ${(s.afterImg?'1':'0')}; Аудіо: ${s.audioUrl?'є':'немає'}`);
+  });
+  download('gas_para02_route_'+stamp()+'.txt', lines.join('\n'));
+  log('Експортовано TXT');
+});
+$('#print58').addEventListener('click',()=>{
+  const rc=$('#rc'); rc.hidden=false;
+  const h=routeHeader();
+  const lines=[
+'=== GAS ROUTE (58мм) ===',
+'Route: '+h.route,
+'Date:  '+h.day,
+'Crew:  '+h.crew,
+'Disp:  '+h.dispatcher,
+'Stops: '+h.stops,
+'--------------------------'
+  ];
+  STOPS.forEach((s,i)=>{
+    lines.push(String(i+1).padStart(2,'0')+' '+(s.addr||'—'));
+    lines.push('  '+(s.job||'-')+' | '+(s.asset||'-')+' | '+(s.durMin||0)+' хв');
+  });
+  lines.push('--------------------------');
+  $('#rc').textContent = lines.join('\n');
+  download('gas_para02_receipt_'+stamp()+'.txt', $('#rc').textContent);
+  log('Згенеровано чек 58мм');
+});
+$('#qrGen').addEventListener('click',()=>{
+  const def = ROUTE_ID||'gas-route';
+  const data = prompt('Встав URL/ID (папка доказів або Route ID):', def);
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url;
+  log('Згенеровано QR');
+});
+
+// ===== Камера рендер активних артефактів при зміні зупинки =====
+function syncStopCounters(){
+  // оновити лічильники фото/аудіо в плитці зупинки
+  STOPS.forEach(s=>{
+    const wrap=$(`[data-sid="${s.id}"]`);
+    if(wrap){
+      const ph=wrap.querySelector('.phc'); if(ph) ph.textContent = (s.beforeImg?1:0)+' / '+(s.afterImg?1:0);
+      const au=wrap.querySelector('.audc'); if(au) au.textContent = s.audioUrl?'є':'немає';
+    }
+  });
+}
+setInterval(syncStopCounters, 1500);
+
+// ===== Ініціалізація =====
+(function init(){
+  // виставити сьогодні
+  const d=new Date(); const iso=d.toISOString().slice(0,10); $('#day').value=iso;
+  // мінімум одна зупинка для старту UX
+  addStop({});
+})();
+</script>
+</body>
+</html>
