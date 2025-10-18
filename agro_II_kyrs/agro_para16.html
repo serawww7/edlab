@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 16 — Arduino: сенсор вологості ґрунту (калібрування, %RHsoil, лог)</title>
+<meta name="description" content="Калібруємо ємнісний датчик вологості ґрунту: ADC→% вологості, усереднення, експоненційне згладжування, графік, експорт CSV/TXT. Генератор персонального .ino і схема підключення."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.btn.warn{border-color:#513a14;background:#2a1f0a}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.input, select, textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+small.mono, .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas,"Courier New",monospace}
+.grid{display:grid;gap:14px;grid-template-columns:1.2fr 1fr}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+svg{max-width:100%;height:auto;display:block}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:260px}
+label>span.hint{color:var(--muted);font-size:.9rem}
+.switch{display:flex;align-items:center;gap:8px}
+.switch input{width:42px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🌱</span>
+      <div>
+        <b>Пара 16 — Arduino: сенсор вологості ґрунту</b><br/>
+        <span class="badge">Агрономія · калібрування → % вологості → згладжування → лог</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">Мета: зняти <b>калібрувальні точки</b> «сухо/мокро», перетворити ADC у <b>% вологості</b>, застосувати <b>усереднення</b> та <b>експоненційне згладжування</b>, вести лог у форматі CSV і зберегти звіт. Без «заліза» можна увімкнути <b>емулятор</b> для розуміння алгоритму.</p>
+
+  <div class="grid">
+    <!-- ЛІВО: кроки + калібрування + графік -->
+    <div class="card">
+      <h2>🔧 Кроки лабораторної</h2>
+      <ol>
+        <li>Зберіть схему (праворуч). Вихід сенсора → <b>A0</b>, живлення 5V/GND.</li>
+        <li>Зніміть показ «<b>сухо</b>»: витріть датчик, тримайте в повітрі → запишіть <span class="mono">ADCdry</span>.</li>
+        <li>Зніміть показ «<b>мокро</b>»: у вологому ґрунті/воді (підрівняти без бульбашок) → <span class="mono">ADCwet</span>.</li>
+        <li>Введіть значення і параметри згладжування → згенеруйте скетч → прошийте → перевірте графік/лог.</li>
+      </ol>
+
+      <h3>🧪 Калібрування та фільтри</h3>
+      <div class="row">
+        <div style="flex:1">
+          <label for="dry">ADC «сухо» <span class="hint">(напр. 3000 або 800 для 10-біт)</span></label>
+          <input id="dry" class="input" type="number" min="10" max="4095" value="3000"/>
+        </div>
+        <div style="flex:1">
+          <label for="wet">ADC «мокро» <span class="hint">(напр. 800 або 500)</span></label>
+          <input id="wet" class="input" type="number" min="10" max="4095" value="800"/>
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label for="avg">Усереднення, зразків</label>
+          <input id="avg" class="input" type="number" min="1" max="50" value="10"/>
+        </div>
+        <div style="flex:1">
+          <label for="alpha">Експоненційне згладжування α (0..1)</label>
+          <input id="alpha" class="input" type="number" step="0.05" min="0" max="1" value="0.3"/>
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label for="ain">Аналоговий пін сенсора</label>
+          <select id="ain" class="input">
+            <option value="A0" selected>A0</option><option value="A1">A1</option><option value="A2">A2</option><option value="A3">A3</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label for="period">Період вимірювання, мс</label>
+          <input id="period" class="input" type="number" min="100" max="5000" step="100" value="1000"/>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <div class="switch">
+          <input id="emu" type="checkbox"/>
+          <label for="emu">Емулятор без Arduino (повзунок нижче)</label>
+        </div>
+        <input id="emuSlider" class="input" type="range" min="400" max="3400" value="2100" disabled/>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn good" id="gen">⚙️ Згенерувати скетч</button>
+        <button class="btn secondary" id="copy">📋 Копіювати код</button>
+        <button class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
+      </div>
+
+      <h3 style="margin-top:12px">📈 Живий графік (емульований або зчитаний вручну)</h3>
+      <div class="canvasWrap">
+        <canvas id="chart" width="900" height="260"></canvas>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="addPoint">➕ Додати точку (зчитати ADC/емулятор)</button>
+        <button class="btn secondary" id="clearChart">🧹 Очистити графік</button>
+        <span class="muted mono" id="lastVal">ADC=— →  — %</span>
+      </div>
+
+      <h3 style="margin-top:12px">🧩 Згенерований код (Arduino .ino)</h3>
+      <pre class="code"><code id="code">// Натисни «Згенерувати скетч» ↑</code></pre>
+
+      <h3 style="margin-top:12px">💾 Збереження протоколу калібрування</h3>
+      <div class="row">
+        <input id="fio" class="input" placeholder="ПІБ студента"/>
+        <button class="btn" id="saveTxt">💾 TXT</button>
+        <button class="btn" id="saveCsv">📄 CSV</button>
+      </div>
+    </div>
+
+    <!-- ПРАВО: схема + нотатки -->
+    <div class="card">
+      <h2>🔌 Схема підключення (SVG)</h2>
+      <svg viewBox="0 0 760 360" role="img" aria-label="Схема Arduino + Soil sensor">
+        <!-- Плата -->
+        <rect x="40" y="40" width="220" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <text x="150" y="65" fill="#e5e7eb" font-size="16" text-anchor="middle">Arduino UNO/Nano</text>
+        <text x="55" y="95" fill="#93c5fd" font-size="12">5V</text>
+        <text x="55" y="115" fill="#93c5fd" font-size="12">GND</text>
+        <text x="55" y="135" fill="#93c5fd" font-size="12">A0</text>
+
+        <!-- Сенсор -->
+        <rect x="320" y="40" width="200" height="100" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <text x="420" y="70" fill="#dcfce7" font-size="16" text-anchor="middle">Ємнісний сенсор</text>
+        <text x="420" y="90" fill="#a7f3d0" font-size="12" text-anchor="middle">VCC — OUT — GND</text>
+
+        <!-- З’єднання -->
+        <line x1="260" y1="90"  x2="320" y2="60"  stroke="#93c5fd" stroke-width="3"/><text x="280" y="80"  fill="#93c5fd" font-size="12">5V → VCC</text>
+        <line x1="260" y1="110" x2="320" y2="100" stroke="#64748b" stroke-width="3"/><text x="280" y="110" fill="#94a3b8" font-size="12">GND → GND</text>
+        <line x1="260" y1="130" x2="320" y2="80"  stroke="#22c55e" stroke-width="3"/><text x="280" y="95"  fill="#86efac" font-size="12">A0 ← OUT</text>
+      </svg>
+
+      <div class="note" style="margin-top:10px">
+        <b>Порада:</b> ємнісний датчик менш чутливий до корозії, але теж не любить «заливання» електроніки. Тримай плату вище рівня вологи, провід OUT — короткий.
+      </div>
+
+      <h3 style="margin-top:12px">🧷 Корисні теги</h3>
+      <div>
+        <span class="tag">#калібрування</span>
+        <span class="tag">#вологість_ґрунту</span>
+        <span class="tag">#усереднення</span>
+        <span class="tag">#експоненційне_згладжування</span>
+        <span class="tag">#серіал_лог</span>
+      </div>
+    </div>
+  </div>
+
+  <hr class="sep"/>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>Фото схеми;</li>
+      <li>Скрін/експорт CSV із 2–3 хв логу (крок ~1 с) при різній вологості;</li>
+      <li>Пояснення обраних параметрів: <span class="mono">ADCdry</span>, <span class="mono">ADCwet</span>, усереднення <span class="mono">N</span>, α-згладжування.</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// Утиліти
+const $ = (s)=>document.querySelector(s);
+function clip(s,n=999){return s.length>n?s.slice(0,n):s}
+function download(name, text, type="text/plain"){
+  const blob = new Blob([text], {type:type+";charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=name;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+function nowStamp(){ return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16); }
+
+// Мапа ADC→%
+function adcToPercent(adc, dry, wet){
+  // Нормуємо на [wet .. dry], де більші ADC = суші (для більшості ємнісних)
+  const span = (dry - wet);
+  if(span === 0) return 0;
+  let x = (adc - wet);
+  let p = 100 - (x * 100 / span);
+  if(p<0) p=0; if(p>100) p=100;
+  return p;
+}
+
+// Емулятор
+const emu = $('#emu'), emuSlider = $('#emuSlider');
+emu.addEventListener('change', ()=>{ emuSlider.disabled = !emu.checked; });
+
+// Примітивний графік
+const canvas = $('#chart'), ctx = canvas.getContext('2d');
+const data = []; // {t, adc, pct}
+function drawChart(){
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+  // рамка
+  ctx.strokeStyle = '#223049'; ctx.strokeRect(0.5,0.5,W-1,H-1);
+
+  if(data.length<2) return;
+  // масштаб
+  const maxN=60;
+  const series = data.slice(-maxN);
+  const xs = series.map((_,i)=> i*(W/(maxN-1)));
+  const adcs = series.map(p=>p.adc);
+  const pcts = series.map(p=>p.pct);
+  const amin = Math.min(...adcs), amax = Math.max(...adcs);
+  const mapY = (val, vmin, vmax)=> H-10 - ( (val - vmin) / Math.max(1,(vmax-vmin)) ) * (H-20);
+
+  // осі підписи
+  ctx.fillStyle = '#94a3b8'; ctx.font = '12px ui-monospace';
+  ctx.fillText(`ADC[min..max]=${amin}..${amax}`, 10, 14);
+  // Лінія ADC
+  ctx.beginPath(); ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2;
+  xs.forEach((x,i)=>{ const y = mapY(adcs[i], amin, amax); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+  ctx.stroke();
+
+  // Лінія % (нормовано до 0..100)
+  ctx.beginPath(); ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2;
+  xs.forEach((x,i)=>{ const y = mapY(pcts[i], 0, 100); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+  ctx.stroke();
+
+  // легенда
+  ctx.fillStyle = '#e6eef9';
+  ctx.fillText('ADC', W-80, 16);
+  ctx.fillText('%',   W-40, 16);
+}
+
+function addPoint(){
+  const dry = parseInt($('#dry').value,10);
+  const wet = parseInt($('#wet').value,10);
+  let adc;
+  if(emu.checked){
+    adc = parseInt(emuSlider.value,10);
+  }else{
+    // Без прямого Arduino у браузері беремо «ручне зчитування»: попросимо студента ввести
+    const m = prompt('Введи поточний ADC з Serial Monitor (ціле число):', '2100');
+    if(m===null) return;
+    adc = parseInt(m,10);
+    if(Number.isNaN(adc)) return alert('Некоректне число');
+  }
+  const pct = Math.round(adcToPercent(adc, dry, wet));
+  data.push({t:Date.now(), adc, pct});
+  $('#lastVal').textContent = `ADC=${adc} →  ${pct} %`;
+  drawChart();
+}
+$('#addPoint').addEventListener('click', addPoint);
+$('#clearChart').addEventListener('click', ()=>{ data.length=0; drawChart(); });
+
+// Генерація скетча
+function makeSketch(){
+  const dry = parseInt($('#dry').value,10);
+  const wet = parseInt($('#wet').value,10);
+  const avg = Math.max(1, parseInt($('#avg').value,10));
+  const alpha = Math.min(1, Math.max(0, parseFloat($('#alpha').value)));
+  const ain = $('#ain').value; // A0...
+  const period = Math.max(100, parseInt($('#period').value,10));
+
+  const code = `/*
+  Пара 16 — Arduino: сенсор вологості ґрунту (калібрування, %, лог)
+  Автор лаби: Сергій Поліщук (EDLab)
+
+  Функції:
+    - Зчитування ${ain} з усередненням N=${avg}
+    - Мапа ADC→% за калібруванням (dry=${dry}, wet=${wet})
+    - Експоненційне згладжування α=${alpha.toFixed(2)} (EMA)
+    - Вивід у Serial (CSV): millis,adc,percent,ema  кожні ${period} мс
+*/
+
+const int PIN_SOIL = ${ain};         // аналоговий пін
+const int AVG_SAMPLES = ${avg};      // усереднення
+const int PERIOD_MS   = ${period};   // період вимірювання
+
+// Калібрування (значення АЦП)
+const int CAL_DRY = ${dry};
+const int CAL_WET = ${wet};
+
+// Стан
+unsigned long tmr = 0;
+float ema = -1;
+
+int readAveraged(int pin){
+  long sum = 0;
+  for(int i=0;i<AVG_SAMPLES;i++){
+    sum += analogRead(pin);
+    delay(2);
+  }
+  return (int)(sum / AVG_SAMPLES);
+}
+
+int adcToPercent(int adc){
+  long span = (long)CAL_DRY - (long)CAL_WET;
+  if(span == 0) return 0;
+  long x = (long)adc - (long)CAL_WET;
+  long p = 100 - (x * 100 / span);
+  if(p<0) p=0; if(p>100) p=100;
+  return (int)p;
+}
+
+void setup(){
+  Serial.begin(115200);
+  delay(300);
+  Serial.println(F("millis,adc,pct,ema"));
+}
+
+void loop(){
+  if(millis() - tmr >= PERIOD_MS){
+    tmr = millis();
+    int adc = readAveraged(PIN_SOIL);
+    int pct = adcToPercent(adc);
+    if(ema < 0) ema = pct; // ініціалізація EMA першим значенням
+    ema = ${alpha.toFixed(3)} * pct + (1.0 - ${alpha.toFixed(3)}) * ema;
+    Serial.print(millis()); Serial.print(',');
+    Serial.print(adc);      Serial.print(',');
+    Serial.print(pct);      Serial.print(',');
+    Serial.println(ema, 2);
+  }
+}
+`;
+  return code;
+}
+
+$('#gen').addEventListener('click', ()=>{
+  const txt = makeSketch();
+  $('#code').textContent = txt;
+  window.scrollTo({top: $('#code').parentElement.getBoundingClientRect().top + window.scrollY - 20, behavior:'smooth'});
+});
+$('#copy').addEventListener('click', ()=>{
+  const ta = document.createElement('textarea');
+  ta.value = $('#code').textContent; document.body.appendChild(ta);
+  ta.select(); ta.setSelectionRange(0, ta.value.length);
+  document.execCommand('copy'); ta.remove();
+  const old = document.title; document.title = '✅ Код скопійовано'; setTimeout(()=>document.title=old,900);
+});
+$('#dl').addEventListener('click', ()=>{
+  const txt = $('#code').textContent || makeSketch();
+  download('agro_para16_soil_sensor.ino', txt, 'text/x-arduino');
+});
+
+// Звіт TXT/CSV
+$('#saveTxt').addEventListener('click', ()=>{
+  const fio = clip($('#fio').value.trim(), 120);
+  const dry = $('#dry').value, wet=$('#wet').value, avg=$('#avg').value, alpha=$('#alpha').value, ain=$('#ain').value, period=$('#period').value;
+  const lines = [
+    'Пара 16 — Arduino: сенсор вологості ґрунту',
+    'Студент: ' + fio,
+    'Калібрування: dry=' + dry + ', wet=' + wet,
+    'Фільтри: усереднення N=' + avg + ', EMA α=' + alpha,
+    'Параметри: пін=' + ain + ', період=' + period + ' мс',
+    'Коментар: ...'
+  ].join('\\n');
+  download('agro_para16_'+nowStamp()+'.txt', lines);
+});
+$('#saveCsv').addEventListener('click', ()=>{
+  const fio = $('#fio').value.replace(/"/g,'""');
+  const dry = $('#dry').value, wet=$('#wet').value, avg=$('#avg').value, alpha=$('#alpha').value, ain=$('#ain').value, period=$('#period').value;
+  const csv = '"Пара","Студент","dry","wet","avgN","alpha","pin","period_ms"\n'
+            + `"16","${fio}",${dry},${wet},${avg},${alpha},"${ain}",${period}\n`;
+  download('agro_para16_'+nowStamp()+'.csv', csv, 'text/csv');
+});
+
+// Живий графік старт
+drawChart();
+
+// Moodle-friendly клас
+if (window.self !== window.top) document.documentElement.classList.add('embedded');
+</script>
+</body>
+</html>
