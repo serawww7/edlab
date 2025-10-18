@@ -1,0 +1,129 @@
+  <h3 style="margin-top:12px">📏 Перетворення люкс → PPFD</h3>
+  <div class="row">
+    <div style="flex:1">
+      <label for="spectrum">Джерело світла</label>
+      <select id="spectrum" class="input">
+        <option value="0.0185" selected>Сонце/тепличне сонячне (~0.0185)</option>
+        <option value="0.0140">Білий LED (~0.0140)</option>
+        <option value="0.0125">Натрієва (HPS) (~0.0125)</option>
+      </select>
+      <small class="muted">Коефіцієнт k: PPFD ≈ k × lux</small>
+    </div>
+    <div style="flex:1">
+      <label for="kCustom">Або власний k (порожньо — не змінює)</label>
+      <input id="kCustom" class="input" type="number" step="0.0001" placeholder="0.0168"/>
+    </div>
+  </div>
+
+  <h3 style="margin-top:12px">🌞 DLI (Daily Light Integral)</h3>
+  <div class="row">
+    <div style="flex:1">
+      <label for="targetDLI">Ціль DLI (mol·m⁻²·d⁻¹)</label>
+      <input id="targetDLI" class="input" type="number" step="0.5" value="18"/>
+    </div>
+    <div style="flex:1">
+      <label for="startHour">Початок вікна (год, 0–23)</label>
+      <input id="startHour" class="input" type="number" min="0" max="23" value="6"/>
+    </div>
+    <div style="flex:1">
+      <label for="endHour">Кінець вікна (год, 0–23)</label>
+      <input id="endHour" class="input" type="number" min="0" max="23" value="22"/>
+    </div>
+  </div>
+  <div class="row" style="gap:14px">
+    <span id="dliBadge" class="badgeDLI">ΣDLI = 0.00 mol·m⁻²·d⁻¹</span>
+    <span class="muted">Формула: <span class="mono">DLI += PPFD × Δt / 1e6</span> (де PPFD в μmol·m⁻²·s⁻¹, <span class="mono">Δt</span> — у секундах)</span>
+  </div>
+
+  <h3 style="margin-top:12px">🧪 Емулятор (без датчика)</h3>
+  <div class="row">
+    <input id="emu" type="checkbox"/><label for="emu">Увімкнути емулятор</label>
+  </div>
+  <div class="row" style="width:100%">
+    <label style="flex:1">Освітленість, люкс
+      <input id="emuLux" class="input" type="range" min="0" max="80000" step="100" value="12000" disabled/>
+    </label>
+    <label style="flex:1">Стан реле (імітація)
+      <select id="emuRelay" class="input" disabled>
+        <option value="0" selected>Вимкнено</option>
+        <option value="1">Увімкнено</option>
+      </select>
+    </label>
+  </div>
+
+  <h3 style="margin-top:12px">📈 Живий графік</h3>
+  <div class="canvasWrap"><canvas id="chart" width="900" height="260"></canvas></div>
+  <div class="row" style="margin-top:8px">
+    <button class="btn" id="tick">➕ Додати точку</button>
+    <button class="btn secondary" id="clear">🧹 Очистити</button>
+    <span class="muted mono" id="lastVal">Lux=—, PPFD=—, ΣDLI=0.00</span>
+  </div>
+
+  <h3 style="margin-top:12px">🧩 Згенерований код (Arduino .ino)</h3>
+  <div class="row">
+    <button class="btn good" id="gen">⚙️ Згенерувати прошивку</button>
+    <button class="btn secondary" id="copy">📋 Копіювати</button>
+    <button class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
+  </div>
+  <pre class="code"><code id="code">// Натисни «Згенерувати прошивку» ↑</code></pre>
+
+  <h3 style="margin-top:12px">💾 Протокол для звіту</h3>
+  <div class="row">
+    <input id="fio" class="input" placeholder="ПІБ студента"/>
+    <button class="btn" id="saveTxt">💾 TXT</button>
+    <button class="btn" id="saveCsv">📄 CSV</button>
+  </div>
+</div>
+
+<!-- ПРАВА КОЛОНКА -->
+<div class="card">
+  <h2>🔌 Схема підключення (SVG)</h2>
+  <svg viewBox="0 0 760 380" role="img" aria-label="Arduino + BH1750 + реле">
+    <!-- Arduino -->
+    <rect x="40" y="40" width="240" height="140" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+    <text x="160" y="65" fill="#e5e7eb" font-size="16" text-anchor="middle">Arduino UNO/Nano</text>
+    <text x="55" y="95" fill="#93c5fd" font-size="12">5V</text>
+    <text x="55" y="115" fill="#93c5fd" font-size="12">GND</text>
+    <text x="55" y="135" fill="#93c5fd" font-size="12">A4 (SDA)</text>
+    <text x="55" y="155" fill="#93c5fd" font-size="12">A5 (SCL)</text>
+    <text x="235" y="155" fill="#93c5fd" font-size="12">D8 → RELAY</text>
+
+    <!-- BH1750 -->
+    <rect x="340" y="40" width="180" height="90" rx="12" fill="#14532d" stroke="#22c55e"/>
+    <text x="430" y="64" fill="#dcfce7" font-size="16" text-anchor="middle">BH1750 (I²C)</text>
+    <text x="430" y="84" fill="#a7f3d0" font-size="12" text-anchor="middle">VCC — GND — SDA — SCL</text>
+
+    <!-- Relay -->
+    <rect x="340" y="160" width="180" height="90" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+    <text x="430" y="184" fill="#fed7aa" font-size="16" text-anchor="middle">Реле (модуль)</text>
+    <text x="430" y="204" fill="#fed7aa" font-size="12" text-anchor="middle">IN — VCC — GND</text>
+
+    <!-- Lines -->
+    <line x1="280" y1="90"  x2="340" y2="60"  stroke="#93c5fd" stroke-width="3"/><text x="295" y="78" fill="#93c5fd" font-size="12">5V → VCC</text>
+    <line x1="280" y1="110" x2="340" y2="80"  stroke="#64748b" stroke-width="3"/><text x="295" y="96" fill="#94a3b8" font-size="12">GND → GND</text>
+    <line x1="280" y1="130" x2="340" y2="90"  stroke="#22c55e" stroke-width="3"/><text x="295" y="116" fill="#86efac" font-size="12">A4 → SDA</text>
+    <line x1="280" y1="150" x2="340" y2="100" stroke="#22c55e" stroke-width="3"/><text x="295" y="136" fill="#86efac" font-size="12">A5 → SCL</text>
+
+    <line x1="280" y1="150" x2="340" y2="180" stroke="#fb923c" stroke-width="3"/><text x="295" y="168" fill="#fdba74" font-size="12">D8 → IN</text>
+    <line x1="280" y1="90"  x2="340" y2="180" stroke="#93c5fd" stroke-width="3" opacity="0.4"/>
+    <line x1="280" y1="110" x2="340" y2="200" stroke="#64748b" stroke-width="3" opacity="0.4"/>
+  </svg>
+
+  <div class="note" style="margin-top:10px">
+    <b>Поради:</b> BH1750 розміщуй на рівні верхнього листя (або трохи вище), уникай тіней від конструкцій. Реле керує <i>блоком живлення</i> ламп, а не самими LED-стрічками напряму (для безпеки).
+  </div>
+
+  <h3 style="margin-top:12px">🧷 Корисні теги</h3>
+  <div>
+    <span class="tag">#BH1750</span>
+    <span class="tag">#PPFD</span>
+    <span class="tag">#DLI</span>
+    <span class="tag">#теплиця</span>
+    <span class="tag">#підсвітка</span>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h3>📜 Історична нотатка для обговорення</h3>
+    <p class="muted">У 1920-х Г. Гарнер і В. Аллард відкрили <b>фотоперіодизм</b> — реакцію рослин на довжину дня. Завдяки цьому агрономи навчилися регулювати цвітіння (хризантеми, соя) керуючи світлом і темрявою. Сьогодні ми рахуємо <b>DLI</b> і керуємо підсвіткою вже мікроконтролером.</p>
+  </div>
+</div>
