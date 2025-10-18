@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 12 (газовики) — Налаштування запірної арматури й регуляторів: карта положень, тренажер “обертів”, графік тиску P_in/P_out, фото, підпис, 58 мм, CSV/TXT, QR</title>
+<meta name="description" content="Практика: карта положень кранів з міжзамками, тренажер обертів регулятора (кроки/оберти/відсоток відкриття), живий графік тиску до/після, KPI (сетпойнт/друп/стабільність), фото, NFC/ID, підпис, чек 58 мм, CSV/TXT, QR."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1280px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:14px;grid-template-columns:1.25fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:#e6eef9}
+textarea{min-height:90px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:#e6eef9;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+canvas.scheme{display:block;width:100%;height:220px;background:#0b1220;border:1px dashed var(--line);border-radius:12px}
+.canvasWrap{overflow:hidden;border-radius:12px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre;min-height:140px}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.photo{width:100%;max-width:240px;border:1px solid var(--line);border-radius:12px;display:block}
+.gallery{display:flex;gap:8px;flex-wrap:wrap}
+.block{border:1px dashed var(--line);border-radius:12px;padding:10px;margin-top:10px;background:#0c182a}
+.sigWrap{border:1px dashed var(--line);border-radius:12px;padding:8px;background:#0c182a}
+#sig{background:#0b1220;border:1px solid var(--line);border-radius:8px;touch-action:none}
+.kpi{display:flex;gap:8px;flex-wrap:wrap}
+.kpi .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 10px;color:#e5e7eb}
+.tag.ok{border-color:#1d3e2a;background:#0f2f1e}
+.tag.warn{border-color:#4a3b13;background:#2b2310}
+.tag.bad{border-color:#5a1f1f;background:#2a1212}
+.valve{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;margin:3px 3px 0 0}
+.valve[data-state="open"]{background:#0f2f1e;border-color:#1d3e2a}
+.valve[data-state="closed"]{background:#2a1212;border-color:#5a1f1f}
+.dialWrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dial{width:140px;height:140px;border:1px solid var(--line);border-radius:50%;position:relative;background:#0b1220}
+.dial .hand{position:absolute;left:50%;top:50%;width:2px;height:50px;background:#e6eef9;transform-origin:bottom center;transform:translate(-50%,-100%) rotate(0deg);border-radius:2px}
+hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🧰⚙️</span>
+      <div>
+        <b>Пара 12 — Налаштування запірної арматури й регуляторів</b><br/>
+        <span class="badge">Карта положень → тренажер обертів → графік P_in/P_out → KPI → фото → NFC/ID → підпис → чек 58 мм → CSV/TXT → QR</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <!-- Ввідні -->
+  <div class="card">
+    <h2>📚 Сценарій</h2>
+    <p>Відпрацьовуємо безпечний пуск і налаштування регулятора тиску. Є <b>карта положень кранів</b> із міжзамками безпеки, <b>тренажер обертів</b> (кроки/оберти, % відкриття), 
+      <b>живий графік тиску</b> (до/після регулятора), автоматичні <b>KPI</b>: сетпойнт, відхилення, <i>droop</i>, стабільність. Додаємо <b>фото</b>, <b>NFC/ID</b>, <b>підпис</b>, друкуємо <b>чек 58 мм</b>, експортуємо <b>CSV/TXT</b>, генеруємо <b>QR</b>.</p>
+    <div class="row">
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котельня/квартира"/></label>
+      <label style="flex:1">Регулятор
+        <select id="regType" class="input">
+          <option selected>RG/2M</option><option>Fisher</option><option>Elster</option><option>Інший</option>
+        </select>
+      </label>
+      <label style="flex:1">DN<input id="dn" class="input" type="number" step="1" value="25"/></label>
+      <label style="flex:1">Сетпойнт P_out, мбар<input id="sp" class="input" type="number" step="0.1" value="20.0"/></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+    </div>
+    <div class="row">
+      <button class="btn good" id="mkCase">🧰 Створити кейс</button>
+      <span class="badge" id="cid">Кейс: —</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Ліва частина -->
+    <div class="card">
+      <h2>🗺️ Карта положень запірної арматури (міжзамки)</h2>
+      <div class="block">
+        <div id="valves" class="row"></div>
+        <small class="muted">Правило безпеки: спершу <b>ввідний</b> закритий, продувка, потім контроль витоків, тоді по черзі &mdash; до регулятора, після регулятора, прилад.</small>
+      </div>
+
+      <h2 style="margin-top:10px">🧭 Тренажер “обертів” регулятора</h2>
+      <div class="block">
+        <div class="dialWrap">
+          <div class="dial"><div id="hand" class="hand"></div></div>
+          <div>
+            <div class="row">
+              <button class="btn" id="turnMinus10">⟲ −10°</button>
+              <button class="btn" id="turnMinus">⟲ −1 крок</button>
+              <button class="btn" id="turnPlus">⟳ +1 крок</button>
+              <button class="btn" id="turnPlus10">⟳ +10°</button>
+            </div>
+            <div class="row">
+              <label>Крок, °<input id="stepDeg" class="input" type="number" step="0.1" value="6.0"/></label>
+              <label>Макс. хід, обертів<input id="maxRev" class="input" type="number" step="0.1" value="10.0"/></label>
+              <button class="btn secondary" id="resetDial">🧹 Скинути</button>
+            </div>
+            <div class="kpi" style="margin-top:6px">
+              <span class="tag ok">Кроків: <b id="stepsCnt">0</b></span>
+              <span class="tag warn">Оберти: <b id="revCnt">0.00</b></span>
+              <span class="tag bad">% відкриття: <b id="openPct">0</b>%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 style="margin-top:10px">🛰️ Емулятори тиску та записи</h2>
+      <div class="block">
+        <div class="row">
+          <label style="flex:1">P_in, мбар<input id="pin" type="range" class="input" min="0" max="100" step="0.5" value="30.0"/></label>
+          <span class="badge">Поточний P_in: <b id="pinNum">30.0</b></span>
+          <button class="btn" id="markPin">📍 Точка P_in</button>
+        </div>
+        <div class="row">
+          <label style="flex:1">P_out, мбар<input id="pout" type="range" class="input" min="0" max="60" step="0.1" value="18.5"/></label>
+          <span class="badge">Поточний P_out: <b id="poutNum">18.5</b></span>
+          <button class="btn" id="markPout">📍 Точка P_out</button>
+          <button class="btn secondary" id="clearSeries">🧹 Очистити графік</button>
+        </div>
+        <div class="row">
+          <label>Поріг стабільності, мбар<input id="stab" type="number" class="input" step="0.1" value="0.5"/></label>
+          <label>Довжина вікна стабільн., с<input id="win" type="number" class="input" step="1" value="15"/></label>
+          <button class="btn secondary" id="applyKPI">⚙️ Застосувати KPI</button>
+        </div>
+        <div class="kpi" style="margin-top:6px">
+          <span class="tag ok">Сетпойнт: <b id="spVal">20.0</b> мбар</span>
+          <span class="tag warn">Δ відхилення: <b id="devVal">—</b> мбар</span>
+          <span class="tag warn">Droop: <b id="droopVal">—</b> %</span>
+          <span class="tag bad">Стабільність: <b id="stabVal">—</b></span>
+        </div>
+      </div>
+
+      <h2 style="margin-top:10px">📈 Графік (P_in / P_out)</h2>
+      <div class="canvasWrap"><canvas id="chart" class="chart" width="520" height="240"></canvas></div>
+      <div class="row">
+        <button class="btn" id="autoTune">🎛️ Імітувати налаштування (10 c)</button>
+      </div>
+
+      <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
+      <div class="row">
+        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <div>
+          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button class="btn" data-kind="overview">📷 Загальний вигляд</button>
+          <button class="btn" data-kind="nameplate">📷 Табличка регулятора</button>
+          <button class="btn" data-kind="gauge">📷 Манометр</button><br/>
+          <small class="muted">Фото зберігаються у «Галереї доказів».</small>
+        </div>
+      </div>
+      <div class="gallery" id="gal"></div>
+
+      <h2 style="margin-top:10px">✍️ Підпис абонента</h2>
+      <div class="sigWrap">
+        <canvas id="sig" width="520" height="200"></canvas>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" id="sigClear">🧹 Очистити</button>
+          <button class="btn" id="sigSave">💾 Зберегти підпис</button>
+          <span class="badge" id="sigStat">Підпису немає</span>
+        </div>
+      </div>
+
+      <h2 style="margin-top:10px">📶 NFC / ID вузла</h2>
+      <div class="block">
+        <div class="row">
+          <button class="btn" id="nfcBtn">📶 NFC</button>
+          <input id="asset" class="input" placeholder="ID регулятора/вузла (якщо NFC недоступний)"/>
+          <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
+          <span class="badge" id="nfcs">Статус NFC: очікується</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Права частина -->
+    <div class="card">
+      <h2>📊 Метрики та стан</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Кейс</th><td id="mCase">—</td></tr>
+          <tr><th>ID вузла</th><td id="mAsset">—</td></tr>
+          <tr><th>Регулятор</th><td id="mReg">—</td></tr>
+          <tr><th>DN</th><td id="mDN">—</td></tr>
+          <tr><th>Сетпойнт</th><td id="mSP">—</td></tr>
+          <tr><th>Крани (ввід/доR/післяR/прилад)</th><td id="mValves">—</td></tr>
+          <tr><th>Кроки/оберти/%</th><td id="mDial">0 / 0.00 / 0%</td></tr>
+          <tr><th>Точок P_in / P_out</th><td id="mPts">0 / 0</td></tr>
+          <tr><th>KPI (Δ, droop, стаб.)</th><td id="mKPI">—</td></tr>
+          <tr><th>Фото (3)</th><td id="mPhotos">0 / 0 / 0</td></tr>
+          <tr><th>Підпис</th><td id="mSig">—</td></tr>
+          <tr><th>Статус</th><td id="mState"><b class="warn">Потрібно виконати кроки</b></td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">✅ Оцінювання (10 балів)</h2>
+      <ul>
+        <li>Кейс + параметри регулятора — <b>2</b></li>
+        <li>Карта кранів у безпечній конфігурації — <b>2</b></li>
+        <li>Тренажер: ≥1 оберт і ≧40% відкриття — <b>1</b></li>
+        <li>Графік: ≥8 точок сумарно — <b>1</b></li>
+        <li>KPI в межах (|Δ|≤1 мбар, droop≤10%, стабільність=Stable) — <b>3</b></li>
+        <li>Фото (3) або підпис — <b>1</b></li>
+      </ul>
+
+      <h2 style="margin-top:10px">💾 Експорт / друк</h2>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV</button>
+        <button class="btn" id="saveTxt">💾 TXT</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+
+      <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
+      <pre id="alog" class="card" style="max-height:240px;overflow:auto;margin-top:6px">// Поки без подій</pre>
+    </div>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString();const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+function clean(s){return String(s).replace(/\s+/g,' ').trim();}
+$('#upd').textContent=new Date().toLocaleDateString('uk-UA');
+(function(){ const d=new Date(); $('#day').value=d.toISOString().slice(0,10); })();
+
+// ===== Стан кейсу
+let CASE_ID=null, ASSET_ID=null;
+let photos={overview:null, nameplate:null, gauge:null};
+let sigUrl=null;
+
+// ===== Кейс
+$('#mkCase').addEventListener('click',()=>{
+  const addr=clean($('#addr').value||''); const tech=clean($('#tech').value||''); const day=$('#day').value;
+  if(!addr||!tech||!day){ alert('Вкажи адресу, виконавця та дату'); return; }
+  CASE_ID='R-'+Math.random().toString(36).slice(2,8).toUpperCase();
+  $('#cid').textContent='Кейс: '+CASE_ID;
+  log(`Кейс ${CASE_ID}: ${addr}, ${$('#regType').value}, DN${$('#dn').value}, SP=${$('#sp').value}мбар, ${tech}, ${day}`);
+  updateMetrics(); computeKPI(); drawChart(); drawScheme();
+});
+
+// ===== Карта клапанів / міжзамки
+const VALVES_DEF=[
+  {k:'inlet', name:'Ввідний кран', state:'closed'},
+  {k:'toReg', name:'Перед регулятором', state:'closed'},
+  {k:'afterReg', name:'Після регулятора', state:'closed'},
+  {k:'appliance', name:'Прилад/пальник', state:'closed'}
+];
+let VALVES = VALVES_DEF.map(v=>({ ...v }));
+function renderValves(){
+  const box=$('#valves'); box.innerHTML='';
+  VALVES.forEach(v=>{
+    const el=document.createElement('div');
+    el.className='valve'; el.dataset.key=v.k; el.dataset.state=v.state;
+    el.innerHTML=`<b>${v.name}</b><span class="badge mono">${v.state==='open'?'OPEN':'CLOSED'}</span><button class="btn secondary">🔁 Перемкнути</button>`;
+    box.appendChild(el);
+  });
+}
+renderValves();
+$('#valves').addEventListener('click',(e)=>{
+  const wrap=e.target.closest('.valve'); if(!wrap) return;
+  if(!e.target.matches('button')) return;
+  const key=wrap.dataset.key; const v=VALVES.find(x=>x.k===key);
+  // Міжзамки: не можна відкрити "appliance", якщо після регулятора закритий; не можна "toReg", якщо "inlet" закритий (імітація безпеки)
+  if(v.state==='closed'){
+    if(key==='toReg' && VALVES.find(x=>x.k==='inlet').state!=='open'){ alert('Спершу відкрий ввідний кран'); return; }
+    if(key==='afterReg' && VALVES.find(x=>x.k==='toReg').state!=='open'){ alert('Спершу відкрий кран перед регулятором'); return; }
+    if(key==='appliance' && VALVES.find(x=>x.k==='afterReg').state!=='open'){ alert('Спершу відкрий кран після регулятора'); return; }
+    v.state='open';
+  }else{
+    // Закриття дозволено будь-де
+    v.state='closed';
+  }
+  wrap.dataset.state=v.state;
+  wrap.querySelector('.badge').textContent = v.state==='open'?'OPEN':'CLOSED';
+  log(`Кран "${v.name}": ${v.state.toUpperCase()}`);
+  drawScheme(); updateMetrics();
+});
+function valvesSummary(){
+  return VALVES.map(v => (v.state==='open'?1:0)).join('/');
+}
+
+// ===== Схема (спрощена)
+const scheme=document.createElement('canvas'); scheme.className='scheme'; scheme.width=520; scheme.height=220;
+const schemeWrap=document.createElement('div'); schemeWrap.className='canvasWrap'; schemeWrap.appendChild(scheme);
+document.querySelector('.card .block').appendChild(document.createElement('div')); // просто заповнювач
+function drawScheme(){
+  const c=scheme, g=c.getContext('2d'); const W=c.width,H=c.height; g.clearRect(0,0,W,H);
+  g.strokeStyle='#223049'; g.strokeRect(0.5,0.5,W-1,H-1);
+  const y=H/2, x1=40, x2=160, x3=300, x4=440;
+  // труба
+  g.strokeStyle='#93c5fd'; g.lineWidth=6; g.beginPath(); g.moveTo(x1,y); g.lineTo(x4,y); g.stroke();
+  // вузли: inlet, toReg, regulator box, afterReg, appliance
+  function valve(x,label,key){
+    const open=VALVES.find(v=>v.k===key)?.state==='open';
+    g.fillStyle=open?'#22c55e':'#f87171';
+    g.fillRect(x-8,y-18,16,36);
+    g.fillStyle='#e5e7eb'; g.font='11px ui-monospace'; g.fillText(label, x-30, y-24);
+  }
+  valve(x1+20,'Ввід', 'inlet');
+  valve(x2-20,'Перед R','toReg');
+  // регулятор
+  g.fillStyle='#0e2a47'; g.strokeStyle='#3b82f6'; g.lineWidth=2;
+  g.fillRect(x2,y-28,90,56); g.strokeRect(x2,y-28,90,56);
+  g.fillStyle='#e5e7eb'; g.font='12px ui-monospace'; g.fillText('REG', x2+30, y+4);
+  valve(x3+20,'Після R','afterReg');
+  g.fillStyle='#eab308'; g.beginPath(); g.arc(x4-10,y,10,0,Math.PI*2); g.fill();
+  g.fillStyle='#e5e7eb'; g.fillText('Прилад', x4-26, y-24);
+}
+drawScheme();
+document.querySelectorAll('h2')[1].after(schemeWrap);
+
+// ===== Тренажер "обертів"
+let angle=0; // -180..+180
+let steps=0;
+function updateDial(){
+  const stepDeg=parseFloat($('#stepDeg').value)||6.0;
+  const maxRev=parseFloat($('#maxRev').value)||10.0;
+  const degPerRev=360;
+  const rev=steps*stepDeg/degPerRev;
+  const pct=Math.max(0, Math.min(100, Math.round( (rev/maxRev)*100 )));
+  $('#revCnt').textContent=rev.toFixed(2);
+  $('#stepsCnt').textContent=String(steps);
+  $('#openPct').textContent=String(pct);
+  $('#hand').style.transform=`translate(-50%,-100%) rotate(${angle}deg)`;
+  // проста залежність P_out від % відкриття та P_in (для навчання)
+  const pin=parseFloat($('#pin').value)||0;
+  const sp=parseFloat($('#sp').value)||0;
+  const target = Math.min(sp+5, pin*0.9, Math.max(0, pct/100*pin)); // навчальна модель
+  $('#pout').value = target.toFixed(1);
+  $('#poutNum').textContent = target.toFixed(1);
+  log(`Dial: кроків=${steps}, обертів=${rev.toFixed(2)}, відкриття=${pct}% → P_out≈${target.toFixed(1)} мбар`);
+  updateMetrics(); computeKPI();
+}
+$('#turnPlus').addEventListener('click',()=>{ const d=parseFloat($('#stepDeg').value)||6; steps++; angle=Math.min(180, angle+d); updateDial(); });
+$('#turnMinus').addEventListener('click',()=>{ const d=parseFloat($('#stepDeg').value)||6; steps=Math.max(0,steps-1); angle=Math.max(-180, angle-d); updateDial(); });
+$('#turnPlus10').addEventListener('click',()=>{ angle=Math.min(180, angle+10); steps+=Math.round(10/((parseFloat($('#stepDeg').value)||6))); updateDial(); });
+$('#turnMinus10').addEventListener('click',()=>{ angle=Math.max(-180, angle-10); steps=Math.max(0, steps-Math.round(10/((parseFloat($('#stepDeg').value)||6)))); updateDial(); });
+$('#resetDial').addEventListener('click',()=>{ steps=0; angle=0; updateDial(); });
+
+// ===== Емулятори/серії/графік
+const chart=$('#chart'), gc=chart.getContext('2d');
+let t0=null, sPin=[], sPout=[];
+function addPoint(series,v){
+  const now=Date.now(); if(!t0) t0=now; series.push({t:now,v}); drawChart(); computeKPI(); updateMetrics();
+}
+$('#pin').addEventListener('input',()=>{ $('#pinNum').textContent=$('#pin').value; });
+$('#pout').addEventListener('input',()=>{ $('#poutNum').textContent=$('#pout').value; });
+$('#markPin').addEventListener('click',()=>{ const v=parseFloat($('#pin').value); addPoint(sPin,v); log('Точка P_in: '+v.toFixed(1)+' мбар'); });
+$('#markPout').addEventListener('click',()=>{ const v=parseFloat($('#pout').value); addPoint(sPout,v); log('Точка P_out: '+v.toFixed(1)+' мбар'); });
+$('#clearSeries').addEventListener('click',()=>{ sPin=[]; sPout=[]; t0=null; drawChart(); computeKPI(); updateMetrics(); log('Очищено графік'); });
+
+function drawChart(){
+  const W=chart.width,H=chart.height; gc.clearRect(0,0,W,H);
+  gc.strokeStyle='#223049'; gc.strokeRect(0.5,0.5,W-1,H-1);
+  const left=40,right=W-50,top=24,bottom=H-30;
+  gc.strokeStyle='#1f2a44'; for(let y=0;y<5;y++){ const yy=top+y*(bottom-top)/4; gc.beginPath(); gc.moveTo(left,yy); gc.lineTo(right,yy); gc.stroke(); }
+  if((sPin.length+sPout.length)<2){ gc.fillStyle='#94a3b8'; gc.fillText('Додавай точки P_in та P_out або запусти імітацію', left+8, top+14); return; }
+  const all=[...sPin.map(x=>x.t), ...sPout.map(x=>x.t)].sort((a,b)=>a-b);
+  const tMin=all[0], tMax=all[all.length-1], span=tMax-tMin||1;
+  const pMax=Math.max(60, ...sPin.map(p=>p.v), ...sPout.map(p=>p.v), 10);
+  function X(t){ return left + (t - tMin)/span*(right-left); }
+  function Yp(v){ return bottom - (v/pMax)*(bottom-top); }
+  // P_in — синя
+  if(sPin.length){
+    gc.beginPath(); gc.strokeStyle='#38bdf8';
+    sPin.forEach((p,i)=>{ const x=X(p.t), y=Yp(p.v); if(i===0) gc.moveTo(x,y); else gc.lineTo(x,y); }); gc.stroke();
+    sPin.forEach(p=>{ const x=X(p.t), y=Yp(p.v); gc.fillStyle='#38bdf8'; gc.fillRect(x-2,y-2,4,4); });
+  }
+  // P_out — зелена
+  if(sPout.length){
+    gc.beginPath(); gc.strokeStyle='#22c55e';
+    sPout.forEach((p,i)=>{ const x=X(p.t), y=Yp(p.v); if(i===0) gc.moveTo(x,y); else gc.lineTo(x,y); }); gc.stroke();
+    sPout.forEach(p=>{ const x=X(p.t), y=Yp(p.v); gc.fillStyle='#22c55e'; gc.fillRect(x-2,y-2,4,4); });
+  }
+  // SP лінія
+  const sp=parseFloat($('#sp').value)||0;
+  gc.strokeStyle='#fbbf24'; gc.beginPath(); gc.moveTo(left, Yp(sp)); gc.lineTo(right, Yp(sp)); gc.stroke();
+
+  gc.fillStyle='#94a3b8'; gc.font='11px ui-monospace';
+  gc.fillText('мбар', left, top-6);
+  gc.fillStyle='#38bdf8'; gc.fillRect(right+4, top, 12, 4); gc.fillStyle='#e5e7eb'; gc.fillText('P_in', right+20, top+4);
+  gc.fillStyle='#22c55e'; gc.fillRect(right+4, top+16, 12, 4); gc.fillStyle='#e5e7eb'; gc.fillText('P_out', right+20, top+20);
+  gc.fillStyle='#fbbf24'; gc.fillRect(right+4, top+32, 12, 4); gc.fillStyle='#e5e7eb'; gc.fillText('SP', right+20, top+36);
+}
+
+// Імітація авто-налаштування
+let autoTimer=null, autoI=0;
+$('#autoTune').addEventListener('click',()=>{
+  if(autoTimer){ clearInterval(autoTimer); autoTimer=null; }
+  autoI=0; const sp=parseFloat($('#sp').value)||20; let pin=parseFloat($('#pin').value)||30;
+  autoTimer=setInterval(()=>{
+    autoI++; // крок (1с)
+    // зробимо невеликі коливання P_in
+    pin += (Math.random()-0.5)*0.6; pin=Math.max(5,Math.min(100,pin));
+    $('#pin').value=pin.toFixed(1); $('#pinNum').textContent=pin.toFixed(1); addPoint(sPin, pin);
+    // повільно тягнемо P_out до SP з невеликою хисткістю
+    const cur=parseFloat($('#pout').value)||0;
+    const next = cur + Math.sign(sp-cur)*Math.max(0.2, Math.abs(sp-cur)*0.25) + (Math.random()-0.5)*0.2;
+    $('#pout').value=next.toFixed(1); $('#poutNum').textContent=next.toFixed(1); addPoint(sPout, parseFloat(next.toFixed(1)));
+    if(autoI>=10){ clearInterval(autoTimer); autoTimer=null; log('Імітацію завершено'); }
+  },1000);
+});
+
+// ===== KPI
+let KPI={stabTol:0.5, winSec:15};
+$('#applyKPI').addEventListener('click',()=>{ KPI.stabTol=Math.max(0,parseFloat($('#stab').value)||0.5); KPI.winSec=Math.max(5,parseInt($('#win').value)||15); computeKPI(); updateMetrics(); log(`KPI: стабільність ±${KPI.stabTol} мбар, вікно ${KPI.winSec}с`); });
+
+function computeKPI(){
+  const sp=parseFloat($('#sp').value)||0;
+  $('#spVal').textContent=sp.toFixed(1);
+  const dev = (sPout.length? sPout[sPout.length-1].v : parseFloat($('#pout').value)||0) - sp;
+  $('#devVal').textContent=isFinite(dev)?dev.toFixed(1):'—';
+  // droop = 100*(Pout_avg_recent - Pout_avg_base)/Pout_avg_base (спрощено: проти середнього перших точок і останніх)
+  let droop='—';
+  if(sPout.length>=6){
+    const n=sPout.length;
+    const base=sPout.slice(0,Math.max(2,Math.floor(n*0.3))).reduce((a,b)=>a+b.v,0)/Math.max(2,Math.floor(n*0.3));
+    const recent=sPout.slice(Math.floor(n*0.7)).reduce((a,b)=>a+b.v,0)/Math.max(1,n-Math.floor(n*0.7));
+    droop = base>0? ((recent-base)/base*100).toFixed(1):'—';
+  }
+  $('#droopVal').textContent=droop;
+  // Stability: якщо протягом winSec std(P_out) <= stabTol → Stable, інакше Unstable
+  let stab='—';
+  if(sPout.length>=3){
+    const now=Date.now(); const win = KPI.winSec*1000;
+    const arr=sPout.filter(p=> now - p.t <= win).map(p=>p.v);
+    if(arr.length>=3){
+      const avg=arr.reduce((a,b)=>a+b,0)/arr.length;
+      const std=Math.sqrt(arr.reduce((a,b)=>a+(b-avg)*(b-avg),0)/arr.length);
+      stab = std<=KPI.stabTol? `Stable (σ=${std.toFixed(2)})` : `Unstable (σ=${std.toFixed(2)})`;
+    }
+  }
+  $('#stabVal').textContent=stab;
+  $('#mKPI').textContent = `${$('#devVal').textContent} мбар, ${$('#droopVal').textContent}% , ${stab}`;
+  updateState();
+}
+
+// ===== Камера / фото
+let stream=null;
+async function startCam(){
+  try{ stream = await navigator.mediaDevices.getUserMedia({video:true,audio:false}); $('#vid').srcObject=stream; log('Камеру увімкнено'); }
+  catch(e){ alert('Камеру заблоковано або недоступно'); }
+}
+$('#camOn').addEventListener('click', startCam);
+function takeShot(kind){
+  const video=$('#vid'); if(!video.srcObject){ alert('Спершу увімкни камеру'); return; }
+  const c=document.createElement('canvas'); c.width=video.videoWidth||640; c.height=video.videoHeight||480;
+  c.getContext('2d').drawImage(video,0,0,c.width,c.height);
+  const url=c.toDataURL('image/png'); photos[kind]=url; renderGallery(); log(`Фото: ${kind}`); updateMetrics();
+}
+$$('button[data-kind]').forEach(b=>b.addEventListener('click',()=>takeShot(b.dataset.kind)));
+function renderGallery(){
+  const gal=$('#gal'); gal.innerHTML='';
+  if(photos.overview){ const i=document.createElement('img'); i.className='photo'; i.src=photos.overview; i.alt='огляд'; gal.appendChild(i); }
+  if(photos.nameplate){ const i=document.createElement('img'); i.className='photo'; i.src=photos.nameplate; i.alt='табличка'; gal.appendChild(i); }
+  if(photos.gauge){ const i=document.createElement('img'); i.className='photo'; i.src=photos.gauge; i.alt='манометр'; gal.appendChild(i); }
+}
+
+// ===== Підпис
+const sig=$('#sig'), ctx=sig.getContext('2d');
+let drawing=false, last=null, hasInk=false;
+function xy(e){ const r=sig.getBoundingClientRect(); const t=e.touches? e.touches[0]:e; return {x:(t.clientX-r.left)*sig.width/r.width, y:(t.clientY-r.top)*sig.height/r.height}; }
+function line(a,b){ ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.strokeStyle='#e5e7eb'; ctx.lineWidth=2; ctx.lineCap='round'; ctx.stroke(); }
+sig.addEventListener('pointerdown',e=>{ drawing=true; last=xy(e); hasInk=true; });
+sig.addEventListener('pointermove',e=>{ if(!drawing) return; const p=xy(e); line(last,p); last=p; });
+sig.addEventListener('pointerup',()=>{ drawing=false; last=null; });
+sig.addEventListener('pointerleave',()=>{ drawing=false; last=null; });
+$('#sigClear').addEventListener('click',()=>{ ctx.clearRect(0,0,sig.width,sig.height); hasInk=false; $('#sigStat').textContent='Підпису немає'; updateMetrics(); });
+$('#sigSave').addEventListener('click',()=>{ if(!hasInk){ alert('Немає підпису'); return; } sigUrl=sig.toDataURL('image/png'); $('#sigStat').textContent='Підпис збережено'; const a=document.createElement('a'); a.href=sigUrl; a.download='signature_'+(CASE_ID||'case')+'_'+stamp()+'.png'; document.body.appendChild(a); a.click(); a.remove(); log('Підпис збережено (png)'); updateMetrics(); });
+
+// ===== NFC / ID
+async function tryNFC(){
+  if('NDEFReader' in window){
+    try{
+      const reader=new NDEFReader(); await reader.scan();
+      $('#nfcs').textContent='Статус NFC: сканування...';
+      reader.addEventListener('reading', ({message, serialNumber})=>{
+        let text=''; for(const rec of message.records){ if(rec.recordType==='text'){ const dec=new TextDecoder(rec.encoding||'utf-8'); text = dec.decode(rec.data); } }
+        ASSET_ID = (text||serialNumber||'NFC-'+Math.random().toString(36).slice(2,7)).toString();
+        $('#asset').value=ASSET_ID; $('#nfcs').textContent='Статус NFC: зчитано';
+        log('NFC: '+ASSET_ID); updateMetrics();
+      });
+    }catch(e){ $('#nfcs').textContent='Статус NFC: помилка'; alert('NFC недоступний/заборонений'); }
+  }else{ alert('Web NFC не підтримується. Введи код вручну.'); }
+}
+$('#nfcBtn').addEventListener('click', tryNFC);
+$('#saveAsset').addEventListener('click',()=>{ const v=clean($('#asset').value||''); if(!v){ alert('Введи ID вузла'); return; } ASSET_ID=v; $('#nfcs').textContent='Статус NFC: застосовано вручну'; log('ID вузла: '+ASSET_ID); updateMetrics(); });
+
+// ===== Метрики/стан
+function updateState(){
+  let score=0;
+  const caseOk=!!CASE_ID;
+  const vSafe = (VALVES.find(x=>x.k==='inlet').state==='open' && VALVES.find(x=>x.k==='toReg').state==='open' && VALVES.find(x=>x.k==='afterReg').state==='open'); // прилад може бути закритим
+  const dialOk = parseFloat($('#revCnt').textContent)>=1 || parseInt($('#openPct').textContent)>=40;
+  const pointsOk=(sPin.length+sPout.length)>=8;
+  const kpiOk = ( Math.abs(parseFloat($('#devVal').textContent)||999)<=1 && (parseFloat($('#droopVal').textContent)||0)<=10 && $('#stabVal').textContent.startsWith('Stable') );
+  const photoOrSign = (!!photos.overview && !!photos.nameplate && !!photos.gauge) || !!sigUrl;
+
+  if(caseOk)score+=2;
+  if(vSafe)score+=2;
+  if(dialOk)score+=1;
+  if(pointsOk)score+=1;
+  if(kpiOk)score+=3;
+  if(photoOrSign)score+=1;
+
+  const html = score>=9? `<b class="ok">Готово (≈${score}/10)</b>`:
+               score>=6? `<b class="warn">Більшість виконано (≈${score}/10)</b>`:
+                         `<b class="bad">Потрібно доробити (≈${score}/10)</b>`;
+  $('#mState').innerHTML=html;
+}
+function updateMetrics(){
+  $('#mCase').textContent = CASE_ID||'—';
+  $('#mAsset').textContent = ASSET_ID||($('#asset').value||'—');
+  $('#mReg').textContent = $('#regType').value||'—';
+  $('#mDN').textContent = $('#dn').value||'—';
+  $('#mSP').textContent = ($('#sp').value||'—')+' мбар';
+  $('#mValves').textContent = valvesSummary();
+  $('#mDial').textContent = `${$('#stepsCnt').textContent} / ${$('#revCnt').textContent} / ${$('#openPct').textContent}%`;
+  $('#mPts').textContent = `${sPin.length} / ${sPout.length}`;
+  $('#mPhotos').textContent = `${photos.overview?1:0} / ${photos.nameplate?1:0} / ${photos.gauge?1:0}`;
+  $('#mSig').textContent = sigUrl?'є':'—';
+  $('#mKPI').textContent = `${$('#devVal').textContent} мбар, ${$('#droopVal').textContent}% , ${$('#stabVal').textContent}`;
+  computeKPI(); updateState();
+}
+
+// ===== Експорт / чек / QR
+function summary(){
+  const addr=$('#addr').value||'—', tech=$('#tech').value||'—', day=$('#day').value||'—';
+  return {
+    case: CASE_ID||'—', addr, tech, day,
+    regulator: {type: $('#regType').value||'—', dn: parseInt($('#dn').value)||0, setpoint_mbar: parseFloat($('#sp').value)||0},
+    asset: ASSET_ID||($('#asset').value||'—'),
+    valves: Object.fromEntries(VALVES.map(v=>[v.k,v.state])),
+    dial: {steps: parseInt($('#stepsCnt').textContent)||0, rev: parseFloat($('#revCnt').textContent)||0, open_pct: parseInt($('#openPct').textContent)||0},
+    points: {
+      pin: sPin.map(p=>({t:new Date(p.t).toISOString(), mbar:p.v})),
+      pout: sPout.map(p=>({t:new Date(p.t).toISOString(), mbar:p.v}))
+    },
+    kpi: {dev_mbar: $('#devVal').textContent, droop_pct: $('#droopVal').textContent, stability: $('#stabVal').textContent},
+    photos: {overview:!!photos.overview, nameplate:!!photos.nameplate, gauge:!!photos.gauge},
+    signature: !!sigUrl
+  };
+}
+$('#saveCsv').addEventListener('click',()=>{
+  const s=summary();
+  let csv='field,value\n';
+  for(const [k,v] of Object.entries(s)){
+    if(k==='points') continue;
+    if(typeof v==='object'){ csv+=`${k},${JSON.stringify(v).replace(/,/g,';')}\n`; }
+    else csv+=`${k},${String(v).replace(/,/g,';')}\n`;
+  }
+  csv+='\n# pin_points\niso_time,mbar\n';
+  s.points.pin.forEach(p=>{ csv+=`${p.t},${p.mbar}\n`; });
+  csv+='\n# pout_points\niso_time,mbar\n';
+  s.points.pout.forEach(p=>{ csv+=`${p.t},${p.mbar}\n`; });
+  download('gas_para12_regulator_'+stamp()+'.csv', csv, 'text/csv'); log('Експортовано CSV');
+});
+$('#saveTxt').addEventListener('click',()=>{
+  const s=summary();
+  const lines=[
+    'Пара 12 — Налаштування запірної арматури й регуляторів: підсумок',
+    `Кейс: ${s.case}`, `Адреса: ${s.addr}`, `Регулятор: ${s.regulator.type}, DN ${s.regulator.dn}, SP ${s.regulator.setpoint_mbar} мбар`,
+    `Виконавець: ${s.tech}`, `Дата: ${s.day}`, `ID вузла: ${s.asset}`,
+    `Крани: ${Object.entries(s.valves).map(([k,v])=>k+':'+v).join(', ')}`,
+    `Тренажер: кроків=${s.dial.steps}, оберти=${s.dial.rev}, відкриття=${s.dial.open_pct}%`,
+    `KPI: Δ=${s.kpi.dev_mbar} мбар; droop=${s.kpi.droop_pct}% ; стабільність=${s.kpi.stability}`,
+    `Фото (overview/nameplate/gauge): ${s.photos.overview?'1':'0'} / ${s.photos.nameplate?'1':'0'} / ${s.photos.gauge?'1':'0'}`,
+    `Підпис: ${s.signature?'є':'—'}`,
+    `--- Точок: P_in=${s.points.pin.length}, P_out=${s.points.pout.length} ---`
+  ];
+  download('gas_para12_regulator_'+stamp()+'.txt', lines.join('\n')); log('Експортовано TXT');
+});
+$('#print58').addEventListener('click',()=>{
+  const s=summary(); const rc=$('#rc'); rc.hidden=false;
+  const lines=[
+'=== REGULATOR SETUP (58мм) ===',
+'Case: '+s.case,
+'Date: '+s.day,
+'Addr: '+s.addr,
+'Reg:  '+s.regulator.type+' DN'+s.regulator.dn+' SP:'+s.regulator.setpoint_mbar+'mbar',
+'Asset:'+s.asset,
+'Valv: '+Object.entries(s.valves).map(([k,v])=>k[0].toUpperCase()+':'+(v==='open'?'O':'C')).join(' '),
+'Dial: '+'S'+s.dial.steps+' R'+s.dial.rev+' '+s.dial.open_pct+'%',
+'KPI:  Δ'+s.kpi.dev_mbar+' droop '+s.kpi.droop_pct+'% '+s.kpi.stability,
+'Pts:  In'+s.points.pin.length+' Out'+s.points.pout.length,
+'Photos:'+(s.photos.overview?1:0)+'/'+(s.photos.nameplate?1:0)+'/'+(s.photos.gauge?1:0)+' Sign:'+(s.signature?'Y':'N'),
+'--------------------------'
+  ];
+  rc.textContent=lines.join('\n');
+  download('gas_para12_receipt_'+stamp()+'.txt', rc.textContent);
+  log('Згенеровано чек 58мм');
+});
+$('#qrGen').addEventListener('click',()=>{
+  const def=CASE_ID||ASSET_ID||'regulator-setup';
+  const data=prompt('Встав URL/ID (Case або Asset):', def);
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url; log('Згенеровано QR');
+});
+
+// ===== Ініт
+function initDefaults(){ const d=new Date(); $('#day').value=d.toISOString().slice(0,10); }
+initDefaults(); updateMetrics(); computeKPI(); drawChart(); drawScheme();
+
+// Вбудоване відображення (Moodle/iFrame)
+(function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+</script>
+</body>
+</html>
