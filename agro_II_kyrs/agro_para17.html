@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 17 — Arduino: насос для поливу (реле, поріг, гістерезис, мін. час, ручний режим)</title>
+<meta name="description" content="Реле насоса для поливу на Arduino: поріг вологості, гістерезис, мінімальний час увімкнення/вимкнення, ручний режим, лог у CSV. Схема + генератор .ino."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.btn.warn{border-color:#513a14;background:#2a1f0a}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.input, select, textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+small.mono, .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas,"Courier New",monospace}
+.grid{display:grid;gap:14px;grid-template-columns:1.2fr 1fr}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+svg{max-width:100%;height:auto;display:block}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:220px}
+.badgeState{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid #334155}
+.badgeState.on{background:#12341b;border-color:#204b2a;color:#bbf7d0}
+.badgeState.off{background:#2a1f0a;border-color:#513a14;color:#fde68a}
+.switch{display:flex;align-items:center;gap:8px}
+.switch input{width:42px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🚿</span>
+      <div>
+        <b>Пара 17 — Arduino: насос для поливу (реле)</b><br/>
+        <span class="badge">Агрономія · поріг → гістерезис → мін. час → ручний режим → лог</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">Продовжуємо після Пара 16: маємо % вологості ґрунту, тепер керуємо <b>реле насоса/клапана</b>. Реалізуємо <b>поріг</b>, <b>гістерезис</b>, <b>мінімальний час</b> вмикання/вимикання, <b>ручний режим</b> і <b>лог</b> у CSV.</p>
+
+  <div class="grid">
+    <!-- ЛІВО: параметри + емулятор + генератор прошивки -->
+    <div class="card">
+      <h2>🔧 Параметри керування</h2>
+      <div class="row">
+        <div style="flex:1">
+          <label for="thr">Поріг вологості, % (нижче — ВМИКАЄМО)</label>
+          <input id="thr" class="input" type="number" min="1" max="99" value="35"/>
+        </div>
+        <div style="flex:1">
+          <label for="hys">Гістерезис, % (ВИМКНЕМо вище поріг+гістерезис)</label>
+          <input id="hys" class="input" type="number" min="1" max="30" value="5"/>
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label for="minOn">Мін. час увімкнення, с</label>
+          <input id="minOn" class="input" type="number" min="1" max="600" value="20"/>
+        </div>
+        <div style="flex:1">
+          <label for="minOff">Мін. час вимкнення, с</label>
+          <input id="minOff" class="input" type="number" min="1" max="600" value="15"/>
+        </div>
+      </div>
+
+      <h3 style="margin-top:12px">⚙️ Піни та калібрування сенсора (щоб тема була автономна)</h3>
+      <div class="row">
+        <div style="flex:1">
+          <label for="ain">Аналоговий пін сенсора</label>
+          <select id="ain" class="input">
+            <option value="A0" selected>A0</option><option value="A1">A1</option><option value="A2">A2</option><option value="A3">A3</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label for="rpin">Пін керування реле (D-пін)</label>
+          <select id="rpin" class="input">
+            <option value="7" selected>D7</option><option value="6">D6</option><option value="8">D8</option><option value="9">D9</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label for="dry">ADCdry (сухо)</label>
+          <input id="dry" class="input" type="number" min="10" max="4095" value="3000"/>
+        </div>
+        <div style="flex:1">
+          <label for="wet">ADCwet (мокро)</label>
+          <input id="wet" class="input" type="number" min="10" max="4095" value="800"/>
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label for="avg">Усереднення, зразків</label>
+          <input id="avg" class="input" type="number" min="1" max="50" value="8"/>
+        </div>
+        <div style="flex:1">
+          <label for="alpha">EMA α (0..1)</label>
+          <input id="alpha" class="input" type="number" step="0.05" min="0" max="1" value="0.3"/>
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label for="period">Період вимірювання, мс</label>
+          <input id="period" class="input" type="number" min="200" max="5000" step="100" value="1000"/>
+        </div>
+        <div style="flex:1">
+          <label for="activeLow">Тип реле</label>
+          <select id="activeLow" class="input">
+            <option value="true" selected>Активне LOW (звично для модулів)</option>
+            <option value="false">Активне HIGH</option>
+          </select>
+        </div>
+      </div>
+
+      <h3 style="margin-top:12px">🧪 Емулятор прийняття рішення</h3>
+      <div class="row">
+        <div class="switch">
+          <input id="emu" type="checkbox"/>
+          <label for="emu">Увімкнути емулятор (% вологості повзунком)</label>
+        </div>
+        <span id="pumpState" class="badgeState off">Pump: OFF</span>
+      </div>
+      <div class="row" style="width:100%">
+        <input id="emuMoist" class="input" type="range" min="0" max="100" value="50" disabled/>
+      </div>
+      <div class="canvasWrap" style="margin-top:8px">
+        <canvas id="chart" width="900" height="220"></canvas>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="tick">➕ Додати точку (емулятор / ручне значення)</button>
+        <button class="btn secondary" id="clearChart">🧹 Очистити графік</button>
+        <span class="muted mono" id="lastVal">% = — | ON&lt;=поріг | OFF&gt;=поріг+гістерезис</span>
+      </div>
+
+      <h3 style="margin-top:12px">🧩 Згенерований код (Arduino .ino)</h3>
+      <div class="row">
+        <button class="btn good" id="gen">⚙️ Згенерувати прошивку</button>
+        <button class="btn secondary" id="copy">📋 Копіювати</button>
+        <button class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
+      </div>
+      <pre class="code"><code id="code">// Натисни «Згенерувати прошивку» ↑</code></pre>
+
+      <h3 style="margin-top:12px">💾 Протокол для звіту</h3>
+      <div class="row">
+        <input id="fio" class="input" placeholder="ПІБ студента"/>
+        <button class="btn" id="saveTxt">💾 TXT</button>
+        <button class="btn" id="saveCsv">📄 CSV</button>
+      </div>
+    </div>
+
+    <!-- ПРАВО: схема + безпека -->
+    <div class="card">
+      <h2>🔌 Схема підключення (SVG)</h2>
+      <svg viewBox="0 0 760 420" role="img" aria-label="Arduino + Soil sensor + Relay + Pump">
+        <!-- Плата -->
+        <rect x="40" y="40" width="220" height="140" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <text x="150" y="65" fill="#e5e7eb" font-size="16" text-anchor="middle">Arduino UNO/Nano</text>
+        <text x="55" y="95" fill="#93c5fd" font-size="12">5V</text>
+        <text x="55" y="115" fill="#93c5fd" font-size="12">GND</text>
+        <text x="55" y="135" fill="#93c5fd" font-size="12">A0</text>
+        <text x="55" y="155" fill="#93c5fd" font-size="12">D7</text>
+
+        <!-- Сенсор -->
+        <rect x="320" y="40" width="200" height="100" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <text x="420" y="70" fill="#dcfce7" font-size="16" text-anchor="middle">Ємнісний сенсор</text>
+        <text x="420" y="90" fill="#a7f3d0" font-size="12" text-anchor="middle">VCC — OUT — GND</text>
+
+        <!-- Реле -->
+        <rect x="320" y="160" width="200" height="120" rx="12" fill="#3f1d2b" stroke="#fb7185"/>
+        <text x="420" y="190" fill="#ffe4e6" font-size="16" text-anchor="middle">Модуль реле</text>
+        <text x="420" y="210" fill="#fecdd3" font-size="12" text-anchor="middle">GND — IN — VCC</text>
+
+        <!-- З'єднання: сенсор -->
+        <line x1="260" y1="90"  x2="320" y2="60"  stroke="#93c5fd" stroke-width="3"/><text x="280" y="80"  fill="#93c5fd" font-size="12">5V → VCC</text>
+        <line x1="260" y1="110" x2="320" y2="100" stroke="#64748b" stroke-width="3"/><text x="280" y="110" fill="#94a3b8" font-size="12">GND → GND</text>
+        <line x1="260" y1="130" x2="320" y2="80"  stroke="#22c55e" stroke-width="3"/><text x="280" y="95"  fill="#86efac" font-size="12">A0 ← OUT</text>
+
+        <!-- З'єднання: реле -->
+        <line x1="260" y1="110" x2="320" y2="220" stroke="#64748b" stroke-width="3"/><text x="280" y="170" fill="#94a3b8" font-size="12">GND → GND</text>
+        <line x1="260" y1="90"  x2="320" y2="180" stroke="#93c5fd" stroke-width="3"/><text x="280" y="150" fill="#93c5fd" font-size="12">5V → VCC</text>
+        <line x1="260" y1="150" x2="320" y2="210" stroke="#38bdf8" stroke-width="3"/><text x="280" y="205" fill="#7dd3fc" font-size="12">D7 → IN</text>
+
+        <!-- Насос/клапан (умовно силова частина) -->
+        <rect x="560" y="160" width="160" height="120" rx="12" fill="#111827" stroke="#f59e0b"/>
+        <text x="640" y="190" fill="#fde68a" font-size="16" text-anchor="middle">Насос/клапан</text>
+        <text x="640" y="210" fill="#fcd34d" font-size="12" text-anchor="middle">керування COM/NO</text>
+        <line x1="520" y1="220" x2="560" y2="220" stroke="#f59e0b" stroke-width="3"/>
+        <text x="540" y="238" fill="#fbbf24" font-size="12">з реле COM→NO</text>
+      </svg>
+
+      <div class="note" style="margin-top:10px">
+        <b>Безпека!</b> Для 220VAC використовуйте модулі реле з оптоізоляцією, розділяйте низьковольтну/силову частини, дотримуйтесь правил ОП. Для навчальних стендів обирайте 5–12V помпи.
+      </div>
+
+      <h3 style="margin-top:12px">🧷 Корисні теги</h3>
+      <div>
+        <span class="tag">#поріг</span>
+        <span class="tag">#гістерезис</span>
+        <span class="tag">#мін_час</span>
+        <span class="tag">#ручний_режим</span>
+        <span class="tag">#серіал_лог</span>
+      </div>
+    </div>
+  </div>
+
+  <hr class="sep"/>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>Фото схеми;</li>
+      <li>Скрін/CSV логів: зміна стану помпи при зміні % вологості (видно гістерезис і мін. час);</li>
+      <li>Опис параметрів: поріг, гістерезис, мін. часи, тип реле, калібрування сенсора.</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// Утиліти
+const $ = (s)=>document.querySelector(s);
+function clip(s,n=999){return s.length>n?s.slice(0,n):s}
+function download(name, text, type="text/plain"){
+  const blob = new Blob([text], {type:type+";charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=name;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+function nowStamp(){ return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16); }
+
+// === Емулятор прийняття рішення (без Arduino) ===
+const emu = $('#emu'), slider = $('#emuMoist'), pumpBadge = $('#pumpState');
+emu.addEventListener('change', ()=>{ slider.disabled = !emu.checked; });
+
+let emuState = {pump:false, lastSwitch:0, mode:'AUTO'}; // AUTO only в цій симуляції
+const canvas = $('#chart'), ctx = canvas.getContext('2d');
+const series = []; // {t, pct, pump}
+function drawChart(){
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,W-1,H-1);
+  if(series.length<2) return;
+
+  const maxN=80;
+  const s=series.slice(-maxN);
+  const xs=s.map((_,i)=> i*(W/(maxN-1)));
+  // % лінія
+  ctx.beginPath(); ctx.strokeStyle='#22c55e'; ctx.lineWidth=2;
+  xs.forEach((x,i)=>{ const y = H-10 - (s[i].pct/100)*(H-20); i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+  ctx.stroke();
+  // pump маркер
+  ctx.fillStyle='#94a3b8'; ctx.font='12px ui-monospace';
+  ctx.fillText('%',W-20,14);
+  s.forEach((p,i)=>{
+    if(p.pump){ ctx.fillStyle='#bbf7d0'; } else { ctx.fillStyle='#fde68a'; }
+    ctx.fillRect(xs[i]-1, H-8, 2, 6);
+  });
+}
+
+function decision(pct, thr, hys, minOn, minOff){
+  const now = Date.now();
+  if(!emuState.pump){
+    // Вмикаємо, якщо нижче порогу і витримано мін. час вимкнення
+    if(pct < thr && (now-emuState.lastSwitch)>=minOff*1000){
+      emuState.pump=true; emuState.lastSwitch=now;
+    }
+  }else{
+    // Вимикаємо, якщо вище OFF і витримано мін. час увімкнення
+    if(pct >= (thr+hys) && (now-emuState.lastSwitch)>=minOn*1000){
+      emuState.pump=false; emuState.lastSwitch=now;
+    }
+  }
+  pumpBadge.textContent = 'Pump: ' + (emuState.pump?'ON':'OFF');
+  pumpBadge.className = 'badgeState ' + (emuState.pump?'on':'off');
+}
+
+$('#tick').addEventListener('click', ()=>{
+  const thr = parseInt($('#thr').value,10);
+  const hys = parseInt($('#hys').value,10);
+  const minOn  = parseInt($('#minOn').value,10);
+  const minOff = parseInt($('#minOff').value,10);
+  let pct;
+  if(emu.checked){
+    pct = parseInt(slider.value,10);
+  }else{
+    const m = prompt('Введи поточний % вологості (0..100):','42');
+    if(m===null) return; pct = parseInt(m,10);
+    if(Number.isNaN(pct) || pct<0 || pct>100){ alert('Некоректне число'); return; }
+  }
+  decision(pct, thr, hys, minOn, minOff);
+  series.push({t:Date.now(), pct, pump:emuState.pump});
+  $('#lastVal').textContent = `% = ${pct} | ON<=${thr} | OFF>=${thr+hys} (мін: ON ${minOn}s, OFF ${minOff}s)`;
+  drawChart();
+});
+$('#clearChart').addEventListener('click', ()=>{ series.length=0; drawChart(); });
+
+// === Генератор прошивки .ino ===
+function makeSketch(){
+  const dry = parseInt($('#dry').value,10);
+  const wet = parseInt($('#wet').value,10);
+  const avg = Math.max(1, parseInt($('#avg').value,10));
+  const alpha = Math.min(1, Math.max(0, parseFloat($('#alpha').value)));
+  const ain = $('#ain').value;
+  const rpin = parseInt($('#rpin').value,10);
+  const period = Math.max(200, parseInt($('#period').value,10));
+  const thr = parseInt($('#thr').value,10);
+  const hys = parseInt($('#hys').value,10);
+  const minOn = parseInt($('#minOn').value,10);
+  const minOff= parseInt($('#minOff').value,10);
+  const activeLow = ($('#activeLow').value==='true');
+
+  const code = `/*
+  Пара 17 — Arduino: насос для поливу (реле)
+  Автор лаби: Сергій Поліщук (EDLab)
+
+  Функції:
+    - Сенсор вологості на ${ain}: усереднення N=${avg}, EMA α=${alpha.toFixed(2)}
+    - Мапа ADC→% за калібруванням (dry=${dry}, wet=${wet})
+    - Поріг=${thr}% , гістерезис=${hys}% , мін. час ON=${minOn}s , OFF=${minOff}s
+    - Ручний режим: через Serial команди ON/OFF/AUTO
+    - Лог у CSV: millis,adc,pct,ema,pump,mode
+*/
+
+const int PIN_SOIL  = ${ain};
+const int PIN_RELAY = ${rpin};
+const bool RELAY_ACTIVE_LOW = ${activeLow};
+
+const int AVG_SAMPLES = ${avg};
+const int PERIOD_MS   = ${period};
+
+const int CAL_DRY = ${dry};
+const int CAL_WET = ${wet};
+
+const int MOIST_ON  = ${thr};
+const int HYST      = ${hys};
+const int MOIST_OFF = MOIST_ON + HYST;
+
+const unsigned long MIN_ON_MS  = ${minOn}UL * 1000UL;
+const unsigned long MIN_OFF_MS = ${minOff}UL * 1000UL;
+
+enum Mode {AUTO, FORCE_ON, FORCE_OFF};
+Mode mode = AUTO;
+
+unsigned long tmr = 0;
+unsigned long lastSwitch = 0;
+bool pumpOn = false;
+float ema = -1;
+
+int readAveraged(int pin){
+  long sum = 0;
+  for(int i=0;i<AVG_SAMPLES;i++){ sum += analogRead(pin); delay(2); }
+  return (int)(sum / AVG_SAMPLES);
+}
+int adcToPercent(int adc){
+  long span = (long)CAL_DRY - (long)CAL_WET;
+  if(span == 0) return 0;
+  long x = (long)adc - (long)CAL_WET;
+  long p = 100 - (x * 100 / span);
+  if(p<0) p=0; if(p>100) p=100;
+  return (int)p;
+}
+void setRelay(bool on){
+  pumpOn = on;
+  if(RELAY_ACTIVE_LOW) digitalWrite(PIN_RELAY, on ? LOW : HIGH);
+  else                 digitalWrite(PIN_RELAY, on ? HIGH: LOW);
+  lastSwitch = millis();
+}
+void setMode(Mode m){
+  mode = m;
+  if(mode==FORCE_ON)  setRelay(true);
+  if(mode==FORCE_OFF) setRelay(false);
+}
+
+void setup(){
+  pinMode(PIN_RELAY, OUTPUT);
+  setRelay(false);
+  Serial.begin(115200);
+  delay(300);
+  Serial.println(F("millis,adc,pct,ema,pump,mode"));
+  Serial.println(F("# Команди: ON | OFF | AUTO"));
+}
+
+void loop(){
+  // Обробка команд
+  if(Serial.available()){
+    String cmd = Serial.readStringUntil('\\n'); cmd.trim();
+    cmd.toUpperCase();
+    if(cmd=="ON")  setMode(FORCE_ON);
+    else if(cmd=="OFF") setMode(FORCE_OFF);
+    else if(cmd=="AUTO") setMode(AUTO);
+  }
+
+  if(millis() - tmr >= PERIOD_MS){
+    tmr = millis();
+    int adc = readAveraged(PIN_SOIL);
+    int pct = adcToPercent(adc);
+    if(ema<0) ema=pct; 
+    ema = ${alpha.toFixed(3)} * pct + (1.0 - ${alpha.toFixed(3)}) * ema;
+
+    // Рішення
+    if(mode==AUTO){
+      if(!pumpOn){
+        if(pct < MOIST_ON && (millis()-lastSwitch)>=MIN_OFF_MS){
+          setRelay(true);
+          Serial.println(F("# PUMP ON (auto)"));
+        }
+      }else{
+        if(pct >= MOIST_OFF && (millis()-lastSwitch)>=MIN_ON_MS){
+          setRelay(false);
+          Serial.println(F("# PUMP OFF (auto)"));
+        }
+      }
+    }
+
+    // Лог CSV
+    Serial.print(millis()); Serial.print(',');
+    Serial.print(adc);      Serial.print(',');
+    Serial.print(pct);      Serial.print(',');
+    Serial.print(ema,2);    Serial.print(',');
+    Serial.print(pumpOn ? 1 : 0); Serial.print(',');
+    Serial.println(mode==AUTO? "AUTO" : (mode==FORCE_ON? "ON":"OFF"));
+  }
+}
+`;
+  return code;
+}
+
+$('#gen').addEventListener('click', ()=>{
+  const txt = makeSketch();
+  $('#code').textContent = txt;
+  window.scrollTo({top: $('#code').parentElement.getBoundingClientRect().top + window.scrollY - 20, behavior:'smooth'});
+});
+$('#copy').addEventListener('click', ()=>{
+  const ta = document.createElement('textarea');
+  ta.value = $('#code').textContent; document.body.appendChild(ta);
+  ta.select(); ta.setSelectionRange(0, ta.value.length);
+  document.execCommand('copy'); ta.remove();
+  const old = document.title; document.title = '✅ Код скопійовано'; setTimeout(()=>document.title=old,900);
+});
+$('#dl').addEventListener('click', ()=>{
+  const txt = $('#code').textContent || makeSketch();
+  download('agro_para17_pump_relay.ino', txt, 'text/x-arduino');
+});
+
+// Протокол
+$('#saveTxt').addEventListener('click', ()=>{
+  const fio = clip($('#fio').value.trim(), 120);
+  const p = (id)=>document.getElementById(id).value;
+  const lines = [
+    'Пара 17 — Arduino: насос для поливу (реле)',
+    'Студент: ' + fio,
+    `Параметри: поріг=${p('thr')}%, гістерезис=${p('hys')}%, minON=${p('minOn')}s, minOFF=${p('minOff')}s`,
+    `Калібрування: dry=${p('dry')}, wet=${p('wet')}, avg=${p('avg')}, EMA α=${p('alpha')}`,
+    `Піни: сенсор ${p('ain')}, реле D${p('rpin')} (${document.getElementById('activeLow').value==='true'?'activeLOW':'activeHIGH'})`,
+    'Коментар: ...'
+  ].join('\n');
+  download('agro_para17_'+nowStamp()+'.txt', lines);
+});
+$('#saveCsv').addEventListener('click', ()=>{
+  const fio = $('#fio').value.replace(/"/g,'""');
+  const v = (id)=>document.getElementById(id).value;
+  const csv = '"Пара","Студент","thr%","hys%","minONs","minOFFs","dry","wet","avg","alpha","ain","rpin","relayType"\n'
+            + `"17","${fio}",${v('thr')},${v('hys')},${v('minOn')},${v('minOff')},${v('dry')},${v('wet')},${v('avg')},${v('alpha')},"${v('ain')}","D${v('rpin')}","${document.getElementById('activeLow').value==='true'?'activeLOW':'activeHIGH'}"\n`;
+  download('agro_para17_'+nowStamp()+'.csv', csv, 'text/csv');
+});
+
+// Старт
+drawChart();
+if (window.self !== window.top) document.documentElement.classList.add('embedded'); // Moodle-friendly
+</script>
+</body>
+</html>
