@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 4 (газовики) — Огляд витоків: сенсор CH₄ (емулятор), пороги, графік, SOAP-тест, фото/аудіо, чек 58 мм, CSV/QR</title>
+<meta name="description" content="Практика огляду витоків: емульований датчик метану (ppm) з порогами, живий графік, SOAP-тест, фото/аудіо, NFC/ID, журнал, чек 58 мм, експорт CSV/TXT, QR."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1280px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:14px;grid-template-columns:1.25fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:90px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+canvas.chart{display:block;width:100%;height:220px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+.canvasWrap{overflow:hidden;border-radius:12px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre;min-height:140px}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.photo{width:100%;max-width:240px;border:1px solid var(--line);border-radius:12px;display:block}
+.gallery{display:flex;gap:8px;flex-wrap:wrap}
+.block{border:1px dashed var(--line);border-radius:12px;padding:10px;margin-top:10px;background:#0c182a}
+hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
+.kpi{display:flex;gap:8px;flex-wrap:wrap}
+.kpi .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 10px;color:#e5e7eb}
+.tag.ok{border-color:#1d3e2a;background:#0f2f1e}
+.tag.warn{border-color:#4a3b13;background:#2b2310}
+.tag.bad{border-color:#5a1f1f;background:#2a1212}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🫧</span>
+      <div>
+        <b>Пара 4 — Огляд витоків газу</b><br/>
+        <span class="badge">Сенсор CH₄ (емулятор) → пороги → графік → SOAP-тест → фото/аудіо → чек 58 мм → CSV/TXT → QR</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <!-- Ввідні -->
+  <div class="card">
+    <h2>📚 Сценарій</h2>
+    <p>Інспектуємо можливий витік біля з’єднань/кранів/шлангів. Ідентифікуємо об’єкт, вимірюємо концентрацію метану (<b>ppm</b>) 
+      за допомогою емулятора (слайдер → легко замінити на значення з <b>Arduino/MQ-4</b>), фіксуємо <b>графік</b> і час вище порогів, 
+      робимо <b>SOAP-тест</b> (бульбашки/немає), додаємо <b>фото</b> і <b>аудіо-коментар</b>, формуємо <b>чек 58 мм</b>, <b>CSV/TXT</b>, <b>QR</b>.</p>
+    <div class="row">
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., під’їзд/квартира"/></label>
+      <label style="flex:1">Зона/вузол<input id="zone" class="input" placeholder="Кран перед плитою / різьбове з’єднання"/></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+    </div>
+    <div class="row">
+      <button class="btn good" id="mkCase">🧰 Створити кейс</button>
+      <span class="badge" id="cid">Кейс: —</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Ліва колонка: Сенсор/Тести/Камера/Аудіо -->
+    <div class="card">
+      <h2>🛰️ Сенсор CH₄ (емулятор)</h2>
+      <div class="row">
+        <input type="range" id="ppm" class="input" min="0" max="1000" step="5" value="25" style="flex:1"/>
+        <span class="badge">Поточне: <b id="ppmNum">25</b> ppm</span>
+        <button class="btn" id="ppmMark">📍 Додати точку</button>
+        <button class="btn secondary" id="ppmClear">🧹 Очистити графік</button>
+      </div>
+      <div class="row">
+        <label>Info (ppm)<input id="thInfo" type="number" class="input" min="0" step="5" value="50"/></label>
+        <label>Warning (ppm)<input id="thWarn" type="number" class="input" min="0" step="5" value="200"/></label>
+        <label>Alarm (ppm)<input id="thAlarm" type="number" class="input" min="0" step="5" value="500"/></label>
+        <button class="btn secondary" id="applyTh">⚙️ Застосувати пороги</button>
+      </div>
+      <div class="kpi" style="margin-top:6px">
+        <span class="tag ok">⏱️ Час >Info: <b id="tInfo">0</b> с</span>
+        <span class="tag warn">⏱️ Час >Warn: <b id="tWarn">0</b> с</span>
+        <span class="tag bad">⏱️ Час >Alarm: <b id="tAlarm">0</b> с</span>
+      </div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="chart" class="chart" width="520" height="220"></canvas></div>
+
+      <h2 style="margin-top:10px">🫧 SOAP-тест (піна)</h2>
+      <div class="row">
+        <select id="soap" class="input" style="max-width:260px">
+          <option value="none" selected>— Обери результат —</option>
+          <option value="bubbles">Видимі бульбашки</option>
+          <option value="no-bubbles">Бульбашок немає</option>
+        </select>
+        <button class="btn" id="soapMark">✅ Підтвердити</button>
+        <span class="badge" id="soapState">—</span>
+      </div>
+
+      <h2 style="margin-top:10px">🎥 Фото (2 шт.)</h2>
+      <div class="row">
+        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <div>
+          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button class="btn" data-kind="area">📷 Місце перевірки</button>
+          <button class="btn" data-kind="manometer">📷 Прилад/манометр</button><br/>
+          <small class="muted">Фото зберігаються в «Галереї доказів».</small>
+        </div>
+      </div>
+      <div class="gallery" id="gal"></div>
+
+      <h2 style="margin-top:10px">🎙️ Аудіо-коментар</h2>
+      <div class="row">
+        <button class="btn" id="recStart">⏺️ Запис</button>
+        <button class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
+        <span class="badge" id="rstat">Немає запису</span>
+      </div>
+      <audio id="player" controls style="margin-top:8px;max-width:100%"></audio>
+
+      <h2 style="margin-top:10px">📶 NFC / ID об’єкта</h2>
+      <div class="block">
+        <div class="row">
+          <button class="btn" id="nfcBtn">📶 NFC</button>
+          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)"/>
+          <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
+          <span class="badge" id="nfcs">Статус NFC: очікується</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Права колонка: Метрики/Статус/Експорт -->
+    <div class="card">
+      <h2>📊 Метрики / стан</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Кейс</th><td id="mCase">—</td></tr>
+          <tr><th>ID об’єкта</th><td id="mAsset">—</td></tr>
+          <tr><th>Точок на графіку</th><td id="mPts">0</td></tr>
+          <tr><th>SOAP-тест</th><td id="mSoap">—</td></tr>
+          <tr><th>Фото (area/manometer)</th><td id="mPhotos">0 / 0</td></tr>
+          <tr><th>Аудіо</th><td id="mAudio">—</td></tr>
+          <tr><th>Порушення порогів</th><td id="mThresh">—</td></tr>
+          <tr><th>Статус</th><td id="mState"><b class="warn">Потрібно виконати кроки</b></td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">✅ Оцінювання (10 балів)</h2>
+      <ul>
+        <li>Кейс створено (адреса/зона/виконавець/дата) — <b>2</b></li>
+        <li>ID об’єкта (NFC/код) — <b>2</b></li>
+        <li>Графік: ≥8 точок + пороги — <b>2</b></li>
+        <li>SOAP-тест підтверджено — <b>1</b></li>
+        <li>Фото (обидва) — <b>2</b></li>
+        <li>Аудіо-коментар — <b>1</b></li>
+      </ul>
+
+      <h2 style="margin-top:10px">💾 Експорт / друк</h2>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV (серія вимірів + події)</button>
+        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+
+      <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
+      <pre id="alog" class="card" style="max-height:240px;overflow:auto;margin-top:6px">// Поки без подій</pre>
+    </div>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString();const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+function clean(s){return String(s).replace(/\s+/g,' ').trim();}
+$('#upd').textContent = new Date().toLocaleDateString('uk-UA');
+(function(){ const d=new Date(); $('#day').value=d.toISOString().slice(0,10); })();
+
+// ===== Кейс / ідентифікація =====
+let CASE_ID=null, ASSET_ID=null;
+$('#mkCase').addEventListener('click',()=>{
+  const addr=clean($('#addr').value||''); const zone=clean($('#zone').value||''); const tech=clean($('#tech').value||''); const day=$('#day').value;
+  if(!addr||!zone||!tech||!day){ alert('Заповни адресу, зону, виконавця і дату'); return; }
+  CASE_ID = 'L-'+Math.random().toString(36).slice(2,8).toUpperCase();
+  $('#cid').textContent = 'Кейс: '+CASE_ID;
+  log(`Кейс ${CASE_ID}: ${addr} (${zone}), ${tech}, ${day}`);
+  updateMetrics();
+});
+async function tryNFC(){
+  if('NDEFReader' in window){
+    try{
+      const reader=new NDEFReader(); await reader.scan();
+      $('#nfcs').textContent='Статус NFC: сканування...';
+      reader.addEventListener('reading', ({message, serialNumber})=>{
+        let text=''; for(const rec of message.records){ if(rec.recordType==='text'){ const dec=new TextDecoder(rec.encoding||'utf-8'); text = dec.decode(rec.data); } }
+        ASSET_ID = (text||serialNumber||'NFC-'+Math.random().toString(36).slice(2,7)).toString();
+        $('#asset').value = ASSET_ID;
+        $('#nfcs').textContent='Статус NFC: зчитано';
+        log('NFC: '+ASSET_ID);
+        updateMetrics();
+      });
+    }catch(e){ $('#nfcs').textContent='Статус NFC: помилка'; alert('NFC недоступний або заборонений'); }
+  }else{ alert('Web NFC не підтримується. Введи код вручну.'); }
+}
+$('#nfcBtn').addEventListener('click', tryNFC);
+$('#saveAsset').addEventListener('click',()=>{
+  const v=clean($('#asset').value||''); if(!v){ alert('Введи ID об’єкта'); return; }
+  ASSET_ID=v; $('#nfcs').textContent='Статус NFC: застосовано вручну'; log('ID об’єкта: '+ASSET_ID); updateMetrics();
+});
+
+// ===== Сенсор CH4: дані/пороги/таймери =====
+const chart=$('#chart'), gc=chart.getContext('2d');
+let series=[]; // {t, ppm}
+let t0=null;
+let thresh={info:50, warn:200, alarm:500};
+let over={info:0, warn:0, alarm:0}; // сек
+let overFlags={info:false,warn:false,alarm:false};
+function applyThresh(){
+  thresh.info = Math.max(0, parseFloat($('#thInfo').value)||50);
+  thresh.warn  = Math.max(thresh.info, parseFloat($('#thWarn').value)||200);
+  thresh.alarm = Math.max(thresh.warn, parseFloat($('#thAlarm').value)||500);
+  log(`Пороги: Info ${thresh.info} / Warn ${thresh.warn} / Alarm ${thresh.alarm} ppm`);
+  updateMetrics();
+  drawChart();
+}
+$('#applyTh').addEventListener('click', applyThresh);
+applyThresh();
+
+function fmtSec(s){return Math.round(s);}
+function updateOver(ppm, dt){
+  const p=ppm;
+  const info=p>thresh.info, warn=p>thresh.warn, alarm=p>thresh.alarm;
+  if(info) over.info += dt; if(warn) over.warn += dt; if(alarm) over.alarm += dt;
+  overFlags={info, warn, alarm};
+  $('#tInfo').textContent=fmtSec(over.info);
+  $('#tWarn').textContent=fmtSec(over.warn);
+  $('#tAlarm').textContent=fmtSec(over.alarm);
+}
+function drawChart(){
+  const W=chart.width,H=chart.height; gc.clearRect(0,0,W,H);
+  gc.strokeStyle='#223049'; gc.strokeRect(0.5,0.5,W-1,H-1);
+  const left=40,right=W-10,top=20,bottom=H-24;
+  // сітка
+  gc.strokeStyle='#1f2a44';
+  for(let y=0;y<5;y++){ const yy=top+y*(bottom-top)/4; gc.beginPath(); gc.moveTo(left,yy); gc.lineTo(right,yy); gc.stroke(); }
+  // ось часу
+  gc.strokeStyle='#334155'; gc.beginPath(); gc.moveTo(left,bottom); gc.lineTo(right,bottom); gc.stroke();
+  if(series.length<2){ gc.fillStyle='#94a3b8'; gc.fillText('Додай точки вимірювань', left+8, top+14); return; }
+  const tMin=series[0].t, tMax=series[series.length-1].t; const span=(tMax-tMin)||1;
+  const ppmMax=Math.max(thresh.alarm, ...series.map(s=>s.ppm), 50);
+  function X(t){ return left + (t - tMin)/span*(right-left); }
+  function Y(v){ return bottom - (v/ppmMax)*(bottom-top); }
+  // лінія
+  gc.beginPath(); gc.strokeStyle='#38bdf8';
+  series.forEach((p,i)=>{ const x=X(p.t), y=Y(p.ppm); if(i===0) gc.moveTo(x,y); else gc.lineTo(x,y); });
+  gc.stroke();
+  // точки
+  series.forEach(p=>{ const x=X(p.t), y=Y(p.ppm); gc.fillStyle='#38bdf8'; gc.fillRect(x-2,y-2,4,4); });
+  // пороги
+  gc.strokeStyle='#22c55e'; gc.beginPath(); gc.moveTo(left, Y(thresh.info)); gc.lineTo(right, Y(thresh.info)); gc.stroke();
+  gc.strokeStyle='#fbbf24'; gc.beginPath(); gc.moveTo(left, Y(thresh.warn)); gc.lineTo(right, Y(thresh.warn)); gc.stroke();
+  gc.strokeStyle='#f87171'; gc.beginPath(); gc.moveTo(left, Y(thresh.alarm)); gc.lineTo(right, Y(thresh.alarm)); gc.stroke();
+  // підписи
+  gc.fillStyle='#94a3b8'; gc.font='11px ui-monospace';
+  gc.fillText('ppm', 8, top+12);
+  gc.fillStyle='#22c55e'; gc.fillText('Info', right-50, Y(thresh.info)-4);
+  gc.fillStyle='#fbbf24'; gc.fillText('Warn', right-50, Y(thresh.warn)-4);
+  gc.fillStyle='#f87171'; gc.fillText('Alarm', right-50, Y(thresh.alarm)-4);
+}
+function addPoint(ppm){
+  const now=Date.now(); if(!t0) t0=now;
+  series.push({t:now, ppm});
+  const dt = series.length>1 ? (series[series.length-1].t - series[series.length-2].t)/1000 : 0;
+  updateOver(ppm, Math.max(0,dt));
+  drawChart();
+  $('#mPts').textContent = String(series.length);
+  updateMetrics();
+}
+$('#ppm').addEventListener('input',()=>{ $('#ppmNum').textContent=$('#ppm').value; });
+$('#ppmMark').addEventListener('click',()=>{ const v=parseFloat($('#ppm').value); addPoint(v); log(`Точка: ${v} ppm`); });
+$('#ppmClear').addEventListener('click',()=>{ series=[]; t0=null; over={info:0,warn:0,alarm:0}; $('#tInfo').textContent='0';$('#tWarn').textContent='0';$('#tAlarm').textContent='0'; drawChart(); $('#mPts').textContent='0'; log('Очищено графік'); updateMetrics(); });
+
+// ===== SOAP-тест =====
+let soapResult=null;
+$('#soapMark').addEventListener('click',()=>{
+  const val=$('#soap').value;
+  if(val==='none'){ alert('Обери результат SOAP-тесту'); return; }
+  soapResult = val;
+  $('#soapState').textContent = (val==='bubbles'?'Бульбашки ВИЯВЛЕНО':'Бульбашок немає');
+  log('SOAP-тест: '+$('#soapState').textContent);
+  updateMetrics();
+});
+
+// ===== Камера / фото =====
+let stream=null; let photos={area:null, manometer:null};
+async function startCam(){
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+    $('#vid').srcObject = stream; log('Камеру увімкнено');
+  }catch(e){ alert('Камеру заблоковано або недоступно'); }
+}
+$('#camOn').addEventListener('click', startCam);
+function takeShot(kind){
+  const video=$('#vid'); if(!video.srcObject){ alert('Спершу увімкни камеру'); return; }
+  const c=document.createElement('canvas'); c.width=video.videoWidth||640; c.height=video.videoHeight||480;
+  const g=c.getContext('2d'); g.drawImage(video,0,0,c.width,c.height);
+  const url=c.toDataURL('image/png'); photos[kind]=url; renderGallery();
+  log(`Фото: ${kind}`); updateMetrics();
+}
+$$('button[data-kind]').forEach(b=>b.addEventListener('click',()=>takeShot(b.dataset.kind)));
+function renderGallery(){
+  const gal=$('#gal'); gal.innerHTML='';
+  if(photos.area){ const i=document.createElement('img'); i.className='photo'; i.src=photos.area; i.alt='area'; gal.appendChild(i); }
+  if(photos.manometer){ const i=document.createElement('img'); i.className='photo'; i.src=photos.manometer; i.alt='manometer'; gal.appendChild(i); }
+}
+
+// ===== Аудіо =====
+let mediaRec=null; let chunks=[]; let audioUrl=null;
+$('#recStart').addEventListener('click', async ()=>{
+  try{
+    const st = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+    mediaRec = new MediaRecorder(st);
+    chunks=[];
+    mediaRec.ondataavailable = e=>{ if(e.data.size>0) chunks.push(e.data); };
+    mediaRec.onstop = ()=>{
+      const blob=new Blob(chunks,{type:'audio/webm'});
+      audioUrl = URL.createObjectURL(blob);
+      $('#player').src=audioUrl;
+      $('#rstat').textContent='Запис готовий';
+      const a=document.createElement('a'); a.href=audioUrl; a.download='voice_'+(CASE_ID||'case')+'_'+stamp()+'.webm'; document.body.appendChild(a); a.click(); a.remove();
+      log('Аудіо збережено (webm)'); updateMetrics();
+    };
+    mediaRec.start();
+    $('#recStart').disabled=true; $('#recStop').disabled=false;
+    $('#rstat').textContent='Йде запис...'; log('Почато аудіозапис');
+  }catch(e){ alert('Мікрофон недоступний'); }
+});
+$('#recStop').addEventListener('click', ()=>{
+  if(mediaRec && mediaRec.state!=='inactive'){ mediaRec.stop(); }
+  $('#recStart').disabled=false; $('#recStop').disabled=true;
+});
+
+// ===== Метрики / статус =====
+function updateMetrics(){
+  $('#mCase').textContent = CASE_ID || '—';
+  $('#mAsset').textContent = ASSET_ID || ($('#asset').value||'—');
+  $('#mSoap').textContent = soapResult? (soapResult==='bubbles'?'Бульбашки ВИЯВЛЕНО':'Немає') : '—';
+  $('#mPhotos').textContent = `${photos.area?1:0} / ${photos.manometer?1:0}`;
+  $('#mAudio').textContent = audioUrl?'є':'—';
+  // порушення порогів
+  const anyInfo = series.some(s=>s.ppm>thresh.info);
+  const anyWarn = series.some(s=>s.ppm>thresh.warn);
+  const anyAlarm= series.some(s=>s.ppm>thresh.alarm);
+  $('#mThresh').textContent = anyAlarm? 'ALARM' : anyWarn? 'WARNING' : anyInfo? 'INFO' : '—';
+  // скоринг
+  let score=0;
+  const caseOk=!!CASE_ID, assetOk=!!(ASSET_ID||clean($('#asset').value||'')); 
+  const chartOk=series.length>=8;
+  const soapOk=!!soapResult && soapResult!=='none';
+  const photosOk=!!photos.area && !!photos.manometer;
+  const audioOk=!!audioUrl;
+  if(caseOk)score+=2; if(assetOk)score+=2; if(chartOk)score+=2; if(soapOk)score+=1; if(photosOk)score+=2; if(audioOk)score+=1;
+  const html = score>=9? `<b class="ok">Готово (≈${score}/10)</b>`:
+               score>=6? `<b class="warn">Більшість виконано (≈${score}/10)</b>`:
+                         `<b class="bad">Потрібно доробити (≈${score}/10)</b>`;
+  $('#mState').innerHTML = html;
+}
+drawChart();
+
+// ===== Експорт / чек / QR =====
+function summary(){
+  const addr=$('#addr').value||'—', zone=$('#zone').value||'—', tech=$('#tech').value||'—', day=$('#day').value||'—';
+  const pt = series.map(p=>({t:new Date(p.t).toISOString(), ppm:p.ppm}));
+  return {
+    case: CASE_ID||'—', addr, zone, tech, day,
+    asset: ASSET_ID||($('#asset').value||'—'),
+    thresholds: {...thresh},
+    over_seconds: {...over},
+    soap: soapResult||'—',
+    photos: {area:!!photos.area, manometer:!!photos.manometer},
+    audio: !!audioUrl,
+    points: pt
+  };
+}
+$('#saveCsv').addEventListener('click',()=>{
+  const s=summary();
+  let csv='field,value\n';
+  Object.entries(s).forEach(([k,v])=>{
+    if(Array.isArray(v)){} else if(typeof v==='object'){ csv+=`${k},${JSON.stringify(v).replace(/,/g,';')}\n`; }
+    else { csv+=`${k},${String(v).replace(/,/g,';')}\n`; }
+  });
+  csv+='\n# points\niso_time,ppm\n';
+  s.points.forEach(p=>{ csv+=`${p.t},${p.ppm}\n`; });
+  download('gas_para04_leak_'+stamp()+'.csv', csv, 'text/csv'); log('Експортовано CSV');
+});
+$('#saveTxt').addEventListener('click',()=>{
+  const s=summary();
+  const lines=[
+    'Пара 4 — Огляд витоків: підсумок',
+    `Кейс: ${s.case}`, `Адреса: ${s.addr}`, `Зона: ${s.zone}`,
+    `Виконавець: ${s.tech}`, `Дата: ${s.day}`,
+    `Об’єкт (ID): ${s.asset}`,
+    `Пороги (ppm): Info ${s.thresholds.info} / Warn ${s.thresholds.warn} / Alarm ${s.thresholds.alarm}`,
+    `Час вище порогів (с): Info ${Math.round(s.over_seconds.info)} / Warn ${Math.round(s.over_seconds.warn)} / Alarm ${Math.round(s.over_seconds.alarm)}`,
+    `SOAP-тест: ${s.soap==='bubbles'?'бульбашки ВИЯВЛЕНО':s.soap==='no-bubbles'?'бульбашок немає':'—'}`,
+    `Фото area/manometer: ${s.photos.area?'1':'0'} / ${s.photos.manometer?'1':'0'}`,
+    `Аудіо: ${s.audio?'є':'—'}`,
+    `Кількість точок: ${s.points.length}`
+  ];
+  download('gas_para04_leak_'+stamp()+'.txt', lines.join('\n')); log('Експортовано TXT');
+});
+$('#print58').addEventListener('click',()=>{
+  const s=summary(); const rc=$('#rc'); rc.hidden=false;
+  const lines=[
+'=== GAS LEAK CHECK (58мм) ===',
+'Case: '+s.case,
+'Date: '+s.day,
+'Addr: '+s.addr,
+'Zone: '+s.zone,
+'Tech: '+s.tech,
+'Asset:'+s.asset,
+'Pts:  '+s.points.length,
+'SOAP: '+(s.soap==='bubbles'?'BUBBLES':'NO'),
+'Thr:  I'+s.thresholds.info+'/W'+s.thresholds.warn+'/A'+s.thresholds.alarm,
+'Over: I'+Math.round(s.over_seconds.info)+'s W'+Math.round(s.over_seconds.warn)+'s A'+Math.round(s.over_seconds.alarm)+'s',
+'Photos:'+(s.photos.area?1:0)+'/'+(s.photos.manometer?1:0)+' Audio:'+(s.audio?'Y':'N'),
+'--------------------------'
+  ];
+  rc.textContent=lines.join('\n');
+  download('gas_para04_receipt_'+stamp()+'.txt', rc.textContent);
+  log('Згенеровано чек 58мм');
+});
+$('#qrGen').addEventListener('click',()=>{
+  const def = CASE_ID || ASSET_ID || 'gas-leak';
+  const data = prompt('Встав URL/ID (Case або Asset):', def);
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url; log('Згенеровано QR');
+});
+
+// ===== Підказка для Arduino (офлайн нотатка у коді)
+// Якщо підключиш MQ-4/інший датчик, заміни addPoint(parseFloat($('#ppm').value))
+// на значення, що приходить із серійного порту/веб-сокета. Валідуй 0..10000 ppm.
+
+// ===== Вбудоване відображення
+(function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+</script>
+</body>
+</html>
