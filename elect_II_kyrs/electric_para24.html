@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 24 (Електрика) — ШІ: прогноз піків (Gradient Boosting JS) + балансування</title>
+<meta name="description" content="Імпорт історії навантаження, фічі часу/лагів/погоди, градієнтний бустинг у JS (decision stumps), 48h прогноз, поради балансування, алерти та експорт (ICS/CSV/TXT)."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+.small{font-size:.9rem}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:280px}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">📈</span>
+      <div>
+        <b>Пара 24 — ШІ: прогноз піків навантаження</b><br/>
+        <span class="badge">CSV → фічі → Gradient Boosting (JS) → 48h forecast → поради → ICS/CSV/TXT</span>
+      </div>
+    </div>
+    <a href="../index.html" class="btn" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">
+    Мета: навчити простий <b>градієнтний бустинг</b> на історії <span class="mono">timestamp,kW[,Temp]</span>, 
+    оцінити якість та <b>важливість фіч</b>, спрогнозувати 48 год наперед, позначити <b>пікові вікна</b> і видати <b>поради балансування/зсувів</b>. 
+    Є синтетичний генератор, живий графік, алерти і експорт.
+  </p>
+
+  <div class="card">
+    <h2>🗂️ Дані (CSV)</h2>
+    <p class="small muted">Формат: <span class="mono">timestamp,kW[,Temp]</span> (годинний ряд). Час у ISO (напр. <span class="mono">2025-05-01T08:00</span>).</p>
+    <textarea id="csv" class="input" rows="7" placeholder="timestamp,kW,Temp
+2025-05-01T00:00,120,16
+2025-05-01T01:00,115,16
+..."></textarea>
+    <div class="row">
+      <button class="btn good" id="load">📥 Імпорт</button>
+      <button class="btn secondary" id="demo">🎲 Згенерувати 60 діб</button>
+      <button class="btn secondary" id="clear">🧹 Очистити</button>
+      <span id="badgeN" class="badge">Записів: 0</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧪 Навчання моделі</h2>
+    <div class="row">
+      <div style="flex:1">
+        <label>Лаги/фічі</label>
+        <div class="row">
+          <label><input type="checkbox" id="fHour" checked/> Hour</label>
+          <label><input type="checkbox" id="fDow" checked/> DayOfWeek</label>
+          <label><input type="checkbox" id="fLag1" checked/> Lag 1h</label>
+          <label><input type="checkbox" id="fLag24" checked/> Lag 24h</label>
+          <label><input type="checkbox" id="fMA24" checked/> MA 24h</label>
+          <label><input type="checkbox" id="fTemp" /> Temp</label>
+        </div>
+      </div>
+      <div style="flex:1">
+        <label for="trees">К-сть дерев</label>
+        <input id="trees" class="input" type="number" min="10" step="10" value="120"/>
+      </div>
+      <div style="flex:1">
+        <label for="depth">Глибина</label>
+        <select id="depth" class="input"><option value="1" selected>1 (stumps)</option><option value="2">2</option></select>
+      </div>
+      <div style="flex:1">
+        <label for="lr">Learning rate</label>
+        <input id="lr" class="input" type="number" min="0.01" step="0.01" value="0.10"/>
+      </div>
+      <div style="flex:1">
+        <label for="split">Train/Test, % (train)</label>
+        <input id="split" class="input" type="number" min="60" max="90" step="1" value="80"/>
+      </div>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="btn good" id="train">🏋️ Тренувати</button>
+      <button class="btn secondary" id="forecast">🔮 48h прогноз</button>
+      <span id="badgeRes" class="badge">MAE: — | RMSE: — | MAPE: —</span>
+    </div>
+
+    <h3 style="margin-top:12px">📊 Важливість фіч (пермутаційна)</h3>
+    <table class="tbl" id="impTbl">
+      <thead><tr><th>Фіча</th><th>ΔRMSE</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>📈 Графік</h2>
+    <div class="canvasWrap"><canvas id="chart" width="1050" height="280"></canvas></div>
+    <div class="row" style="margin-top:6px">
+      <label style="flex:1">Поріг піку, кВт <input id="thr" class="input" type="number" step="1" value="300"/></label>
+      <button class="btn" id="findPeaks">🚨 Знайти піки</button>
+      <span id="badgePk" class="badge">Піків: —</span>
+    </div>
+    <h3 style="margin-top:8px">📜 Поради балансування</h3>
+    <pre class="code" id="advice">// Поради з’являться після «Знайти піки»</pre>
+  </div>
+
+  <div class="card">
+    <h2>🧾 Експорт</h2>
+    <div class="row">
+      <button class="btn" id="expCSV">📄 Прогноз CSV</button>
+      <button class="btn" id="expICS">🗓️ Піки ICS</button>
+      <button class="btn" id="expTXT">💾 TXT (підсумок/поради)</button>
+      <button class="btn secondary" id="receipt">🖨️ 58-мм чек на день</button>
+    </div>
+    <div id="rc" class="receipt" hidden></div>
+  </div>
+
+  <div class="card">
+    <h2>🤖 Промпт до LLM (диспетчер навантаження)</h2>
+    <div class="row">
+      <button class="btn" id="genPrompt">📝 Згенерувати промпт</button>
+      <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+      <button class="btn secondary" id="savePrompt">⬇️ TXT</button>
+    </div>
+    <pre class="code" id="prompt">// Спочатку натренуй модель і сформуй піки</pre>
+  </div>
+
+  <div class="card">
+    <h2>🔁 Схема процесу (SVG)</h2>
+    <svg viewBox="0 0 1000 360" role="img" aria-label="Дані → Фічі → GBRT → Прогноз → Піки → Поради → Експорт">
+      <rect x="30" y="40" width="180" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <text x="120" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Історія CSV</text>
+      <text x="120" y="90" fill="#93c5fd" font-size="12" text-anchor="middle">timestamp,kW[,Temp]</text>
+
+      <rect x="240" y="40" width="200" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <text x="340" y="70" fill="#dcfce7" font-size="14" text-anchor="middle">Фічі/лаги</text>
+      <text x="340" y="90" fill="#a7f3d0" font-size="12" text-anchor="middle">hour,dow,lag1,lag24,MA24,temp</text>
+
+      <rect x="460" y="40" width="200" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+      <text x="560" y="70" fill="#fed7aa" font-size="14" text-anchor="middle">GBRT (JS)</text>
+      <text x="560" y="90" fill="#fed7aa" font-size="12" text-anchor="middle">stumps d=1..2</text>
+
+      <rect x="680" y="40" width="140" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+      <text x="750" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Прогноз</text>
+
+      <rect x="840" y="40" width="130" height="80" rx="12" fill="#111827" stroke="#4b5563"/>
+      <text x="905" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Піки/Поради</text>
+
+      <line x1="210" y1="80" x2="240" y2="80" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="440" y1="80" x2="460" y2="80" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="660" y1="80" x2="680" y2="80" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="820" y1="80" x2="840" y2="80" stroke="#93c5fd" stroke-width="3"/>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>MAE/RMSE/MAPE та важливість фіч (скрін).</li>
+      <li>Графік історія+прогноз із позначеними піками.</li>
+      <li>ICS події та TXT поради для чергової зміни.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📜 Нотатка з історії</h2>
+    <p class="muted small">
+      Класичні добові графіки навантаження ще з 60-х шукали піки «на око». 
+      Сьогодні навіть простий бустинг над лагами/годиною/погодою дає керований прогноз із пояснюваними фічами, 
+      а це — менше штрафів за піки й кращий графік роботи змін.
+    </p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ========= Утиліти =========
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+
+// ========= Дані =========
+let rows=[]; // {t:Date, y:Number, temp:Number|undefined}
+let MODEL=null; // {base, trees:[{feat,thr,left,right,depth}], mu:[], sig:[], feats:[name], trainIdx:[], testIdx:[], params:{lr,depth}}
+let PRED=[]; // {t,yhat}
+let PEAKS=[];
+
+// ========= Імпорт / Демодані =========
+function parseCSV(txt){
+  rows.length=0;
+  const lines=(txt||'').trim().split(/\r?\n/).filter(Boolean);
+  const head=lines.shift().split(',').map(s=>s.trim());
+  const idx=n=>head.indexOf(n);
+  if(idx('timestamp')===-1 || idx('kW')===-1) throw new Error('Потрібні стовпці: timestamp,kW[,Temp]');
+  lines.forEach(line=>{
+    const p=line.split(',').map(s=>s.trim());
+    const t=new Date(p[idx('timestamp')]); if(isNaN(t)) return;
+    rows.push({t, y: parseFloat(p[idx('kW')])||0, temp: idx('Temp')>=0? parseFloat(p[idx('Temp')]) : undefined});
+  });
+  rows.sort((a,b)=>a.t-b.t);
+  $('#badgeN').textContent='Записів: '+rows.length;
+  draw();
+}
+
+function genDemo(){
+  rows.length=0;
+  const start=new Date(); start.setHours(0,0,0,0); start.setDate(start.getDate()-60);
+  let t=new Date(start);
+  for(let i=0;i<60*24;i++){
+    const h=t.getHours(), dow=t.getDay();
+    const base = 120 + 30*Math.sin((h-6)/3) + (dow===0||dow===6?-20:0);
+    const temp = 16 + 8*Math.sin((h-13)/4) + ((Math.random()*2-1)*1.5);
+    const sens = 0.8*Math.max(0, (30-temp)); // чим спекотніше, тим більше кондиціювання (або навпаки — налаштовується)
+    const shock = (h>=18&&h<=20 && Math.random()<0.20) ? 80*Math.random() : 0; // випадкові вечірні піки
+    const y = base + sens + shock + (Math.random()*8-4);
+    rows.push({t:new Date(t), y:Math.max(40, y), temp:parseFloat(temp.toFixed(1))});
+    t=new Date(t.getTime()+3600000);
+  }
+  $('#badgeN').textContent='Записів: '+rows.length+' (демо)';
+  draw();
+}
+$('#demo').addEventListener('click', genDemo);
+$('#load').addEventListener('click', ()=>{ try{ parseCSV($('#csv').value); } catch(e){ alert('CSV помилка: '+e.message); }});
+$('#clear').addEventListener('click', ()=>{ rows.length=0; $('#badgeN').textContent='Записів: 0'; draw(); });
+
+// ========= Фічі =========
+function makeFeatures(arr, use){
+  // use: {hour,dow,lag1,lag24,ma24,temp}
+  const out=[];
+  const get=(i)=>arr[i];
+  for(let i=0;i<arr.length;i++){
+    const r=arr[i];
+    const hour=r.t.getHours();
+    const dow=r.t.getDay();
+    const f=[];
+    const names=[];
+    if(use.hour){ f.push(hour/23); names.push('hour'); }
+    if(use.dow){ f.push(dow/6); names.push('dow'); }
+    if(use.lag1 && i-1>=0){ f.push(get(i-1).y); names.push('lag1'); } else if(use.lag1){ f.push(NaN); names.push('lag1'); }
+    if(use.lag24 && i-24>=0){ f.push(get(i-24).y); names.push('lag24'); } else if(use.lag24){ f.push(NaN); names.push('lag24'); }
+    if(use.ma24){
+      let s=0,c=0; for(let j=1;j<=24;j++){ if(i-j>=0){ s+=get(i-j).y; c++; } }
+      f.push(c? s/c : NaN); names.push('ma24');
+    }
+    if(use.temp){ f.push((r.temp??NaN)); names.push('temp'); }
+    out.push({i, t:r.t, y:r.y, x:f, names});
+  }
+  // приберемо NaN рядки (на початку)
+  return out.filter(o=>!o.x.some(v=>Number.isNaN(v)));
+}
+
+// стандартизація
+function fitScaler(X){
+  const D=X[0].length, mu=new Array(D).fill(0), sig=new Array(D).fill(0);
+  for(const x of X){ for(let j=0;j<D;j++) mu[j]+=x[j]; } for(let j=0;j<D;j++) mu[j]/=X.length;
+  for(const x of X){ for(let j=0;j<D;j++){ const d=x[j]-mu[j]; sig[j]+=d*d; } }
+  for(let j=0;j<D;j++) sig[j]=Math.sqrt(sig[j]/Math.max(1,X.length-1))||1;
+  return {mu,sig};
+}
+function transformX(X,sc){ return X.map(x=>x.map((v,j)=>(v-sc.mu[j])/sc.sig[j])); }
+
+// ========= GBRT (стампи/дерева глибини 1..2) =========
+function fitStump(X, r){ // повертає найкращий розкол: feat, thr, left=mean, right=mean, mse
+  const N=X.length, D=X[0].length;
+  let best={feat:0,thr:0,left:0,right:0,mse:Infinity};
+  for(let j=0;j<D;j++){
+    // візьмемо ~20 квантилів як кандидати порогів
+    const vals = X.map(x=>x[j]).slice().sort((a,b)=>a-b);
+    for(let q=1;q<20;q++){
+      const k=Math.floor(q*(N-1)/20);
+      const thr=vals[k];
+      let sumL=0,cL=0,sumR=0,cR=0;
+      for(let i=0;i<N;i++){ if(X[i][j]<=thr){ sumL+=r[i]; cL++; } else { sumR+=r[i]; cR++; } }
+      const mL=cL?sumL/cL:0, mR=cR?sumR/cR:0;
+      let mse=0;
+      for(let i=0;i<N;i++){ const pred=(X[i][j]<=thr)?mL:mR; const d=r[i]-pred; mse+=d*d; }
+      if(mse<best.mse) best={feat:j,thr,left:mL,right:mR,mse};
+    }
+  }
+  return best;
+}
+function predictStump(x, s){ return (x[s.feat]<=s.thr)? s.left : s.right; }
+
+function fitTreeDepth2(X, r){ // глибина 2: stump → по обох гілках локальні середні (4 листи)
+  const root=fitStump(X, r);
+  // розіб'ємо
+  const leftIdx=[], rightIdx=[];
+  for(let i=0;i<X.length;i++){ (X[i][root.feat]<=root.thr?leftIdx:rightIdx).push(i); }
+  function leafMean(idxs){
+    if(idxs.length===0) return {feat:-1,thr:0,left:0,right:0,isLeaf:true,mean:0};
+    let sum=0; idxs.forEach(i=>sum+=r[i]); return {isLeaf:true,mean:sum/idxs.length};
+  }
+  // спробуємо ще один стамп в кожній гілці
+  function bestChild(idxs){
+    if(idxs.length<10) return leafMean(idxs);
+    const Xc=idxs.map(i=>X[i]), rc=idxs.map(i=>r[i]);
+    const st=fitStump(Xc, rc);
+    // якщо виграш мінімальний — повертаємо лист
+    const total=rc.reduce((a,b)=>a+b*b,0);
+    if(st.mse>0.95*total) return leafMean(idxs);
+    return {isLeaf:false, feat:st.feat, thr:st.thr, left:st.left, right:st.right};
+  }
+  const left = bestChild(leftIdx);
+  const right= bestChild(rightIdx);
+  return {depth:2, root, left, right};
+}
+function predictTree2(x, t){
+  const inLeft = (x[t.root.feat]<=t.root.thr);
+  const ch = inLeft? t.left : t.right;
+  if(ch.isLeaf) return ch.mean;
+  return (x[ch.feat]<=ch.thr)? ch.left : ch.right;
+}
+
+function fitGBRT(X, y, params){ // params: {M, lr, depth}
+  const N=X.length, M=params.M, lr=params.lr, depth=params.depth;
+  const base = y.reduce((a,b)=>a+b,0)/N;
+  const yhat=new Array(N).fill(base);
+  const trees=[];
+  for(let m=0;m<M;m++){
+    const r=y.map((yi,i)=>yi - yhat[i]);
+    let model;
+    if(depth===1){ model=fitStump(X, r); }
+    else{ model=fitTreeDepth2(X, r); }
+    trees.push(model);
+    for(let i=0;i<N;i++){
+      const inc = (depth===1)? predictStump(X[i], model) : predictTree2(X[i], model);
+      yhat[i] += lr*inc;
+    }
+  }
+  return {base, trees, params:{lr,depth}};
+}
+function predictGBRT(X, M){
+  const out=[];
+  for(const x of X){
+    let v=M.base;
+    for(const t of M.trees){
+      const inc = (M.params.depth===1)? predictStump(x, t) : predictTree2(x, t);
+      v += M.params.lr * inc;
+    }
+    out.push(v);
+  }
+  return out;
+}
+
+// ========= Навчання / Тест =========
+function train(){
+  if(rows.length<72){ alert('Занадто мало даних (≥72 год)'); return; }
+  const use={
+    hour:$('#fHour').checked, dow:$('#fDow').checked,
+    lag1:$('#fLag1').checked, lag24:$('#fLag24').checked,
+    ma24:$('#fMA24').checked, temp:$('#fTemp').checked
+  };
+  const featRows = makeFeatures(rows, use);
+  const X=featRows.map(r=>r.x), y=featRows.map(r=>r.y), tIdx=featRows.map(r=>r.i), names=featRows[0].names;
+
+  // масштабування
+  const sc=fitScaler(X); const Xz=transformX(X,sc);
+
+  // train/test по часу
+  const split=parseInt($('#split').value)||80;
+  const nTrain=Math.round(Xz.length*split/100);
+  const trX=Xz.slice(0,nTrain), trY=y.slice(0,nTrain);
+  const teX=Xz.slice(nTrain),   teY=y.slice(nTrain);
+
+  const M=parseInt($('#trees').value)||120, lr=parseFloat($('#lr').value)||0.1, depth=parseInt($('#depth').value)||1;
+  const model=fitGBRT(trX, trY, {M,lr,depth});
+
+  // оцінка
+  const pred = predictGBRT(teX, model);
+  const mae = meanAbsErr(teY, pred), rmse=RMSE(teY,pred), mape=MAPE(teY,pred);
+  $('#badgeRes').textContent=`MAE: ${mae.toFixed(1)} | RMSE: ${rmse.toFixed(1)} | MAPE: ${mape.toFixed(1)}%`;
+
+  // важливість (пермутаційна ΔRMSE на валі)
+  const impr=[];
+  const baseRMSE = rmse;
+  for(let j=0;j<trX[0].length;j++){
+    const teXperm=teX.map(v=>v.slice());
+    // пермутація по стовпцю j
+    const col=teXperm.map(v=>v[j]).slice().sort(()=>Math.random()-0.5);
+    for(let i=0;i<teXperm.length;i++) teXperm[i][j]=col[i];
+    const p2=predictGBRT(teXperm, model);
+    impr.push({name:names[j], dRMSE: RMSE(teY,p2)-baseRMSE});
+  }
+  const tb=$('#impTbl tbody'); tb.innerHTML='';
+  impr.sort((a,b)=>b.dRMSE-a.dRMSE).forEach(r=>{
+    const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.name}</td><td>${r.dRMSE.toFixed(2)}</td>`;
+    tb.appendChild(tr);
+  });
+
+  MODEL={base:model.base, trees:model.trees, mu:sc.mu, sig:sc.sig, feats:names, trainIdx:tIdx.slice(0,nTrain), testIdx:tIdx.slice(nTrain), params:model.params};
+  PRED.length=0; PEAKS.length=0;
+  draw();
+}
+
+function meanAbsErr(y,p){ let s=0; for(let i=0;i<y.length;i++) s+=Math.abs(y[i]-p[i]); return s/y.length; }
+function RMSE(y,p){ let s=0; for(let i=0;i<y.length;i++){ const d=y[i]-p[i]; s+=d*d; } return Math.sqrt(s/y.length); }
+function MAPE(y,p){ let s=0,c=0; for(let i=0;i<y.length;i++){ if(y[i]!==0){ s+=Math.abs((y[i]-p[i])/y[i]); c++; } } return 100*(s/Math.max(1,c)); }
+
+$('#train').addEventListener('click', train);
+
+// ========= Прогноз 48 h =========
+function forecast48(){
+  if(!MODEL){ alert('Спочатку тренування'); return; }
+  // візьмемо останню добу для лагів
+  let cur = new Date(rows.at(-1).t.getTime()+3600000);
+  const last = rows.slice(-48-24); // контекст
+  const use={hour:$('#fHour').checked, dow:$('#fDow').checked, lag1:$('#fLag1').checked, lag24:$('#fLag24').checked, ma24:$('#fMA24').checked, temp:$('#fTemp').checked};
+
+  PRED.length=0;
+  const buf = rows.slice(); // будемо дописувати прогнози як якорі для лагів
+  for(let i=0;i<48;i++){
+    // синтетична температура якщо її не було
+    const temp = (typeof rows[0].temp==='number') ? undefined : (16 + 8*Math.sin((cur.getHours()-13)/4));
+    buf.push({t:new Date(cur), y:NaN, temp: (rows[0].temp!==undefined? rows[buf.length-1].temp : temp)});
+    const feats = makeFeatures(buf, use).at(-1);
+    // масштабування
+    const xz = feats.x.map((v,j)=>(v-MODEL.mu[j])/MODEL.sig[j]);
+    const yhat = predictGBRT([xz], {base:MODEL.base, trees:MODEL.trees, params:MODEL.params})[0];
+    PRED.push({t:new Date(cur), yhat});
+    // підставимо як lag1/ma
+    buf[buf.length-1].y = yhat;
+    cur = new Date(cur.getTime()+3600000);
+  }
+  draw();
+}
+$('#forecast').addEventListener('click', forecast48);
+
+// ========= Піки, поради, експорт =========
+function findPeaks(){
+  if(PRED.length===0){ alert('Зроби прогноз'); return; }
+  const thr=parseFloat($('#thr').value)||300;
+  PEAKS = PRED.filter(p=>p.yhat>=thr);
+  $('#badgePk').textContent='Піків: '+PEAKS.length;
+  // прості поради
+  const tips=[];
+  if(PEAKS.length){
+    // часові «гарячі» інтервали
+    const hours=PEAKS.map(p=>p.t.getHours());
+    const hist=new Map(); hours.forEach(h=>hist.set(h,(hist.get(h)||0)+1));
+    const topH=[...hist.entries()].sort((a,b)=>b[1]-a[1]).slice(0,3).map(([h,c])=>`${h}:00 (${c} разів)`);
+    tips.push(`⏱️ Гарячі години: ${topH.join(', ')}`);
+    tips.push(`🔀 Зсув не критичних навантажень (заряд, компресори) на вікна з 01:00–05:00 або 10:00–15:00 (типово нижчі базові рівні).`);
+    tips.push(`🌀 Якщо є акумуляція/ДС: заряд до початку пікового коридору, розряд під час піка (мінімізувати Pmax).`);
+    tips.push(`🌡️ Якщо Temp використовується: перевір гістрезис термостатів/чіллерів, вирівняй одночасний старт.`);
+  } else {
+    tips.push('✅ Піків вище порогу не знайдено. Можна зменшити поріг для тренування диспетчерів.');
+  }
+  $('#advice').textContent=tips.join('\n');
+  draw();
+}
+$('#findPeaks').addEventListener('click', findPeaks);
+
+$('#expCSV').addEventListener('click', ()=>{
+  if(PRED.length===0){ alert('Немає прогнозу'); return; }
+  const head='timestamp,yhat_kW\n';
+  const body=PRED.map(p=>`${p.t.toISOString()},${p.yhat.toFixed(1)}`).join('\n');
+  download('electric_para24_forecast_'+stamp()+'.csv', head+body, 'text/csv');
+});
+$('#expICS').addEventListener('click', ()=>{
+  if(PEAKS.length===0){ alert('Спочатку знайди піки'); return; }
+  const thr=parseFloat($('#thr').value)||300;
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//EDLab//Peak Alerts//UA'];
+  PEAKS.forEach((p,i)=>{
+    const s=p.t, e=new Date(p.t.getTime()+3600000);
+    const dt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:'+('peak-'+i+'-'+Date.now())+'@edlab');
+    lines.push('DTSTART:'+dt(s));
+    lines.push('DTEND:'+dt(e));
+    lines.push('SUMMARY:Пік навантаження ≥ '+thr+' кВт');
+    lines.push('DESCRIPTION:Прогноз='+p.yhat.toFixed(1)+' кВт. Рекомендації у TXT/чеку.');
+    lines.push('END:VEVENT');
+  });
+  lines.push('END:VCALENDAR');
+  download('electric_para24_peaks_'+stamp()+'.ics', lines.join('\r\n'), 'text/calendar');
+});
+$('#expTXT').addEventListener('click', ()=>{
+  const lines=[
+    'Пара 24 — Прогноз піків навантаження',
+    $('#badgeRes').textContent,
+    'Піків: '+PEAKS.length,
+    'Поріг: '+($('#thr').value||'—')+' кВт',
+    '--- Поради ---',
+    $('#advice').textContent||'-'
+  ];
+  download('electric_para24_summary_'+stamp()+'.txt', lines.join('\n'));
+});
+$('#receipt').addEventListener('click', ()=>{
+  if(PRED.length===0){ alert('Немає прогнозу'); return; }
+  // чек на перший день прогнозу
+  const day = new Date(PRED[0].t); day.setHours(0,0,0,0);
+  const items = PRED.filter(p=>{const d=new Date(p.t); d.setHours(0,0,0,0); return d.getTime()===day.getTime();});
+  const lines=['=== ЧЕК ПРОГНОЗУ (58мм) ===','Дата: '+day.toISOString().slice(0,10),'---'];
+  items.forEach(p=>lines.push(`${p.t.toISOString().slice(11,16)}  ${p.yhat.toFixed(1)} кВт`));
+  const hot = PEAKS.filter(p=>{const d=new Date(p.t); d.setHours(0,0,0,0); return d.getTime()===day.getTime();});
+  lines.push('--- Пікові години ---');
+  hot.forEach(p=>lines.push(p.t.toISOString().slice(11,16)+' ≥'+($('#thr').value||'')+'кВт'));
+  const el=$('#rc'); el.hidden=false; el.textContent=lines.join('\n');
+  download('para24_receipt_'+stamp()+'.txt', lines.join('\n'));
+});
+
+// ========= Промпт до LLM =========
+function buildPrompt(){
+  const thr=$('#thr').value||'—';
+  const acc=$('#badgeRes').textContent||'—';
+  const pk=PEAKS.slice(0,8).map(p=>`${p.t.toISOString().slice(0,16)} → ${p.yhat.toFixed(1)} кВт`).join('\n');
+  return `Ти — диспетчер енерговикористання. За прогнозом навантаження розпиши план балансування.
+Вхід:
+• Метрики моделі: ${acc}
+• Поріг піку: ${thr} кВт
+• Топ піків (до 8): 
+${pk||'-'}
+Завдання:
+1) Запропонуй часові «вікна зсуву» для некритичних навантажень (заряд, компресори, обігрів/охолодження).
+2) Якщо керовані ДС/акумуляція — дай графік charge/discharge на добу.
+3) Оціни ризик штрафів за перевищення Pmax і як його мінімізувати.
+4) Таблиця «година → дія → очікуване зниження кВт». Заверши коротким резюме для зміни.`;
+}
+$('#genPrompt').addEventListener('click', ()=>{ $('#prompt').textContent=buildPrompt(); });
+$('#copyPrompt').addEventListener('click', ()=>{
+  const ta=document.createElement('textarea'); ta.value=$('#prompt').textContent; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+});
+$('#savePrompt').addEventListener('click', ()=>{ const txt=$('#prompt').textContent||buildPrompt(); download('electric_para24_prompt_'+stamp()+'.txt', txt); });
+
+// ========= Графік =========
+const g=$('#chart'), ctx=g.getContext('2d');
+function draw(){
+  const W=g.width,H=g.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,W-1,H-1);
+  if(rows.length<2) return;
+
+  // діапазон часу: історія + прогноз
+  const t0=rows[0].t, t1=PRED.length? PRED.at(-1).t : rows.at(-1).t;
+  const spanH=Math.max(24, Math.round((t1-t0)/3600000));
+  const pxPerH=(W-80)/spanH;
+
+  // сітка днів
+  for(let h=0; h<=spanH; h++){
+    const x=80+h*pxPerH;
+    ctx.strokeStyle = (h%24===0)? '#2a3a59':'#18243b';
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+    if(h%24===0){
+      const d=new Date(t0.getTime()+h*3600000);
+      ctx.fillStyle='#94a3b8'; ctx.font='12px ui-monospace'; ctx.fillText(d.toISOString().slice(5,10), x+4, 14);
+    }
+  }
+
+  // історія
+  const maxY = Math.max(100, Math.max(...rows.map(r=>r.y))*1.2, PRED.length? Math.max(...PRED.map(p=>p.yhat))*1.2 : 0);
+  ctx.beginPath(); ctx.strokeStyle='#38bdf8'; ctx.lineWidth=1.8;
+  rows.forEach((r,i)=>{
+    const x=80+((r.t-t0)/3600000)*pxPerH;
+    const y=H-10-(Math.min(maxY,r.y)/maxY)*(H-20);
+    i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+  }); ctx.stroke();
+  ctx.fillStyle='#94a3b8'; ctx.fillText('Історія (кВт)', W-120, 14);
+
+  // прогноз
+  if(PRED.length){
+    ctx.beginPath(); ctx.strokeStyle='#22c55e'; ctx.lineWidth=2;
+    PRED.forEach((p,i)=>{
+      const x=80+((p.t-t0)/3600000)*pxPerH;
+      const y=H-10-(Math.min(maxY,p.yhat)/maxY)*(H-20);
+      i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+    }); ctx.stroke();
+    ctx.fillText('Прогноз (кВт)', W-120, 30);
+  }
+
+  // поріг
+  const thr=parseFloat($('#thr').value)||NaN;
+  if(!Number.isNaN(thr)){
+    const y=H-10-(Math.min(maxY,thr)/maxY)*(H-20);
+    ctx.strokeStyle='#fbbf24'; ctx.setLineDash([6,4]); ctx.beginPath(); ctx.moveTo(80,y); ctx.lineTo(W-0,y); ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  // позначки піків
+  if(PEAKS.length){
+    ctx.fillStyle='#f87171';
+    PEAKS.forEach(p=>{
+      const x=80+((p.t-t0)/3600000)*pxPerH;
+      const y=H-10-(Math.min(maxY,p.yhat)/maxY)*(H-20);
+      ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+    });
+  }
+}
+
+// ========= Ініціалізація =========
+if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
+draw();
+</script>
+</body>
+</html>
