@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 17 (газовики) — Диспетчеризація аварій: мапа, черги, маршрути бригад, ETA, SLA-графік, експорт</title>
+<meta name="description" content="Інтерактивна диспетчеризація: клік на мапі → інцидент (P1/P2/P3), черга, авто-призначення найближчої бригади, маршрут/ETA, імітація руху й усунення, графік SLA, метрики, журнал, експорт CSV/TXT."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1320px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.grid{display:grid;gap:14px;grid-template-columns:1.25fr 1fr}
+@media(max-width:1150px){.grid{grid-template-columns:1fr}}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:#e6eef9}
+.btn{border:1px solid var(--line);background:#0f1f39;color:#e6eef9;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+h2{margin:.2em 0 .4em}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:#e5e7eb;margin-right:6px;margin-top:6px}
+.muted{color:var(--muted)}
+canvas.map{display:block;width:100%;height:520px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+canvas.chart{display:block;width:100%;height:220px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;padding:10px}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 10px;color:#e5e7eb}
+.tag.ok{border-color:#1d3e2a;background:#0f2f1e}
+.tag.warn{border-color:#4a3b13;background:#2b2310}
+.tag.bad{border-color:#5a1f1f;background:#2a1212}
+.footer{margin-top:20px;color:#94a3b8;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🚨🗺️</span>
+      <div>
+        <b>Пара 17 — Диспетчеризація аварій</b><br/>
+        <span class="badge">Мапа → інциденти → черга/пріоритет → призначення бригади → маршрут/ETA → графік SLA → експорт</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <div class="card">
+    <h2>📚 Контекст</h2>
+    <p>Клікай на мапі, щоб створити <b>інцидент</b>. Обирай <b>пріоритет</b> (P1/P2/P3) і тип (запах газу, витік, відсутність газу, вибухонебезпечні роботи поруч). 
+      Система тримає <b>чергу</b>, <b>призначає бригади</b> за принципом «найближча вільна до найвищого пріоритету», рахує <b>ETA</b>, імітує рух і <b>усунення</b>. 
+      На графіку — частка <b>заяв у SLA</b>. Пробуй сценарії — і експортуй результат.</p>
+    <div class="row">
+      <label style="flex:1">SLA P1, хв<input id="slaP1" class="input" type="number" step="1" value="30"></label>
+      <label style="flex:1">SLA P2, хв<input id="slaP2" class="input" type="number" step="1" value="60"></label>
+      <label style="flex:1">SLA P3, хв<input id="slaP3" class="input" type="number" step="1" value="180"></label>
+      <label style="flex:1">Швидкість бригади, км/год<input id="spd" class="input" type="number" step="1" value="30"><small class="muted" style="display:block;margin-top:-4px">1 клітинка ≈ 100 м</small></label>
+    </div>
+    <div class="row">
+      <button class="btn good" id="run">▶️ Старт</button>
+      <button class="btn secondary" id="stop">⏹️ Стоп</button>
+      <button class="btn" id="reset">🔄 Скинути</button>
+      <button class="btn" id="autogen">🧪 Згенерувати 5 інцидентів</button>
+      <span class="badge">t = <b id="tSim">0</b> хв</span>
+      <span class="badge">Активні: <b id="actCnt">0</b>, В черзі: <b id="qCnt">0</b></span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>🗺️ Мапа диспетчеризації</h2>
+      <canvas id="map" class="map" width="860" height="520"></canvas>
+      <div class="row" style="margin-top:8px">
+        <label>Пріоритет
+          <select id="prio" class="input">
+            <option value="P1">P1 (критичний)</option>
+            <option value="P2" selected>P2 (високий)</option>
+            <option value="P3">P3 (звичайний)</option>
+          </select>
+        </label>
+        <label>Тип
+          <select id="itype" class="input">
+            <option>Запах газу</option>
+            <option>Підтверджений витік</option>
+            <option>Відсутність газу</option>
+            <option>Роботи поруч (ризик)</option>
+          </select>
+        </label>
+        <label style="flex:1">Нотатка<input id="inote" class="input" placeholder="Деталі інциденту"/></label>
+        <button class="btn" id="assign">🤖 Перепризначити вручну (опц.)</button>
+      </div>
+
+      <h2 style="margin-top:10px">📈 SLA-графік (виконано в нормативі, %)</h2>
+      <canvas id="chart" class="chart" width="560" height="220"></canvas>
+    </div>
+
+    <div class="card">
+      <h2>📊 Таблиці та метрики</h2>
+      <div class="row">
+        <span class="tag ok">SLA P1 ≤ <b id="sla1Tag">30</b> хв</span>
+        <span class="tag warn">SLA P2 ≤ <b id="sla2Tag">60</b> хв</span>
+        <span class="tag bad">SLA P3 ≤ <b id="sla3Tag">180</b> хв</span>
+      </div>
+      <table class="tbl" style="margin-top:8px">
+        <thead><tr><th>#</th><th>Пріор.</th><th>Тип</th><th>Статус</th><th>ETA</th><th>Виконавець</th></tr></thead>
+        <tbody id="tblInc"><tr><td colspan="6" class="muted">— інцидентів поки немає —</td></tr></tbody>
+      </table>
+
+      <h3 style="margin-top:10px">🚐 Бригади</h3>
+      <table class="tbl">
+        <thead><tr><th>Бригада</th><th>Стан</th><th>Інцидент</th><th>Прогрес</th></tr></thead>
+        <tbody id="tblCrew"></tbody>
+      </table>
+
+      <h3 style="margin-top:10px">🛎️ Журнал</h3>
+      <pre id="alog" class="log">// Поки порожньо</pre>
+
+      <h3 style="margin-top:10px">💾 Експорт</h3>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV (інциденти + таймлайн SLA)</button>
+        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Завдання для студентів</h2>
+    <ol>
+      <li>Створи 3 інциденти (P1, P2, P3) у різних районах. Переконайся, що P1 отримує бригаду першим і має найменший ETA.</li>
+      <li>Підібрай швидкість бригад так, щоб **≥80% заяв** виконувались у **SLA**. Поясни, де «вузькі місця».</li>
+      <li>Запусти «🧪 Згенерувати 5 інцидентів», потім «Перепризначити вручну» — порівняй відсоток SLA до/після.</li>
+      <li>Експортуй CSV/TXT і зроби висновки щодо оптимізації кількості бригад та їх стартових позицій.</li>
+    </ol>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+/* ===== Утиліти/стан ===== */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString('uk-UA');const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+$('#upd').textContent=new Date().toLocaleDateString('uk-UA');
+
+const map=$('#map'), g=map.getContext('2d');
+const W=map.width, H=map.height;
+const COLS=43, ROWS=26; // ~100м клітинка → поле ~4.3x2.6 км
+const CELLW=W/COLS, CELLH=H/ROWS;
+
+let T=0, timer=null;
+let crews=[], incidents=[], timeline=[]; // timeline для SLA графіка
+
+/* ===== Початкові бригади (3 шт.) ===== */
+function initCrews(){
+  crews=[
+    {id:'C1', x:4,  y:20, state:'idle', tgt:null, path:[], dist:0, eta:null, progress:0, color:'#38bdf8'},
+    {id:'C2', x:20, y:4,  state:'idle', tgt:null, path:[], dist:0, eta:null, progress:0, color:'#22c55e'},
+    {id:'C3', x:36, y:18, state:'idle', tgt:null, path:[], dist:0, eta:null, progress:0, color:'#fbbf24'}
+  ];
+}
+initCrews();
+
+/* ===== Мапа (сітка + стилізовані “райони”) ===== */
+function drawMap(){
+  g.clearRect(0,0,W,H);
+  // фон районів
+  const blocks=[{x:1,y:1,w:14,h:10,c:'#0b1528'},{x:15,y:1,w:14,h:12,c:'#0b182d'},{x:29,y:1,w:13,h:11,c:'#0b1b32'},
+                {x:1,y:12,w:16,h:12,c:'#0b162a'},{x:17,y:13,w:12,h:12,c:'#0b1930'},{x:29,y:12,w:13,h:13,c:'#0b1d35'}];
+  blocks.forEach(b=>{ g.fillStyle=b.c; g.fillRect(b.x*CELLW,b.y*CELLH,b.w*CELLW,b.h*CELLH); });
+  // сітка груба
+  g.strokeStyle='#1f2a44'; g.lineWidth=1;
+  for(let i=0;i<=COLS;i++){ g.beginPath(); g.moveTo(i*CELLW,0); g.lineTo(i*CELLW,H); g.stroke(); }
+  for(let j=0;j<=ROWS;j++){ g.beginPath(); g.moveTo(0,j*CELLH); g.lineTo(W,j*CELLH); g.stroke(); }
+  // депо (умовні)
+  [['DEP1',4,20],['DEP2',20,4],['DEP3',36,18]].forEach(([t,x,y])=>{
+    g.fillStyle='#64748b'; g.fillRect(x*CELLW-10,y*CELLH-10,20,20);
+    g.fillStyle='#e5e7eb'; g.font='10px ui-monospace'; g.fillText(t, x*CELLW-14, y*CELLH-12);
+  });
+  // інциденти
+  incidents.forEach(inc=>{
+    const col = inc.prio==='P1'?'#f87171':(inc.prio==='P2'?'#fbbf24':'#38bdf8');
+    g.fillStyle=col; g.beginPath(); g.arc((inc.x+0.5)*CELLW,(inc.y+0.5)*CELLH,7,0,Math.PI*2); g.fill();
+    g.fillStyle='#0b1220'; g.font='10px ui-monospace'; g.fillText(inc.prio,(inc.x+0.5)*CELLW-9,(inc.y+0.5)*CELLH+3);
+  });
+  // маршрути + бригади
+  crews.forEach(c=>{
+    if(c.path.length>0){
+      g.strokeStyle=c.color; g.lineWidth=2; g.beginPath();
+      const p0={x:(c.x+0.5)*CELLW,y:(c.y+0.5)*CELLH}; g.moveTo(p0.x,p0.y);
+      c.path.forEach(p=>{ g.lineTo((p.x+0.5)*CELLW,(p.y+0.5)*CELLH); });
+      g.stroke();
+    }
+    g.fillStyle=c.color; g.beginPath(); g.arc((c.x+0.5)*CELLW,(c.y+0.5)*CELLH,8,0,Math.PI*2); g.fill();
+    g.fillStyle='#0b1220'; g.font='10px ui-monospace'; g.fillText(c.id,(c.x+0.5)*CELLW-10,(c.y+0.5)*CELLH+3);
+  });
+}
+
+/* ===== Інциденти ===== */
+function addIncident(x,y, prio, type, note){
+  const id='I'+(Math.random().toString(36).slice(2,6).toUpperCase());
+  const sla = getSLAmin(prio);
+  const inc={id,x,y,prio,type,note, tCreate:T, tAssign:null, tArrive:null, tFix:null, crew:null, status:'NEW', slaMin:sla};
+  incidents.push(inc);
+  log(`➕ Інцидент ${inc.id} (${prio}/${type}) @ ${x},${y}`);
+  tryAssign(); // спроба призначити
+  refreshTables(); drawMap();
+}
+
+function getSLAmin(prio){
+  if(prio==='P1') return Math.max(1,parseInt($('#slaP1').value)||30);
+  if(prio==='P2') return Math.max(1,parseInt($('#slaP2').value)||60);
+  return Math.max(1,parseInt($('#slaP3').value)||180);
+}
+
+/* ===== Призначення бригад ===== */
+function tryAssign(){
+  // відсортуємо відкриті інциденти: P1→P2→P3, далі найстаріші
+  const open = incidents.filter(i=>i.status==='NEW'||i.status==='QUEUED').sort((a,b)=>{
+    const pr = {'P1':1,'P2':2,'P3':3};
+    if(pr[a.prio]!==pr[b.prio]) return pr[a.prio]-pr[b.prio];
+    return a.tCreate-b.tCreate;
+  });
+  open.forEach(i=>{
+    // знайти найближчу вільну бригаду
+    const free = crews.filter(c=>c.state==='idle');
+    if(!free.length){ i.status='QUEUED'; return; }
+    let best=null, bestD=1e9;
+    free.forEach(c=>{
+      const d = Math.abs(c.x-i.x)+Math.abs(c.y-i.y);
+      if(d<bestD){bestD=d; best=c;}
+    });
+    if(best){
+      assign(best,i);
+    }
+  });
+}
+
+function assign(c, inc){
+  // маршрут: манхеттенський найкоротший
+  const path=[]; let cx=c.x, cy=c.y;
+  while(cx!==inc.x){ cx += (inc.x>cx?1:-1); path.push({x:cx,y:cy}); }
+  while(cy!==inc.y){ cy += (inc.y>cy?1:-1); path.push({x:cx,y:cy}); }
+  c.tgt=inc.id; c.path=path; c.state='to_site';
+  c.dist=path.length; c.progress=0;
+  const minPerCell = 6/(Math.max(1, parseFloat($('#spd').value)||30)); // 30 км/год ≈ 0.5 км/хв; 100 м = 0.2 хв → 12 с. Ми робимо 6/Speed хв/клітка
+  c.eta = T + Math.ceil(c.dist*minPerCell);
+  inc.crew=c.id; inc.status='ASSIGNED'; inc.tAssign=T;
+  log(`🚐 ${c.id} → ${inc.id} (ETA ~ ${c.eta-T} хв)`);
+}
+
+/* ===== Імітація кроків ===== */
+function tick(){
+  T += 1; // 1 крок = 1 хв
+  $('#tSim').textContent=T;
+  // рух бригад
+  crews.forEach(c=>{
+    if(c.state==='to_site' && c.path.length){
+      // кожні k хв рух на 1 клітинку
+      const minPerCell = 6/(Math.max(1, parseFloat($('#spd').value)||30));
+      c.progress += 1;
+      while(c.progress>=minPerCell && c.path.length){
+        c.progress -= minPerCell;
+        const p=c.path.shift(); c.x=p.x; c.y=p.y;
+      }
+      if(c.path.length===0){
+        // прибули
+        const inc=incById(c.tgt);
+        if(inc){ inc.tArrive=T; inc.status='ON_SITE'; log(`✅ ${c.id} прибув до ${inc.id}`); }
+        c.state='fixing'; c.progress=0;
+      }
+    } else if(c.state==='fixing'){
+      // ремонт займає 10–30 хв залежно від пріоритету
+      const inc=incById(c.tgt); if(!inc) {c.state='idle'; return;}
+      const need = (inc.prio==='P1'?10:(inc.prio==='P2'?15:25));
+      c.progress += 1;
+      if(c.progress>=need){
+        inc.tFix=T; inc.status='DONE'; log(`🧰 ${c.id} завершає ${inc.id} (t=${T-inc.tCreate} хв)`);
+        // SLA
+        const within = (inc.tArrive - inc.tCreate) <= inc.slaMin ? 1:0;
+        timeline.push({t:T, within});
+        c.state='idle'; c.tgt=null; c.eta=null; c.progress=0;
+        tryAssign(); // як тільки звільнились — беремо наступний
+      }
+    }
+  });
+  // періодичний запис SLA % (ковзне вікно)
+  if(T%5===0){
+    const pct = slaPct();
+    timeline.push({t:T, within:pct}); // для графіка зручно зберігати % окремою точкою
+  }
+  refreshTables(); drawMap(); drawChart();
+}
+
+function incById(id){ return incidents.find(i=>i.id===id); }
+function slaPct(){
+  const done=incidents.filter(i=>i.status==='DONE');
+  if(done.length===0) return 0;
+  let ok=0; done.forEach(i=>{ if((i.tArrive - i.tCreate) <= i.slaMin) ok++; });
+  return Math.round(ok/done.length*100);
+}
+
+/* ===== UI: клік по мапі = новий інцидент ===== */
+map.addEventListener('click',(e)=>{
+  const r=map.getBoundingClientRect(); const x=Math.floor((e.clientX-r.left)/CELLW); const y=Math.floor((e.clientY-r.top)/CELLH);
+  const prio=$('#prio').value; const type=$('#itype').value; const note=$('#inote').value.trim();
+  addIncident(x,y, prio, type, note);
+});
+$('#autogen').addEventListener('click',()=>{
+  for(let k=0;k<5;k++){
+    const x=Math.floor(Math.random()*COLS), y=Math.floor(Math.random()*ROWS);
+    const pr=['P1','P2','P3'][Math.floor(Math.random()*3)];
+    const tp=['Запах газу','Підтверджений витік','Відсутність газу','Роботи поруч (ризик)'][Math.floor(Math.random()*4)];
+    addIncident(x,y,pr,tp,'auto');
+  }
+});
+$('#assign').addEventListener('click',()=>{ tryAssign(); refreshTables(); drawMap(); });
+
+/* ===== Таблиці ===== */
+function refreshTables(){
+  // інциденти
+  const body=$('#tblInc'); body.innerHTML='';
+  if(incidents.length===0){ body.innerHTML='<tr><td colspan="6" class="muted">— інцидентів поки немає —</td></tr>'; }
+  incidents.slice().sort((a,b)=>b.tCreate-a.tCreate).forEach((i,idx)=>{
+    const eta = i.status==='ASSIGNED'||i.status==='ON_SITE' ? ((incById(i.id), crewById(i.crew)?.eta - T) : null) : null;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${incidents.length-idx}</td><td>${i.prio}</td><td>${i.type}</td><td>${i.status}</td><td>${eta!=null?Math.max(0,eta):'—'}</td><td>${i.crew||'—'}</td>`;
+    body.appendChild(tr);
+  });
+  // бригади
+  const bc=$('#tblCrew'); bc.innerHTML='';
+  crews.forEach(c=>{
+    const inc = c.tgt? incById(c.tgt):null;
+    const prog = c.state==='to_site' ? `${Math.max(0,Math.min(100, Math.round((c.dist-(c.path.length))/Math.max(1,c.dist)*100)))}%`
+               : c.state==='fixing' ? `${Math.min(100,Math.round((c.progress)/(inc?(inc.prio==='P1'?10:(inc.prio==='P2'?15:25)):15)*100))}%`
+               : '—';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${c.id}</td><td>${c.state}</td><td>${c.tgt||'—'}</td><td>${prog}</td>`;
+    bc.appendChild(tr);
+  });
+  // лічильники/теги
+  $('#actCnt').textContent = incidents.filter(i=>i.status!=='DONE').length;
+  $('#qCnt').textContent = incidents.filter(i=>i.status==='QUEUED' || i.status==='NEW').length;
+  $('#sla1Tag').textContent=$('#slaP1').value; $('#sla2Tag').textContent=$('#slaP2').value; $('#sla3Tag').textContent=$('#slaP3').value;
+}
+
+function crewById(id){ return crews.find(c=>c.id===id); }
+
+/* ===== Керування симуляцією ===== */
+$('#run').addEventListener('click',()=>{ if(timer) return; timer=setInterval(tick,1000); log('▶️ Симуляцію запущено (1 крок = 1 хв)'); });
+$('#stop').addEventListener('click',()=>{ if(!timer) return; clearInterval(timer); timer=null; log('⏹️ Симуляцію зупинено'); });
+$('#reset').addEventListener('click',()=>{
+  if(timer){ clearInterval(timer); timer=null; }
+  T=0; incidents=[]; timeline=[]; initCrews(); refreshTables(); drawMap(); drawChart(); log('🔄 Скидання середовища');
+});
+
+/* ===== Графік SLA ===== */
+const chart=$('#chart'), gc=chart.getContext('2d');
+function drawChart(){
+  const Wc=chart.width,Hc=chart.height; gc.clearRect(0,0,Wc,Hc);
+  gc.strokeStyle='#223049'; gc.strokeRect(0.5,0.5,Wc-1,Hc-1);
+  const left=40,right=Wc-20,top=20,bottom=Hc-28;
+  // сітка
+  gc.strokeStyle='#1f2a44'; for(let i=0;i<=4;i++){ const y=top+i*(bottom-top)/4; gc.beginPath(); gc.moveTo(left,y); gc.lineTo(right,y); gc.stroke(); }
+  // дані
+  const pts = timeline.filter(p=>typeof p.within==='number' && p.within>=0);
+  if(pts.length<2){ gc.fillStyle='#94a3b8'; gc.fillText('SLA-процент з’явиться після виконаних інцидентів', left+8, top+14); return; }
+  const tMin=pts[0].t, tMax=pts[pts.length-1].t, span=(tMax-tMin)||1;
+  const X=t=> left + (t-tMin)/span*(right-left);
+  const Y=v=> bottom - (v/100)*(bottom-top);
+  gc.beginPath(); gc.strokeStyle='#22c55e';
+  pts.forEach((p,i)=>{ const x=X(p.t), y=Y(p.within); if(i===0) gc.moveTo(x,y); else gc.lineTo(x,y); });
+  gc.stroke();
+  gc.fillStyle='#e5e7eb'; gc.font='11px ui-monospace';
+  gc.fillText('SLA %', right-56, top+12);
+}
+
+/* ===== Експорт ===== */
+function saveCSV(){
+  let csv='id,prio,type,status,created_min,assigned_min,arrive_min,fix_min,crew,sla_min,withinSLA\n';
+  incidents.forEach(i=>{
+    const within = (i.tArrive!=null) ? ((i.tArrive - i.tCreate) <= i.slaMin) : '';
+    csv+=`${i.id},${i.prio},${i.type.replace(/,/g,';')},${i.status},${i.tCreate??''},${i.tAssign??''},${i.tArrive??''},${i.tFix??''},${i.crew??''},${i.slaMin},${within}\n`;
+  });
+  csv+='\n# sla_timeline\nminute,pct\n';
+  timeline.forEach(p=>{ if(p.within!=null) csv+=`${p.t},${p.within}\n`; });
+  download('gas_para17_dispatch_'+stamp()+'.csv', csv, 'text/csv');
+}
+function saveTXT(){
+  const done=incidents.filter(i=>i.status==='DONE').length;
+  const pct = slaPct();
+  const lines=[
+    'Пара 17 — Диспетчеризація аварій: підсумок',
+    `Час моделювання: ${T} хв`,
+    `Усього інцидентів: ${incidents.length}; Виконано: ${done}`,
+    `SLA виконано: ${pct}%`,
+    `Бригади: ${crews.map(c=>`${c.id}@${c.x},${c.y} (${c.state})`).join(' | ')}`,
+    '--- Останні 5 інцидентів ---',
+    ...incidents.slice(-5).map(i=>`${i.id} ${i.prio} ${i.type} — ${i.status} (crew:${i.crew||'-'}, ETA:${crewById(i.crew)?.eta!=null?Math.max(0,crewById(i.crew).eta-T):'—'})`),
+  ];
+  download('gas_para17_summary_'+stamp()+'.txt', lines.join('\n'));
+}
+$('#saveCsv').addEventListener('click', saveCSV);
+$('#saveTxt').addEventListener('click', saveTXT);
+
+/* ===== Ініт ===== */
+drawMap(); drawChart(); refreshTables();
+</script>
+</body>
+</html>
