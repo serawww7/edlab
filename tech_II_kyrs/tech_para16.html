@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 16 (технологи) — Пастеризація: теплограма → пастеризаційні одиниці (PU) → CCP → чек 58 мм/QR/CSV</title>
+<meta name="description" content="Емулятор пастеризації молока/соку/яєчної маси: нагрів–витримка–охолодження. Обчислення PU = ∫10^((T−Tref)/z)dt, контроль CCP, графік, журнал тривог, чек 58 мм, QR, експорт CSV/TXT."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:100px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.grid{display:grid;gap:14px;grid-template-columns:1.2fr 1fr}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:300px}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🥛</span>
+      <div>
+        <b>Пара 16 — Пастеризація (емулятор + PU + CCP)</b><br/>
+        <span class="badge">нагрів → витримка → охолодження • ∫10^((T−Tref)/z)dt • графік • журнал • чек/QR/CSV</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">Мета: змоделювати пастеризацію <b>молока/соку/яєчної маси</b>, обчислити <b>пастеризаційні одиниці (PU)</b> за параметрами <span class="mono">Tref</span> та <span class="mono">z</span>, контролювати <b>CCP-пороги</b>, будувати графік і формувати документи (CSV/TXT/чек 58 мм, QR).</p>
+
+  <div class="grid">
+    <!-- ЛІВО: налаштування + графік + управління -->
+    <div class="card">
+      <h2>🔧 Налаштування процесу</h2>
+      <div class="row">
+        <select id="product" class="input" style="max-width:220px">
+          <option value="milk" selected>Молоко HTST (≈72°C/15 с)</option>
+          <option value="batch">Молоко batch (≈63°C/30 хв)</option>
+          <option value="egg">Яєчна маса (≈60°C/3,5 хв)</option>
+          <option value="juice">Сік (налаштовується)</option>
+        </select>
+        <label>Об’єм, л<input id="vol" class="input" type="number" min="10" step="10" value="500"/></label>
+        <label>Темп. старту °C<input id="t0" class="input" type="number" step="1" value="6"/></label>
+      </div>
+      <div class="row">
+        <label>Tref °C<input id="tref" class="input" type="number" step="0.1" value="60"/></label>
+        <label>z °C<input id="z" class="input" type="number" step="0.1" value="7"/></label>
+        <label>Ціль PU<input id="puTarget" class="input" type="number" step="1" value="15"/></label>
+        <label>Δt симуляції, с<input id="dt" class="input" type="number" min="1" step="1" value="1"/></label>
+      </div>
+      <div class="row">
+        <label>Потужність нагріву %<input id="heat" class="input" type="range" min="0" max="100" value="75"/></label>
+        <label>Охолодження %<input id="cool" class="input" type="range" min="0" max="100" value="60"/></label>
+        <label>Утримувати ≥Thold °C<input id="thold" class="input" type="number" step="0.5" value="72"/></label>
+        <label>Тривалість hold, с<input id="holdSec" class="input" type="number" step="1" value="15"/></label>
+      </div>
+      <div class="row">
+        <button class="btn good" id="start">▶️ Старт симуляції</button>
+        <button class="btn" id="pause">⏸️ Пауза</button>
+        <button class="btn secondary" id="reset">🧹 Скинути</button>
+        <span class="badge" id="status">Статус: idle</span>
+      </div>
+
+      <h3 style="margin-top:10px">📈 Живий графік</h3>
+      <div class="canvasWrap"><canvas id="chart" width="960" height="300"></canvas></div>
+      <div class="row" style="margin-top:6px">
+        <span id="live" class="mono">t=0 c | T=— °C | PU=0.00 | hold=0 c</span>
+        <span id="ccp" class="badge">CCP: —</span>
+      </div>
+
+      <h3 style="margin-top:10px">💾 Експорт/друк</h3>
+      <div class="row">
+        <input id="lot" class="input" placeholder="Лот/партія (напр. 2025-10-18-01)"/>
+        <button class="btn" id="saveCsv">📄 CSV</button>
+        <button class="btn" id="saveTxt">💾 TXT-звіт</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR</button>
+      </div>
+      <div class="receipt" id="rc" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+      <small class="muted">QR генерується через відкритий сервіс <span class="mono">api.qrserver.com</span>. Якщо офлайн — буде текстовий фолбек.</small>
+    </div>
+
+    <!-- ПРАВО: схема + таблиці/журнал -->
+    <div class="card">
+      <h2>🔌 Схема процесу (SVG)</h2>
+      <svg viewBox="0 0 820 280" role="img" aria-label="Бак пастеризації: нагрів–витримка–охолодження">
+        <rect x="40" y="40" width="240" height="160" rx="14" fill="#0e2a47" stroke="#3b82f6"/>
+        <text x="160" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Бак з сорочкою</text>
+        <text x="160" y="90" fill="#93c5fd" font-size="12" text-anchor="middle">датчик T, перемішування</text>
+
+        <rect x="320" y="40" width="200" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <text x="420" y="72" fill="#dcfce7" font-size="14" text-anchor="middle">Нагрівач</text>
+        <text x="420" y="90" fill="#a7f3d0" font-size="12" text-anchor="middle">пара/ТЕН</text>
+
+        <rect x="320" y="120" width="200" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <text x="420" y="152" fill="#e5e7eb" font-size="14" text-anchor="middle">Охолоджувач</text>
+        <text x="420" y="170" fill="#93c5fd" font-size="12" text-anchor="middle">вода/розсіл</text>
+
+        <rect x="560" y="40" width="220" height="160" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+        <text x="670" y="72" fill="#e5e7eb" font-size="14" text-anchor="middle">CCP-контролер</text>
+        <text x="670" y="90" fill="#93c5fd" font-size="12" text-anchor="middle">PU, Tref, z, hold</text>
+
+        <line x1="280" y1="120" x2="320" y2="80"  stroke="#93c5fd" stroke-width="3"/>
+        <line x1="280" y1="120" x2="320" y2="160" stroke="#64748b" stroke-width="3"/>
+        <line x1="520" y1="120" x2="560" y2="120" stroke="#22c55e" stroke-width="3"/>
+
+        <text x="410" y="230" fill="#fbbf24" font-size="12" text-anchor="middle">Протокол: CSV/TXT • Чек 58 мм • QR</text>
+      </svg>
+
+      <h2 style="margin-top:10px">📋 Параметри/результати</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Продукт</th><td id="p_name">—</td></tr>
+          <tr><th>Tref / z</th><td id="p_tz">—</td></tr>
+          <tr><th>Ціль PU</th><td id="p_put">—</td></tr>
+          <tr><th>Досягнуто</th><td id="p_pu">—</td></tr>
+          <tr><th>Hold фактичний</th><td id="p_hold">—</td></tr>
+          <tr><th>CCP-вердикт</th><td id="p_ccp">—</td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
+      <pre id="alog" class="note" style="max-height:220px;overflow:auto">// Поки без подій</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Завдання для студентів</h2>
+    <ol>
+      <li>Змоделюй **HTST для молока**: ціль <span class="mono">PU=15</span>, <span class="mono">Tref=60°C</span>, <span class="mono">z=7°C</span>, утримання <span class="mono">≥72°C/15 с</span>. Збережи <b>CSV</b> і <b>TXT</b>.</li>
+      <li>Порівняй із **batch-пастеризацією** <span class="mono">63°C/30 хв</span> — досягни еквівалентного PU. Зроби висновок у <b>TXT</b>.</li>
+      <li>Задай «яєчну масу»: <span class="mono">Tref=60°C, z=7°C, hold=60°C/210 с</span>, перевір **CCP**. Роздрукуй <b>чек 58 мм</b>.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>📜 Історична нотатка</h2>
+    <p class="muted small">Луї Пастер у XIX ст. показав, що тепло знижує мікробне навантаження. Сьогодні технологи рахують «еквівалент пастеризації» як інтеграл від температури — і ми це повторюємо просто в браузері.</p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s);
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+function fmt(x,n=2){return (Math.round(x*Math.pow(10,n))/Math.pow(10,n)).toFixed(n).replace('.',',');}
+function log(msg){const t=new Date().toLocaleTimeString();const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+
+// ===== Глобальні змінні симуляції =====
+const cvs=$('#chart'), ctx=cvs.getContext('2d');
+let t=0, T=null, PU=0, hold=0, running=false, timer=null;
+const series=[]; // {t, T, PU}
+
+// Профілі продуктів
+const PRESETS={
+  milk:{ name:'Молоко HTST', tref:60, z:7, pu:15, thold:72, holdSec:15 },
+  batch:{ name:'Молоко batch', tref:60, z:7, pu:300, thold:63, holdSec:1800 },
+  egg:{ name:'Яєчна маса', tref:60, z:7, pu:210, thold:60, holdSec:210 },
+  juice:{ name:'Сік (кастом)', tref:60, z:10, pu:50, thold:72, holdSec:20 }
+};
+
+// ===== UI presets =====
+const product=$('#product');
+function applyPreset(){
+  const p=product.value;
+  const s=PRESETS[p];
+  $('#tref').value=s.tref; $('#z').value=s.z; $('#puTarget').value=s.pu;
+  $('#thold').value=s.thold; $('#holdSec').value=s.holdSec;
+  $('#p_name').textContent=s.name;
+  $('#p_tz').textContent=`Tref=${s.tref}°C, z=${s.z}°C`;
+  $('#p_put').textContent=s.pu+' PU';
+}
+product.addEventListener('change',applyPreset);
+applyPreset();
+
+// ===== Графік =====
+function draw(){
+  const W=cvs.width,H=cvs.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#223049';ctx.strokeRect(0.5,0.5,W-1,H-1);
+  if(series.length<2) return;
+  const maxN=500;
+  const s=series.slice(-maxN);
+  const tmin=s[0].t, tmax=s[s.length-1].t||1;
+  const xs=s.map(v=> (v.t-tmin)/(tmax-tmin||1)*(W-20)+10);
+  // осі
+  ctx.fillStyle='#94a3b8';ctx.font='12px ui-monospace';
+  ctx.fillText('T °C', 8, 14); ctx.fillText('PU', W-36, 14);
+
+  // шкали
+  const Tmax=Math.max(...s.map(v=>v.T), 80), Tmin=Math.min(...s.map(v=>v.T), 0);
+  // T
+  ctx.beginPath(); ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2;
+  xs.forEach((x,i)=>{const y=H-12-( (s[i].T - Tmin) / (Tmax - Tmin || 1) )*(H-24); i?ctx.lineTo(x,y):ctx.moveTo(x,y);}); ctx.stroke();
+  // PU (нормовано)
+  const PUmax=Math.max(...s.map(v=>v.PU), 1);
+  ctx.beginPath(); ctx.strokeStyle='#22c55e'; ctx.lineWidth=2;
+  xs.forEach((x,i)=>{const y=H-12-( (s[i].PU) / (PUmax || 1) )*(H-24); i?ctx.lineTo(x,y):ctx.moveTo(x,y);}); ctx.stroke();
+
+  // лінія hold
+  const th=parseFloat($('#thold').value);
+  const yH=H-12-( (th - Tmin) / (Tmax - Tmin || 1) )*(H-24);
+  ctx.strokeStyle='#fbbf24'; ctx.setLineDash([6,4]); ctx.beginPath(); ctx.moveTo(10,yH); ctx.lineTo(W-10,yH); ctx.stroke(); ctx.setLineDash([]);
+}
+
+function step(){
+  const dt=parseFloat($('#dt').value)||1;
+  const heat=parseInt($('#heat').value,10)/100;
+  const cool=parseInt($('#cool').value,10)/100;
+  const thold=parseFloat($('#thold').value)||72;
+  const holdSec=parseFloat($('#holdSec').value)||15;
+
+  // Дуже проста модель: T рухається до Tin при нагріві та до Tout при охолодженні з різними константами
+  const Tin = 78 + 10*heat;   // ефективна «гаряча» температура сорочки
+  const Tout= 4 + (1-cool)*8; // ефективна «холодна» температура
+  const kHeat = 0.015 + 0.015*heat;   // швидкість нагріву
+  const kCool = 0.02  + 0.02 *cool;   // швидкість охол.
+
+  // Фаза: поки T<thold — нагрів; коли досягнуто — утримання; після цілі PU — охолодження
+  const targetPU=parseFloat($('#puTarget').value)||15;
+  let dT=0;
+  if(PU>=targetPU){
+    dT = (Tout - T)*kCool*dt;
+  }else if(T>=thold){
+    dT = (thold - T)*0.03*dt; // тримай біля hold
+  }else{
+    dT = (Tin - T)*kHeat*dt;
+  }
+  T += dT;
+
+  // PU інтеграл
+  const tref=parseFloat($('#tref').value), z=parseFloat($('#z').value);
+  const rate = Math.pow(10, (T - tref)/z); // 1/сек
+  PU += rate * dt;
+
+  // hold час
+  if(T>=thold) hold += dt; else if(hold>0 && T<thold-0.5) hold = Math.max(0, hold - dt*0.2); // невелике спадання при виході
+
+  t += dt;
+  series.push({t, T, PU});
+
+  // статус/CCP
+  const ccp = (PU>=targetPU && hold>=holdSec) ? 'OK' : (T>=thold ? 'HOLD' : 'HEAT');
+  $('#live').textContent=`t=${t.toFixed(0)} c | T=${T.toFixed(2)} °C | PU=${PU.toFixed(2)} | hold=${hold.toFixed(0)} c`;
+  $('#ccp').textContent='CCP: '+ccp;
+  if(ccp==='OK'){ $('#ccp').classList.remove('warn','bad'); $('#ccp').classList.add('ok'); }
+  else if(ccp==='HOLD'){ $('#ccp').classList.remove('ok','bad'); $('#ccp').classList.add('warn'); }
+  else { $('#ccp').classList.remove('ok','warn'); $('#ccp').classList.add('bad'); }
+
+  draw();
+
+  // автологування подій
+  if(Math.abs(T - thold) < 0.05 && hold<1){ log('Досягнуто порогу hold'); }
+  if(PU>=targetPU && Math.abs(PU-targetPU)<rate*dt){ log('Досягнуто цільових PU'); }
+
+  // оновити підсумкову табличку
+  $('#p_pu').textContent=PU.toFixed(2)+' PU';
+  $('#p_hold').textContent=hold.toFixed(0)+' c';
+  $('#p_ccp').innerHTML = (PU>=targetPU && hold>=holdSec) ? '<b class="ok">PASS</b>' : '<b class="warn">IN PROGRESS</b>';
+}
+
+function loop(){
+  if(!running) return;
+  step();
+  timer = setTimeout(loop, 50); // швидка візуалізація
+}
+
+function reset(){
+  running=false; if(timer) clearTimeout(timer);
+  t=0; PU=0; hold=0; T=parseFloat($('#t0').value)||6; series.length=0;
+  series.push({t, T, PU});
+  draw();
+  $('#status').textContent='Статус: idle';
+  $('#rc').hidden=true; const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220);
+  log('Скидання виконано');
+}
+
+$('#start').addEventListener('click', ()=>{
+  if(!running){ running=true; $('#status').textContent='Статус: running'; if(series.length===0) reset(); loop(); }
+});
+$('#pause').addEventListener('click', ()=>{ running=false; $('#status').textContent='Статус: paused'; });
+$('#reset').addEventListener('click', reset);
+
+// ініціалізація
+reset();
+$('#p_name').textContent=PRESETS[product.value].name;
+
+// ===== Експорт CSV/TXT/Чек =====
+$('#saveCsv').addEventListener('click', ()=>{
+  if(series.length<2) return alert('Немає даних');
+  const lot=($('#lot').value||'').replace(/"/g,'""');
+  const head='t_sec,Temp_C,PU_cum,Lot\n';
+  const rows=series.map(v=>`${v.t.toFixed(0)},${v.T.toFixed(3)},${v.PU.toFixed(3)},"${lot}"`).join('\n');
+  download('tech_para16_pasteur_'+stamp()+'.csv', head+rows+'\n', 'text/csv');
+});
+$('#saveTxt').addEventListener('click', ()=>{
+  const s=PRESETS[product.value];
+  const txt=[
+    'Пара 16 — Пастеризація (емулятор)',
+    `Продукт: ${s.name}`,
+    `Параметри: Tref=${$('#tref').value}°C, z=${$('#z').value}°C, Ціль PU=${$('#puTarget').value}, Hold: ≥${$('#thold').value}°C/${$('#holdSec').value} c`,
+    `Результат: PU=${PU.toFixed(2)}, Hold=${hold.toFixed(0)} c, Статус=${(PU>=s.pu && hold>=(+$('#holdSec').value))?'PASS':'IN PROGRESS'}`,
+    `Лот: ${$('#lot').value||'—'}`,
+    '--- Журнал ---',
+    ...($('#alog').textContent.startsWith('//')?[]:$('#alog').textContent.trim().split('\n'))
+  ];
+  download('tech_para16_report_'+stamp()+'.txt', txt.join('\n'));
+});
+$('#print58').addEventListener('click', ()=>{
+  const s=PRESETS[product.value];
+  const lines=[
+    '=== ЧЕК ПАСТЕРИЗАЦІЇ (58мм) ===',
+    'Продукт: '+s.name,
+    `Tref=${$('#tref').value}°C, z=${$('#z').value}°C`,
+    `Ціль PU=${$('#puTarget').value}`,
+    `Hold ≥${$('#thold').value}°C/${$('#holdSec').value} c`,
+    `PU=${PU.toFixed(2)} | Hold=${hold.toFixed(0)} c`,
+    'Вердикт: '+((PU>=(+$('#puTarget').value) && hold>= (+$('#holdSec').value))?'PASS':'IN PROGRESS'),
+    'Лот: '+($('#lot').value||'—'),
+    '-----------------------------'
+  ];
+  const rc=$('#rc'); rc.hidden=false; rc.textContent=lines.join('\n');
+  download('tech_para16_receipt_'+stamp()+'.txt', lines.join('\n'));
+});
+
+// ===== QR =====
+$('#qrGen').addEventListener('click', ()=>{
+  const data = prompt('Встав текст/URL для QR (напр., папка з логами/фото):', $('#lot').value || 'pasteurization-log');
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url;
+});
+</script>
+</body>
+</html>
