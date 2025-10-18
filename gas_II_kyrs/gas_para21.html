@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 21 (газовики) — AI-помічник бригади: NLP заявки → P1/P2/P3 → кроки дій → акт, підпис, чек, експорт</title>
+<meta name="description" content="Встав текст заявки або надиктуй: локальний AI витягає сутності, визначає пріоритет (P1/P2/P3), пропонує алгоритм дій і автозаповнює акт. Експорт CSV/TXT, чек 58 мм, QR на докази."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1320px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.grid{display:grid;gap:14px;grid-template-columns:1.25fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:#e6eef9}
+textarea{min-height:120px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:#e6eef9;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+h2{margin:.2em 0 .4em}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:#e5e7eb;margin-right:6px;margin-top:6px}
+.muted{color:var(--muted)}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+pre.log{max-height:220px;overflow:auto;background:#0c182a;border-radius:12px;padding:10px}
+canvas.chart{display:block;width:100%;height:220px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 10px;color:#e5e7eb}
+.tag.ok{border-color:#1d3e2a;background:#0f2f1e}
+.tag.warn{border-color:#4a3b13;background:#2b2310}
+.tag.bad{border-color:#5a1f1f;background:#2a1212}
+.sig{border:1px solid var(--line);border-radius:12px;background:#0b1220}
+.footer{margin-top:20px;color:#94a3b8;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🤖🧯</span>
+      <div>
+        <b>Пара 21 — AI-помічник бригади</b><br/>
+        <span class="badge">Заявка → NLP сутності → пріоритет → рекомендації → акт/підпис → чек/CSV/TXT/QR</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <div class="card">
+    <h2>📚 Контекст</h2>
+    <p>Встав текст заявки (або кілька), натисни <b>Аналізувати</b> — локальний AI витягне сутності (<span class="mono">АДРЕСА, ПІБ, ТЕЛ, ЛІЧИЛЬНИК, ОЗНАКИ, ТИСК, ЧАС</span>), оцінить ризик, пріоритезує <b>P1/P2/P3</b>, згенерує <b>рекомендації</b> і заповнить <b>акт виїзду</b>. Далі — підпис абонента, чек 58 мм, CSV/TXT, QR на докази.</p>
+    <div class="row">
+      <button class="btn" id="ex">🧪 Приклади (3 заявки)</button>
+      <button class="btn secondary" id="clr">🧹 Очистити</button>
+      <button class="btn good" id="an">🔎 Аналізувати</button>
+      <span class="badge">Заявок: <b id="cnt">0</b></span>
+    </div>
+    <textarea id="txt" placeholder="Приклад формату (вільний текст, одна заявка в рядку або через порожній рядок):
+Київ, вул. Симиренка 12, кв. 47. Тел 0671234567, абонент: Іваненко Олена. Різкий запах газу у під’їзді, чутно свист біля стояка, тиск 0.7. Час: 08:35. Лічильник G4 № 00123456.
+"></textarea>
+
+    <div class="row">
+      <label>Вага «Запах/Свист/Полум’я», бал <input id="wDanger" class="input" type="number" step="1" value="50"></label>
+      <label>Вага «Тиск/без газу», бал <input id="wPress" class="input" type="number" step="1" value="30"></label>
+      <label>Пороги: P1 / P2 <input id="thr" class="input" type="text" value="70/40"><small class="muted">балів (інакше P3)</small></label>
+      <label>Виконавець (бригада) <input id="crew" class="input" value="Аварійна-1"></label>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Ліва панель: результат AI -->
+    <div class="card">
+      <h2>🧠 Витяг сутностей / пріоритет / рекомендації</h2>
+      <table class="tbl">
+        <thead>
+          <tr><th>#</th><th>Адреса</th><th>Абонент</th><th>Телефон</th><th>Лічильник</th><th>Ознаки</th><th>Тиск</th><th>Час</th><th>Пріоритет</th></tr>
+        </thead>
+        <tbody id="entBody"><tr><td colspan="9" class="muted">— натисни «Аналізувати» —</td></tr></tbody>
+      </table>
+
+      <h3 style="margin-top:10px">📋 Рекомендовані дії</h3>
+      <ol id="steps"><li class="muted">— буде після аналізу —</li></ol>
+
+      <h3 style="margin-top:10px">📈 Індикатор ризику</h3>
+      <canvas id="risk" class="chart" width="560" height="220"></canvas>
+    </div>
+
+    <!-- Права панель: акт, підпис, експорт -->
+    <div class="card">
+      <h2>📝 Акт виїзду (авто-заповнення)</h2>
+      <div class="row">
+        <label style="flex:1">Адреса<input id="actAddr" class="input"></label>
+        <label style="flex:1">Абонент<input id="actName" class="input"></label>
+        <label style="flex:1">Телефон<input id="actTel" class="input"></label>
+      </div>
+      <div class="row">
+        <label style="flex:1">Лічильник<input id="actMeter" class="input"></label>
+        <label style="flex:1">Пріоритет<input id="actPrio" class="input"></label>
+        <label style="flex:1">Виконавець<input id="actCrew" class="input"></label>
+      </div>
+      <label>Опис ситуації<textarea id="actDesc"></textarea></label>
+      <label>Виконані дії<textarea id="actActions"></textarea></label>
+
+      <h3 style="margin-top:10px">✍️ Підпис абонента</h3>
+      <canvas id="sig" class="sig" width="500" height="160"></canvas>
+      <div class="row">
+        <button class="btn secondary" id="sigClr">🧽 Очистити підпис</button>
+        <button class="btn" id="saveTxt">💾 TXT (акт)</button>
+        <button class="btn" id="saveCsv">📄 CSV (сутності)</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div style="margin-top:8px"><canvas id="qr" width="220" height="220" style="background:#0b1220;border:1px solid var(--line);border-radius:12px"></canvas></div>
+
+      <h3 style="margin-top:10px">🛎️ Журнал</h3>
+      <pre id="alog" class="log">// Поки без подій</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Завдання для студентів</h2>
+    <ol>
+      <li>Встав 3–5 заявок різного типу (запах/свист/без газу/роботи поруч). Поясни, чому AI відніс їх до P1/P2/P3.</li>
+      <li>Відредагуй ваги та пороги так, щоб <b>знизити хибні P1</b>, але не втратити критичні кейси.</li>
+      <li>Згенеруй акт, підпиши, надрукуй чек 58 мм, створи QR на фото/відео доказів (хмара/папка коледжу).</li>
+      <li>Експортуй CSV сутностей і порівняй із «ручним» розбором — що AI пропустив, як покращити правила?</li>
+    </ol>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+/* ===== Утиліти ===== */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString('uk-UA');const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+$('#upd').textContent=new Date().toLocaleDateString('uk-UA');
+
+/* ===== Ввід/приклади ===== */
+$('#ex').addEventListener('click', ()=>{
+  $('#txt').value = [
+'Київ, вул. Симиренка 12, кв. 47. Тел 0671234567, абонент: Іваненко Олена. Різкий запах газу у під’їзді, чутно свист біля стояка, тиск 0.7. Час: 08:35. Лічильник G4 № 00123456.',
+'Бровари, вул. Героїв 5. Абонент: ПЕТРЕНКО І.Г., тел. +380631112233. Газу немає зранку, тиск 0.2, робітники копають біля вводу. Лічильник BK-G6 № 998877. Час 11:10.',
+'Ірпінь, Соборна 101 оф. 12. Тел: 044-123-45-67, клієнт ТОВ «Сервіс-Х». Видимого полум’я немає, але запах слабкий у підвалі, датчик спрацював вночі. Час 03:20. Лічильник Ірвінг G10 № 555222.'
+  ].join('\n');
+  updCnt();
+  log('Підставлено 3 приклади заявок');
+});
+$('#clr').addEventListener('click', ()=>{ $('#txt').value=''; updCnt(); $('#entBody').innerHTML='<tr><td colspan="9" class="muted">— натисни «Аналізувати» —</td></tr>'; $('#steps').innerHTML='<li class="muted">— буде після аналізу —</li>'; drawRisk([]); });
+
+function splitRecs(text){ return text.split(/\n+/).map(s=>s.trim()).filter(Boolean); }
+function updCnt(){ $('#cnt').textContent = String(splitRecs($('#txt').value).length); }
+$('#txt').addEventListener('input', updCnt);
+
+/* ===== Локальний «міні-NLP» ===== */
+const RX={
+  addr: /((?:м\.|місто|Київ|Бровари|Ірпінь|Буча|Вишневе|Бориспіль|Обухів|Біла Церква|[\p{Lu}\p{Ll}ʼ’\-]+)\s*,?\s*(?:вул\.|вулиця|просп\.|проспект|пров\.|провулок|пл\.|площа|шосе|пр-т|бульв\.|бульвар)\s*[\p{L}\d\-\s]+(?:[, ]+(?:кв\.|оф\.)\s*\d+)?)|((?:вул\.|вулиця|проспект|бульвар)\s*[\p{L}\d\-\s]+(?:\s*\d+)?(?:[, ]+(?:кв\.|оф\.)\s*\d+)?)|((?:вул\.|вулиця|проспект|бульвар)\s*[\p{L}\d\-\s]+)/ui,
+  tel: /(?:\+?380|0)\s?\d{2}\s?\d{3}\s?\d{2}\s?\d{2}|(?:\+?38|)\s?0\d{2}[-\s]?\d{3}[-\s]?\d{2}[-\s]?\d{2}/g,
+  name: /(?:абонент|клієнт|ПІБ)\s*[:\-]?\s*([A-ZА-ЯІЇЄҐ][\p{L}\.'’\-]+(?:\s+[A-ZА-ЯІЇЄҐ][\p{L}\.'’\-]+){0,2}|ТОВ «[^»]+»|ФОП [^.,;]+)/u,
+  meter: /(G[2-9]|BK\-?G\d+|Ірвінг\s*G\d+|RS|LV)\s*№?\s*([0-9]{5,8})/i,
+  press: /(тиск)\s*([0-9]+(?:[\.,][0-9]+)?)/i,
+  time: /\b(0?\d|1\d|2[0-3])[:.]\d{2}\b/,
+  danger: /(полум'я|полум’я|запах|смерд|свист|шум|витік|витікає|удар|вибух|іскр|датчик|спрацював|копа[юе]ть|роботи\s+поруч)/gi,
+  noGas: /(немає\s*газу|без\s*газу|нема\s*газу)/i
+};
+function parseRec(text){
+  const addr=(text.match(RX.addr)||[''])[0];
+  const tel=(text.match(RX.tel)||[])[0]||'';
+  const name=(text.match(RX.name)||[])[1]||'';
+  const meterM=text.match(RX.meter); const meter = meterM? (meterM[1].toUpperCase()+' № '+meterM[2]) : '';
+  const pressM=text.match(RX.press); const press = pressM? parseFloat(String(pressM[2]).replace(',','.')): null;
+  const time=(text.match(RX.time)||[])[0]||'';
+  const dangerAll=(text.match(RX.danger)||[]).map(s=>s.toLowerCase());
+  const noGas=RX.noGas.test(text);
+  const signs = [...new Set(dangerAll)];
+  return {raw:text, addr, tel, name, meter, press, time, signs, noGas};
+}
+
+/* ===== Оцінка ризику / пріоритет ===== */
+function assess(r, cfg){
+  let score=0; const tags=[];
+  const s=r.signs.join(' ');
+  // небезпека
+  if(/полум/.test(s)){ score+=cfg.wDanger+30; tags.push('полум’я'); }
+  if(/запах/.test(s)){ score+=cfg.wDanger; tags.push('запах газу'); }
+  if(/свист|шум/.test(s)){ score+=cfg.wDanger*0.7; tags.push('свист/шум'); }
+  if(/витік|витікає/.test(s)){ score+=cfg.wDanger*0.9; tags.push('підозра витоку'); }
+  if(/датчик|спрацював/.test(s)){ score+=cfg.wDanger*0.6; tags.push('датчик спрацював'); }
+  if(/копа|роботи\s+поруч/.test(s)){ score+=20; tags.push('роботи поруч'); }
+  // тиск / відсутність газу
+  if(r.press!=null){
+    if(r.press<0.5){ score+=cfg.wPress+20; tags.push('низький тиск'); }
+    else if(r.press<0.9){ score+=cfg.wPress*0.6; tags.push('занижений тиск'); }
+  }
+  if(r.noGas){ score+=cfg.wPress*0.5; tags.push('відсутній газ'); }
+  // пріоритет
+  const [thr1,thr2]=cfg.thr; // P1>=thr1, P2>=thr2, інакше P3
+  let prio='P3'; if(score>=thr1) prio='P1'; else if(score>=thr2) prio='P2';
+  return {score:Math.round(score), prio, tags:[...new Set(tags)]};
+}
+
+/* ===== Рекомендації (детерміновані правила) ===== */
+function recommend(r, prio){
+  const steps=[];
+  // базові безпека
+  steps.push('1) Попередити абонента: не вмикати електроприлади, не палити, провітрити приміщення (за безпечних умов).');
+  if(prio==='P1'){
+    steps.push('2) Негайний виїзд бригади. Уточнити на під’їзді: джерело запаху/свисту, перекрити кран перед лічильником.');
+    steps.push('3) Перевірка витоків: мильний розчин/детектор газу, огляд стояка/гнучких підводок/обв’язки лічильника.');
+    steps.push('4) За потреби — локальне відключення ділянки/під’їзду, виклик суміжних служб (ДСНС) при загрозі.');
+  }else if(prio==='P2'){
+    steps.push('2) Виїзд протягом нормативу. Перевірити тиск на вводі, цілісність з’єднань, вентиляцію.');
+    steps.push('3) Усунення нещільностей/заміна прокладок, відновлення подачі після контролю безпеки.');
+  }else{
+    steps.push('2) Виїзд планово/в межах черги. Верифікація скарги, консультація абонента щодо правильної експлуатації.');
+  }
+  if(r.press!=null) steps.push(`• Заявлено тиск: ${r.press} (умовн. од.) — зафіксувати фактичні вимірювання при обстеженні.`);
+  if(r.meter) steps.push(`• Перевірити вузол обліку: ${r.meter} (герметичність, стан пломби).`);
+  return steps;
+}
+
+/* ===== Візуалізація ризику ===== */
+const cRisk=$('#risk'), gr=cRisk.getContext('2d');
+function drawRisk(items){
+  const W=cRisk.width,H=cRisk.height; gr.clearRect(0,0,W,H);
+  gr.strokeStyle='#223049'; gr.strokeRect(0.5,0.5,W-1,H-1);
+  if(items.length===0){ gr.fillStyle='#94a3b8'; gr.fillText('Графік ризику з’явиться після аналізу', 16, 24); return; }
+  const left=40,right=W-10,top=20,bottom=H-28; const bw=(right-left)/items.length;
+  const max=Math.max(100, ...items.map(i=>i.score));
+  // сітка
+  gr.strokeStyle='#1f2a44'; for(let i=0;i<=4;i++){ const y=top+i*(bottom-top)/4; gr.beginPath(); gr.moveTo(left,y); gr.lineTo(right,y); gr.stroke(); }
+  // bars
+  items.forEach((it,i)=>{
+    const x=left+i*bw+4; const h=(it.score/max)*(bottom-top);
+    const col = it.prio==='P1'? '#f87171' : it.prio==='P2'? '#fbbf24' : '#22c55e';
+    gr.fillStyle=col; gr.fillRect(x, bottom-h, bw-8, h);
+    gr.fillStyle='#e5e7eb'; gr.font='11px ui-monospace'; gr.fillText(it.prio, x+2, bottom-4);
+  });
+}
+
+/* ===== Аналіз натиском ===== */
+$('#an').addEventListener('click', ()=>{
+  const recs = splitRecs($('#txt').value).map(parseRec);
+  if(!recs.length){ alert('Немає текстів'); return; }
+  const cfg={
+    wDanger: Math.max(0, parseInt($('#wDanger').value)||50),
+    wPress: Math.max(0, parseInt($('#wPress').value)||30),
+    thr: (function(){ const m=$('#thr').value.split('/').map(s=>parseInt(s.trim())); return [m[0]||70, m[1]||40]; })()
+  };
+  const rows=$('#entBody'); rows.innerHTML='';
+  const scored=[];
+  recs.forEach((r,i)=>{
+    const a=assess(r,cfg);
+    scored.push({...a, idx:i+1});
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${i+1}</td><td>${escape(r.addr)||'—'}</td><td>${escape(r.name)||'—'}</td><td>${escape(r.tel)||'—'}</td>
+    <td>${escape(r.meter)||'—'}</td><td>${escape((r.signs.join(', ')||'—'))}</td><td>${r.press!=null?r.press:'—'}</td><td>${escape(r.time||'—')}</td>
+    <td class="${a.prio==='P1'?'bad':a.prio==='P2'?'warn':'ok'}"><b>${a.prio}</b> · ${a.score}</td>`;
+    rows.appendChild(tr);
+  });
+  // взяти найкритичнішу для авто-акта
+  const top = scored.slice().sort((a,b)=>b.score-a.score)[0];
+  const r0 = recs[top.idx-1];
+  fillAct(r0, top);
+  // рекомендації
+  const steps = recommend(r0, top.prio);
+  const ol=$('#steps'); ol.innerHTML=''; steps.forEach(s=>{ const li=document.createElement('li'); li.textContent=s; ol.appendChild(li); });
+  // графік
+  drawRisk(scored);
+  log(`Проаналізовано ${recs.length} заяв(ок). Топ: #${top.idx} (${top.prio}, ${top.score} балів).`);
+});
+
+function escape(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m])); }
+
+/* ===== Акт: автозаповнення ===== */
+function fillAct(r,a){
+  $('#actAddr').value = r.addr||'';
+  $('#actName').value = r.name||'';
+  $('#actTel').value  = r.tel||'';
+  $('#actMeter').value= r.meter||'';
+  $('#actPrio').value = a.prio+' ('+a.score+' б.)';
+  $('#actCrew').value = $('#crew').value||'Аварійна-1';
+  $('#actDesc').value = (r.raw||'').trim();
+  const base = [
+    `Виїзд бригади ${$('#actCrew').value}.`,
+    `Огляд місця: ${r.addr||'—'}.`,
+    a.tags.includes('запах газу')?'Локалізовано запах, виконано провітрювання.':'Запах не підтверджено.',
+    a.tags.includes('підозра витоку')||a.tags.includes('свист/шум')?'Перевірено з’єднання, застосовано детектор, мильна емульсія.':'Проведено профілактичний огляд.',
+    r.meter?`Вузол обліку ${r.meter}: герметичність/пломби перевірено.`:'Вузол обліку оглянуто.',
+    'За потреби виконано відключення/обмеження подачі, контроль повторної подачі після перевірок.'
+  ];
+  $('#actActions').value = base.join('\n');
+}
+
+/* ===== Підпис абонента (canvas) ===== */
+const sig=$('#sig'); const gs=sig.getContext('2d');
+let drawing=false,last=[0,0];
+function drawLine(x1,y1,x2,y2){ gs.strokeStyle='#e6eef9'; gs.lineWidth=2; gs.lineCap='round'; gs.beginPath(); gs.moveTo(x1,y1); gs.lineTo(x2,y2); gs.stroke(); }
+sig.addEventListener('mousedown',e=>{drawing=true; const r=sig.getBoundingClientRect(); last=[e.clientX-r.left,e.clientY-r.top];});
+sig.addEventListener('mousemove',e=>{ if(!drawing) return; const r=sig.getBoundingClientRect(); const x=e.clientX-r.left,y=e.clientY-r.top; drawLine(last[0],last[1],x,y); last=[x,y];});
+sig.addEventListener('mouseup',()=>drawing=false); sig.addEventListener('mouseleave',()=>drawing=false);
+$('#sigClr').addEventListener('click',()=>{ gs.clearRect(0,0,sig.width,sig.height); });
+
+/* ===== Експорт / чек / QR ===== */
+$('#saveTxt').addEventListener('click',()=>{
+  const lines=[
+    'Акт виїзду (AI-помічник)',
+    `Адреса: ${$('#actAddr').value}`,
+    `Абонент: ${$('#actName').value} | Тел: ${$('#actTel').value}`,
+    `Лічильник: ${$('#actMeter').value}`,
+    `Пріоритет: ${$('#actPrio').value}`,
+    `Виконавець: ${$('#actCrew').value}`,
+    '',
+    'Опис ситуації:',
+    $('#actDesc').value.trim(),
+    '',
+    'Виконані дії:',
+    $('#actActions').value.trim()
+  ];
+  download('gas_para21_act_'+stamp()+'.txt', lines.join('\n'));
+  log('TXT (акт) збережено');
+});
+$('#saveCsv').addEventListener('click',()=>{
+  const rows=$$('#entBody tr'); let csv='idx,address,name,phone,meter,signs,press,time,priority\n';
+  rows.forEach((tr,i)=>{
+    const tds=tr.querySelectorAll('td'); if(tds.length<9) return;
+    csv+=`${i+1},"${tds[1].innerText}","${tds[2].innerText}","${tds[3].innerText}","${tds[4].innerText}","${tds[5].innerText}",${tds[6].innerText},"${tds[7].innerText}","${tds[8].innerText}"\n`;
+  });
+  download('gas_para21_entities_'+stamp()+'.csv', csv, 'text/csv');
+  log('CSV (сутності) збережено');
+});
+$('#print58').addEventListener('click',()=>{
+  const rc=$('#rc'); rc.hidden=false;
+  const lines=[
+    '=== AI-HELPER (58мм) ===',
+    `Адреса: ${($('#actAddr').value||'—').slice(0,28)}`,
+    `Абонент: ${($('#actName').value||'—').slice(0,28)}`,
+    `Тел: ${($('#actTel').value||'—')}`,
+    `Пріор: ${($('#actPrio').value||'—')}`,
+    `Бригада: ${($('#actCrew').value||'—')}`,
+    '--- ДІЇ ---',
+    ...$('#actActions').value.split('\n').slice(0,6).map(s=>s.slice(0,28)),
+    '--------------------------'
+  ];
+  rc.textContent = lines.join('\n');
+  download('gas_para21_receipt_'+stamp()+'.txt', rc.textContent);
+  log('Чек 58 мм збережено (TXT)');
+});
+$('#qrGen').addEventListener('click',()=>{
+  const data = prompt('Встав URL/текст (папка з доказами/фото/відео):', 'https://');
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url;
+  log('QR згенеровано');
+});
+
+/* ===== Початкові рамки графіка ===== */
+function initRisk(){ gr.clearRect(0,0,cRisk.width,cRisk.height); gr.strokeStyle='#223049'; gr.strokeRect(0.5,0.5,cRisk.width-1,cRisk.height-1); }
+initRisk();
+</script>
+</body>
+</html>
