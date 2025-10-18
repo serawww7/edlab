@@ -5,12 +5,9 @@
      Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
      Обладнання: телефони (калькулятор/таймер); за наявності — мультиметр (дані можна ввести вручну).
      Примітка щодо контрасту: темні клітинки таблиць мають світлий текст (.dark).
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 11 (механіки) — Електрика 12/24В: падіння напруги, провід, запобіжник/реле, генератор, журнал, квиток 58 мм, NFC</title>
 <meta name="color-scheme" content="light dark">
 <style>
@@ -56,7 +53,7 @@
   html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
   @media print{@page{margin:4mm}.no-print{display:none!important}}
 </style>
-</head>
+<meta name="description" content="За пару студенти навчаться розраховувати падіння напруги та підбирати переріз проводу, правильно вибирати запобіжник і реле, оцінювати баланс генератора за"><link rel="canonical" href="https://edlab.pp.ua/mech_II_kyrs/mechanic_para11.html"><meta property="og:type" content="article"><meta property="og:title" content="🔌 Електрика 12/24В: падіння напруги, провід/запобіжник/реле, генератор, журнал, квиток 58 мм, NFC"><meta property="og:description" content="За пару студенти навчаться розраховувати падіння напруги та підбирати переріз проводу, правильно вибирати запобіжник і реле, оцінювати баланс генератора за"><meta property="og:url" content="https://edlab.pp.ua/mech_II_kyrs/mechanic_para11.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🔌 Електрика 12/24В: падіння напруги, провід/запобіжник/реле, генератор, журнал, квиток 58 мм, NFC","description":"За пару студенти навчаться розраховувати падіння напруги та підбирати переріз проводу, правильно вибирати запобіжник і реле, оцінювати баланс генератора за","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/mech_II_kyrs/mechanic_para11.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <span class="badge">Пара 11 · аудиторно · механіки</span>
@@ -81,14 +78,14 @@
         <h3>Мережа та генератор</h3>
         <div class="row">
           <div style="flex:1"><label>Номінал мережі, В</label>
-            <select id="U" onchange="syncU()"><option value="12" selected>12</option><option value="24">24</option></select>
+            <select id="U" onchange="syncU()"><option value="12" selected="">12</option><option value="24">24</option></select>
           </div>
           <div style="flex:1"><label>Генератор, А</label><input id="AltA" type="number" step="1" value="120"></div>
         </div>
         <div class="row" style="margin-top:6px">
           <div style="flex:1"><label>Резерв на заряд АКБ, А</label><input id="AltReserve" type="number" step="1" value="15"></div>
           <div style="flex:1"><label>Матеріал проводу</label>
-            <select id="mat"><option value="cu" selected>мідь</option><option value="al">алюміній</option></select>
+            <select id="mat"><option value="cu" selected="">мідь</option><option value="al">алюміній</option></select>
           </div>
         </div>
       </div>
@@ -624,5 +621,6 @@
     });
   })();
 </script>
-</body>
-</html>
+
+
+</body></html>

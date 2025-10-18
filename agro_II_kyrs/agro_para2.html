@@ -2,12 +2,9 @@
      Тема: Паспорт поля: QR/NFC → мобільна форма → таблиця/дашборд
      Фокус: максимум телефону — скани QR/NFC, фото з геоміткою, короткі нотатки, миттєва аналітика.
      Готово для розміщення на GitHub Pages або вставки в Moodle через iFrame.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 2 — Паспорт поля: QR/NFC → мобільна форма → дашборд</title>
 <meta name="color-scheme" content="light dark">
 <style>
@@ -65,7 +62,7 @@
     .no-print{ display:none !important }
   }
 </style>
-</head>
+<meta name="description" content="Навчити студентів швидко збирати польові дані зі смартфона через QR/NFC та мобільну форму з фото+геоміткою, а також правильно імпортувати відповіді в табли"><link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para2.html"><meta property="og:type" content="article"><meta property="og:title" content="🌱 Паспорт поля: QR/NFC → мобільна форма → таблиця/дашборд"><meta property="og:description" content="Навчити студентів швидко збирати польові дані зі смартфона через QR/NFC та мобільну форму з фото+геоміткою, а також правильно імпортувати відповіді в табли"><meta property="og:url" content="https://edlab.pp.ua/agro_II_kyrs/agro_para2.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🌱 Паспорт поля: QR/NFC → мобільна форма → таблиця/дашборд","description":"Навчити студентів швидко збирати польові дані зі смартфона через QR/NFC та мобільну форму з фото+геоміткою, а також правильно імпортувати відповіді в табли","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/agro_II_kyrs/agro_para2.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Пара 2 · ЛПЗ · агрономи</span>
@@ -78,8 +75,8 @@
         <b>мобільну форму</b> з фото+геоміткою, а також правильно імпортувати відповіді в таблицю для оперативного аналізу.
       </p>
       <div class="grid g2">
-        <div class="kpi"><span>📍</span><div><b>Ідентифікація поля</b><br/>QR або NFC-стікер на табличці/папці</div></div>
-        <div class="kpi"><span>📷</span><div><b>Фото з EXIF</b><br/>геомітка + час + короткий опис стану</div></div>
+        <div class="kpi"><span>📍</span><div><b>Ідентифікація поля</b><br>QR або NFC-стікер на табличці/папці</div></div>
+        <div class="kpi"><span>📷</span><div><b>Фото з EXIF</b><br>геомітка + час + короткий опис стану</div></div>
       </div>
     </div>
 
@@ -119,7 +116,7 @@
 
       <div class="step"><div class="n">2</div><div>
         <b>Збираємо URL форми з автозаповненням</b> (8–10 хв). У Google Form відкрий «Попередній перегляд» (іконка ока) — скопіюй базовий URL.
-        Додай параметр <span class="mono">?field=F-01</span> (або власний ключ форми, якщо використовуєш entries). <br/>
+        Додай параметр <span class="mono">?field=F-01</span> (або власний ключ форми, якщо використовуєш entries). <br>
         Приклад: <span class="mono">https://docs.google.com/forms/d/e/ABC/viewform?field=F-01</span>
       </div></div>
 
@@ -149,15 +146,15 @@
 
       <div class="field">
         <label for="formUrl">Базовий URL форми (viewform)</label>
-        <input id="formUrl" type="text" value="https://docs.google.com/forms/d/e/XXXXXXXXXXXX/viewform" />
+        <input id="formUrl" type="text" value="https://docs.google.com/forms/d/e/XXXXXXXXXXXX/viewform">
       </div>
       <div class="field">
         <label for="param">Параметр для поля (наприклад, field або entry.123456)</label>
-        <input id="param" type="text" value="field" />
+        <input id="param" type="text" value="field">
       </div>
       <div class="field">
         <label for="code">Код поля (наприклад, F-01)</label>
-        <input id="code" type="text" value="F-01" />
+        <input id="code" type="text" value="F-01">
       </div>
 
       <div class="flex no-print">
@@ -222,5 +219,6 @@
   // Початковий приклад
   buildURL();
 </script>
-</body>
-</html>
+
+
+</body></html>

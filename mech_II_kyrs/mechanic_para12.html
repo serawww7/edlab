@@ -12,12 +12,9 @@
      • Конвертації: Н·м ↔ кгс·м; рекомендації по мастилу й крокам затягування (30% → 60% → 100%).
      • Генерує послідовність затягування для 4/5/6/8 болтів (SVG), журнал, 58 мм квиток, NFC, CSV.
      Примітка: темні клітинки мають світлий текст (.dark) — добрий контраст у Moodle.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 12 (механіки) — Болти та момент затягування: K-фактор, подовжувач, шаблони, чек, NFC, CSV</title>
 <meta name="color-scheme" content="light dark">
 <style>
@@ -62,7 +59,7 @@
   @media print{@page{margin:4mm}.no-print{display:none!important}}
   .svgwrap{background:#0b1324;border:1px solid #223049;border-radius:12px;padding:8px}
 </style>
-</head>
+<meta name="description" content="За пару студенти навчаться підбирати момент затягування під потрібний натяг болта, враховувати мастило (K-фактор), робити поправку динамометричного ключа з"><link rel="canonical" href="https://edlab.pp.ua/mech_II_kyrs/mechanic_para12.html"><meta property="og:type" content="article"><meta property="og:title" content="🔩 Болти та момент затягування: K-фактор, подовжувач, шаблони, чек, NFC, CSV"><meta property="og:description" content="За пару студенти навчаться підбирати момент затягування під потрібний натяг болта, враховувати мастило (K-фактор), робити поправку динамометричного ключа з"><meta property="og:url" content="https://edlab.pp.ua/mech_II_kyrs/mechanic_para12.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🔩 Болти та момент затягування: K-фактор, подовжувач, шаблони, чек, NFC, CSV","description":"За пару студенти навчаться підбирати момент затягування під потрібний натяг болта, враховувати мастило (K-фактор), робити поправку динамометричного ключа з","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/mech_II_kyrs/mechanic_para12.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <span class="badge">Пара 12 · аудиторно · механіки</span>
@@ -97,7 +94,7 @@
           <div style="flex:1"><label>Клас міцності</label>
             <select id="grade">
               <option value="8.8">8.8 (Sp≈640 МПа)</option>
-              <option value="10.9" selected>10.9 (Sp≈830 МПа)</option>
+              <option value="10.9" selected="">10.9 (Sp≈830 МПа)</option>
               <option value="12.9">12.9 (Sp≈970 МПа)</option>
             </select>
           </div>
@@ -107,13 +104,13 @@
           <div style="flex:1"><label>Мастило (K-фактор)</label>
             <select id="kfact">
               <option value="0.20">сухо (K≈0.20)</option>
-              <option value="0.16" selected>олива (K≈0.16)</option>
+              <option value="0.16" selected="">олива (K≈0.16)</option>
               <option value="0.12">молібден (K≈0.12)</option>
             </select>
           </div>
           <div style="flex:1"><label>Кроки затягування</label>
             <select id="steps">
-              <option value="30,60,100" selected>30% → 60% → 100%</option>
+              <option value="30,60,100" selected="">30% → 60% → 100%</option>
               <option value="40,80,100">40% → 80% → 100%</option>
               <option value="50,100">50% → 100%</option>
             </select>
@@ -130,13 +127,13 @@
         <div class="row" style="margin-top:6px">
           <div style="flex:1"><label>Орієнтація</label>
             <select id="angle">
-              <option value="inline" selected>в лінію (зміна Tset)</option>
+              <option value="inline" selected="">в лінію (зміна Tset)</option>
               <option value="90">прибл. 90° (без зміни)</option>
             </select>
           </div>
           <div style="flex:1"><label>К-ть болтів, шт</label>
             <select id="nBolts">
-              <option>4</option><option selected>6</option><option>5</option><option>8</option>
+              <option>4</option><option selected="">6</option><option>5</option><option>8</option>
             </select>
           </div>
         </div>
@@ -168,7 +165,7 @@
         <div class="row">
           <div style="flex:1"><label>К-ть болтів</label>
             <select id="nBolts2">
-              <option>4</option><option>5</option><option selected>6</option><option>8</option>
+              <option>4</option><option>5</option><option selected="">6</option><option>8</option>
             </select>
           </div>
           <div style="flex:1"><label>Діаметр кола, мм</label><input id="pcd" type="number" step="1" value="180"></div>
@@ -510,5 +507,6 @@
     });
   })();
 </script>
-</body>
-</html>
+
+
+</body></html>

@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 25 — ШІ-планувальник робіт: нотатки → календар (SOP/REI/PHI/погода) + конфлікт-чекинґ</title>
-<meta name="description" content="Імпорт польових нотаток і погоди → автоплан робіт із урахуванням REI/PHI та погодних вікон → перевірка конфліктів ресурсів → Gantt, експорт ICS/CSV/TXT, 58-мм чек, промпт до LLM."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Імпорт польових нотаток і погоди → автоплан робіт із урахуванням REI/PHI та погодних вікон → перевірка конфліктів ресурсів → Gantt, експорт ICS/CSV/TXT, 58-мм чек, промпт до LLM.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -39,14 +37,14 @@ canvas{display:block;width:100%;height:260px}
 .receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
 .footer{margin-top:20px;color:var(--muted);font-size:.9rem}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para25.html"><meta property="og:type" content="article"><meta property="og:title" content="Агрономія — Пара 25"><meta property="og:description" content="Мета: перетворити польові нотатки в виробничий календар із урахуванням REI (ре-entry), PHI (період до збору), погодних вікон, ресурсів та SOP. Далі — конфл"><meta property="og:url" content="https://edlab.pp.ua/agro_II_kyrs/agro_para25.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Агрономія — Пара 25","description":"Мета: перетворити польові нотатки в виробничий календар із урахуванням REI (ре-entry), PHI (період до збору), погодних вікон, ресурсів та SOP. Далі — конфл","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/agro_II_kyrs/agro_para25.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">📅</span>
       <div>
-        <b>Пара 25 — ШІ-планувальник робіт</b><br/>
+        <b>Пара 25 — ШІ-планувальник робіт</b><br>
         <span class="badge">Нотатки → календар → REI/PHI → вікна погоди → конфлікти → експорт</span>
       </div>
     </div>
@@ -91,47 +89,47 @@ canvas{display:block;width:100%;height:260px}
       <div class="row">
         <div style="flex:1">
           <label for="sprayers">Кількість обприскувачів</label>
-          <input id="sprayers" class="input" type="number" min="0" value="1"/>
+          <input id="sprayers" class="input" type="number" min="0" value="1">
         </div>
         <div style="flex:1">
           <label for="workStart">Робочий день з</label>
-          <input id="workStart" class="input" type="time" value="08:00"/>
+          <input id="workStart" class="input" type="time" value="08:00">
         </div>
         <div style="flex:1">
           <label for="workEnd">до</label>
-          <input id="workEnd" class="input" type="time" value="20:00"/>
+          <input id="workEnd" class="input" type="time" value="20:00">
         </div>
       </div>
       <div class="row">
         <div style="flex:1">
           <label for="harvest">Орієнтовна дата збору (PHI)</label>
-          <input id="harvest" class="input" type="datetime-local" value="2025-06-30T08:00"/>
+          <input id="harvest" class="input" type="datetime-local" value="2025-06-30T08:00">
         </div>
         <div style="flex:1">
           <label for="windMax">Макс. вітер (м/с) для обпр.</label>
-          <input id="windMax" class="input" type="number" step="0.1" value="5"/>
+          <input id="windMax" class="input" type="number" step="0.1" value="5">
         </div>
         <div style="flex:1">
           <label for="rainMax">Макс. опади (мм/год)</label>
-          <input id="rainMax" class="input" type="number" step="0.1" value="0"/>
+          <input id="rainMax" class="input" type="number" step="0.1" value="0">
         </div>
       </div>
       <div class="row">
         <div style="flex:1">
           <label for="tMin">T мін (°C)</label>
-          <input id="tMin" class="input" type="number" step="0.5" value="8"/>
+          <input id="tMin" class="input" type="number" step="0.5" value="8">
         </div>
         <div style="flex:1">
           <label for="tMax">T макс (°C)</label>
-          <input id="tMax" class="input" type="number" step="0.5" value="28"/>
+          <input id="tMax" class="input" type="number" step="0.5" value="28">
         </div>
         <div style="flex:1">
           <label for="rhMin">RH мін (%)</label>
-          <input id="rhMin" class="input" type="number" step="1" value="40"/>
+          <input id="rhMin" class="input" type="number" step="1" value="40">
         </div>
         <div style="flex:1">
           <label for="rhMax">RH макс (%)</label>
-          <input id="rhMax" class="input" type="number" step="1" value="95"/>
+          <input id="rhMax" class="input" type="number" step="1" value="95">
         </div>
       </div>
 
@@ -166,7 +164,7 @@ canvas{display:block;width:100%;height:260px}
         <button class="btn" id="exportTXT">💾 Підсумок TXT</button>
         <button class="btn secondary" id="dayReceipt">🖨️ 58-мм чек (за день)</button>
       </div>
-      <div class="receipt" id="receipt" hidden></div>
+      <div class="receipt" id="receipt" hidden=""></div>
 
       <h2 style="margin-top:12px">🤖 Промпт для LLM (оптимізація)</h2>
       <div class="row">
@@ -178,30 +176,30 @@ canvas{display:block;width:100%;height:260px}
 
       <h2 style="margin-top:12px">🔁 Схема процесу (SVG)</h2>
       <svg viewBox="0 0 760 420" role="img" aria-label="Пайплайн планування">
-        <rect x="40" y="40" width="200" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <rect x="40" y="40" width="200" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
         <text x="140" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Нотатки/CSV</text>
         <text x="140" y="88" fill="#93c5fd" font-size="12" text-anchor="middle">task/REI/PHI/швидк.</text>
 
-        <rect x="280" y="40" width="200" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <rect x="280" y="40" width="200" height="80" rx="12" fill="#14532d" stroke="#22c55e"></rect>
         <text x="380" y="70" fill="#dcfce7" font-size="14" text-anchor="middle">Погодні вікна</text>
         <text x="380" y="88" fill="#a7f3d0" font-size="12" text-anchor="middle">вітер/дощ/T/RH</text>
 
-        <rect x="520" y="40" width="200" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+        <rect x="520" y="40" width="200" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"></rect>
         <text x="620" y="70" fill="#fed7aa" font-size="14" text-anchor="middle">Автоплан</text>
         <text x="620" y="88" fill="#fed7aa" font-size="12" text-anchor="middle">ресурси/SOP</text>
 
-        <line x1="240" y1="80" x2="280" y2="80" stroke="#93c5fd" stroke-width="3"/>
-        <line x1="480" y1="80" x2="520" y2="80" stroke="#93c5fd" stroke-width="3"/>
+        <line x1="240" y1="80" x2="280" y2="80" stroke="#93c5fd" stroke-width="3"></line>
+        <line x1="480" y1="80" x2="520" y2="80" stroke="#93c5fd" stroke-width="3"></line>
 
-        <rect x="40" y="170" width="260" height="90" rx="12" fill="#0b3f5a" stroke="#22d3ee"/>
+        <rect x="40" y="170" width="260" height="90" rx="12" fill="#0b3f5a" stroke="#22d3ee"></rect>
         <text x="170" y="200" fill="#a5f3fc" font-size="14" text-anchor="middle">Перевірки</text>
         <text x="170" y="220" fill="#a5f3fc" font-size="12" text-anchor="middle">REI/PHI/ресурси/погода</text>
 
-        <rect x="340" y="170" width="190" height="90" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <rect x="340" y="170" width="190" height="90" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
         <text x="435" y="200" fill="#e5e7eb" font-size="14" text-anchor="middle">Експорт</text>
         <text x="435" y="220" fill="#9ca3af" font-size="12" text-anchor="middle">ICS/CSV/TXT/чек</text>
 
-        <rect x="560" y="170" width="160" height="90" rx="12" fill="#111827" stroke="#4b5563"/>
+        <rect x="560" y="170" width="160" height="90" rx="12" fill="#111827" stroke="#4b5563"></rect>
         <text x="640" y="200" fill="#e5e7eb" font-size="14" text-anchor="middle">LLM</text>
         <text x="640" y="220" fill="#9ca3af" font-size="12" text-anchor="middle">оптимізація</text>
       </svg>
@@ -618,5 +616,6 @@ $('#clearPlan').addEventListener('click', ()=>{ plan.length=0; $('#tblPlan tbody
 drawGantt();
 if (window.self !== window.top) document.documentElement.classList.add('embedded'); // Moodle-friendly
 </script>
-</body>
-</html>
+
+
+</body></html>

@@ -3,14 +3,11 @@
      Протокол огляду і вимірювань: опір заземлювача (Ω), неперервність PE (Ω), оцінка PASS/FAIL, A4-протокол (PDF/друк),
      мітка 58 мм «ЗАЗЕМЛЕННЯ · ПЕРЕВІРЕНО», NFC/QR-рядок, імпорт/експорт CSV.
      Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 9 — Вузол заземлення: протокол, PASS/FAIL, друк 58 мм</title>
-<meta name="color-scheme" content="light dark" />
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -80,7 +77,7 @@
     .doc{ page-break-after:always }
   }
 </style>
-</head>
+<meta name="description" content="Виконати огляд вузла заземлення, виміряти опір заземлювача (Ω) та неперервність провідника PE (Ω), оцінити PASS/FAIL за навчальними лімітами, сформувати A4"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para9.html"><meta property="og:type" content="article"><meta property="og:title" content="🟩 Вузол заземлення: огляд, вимірювання, A4-протокол + 🧾 мітка 58 мм"><meta property="og:description" content="Виконати огляд вузла заземлення, виміряти опір заземлювача (Ω) та неперервність провідника PE (Ω), оцінити PASS/FAIL за навчальними лімітами, сформувати A4"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para9.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🟩 Вузол заземлення: огляд, вимірювання, A4-протокол + 🧾 мітка 58 мм","description":"Виконати огляд вузла заземлення, виміряти опір заземлювача (Ω) та неперервність провідника PE (Ω), оцінити PASS/FAIL за навчальними лімітами, сформувати A4","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para9.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Електрики · Пара 9 · аудиторно</span>
@@ -98,17 +95,17 @@
         <div>
           <div class="row">
             <label class="small" style="min-width:140px">Об’єкт/адреса</label>
-            <input id="site" class="btn" value="Коледж · Майстерня" />
+            <input id="site" class="btn" value="Коледж · Майстерня">
           </div>
           <div class="row" style="margin-top:8px">
             <label class="small" style="min-width:140px">Система</label>
-            <select id="system" class="btn"><option>TN</option><option selected>TT</option></select>
+            <select id="system" class="btn"><option>TN</option><option selected="">TT</option></select>
             <label class="small" style="min-width:80px">Темп. °C</label>
-            <input id="temp" class="btn" type="number" value="20" />
+            <input id="temp" class="btn" type="number" value="20">
           </div>
           <div class="row" style="margin-top:8px">
             <label class="small" style="min-width:140px">Відповідальний</label>
-            <input id="resp" class="btn" value="Студент ПІБ / група" />
+            <input id="resp" class="btn" value="Студент ПІБ / група">
           </div>
         </div>
         <div>
@@ -119,7 +116,7 @@
           </div>
           <div class="row" style="margin-top:8px">
             <button class="btn" type="button" onclick="exportCSV()">📤 Експорт CSV</button>
-            <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+            <input id="file" type="file" accept=".csv,text/csv" class="btn">
             <button class="btn" type="button" onclick="importCSV()">⬆️ Імпорт CSV</button>
           </div>
         </div>
@@ -133,21 +130,21 @@
           <h3>Додати точку</h3>
           <div class="row"><label class="small" style="min-width:120px">Тип</label>
             <select id="ptType" class="btn">
-              <option selected>Rзаз (електрод/контур)</option>
+              <option selected="">Rзаз (електрод/контур)</option>
               <option>RPE (неперервність PE)</option>
             </select>
           </div>
           <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px">Назва точки</label>
-            <input id="ptName" class="btn" value="Контур 1 · болт контрольний"/>
+            <input id="ptName" class="btn" value="Контур 1 · болт контрольний">
           </div>
           <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px">R вимір., Ω</label>
-            <input id="ptR" class="btn" type="number" step="0.01" value="3.2"/>
+            <input id="ptR" class="btn" type="number" step="0.01" value="3.2">
           </div>
           <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px">Ліміт, Ω</label>
-            <input id="ptLimit" class="btn" type="number" step="0.01" value="4"/>
+            <input id="ptLimit" class="btn" type="number" step="0.01" value="4">
           </div>
           <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px">Примітка</label>
-            <input id="ptNote" class="btn" placeholder="схема 62% / 3-кiлки / довжина..." />
+            <input id="ptNote" class="btn" placeholder="схема 62% / 3-кiлки / довжина...">
           </div>
           <div class="row" style="margin-top:8px">
             <button class="btn" onclick="addPoint()">➕ Додати</button>
@@ -160,7 +157,7 @@
             <h3>Фільтр</h3>
             <div class="row">
               <select id="flt" class="btn">
-                <option selected>Всі</option>
+                <option selected="">Всі</option>
                 <option>Лише Rзаз</option>
                 <option>Лише RPE</option>
                 <option>Лише FAIL</option>
@@ -484,5 +481,6 @@
   // Авто-демо
   seedDemo();
 </script>
-</body>
-</html>
+
+
+</body></html>

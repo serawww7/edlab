@@ -2,14 +2,11 @@
      Пара 8 (Електрики, аудиторно): ОБЛІК ІНСТРУМЕНТУ
      Картки інструменту, графік калібрувань, видача/повернення, стани, NFC/QR, друк 58 мм, імпорт/експорт CSV.
      Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 8 — Облік інструменту, калібрування, QR/NFC, друк 58 мм</title>
-<meta name="color-scheme" content="light dark" />
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -65,7 +62,7 @@
     .ticket{ box-shadow:none; width:auto; padding:0 }
   }
 </style>
-</head>
+<meta name="description" content="Навчитися вести облік електровимірювального та допоміжного інструменту: картки інструменту, графік калібрувань, видача/повернення, стани OK/REPAIR/OOS, шви"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para8.html"><meta property="og:type" content="article"><meta property="og:title" content="🧰 Облік інструменту · калібрування · видача/повернення · QR/NFC · 🧾 друк 58 мм"><meta property="og:description" content="Навчитися вести облік електровимірювального та допоміжного інструменту: картки інструменту, графік калібрувань, видача/повернення, стани OK/REPAIR/OOS, шви"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para8.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🧰 Облік інструменту · калібрування · видача/повернення · QR/NFC · 🧾 друк 58 мм","description":"Навчитися вести облік електровимірювального та допоміжного інструменту: картки інструменту, графік калібрувань, видача/повернення, стани OK/REPAIR/OOS, шви","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para8.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Електрики · Пара 8 · аудиторно</span>
@@ -77,7 +74,7 @@
       <div class="row">
         <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
         <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <input id="file" type="file" accept=".csv,text/csv" class="btn">
         <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
       </div>
       <p class="small">Поля CSV: <span class="mono">tool_id,name,category,serial,location,responsible,condition,last_cal,interval_m,next_cal,status,holder,notes,url</span></p>
@@ -88,27 +85,27 @@
       <div class="grid g3">
         <div>
           <h3>Картка інструменту</h3>
-          <div class="field"><label for="tid">ID</label><input id="tid" value="TL-001" /></div>
-          <div class="field"><label for="tname">Назва</label><input id="tname" value="Мультиметр UT61E" /></div>
-          <div class="field"><label for="tcat">Категорія</label><input id="tcat" value="Вимірювальний" /></div>
-          <div class="field"><label for="tser">Серійний №</label><input id="tser" value="SN-A12345" /></div>
-          <div class="field"><label for="tloc">Локація</label><input id="tloc" value="Майстерня" /></div>
-          <div class="field"><label for="tresp">Відповідальний</label><input id="tresp" value="Студент ПІБ / група" /></div>
+          <div class="field"><label for="tid">ID</label><input id="tid" value="TL-001"></div>
+          <div class="field"><label for="tname">Назва</label><input id="tname" value="Мультиметр UT61E"></div>
+          <div class="field"><label for="tcat">Категорія</label><input id="tcat" value="Вимірювальний"></div>
+          <div class="field"><label for="tser">Серійний №</label><input id="tser" value="SN-A12345"></div>
+          <div class="field"><label for="tloc">Локація</label><input id="tloc" value="Майстерня"></div>
+          <div class="field"><label for="tresp">Відповідальний</label><input id="tresp" value="Студент ПІБ / група"></div>
           <div class="field"><label for="tcond">Стан</label>
-            <select id="tcond"><option value="OK" selected>OK</option><option value="REPAIR">REPAIR</option><option value="OOS">OOS</option></select>
+            <select id="tcond"><option value="OK" selected="">OK</option><option value="REPAIR">REPAIR</option><option value="OOS">OOS</option></select>
           </div>
         </div>
         <div>
           <h3>Калібрування</h3>
-          <div class="field"><label for="tlast">Останнє калібрування</label><input id="tlast" type="date" /></div>
-          <div class="field"><label for="tint">Інтервал, міс</label><input id="tint" type="number" value="6" /></div>
-          <div class="field"><label for="tnext">Наступне (розрах.)</label><input id="tnext" type="text" readonly placeholder="—" /></div>
-          <div class="field"><label for="tstatus">Статус</label><input id="tstatus" type="text" readonly placeholder="—" /></div>
+          <div class="field"><label for="tlast">Останнє калібрування</label><input id="tlast" type="date"></div>
+          <div class="field"><label for="tint">Інтервал, міс</label><input id="tint" type="number" value="6"></div>
+          <div class="field"><label for="tnext">Наступне (розрах.)</label><input id="tnext" type="text" readonly="" placeholder="—"></div>
+          <div class="field"><label for="tstatus">Статус</label><input id="tstatus" type="text" readonly="" placeholder="—"></div>
         </div>
         <div>
           <h3>Посилання/Нотатки</h3>
           <div class="field"><label for="turl">URL (NFC/QR)</label><input id="turl" placeholder="https://serawww7.github.io/edlab/..."></div>
-          <div class="field"><label for="tnote">Нотатка</label><input id="tnote" placeholder="Комплект щупів у кейсі" /></div>
+          <div class="field"><label for="tnote">Нотатка</label><input id="tnote" placeholder="Комплект щупів у кейсі"></div>
           <div class="row">
             <button class="btn" onclick="calcNext()">🧩 Розрахувати наступну дату</button>
             <button class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
@@ -122,7 +119,7 @@
       <h2>🧾 Видача/повернення</h2>
       <div class="grid g2">
         <div>
-          <div class="field"><label for="holder">Кому видано</label><input id="holder" placeholder="Студент Прізвище / група" /></div>
+          <div class="field"><label for="holder">Кому видано</label><input id="holder" placeholder="Студент Прізвище / група"></div>
           <div class="row">
             <button class="btn" onclick="checkout()">📤 Видати</button>
             <button class="btn" onclick="checkin()">📥 Повернення</button>
@@ -445,5 +442,6 @@
   // Авто-демо при старті
   seedDemo();
 </script>
-</body>
-</html>
+
+
+</body></html>

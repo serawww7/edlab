@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://edlab.pp.ua/sitemap.xml

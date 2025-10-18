@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 17 — Arduino: насос для поливу (реле, поріг, гістерезис, мін. час, ручний режим)</title>
-<meta name="description" content="Реле насоса для поливу на Arduino: поріг вологості, гістерезис, мінімальний час увімкнення/вимкнення, ручний режим, лог у CSV. Схема + генератор .ino."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Реле насоса для поливу на Arduino: поріг вологості, гістерезис, мінімальний час увімкнення/вимкнення, ручний режим, лог у CSV. Схема + генератор .ino.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -43,14 +41,14 @@ canvas{display:block;width:100%;height:220px}
 .switch{display:flex;align-items:center;gap:8px}
 .switch input{width:42px}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para17.html"><meta property="og:type" content="article"><meta property="og:title" content="Агрономія — Пара 17"><meta property="og:description" content="Продовжуємо після Пара 16: маємо % вологості ґрунту, тепер керуємо реле насоса/клапана. Реалізуємо поріг, гістерезис, мінімальний час вмикання/вимикання, р"><meta property="og:url" content="https://edlab.pp.ua/agro_II_kyrs/agro_para17.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Агрономія — Пара 17","description":"Продовжуємо після Пара 16: маємо % вологості ґрунту, тепер керуємо реле насоса/клапана. Реалізуємо поріг, гістерезис, мінімальний час вмикання/вимикання, р","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/agro_II_kyrs/agro_para17.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🚿</span>
       <div>
-        <b>Пара 17 — Arduino: насос для поливу (реле)</b><br/>
+        <b>Пара 17 — Arduino: насос для поливу (реле)</b><br>
         <span class="badge">Агрономія · поріг → гістерезис → мін. час → ручний режим → лог</span>
       </div>
     </div>
@@ -66,21 +64,21 @@ canvas{display:block;width:100%;height:220px}
       <div class="row">
         <div style="flex:1">
           <label for="thr">Поріг вологості, % (нижче — ВМИКАЄМО)</label>
-          <input id="thr" class="input" type="number" min="1" max="99" value="35"/>
+          <input id="thr" class="input" type="number" min="1" max="99" value="35">
         </div>
         <div style="flex:1">
           <label for="hys">Гістерезис, % (ВИМКНЕМо вище поріг+гістерезис)</label>
-          <input id="hys" class="input" type="number" min="1" max="30" value="5"/>
+          <input id="hys" class="input" type="number" min="1" max="30" value="5">
         </div>
       </div>
       <div class="row">
         <div style="flex:1">
           <label for="minOn">Мін. час увімкнення, с</label>
-          <input id="minOn" class="input" type="number" min="1" max="600" value="20"/>
+          <input id="minOn" class="input" type="number" min="1" max="600" value="20">
         </div>
         <div style="flex:1">
           <label for="minOff">Мін. час вимкнення, с</label>
-          <input id="minOff" class="input" type="number" min="1" max="600" value="15"/>
+          <input id="minOff" class="input" type="number" min="1" max="600" value="15">
         </div>
       </div>
 
@@ -89,45 +87,45 @@ canvas{display:block;width:100%;height:220px}
         <div style="flex:1">
           <label for="ain">Аналоговий пін сенсора</label>
           <select id="ain" class="input">
-            <option value="A0" selected>A0</option><option value="A1">A1</option><option value="A2">A2</option><option value="A3">A3</option>
+            <option value="A0" selected="">A0</option><option value="A1">A1</option><option value="A2">A2</option><option value="A3">A3</option>
           </select>
         </div>
         <div style="flex:1">
           <label for="rpin">Пін керування реле (D-пін)</label>
           <select id="rpin" class="input">
-            <option value="7" selected>D7</option><option value="6">D6</option><option value="8">D8</option><option value="9">D9</option>
+            <option value="7" selected="">D7</option><option value="6">D6</option><option value="8">D8</option><option value="9">D9</option>
           </select>
         </div>
       </div>
       <div class="row">
         <div style="flex:1">
           <label for="dry">ADCdry (сухо)</label>
-          <input id="dry" class="input" type="number" min="10" max="4095" value="3000"/>
+          <input id="dry" class="input" type="number" min="10" max="4095" value="3000">
         </div>
         <div style="flex:1">
           <label for="wet">ADCwet (мокро)</label>
-          <input id="wet" class="input" type="number" min="10" max="4095" value="800"/>
+          <input id="wet" class="input" type="number" min="10" max="4095" value="800">
         </div>
       </div>
       <div class="row">
         <div style="flex:1">
           <label for="avg">Усереднення, зразків</label>
-          <input id="avg" class="input" type="number" min="1" max="50" value="8"/>
+          <input id="avg" class="input" type="number" min="1" max="50" value="8">
         </div>
         <div style="flex:1">
           <label for="alpha">EMA α (0..1)</label>
-          <input id="alpha" class="input" type="number" step="0.05" min="0" max="1" value="0.3"/>
+          <input id="alpha" class="input" type="number" step="0.05" min="0" max="1" value="0.3">
         </div>
       </div>
       <div class="row">
         <div style="flex:1">
           <label for="period">Період вимірювання, мс</label>
-          <input id="period" class="input" type="number" min="200" max="5000" step="100" value="1000"/>
+          <input id="period" class="input" type="number" min="200" max="5000" step="100" value="1000">
         </div>
         <div style="flex:1">
           <label for="activeLow">Тип реле</label>
           <select id="activeLow" class="input">
-            <option value="true" selected>Активне LOW (звично для модулів)</option>
+            <option value="true" selected="">Активне LOW (звично для модулів)</option>
             <option value="false">Активне HIGH</option>
           </select>
         </div>
@@ -136,13 +134,13 @@ canvas{display:block;width:100%;height:220px}
       <h3 style="margin-top:12px">🧪 Емулятор прийняття рішення</h3>
       <div class="row">
         <div class="switch">
-          <input id="emu" type="checkbox"/>
+          <input id="emu" type="checkbox">
           <label for="emu">Увімкнути емулятор (% вологості повзунком)</label>
         </div>
         <span id="pumpState" class="badgeState off">Pump: OFF</span>
       </div>
       <div class="row" style="width:100%">
-        <input id="emuMoist" class="input" type="range" min="0" max="100" value="50" disabled/>
+        <input id="emuMoist" class="input" type="range" min="0" max="100" value="50" disabled="">
       </div>
       <div class="canvasWrap" style="margin-top:8px">
         <canvas id="chart" width="900" height="220"></canvas>
@@ -163,7 +161,7 @@ canvas{display:block;width:100%;height:220px}
 
       <h3 style="margin-top:12px">💾 Протокол для звіту</h3>
       <div class="row">
-        <input id="fio" class="input" placeholder="ПІБ студента"/>
+        <input id="fio" class="input" placeholder="ПІБ студента">
         <button class="btn" id="saveTxt">💾 TXT</button>
         <button class="btn" id="saveCsv">📄 CSV</button>
       </div>
@@ -174,7 +172,7 @@ canvas{display:block;width:100%;height:220px}
       <h2>🔌 Схема підключення (SVG)</h2>
       <svg viewBox="0 0 760 420" role="img" aria-label="Arduino + Soil sensor + Relay + Pump">
         <!-- Плата -->
-        <rect x="40" y="40" width="220" height="140" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <rect x="40" y="40" width="220" height="140" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
         <text x="150" y="65" fill="#e5e7eb" font-size="16" text-anchor="middle">Arduino UNO/Nano</text>
         <text x="55" y="95" fill="#93c5fd" font-size="12">5V</text>
         <text x="55" y="115" fill="#93c5fd" font-size="12">GND</text>
@@ -182,30 +180,30 @@ canvas{display:block;width:100%;height:220px}
         <text x="55" y="155" fill="#93c5fd" font-size="12">D7</text>
 
         <!-- Сенсор -->
-        <rect x="320" y="40" width="200" height="100" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <rect x="320" y="40" width="200" height="100" rx="12" fill="#14532d" stroke="#22c55e"></rect>
         <text x="420" y="70" fill="#dcfce7" font-size="16" text-anchor="middle">Ємнісний сенсор</text>
         <text x="420" y="90" fill="#a7f3d0" font-size="12" text-anchor="middle">VCC — OUT — GND</text>
 
         <!-- Реле -->
-        <rect x="320" y="160" width="200" height="120" rx="12" fill="#3f1d2b" stroke="#fb7185"/>
+        <rect x="320" y="160" width="200" height="120" rx="12" fill="#3f1d2b" stroke="#fb7185"></rect>
         <text x="420" y="190" fill="#ffe4e6" font-size="16" text-anchor="middle">Модуль реле</text>
         <text x="420" y="210" fill="#fecdd3" font-size="12" text-anchor="middle">GND — IN — VCC</text>
 
         <!-- З'єднання: сенсор -->
-        <line x1="260" y1="90"  x2="320" y2="60"  stroke="#93c5fd" stroke-width="3"/><text x="280" y="80"  fill="#93c5fd" font-size="12">5V → VCC</text>
-        <line x1="260" y1="110" x2="320" y2="100" stroke="#64748b" stroke-width="3"/><text x="280" y="110" fill="#94a3b8" font-size="12">GND → GND</text>
-        <line x1="260" y1="130" x2="320" y2="80"  stroke="#22c55e" stroke-width="3"/><text x="280" y="95"  fill="#86efac" font-size="12">A0 ← OUT</text>
+        <line x1="260" y1="90" x2="320" y2="60" stroke="#93c5fd" stroke-width="3"></line><text x="280" y="80" fill="#93c5fd" font-size="12">5V → VCC</text>
+        <line x1="260" y1="110" x2="320" y2="100" stroke="#64748b" stroke-width="3"></line><text x="280" y="110" fill="#94a3b8" font-size="12">GND → GND</text>
+        <line x1="260" y1="130" x2="320" y2="80" stroke="#22c55e" stroke-width="3"></line><text x="280" y="95" fill="#86efac" font-size="12">A0 ← OUT</text>
 
         <!-- З'єднання: реле -->
-        <line x1="260" y1="110" x2="320" y2="220" stroke="#64748b" stroke-width="3"/><text x="280" y="170" fill="#94a3b8" font-size="12">GND → GND</text>
-        <line x1="260" y1="90"  x2="320" y2="180" stroke="#93c5fd" stroke-width="3"/><text x="280" y="150" fill="#93c5fd" font-size="12">5V → VCC</text>
-        <line x1="260" y1="150" x2="320" y2="210" stroke="#38bdf8" stroke-width="3"/><text x="280" y="205" fill="#7dd3fc" font-size="12">D7 → IN</text>
+        <line x1="260" y1="110" x2="320" y2="220" stroke="#64748b" stroke-width="3"></line><text x="280" y="170" fill="#94a3b8" font-size="12">GND → GND</text>
+        <line x1="260" y1="90" x2="320" y2="180" stroke="#93c5fd" stroke-width="3"></line><text x="280" y="150" fill="#93c5fd" font-size="12">5V → VCC</text>
+        <line x1="260" y1="150" x2="320" y2="210" stroke="#38bdf8" stroke-width="3"></line><text x="280" y="205" fill="#7dd3fc" font-size="12">D7 → IN</text>
 
         <!-- Насос/клапан (умовно силова частина) -->
-        <rect x="560" y="160" width="160" height="120" rx="12" fill="#111827" stroke="#f59e0b"/>
+        <rect x="560" y="160" width="160" height="120" rx="12" fill="#111827" stroke="#f59e0b"></rect>
         <text x="640" y="190" fill="#fde68a" font-size="16" text-anchor="middle">Насос/клапан</text>
         <text x="640" y="210" fill="#fcd34d" font-size="12" text-anchor="middle">керування COM/NO</text>
-        <line x1="520" y1="220" x2="560" y2="220" stroke="#f59e0b" stroke-width="3"/>
+        <line x1="520" y1="220" x2="560" y2="220" stroke="#f59e0b" stroke-width="3"></line>
         <text x="540" y="238" fill="#fbbf24" font-size="12">з реле COM→NO</text>
       </svg>
 
@@ -224,7 +222,7 @@ canvas{display:block;width:100%;height:220px}
     </div>
   </div>
 
-  <hr class="sep"/>
+  <hr class="sep">
 
   <div class="card">
     <h2>📋 Підсумок для звіту</h2>
@@ -492,5 +490,6 @@ $('#saveCsv').addEventListener('click', ()=>{
 drawChart();
 if (window.self !== window.top) document.documentElement.classList.add('embedded'); // Moodle-friendly
 </script>
-</body>
-</html>
+
+
+</body></html>

@@ -2,14 +2,11 @@
      Пара 7 (Електрики, аудиторно): МАРКУВАННЯ ЩИТА
      Генератор адрес/ланцюгів, таблиця навантажень, пакет наклейок 58 мм, NFC/QR-рядок, імпорт/експорт CSV.
      Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 7 — Маркування щита: адреси, навантаження, наклейки 58 мм</title>
-<meta name="color-scheme" content="light dark" />
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -70,7 +67,7 @@
     .ticket{ box-shadow:none; width:auto; padding:0 }
   }
 </style>
-</head>
+<meta name="description" content="Сформувати **адресацію кола** (щит/модуль/позиція), опис навантаження, номінали захистів і згенерувати **пакет наклейок 58 мм** для щита. Передбачено **імі"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para7.html"><meta property="og:type" content="article"><meta property="og:title" content="🏷️ Маркування щита: адреси, навантаження, пакет наклейок 58 мм + CSV/NFC"><meta property="og:description" content="Сформувати **адресацію кола** (щит/модуль/позиція), опис навантаження, номінали захистів і згенерувати **пакет наклейок 58 мм** для щита. Передбачено **імі"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para7.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🏷️ Маркування щита: адреси, навантаження, пакет наклейок 58 мм + CSV/NFC","description":"Сформувати **адресацію кола** (щит/модуль/позиція), опис навантаження, номінали захистів і згенерувати **пакет наклейок 58 мм** для щита. Передбачено **імі","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para7.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Електрики · Пара 7 · аудиторно</span>
@@ -82,7 +79,7 @@
       <div class="row">
         <button class="btn" type="button" onclick="seedDemo()">🔄 Приклад</button>
         <button class="btn" type="button" onclick="exportCSV()">📤 Експорт CSV</button>
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <input id="file" type="file" accept=".csv,text/csv" class="btn">
         <button class="btn" type="button" onclick="importCSV()">⬆️ Імпорт CSV</button>
       </div>
       <p class="small">Поле CSV: <span class="mono">panel,circuit,addr,device,mcbrating_A,phase,wire,load,room,notes,url</span></p>
@@ -96,10 +93,10 @@
           <div class="field"><label for="panel">Щит (panel)</label><input id="panel" value="ЩО-1"></div>
           <div class="field"><label for="circuit">№ кола</label><input id="circuit" type="number" value="5"></div>
           <div class="field"><label for="device">Пристрій</label>
-            <select id="device"><option selected>MCB</option><option>RCD</option><option>RCBO</option></select></div>
+            <select id="device"><option selected="">MCB</option><option>RCD</option><option>RCBO</option></select></div>
           <div class="field"><label for="mcb">Номінал, А</label><input id="mcb" type="number" value="16"></div>
           <div class="field"><label for="phase">Фази</label>
-            <select id="phase"><option selected>1ф</option><option>3ф</option></select></div>
+            <select id="phase"><option selected="">1ф</option><option>3ф</option></select></div>
           <div class="field"><label for="wire">Кабель</label><input id="wire" value="Cu 3x2.5"></div>
           <div class="field"><label for="load">Навантаження</label><input id="load" value="Розетки майстерні"></div>
           <div class="field"><label for="room">Локація/пом.</label><input id="room" value="Майстерня"></div>
@@ -115,9 +112,9 @@
           <div class="field"><label for="to">По №</label><input id="to" type="number" value="8"></div>
           <div class="field"><label for="mcbB">Номінал, А</label><input id="mcbB" type="number" value="16"></div>
           <div class="field"><label for="deviceB">Пристрій</label>
-            <select id="deviceB"><option selected>MCB</option><option>RCBO</option></select></div>
+            <select id="deviceB"><option selected="">MCB</option><option>RCBO</option></select></div>
           <div class="field"><label for="phaseB">Фази</label>
-            <select id="phaseB"><option selected>1ф</option><option>3ф</option></select></div>
+            <select id="phaseB"><option selected="">1ф</option><option>3ф</option></select></div>
           <div class="field"><label for="wireB">Кабель</label><input id="wireB" value="Cu 3x2.5"></div>
           <div class="field"><label for="roomB">Локація</label><input id="roomB" value="Майстерня"></div>
           <div class="field"><label for="loadB">Шаблон навантаження</label><input id="loadB" value="Розетка #NUM"></div>
@@ -376,5 +373,6 @@
   // Автозапуск демо, щоб було що показати
   seedDemo();
 </script>
-</body>
-</html>
+
+
+</body></html>

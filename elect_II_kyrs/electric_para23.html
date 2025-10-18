@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 23 (Електрика) — ШІ-помічник техобслуговування: SOP → чек-листи, квіз, RAG</title>
-<meta name="description" content="Парсимо SOP/інструкції, формуємо чек-листи (58 мм), генеруємо квіз і перевіряємо відповіді, локальний RAG-пошук по базі SOP, експорт CSV/TXT/ICS."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Парсимо SOP/інструкції, формуємо чек-листи (58 мм), генеруємо квіз і перевіряємо відповіді, локальний RAG-пошук по базі SOP, експорт CSV/TXT/ICS.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -38,14 +36,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
 .ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para23.html"><meta property="og:type" content="article"><meta property="og:title" content="Електроенергетика — Пара 23"><meta property="og:description" content="Мета: перетворити «сирий» SOP/інструкцію (копія з PDF) у структуровану карту робіт: PPE/Інструменти/Підготовка/Кроки/Перевірка, зробити чек-листи з тайм-шт"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para23.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Електроенергетика — Пара 23","description":"Мета: перетворити «сирий» SOP/інструкцію (копія з PDF) у структуровану карту робіт: PPE/Інструменти/Підготовка/Кроки/Перевірка, зробити чек-листи з тайм-шт","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para23.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧰</span>
       <div>
-        <b>Пара 23 — ШІ-помічник техобслуговування</b><br/>
+        <b>Пара 23 — ШІ-помічник техобслуговування</b><br>
         <span class="badge">SOP → чек-листи 58 мм → квіз → локальний RAG → експорт</span>
       </div>
     </div>
@@ -80,11 +78,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>✅ Чек-лист виконання</h2>
     <div class="row">
-      <input id="jobTitle" class="input" placeholder="Назва роботи (напр. ТО щита ЩО-1)"/>
-      <input id="who" class="input" placeholder="Виконавець (ПІБ)"/>
-      <input id="super" class="input" placeholder="Контролер/допуск (ПІБ)"/>
-      <input id="start" class="input" type="datetime-local"/>
-      <input id="loc" class="input" placeholder="Місце/шафа/фідер"/>
+      <input id="jobTitle" class="input" placeholder="Назва роботи (напр. ТО щита ЩО-1)">
+      <input id="who" class="input" placeholder="Виконавець (ПІБ)">
+      <input id="super" class="input" placeholder="Контролер/допуск (ПІБ)">
+      <input id="start" class="input" type="datetime-local">
+      <input id="loc" class="input" placeholder="Місце/шафа/фідер">
     </div>
     <table class="tbl" id="tbl">
       <thead><tr><th>#</th><th>Крок</th><th>Готово</th><th>Час</th><th>Коментар</th></tr></thead>
@@ -99,7 +97,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <button class="btn" id="exportTxt">💾 TXT</button>
       <button class="btn" id="exportIcs">🗓️ ICS</button>
     </div>
-    <div class="receipt" id="rc" hidden></div>
+    <div class="receipt" id="rc" hidden=""></div>
   </div>
 
   <div class="card">
@@ -125,7 +123,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <h2>🔎 Локальний RAG-помічник (без інтернету)</h2>
     <p class="small muted">Задай питання, відповіді шукатимуться у тексті SOP (tf-idf/косинус). Відповідь міститиме посилання на релевантні фрагменти.</p>
     <div class="row">
-      <input id="q" class="input" placeholder="Що робити перед замірами опору ізоляції?"/>
+      <input id="q" class="input" placeholder="Що робити перед замірами опору ізоляції?">
       <button class="btn" id="ask">❓ Запитати</button>
     </div>
     <pre class="code" id="ragOut">// Відповідь з’явиться тут</pre>
@@ -134,25 +132,25 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🔁 Схема процесу (SVG)</h2>
     <svg viewBox="0 0 900 360" role="img" aria-label="SOP → Чек-лист → Квіз → RAG → Експорт">
-      <rect x="30" y="40" width="180" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <rect x="30" y="40" width="180" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
       <text x="120" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">SOP текст</text>
       <text x="120" y="90" fill="#93c5fd" font-size="12" text-anchor="middle">вставка з PDF</text>
 
-      <rect x="240" y="40" width="180" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <rect x="240" y="40" width="180" height="80" rx="12" fill="#14532d" stroke="#22c55e"></rect>
       <text x="330" y="70" fill="#dcfce7" font-size="14" text-anchor="middle">Парсер</text>
       <text x="330" y="90" fill="#a7f3d0" font-size="12" text-anchor="middle">рубрики/кроки</text>
 
-      <rect x="450" y="40" width="180" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+      <rect x="450" y="40" width="180" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"></rect>
       <text x="540" y="70" fill="#fed7aa" font-size="14" text-anchor="middle">Чек-лист</text>
       <text x="540" y="90" fill="#fed7aa" font-size="12" text-anchor="middle">тайм-штампи</text>
 
-      <rect x="660" y="40" width="200" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+      <rect x="660" y="40" width="200" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
       <text x="760" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Квіз + RAG</text>
       <text x="760" y="90" fill="#9ca3af" font-size="12" text-anchor="middle">перевірка знань</text>
 
-      <line x1="210" y1="80" x2="240" y2="80" stroke="#93c5fd" stroke-width="3"/>
-      <line x1="420" y1="80" x2="450" y2="80" stroke="#93c5fd" stroke-width="3"/>
-      <line x1="630" y1="80" x2="660" y2="80" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="210" y1="80" x2="240" y2="80" stroke="#93c5fd" stroke-width="3"></line>
+      <line x1="420" y1="80" x2="450" y2="80" stroke="#93c5fd" stroke-width="3"></line>
+      <line x1="630" y1="80" x2="660" y2="80" stroke="#93c5fd" stroke-width="3"></line>
     </svg>
   </div>
 
@@ -502,5 +500,6 @@ $('#parse').addEventListener('click', afterParse);
 // ===== Ініціалізація =====
 if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
 </script>
-</body>
-</html>
+
+
+</body></html>

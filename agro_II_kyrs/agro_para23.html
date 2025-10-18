@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 23 — ШІ-чекер етикеток і сумісності бакових сумішей</title>
-<meta name="description" content="Імпорт етикеток ЗЗР → конструктор бакової суміші → автоматична перевірка сумісності (FRAC/HRAC, pH, послідовність, заборони), матриця ризиків, журнал суперечностей, розрахунки під бак і гектар, 58мм чек, генератор промпта для LLM."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Імпорт етикеток ЗЗР → конструктор бакової суміші → автоматична перевірка сумісності (FRAC/HRAC, pH, послідовність, заборони), матриця ризиків, журнал суперечностей, розрахунки під бак і гектар, 58мм чек, генератор промпта для LLM.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -42,14 +40,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
 .receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para23.html"><meta property="og:type" content="article"><meta property="og:title" content="Агрономія — Пара 23"><meta property="og:description" content="Мета: зібрати з етикеток дані по ЗЗР, сконструювати бакову суміш, автоматично перевірити сумісність (МоА FRAC/HRAC, pH, порядок змішування, попередження),"><meta property="og:url" content="https://edlab.pp.ua/agro_II_kyrs/agro_para23.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Агрономія — Пара 23","description":"Мета: зібрати з етикеток дані по ЗЗР, сконструювати бакову суміш, автоматично перевірити сумісність (МоА FRAC/HRAC, pH, порядок змішування, попередження),","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/agro_II_kyrs/agro_para23.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧯</span>
       <div>
-        <b>Пара 23 — ШІ-чекер етикеток і сумісності бакових сумішей</b><br/>
+        <b>Пара 23 — ШІ-чекер етикеток і сумісності бакових сумішей</b><br>
         <span class="badge">Етикетки → план суміші → перевірка FRAC/HRAC/pH/порядок → матриця ризиків → журнал → промпт LLM</span>
       </div>
     </div>
@@ -77,11 +75,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div class="row">
         <div style="flex:1">
           <label for="crop">Культура</label>
-          <input id="crop" class="input" placeholder="Пшениця озима"/>
+          <input id="crop" class="input" placeholder="Пшениця озима">
         </div>
         <div style="flex:1">
           <label for="target">Ціль (шкідник/хвороба/бур’ян)</label>
-          <input id="target" class="input" placeholder="септоріоз, борошниста роса"/>
+          <input id="target" class="input" placeholder="септоріоз, борошниста роса">
         </div>
       </div>
       <div class="row">
@@ -91,7 +89,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         </div>
         <div style="flex:1">
           <label for="dose">Норма на га</label>
-          <input id="dose" class="input" type="number" step="0.01" value="0.5"/>
+          <input id="dose" class="input" type="number" step="0.01" value="0.5">
         </div>
         <div style="flex:1">
           <label for="unit">Одиниця</label>
@@ -110,15 +108,15 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div class="row">
         <div style="flex:1">
           <label for="water">Вода, л/га</label>
-          <input id="water" class="input" type="number" step="10" value="200"/>
+          <input id="water" class="input" type="number" step="10" value="200">
         </div>
         <div style="flex:1">
           <label for="tank">Об’єм бака, л</label>
-          <input id="tank" class="input" type="number" step="10" value="2000"/>
+          <input id="tank" class="input" type="number" step="10" value="2000">
         </div>
         <div style="flex:1">
           <label for="area">Площа обробки, га</label>
-          <input id="area" class="input" type="number" step="0.1" value="10"/>
+          <input id="area" class="input" type="number" step="0.1" value="10">
         </div>
       </div>
 
@@ -128,7 +126,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <span id="badgeRisk" class="badge">Статус: —</span>
       </div>
 
-      <div class="receipt" id="receipt" hidden></div>
+      <div class="receipt" id="receipt" hidden=""></div>
 
       <h3 style="margin-top:12px">🧭 Рекомендований порядок змішування (tank order)</h3>
       <pre class="code" id="order">// Натисни «🧪 Перевірити сумісність»</pre>
@@ -157,30 +155,30 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h2 style="margin-top:12px">🔌 Схема процесу (SVG)</h2>
       <svg viewBox="0 0 760 420" role="img" aria-label="Пайплайн сумісності">
-        <rect x="40" y="40" width="220" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <rect x="40" y="40" width="220" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
         <text x="150" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Етикетки ЗЗР (CSV)</text>
         <text x="150" y="88" fill="#93c5fd" font-size="12" text-anchor="middle">ai/FRAC/pH/REI/PHI</text>
 
-        <rect x="300" y="40" width="200" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <rect x="300" y="40" width="200" height="80" rx="12" fill="#14532d" stroke="#22c55e"></rect>
         <text x="400" y="70" fill="#dcfce7" font-size="14" text-anchor="middle">Конструктор суміші</text>
         <text x="400" y="88" fill="#a7f3d0" font-size="12" text-anchor="middle">дози/вода/площа</text>
 
-        <rect x="540" y="40" width="180" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+        <rect x="540" y="40" width="180" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"></rect>
         <text x="630" y="70" fill="#fed7aa" font-size="14" text-anchor="middle">Перевірки</text>
         <text x="630" y="88" fill="#fed7aa" font-size="12" text-anchor="middle">FRAC/pH/order</text>
 
-        <line x1="260" y1="80" x2="300" y2="80" stroke="#93c5fd" stroke-width="3"/>
-        <line x1="500" y1="80" x2="540" y2="80" stroke="#93c5fd" stroke-width="3"/>
+        <line x1="260" y1="80" x2="300" y2="80" stroke="#93c5fd" stroke-width="3"></line>
+        <line x1="500" y1="80" x2="540" y2="80" stroke="#93c5fd" stroke-width="3"></line>
 
-        <rect x="40" y="170" width="280" height="90" rx="12" fill="#0b3f5a" stroke="#22d3ee"/>
+        <rect x="40" y="170" width="280" height="90" rx="12" fill="#0b3f5a" stroke="#22d3ee"></rect>
         <text x="180" y="200" fill="#a5f3fc" font-size="14" text-anchor="middle">Розрахунки</text>
         <text x="180" y="220" fill="#a5f3fc" font-size="12" text-anchor="middle">на бак і на гектар</text>
 
-        <rect x="360" y="170" width="170" height="90" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <rect x="360" y="170" width="170" height="90" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
         <text x="445" y="200" fill="#e5e7eb" font-size="14" text-anchor="middle">58мм чек</text>
         <text x="445" y="220" fill="#9ca3af" font-size="12" text-anchor="middle">для бригадира</text>
 
-        <rect x="560" y="170" width="160" height="90" rx="12" fill="#111827" stroke="#4b5563"/>
+        <rect x="560" y="170" width="160" height="90" rx="12" fill="#111827" stroke="#4b5563"></rect>
         <text x="640" y="200" fill="#e5e7eb" font-size="14" text-anchor="middle">Промпт до ШІ</text>
         <text x="640" y="220" fill="#9ca3af" font-size="12" text-anchor="middle">валідація IPM</text>
       </svg>
@@ -508,5 +506,6 @@ $('#resetLog').addEventListener('click', ()=>{ LOG.textContent=''; });
 refreshProductList();
 if (window.self !== window.top) document.documentElement.classList.add('embedded'); // Moodle-friendly
 </script>
-</body>
-</html>
+
+
+</body></html>
