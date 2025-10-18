@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 18 (механіки) — Акустична діагностика гідросистем (WebAudio: осцилограма+FFT, класи, журнал)</title>
+<meta name="description" content="Без Arduino: мікрофон гарнітури або WAV → осцилограма, FFT, ознаки (смугові енергії, центроїд, плоскість, тональність, ZCR, SNR) → класифікація (кавітація/перепуск/аерація/норма) → журнал, чек 58 мм, CSV/TXT/PNG, ICS."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1140px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+.small{font-size:.9rem}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:220px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🛠️</span>
+      <div>
+        <b>Пара 18 — Акустична діагностика гідросистем (без Arduino)</b><br/>
+        <span class="badge">мікрофон/гарнітура → осцилограма + FFT → ознаки → класи (кавітація/перепуск/аерація/норма) → журнал → експорт</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">
+    Мета: за допомогою <b>мікрофона гарнітури</b> або <b>аудіозапису</b> проаналізувати звук гідросистеми та розпізнати <b>кавітацію насоса</b>, роботу <b>перепускного/запобіжного клапана</b>, <b>аерацію (повітря в маслі)</b> чи <b>нормальний режим</b>. Усе виконується прямо в браузері комп’ютерного класу.
+  </p>
+
+  <div class="card">
+    <h2>🎙️ Джерело звуку</h2>
+    <div class="row">
+      <div style="flex:1">
+        <label for="src">Джерело</label>
+        <select id="src" class="input">
+          <option value="mic" selected>Мікрофон (гарнітура/ноутбук)</option>
+          <option value="file">Аудіофайл (WAV/MP3)</option>
+          <option value="emu">Емулятор (синтетика)</option>
+        </select>
+      </div>
+      <div class="row" style="gap:8px">
+        <button class="btn good" id="start">▶️ Старт</button>
+        <button class="btn secondary" id="stop">⏸️ Стоп</button>
+        <span id="stat" class="badge">Статус: idle</span>
+      </div>
+    </div>
+    <div id="fileBox" class="row" style="display:none;margin-top:6px">
+      <input id="fileInp" class="input" type="file" accept="audio/*"/>
+      <button class="btn" id="playFile">▶️ Відтворити файл</button>
+    </div>
+    <div id="emuBox" class="note" style="display:none;margin-top:6px">
+      <b>Емулятор:</b>
+      <div class="row">
+        <div style="flex:1">
+          <select id="emuType" class="input">
+            <option value="normal" selected>Нормальний режим насоса</option>
+            <option value="cav">Кавітація (широкосмуговий «шурхіт» 3–10 кГц)</option>
+            <option value="relief">Перепуск/запобіжний (тон 400–1200 Гц)</option>
+            <option value="aero">Аерація (бульбашки, низькочастотний «бульк» 100–400 Гц + шум)</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label>Рівень <input id="emuLvl" class="input" type="range" min="0" max="1" step="0.01" value="0.7"/></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📈 Осцилограма та спектр</h2>
+    <div class="canvasWrap"><canvas id="wave" width="1080" height="200"></canvas></div>
+    <div class="canvasWrap" style="margin-top:8px"><canvas id="spec" width="1080" height="240"></canvas></div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" id="png">🖼️ PNG (графіки)</button>
+      <button class="btn secondary" id="clearPlot">🧹 Очистити</button>
+      <span class="badge">Fs=авто; FFT=4096</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧠 Ознаки та класифікація</h2>
+    <div class="row">
+      <div style="flex:1">
+        <label for="auto">Автокласифікація</label>
+        <select id="auto" class="input"><option>Увімкнена</option><option>Вимкнена</option></select>
+      </div>
+      <div style="flex:1">
+        <label for="k">k для k-NN (допоміжно)</label>
+        <input id="k" class="input" type="number" min="1" step="1" value="3"/>
+      </div>
+      <div style="flex:2">
+        <span id="pred" class="badge">Pred: —</span>
+        <span id="risk" class="badge">Скоринг ризику (кавітація): —</span>
+      </div>
+    </div>
+
+    <h3 style="margin-top:8px">📐 Обчислені ознаки</h3>
+    <table class="tbl">
+      <tbody id="feat">
+        <tr><th>Енергія [0.5–1 кГц]</th><td id="b1">—</td></tr>
+        <tr><th>Енергія [1–3 кГц]</th><td id="b2">—</td></tr>
+        <tr><th>Енергія [3–8 кГц]</th><td id="b3">—</td></tr>
+        <tr><th>Енергія [8–15 кГц]</th><td id="b4">—</td></tr>
+        <tr><th>Центроїд спектра (Гц)</th><td id="cent">—</td></tr>
+        <tr><th>Плоскість спектра</th><td id="flat">—</td></tr>
+        <tr><th>Тональність (max/Σ)</th><td id="ton">—</td></tr>
+        <tr><th>Zero-Crossing Rate</th><td id="zcr">—</td></tr>
+        <tr><th>SNR (оцінка, дБ)</th><td id="snr">—</td></tr>
+      </tbody>
+    </table>
+
+    <div class="row" style="margin-top:8px">
+      <button class="btn good" id="classify">✅ Класифікувати зараз</button>
+      <button class="btn secondary" id="mark">📌 Додати мітку (навчити k-NN)</button>
+      <select id="label" class="input" style="max-width:240px">
+        <option value="normal" selected>normal</option>
+        <option value="cav">cav</option>
+        <option value="relief">relief</option>
+        <option value="aero">aero</option>
+      </select>
+    </div>
+
+    <h3 style="margin-top:12px">📜 Журнал інцидентів</h3>
+    <pre id="alog" class="code" style="max-height:180px;overflow:auto">// Поки без інцидентів</pre>
+  </div>
+
+  <div class="card">
+    <h2>💾 Експорт</h2>
+    <div class="row">
+      <button class="btn" id="expCSV">📄 CSV (ознаки)</button>
+      <button class="btn" id="expTXT">💾 TXT (підсумок)</button>
+      <button class="btn" id="expICS">🗓️ ICS (вікна ризику)</button>
+      <button class="btn secondary" id="receipt">🖨️ 58-мм чек</button>
+    </div>
+    <div id="rc" class="receipt" hidden></div>
+  </div>
+
+  <div class="card">
+    <h2>🔌 Схема розміщення мікрофона (SVG)</h2>
+    <svg viewBox="0 0 980 320" role="img" aria-label="Мікрофон на гідролінії/біля насоса">
+      <rect x="40" y="40" width="280" height="160" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <text x="180" y="70" fill="#e5e7eb" font-size="16" text-anchor="middle">Гідробак + насос</text>
+      <text x="180" y="90" fill="#93c5fd" font-size="12" text-anchor="middle">всмоктування ↔ нагнітання</text>
+
+      <rect x="360" y="60" width="560" height="40" rx="8" fill="#1f2937" stroke="#9ca3af"/>
+      <text x="640" y="85" fill="#e5e7eb" font-size="14" text-anchor="middle">Напірна лінія</text>
+
+      <rect x="360" y="140" width="560" height="40" rx="8" fill="#1f2937" stroke="#9ca3af"/>
+      <text x="640" y="165" fill="#e5e7eb" font-size="14" text-anchor="middle">Зворотна лінія (краще чути кавітацію)</text>
+
+      <circle cx="420" cy="160" r="16" fill="#14532d" stroke="#22c55e"/>
+      <text x="420" y="165" fill="#dcfce7" font-size="12" text-anchor="middle">🎤</text>
+      <text x="420" y="185" fill="#a7f3d0" font-size="12" text-anchor="middle">мікрофон 10–20 мм</text>
+
+      <text x="120" y="250" fill="#fbbf24" font-size="12">⚠️ Безпека: не торкатися рухомих/гарячих частин; LOTO перед сервісом.</text>
+    </svg>
+
+    <div class="note small" style="margin-top:10px">
+      <b>Поради:</b> для лабораторії — запиши на телефон/диктофон реальний трактор/навісне (на холостих і під навантаженням), потім завантаж у цю сторінку. 
+      Мікрофон притисни до шланга м’яким кільцем або ізолентою; у класі тестуй на емуляторі, щоб відкалібрувати «нюх» до ознак.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>PNG осцилограми+спектра зі вказаним діагнозом.</li>
+      <li>CSV ознак за 1–2 хв аналізу та журнал інцидентів.</li>
+      <li>Висновок: чи є кавітація/перепуск/аерація, які дії: перевір забору масла, фільтр, рівень, в’язкість, клапани, шланги.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📜 Історична нотатка</h2>
+    <p class="muted small">
+      Механіки «слухали» насоси ще у 1960-х: кавітацію описували як «шипіння піску». Сьогодні мікрофон гарнітури + FFT у браузері дає такі ж «вуха», 
+      але з цифрами і журналом — і це доступно кожному студенту в комп’ютерному класі.
+    </p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+
+// ===== Аудіо пайплайн =====
+let actx=null, analyser=null, srcNode=null, micStream=null, fileBuf=null, fileSrc=null, emuNodes=[];
+let fs=48000;
+const NFFT=4096;
+const wfBuf=new Float32Array(NFFT);
+const spBuf=new Float32Array(NFFT/2);
+
+const wave=$('#wave'), wctx=wave.getContext('2d');
+const spec=$('#spec'), sctx=spec.getContext('2d');
+
+const logbook=[], featsLog=[];
+function log(msg){const t=new Date().toLocaleTimeString(); const box=$('#alog'); if(box.textContent.startsWith('//')) box.textContent=''; box.textContent+=`[${t}] ${msg}\n`; box.scrollTop=box.scrollHeight; logbook.push({t,msg});}
+
+function drawWave(arr){
+  const W=wave.width,H=wave.height;
+  wctx.clearRect(0,0,W,H);
+  wctx.strokeStyle='#223049'; wctx.strokeRect(0.5,0.5,W-1,H-1);
+  wctx.beginPath(); wctx.strokeStyle='#38bdf8'; wctx.lineWidth=1;
+  for(let i=0;i<arr.length;i++){
+    const x=i*(W/(arr.length-1));
+    const y=H/2 - arr[i]*(H/2-12);
+    i?wctx.lineTo(x,y):wctx.moveTo(x,y);
+  }
+  wctx.stroke();
+}
+function drawSpec(db){
+  const W=spec.width,H=spec.height;
+  sctx.clearRect(0,0,W,H);
+  sctx.strokeStyle='#223049'; sctx.strokeRect(0.5,0.5,W-1,H-1);
+  sctx.fillStyle='#94a3b8'; sctx.font='12px ui-monospace';
+  for(let fk=1000; fk<=20000; fk+=1000){
+    const i=Math.round(fk/(fs/NFFT));
+    const x=i*(W/(NFFT/2-1));
+    sctx.strokeStyle='#18243b'; sctx.beginPath(); sctx.moveTo(x,0); sctx.lineTo(x,H); sctx.stroke();
+    sctx.fillText(fk/1000+'к', x+2, 12);
+  }
+  sctx.beginPath(); sctx.strokeStyle='#22c55e'; sctx.lineWidth=1.6;
+  for(let i=0;i<db.length;i++){
+    const x=i*(W/(db.length-1));
+    const y=H-10 - ((Math.max(-100,Math.min(0,db[i]))+100)/100)*(H-20);
+    i?sctx.lineTo(x,y):sctx.moveTo(x,y);
+  }
+  sctx.stroke();
+}
+
+function startAudio(){
+  if(actx) return;
+  actx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});
+  fs=actx.sampleRate;
+  analyser=actx.createAnalyser();
+  analyser.fftSize=NFFT;
+  analyser.smoothingTimeConstant=0.4;
+  $('#stat').textContent='Статус: init '+fs+' Гц';
+
+  const mode=$('#src').value;
+  if(mode==='mic'){
+    navigator.mediaDevices.getUserMedia({audio:{noiseSuppression:false,echoCancellation:false,autoGainControl:false}})
+      .then(stream=>{
+        micStream=stream;
+        srcNode=actx.createMediaStreamSource(stream);
+        srcNode.connect(analyser);
+        $('#stat').textContent='Статус: mic';
+        loop();
+        log('Мікрофон увімкнено');
+      }).catch(err=>{ alert('Немає доступу до мікрофона: '+err.message); $('#stat').textContent='Статус: помилка'; });
+  }else if(mode==='file'){
+    $('#fileBox').style.display='flex';
+    log('Вибери аудіофайл (WAV/MP3)');
+  }else{
+    // Емулятор
+    const g=actx.createGain(); g.gain.value=parseFloat($('#emuLvl').value)||0.7;
+    emuNodes=[g];
+    function mkOsc(f, gain, type='sine'){const o=actx.createOscillator(); o.type=type; o.frequency.value=f; const gg=actx.createGain(); gg.gain.value=gain; o.connect(gg).connect(g); o.start(); emuNodes.push(o,gg);}
+    function mkNoise(center, bw, gain){const buf=actx.createBuffer(1,fs,fs),d=buf.getChannelData(0); for(let i=0;i<fs;i++) d[i]=Math.random()*2-1; const s=actx.createBufferSource(); s.buffer=buf; s.loop=true; const biq=actx.createBiquadFilter(); biq.type='bandpass'; biq.frequency.value=center; biq.Q=center/Math.max(10,bw); const gg=actx.createGain(); gg.gain.value=gain; s.connect(biq).connect(gg).connect(g); s.start(); emuNodes.push(s,biq,gg);}
+    const t=$('#emuType').value;
+    if(t==='normal'){ mkNoise(700,600,0.10); mkOsc(100,0.02,'sawtooth'); }
+    if(t==='cav'){ mkNoise(5000,6000,0.45); mkNoise(1500,1000,0.12); }
+    if(t==='relief'){ mkOsc(800,0.25,'square'); mkNoise(2000,2000,0.08); }
+    if(t==='aero'){ mkNoise(250,300,0.22); mkNoise(1200,1200,0.10); }
+    g.connect(analyser);
+    srcNode=g;
+    $('#stat').textContent='Статус: емулятор';
+    loop(); log('Емулятор: '+t);
+  }
+}
+function stopAudio(){
+  if(emuNodes.length){ emuNodes.forEach(n=>{try{if(n.stop)n.stop(); if(n.disconnect)n.disconnect();}catch{}}); emuNodes.length=0; }
+  if(fileSrc){ try{fileSrc.stop(); fileSrc.disconnect();}catch{} fileSrc=null; }
+  if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; }
+  if(actx){ try{actx.close();}catch{} }
+  actx=null; analyser=null; srcNode=null;
+  $('#stat').textContent='Статус: idle';
+  log('Зупинено');
+}
+$('#start').addEventListener('click', startAudio);
+$('#stop').addEventListener('click', stopAudio);
+$('#src').addEventListener('change', ()=>{
+  $('#fileBox').style.display = ($('#src').value==='file')?'flex':'none';
+  $('#emuBox').style.display  = ($('#src').value==='emu')?'block':'none';
+});
+
+$('#fileInp').addEventListener('change', async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const ab=await f.arrayBuffer();
+  if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+  fileBuf=await actx.decodeAudioData(ab);
+  log('Файл завантажено: '+f.name);
+});
+$('#playFile').addEventListener('click', ()=>{
+  if(!fileBuf){ alert('Немає файлу'); return; }
+  if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+  analyser=actx.createAnalyser(); analyser.fftSize=NFFT; analyser.smoothingTimeConstant=0.4; fs=actx.sampleRate;
+  fileSrc=actx.createBufferSource(); fileSrc.buffer=fileBuf; fileSrc.connect(analyser).connect(actx.destination);
+  fileSrc.start(); $('#stat').textContent='Статус: file play'; loop(); log('Відтворення файлу');
+});
+
+// ===== Обчислення ознак =====
+function computeFeatures(){
+  if(!analyser) return null;
+  analyser.getFloatTimeDomainData(wfBuf);
+  analyser.getFloatFrequencyData(spBuf);
+  drawWave(wfBuf);
+  drawSpec(spBuf);
+
+  const fstep=fs/NFFT;
+  function bandEnergy(fa,fb){ const ia=Math.max(1,Math.floor(fa/fstep)), ib=Math.min(spBuf.length-1,Math.ceil(fb/fstep)); let s=0; for(let i=ia;i<=ib;i++){ const a=Math.pow(10, spBuf[i]/20); s+=a*a; } return Math.sqrt(s/(ib-ia+1)); }
+  const b1=bandEnergy(500,1000);
+  const b2=bandEnergy(1000,3000);
+  const b3=bandEnergy(3000,8000);
+  const b4=bandEnergy(8000,15000);
+
+  let num=0,den=0; for(let k=1;k<spBuf.length;k++){ const a=Math.pow(10, spBuf[k]/20); num+=(k*fstep)*a; den+=a; }
+  const cent = den>0? num/den : 0;
+
+  let sum=0,sumLog=0,n=0; for(let i=1;i<spBuf.length;i++){ const a=Math.max(1e-8,Math.pow(10, spBuf[i]/20)); sum+=a; sumLog+=Math.log(a); n++; }
+  const flat = (Math.exp(sumLog/n))/(sum/n);
+
+  const arr=spBuf.slice(1).map(v=>Math.pow(10,v/20));
+  const ton = (arr.reduce((a,b)=>a+b,0)>0)? (Math.max(...arr)/arr.reduce((a,b)=>a+b,0)) : 0;
+
+  let z=0; for(let i=1;i<wfBuf.length;i++){ if((wfBuf[i-1]>=0)!==(wfBuf[i]>=0)) z++; }
+  const zcr=z/wfBuf.length;
+
+  const maxA=Math.max(...arr), med=arr.slice().sort((a,b)=>a-b)[Math.floor(arr.length*0.5)];
+  const snr=20*Math.log10((maxA+1e-9)/(med+1e-9));
+
+  // UI
+  $('#b1').textContent=b1.toFixed(3);
+  $('#b2').textContent=b2.toFixed(3);
+  $('#b3').textContent=b3.toFixed(3);
+  $('#b4').textContent=b4.toFixed(3);
+  $('#cent').textContent=cent.toFixed(0);
+  $('#flat').textContent=flat.toFixed(2);
+  $('#ton').textContent=ton.toFixed(2);
+  $('#zcr').textContent=zcr.toFixed(3);
+  $('#snr').textContent=snr.toFixed(1)+' дБ';
+
+  const row={t:new Date().toISOString(), b1,b2,b3,b4,cent,flat,ton,zcr,snr};
+  featsLog.push(row);
+  return row;
+}
+
+// Правила + kNN
+const MEMO=[]; // {x:[...], y:'label'}
+function toVec(f){ return [f.b1,f.b2,f.b3,f.b4,f.cent,f.flat,f.ton,f.zcr,f.snr]; }
+function dist2(a,b){ let s=0; for(let i=0;i<a.length;i++){ const d=a[i]-b[i]; s+=d*d; } return s; }
+function knn(feat,k){
+  if(MEMO.length<6) return null;
+  const x=toVec(feat);
+  const arr=MEMO.map(r=>({d:dist2(x,r.x), y:r.y})).sort((a,b)=>a.d-b.d).slice(0,k);
+  const votes=new Map(); arr.forEach(o=>votes.set(o.y,(votes.get(o.y)||0)+1));
+  let best=null,v=-1; for(const [y,c] of votes){ if(c>v){v=c; best=y;} }
+  return best;
+}
+function rules(f){
+  // Кавітація: високочастотна енергія (3–8, 8–15 кГц) + висока плоскість, високий зсув центроїда
+  if((f.b3>0.10 && f.b4>0.05 && f.flat>0.55 && f.cent>3000) || (f.b3>0.14 && f.flat>0.5)) return 'cav';
+  // Перепуск/предохранительный: домінантна тональність 0.4–1.2 кГц (b1 високий), низька плоскість, висока тональність
+  if(f.b1>0.14 && f.ton>0.35 && f.flat<0.55 && f.cent>=400 && f.cent<=1500) return 'relief';
+  // Аерація: підвищена енергія в 100–400/500–1000 Гц, середні частоти слабкі, плоскість середня, ZCR помірний
+  if(f.b1>0.10 && f.b2<0.09 && f.b3<0.06 && f.cent<1200 && f.flat>=0.40 && f.flat<=0.65) return 'aero';
+  // Норма: низька HF енергія, середній центроїд, невисока плоскість
+  if(f.b3<0.08 && f.b4<0.04 && f.cent<2500 && f.flat<0.55) return 'normal';
+  return 'normal';
+}
+function riskScoreCav(f){ // 0..1
+  const hf = Math.min(1, 0.6*(f.b3/0.15) + 0.4*(f.b4/0.08));
+  const cf = Math.min(1, (f.cent-2500)/3500);
+  const fl = Math.min(1, (f.flat-0.45)/0.4);
+  return Math.max(0, Math.min(1, 0.5*hf + 0.3*cf + 0.2*fl));
+}
+
+function classifyNow(){
+  const f=computeFeatures(); if(!f) return;
+  let pred=rules(f);
+  const k=parseInt($('#k').value)||3;
+  const p2=knn(f,k); if(p2) pred=p2;
+  $('#pred').textContent='Pred: '+pred;
+  const score=riskScoreCav(f);
+  $('#risk').textContent='Скоринг ризику (кавітація): '+(score*100).toFixed(0)+'%';
+  if(pred!=='normal'){ log(`Аномалія: ${pred} | cent=${f.cent.toFixed(0)}Гц flat=${f.flat.toFixed(2)} b3=${f.b3.toFixed(2)} b4=${f.b4.toFixed(2)}`); }
+  return {pred,f,score};
+}
+$('#classify').addEventListener('click', classifyNow);
+$('#mark').addEventListener('click', ()=>{
+  const f=computeFeatures(); if(!f) return;
+  const y=$('#label').value;
+  MEMO.push({x:toVec(f), y});
+  if(MEMO.length>400) MEMO.shift();
+  log('Додано у пам’ять k-NN як '+y);
+});
+
+let autoTick=true;
+$('#auto').addEventListener('change', ()=>{ autoTick = ($('#auto').value==='Увімкнена'); });
+
+// Основний цикл
+function loop(){
+  if(!analyser) return;
+  const f=computeFeatures();
+  if(autoTick) classifyNow();
+  requestAnimationFrame(loop);
+}
+
+// ===== Експорт =====
+$('#png').addEventListener('click', ()=>{
+  const tmp=document.createElement('canvas'); tmp.width=spec.width; tmp.height=spec.height+wave.height+10;
+  const tctx=tmp.getContext('2d'); tctx.drawImage(wave,0,0); tctx.drawImage(spec,0,wave.height+10);
+  tmp.toBlob(b=>{ const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='mech_para18_spectrum_'+stamp()+'.png'; a.click(); URL.revokeObjectURL(u); });
+});
+$('#clearPlot').addEventListener('click', ()=>{ wctx.clearRect(0,0,wave.width,wave.height); sctx.clearRect(0,0,spec.width,spec.height); });
+
+$('#expCSV').addEventListener('click', ()=>{
+  const head='timestamp,b1_0.5-1k,b2_1-3k,b3_3-8k,b4_8-15k,cent,flat,ton,zcr,snr,pred\n';
+  const body=featsLog.map(r=>`${r.t},${r.b1.toFixed(4)},${r.b2.toFixed(4)},${r.b3.toFixed(4)},${r.b4.toFixed(4)},${r.cent.toFixed(0)},${r.flat.toFixed(3)},${r.ton.toFixed(3)},${r.zcr.toFixed(4)},${r.snr.toFixed(1)},`).join('\n');
+  download('mechanic_para18_feats_'+stamp()+'.csv', head+body, 'text/csv');
+});
+$('#expTXT').addEventListener('click', ()=>{
+  const lines=['Пара 18 — Акустична діагностика гідросистем','Підсумок інцидентів:']; logbook.forEach(l=>lines.push(`[${l.t}] ${l.msg}`));
+  download('mechanic_para18_summary_'+stamp()+'.txt', lines.join('\n'));
+});
+$('#expICS').addEventListener('click', ()=>{
+  // створюємо події для останніх записів із високим ризиком кавітації
+  const recent=featsLog.slice(-120); // ~2 хв
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//EDLab//HydroAudio//UA'];
+  recent.forEach((r,i)=>{
+    const score=riskScoreCav(r);
+    if(score>0.65){
+      const s=new Date(r.t); const e=new Date(s.getTime()+60000);
+      const dt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
+      lines.push('BEGIN:VEVENT');
+      lines.push('UID:'+('cav-'+i+'-'+Date.now())+'@edlab');
+      lines.push('DTSTART:'+dt(s));
+      lines.push('DTEND:'+dt(e));
+      lines.push('SUMMARY:Ризик кавітації високий ('+(score*100).toFixed(0)+'%)');
+      lines.push('DESCRIPTION:Перевір рівень/в’язкість масла, фільтр, всмоктування, клапани.');
+      lines.push('END:VEVENT');
+    }
+  });
+  lines.push('END:VCALENDAR');
+  download('mechanic_para18_cav_'+stamp()+'.ics', lines.join('\r\n'), 'text/calendar');
+});
+$('#receipt').addEventListener('click', ()=>{
+  const items=logbook.slice(-10);
+  const lines=['=== ЧЕК ГІДРОДІАГНОСТИКИ (58мм) ===','Дата: '+new Date().toISOString().slice(0,10),'---'];
+  if(items.length===0){ lines.push('Подій не зафіксовано'); }
+  else { items.forEach(l=>lines.push(`[${l.t}] ${l.msg}`)); }
+  const el=$('#rc'); el.hidden=false; el.textContent=lines.join('\n');
+  download('para18_receipt_'+stamp()+'.txt', lines.join('\n'));
+});
+
+// ===== Ініціалізація =====
+if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
+</script>
+</body>
+</html>
