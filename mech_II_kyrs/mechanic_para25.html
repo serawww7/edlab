@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 25 (механіки) — ШІ#5: Планувальник ТО (LLM-агент, Gantt, CSV/ICS, чек 58 мм)</title>
+<meta name="description" content="Черга робіт ТО: ризик, безпека, дедлайн, запчастини, механіки. Пріоритезація, розклад по днях, Gantt-діаграма, експорт CSV/ICS, чек 58 мм, журнал, промпт для LLM."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1240px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:100px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
+.grid{display:grid;gap:14px;grid-template-columns:1.3fr 1fr}
+@media(max-width:1120px){.grid{grid-template-columns:1fr}}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;max-width:100%}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🗂️</span>
+      <div>
+        <b>Пара 25 — Планувальник ТО (ШІ-агент, Gantt, CSV/ICS)</b><br/>
+        <span class="badge">черга робіт → пріоритет → ресурси → розклад → Gantt → експорт → чек 58 мм</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">Мета: навчитися формувати **розклад ТО/ремонту** з урахуванням <b>ризику</b>, <b>безпеки</b>, <b>дедлайнів</b>, <b>запчастин</b>, <b>штату</b> та <b>вартості простою</b>. Інструмент оцінює **пріоритет** і автоматично планує дні, забезпечуючи **LOTO/безпеку** та **вивантаження у календар (.ics)**.</p>
+
+  <div class="grid">
+    <!-- ЛІВО: черга робіт + ресурси + налаштування -->
+    <div class="card">
+      <h2>🧾 Черга робіт</h2>
+      <table class="tbl" id="jobsTbl">
+        <thead>
+          <tr>
+            <th>Машина</th><th>Робота</th><th>Тривалість, год</th><th>Потр. мех.</th>
+            <th>Дедлайн</th><th>Риск p(0..1)</th><th>Вплив 1..5</th><th>Безпека</th>
+            <th>Downtime, $/день</th><th>Запчастини (item:шт)</th><th>Дія</th>
+          </tr>
+        </thead>
+        <tbody id="jobsBody"></tbody>
+      </table>
+      <div class="row" style="margin-top:6px">
+        <input class="input" id="jMach" placeholder="Трактор МТЗ-82"/>
+        <input class="input" id="jTask" placeholder="Заміна підшипника на промвалі"/>
+        <input class="input" id="jDur" type="number" min="1" step="1" value="6"/>
+        <input class="input" id="jTech" type="number" min="1" step="1" value="2"/>
+        <input class="input" id="jDue" type="date"/>
+        <input class="input" id="jRisk" type="number" min="0" max="1" step="0.05" value="0.6"/>
+        <input class="input" id="jImp" type="number" min="1" max="5" step="1" value="4"/>
+        <select class="input" id="jSafe"><option value="ok">ok</option><option value="warn">warn</option><option value="critical">critical</option></select>
+        <input class="input" id="jDown" type="number" min="0" step="10" value="400"/>
+        <input class="input" id="jParts" placeholder="6204:2, A42:1"/>
+        <button class="btn good" id="addJob">➕ Додати</button>
+        <button class="btn secondary" id="demoJobs">📌 Демодані</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>👷 Ресурси та політика планування</h2>
+      <div class="row">
+        <label style="flex:1">Механіків у зміні<input class="input" id="capTech" type="number" min="1" value="4"/></label>
+        <label style="flex:1">Годин у зміні<input class="input" id="capHours" type="number" min="1" value="8"/></label>
+        <label style="flex:1">Початкова дата плану<input class="input" id="startDate" type="date"/></label>
+      </div>
+      <div class="row">
+        <label style="flex:1">Запаси (через кому)<textarea id="stock" class="input" placeholder="6204:10, A42:3, HLP-46:20л, M10:50"></textarea></label>
+        <label style="flex:1">Вага критеріїв<input class="input" id="weights" value='{"risk":0.35,"impact":0.2,"safety":0.2,"urgency":0.15,"downtime":0.1}'/></label>
+      </div>
+      <div class="row">
+        <button class="btn" id="plan">🧠 Спланувати (пріоритет→розклад)</button>
+        <button class="btn secondary" id="clearAll">🧹 Очистити все</button>
+        <span id="stat" class="badge">Статус: очікування</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📊 Пріоритезація та розклад</h2>
+    <div class="row">
+      <div style="flex:1">
+        <table class="tbl" id="prioTbl">
+          <thead><tr><th>#</th><th>Машина</th><th>Робота</th><th>Score</th><th>Причина</th></tr></thead>
+          <tbody id="prioBody"><tr><td colspan="5" class="muted">Натисни «Спланувати»</td></tr></tbody>
+        </table>
+      </div>
+      <div style="flex:1">
+        <table class="tbl" id="planTbl">
+          <thead><tr><th>Дата</th><th>Завдання</th><th>Тривалість</th><th>Мех.</th><th>Статус</th></tr></thead>
+          <tbody id="planBody"><tr><td colspan="5" class="muted">Порожньо</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📈 Gantt-діаграма</h2>
+    <div class="canvasWrap"><canvas id="gantt" width="1100" height="360"></canvas></div>
+    <small class="muted">Клік по бару — виділити завдання; подвійний клік — відмітити як <b>виконано</b>.</small>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>🧠 Промпт до LLM-агента (опційно)</h2>
+      <div class="row">
+        <button class="btn" id="mkPromptUA">🇺🇦 Згенерувати (укр)</button>
+        <button class="btn" id="mkPromptEN">🇬🇧 Generate (eng)</button>
+        <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+      </div>
+      <pre class="code" id="promptBox">// Спочатку побудуй розклад</pre>
+    </div>
+
+    <div class="card">
+      <h2>📜 Журнал і експорт</h2>
+      <div class="row">
+        <button class="btn" id="expCSV">📄 CSV (розклад)</button>
+        <button class="btn" id="expICS">📆 ICS (календар)</button>
+        <button class="btn" id="makeReceipt">🖨️ 58 мм чек</button>
+      </div>
+      <pre class="code" id="alog" style="max-height:180px;overflow:auto">// Поки без записів</pre>
+      <div class="receipt" id="rc" hidden></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Завдання для студентів</h2>
+    <ol>
+      <li>Завантаж 6–10 робіт (різні ризики/дедлайни), встанови <b>запаси</b> та <b>ваги</b>. Натисни «Спланувати». Збережи <b>CSV</b> та <b>ICS</b>.</li>
+      <li>Зміни ваги так, щоб безпека мала найбільший вплив, і повтори план. Порівняй <b>Score</b> та порядок у <b>TXT</b>-нотатці.</li>
+      <li>Відміть 1–2 задачі як «виконано» на Gantt, повторно згенеруй чек 58 мм для бригади.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>🔌 Схема потоку (SVG)</h2>
+    <svg viewBox="0 0 980 260" role="img" aria-label="Черга → Пріоритезація → Розклад → Gantt → Експорт">
+      <rect x="40" y="60" width="180" height="100" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <text x="130" y="92" fill="#e5e7eb" font-size="14" text-anchor="middle">Черга робіт</text>
+      <text x="130" y="112" fill="#93c5fd" font-size="12" text-anchor="middle">ризик/запчастини</text>
+
+      <rect x="250" y="50" width="200" height="120" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <text x="350" y="90" fill="#dcfce7" font-size="14" text-anchor="middle">Пріоритезація</text>
+      <text x="350" y="108" fill="#a7f3d0" font-size="12" text-anchor="middle">risk·impact·safety·urgency·downtime</text>
+
+      <rect x="480" y="50" width="200" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+      <text x="580" y="90" fill="#e5e7eb" font-size="14" text-anchor="middle">Розклад</text>
+      <text x="580" y="108" fill="#93c5fd" font-size="12" text-anchor="middle">люди·години·склад</text>
+
+      <rect x="700" y="50" width="240" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+      <text x="820" y="90" fill="#e5e7eb" font-size="14" text-anchor="middle">Gantt + Експорт</text>
+      <text x="820" y="108" fill="#93c5fd" font-size="12" text-anchor="middle">CSV / ICS / чек 58 мм</text>
+
+      <line x1="220" y1="110" x2="250" y2="110" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="450" y1="110" x2="480" y2="110" stroke="#22c55e" stroke-width="3"/>
+      <line x1="680" y1="110" x2="700" y2="110" stroke="#64748b" stroke-width="3"/>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>CSV розкладу: <span class="mono">date,start,end,machine,task,hours,tech,score,status</span>.</li>
+      <li>ICS календар із подіями по роботах.</li>
+      <li>Скрин Gantt + чек 58 мм для бригади.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📜 Історична нотатка</h2>
+    <p class="muted small">Піонери планування у 1950-х (PERT/CPM) оптимізували будівництво кораблів. Сьогодні той самий дух — у шкільному браузері: ризик, ресурси, критичні вікна — і на виході календар для ремонтної бригади.</p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function parseDate(d){const t=new Date(d); if(isNaN(+t)) return null; return new Date(t.getFullYear(),t.getMonth(),t.getDate());}
+function addDays(d,n){const x=new Date(d); x.setDate(x.getDate()+n); return x;}
+function ymd(d){return d.toISOString().slice(0,10);}
+function pad(n){return (n<10?'0':'')+n;}
+function log(msg){const t=new Date().toLocaleTimeString(); const box=$('#alog'); if(box.textContent.startsWith('//')) box.textContent=''; box.textContent+=`[${t}] ${msg}\n`; box.scrollTop=box.scrollHeight;}
+
+// ===== Дані =====
+let JOBS=[]; // {id,mach,task,dur,tech,due,risk,imp,safe,down,parts:{name:qty}}
+let PLAN=[]; // {date,start,end,jobId,hours,tech,status}
+let STOCK=new Map(); // part -> qty
+let SELECTED=null;
+
+// ===== Черга робіт =====
+function renderJobs(){
+  const body=$('#jobsBody'); body.innerHTML='';
+  if(!JOBS.length){ body.innerHTML='<tr><td colspan="11" class="muted">Додай роботи</td></tr>'; return; }
+  JOBS.forEach((j,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${j.mach}</td><td>${j.task}</td><td>${j.dur}</td><td>${j.tech}</td>
+      <td>${j.due?ymd(j.due):'—'}</td><td>${j.risk.toFixed(2)}</td><td>${j.imp}</td>
+      <td>${j.safe}</td><td>${j.down}</td>
+      <td>${Object.entries(j.parts).map(([k,v])=>`${k}:${v}`).join(', ')||'—'}</td>
+      <td><button class="btn secondary" data-del="${j.id}">🗑️</button></td>`;
+    body.appendChild(tr);
+  });
+  body.querySelectorAll('button[data-del]').forEach(b=>{
+    b.addEventListener('click',()=>{ JOBS=JOBS.filter(x=>x.id!==b.getAttribute('data-del')); renderJobs(); });
+  });
+}
+
+function parseParts(s){
+  const out={}; (s||'').split(',').map(x=>x.trim()).filter(Boolean).forEach(p=>{
+    const m=p.match(/^(.+?):\s*([0-9]+)\s*$/);
+    if(m){ out[m[1].trim()]=parseInt(m[2],10); }
+  });
+  return out;
+}
+function parseStock(s){
+  STOCK.clear();
+  (s||'').split(',').map(x=>x.trim()).filter(Boolean).forEach(p=>{
+    // Підтримка "HLP-46:20л" → записуємо як 20 (од.)
+    const m=p.match(/^(.+?):\s*([0-9]+(?:[.,][0-9]+)?)\s*/i);
+    if(m){ STOCK.set(m[1].trim(), parseFloat(m[2].replace(',','.'))); }
+  });
+}
+
+$('#addJob').addEventListener('click', ()=>{
+  const mach=($('#jMach').value||'').trim();
+  const task=($('#jTask').value||'').trim();
+  const dur=parseInt($('#jDur').value,10)||1;
+  const tech=parseInt($('#jTech').value,10)||1;
+  const due=parseDate($('#jDue').value);
+  const risk=parseFloat($('#jRisk').value)||0;
+  const imp=parseInt($('#jImp').value,10)||1;
+  const safe=$('#jSafe').value;
+  const down=parseFloat($('#jDown').value)||0;
+  const parts=parseParts($('#jParts').value);
+  if(!mach||!task){ alert('Заповни Машина і Робота'); return; }
+  const id='J'+Math.random().toString(36).slice(2,8);
+  JOBS.push({id,mach,task,dur,tech,due,risk,imp,safe,down,parts});
+  renderJobs();
+});
+$('#demoJobs').addEventListener('click', ()=>{
+  const today=new Date(); const d=dt=>ymd(addDays(today,dt));
+  $('#jDue').value=d(2);
+  JOBS=[
+    {id:'J1',mach:'Комбайн John Deere',task:'Підшипник ротора 6307',dur:8,tech:2,due:addDays(today,2),risk:0.7,imp:5,safe:'critical',down:1500,parts:{'6307':1,'Літол-24':1}},
+    {id:'J2',mach:'Трактор МТЗ-82',task:'Ремінь генератора A42',dur:3,tech:1,due:addDays(today,4),risk:0.4,imp:2,safe:'ok',down:300,parts:{'A42':1}},
+    {id:'J3',mach:'Обприскувач Amazone',task:'Тріщина хомута Ø25, заміна',dur:2,tech:1,due:addDays(today,1),risk:0.6,imp:3,safe:'warn',down:500,parts:{'Хомут 25-40':2}},
+    {id:'J4',mach:'Косарка',task:'Вібрація редуктора, діагностика',dur:5,tech:2,due:addDays(today,3),risk:0.8,imp:4,safe:'warn',down:700,parts:{}},
+    {id:'J5',mach:'Посівний комплекс',task:'Гідророзподільник — теча',dur:6,tech:2,due:addDays(today,2),risk:0.9,imp:5,safe:'critical',down:1200,parts:{'HLP-46':5}}
+  ];
+  $('#stock').value='6307:2, Літол-24:3, A42:3, Хомут 25-40:10, HLP-46:20';
+  $('#weights').value='{"risk":0.35,"impact":0.2,"safety":0.2,"urgency":0.15,"downtime":0.1}';
+  const sd=ymd(today); $('#startDate').value=sd;
+  renderJobs();
+  log('Завантажено демонстраційні дані');
+});
+
+$('#clearAll').addEventListener('click', ()=>{
+  JOBS=[]; PLAN=[]; STOCK.clear();
+  $('#stock').value=''; $('#prioBody').innerHTML='<tr><td colspan="5" class="muted">—</td></tr>';
+  $('#planBody').innerHTML='<tr><td colspan="5" class="muted">—</td></tr>';
+  const g=$('#gantt').getContext('2d'); g.clearRect(0,0,$('#gantt').width,$('#gantt').height);
+  log('Очищено всі дані');
+});
+
+// ===== Пріоритезація =====
+function safetyWeight(s){ return s==='critical'?1 : (s==='warn'?0.5:0); }
+function urgencyScore(due, start){
+  if(!due) return 0.2; // невідомий дедлайн — невеликий тиск
+  const days = Math.max(0,(due - start)/(24*3600*1000));
+  if(days<=0) return 1;
+  if(days<1) return 0.9;
+  if(days<3) return 0.7;
+  if(days<5) return 0.5;
+  if(days<7) return 0.3;
+  return 0.1;
+}
+function normDowntime(v, arr){
+  const max=Math.max(10, ...arr);
+  return Math.min(1, v/max);
+}
+function computePriority(jobs, weights, startDate){
+  const downs=jobs.map(j=>j.down);
+  return jobs.map(j=>{
+    const risk=j.risk; // 0..1
+    const imp=j.imp/5; // 0..1
+    const saf=safetyWeight(j.safe); // 0..1
+    const urg=urgencyScore(j.due, startDate); // 0..1
+    const dtn=normDowntime(j.down, downs); // 0..1
+    const score = weights.risk*risk + weights.impact*imp + weights.safety*saf + weights.urgency*urg + weights.downtime*dtn;
+    const why = `risk ${risk.toFixed(2)} · imp ${(imp*5).toFixed(0)}/5 · safety ${j.safe} · urg ${(urg*100).toFixed(0)}% · dt ${(dtn*100).toFixed(0)}%`;
+    return {id:j.id,score,why};
+  }).sort((a,b)=>b.score-a.score);
+}
+
+function renderPrio(list){
+  const body=$('#prioBody'); body.innerHTML='';
+  list.forEach((p,i)=>{
+    const j=JOBS.find(x=>x.id===p.id);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td>${j.mach}</td><td>${j.task}</td><td>${p.score.toFixed(3)}</td><td class="small muted">${p.why}</td>`;
+    body.appendChild(tr);
+  });
+  if(!list.length){ body.innerHTML='<tr><td colspan="5" class="muted">Порожньо</td></tr>'; }
+}
+
+// ===== Планування з обмеженнями =====
+function cloneStock(){ const m=new Map(); STOCK.forEach((v,k)=>m.set(k,v)); return m; }
+function partsAvailable(job, stock){ return Object.entries(job.parts).every(([k,v]) => (stock.get(k)||0) >= v); }
+function consumeParts(job, stock){ Object.entries(job.parts).forEach(([k,v])=> stock.set(k, (stock.get(k)||0)-v)); }
+function planSchedule(jobs, prio, startDate, capTech, capHours){
+  const dayCap = capTech * capHours; // людино-години на день
+  let cur = new Date(startDate);
+  const plan=[]; const used= new Set(); const stock=cloneStock();
+  // Ідемо по днях, поки є незаплановані
+  let safetyLoop=0;
+  while(used.size<jobs.length && safetyLoop<365){
+    safetyLoop++;
+    let remaining=dayCap; let techLeft=capTech;
+    // кожного дня ставимо задачі в порядку пріоритету
+    for(const p of prio){
+      if(used.has(p.id)) continue;
+      const j=jobs.find(x=>x.id===p.id);
+      if(!partsAvailable(j,stock)) continue;
+      if(j.tech>techLeft) continue; // недостатньо механіків сьогодні
+      const hours = Math.min(j.dur, remaining/j.tech); // на сьогодні можемо виділити стільки годин
+      if(hours<=0) continue;
+      // фіксуємо слот
+      const startH = capHours - Math.floor(remaining/j.tech); // груба прив'язка
+      const endH = startH + hours;
+      plan.push({date:new Date(cur), start:startH, end:endH, jobId:j.id, hours, tech:j.tech, status:'planned'});
+      remaining -= hours*j.tech;
+      techLeft -= 0; // механіки повертаються після виконання слоту; модель спрощена
+      j.dur -= hours;
+      if(j.dur<=0){ used.add(j.id); consumeParts(j,stock); }
+    }
+    // наступний день
+    cur = addDays(cur,1);
+  }
+  return plan;
+}
+
+function renderPlan(plan){
+  const body=$('#planBody'); body.innerHTML='';
+  if(!plan.length){ body.innerHTML='<tr><td colspan="5" class="muted">Порожньо</td></tr>'; return; }
+  plan.forEach(s=>{
+    const j=JOBS.find(x=>x.id===s.jobId);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${ymd(s.date)}</td><td>${j.mach} — ${j.task}</td><td>${s.hours.toFixed(1)} год</td><td>${s.tech}</td><td>${s.status}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+// ===== Gantt =====
+const gantt=$('#gantt'), gctx=gantt.getContext('2d');
+function drawGantt(plan){
+  const W=gantt.width, H=gantt.height;
+  gctx.clearRect(0,0,W,H);
+  if(!plan.length){ gctx.fillStyle='#94a3b8'; gctx.fillText('Немає даних для Gantt', 20, 20); return; }
+  const dates=[...new Set(plan.map(s=>ymd(s.date)))];
+  const dayWidth=Math.max(80, Math.floor((W-160)/dates.length));
+  const rowHeight=36;
+  // осі
+  gctx.strokeStyle='#223049'; gctx.strokeRect(0.5,0.5,W-1,H-1);
+  // дні
+  dates.forEach((d,i)=>{
+    const x=100+i*dayWidth;
+    gctx.fillStyle='#94a3b8'; gctx.fillText(d, x+8, 16);
+    gctx.strokeStyle='#223049'; gctx.beginPath(); gctx.moveTo(x,20); gctx.lineTo(x,H-10); gctx.stroke();
+  });
+  // групування по задачах
+  const jobsOrder=[...new Set(plan.map(s=>s.jobId))];
+  jobsOrder.forEach((jid,ri)=>{
+    const y=30+ri*rowHeight;
+    const j=JOBS.find(x=>x.id===jid);
+    gctx.fillStyle='#e6eef9'; gctx.fillText((ri+1)+'. '+j.mach+' — '+j.task, 8, y+14);
+    // слоти
+    const slots=plan.filter(s=>s.jobId===jid);
+    slots.forEach(s=>{
+      const i=dates.indexOf(ymd(s.date));
+      const x=100+i*dayWidth;
+      const span=Math.max(8, Math.floor((s.end-s.start)/($('#capHours').value||8)* (dayWidth-12)));
+      gctx.fillStyle = s.status==='done' ? '#22c55e' : '#38bdf8';
+      gctx.fillRect(x+6, y+6, span, rowHeight-12);
+      gctx.strokeStyle='#0b1220'; gctx.strokeRect(x+6.5, y+6.5, span-1, rowHeight-13);
+    });
+  });
+
+  // інтерактив: хіт-тест
+  gantt.onclick=(e)=>{
+    const r=gantt.getBoundingClientRect(); const mx=e.clientX-r.left, my=e.clientY-r.top;
+    SELECTED = hitSlot(mx,my,plan,dates,dayWidth,rowHeight);
+    if(SELECTED){ const j=JOBS.find(x=>x.id===SELECTED.jobId); log(`Вибрано: ${ymd(SELECTED.date)} | ${j.mach} — ${j.task} (${SELECTED.hours.toFixed(1)} год)`); }
+  };
+  gantt.ondblclick=(e)=>{
+    const r=gantt.getBoundingClientRect(); const mx=e.clientX-r.left, my=e.clientY-r.top;
+    const sl=hitSlot(mx,my,plan,dates,dayWidth,rowHeight);
+    if(sl){ sl.status = (sl.status==='done'?'planned':'done'); renderPlan(plan); drawGantt(plan); log(`Статус змінено: ${ymd(sl.date)} → ${sl.status}`); }
+  };
+}
+function hitSlot(mx,my,plan,dates,dayWidth,rowHeight){
+  const jobsOrder=[...new Set(plan.map(s=>s.jobId))];
+  for(let ri=0;ri<jobsOrder.length;ri++){
+    const y=30+ri*rowHeight;
+    if(my<y||my>y+rowHeight) continue;
+    const jid=jobsOrder[ri];
+    for(const s of plan.filter(x=>x.jobId===jid)){
+      const i=dates.indexOf(ymd(s.date)); const x=100+i*dayWidth;
+      const span=Math.max(8, Math.floor((s.end-s.start)/($('#capHours').value||8)* (dayWidth-12)));
+      if(mx>=x+6 && mx<=x+6+span && my>=y+6 && my<=y+6+rowHeight-12) return s;
+    }
+  }
+  return null;
+}
+
+// ===== Промпти до LLM =====
+function makePrompt(lang='ua'){
+  if(!PLAN.length){ alert('Спершу побудуй розклад'); return; }
+  const w=JSON.parse($('#weights').value||'{"risk":0.35}');
+  const header = (lang==='ua')
+   ? `SYSTEM:\nТи — планувальник ТО с/г техніки. Надай короткі рекомендації, зверни увагу на безпеку (LOTO, ЗІЗ), критичні вузли та ризики.\nUSER:\n`
+   : `SYSTEM:\nYou are a maintenance planner for agricultural machinery. Provide brief recommendations stressing safety (LOTO, PPE), critical items and risks.\nUSER:\n`;
+  const jobs = JOBS.map(j=>`- ${j.mach} | ${j.task} | dur ${j.dur<=0?0:j.dur}h left | tech ${j.tech} | due ${j.due?ymd(j.due):'—'} | risk ${j.risk} | impact ${j.imp}/5 | safety ${j.safe} | downtime $${j.down}/day | parts ${Object.entries(j.parts).map(([k,v])=>k+':'+v).join(';')||'—'}`).join('\n');
+  const plan = PLAN.map(s=>{ const j=JOBS.find(x=>x.id===s.jobId); return `${ymd(s.date)} ${pad(Math.floor(s.start))}:00-${pad(Math.floor(s.end))}:00 | ${j.mach} — ${j.task} | ${s.hours.toFixed(1)}h x${s.tech} | ${s.status}`; }).join('\n');
+  const ask = (lang==='ua')
+    ? `Ваги критеріїв: ${JSON.stringify(w)}.\n1) Поради щодо ризиків і безпеки.\n2) Що перенести у разі дефіциту запчастин.\n3) Як змінити ваги для мінімуму простою.\n4) Коротка нотатка для бригади.`
+    : `Weights: ${JSON.stringify(w)}.\n1) Risk & safety notes.\n2) What to reschedule if parts are short.\n3) How to adjust weights to minimize downtime.\n4) Short note for crew.`;
+  const txt = `${header}Queue:\n${jobs}\n\nSchedule:\n${plan}\n\n${ask}`;
+  $('#promptBox').textContent=txt;
+  return txt;
+}
+$('#mkPromptUA').addEventListener('click', ()=>makePrompt('ua'));
+$('#mkPromptEN').addEventListener('click', ()=>makePrompt('en'));
+$('#copyPrompt').addEventListener('click', ()=>{
+  const ta=document.createElement('textarea'); ta.value=$('#promptBox').textContent; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); log('Промпт скопійовано');
+});
+
+// ===== Експорти =====
+$('#expCSV').addEventListener('click', ()=>{
+  if(!PLAN.length) return alert('Немає розкладу');
+  const head='date,start,end,machine,task,hours,tech,score,status\n';
+  const pr=computePriority(JOBS, JSON.parse($('#weights').value||'{}'), parseDate($('#startDate').value)||new Date());
+  const scoreMap=new Map(pr.map(p=>[p.id,p.score]));
+  const rows=PLAN.map(s=>{
+    const j=JOBS.find(x=>x.id===s.jobId);
+    return [ymd(s.date), pad(Math.floor(s.start))+':00', pad(Math.floor(s.end))+':00', csv(j.mach), csv(j.task), s.hours.toFixed(1), s.tech, (scoreMap.get(j.id)||0).toFixed(3), s.status].join(',');
+  }).join('\n');
+  download('mechanic_para25_plan_'+stamp()+'.csv', head+rows+'\n','text/csv');
+});
+
+$('#expICS').addEventListener('click', ()=>{
+  if(!PLAN.length) return alert('Немає розкладу');
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Kyiv';
+  const toDT = (d,h)=> `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(Math.floor(h))}0000`;
+  let ics = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//EDLab Mechanic Planner//UA\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n';
+  PLAN.forEach(s=>{
+    const j=JOBS.find(x=>x.id===s.jobId);
+    const dtstart=toDT(s.date,s.start);
+    const dtend  =toDT(s.date,s.end);
+    const uid = `${s.jobId}-${ymd(s.date)}-${Math.floor(s.start)}@edlab`;
+    ics+=`BEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${toDT(new Date(),0)}Z\nSUMMARY:${escapeICS(j.mach+' — '+j.task)}\nDTSTART;TZID=${tz}:${dtstart}\nDTEND;TZID=${tz}:${dtend}\nDESCRIPTION:${escapeICS('Мех: '+s.tech+'; Год: '+s.hours.toFixed(1)+'; Статус: '+s.status)}\nEND:VEVENT\n`;
+  });
+  ics+='END:VCALENDAR\n';
+  download('mechanic_para25_plan_'+stamp()+'.ics', ics, 'text/calendar');
+});
+
+function escapeICS(s){ return s.replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n'); }
+function csv(s){ return `"${(s??'').toString().replace(/"/g,'""')}"`; }
+
+// Чек 58 мм
+$('#makeReceipt').addEventListener('click', ()=>{
+  if(!PLAN.length) return alert('Немає розкладу');
+  const today=new Date().toISOString().slice(0,10);
+  const lines=['=== ЧЕК ПЛАНУ (58мм) ===','Дата: '+today,'--- Топ задачі ---'];
+  const pr=computePriority(JOBS, JSON.parse($('#weights').value||'{}'), parseDate($('#startDate').value)||new Date());
+  pr.slice(0,5).forEach((p,i)=>{ const j=JOBS.find(x=>x.id===p.id); lines.push(`${i+1}. ${j.mach}: ${j.task} | score ${p.score.toFixed(2)}`);});
+  lines.push('--- Ближчі слоти ---');
+  PLAN.slice(0,6).forEach(s=>{ const j=JOBS.find(x=>x.id===s.jobId); lines.push(`${ymd(s.date)} ${pad(Math.floor(s.start))}-${pad(Math.floor(s.end))} ${j.mach}`); });
+  const rc=$('#rc'); rc.hidden=false; rc.textContent=lines.join('\n');
+  download('para25_receipt_'+stamp()+'.txt', lines.join('\n'));
+});
+
+// ===== Головна кнопка «Спланувати» =====
+$('#plan').addEventListener('click', ()=>{
+  if(!JOBS.length) return alert('Додай хоча б одну роботу');
+  const start=parseDate($('#startDate').value)||new Date();
+  parseStock($('#stock').value);
+  let weights={risk:0.35,impact:0.2,safety:0.2,urgency:0.15,downtime:0.1};
+  try{ weights=Object.assign(weights, JSON.parse($('#weights').value||'{}')); }catch{}
+  const pr=computePriority(JOBS.map(j=>({...j})), weights, start);
+  renderPrio(pr);
+  // робимо копії тривалостей для плану
+  const jobsCopy=JOBS.map(j=>({ ...j, dur: j.dur }));
+  PLAN = planSchedule(jobsCopy, pr, start, parseInt($('#capTech').value,10)||4, parseInt($('#capHours').value,10)||8);
+  renderPlan(PLAN);
+  drawGantt(PLAN);
+  $('#stat').textContent='Статус: план готовий';
+  log('Планування завершено: слотів '+PLAN.length);
+});
+
+// ===== Ініціалізація =====
+(function init(){
+  const now=new Date(); $('#startDate').value = ymd(now);
+})();
+</script>
+</body>
+</html>
