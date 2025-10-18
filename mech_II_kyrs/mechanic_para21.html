@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 21 (механіки) — ШІ Copilot ТО: аналіз симптомів, класи, чек-лист, промпти, ICS</title>
+<meta name="description" content="ШІ для механіків #1: текст/голос → zero-shot класифікація поломок → чек-лист дій → генератор промптів для LLM → планувальник ICS → чек 58 мм, експорт CSV/TXT."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+textarea{min-height:110px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+.small{font-size:.9rem}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.grid{display:grid;gap:14px;grid-template-columns:1.3fr 1fr}
+@media(max-width:1080px){.grid{grid-template-columns:1fr}}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🤖</span>
+      <div>
+        <b>Пара 21 — ШІ Copilot ТО (для механіків)</b><br/>
+        <span class="badge">текст/голос → класифікація → чек-лист → промпти → планувальник → експорт</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">Мета: навчитися використовувати ШІ як «співмеханіка». Вводиш симптоми текстом або голосом — отримуєш клас поломки, чек-лист дій, готові промпти для LLM, план робіт (ICS), чек 58 мм та CSV для звіту.</p>
+
+  <div class="grid">
+    <!-- Ліва колонка -->
+    <div class="card">
+      <h2>📝 Опис симптомів</h2>
+      <div class="row">
+        <div style="flex:1">
+          <label>Машина</label>
+          <input id="machine" class="input" placeholder="Трактор / Комбайн / Навісне..."/>
+        </div>
+        <div style="flex:1">
+          <label>Наробіток, м/г</label>
+          <input id="hours" class="input" type="number" min="0" step="1" value="3500"/>
+        </div>
+        <div style="flex:1">
+          <label>Критичність</label>
+          <select id="crit" class="input">
+            <option value="low">низька</option>
+            <option value="medium" selected>середня</option>
+            <option value="high">висока</option>
+          </select>
+        </div>
+      </div>
+      <textarea id="text" class="input" placeholder="Опиши симптоми: «свист ременя при розгоні, запах гуми, температура ОЖ росте, вібрація на 1800 об/хв...»"></textarea>
+      <div class="row" style="margin-top:6px">
+        <button class="btn" id="mic">🎙️ Голосом</button>
+        <button class="btn good" id="analyze">🔍 Проаналізувати</button>
+        <button class="btn secondary" id="clear">🧹 Очистити</button>
+        <span id="stat" class="badge">Статус: очікування</span>
+      </div>
+
+      <h3 style="margin-top:10px">📊 Результати аналізу</h3>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Клас поломки (предикт)</th><td id="pred">—</td></tr>
+          <tr><th>Топ-ознаки</th><td id="feat">—</td></tr>
+          <tr><th>Скоринг ризику</th><td id="risk">—</td></tr>
+          <tr><th>Рекомендації</th><td id="reco">—</td></tr>
+          <tr><th>Потрібні ЗІЗ/інструмент</th><td id="ppe">—</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:10px">✅ Чек-лист дій</h3>
+      <div id="checklist" class="note small">Натисни «Проаналізувати», щоб згенерувати список дій.</div>
+    </div>
+
+    <!-- Права колонка -->
+    <div class="card">
+      <h2>🧠 Навчальні приклади (few-shot k-NN)</h2>
+      <p class="small muted">Додай 3–5 прикладів на кожен клас — локальний класифікатор стане точнішим.</p>
+      <div class="row">
+        <select id="label" class="input" style="flex:1;max-width:220px">
+          <option value="belt">ремінний привід</option>
+          <option value="bearing">підшипник</option>
+          <option value="hydraulic">гідравліка</option>
+          <option value="electric">електрика</option>
+          <option value="cooling">охолодження</option>
+          <option value="fuel">паливо</option>
+        </select>
+        <input id="shot" class="input" placeholder="Короткий приклад симптому для цього класу"/>
+        <button class="btn" id="addShot">➕ Додати</button>
+        <button class="btn secondary" id="exportShots">💾 Експорт прикладів</button>
+      </div>
+      <pre id="shotsBox" class="code small" style="max-height:180px;overflow:auto">// Поки без прикладів</pre>
+
+      <h2 style="margin-top:10px">🧩 Генератор промптів для LLM</h2>
+      <div class="row">
+        <button class="btn" id="genUA">🇺🇦 Згенерувати (укр)</button>
+        <button class="btn" id="genEN">🇬🇧 Generate (eng)</button>
+        <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+      </div>
+      <pre id="promptBox" class="code small">// Натисни кнопку, щоб згенерувати промпт</pre>
+
+      <h2 style="margin-top:10px">💾 Експорт / План</h2>
+      <div class="row">
+        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button class="btn" id="saveCsv">📄 CSV (аналіз)</button>
+        <button class="btn" id="saveIcs">🗓️ ICS (план робіт)</button>
+        <button class="btn secondary" id="receipt">🖨️ 58 мм чек</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔌 Схема роботи Copilot (SVG)</h2>
+    <svg viewBox="0 0 980 260" role="img" aria-label="Потік: симптоми → класи → дії → промпт → план">
+      <rect x="40" y="60" width="200" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <text x="140" y="92" fill="#e5e7eb" font-size="14" text-anchor="middle">Симптоми</text>
+      <text x="140" y="112" fill="#93c5fd" font-size="12" text-anchor="middle">текст/голос</text>
+
+      <rect x="270" y="50" width="210" height="100" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <text x="375" y="90" fill="#dcfce7" font-size="14" text-anchor="middle">Zero-shot класифікатор</text>
+
+      <rect x="510" y="50" width="210" height="100" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+      <text x="615" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Чек-лист дій</text>
+      <text x="615" y="96" fill="#93c5fd" font-size="12" text-anchor="middle">ПЕЕ, інструмент</text>
+
+      <rect x="750" y="50" width="190" height="100" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+      <text x="845" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Промпт → LLM</text>
+      <text x="845" y="96" fill="#93c5fd" font-size="12" text-anchor="middle">звіт/інструкція</text>
+
+      <line x1="240" y1="100" x2="270" y2="100" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="480" y1="100" x2="510" y2="100" stroke="#22c55e" stroke-width="3"/>
+      <line x1="720" y1="100" x2="750" y2="100" stroke="#64748b" stroke-width="3"/>
+
+      <text x="140" y="180" fill="#fbbf24" font-size="12" text-anchor="middle">ICS план робіт, чек 58 мм, CSV</text>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>TXT із діагнозом, ризиком, чек-листом та промптом.</li>
+      <li>CSV з полями: машина, м/г, симптоми, клас, ризик, дії, інструмент.</li>
+      <li>ICS із задачами: «Негайно/Сьогодні/Планове ТО».</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📜 Історична нотатка</h2>
+    <p class="muted small">Перші експертні системи для сервісу тракторів у 1980-х працювали на правилах «якщо-то». Ми повертаємось до цієї ідеї: додаємо навчальні приклади й промпти — і маємо «кишенькового майстра зміни» на кожному ПК.</p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+
+// ===== База знань (мінідовідник) =====
+const KB = {
+  belt:{
+    name:'Ремінний привід',
+    keywords:['свист','скрип','прослиз','ремін','запах гуми','шків','натяг','строб','биття'],
+    actions:[
+      'Перевірити натяг ременя та паралельність шківів',
+      'Оглянути знос канавок, забруднення, масло на ремені',
+      'Перевірити підшипники натяжних роликів і биття шківів',
+      'За потреби — заміна ременя/регулювання'
+    ],
+    ppe:['Окуляри','Рукавиці','LOTO на двигуні/ВВП'],
+    tools:['Ключі','Лінійка/рівень','Стробоскоп (див. Пара 19)']
+  },
+  bearing:{
+    name:'Підшипник',
+    keywords:['скрегіт','гул','дзижч','вибрація','перегрів','люфт','удари','огинаюча','кепструм'],
+    actions:[
+      'Перевірити люфт/посадку, температуру',
+      'Прослухати стетоскопом (див. Пара 20): envelope/кепструм',
+      'Замінити підшипник за зростанням Kurtosis/ENV-піків',
+      'Перевірити змащення і сальники'
+    ],
+    ppe:['Окуляри','Рукавиці'],
+    tools:['Термометр ІЧ','Стетоскоп/мікрофон','Знімач підшипників']
+  },
+  hydraulic:{
+    name:'Гідравліка',
+    keywords:['підтік','масло','шланг','циліндр','клапан','повітря','кавітац','свист насоса','ривки'],
+    actions:[
+      'Оглянути шланги/фітинги, підтягнути або замінити',
+      'Перевірити рівень і в’язкість масла, фільтри',
+      'Прослухати гідросистему на кавітацію (Пара 18)',
+      'Тест перепускного/предохранительного клапана'
+    ],
+    ppe:['Окуляри','Фартух','Рукавиці'],
+    tools:['Ключі','Манометр','Мікрофон/гарнітура']
+  },
+  electric:{
+    name:'Електрика',
+    keywords:['не заводиться','просідає напруга','іскра','корозія клем','генератор','АКБ','реле'],
+    actions:[
+      'Перевірити затискачі АКБ, падіння напруги на масах',
+      'Тести генератора/реле регулятора (Пари 6/11)',
+      'Огляд проводки на перетирання/окиснення',
+      'Діагностика споживання струму в спокої'
+    ],
+    ppe:['Діелектричні рукавиці','Окуляри'],
+    tools:['Мультиметр','Струмові кліщі','Навантажувальна вилка']
+  },
+  cooling:{
+    name:'Охолодження',
+    keywords:['перегрів','температура ОЖ','вентилятор','радіатор','антифриз','термостат','протік','запах'],
+    actions:[
+      'Промити радіатор, перевірити термостат/в’язкість муфти',
+      'Перевірити ремінь вентилятора (Пара 19)',
+      'Огляд патрубків, тест на CO₂ у системі ОЖ (якщо є)',
+      'Долив/заміна антифризу відповідного класу'
+    ],
+    ppe:['Окуляри','Рукавиці'],
+    tools:['Термометр ІЧ','Тестер тиску системи ОЖ']
+  },
+  fuel:{
+    name:'Паливна система',
+    keywords:['двигун троїть','димність','не розвиває потужність','повітря в паливі','фільтр палива','форсунка'],
+    actions:[
+      'Замінити/продути паливний фільтр, перевірити воду',
+      'Перевірити підсмоктування повітря на з’єднаннях',
+      'Оцінити тиск/розпил форсунок, повернення',
+      'Паливопроводи: заломи/бруд'
+    ],
+    ppe:['Окуляри','Рукавиці'],
+    tools:['Манометр палива','Тестер форсунок','Збірник звороту']
+  }
+};
+
+// Початкові few-shot приклади
+const SHOTS=[
+  {y:'belt', x:'свист при розгоні, запах гуми, температура росте, прослизання ременя'},
+  {y:'bearing', x:'гул і вібрація під навантаженням, після 10 хвилин теплішає корпус'},
+  {y:'hydraulic', x:'ривки гідроциліндра, шум насоса схожий на шурхіт, масло з піною'},
+  {y:'electric', x:'поганий запуск, просідання напруги при стартері, окислені клеми'},
+  {y:'cooling', x:'перегрів у полі, вентилятор крутиться повільно, радіатор забитий'},
+  {y:'fuel', x:'двигун не тягне, чорний дим, забитий паливний фільтр'}
+];
+
+// ===== TF-IDF k-NN + правила =====
+function tokenize(s){
+  return (s.toLowerCase().replace(/[^\p{L}\p{N}\s]+/gu,' ').split(/\s+/).filter(w=>w.length>1));
+}
+function buildTfidf(shots){
+  const docs=shots.map(r=>tokenize(r.x));
+  const df=new Map();
+  docs.forEach(d=>{ new Set(d).forEach(t=>df.set(t,(df.get(t)||0)+1)); });
+  const N=docs.length;
+  function vec(doc){
+    const tf=new Map();
+    doc.forEach(t=>tf.set(t,(tf.get(t)||0)+1));
+    const v=new Map();
+    tf.forEach((cnt,t)=>{
+      const idf=Math.log((N+1)/((df.get(t)||1)))+1;
+      v.set(t, (cnt/doc.length)*idf);
+    });
+    return v;
+  }
+  return {df,N,vec};
+}
+function cosSim(a,b){
+  let dot=0,na=0,nb=0;
+  a.forEach((va,t)=>{ if(b.has(t)) dot+=va*b.get(t); na+=va*va; });
+  b.forEach(v=>{ nb+=v*v; });
+  return dot/(Math.sqrt(na*nb)+1e-9);
+}
+function knnPredict(text, shots, k=3){
+  if(shots.length===0) return {y:'unknown', score:0};
+  const tfidf=buildTfidf(shots);
+  const q=tfidf.vec(tokenize(text));
+  const sims=shots.map(r=>({y:r.y, s:cosSim(q, tfidf.vec(tokenize(r.x)))})).sort((a,b)=>b.s-a.s).slice(0,k);
+  const votes=new Map(); sims.forEach(o=>votes.set(o.y,(votes.get(o.y)||0)+o.s));
+  let best='unknown', sc=-1; votes.forEach((v,y)=>{ if(v>sc){sc=v; best=y;} });
+  return {y:best, score: Math.max(0, Math.min(1, sc))};
+}
+function ruleBoost(text, pred){
+  // Якщо присутні ключові слова конкретного вузла — підсилюємо клас
+  const t=text.toLowerCase();
+  let best=pred;
+  Object.entries(KB).forEach(([k,obj])=>{
+    const hits=obj.keywords.filter(w=>t.includes(w));
+    if(hits.length>=2 && (best.y!==k)) best={y:k, score:Math.max(pred.score, 0.75)};
+  });
+  return best;
+}
+function riskScore(pred, crit){
+  const base={low:0.3, medium:0.6, high:0.8}[crit]||0.6;
+  const clsBoost={belt:0.5,bearing:0.8,hydraulic:0.7,electric:0.7,cooling:0.7,fuel:0.7}[pred.y]||0.4;
+  return Math.max(0, Math.min(1, 0.4*base + 0.6*clsBoost));
+}
+
+// ===== Голосовий ввід =====
+let recog=null;
+function startMic(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ alert('Ваш браузер не підтримує SpeechRecognition. Введіть текст вручну.'); return; }
+  recog = new SR(); recog.lang='uk-UA'; recog.interimResults=true; recog.continuous=false;
+  $('#stat').textContent='Статус: слухаю...';
+  recog.onresult = (e)=>{
+    let s=''; for(let i=0;i<e.results.length;i++){ s+=e.results[i][0].transcript+' '; }
+    $('#text').value = ($('#text').value+' '+s).trim();
+  };
+  recog.onend=()=>$('#stat').textContent='Статус: розпізнавання завершено';
+  recog.start();
+}
+
+// ===== Генерація чек-листу, промптів, експортів =====
+const SHOTS_STORE=[...SHOTS];
+$('#addShot').addEventListener('click', ()=>{
+  const lab=$('#label').value; const s=($('#shot').value||'').trim();
+  if(!s) return;
+  SHOTS_STORE.push({y:lab,x:s});
+  $('#shot').value='';
+  renderShots();
+});
+$('#exportShots').addEventListener('click', ()=>{
+  download('mechanic_para21_shots_'+stamp()+'.json', JSON.stringify(SHOTS_STORE,null,2));
+});
+function renderShots(){
+  const box=$('#shotsBox');
+  box.textContent = SHOTS_STORE.map((r,i)=> `${i+1}. [${r.y}] ${r.x}`).join('\n') || '// Поки без прикладів';
+}
+renderShots();
+
+function analyze(){
+  const machine=$('#machine').value||'Н/Д';
+  const hours=parseInt($('#hours').value||'0',10);
+  const crit=$('#crit').value;
+  const text=($('#text').value||'').trim();
+  if(!text){ alert('Введи симптоми.'); return; }
+
+  $('#stat').textContent='Статус: аналіз...';
+  // 1) TF-IDF k-NN
+  let pred = knnPredict(text, SHOTS_STORE, 3);
+  // 2) Правила/ключові слова
+  pred = ruleBoost(text, pred);
+  // 3) Ризик
+  const risk = riskScore(pred, crit);
+
+  // 4) Рекомендації з бази
+  const kb = KB[pred.y] || {name:'Невідомо',actions:['Попроси більше контексту'],'ppe':[],tools:[]};
+
+  // 5) Топ-ознаки (ключові слова, що спрацювали)
+  const feats = (KB[pred.y]?.keywords||[]).filter(w=>text.toLowerCase().includes(w)).slice(0,6);
+
+  // 6) Чек-лист
+  const checklist = (KB[pred.y]?.actions||['Збери додаткові дані']).map((a,i)=>`<label style="display:block;margin:.2em 0"><input type="checkbox" data-i="${i}"/> ${a}</label>`).join('');
+  $('#checklist').innerHTML = checklist;
+
+  // 7) ПЕЕ/Інструмент
+  $('#ppe').textContent = ((KB[pred.y]?.ppe||[]).join(', ') || 'Н/Д') + ' | Інструмент: ' + ((KB[pred.y]?.tools||[]).join(', ')||'Н/Д');
+
+  // 8) Вивід
+  $('#pred').textContent = `${KB[pred.y]?.name||pred.y} (score ${ (pred.score*100).toFixed(0)}%)`;
+  $('#feat').textContent = feats.length? feats.join(', '): 'ключові слова не знайдено';
+  $('#risk').textContent = (risk*100).toFixed(0)+'%';
+  $('#reco').textContent = (KB[pred.y]?.actions||[]).slice(0,3).join('; ');
+
+  // Зберегти останній результат
+  lastResult = {machine,hours,crit,text,pred:pred.y,predName:KB[pred.y]?.name||pred.y,score:pred.score,risk,feats,actions:KB[pred.y]?.actions||[],ppe:KB[pred.y]?.ppe||[],tools:KB[pred.y]?.tools||[]};
+  $('#stat').textContent='Статус: готово';
+}
+let lastResult=null;
+
+function makePrompt(lang='ua'){
+  if(!lastResult){ alert('Спочатку проведи аналіз.'); return; }
+  const r=lastResult;
+  const sysUA = `Ти — досвідчений майстер з ТО с/г техніки. Пояснюй стисло, кроками, з посиланням на ризики безпеки (LOTO, ЗІЗ). Видавай відповідь як структурований план з пріоритезацією.`;
+  const sysEN = `You are a seasoned agricultural machinery service engineer. Explain concisely, step-by-step, highlighting safety risks (LOTO, PPE). Return a structured, prioritized plan.`;
+  const userUA = [
+    `Машина: ${r.machine}`,
+    `Наробіток: ${r.hours} м/г, критичність: ${r.crit}`,
+    `Симптоми: ${r.text}`,
+    `Попередній клас: ${r.predName}`,
+    `Що потрібно: 1) діагноз з імовірністю, 2) детальний чек-лист, 3) потрібні інструменти/запчастини, 4) коли можна відкласти, 5) короткий технічний коментар.`
+  ].join('\n');
+  const userEN = [
+    `Machine: ${r.machine}`,
+    `Hours: ${r.hours}, criticality: ${r.crit}`,
+    `Symptoms: ${r.text}`,
+    `Preliminary class: ${r.predName}`,
+    `Need: 1) diagnosis with likelihood, 2) detailed checklist, 3) required tools/spares, 4) when it can be deferred, 5) brief technical note.`
+  ].join('\n');
+
+  const prompt = (lang==='ua')
+    ? `SYSTEM:\n${sysUA}\n\nUSER:\n${userUA}\n\nFORMAT: Markdown with numbered steps, and a final "Safety" section.`
+    : `SYSTEM:\n${sysEN}\n\nUSER:\n${userEN}\n\nFORMAT: Markdown with numbered steps, and a final "Safety" section.`;
+
+  $('#promptBox').textContent = prompt;
+  return prompt;
+}
+
+function copyPrompt(){ const ta=document.createElement('textarea'); ta.value=$('#promptBox').textContent; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+
+// ===== Експорти =====
+function saveTXT(){
+  if(!lastResult){ alert('Спочатку аналіз.'); return; }
+  const r=lastResult;
+  const lines=[
+    'Пара 21 — ШІ Copilot ТО',
+    `Машина: ${r.machine} | м/г: ${r.hours} | критичність: ${r.crit}`,
+    `Симптоми: ${r.text}`,
+    `Клас: ${r.predName} (score ${(r.score*100).toFixed(0)}%), ризик ${(r.risk*100).toFixed(0)}%`,
+    `Топ-ознаки: ${r.feats.join(', ')||'—'}`,
+    '--- Чек-лист дій ---',
+    ...(r.actions.map((a,i)=>`${i+1}. ${a}`)),
+    '--- ПЕЕ/Інструмент ---',
+    `ПЕЕ: ${(r.ppe||[]).join(', ')||'—'}`,
+    `Інструмент: ${(r.tools||[]).join(', ')||'—'}`,
+    '--- Промпт (укр) ---',
+    makePrompt('ua')
+  ];
+  download('mechanic_para21_summary_'+stamp()+'.txt', lines.join('\n'));
+}
+
+function saveCSV(){
+  if(!lastResult){ alert('Спочатку аналіз.'); return; }
+  const r=lastResult;
+  const head='machine,hours,criticality,symptoms,class,score,risk,features,actions,ppe,tools\n';
+  const row=[
+    `"${r.machine}"`,r.hours,r.crit,
+    `"${r.text.replace(/"/g,'""')}"`,
+    `"${r.predName}"`,
+    (r.score.toFixed(3)),(r.risk.toFixed(3)),
+    `"${(r.feats||[]).join('|')}"`,
+    `"${(r.actions||[]).join('|')}"`,
+    `"${(r.ppe||[]).join('|')}"`,
+    `"${(r.tools||[]).join('|')}"`
+  ].join(',');
+  download('mechanic_para21_analysis_'+stamp()+'.csv', head+row+'\n','text/csv');
+}
+
+function saveICS(){
+  if(!lastResult){ alert('Спочатку аналіз.'); return; }
+  const r=lastResult;
+  const now=new Date(); const dt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
+  const lines=[
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//EDLab//MechCopilot//UA'
+  ];
+  // Негайно (якщо ризик > 0.7)
+  if(r.risk>0.7){
+    const s=new Date(now.getTime()+15*60*1000), e=new Date(s.getTime()+60*60*1000);
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:'+('urgent-'+Date.now())+'@edlab');
+    lines.push('DTSTART:'+dt(s)); lines.push('DTEND:'+dt(e));
+    lines.push('SUMMARY:Негайна дія — '+r.predName);
+    lines.push('DESCRIPTION:'+('Перевірити: '+(r.actions[0]||'—')));
+    lines.push('END:VEVENT');
+  }
+  // Сьогодні
+  const s2=new Date(now.getFullYear(),now.getMonth(),now.getDate(),17,0,0);
+  const e2=new Date(s2.getTime()+60*60*1000);
+  lines.push('BEGIN:VEVENT');
+  lines.push('UID:'+('today-'+Date.now())+'@edlab');
+  lines.push('DTSTART:'+dt(s2)); lines.push('DTEND:'+dt(e2));
+  lines.push('SUMMARY:Дії за чек-листом — '+r.predName);
+  lines.push('DESCRIPTION:'+(r.actions.slice(0,3).join('; ')));
+  lines.push('END:VEVENT');
+
+  // Планове ТО через тиждень
+  const s3=new Date(now.getTime()+7*24*3600*1000); s3.setHours(9,0,0,0);
+  const e3=new Date(s3.getTime()+2*3600*1000);
+  lines.push('BEGIN:VEVENT');
+  lines.push('UID:'+('plan-'+Date.now())+'@edlab');
+  lines.push('DTSTART:'+dt(s3)); lines.push('DTEND:'+dt(e3));
+  lines.push('SUMMARY:Планове ТО (контроль після діагностики)');
+  lines.push('DESCRIPTION:Машина: '+r.machine+' | Симптоми: '+r.text.slice(0,120));
+  lines.push('END:VEVENT');
+
+  lines.push('END:VCALENDAR');
+  download('mechanic_para21_plan_'+stamp()+'.ics', lines.join('\r\n'), 'text/calendar');
+}
+
+function makeReceipt(){
+  if(!lastResult){ alert('Спочатку аналіз.'); return; }
+  const r=lastResult;
+  const lines=[
+    '=== ЧЕК ШІ COPILOT ТО (58мм) ===',
+    'Дата: '+new Date().toISOString().slice(0,10),
+    'Машина: '+r.machine,
+    'Клас: '+r.predName,
+    'Ризик: '+(r.risk*100).toFixed(0)+'%',
+    '--- Перші дії ---',
+    ...(r.actions.slice(0,3).map(a=>'- '+a))
+  ];
+  const el=$('#rc'); el.hidden=false; el.textContent=lines.join('\n');
+  download('para21_receipt_'+stamp()+'.txt', lines.join('\n'));
+}
+
+// ===== Події UI =====
+$('#mic').addEventListener('click', startMic);
+$('#analyze').addEventListener('click', analyze);
+$('#clear').addEventListener('click', ()=>{ $('#text').value=''; $('#stat').textContent='Статус: очищено'; });
+
+$('#genUA').addEventListener('click', ()=>makePrompt('ua'));
+$('#genEN').addEventListener('click', ()=>makePrompt('en'));
+$('#copyPrompt').addEventListener('click', copyPrompt);
+
+$('#saveTxt').addEventListener('click', saveTXT);
+$('#saveCsv').addEventListener('click', saveCSV);
+$('#saveIcs').addEventListener('click', saveICS);
+$('#receipt').addEventListener('click', makeReceipt);
+
+// ===== Ініціалізація =====
+if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
+</script>
+</body>
+</html>
