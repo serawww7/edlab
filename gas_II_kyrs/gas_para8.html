@@ -483,7 +483,7 @@ $('#saveCsv').addEventListener('click',()=>{
   s.steps.forEach(st=>{ csv+=`${st.key},"${st.name.replace(/"/g,'""')}",${st.duration_s},${st.done?1:0},${st.soap||''}\n`; });
   csv+='\n# pressure_points\niso_time,mbar\n';
   s.points.forEach(p=>{ csv+=`${p.t},${p.mbar}\n`; });
-  download('gas_para08_startstop_'+stamp()+'.csv', csv, 'text/csv'); log('Експортовано CSV');
+  download('gas_para8_'+stamp()+'.csv', csv, 'text/csv'); log('Експортовано CSV');
 });
 $('#saveTxt').addEventListener('click',()=>{
   const s=summary();
@@ -501,7 +501,7 @@ $('#saveTxt').addEventListener('click',()=>{
   ];
   s.steps.forEach((st,i)=> lines.push(`${i+1}) ${st.name} — ${st.duration_s}s — ${st.done?'DONE':'…'}${(st.key==='soap'?' — SOAP: '+(st.soap==='bubbles'?'бульбашки ВИЯВЛЕНО':st.soap==='no-bubbles'?'бульбашок немає':'—'):'')}`));
   lines.push(`--- Точок тиску: ${s.points.length}`);
-  download('gas_para08_startstop_'+stamp()+'.txt', lines.join('\n')); log('Експортовано TXT');
+  download('gas_para8_'+stamp()+'.txt', lines.join('\n')); log('Експортовано TXT');
 });
 $('#print58').addEventListener('click',()=>{
   const s=summary(); const rc=$('#rc'); rc.hidden=false;
