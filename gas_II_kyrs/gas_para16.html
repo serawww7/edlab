@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 16 (газовики) — Гідравлічні режими мережі: інтерактивна схема, попит/регулятор/витоки, графік, тривоги, експорт</title>
+<meta name="description" content="Інтерактивна анімаційна схема ГРМ: вузли/ділянки, регулятор тиску, насос, витоки, засувки, попит, графік P/Q, тривоги, журнал, експорт CSV/TXT."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1300px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.grid{display:grid;gap:14px;grid-template-columns:1.2fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:#e6eef9}
+.btn{border:1px solid var(--line);background:#0f1f39;color:#e6eef9;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+h2{margin:.2em 0 .4em}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:#e5e7eb;margin-right:6px;margin-top:6px}
+.muted{color:var(--muted)}
+svg{width:100%;height:auto;display:block;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+.node{stroke:#94a3b8;fill:#0f172a}
+.edge{stroke:#334155;stroke-width:8;stroke-linecap:round;opacity:.9}
+.valve{stroke:#a3a3a3;fill:#0f172a}
+.grp{stroke:#22c55e;fill:#0b1a2f}
+.pump{stroke:#38bdf8;fill:#0b1220}
+label>small{display:block;color:#94a3b8;margin-top:-2px}
+canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.kpi{display:flex;gap:8px;flex-wrap:wrap}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 10px;color:#e5e7eb}
+.tag.ok{border-color:#1d3e2a;background:#0f2f1e}
+.tag.warn{border-color:#4a3b13;background:#2b2310}
+.tag.bad{border-color:#5a1f1f;background:#2a1212}
+pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;padding:10px}
+.footer{margin-top:20px;color:#94a3b8;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🗺️🌬️</span>
+      <div>
+        <b>Пара 16 — Гідравлічні режими мережі</b><br/>
+        <span class="badge">Схема ГРМ → попит/засувки/витоки → регулятор тиску → графік → тривоги → журнал → експорт</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <div class="card">
+    <h2>📚 Контекст</h2>
+    <p>На схемі нижче — зразкова **локальна мережа низького тиску**: магістраль, відгалуження до трьох районів <b>N1–N3</b>, <b>ГРП</b> зі стабілізацією тиску, <b>насос-підкачка</b> (умовний), три <b>засувки</b> та два потенційні <b>витоки</b>.
+    Задача: керуй <b>попитом</b>, <b>відкриттям засувок</b>, <b>швидкістю насоса</b>, <b>уставкою регулятора</b>, вмикай <b>витоки/аварії</b> — спостерігай за **теплокартою тиску** та **графіком P/Q**. Лови <b>тривоги KPI</b> і збережи результат.</p>
+    <div class="row">
+      <label style="flex:1">Попит базовий, м³/год<input id="dBase" class="input" type="range" min="50" max="600" step="10" value="200"><small>Впливає на всі три райони</small></label>
+      <label style="flex:1">Навантаження N1, %<input id="d1" class="input" type="range" min="50" max="150" step="1" value="100"></label>
+      <label style="flex:1">Навантаження N2, %<input id="d2" class="input" type="range" min="50" max="150" step="1" value="100"></label>
+      <label style="flex:1">Навантаження N3, %<input id="d3" class="input" type="range" min="50" max="150" step="1" value="100"></label>
+    </div>
+    <div class="row">
+      <label style="flex:1">Засувка V1 (до N1), % відкриття<input id="v1" class="input" type="range" min="0" max="100" step="1" value="100"></label>
+      <label style="flex:1">Засувка V2 (до N2), % відкриття<input id="v2" class="input" type="range" min="0" max="100" step="1" value="100"></label>
+      <label style="flex:1">Засувка V3 (до N3), % відкриття<input id="v3" class="input" type="range" min="0" max="100" step="1" value="100"></label>
+    </div>
+    <div class="row">
+      <label style="flex:1">Насос (частота), %<input id="pump" class="input" type="range" min="0" max="120" step="1" value="60"><small>Підвищує тиск у магістралі</small></label>
+      <label style="flex:1">Регулятор: уставка Pout, кПа<input id="sp" class="input" type="number" step="0.5" value="2.0"></label>
+      <label style="flex:1">Регулятор: коеф. Kp<input id="kp" class="input" type="number" step="0.1" value="1.2"></label>
+    </div>
+    <div class="row">
+      <label><input id="leak1" type="checkbox"> Витік L1 біля N2 (~фт)</label>
+      <label><input id="leak2" type="checkbox"> Витік L2 на гілці N3</label>
+      <label><input id="valvTrip" type="checkbox"> Аварія: V2 заклинило (→0%)</label>
+      <label><input id="surge" type="checkbox"> Стрибок попиту (+40% на 20 с)</label>
+    </div>
+    <div class="row">
+      <button class="btn good" id="run">▶️ Старт</button>
+      <button class="btn secondary" id="stop">⏹️ Стоп</button>
+      <button class="btn" id="reset">🔄 Скинути</button>
+      <span class="badge">t = <b id="tSim">0</b> c</span>
+      <span class="badge">Q магістралі: <b id="qMain">—</b> м³/год</span>
+      <span class="badge">Pmin мережі: <b id="pMin">—</b> кПа</span>
+      <span class="badge">Pmax мережі: <b id="pMax">—</b> кПа</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>🗺️ Анімаційна схема мережі</h2>
+      <svg id="net" viewBox="0 0 900 500" role="img" aria-label="Газова мережа">
+        <!-- Магістраль -->
+        <line id="e_main" class="edge" x1="80" y1="250" x2="820" y2="250"/>
+        <!-- Вузли -->
+        <circle id="n_src" class="node" cx="80" cy="250" r="16"/>
+        <rect id="n_grp" class="grp" x="150" y="220" width="60" height="60" rx="8"/>
+        <rect id="n_pump" class="pump" x="240" y="220" width="60" height="60" rx="8"/>
+        <circle id="n_t1" class="node" cx="380" cy="250" r="14"/>
+        <circle id="n_split" class="node" cx="540" cy="250" r="12"/>
+        <!-- Відгалуження -->
+        <line id="e_n1" class="edge" x1="540" y1="250" x2="540" y2="120"/>
+        <line id="e_n2" class="edge" x1="620" y1="250" x2="620" y2="120"/>
+        <line id="e_n3" class="edge" x1="700" y1="250" x2="700" y2="120"/>
+        <!-- Ноди споживачів -->
+        <circle id="n1" class="node" cx="540" cy="100" r="12"/>
+        <circle id="n2" class="node" cx="620" cy="100" r="12"/>
+        <circle id="n3" class="node" cx="700" cy="100" r="12"/>
+        <!-- Засувки -->
+        <rect id="v1_icon" class="valve" x="536" y="170" width="8" height="24" rx="2"/>
+        <rect id="v2_icon" class="valve" x="616" y="170" width="8" height="24" rx="2"/>
+        <rect id="v3_icon" class="valve" x="696" y="170" width="8" height="24" rx="2"/>
+        <!-- Підписи -->
+        <text x="70" y="235" fill="#94a3b8" font-size="12">SRC</text>
+        <text x="154" y="214" fill="#22c55e" font-size="12">ГРП</text>
+        <text x="242" y="214" fill="#38bdf8" font-size="12">PUMP</text>
+        <text x="520" y="268" fill="#94a3b8" font-size="12">N_split</text>
+        <text x="530" y="92" fill="#e5e7eb" font-size="12">N1</text>
+        <text x="610" y="92" fill="#e5e7eb" font-size="12">N2</text>
+        <text x="690" y="92" fill="#e5e7eb" font-size="12">N3</text>
+      </svg>
+
+      <h2 style="margin-top:10px">📈 Графік: P вузлів (кПа) та Q магістралі (м³/год)</h2>
+      <div class="row">
+        <button class="btn" id="mark">📍 Зняти точку</button>
+        <button class="btn secondary" id="clear">🧹 Очистити графік</button>
+      </div>
+      <canvas id="chart" class="chart" width="560" height="240"></canvas>
+    </div>
+
+    <div class="card">
+      <h2>📊 Метрики та KPI</h2>
+      <div class="kpi">
+        <span class="tag ok">KPI Pmin ≥ <b id="kPmin">1.2</b> кПа</span>
+        <span class="tag warn">KPI Pmax ≤ <b id="kPmax">5.0</b> кПа</span>
+        <span class="tag bad">KPI ΔP (розкид) ≤ <b id="kDelta">2.0</b> кПа</span>
+      </div>
+      <table class="tbl" style="margin-top:8px">
+        <tbody>
+          <tr><th>P(N1/N2/N3), кПа</th><td id="pNodes">—</td></tr>
+          <tr><th>Q(N1/N2/N3), м³/год</th><td id="qNodes">—</td></tr>
+          <tr><th>Невиконаний попит, %</th><td id="deficit">—</td></tr>
+          <tr><th>Тривоги</th><td id="alarms">—</td></tr>
+          <tr><th>Статус</th><td id="state"><b class="warn">Очікування</b></td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">🛎️ Журнал</h2>
+      <pre id="alog" class="log">// Поки порожньо</pre>
+
+      <h2 style="margin-top:10px">💾 Експорт</h2>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV (серія P/Q)</button>
+        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Завдання для студентів</h2>
+    <ol>
+      <li>Підбери такий режим <b>насоса</b> і <b>уставку ГРП</b>, щоб при базовому попиті <b>P(N1..N3) ≥ 1.2 кПа</b> та <b>Pmax ≤ 5.0 кПа</b>.</li>
+      <li>Увімкни <b>витік L1</b> і поясни, що зміниться по P та Q. Спробуй компенсувати регулятором/насосом.</li>
+      <li>Симулюй <b>заклинювання V2</b>. Оціни <b>дефіцит %</b> та розкажи, як його мінімізувати.</li>
+      <li>Запусти <b>стрибок попиту</b>. Зроби ≥10 точок графіка та експортуй CSV/TXT.</li>
+    </ol>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+/* ===== Утиліти ===== */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString('uk-UA');const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+$('#upd').textContent=new Date().toLocaleDateString('uk-UA');
+
+/* ===== Параметри KPI ===== */
+const KPI={Pmin:1.2, Pmax:5.0, dP:2.0}; // кПа
+
+/* ===== Мережа (спрощена модель) =====
+Вузли: SRC -> ГРП -> PUMP -> T1 -> SPLIT -> (N1,N2,N3)
+Кожне відгалуження має гідравл. опір R ~ 1/(відкриття засувки)^2.
+P джерела = Pgrp_out (регулятор) + ΔPнасоса. Втрати на магістралі ~ k*Q.
+*/
+let t=0, timer=null;
+const hist=[]; // [{t, P1,P2,P3, Qmain}]
+function state(){
+  const dBase=+$('#dBase').value; // м3/год
+  const d=[+$('#d1').value, +$('#d2').value, +$('#d3').value].map(p=>p/100);
+  const demand=[dBase*d[0], dBase*d[1], dBase*d[2]]; // цільовий попит вузлів
+  const leak1=$('#leak1').checked? 40:0;
+  const leak2=$('#leak2').checked? 30:0;
+  const trip=$('#valvTrip').checked;
+  const surge=$('#surge').checked;
+
+  // відкриття засувок (0..100 %)
+  let v=[+$('#v1').value, +$('#v2').value, +$('#v3').value];
+  if(trip) v[1]=0;
+  // опори гілок (менший відкриття -> більший опір)
+  const R=v.map(x=> 200/Math.max(5,x)**2 ); // умовні одиниці
+
+  // насос і ГРП
+  const sp=+$('#sp').value;     // кПа (уставка виходу ГРП)
+  const kp=+$('#kp').value;     // коеф посилення
+  const pump=+$('#pump').value; // % впливу
+  // базова вихідна P після ГРП (з урахуванням PID-лайт)
+  // Розрахуємо помилку від середнього тиску попереднього кроку (якщо є)
+  const last=hist.at(-1);
+  const PavgLast = last? (last.P1+last.P2+last.P3)/3 : sp;
+  const e = sp - PavgLast;
+  const Pgrp = Math.max(0.5, sp + kp*e*0.4); // обмеження від «провалу» нижче 0.5 кПа
+  const Ppump = pump*0.02; // кПа підйому від насоса (грубо)
+
+  const Psrc = Pgrp + Ppump; // кПа на вході магістралі
+  const kMain = 0.0008;      // втрати на магістралі
+
+  // Розподіл витрат: Q_i = (Psrc - Pnode_i)/R_i; споживання ~ demand_i, витік додає споживання
+  // Підберемо Pnode_i і Qmain через ітерацію (2-3 кроки достатньо для навчального демо)
+  let P = [Psrc*0.9, Psrc*0.88, Psrc*0.86]; // початкове припущення
+  let Q = [0,0,0];
+  let leak=[0, leak1, leak2];
+  const extra = surge? 0.4:0; // +40% попиту на 20с (імітація): реалізуємо через фазу t%40<20
+  const surgeOn = surge && ((t%40)<20);
+  for(let it=0; it<3; it++){
+    for(let i=0;i<3;i++){
+      const Rtot = R[i]+0.001; // не нуль
+      const need = demand[i]*(surgeOn? (1+extra):1);
+      // споживання лімітується гідр. пропускною здатністю: Qcap ~ (Psrc - P[i]) / R
+      // візьмемо P[i] як частку Psrc мінус втрати на магістралі
+      const Qcap = Math.max(0, (Psrc - Math.max(0,P[i])) / Rtot);
+      const take = Math.min(need + leak[i], Qcap);
+      Q[i]=take;
+      // оновимо P[i] від відбору
+      P[i] = Math.max(0, Psrc - (Rtot*take) - kMain*(Q[0]+Q[1]+Q[2]));
+    }
+  }
+  const Qmain = Q[0]+Q[1]+Q[2];
+  return {Psrc,P,Q,Qmain, demand, leaks:[leak1,leak2], sp, kp, pump, v, trip, surgeOn};
+}
+
+/* ===== Малювання схеми: колір по тиску ===== */
+function colorForP(p){ // 0..6 кПа
+  const x=Math.max(0,Math.min(1,p/6));
+  const r=Math.floor(120+135*(1-x)); // червоний → зелений
+  const g=Math.floor(80+160*x);
+  const b=120;
+  return `rgb(${r},${g},${b})`;
+}
+function updateSVG(st){
+  // фарбуємо ребра та ноди по середньому тиску
+  const Pavg = (st.P[0]+st.P[1]+st.P[2])/3;
+  $('#e_main').setAttribute('stroke', colorForP(Pavg));
+  $('#n_t1').setAttribute('fill', colorForP(Pavg));
+  $('#n_split').setAttribute('fill', colorForP(Pavg*0.95));
+  // відгалуження
+  const idsE=['#e_n1','#e_n2','#e_n3'], idsN=['#n1','#n2','#n3'];
+  for(let i=0;i<3;i++){
+    $(idsE[i]).setAttribute('stroke', colorForP(st.P[i]));
+    $(idsN[i]).setAttribute('fill', colorForP(st.P[i]));
+  }
+  // засувки — ширина/нахил по відкриттю
+  const vids=['#v1_icon','#v2_icon','#v3_icon'];
+  st.v.forEach((v,i)=>{ const el=$(vids[i]); el.setAttribute('transform', `rotate(${(100-v)*0.7}, ${parseFloat(el.getAttribute('x'))+4}, ${parseFloat(el.getAttribute('y'))+12})`); el.setAttribute('stroke', v>0? '#a3a3a3':'#f87171'); });
+  // ГРП/насос — «світяться» за активністю
+  $('#n_grp').setAttribute('stroke', st.sp>0? '#22c55e':'#64748b');
+  $('#n_pump').setAttribute('stroke', st.pump>0? '#38bdf8':'#64748b');
+}
+
+/* ===== Графік ===== */
+const chart=$('#chart'), gc=chart.getContext('2d');
+const series={t:[], P1:[], P2:[], P3:[], Qm:[]};
+function drawChart(){
+  const W=chart.width,H=chart.height; gc.clearRect(0,0,W,H);
+  gc.strokeStyle='#223049'; gc.strokeRect(0.5,0.5,W-1,H-1);
+  const left=40,right=W-50,top=24,bottom=H-28;
+  gc.strokeStyle='#1f2a44'; for(let i=0;i<5;i++){ const y=top+i*(bottom-top)/4; gc.beginPath(); gc.moveTo(left,y); gc.lineTo(right,y); gc.stroke(); }
+  if(series.t.length<2){ gc.fillStyle='#94a3b8'; gc.fillText('Натисни «Зняти точку» або запусти симуляцію', left+8, top+14); return; }
+  const n=series.t.length; const tMin=series.t[0], tMax=series.t[n-1], span=(tMax-tMin)||1;
+  const pMax=Math.max(6, ...series.P1, ...series.P2, ...series.P3);
+  const qMax=Math.max(200, ...series.Qm);
+  const X=t=> left + (t-tMin)/span*(right-left);
+  const YP=p=> bottom - (p/pMax)*(bottom-top);
+  const YQ=q=> bottom - (q/qMax)*(bottom-top);
+  // P1,P2,P3
+  [['P1','#38bdf8'],['P2','#22c55e'],['P3','#fbbf24']].forEach(([k,col])=>{
+    gc.beginPath(); gc.strokeStyle=col;
+    series.t.forEach((tt,i)=>{ const x=X(tt), y=YP(series[k][i]); if(i===0) gc.moveTo(x,y); else gc.lineTo(x,y); });
+    gc.stroke();
+  });
+  // Qm
+  gc.beginPath(); gc.strokeStyle='#e879f9';
+  series.t.forEach((tt,i)=>{ const x=X(tt), y=YQ(series.Qm[i]); if(i===0) gc.moveTo(x,y); else gc.lineTo(x,y); });
+  gc.stroke();
+  // легенда
+  gc.fillStyle='#94a3b8'; gc.font='11px ui-monospace';
+  const key=(y,txt,col)=>{ gc.fillStyle=col; gc.fillRect(right+4,y,12,4); gc.fillStyle='#e5e7eb'; gc.fillText(txt,right+20,y+4); };
+  key(top,'P1', '#38bdf8'); key(top+16,'P2','#22c55e'); key(top+32,'P3','#fbbf24'); key(top+48,'Qm','#e879f9');
+}
+
+/* ===== Алгоритм симуляції ===== */
+function step(){
+  t+=1;
+  const st=state();
+  // Метрики й тривоги
+  const Pmin=Math.min(...st.P), Pmax=Math.max(...st.P), dP=Pmax-Pmin;
+  $('#tSim').textContent=t.toString();
+  $('#qMain').textContent=st.Qmain.toFixed(0);
+  $('#pMin').textContent=Pmin.toFixed(2);
+  $('#pMax').textContent=Pmax.toFixed(2);
+  $('#pNodes').textContent=`${st.P[0].toFixed(2)} / ${st.P[1].toFixed(2)} / ${st.P[2].toFixed(2)}`;
+  $('#qNodes').textContent=`${st.Q[0].toFixed(0)} / ${st.Q[1].toFixed(0)} / ${st.Q[2].toFixed(0)}`;
+  // Невиконаний попит
+  const def = st.demand.map((d,i)=> Math.max(0, 1 - st.Q[i]/Math.max(1,d)) );
+  const defPct = (def.reduce((a,b)=>a+b,0)/3)*100;
+  $('#deficit').textContent=defPct.toFixed(1);
+
+  // KPI alarms
+  const alarms=[];
+  if(Pmin<KPI.Pmin) alarms.push(`Pmin ${Pmin.toFixed(2)}<${KPI.Pmin}`);
+  if(Pmax>KPI.Pmax) alarms.push(`Pmax ${Pmax.toFixed(2)}>${KPI.Pmax}`);
+  if(dP>KPI.dP)     alarms.push(`ΔP ${dP.toFixed(2)}>${KPI.dP}`);
+  if(st.v[1]===0 && $('#valvTrip').checked) alarms.push('V2 заклинюв. 0%');
+  if($('#leak1').checked) alarms.push(`Витік L1 ${st.leaks[0]} м³/год`);
+  if($('#leak2').checked) alarms.push(`Витік L2 ${st.leaks[1]} м³/год`);
+  $('#alarms').textContent = alarms.length? alarms.join(', ') : '—';
+  $('#state').innerHTML = alarms.length? `<b class="bad">Аварійні відхилення</b>` :
+                         defPct>5? `<b class="warn">Є дефіцит постачання</b>` :
+                                   `<b class="ok">Режим стабільний</b>`;
+
+  // Відмальовка
+  updateSVG(st);
+
+  // Лог (короткий)
+  if(t%5===0) log(`t=${t}s P=${st.P.map(x=>x.toFixed(2)).join('/')} кПа Qm=${st.Qmain.toFixed(0)} м3/год`);
+
+  // Автозбір точки на графік
+  series.t.push(t); series.P1.push(st.P[0]); series.P2.push(st.P[1]); series.P3.push(st.P[2]); series.Qm.push(st.Qmain);
+  if(series.t.length>240){ ['t','P1','P2','P3','Qm'].forEach(k=>series[k].shift()); }
+  drawChart();
+}
+
+/* ===== Кнопки керування ===== */
+$('#run').addEventListener('click',()=>{ if(timer) return; timer=setInterval(step,1000); log('Симуляцію запущено'); });
+$('#stop').addEventListener('click',()=>{ if(timer){ clearInterval(timer); timer=null; log('Симуляцію зупинено'); }});
+$('#reset').addEventListener('click',()=>{ t=0; if(timer){clearInterval(timer); timer=null;} ['t','P1','P2','P3','Qm'].forEach(k=>series[k]=[]); drawChart(); log('Скидання'); });
+
+$('#mark').addEventListener('click',()=>{ step(); });
+$('#clear').addEventListener('click',()=>{ ['t','P1','P2','P3','Qm'].forEach(k=>series[k]=[]); drawChart(); log('Графік очищено'); });
+
+/* ===== Експорт ===== */
+function summary(){
+  return {
+    time:t,
+    lastP: series.t.length? {P1:series.P1.at(-1),P2:series.P2.at(-1),P3:series.P3.at(-1)} : null,
+    points: series.t.length,
+    kpi: KPI,
+    controls:{
+      dBase:+$('#dBase').value, d1:+$('#d1').value, d2:+$('#d2').value, d3:+$('#d3').value,
+      v1:+$('#v1').value, v2:+$('#v2').value, v3:+$('#v3').value,
+      pump:+$('#pump').value, sp:+$('#sp').value, kp:+$('#kp').value,
+      leak1:$('#leak1').checked, leak2:$('#leak2').checked, trip:$('#valvTrip').checked, surge:$('#surge').checked
+    }
+  };
+}
+$('#saveCsv').addEventListener('click',()=>{
+  let csv='t_s,P1_kPa,P2_kPa,P3_kPa,Qmain_m3h\n';
+  series.t.forEach((tt,i)=>{ csv+=`${tt},${series.P1[i].toFixed(3)},${series.P2[i].toFixed(3)},${series.P3[i].toFixed(3)},${series.Qm[i].toFixed(1)}\n`;});
+  download('gas_para16_hydraulics_'+stamp()+'.csv', csv, 'text/csv'); log('CSV збережено');
+});
+$('#saveTxt').addEventListener('click',()=>{
+  const s=summary();
+  const lines=[
+    'Пара 16 — Гідравлічні режими мережі: підсумок',
+    `Час моделювання: ${s.time} c`,
+    `Точок серії: ${s.points}`,
+    `Останні P (кПа): ${s.lastP? `${s.lastP.P1.toFixed(2)} / ${s.lastP.P2.toFixed(2)} / ${s.lastP.P3.toFixed(2)}`:'—'}`,
+    `KPI: Pmin≥${KPI.Pmin}, Pmax≤${KPI.Pmax}, ΔP≤${KPI.dP}`,
+    `Керування: ${JSON.stringify(s.controls).replace(/,/g,', ')}`,
+  ];
+  download('gas_para16_summary_'+stamp()+'.txt', lines.join('\n')); log('TXT збережено');
+});
+
+/* ===== Ініт ===== */
+drawChart(); updateSVG({P:[2,2,2], v:[100,100,100], sp:2, pump:60});
+log('Готово. Запускай симуляцію або знімай точки вручну.');
+</script>
+</body>
+</html>
