@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 19 (газовики) — Комерційний облік: профілі навантаження, агрегація, піки, ліміти</title>
+<meta name="description" content="Погодинні профілі вузлів, групування, контрактні ліміти (добовий обсяг та погодинний пік), алерти, графіки (профіль/піки/кумулятив), теплокарта, експорт CSV/TXT."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1320px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.grid{display:grid;gap:14px;grid-template-columns:1.25fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:#e6eef9}
+textarea{min-height:100px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:#e6eef9;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+h2{margin:.2em 0 .4em}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:#e5e7eb;margin-right:6px;margin-top:6px}
+.muted{color:var(--muted)}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+canvas.map{display:block;width:100%;height:240px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;padding:10px}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 10px;color:#e5e7eb}
+.tag.ok{border-color:#1d3e2a;background:#0f2f1e}
+.tag.warn{border-color:#4a3b13;background:#2b2310}
+.tag.bad{border-color:#5a1f1f;background:#2a1212}
+.footer{margin-top:20px;color:#94a3b8;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">📈⛽</span>
+      <div>
+        <b>Пара 19 — Комерційний облік</b><br/>
+        <span class="badge">Профілі (год) → агрегація → піки → ліміти (Vday/Pmax) → алерти → графіки → експорт</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <div class="card">
+    <h2>📚 Контекст</h2>
+    <p>Працюємо з <b>погодинними профілями</b> вузлів (лічильники/ТП). Агрегуємо по <b>групах</b> (Feeder/Район) і контролюємо <b>контрактні ліміти</b>:
+      <b>V<sub>day</sub></b> (добовий обсяг, тис. м³) та <b>P<sub>max</sub></b> (погодинний пік, м³/год). При порушеннях — <b>алерти</b>. Задача: навчитися читати профілі, 
+      прогнозувати піки та пояснювати перевищення.</p>
+    <div class="row">
+      <label>Дата профілю <input id="day" class="input" type="date"></label>
+      <label>Група/фідер <input id="group" class="input" placeholder="Feeder-A / Район-1"></label>
+      <label>Вузол (ID) <input id="node" class="input" placeholder="MTR-0001"></label>
+      <label>Базове навантаження, м³/год <input id="base" class="input" type="number" step="1" value="400"></label>
+      <label>Ампл. піків, % <input id="amp" class="input" type="number" step="1" value="45"></label>
+      <button class="btn" id="gen">🧪 Згенерувати 24 точки</button>
+      <button class="btn secondary" id="add">➕ Додати профіль</button>
+      <button class="btn" id="clr">🧹 Очистити все</button>
+    </div>
+    <textarea id="txt" placeholder="Формат рядка: HH; m3_per_hour (наприклад 00; 320)
+00; 320
+01; 300
+...
+23; 410"></textarea>
+
+    <div class="row" style="margin-top:6px">
+      <label>Ліміт добовий Vday, тис. м³ <input id="limDay" class="input" type="number" step="0.1" value="9.5"></label>
+      <label>Ліміт погодинний Pmax, м³/год <input id="limMax" class="input" type="number" step="10" value="580"></label>
+      <button class="btn good" id="applyLim">⚙️ Застосувати ліміти</button>
+      <span class="badge">Σвузлів: <b id="nNodes">0</b></span>
+      <span class="badge">Σгруп: <b id="nGroups">0</b></span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>📈 Графік 1 — Сукупний профіль (м³/год)</h2>
+      <div class="row">
+        <label>Показати групу
+          <select id="selGroup" class="input"></select>
+        </label>
+        <label>Лінія Pmax (вкл) <input id="shPmax" type="checkbox" checked></label>
+        <label>Лінія середнього <input id="shAvg" type="checkbox" checked></label>
+        <button class="btn" id="mark">📍 Зняти точку</button>
+        <button class="btn secondary" id="clear">🧹 Очистити графік</button>
+      </div>
+      <canvas id="cMain" class="chart" width="560" height="240"></canvas>
+
+      <h2 style="margin-top:10px">📊 Гістограма піків (м³/год)</h2>
+      <canvas id="cHist" class="chart" width="560" height="240"></canvas>
+
+      <h2 style="margin-top:10px">📈 Кумулятив доби vs ліміт (тис. м³)</h2>
+      <canvas id="cCum" class="chart" width="560" height="240"></canvas>
+    </div>
+
+    <div class="card">
+      <h2>📊 Метрики / алерти / теплокарта</h2>
+      <div class="row">
+        <span class="tag ok">ΣV<sub>day</sub>: <b id="mDay">—</b> тис. м³</span>
+        <span class="tag warn">P<sub>max</sub> факт: <b id="mPmax">—</b> м³/год</span>
+        <span class="tag bad">Порушення: <b id="mViol">0</b></span>
+      </div>
+
+      <table class="tbl" style="margin-top:8px">
+        <thead><tr><th>#</th><th>Дата</th><th>Група</th><th>Вузол</th><th>Pmax</th><th>ΣVday</th><th>Статус</th></tr></thead>
+        <tbody id="tbl"><tr><td colspan="7" class="muted">— ще порожньо —</td></tr></tbody>
+      </table>
+
+      <h3 style="margin-top:10px">🗺️ Теплокарта годин (завантаження)</h3>
+      <canvas id="cHeat" class="map" width="520" height="240"></canvas>
+
+      <h3 style="margin-top:10px">🛎️ Журнал</h3>
+      <pre id="alog" class="log">// Поки без подій</pre>
+
+      <h3 style="margin-top:10px">💾 Експорт</h3>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV (вузли + сумарний профіль)</button>
+        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Завдання для студентів</h2>
+    <ol>
+      <li>Створи 2–3 вузли в різних групах. Досягни ситуації, коли <b>сума Vday</b> у вибраній групі <b>майже дорівнює</b> ліміту (без перевищення).</li>
+      <li>Знайди години, де сукупний профіль перевищує <b>Pmax</b>. Запропонуй 2 способи зниження піку (технічні/організаційні).</li>
+      <li>Збудуй <b>гістограму піків</b> та поясни «довгий хвіст». Зроби висновок щодо доцільності збільшення Pmax.</li>
+      <li>Експортуй CSV/TXT і підготуй коротке резюме для договору постачання (ризик перевищень, рекомендації).</li>
+    </ol>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+/* ===== Утиліти ===== */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString('uk-UA');const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+$('#upd').textContent=new Date().toLocaleDateString('uk-UA');
+(function(){ const d=new Date(); $('#day').value=d.toISOString().slice(0,10); })();
+
+/* ===== Сховище профілів ===== */
+let PROFILES=[]; // {date, group, node, vals[24], sum, pmax}
+let LIMITS={Vday:9.5, Pmax:580}; // Vday тис. м3, Pmax м3/год
+let SERIES={t:[], Y:[]}; // для графіка сукупного профілю (вибрана група)
+
+/* ===== Генерація/Парсинг ===== */
+function gen24(base, amp){
+  // денна форма: ранковий та вечірній піки + шум
+  const out=[];
+  for(let h=0;h<24;h++){
+    const morning = Math.max(0, Math.sin((h-7)/3));   // ~7-10
+    const evening = Math.max(0, Math.sin((h-19)/3));  // ~19-22
+    const val = base * (0.65 + 0.35*morning + 0.45*evening) * (1 + (amp/100)*(Math.random()*0.2-0.1));
+    out.push(Math.round(val));
+  }
+  return out;
+}
+function parseText(txt){
+  const rows = txt.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+  if(rows.length!==24) return null;
+  const vals=[];
+  for(const line of rows){
+    const m=line.match(/^(\d{2});\s*([0-9]+(?:\.[0-9]+)?)$/);
+    if(!m) return null;
+    const h=parseInt(m[1]); const v=+m[2];
+    if(h<0||h>23||!Number.isFinite(v)) return null;
+    vals[h]=Math.round(v);
+  }
+  return vals;
+}
+
+/* ===== Додавання профілю ===== */
+function recalc(p){
+  p.sum = p.vals.reduce((a,b)=>a+b,0)/1000; // тис. м3 за добу
+  p.pmax = Math.max(...p.vals);
+}
+function addProfile(date, group, node, vals){
+  const p={date, group, node, vals:vals.slice(), sum:0, pmax:0}; recalc(p);
+  PROFILES.push(p);
+  log(`Додано профіль: ${date} ${group}/${node}, Σ=${p.sum.toFixed(3)} тис.м³, Pmax=${p.pmax} м³/год`);
+  refreshGroups(); refreshTable(); redrawAll();
+}
+$('#gen').addEventListener('click',()=>{
+  const vals=gen24( +$('#base').value||400, +$('#amp').value||40 );
+  $('#txt').value = vals.map((v,h)=>`${String(h).padStart(2,'0')}; ${v}`).join('\n');
+});
+$('#add').addEventListener('click',()=>{
+  const date=$('#day').value||'—', group=($('#group').value||'—').trim(), node=($('#node').value||'—').trim();
+  const vals=parseText($('#txt').value);
+  if(!group||!node||!vals){ alert('Заповни групу/вузол і 24 рядки формату HH; value'); return; }
+  addProfile(date, group, node, vals);
+});
+$('#clr').addEventListener('click',()=>{ PROFILES=[]; SERIES={t:[],Y:[]}; refreshGroups(); refreshTable(); redrawAll(); log('Очищено'); });
+
+/* ===== Ліміти ===== */
+$('#applyLim').addEventListener('click',()=>{
+  LIMITS.Vday = Math.max(0.1, parseFloat($('#limDay').value)||LIMITS.Vday);
+  LIMITS.Pmax = Math.max(1, parseFloat($('#limMax').value)||LIMITS.Pmax);
+  log(`Ліміти: Vday=${LIMITS.Vday} тис.м³; Pmax=${LIMITS.Pmax} м³/год`); redrawAll();
+});
+
+/* ===== Агрегація по групі ===== */
+function groups(){ return [...new Set(PROFILES.map(p=>p.group))]; }
+function refreshGroups(){
+  const gSel=$('#selGroup'); const gs=groups();
+  gSel.innerHTML = gs.length? gs.map(g=>`<option>${g}</option>`).join('') : `<option>(всі)</option>`;
+  $('#nNodes').textContent=String(PROFILES.length);
+  $('#nGroups').textContent=String(gs.length);
+}
+$('#selGroup').addEventListener('change', redrawAll);
+
+/* ===== Розрахунки сумарного профілю, піків, кумулятиву ===== */
+function buildAggregate(group=null){
+  // сумуємо по 24 годинах серед усіх вузлів у групі (або по всіх)
+  const hours=new Array(24).fill(0);
+  const filter = group? PROFILES.filter(p=>p.group===group) : PROFILES.slice();
+  filter.forEach(p=>{ for(let h=0;h<24;h++) hours[h]+=p.vals[h]; });
+  const sDay = hours.reduce((a,b)=>a+b,0)/1000; // тис.м3
+  const pMax = Math.max(...hours);
+  return {hours, sDay, pMax, count:filter.length};
+}
+
+/* ===== Графік 1: сукупний профіль ===== */
+const cMain=$('#cMain'), g1=cMain.getContext('2d');
+function drawMain(series, showAvg=true, showPmax=true){
+  const W=cMain.width,H=cMain.height; g1.clearRect(0,0,W,H);
+  g1.strokeStyle='#223049'; g1.strokeRect(0.5,0.5,W-1,H-1);
+  const left=40,right=W-10,top=20,bottom=H-26;
+  // сітка
+  g1.strokeStyle='#1f2a44'; for(let i=0;i<=4;i++){ const y=top+i*(bottom-top)/4; g1.beginPath(); g1.moveTo(left,y); g1.lineTo(right,y); g1.stroke(); }
+  if(series.length===0){ g1.fillStyle='#94a3b8'; g1.fillText('Додай 1+ профілів', left+8, top+14); return; }
+  const max=Math.max(LIMITS.Pmax, ...series);
+  const X=i=> left + i/23*(right-left);
+  const Y=v=> bottom - (v/max)*(bottom-top);
+  // крива
+  g1.beginPath(); g1.strokeStyle='#38bdf8';
+  series.forEach((v,i)=>{ const x=X(i), y=Y(v); if(i===0) g1.moveTo(x,y); else g1.lineTo(x,y); });
+  g1.stroke();
+  // середнє
+  if(showAvg){ const avg=series.reduce((a,b)=>a+b,0)/Math.max(1,series.length);
+    g1.strokeStyle='#22c55e'; const y=Y(avg); g1.beginPath(); g1.moveTo(left,y); g1.lineTo(right,y); g1.stroke();
+    g1.fillStyle='#e5e7eb'; g1.font='11px ui-monospace'; g1.fillText('Avg', right-34, y-4);
+  }
+  // ліміт Pmax
+  if(showPmax){ const y=Y(LIMITS.Pmax); g1.strokeStyle='#fbbf24'; g1.beginPath(); g1.moveTo(left,y); g1.lineTo(right,y); g1.stroke();
+    g1.fillStyle='#e5e7eb'; g1.font='11px ui-monospace'; g1.fillText('Pmax', right-44, y-4);
+  }
+}
+
+/* ===== Гістограма піків ===== */
+const cHist=$('#cHist'), g2=cHist.getContext('2d');
+function drawHist(series){
+  const W=cHist.width,H=cHist.height; g2.clearRect(0,0,W,H);
+  g2.strokeStyle='#223049'; g2.strokeRect(0.5,0.5,W-1,H-1);
+  const left=40,right=W-10,top=20,bottom=H-26;
+  if(series.length===0){ g2.fillStyle='#94a3b8'; g2.fillText('Немає даних', left+8, top+14); return; }
+  const max=Math.max(...series); const bins=10, bw=(right-left)/bins;
+  const step=Math.ceil(max/bins); const hist=new Array(bins).fill(0);
+  series.forEach(v=>{ const i=Math.min(bins-1, Math.floor(v/step)); hist[i]++; });
+  const hMax=Math.max(1, ...hist);
+  // сітка
+  g2.strokeStyle='#1f2a44'; for(let i=0;i<=4;i++){ const y=top+i*(bottom-top)/4; g2.beginPath(); g2.moveTo(left,y); g2.lineTo(right,y); g2.stroke(); }
+  // стовпчики
+  hist.forEach((c,i)=>{
+    const x=left+i*bw+4; const h=(c/hMax)*(bottom-top);
+    g2.fillStyle='#22c55e'; g2.fillRect(x, bottom-h, bw-8, h);
+  });
+  g2.fillStyle='#e5e7eb'; g2.font='11px ui-monospace';
+  g2.fillText(`Крок ~ ${step} м³/год`, right-120, top+12);
+}
+
+/* ===== Кумулятив доби ===== */
+const cCum=$('#cCum'), g3=cCum.getContext('2d');
+function drawCum(series){
+  const W=cCum.width,H=cCum.height; g3.clearRect(0,0,W,H);
+  g3.strokeStyle='#223049'; g3.strokeRect(0.5,0.5,W-1,H-1);
+  const left=40,right=W-10,top=20,bottom=H-26;
+  if(series.length===0){ g3.fillStyle='#94a3b8'; g3.fillText('Немає даних', left+8, top+14); return; }
+  // переводимо у тис.м3, інтегруючи годинні витрати (м3/год) → сума/1000
+  const cum=[]; let s=0; for(let h=0;h<24;h++){ s+=series[h]; cum[h]=s/1000; }
+  const max=Math.max(LIMITS.Vday, ...cum);
+  const X=i=> left + i/23*(right-left);
+  const Y=v=> bottom - (v/max)*(bottom-top);
+  g3.beginPath(); g3.strokeStyle='#38bdf8';
+  cum.forEach((v,i)=>{ const x=X(i), y=Y(v); if(i===0) g3.moveTo(x,y); else g3.lineTo(x,y); }); g3.stroke();
+  // Vday
+  const y=Y(LIMITS.Vday); g3.strokeStyle='#fbbf24'; g3.beginPath(); g3.moveTo(left,y); g3.lineTo(right,y); g3.stroke();
+  g3.fillStyle='#e5e7eb'; g3.font='11px ui-monospace'; g3.fillText('Vday', right-44, y-4);
+}
+
+/* ===== Теплокарта годин × групи ===== */
+const cHeat=$('#cHeat'), gh=cHeat.getContext('2d');
+function drawHeat(){
+  const W=cHeat.width,H=cHeat.height; gh.clearRect(0,0,W,H);
+  gh.strokeStyle='#223049'; gh.strokeRect(0.5,0.5,W-1,H-1);
+  const gs=groups(); const ROWS=gs.length, COLS=24;
+  if(ROWS===0){ gh.fillStyle='#94a3b8'; gh.fillText('Додай групи — з’явиться теплокарта', 16, 20); return; }
+  const cellW=(W-80)/COLS, cellH=(H-40)/ROWS;
+  // max по всіх групах (для нормування кольору)
+  let max=1; gs.forEach(g=>{ const a=buildAggregate(g).hours; a.forEach(v=>{ if(v>max) max=v;}); });
+  // підписи
+  gh.fillStyle='#94a3b8'; gh.font='11px ui-monospace'; gh.fillText('години →', 80, 16);
+  // клітини
+  gs.forEach((g,i)=>{
+    const a=buildAggregate(g).hours;
+    for(let h=0;h<24;h++){
+      const x=80+h*cellW, y=24+i*cellH;
+      const t=a[h]/max; const r=Math.floor(80+150*t), gg=Math.floor(100+120*t), b=120;
+      gh.fillStyle=`rgb(${r},${gg},${b})`; gh.fillRect(x,y,cellW-1,cellH-1);
+    }
+    gh.fillStyle='#e5e7eb'; gh.fillText(g, 8, 24+i*cellH+Math.min(cellH-6,14));
+  });
+}
+
+/* ===== Таблиця/метрики/алерти ===== */
+function refreshTable(){
+  const tb=$('#tbl'); tb.innerHTML='';
+  if(PROFILES.length===0){ tb.innerHTML='<tr><td colspan="7" class="muted">— ще порожньо —</td></tr>'; return; }
+  const rows=PROFILES.slice().sort((a,b)=> (a.group.localeCompare(b.group) || a.node.localeCompare(b.node)) );
+  let viol=0, sDayTot=0, pMaxTot=0;
+  rows.forEach((p,i)=>{
+    const vdayOk = p.sum <= LIMITS.Vday;
+    const pmaxOk = p.pmax <= LIMITS.Pmax;
+    const st = vdayOk && pmaxOk? '<b class="ok">OK</b>' : (vdayOk||pmaxOk? '<b class="warn">Майже ліміт</b>' : '<b class="bad">Перевищення</b>');
+    if(!vdayOk||!pmaxOk) viol++;
+    sDayTot+=p.sum; pMaxTot=Math.max(pMaxTot,p.pmax);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td>${p.date}</td><td>${p.group}</td><td>${p.node}</td><td>${p.pmax}</td><td>${p.sum.toFixed(3)}</td><td>${st}</td>`;
+    tb.appendChild(tr);
+  });
+  $('#mViol').textContent=viol.toString();
+  $('#mDay').textContent=sDayTot.toFixed(3);
+  $('#mPmax').textContent=pMaxTot.toFixed(0);
+}
+
+/* ===== Зведений рендер ===== */
+function redrawAll(){
+  const gSel=$('#selGroup').value || null;
+  const agg = buildAggregate(groups().includes(gSel)? gSel : null);
+  SERIES.Y = agg.hours; SERIES.t=[...Array(24).keys()];
+  drawMain(SERIES.Y, $('#shAvg').checked, $('#shPmax').checked);
+  drawHist(SERIES.Y);
+  drawCum(SERIES.Y);
+  drawHeat();
+  refreshTable();
+}
+$('#shPmax').addEventListener('change', ()=>drawMain(SERIES.Y, $('#shAvg').checked, $('#shPmax').checked));
+$('#shAvg').addEventListener('change', ()=>drawMain(SERIES.Y, $('#shAvg').checked, $('#shPmax').checked));
+
+/* ===== Кнопки графіка ===== */
+$('#mark').addEventListener('click', ()=>{
+  // «Марка» = ще одна точка історії графіка — для простоти просто перерахунок і лог
+  if(SERIES.Y.length){ const pmax=Math.max(...SERIES.Y); const day=SERIES.Y.reduce((a,b)=>a+b,0)/1000;
+    log(`Маркер: Pmax=${pmax} м³/год; ΣVday=${day.toFixed(3)} тис.м³`); }
+});
+$('#clear').addEventListener('click', ()=>{ SERIES={t:[],Y:[]}; drawMain([],true,true); drawHist([]); drawCum([]); log('Графіки очищено'); });
+
+/* ===== Експорт ===== */
+$('#saveCsv').addEventListener('click',()=>{
+  let csv='date,group,node,hour,value_m3ph,sum_km3,pmax_m3ph\n';
+  PROFILES.forEach(p=>{
+    for(let h=0;h<24;h++){ csv+=`${p.date},${p.group},${p.node},${String(h).padStart(2,'0')},${p.vals[h]},, \n`; }
+    csv+=`,,,Σ, ,${p.sum.toFixed(3)},${p.pmax}\n`;
+  });
+  // додамо сукупний профіль вибраної групи
+  const gSel=$('#selGroup').value || '';
+  const agg=buildAggregate(groups().includes(gSel)? gSel : null);
+  csv+='\n# aggregate\nhour,value_m3ph\n';
+  agg.hours.forEach((v,h)=>{ csv+=`${String(h).padStart(2,'0')},${v}\n`; });
+  download('gas_para19_profiles_'+stamp()+'.csv', csv, 'text/csv'); log('CSV збережено');
+});
+$('#saveTxt').addEventListener('click',()=>{
+  const gSel=$('#selGroup').value || null;
+  const agg=buildAggregate(groups().includes(gSel)? gSel : null);
+  const lines=[
+    'Пара 19 — Комерційний облік: підсумок',
+    `Профілі: ${PROFILES.length}, груп: ${groups().length}`,
+    `Ліміти: Vday=${LIMITS.Vday} тис.м³; Pmax=${LIMITS.Pmax} м³/год`,
+    `ΣVday(агр): ${agg.sDay.toFixed(3)} тис.м³; Pmax(агр): ${agg.pMax} м³/год; вузлів у виборі: ${agg.count}`,
+    `Порушення загалом: ${$('#mViol').textContent}`
+  ];
+  download('gas_para19_summary_'+stamp()+'.txt', lines.join('\n')); log('TXT збережено');
+});
+
+/* ===== Ініт ===== */
+refreshGroups(); redrawAll();
+</script>
+</body>
+</html>
