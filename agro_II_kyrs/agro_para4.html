@@ -1,12 +1,9 @@
 <!-- ПАРА 4 (дистанційно) для агрономів
      Тема: Погода для агронома — сума активних температур (GDD), опади, «вікна робіт»
      Фокус: максимум телефону. Учні вносять дані з будь-якого погодного застосунку вручну.
-     Усе локально, без інтернет-запитів. Готово для GitHub Pages / iFrame у Moodle. -->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+     Усе локально, без інтернет-запитів. Готово для GitHub Pages / iFrame у Moodle. --><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 4 — Погода: GDD, опади, вікна для робіт</title>
 <meta name="color-scheme" content="light dark">
 <style>
@@ -62,7 +59,7 @@
     .no-print{ display:none !important }
   }
 </style>
-</head>
+<meta name="description" content="Навчити студентів з телефону швидко знімати числа з погодного застосунку, рахувати GDD (сума активних температур), заносити опади/вітер і визначати «вікна»"><link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para4.html"><meta property="og:type" content="article"><meta property="og:title" content="🌦️ Погода для агронома: GDD (сума активних температур), опади і «вікна робіт»"><meta property="og:description" content="Навчити студентів з телефону швидко знімати числа з погодного застосунку, рахувати GDD (сума активних температур), заносити опади/вітер і визначати «вікна»"><meta property="og:url" content="https://edlab.pp.ua/agro_II_kyrs/agro_para4.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🌦️ Погода для агронома: GDD (сума активних температур), опади і «вікна робіт»","description":"Навчити студентів з телефону швидко знімати числа з погодного застосунку, рахувати GDD (сума активних температур), заносити опади/вітер і визначати «вікна»","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/agro_II_kyrs/agro_para4.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Пара 4 · дистанційно · агрономи</span>
@@ -75,9 +72,9 @@
         заносити опади/вітер і <b>визначати «вікна» для робіт</b> (обприскування, висів, внесення). Уся аналітика — локально в цій сторінці.
       </p>
       <div class="grid g3">
-        <div class="box"><b>📱 Джерело</b><br/>Будь-який погодний ап (дані вводимо вручну).</div>
-        <div class="box"><b>🧮 Розрахунок</b><br/>GDD за формулою <span class="small mono">(Tmax+Tmin)/2 − база</span>, не нижче нуля.</div>
-        <div class="box"><b>🪟 Рішення</b><br/>Авто-підсвітка днів, де погодні умови в нормі для робіт.</div>
+        <div class="box"><b>📱 Джерело</b><br>Будь-який погодний ап (дані вводимо вручну).</div>
+        <div class="box"><b>🧮 Розрахунок</b><br>GDD за формулою <span class="small mono">(Tmax+Tmin)/2 − база</span>, не нижче нуля.</div>
+        <div class="box"><b>🪟 Рішення</b><br>Авто-підсвітка днів, де погодні умови в нормі для робіт.</div>
       </div>
     </div>
 
@@ -98,11 +95,11 @@
       <div class="grid g2">
         <div class="box">
           <h3>Параметри</h3>
-          <div class="field"><label for="crop">Культура</label><input id="crop" type="text" value="Пшениця озима" /></div>
-          <div class="field"><label for="base">Базова t° (°C)</label><input id="base" type="number" step="0.1" value="5" /></div>
-          <div class="field"><label for="gddTarget">Мета GDD (етап)</label><input id="gddTarget" type="number" step="1" value="120" /></div>
-          <div class="field"><label for="rainMax">Макс. опади (мм/доба)</label><input id="rainMax" type="number" step="0.1" value="1.0" /></div>
-          <div class="field"><label for="windMax">Макс. вітер (м/с)</label><input id="windMax" type="number" step="0.1" value="4.5" /></div>
+          <div class="field"><label for="crop">Культура</label><input id="crop" type="text" value="Пшениця озима"></div>
+          <div class="field"><label for="base">Базова t° (°C)</label><input id="base" type="number" step="0.1" value="5"></div>
+          <div class="field"><label for="gddTarget">Мета GDD (етап)</label><input id="gddTarget" type="number" step="1" value="120"></div>
+          <div class="field"><label for="rainMax">Макс. опади (мм/доба)</label><input id="rainMax" type="number" step="0.1" value="1.0"></div>
+          <div class="field"><label for="windMax">Макс. вітер (м/с)</label><input id="windMax" type="number" step="0.1" value="4.5"></div>
           <div class="row"><button class="btn" type="button" onclick="recalcAll()">🔁 Перерахувати</button></div>
           <p class="small">Рекомендація: база 5°C для озимих, 10°C для кукурудзи/соняшнику тощо.</p>
         </div>
@@ -316,5 +313,6 @@
   // ініціалізація
   recalcAll();
 </script>
-</body>
-</html>
+
+
+</body></html>

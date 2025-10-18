@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 17 (механіки) — Arduino: тензодатчик натягу ременя (HX711) + SLIP% тригери</title>
-<meta name="description" content="Тензоміст + HX711: калібрування 2-точки, вимір натягу (Н/кгс), EMA-фільтр, живий графік, алерти за натягом і SLIP%, експорт CSV/TXT/квиток 58 мм, генератор прошивки (.ino)."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Тензоміст + HX711: калібрування 2-точки, вимір натягу (Н/кгс), EMA-фільтр, живий графік, алерти за натягом і SLIP%, експорт CSV/TXT/квиток 58 мм, генератор прошивки (.ino).">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -38,14 +36,14 @@ canvas{display:block;width:100%;height:260px}
 .receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
 kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/mech_II_kyrs/mechanic_para17.html"><meta property="og:type" content="article"><meta property="og:title" content="Механізація — Пара 17"><meta property="og:description" content="Мета: зібрати вимірювач натягу ременя на тензомості + HX711, відкалібрувати «нуль» та «еталон», отримати натяг у Н (або кгс), візуалізувати живий графік, в"><meta property="og:url" content="https://edlab.pp.ua/mech_II_kyrs/mechanic_para17.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Механізація — Пара 17","description":"Мета: зібрати вимірювач натягу ременя на тензомості + HX711, відкалібрувати «нуль» та «еталон», отримати натяг у Н (або кгс), візуалізувати живий графік, в","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/mech_II_kyrs/mechanic_para17.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧰</span>
       <div>
-        <b>Пара 17 — Arduino: тензонатяг ременя (HX711)</b><br/>
+        <b>Пара 17 — Arduino: тензонатяг ременя (HX711)</b><br>
         <span class="badge">калібрування → Н/кгс → EMA → графік → тригери (натяг/SLIP%) → експорт</span>
       </div>
     </div>
@@ -63,22 +61,22 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div style="flex:1">
         <label>Піни HX711</label>
         <div class="row">
-          <label>DT <input id="dt" class="input" type="number" min="2" max="13" value="3"/></label>
-          <label>SCK <input id="sck" class="input" type="number" min="2" max="13" value="2"/></label>
-          <label>Канал <select id="chan" class="input"><option value="128" selected>A (gain128)</option><option value="64">A (gain64)</option><option value="32">B (gain32)</option></select></label>
+          <label>DT <input id="dt" class="input" type="number" min="2" max="13" value="3"></label>
+          <label>SCK <input id="sck" class="input" type="number" min="2" max="13" value="2"></label>
+          <label>Канал <select id="chan" class="input"><option value="128" selected="">A (gain128)</option><option value="64">A (gain64)</option><option value="32">B (gain32)</option></select></label>
         </div>
       </div>
       <div style="flex:1">
         <label>Одиниці</label>
-        <select id="units" class="input"><option value="N" selected>Н (Ньютони)</option><option value="kgf">кгс</option></select>
+        <select id="units" class="input"><option value="N" selected="">Н (Ньютони)</option><option value="kgf">кгс</option></select>
       </div>
       <div style="flex:1">
         <label>EMA згладжування α (0..1)</label>
-        <input id="alpha" class="input" type="number" min="0" max="1" step="0.05" value="0.25"/>
+        <input id="alpha" class="input" type="number" min="0" max="1" step="0.05" value="0.25">
       </div>
       <div style="flex:1">
         <label>Період зчитування, мс</label>
-        <input id="period" class="input" type="number" min="50" step="10" value="100"/>
+        <input id="period" class="input" type="number" min="50" step="10" value="100">
       </div>
     </div>
 
@@ -87,7 +85,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <label>Калібрування</label>
         <div class="row">
           <button class="btn" id="calZero">⚖️ Записати «нуль»</button>
-          <input id="calMass" class="input" type="number" step="0.1" value="10" title="Маса еталону в кг"/>
+          <input id="calMass" class="input" type="number" step="0.1" value="10" title="Маса еталону в кг">
           <button class="btn secondary" id="calRef">🏋️ Записати «еталон»</button>
         </div>
         <small class="muted">Алгоритм: <span class="mono">scale = (Fref)/(rawRef - rawZero)</span>, де <span class="mono">Fref = m*g</span> (для кгс — <span class="mono">Fref = m</span>).</small>
@@ -95,15 +93,15 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div style="flex:1">
         <label>Діапазон робочого натягу, Н</label>
         <div class="row">
-          <label>Min <input id="tmin" class="input" type="number" step="1" value="120"/></label>
-          <label>Max <input id="tmax" class="input" type="number" step="1" value="250"/></label>
+          <label>Min <input id="tmin" class="input" type="number" step="1" value="120"></label>
+          <label>Max <input id="tmax" class="input" type="number" step="1" value="250"></label>
         </div>
       </div>
       <div style="flex:1">
         <label>SLIP% з Пара-16 (необов.)</label>
         <div class="row">
-          <input id="slip" class="input" type="number" step="0.1" value="0" title="Встав тут миттєве SLIP% із тахометра"/>
-          <label>Поріг SLIP% <input id="slipThr" class="input" type="number" step="0.5" value="3.0"/></label>
+          <input id="slip" class="input" type="number" step="0.1" value="0" title="Встав тут миттєве SLIP% із тахометра">
+          <label>Поріг SLIP% <input id="slipThr" class="input" type="number" step="0.5" value="3.0"></label>
         </div>
       </div>
     </div>
@@ -112,8 +110,8 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🧪 Емулятор (без «заліза»)</h2>
     <div class="row">
-      <label><input id="emu" type="checkbox"/> Увімкнути емулятор</label>
-      <label style="flex:1">Натяг (Н) <input id="emuF" class="input" type="range" min="50" max="400" step="1" value="180" disabled/></label>
+      <label><input id="emu" type="checkbox"> Увімкнути емулятор</label>
+      <label style="flex:1">Натяг (Н) <input id="emuF" class="input" type="range" min="50" max="400" step="1" value="180" disabled=""></label>
       <button class="btn" id="tick">➕ Додати точку</button>
       <button class="btn secondary" id="clear">🧹 Очистити</button>
       <span id="badge" class="badge">Калібровано: ні</span>
@@ -142,44 +140,44 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>💾 Протокол і експорт</h2>
     <div class="row">
-      <input id="fio" class="input" placeholder="ПІБ механіка"/>
-      <input id="job" class="input" placeholder="Робота (ремінний привід жатки, секція Х)"/>
+      <input id="fio" class="input" placeholder="ПІБ механіка">
+      <input id="job" class="input" placeholder="Робота (ремінний привід жатки, секція Х)">
       <button class="btn" id="saveTxt">💾 TXT</button>
       <button class="btn" id="saveCsv">📄 CSV</button>
       <button class="btn" id="receipt">🖨️ 58 мм чек</button>
     </div>
-    <div id="rc" class="receipt" hidden></div>
+    <div id="rc" class="receipt" hidden=""></div>
   </div>
 
   <div class="card">
     <h2>🔌 Схема підключення (SVG)</h2>
     <svg viewBox="0 0 900 360" role="img" aria-label="Arduino + HX711 + тензоміст">
       <!-- Arduino -->
-      <rect x="40" y="40" width="220" height="140" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <rect x="40" y="40" width="220" height="140" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
       <text x="150" y="65" fill="#e5e7eb" font-size="16" text-anchor="middle">Arduino UNO/Nano</text>
       <text x="55" y="95" fill="#93c5fd" font-size="12">5V</text>
       <text x="55" y="115" fill="#93c5fd" font-size="12">GND</text>
       <text x="55" y="135" fill="#93c5fd" font-size="12">D2…D13</text>
       <!-- HX711 -->
-      <rect x="320" y="40" width="220" height="140" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <rect x="320" y="40" width="220" height="140" rx="12" fill="#14532d" stroke="#22c55e"></rect>
       <text x="430" y="65" fill="#dcfce7" font-size="16" text-anchor="middle">HX711</text>
       <text x="430" y="85" fill="#a7f3d0" font-size="12" text-anchor="middle">VCC — GND — DT — SCK</text>
       <text x="430" y="105" fill="#a7f3d0" font-size="12" text-anchor="middle">A+ A- B+ B- (тензоміст)</text>
       <!-- Load cell -->
-      <rect x="600" y="40" width="240" height="140" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+      <rect x="600" y="40" width="240" height="140" rx="12" fill="#7c2d12" stroke="#fb923c"></rect>
       <text x="720" y="65" fill="#fed7aa" font-size="16" text-anchor="middle">Тензодатчик (міст)</text>
       <text x="720" y="85" fill="#fed7aa" font-size="12" text-anchor="middle">4 дроти: EXC+/EXC- SIG+/SIG-</text>
 
       <!-- Проводи -->
-      <line x1="260" y1="90" x2="320" y2="80" stroke="#93c5fd" stroke-width="3"/><text x="280" y="80" fill="#93c5fd" font-size="12">5V → VCC</text>
-      <line x1="260" y1="110" x2="320" y2="100" stroke="#64748b" stroke-width="3"/><text x="280" y="110" fill="#94a3b8" font-size="12">GND → GND</text>
-      <line x1="260" y1="130" x2="320" y2="120" stroke="#22c55e" stroke-width="3"/><text x="280" y="125" fill="#86efac" font-size="12">D3 → DT</text>
-      <line x1="260" y1="150" x2="320" y2="140" stroke="#38bdf8" stroke-width="3"/><text x="280" y="150" fill="#93c5fd" font-size="12">D2 → SCK</text>
+      <line x1="260" y1="90" x2="320" y2="80" stroke="#93c5fd" stroke-width="3"></line><text x="280" y="80" fill="#93c5fd" font-size="12">5V → VCC</text>
+      <line x1="260" y1="110" x2="320" y2="100" stroke="#64748b" stroke-width="3"></line><text x="280" y="110" fill="#94a3b8" font-size="12">GND → GND</text>
+      <line x1="260" y1="130" x2="320" y2="120" stroke="#22c55e" stroke-width="3"></line><text x="280" y="125" fill="#86efac" font-size="12">D3 → DT</text>
+      <line x1="260" y1="150" x2="320" y2="140" stroke="#38bdf8" stroke-width="3"></line><text x="280" y="150" fill="#93c5fd" font-size="12">D2 → SCK</text>
 
-      <line x1="540" y1="90" x2="600" y2="80" stroke="#fde68a" stroke-width="3"/><text x="560" y="78" fill="#fde68a" font-size="12">A+ ↔ SIG+</text>
-      <line x1="540" y1="110" x2="600" y2="100" stroke="#fde68a" stroke-width="3"/><text x="560" y="98" fill="#fde68a" font-size="12">A- ↔ SIG-</text>
-      <line x1="540" y1="130" x2="600" y2="120" stroke="#fde68a" stroke-width="3"/><text x="560" y="118" fill="#fde68a" font-size="12">E+ ↔ EXC+</text>
-      <line x1="540" y1="150" x2="600" y2="140" stroke="#fde68a" stroke-width="3"/><text x="560" y="138" fill="#fde68a" font-size="12">E- ↔ EXC-</text>
+      <line x1="540" y1="90" x2="600" y2="80" stroke="#fde68a" stroke-width="3"></line><text x="560" y="78" fill="#fde68a" font-size="12">A+ ↔ SIG+</text>
+      <line x1="540" y1="110" x2="600" y2="100" stroke="#fde68a" stroke-width="3"></line><text x="560" y="98" fill="#fde68a" font-size="12">A- ↔ SIG-</text>
+      <line x1="540" y1="130" x2="600" y2="120" stroke="#fde68a" stroke-width="3"></line><text x="560" y="118" fill="#fde68a" font-size="12">E+ ↔ EXC+</text>
+      <line x1="540" y1="150" x2="600" y2="140" stroke="#fde68a" stroke-width="3"></line><text x="560" y="138" fill="#fde68a" font-size="12">E- ↔ EXC-</text>
 
       <text x="150" y="210" fill="#fbbf24" font-size="12">⚠️ Фіксуй датчик і прес-ролик! Не торкайся обертових вузлів.</text>
     </svg>
@@ -455,5 +453,6 @@ function demoTick(){
 }
 demoTick();
 </script>
-</body>
-</html>
+
+
+</body></html>

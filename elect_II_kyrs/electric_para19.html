@@ -3,14 +3,11 @@
      Мета: створити цифровий "Дозвіл на роботи" (PTW) із переліком точок ізоляції, чек-листами,
      QR/NFC-ідентифікатором, наклейками 58 мм, A4-документом, CSV/ICS експортом.
      Повністю автономно для GitHub Pages та вбудовування у Moodle (iframe).
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 19 — LOTO та Дозвіл на роботи (PTW)</title>
-<meta name="color-scheme" content="light dark"/>
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#101826; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -73,7 +70,7 @@
   .chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; background:#0d1a2e; font-size:12px}
   .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
 </style>
-</head>
+<meta name="description" content="Змоделювати процес LOTO: створити дозвіл на роботи (PTW), зафіксувати точки ізоляції, сформувати чек-листи, згенерувати наклейки 58 мм для бірок/замків, A4"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para19.html"><meta property="og:type" content="article"><meta property="og:title" content="🔒 LOTO та «Дозвіл на роботи» (PTW): чек-листи → точки ізоляції → 58 мм → A4 → .csv → .ics"><meta property="og:description" content="Змоделювати процес LOTO: створити дозвіл на роботи (PTW), зафіксувати точки ізоляції, сформувати чек-листи, згенерувати наклейки 58 мм для бірок/замків, A4"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para19.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🔒 LOTO та «Дозвіл на роботи» (PTW): чек-листи → точки ізоляції → 58 мм → A4 → .csv → .ics","description":"Змоделювати процес LOTO: створити дозвіл на роботи (PTW), зафіксувати точки ізоляції, сформувати чек-листи, згенерувати наклейки 58 мм для бірок/замків, A4","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para19.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <span class="badge">Електрики · Пара 19 · аудиторно</span>
@@ -86,7 +83,7 @@
     <div class="row">
       <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
       <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-      <input id="file" class="btn" type="file" accept=".csv,text/csv"/>
+      <input id="file" class="btn" type="file" accept=".csv,text/csv">
       <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
       <button class="btn" onclick="downloadICS()">📅 .ics для календаря</button>
     </div>
@@ -102,14 +99,14 @@
         <div class="row"><label class="small" style="min-width:140px">Робота</label><input id="job_title" value="Заміна автомата C16"></div>
         <div class="row"><label class="small" style="min-width:140px">Локація</label><input id="location" value="ЩО-1 · Корпус А"></div>
         <div class="row"><label class="small" style="min-width:140px">Тип робіт</label><select id="work_type">
-          <option selected>Електромонтаж</option><option>Огляд/ТО</option><option>Вимірювання</option><option>Прибирання зони</option></select></div>
+          <option selected="">Електромонтаж</option><option>Огляд/ТО</option><option>Вимірювання</option><option>Прибирання зони</option></select></div>
       </div>
       <div>
         <h3>Відповідальні</h3>
         <div class="row"><label class="small" style="min-width:140px">Замовник</label><input id="requester" value="Викл. Сергій"></div>
         <div class="row"><label class="small" style="min-width:140px">Дозвіл видав</label><input id="issuer" value="Староста групи"></div>
         <div class="row"><label class="small" style="min-width:140px">Команда</label><input id="team" value="Студенти гр. ЕЛ-21 (2 ос.)"></div>
-        <div class="row"><label class="small" style="min-width:140px">Ризик</label><select id="risk_level"><option>Низький</option><option selected>Середній</option><option>Високий</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">Ризик</label><select id="risk_level"><option>Низький</option><option selected="">Середній</option><option>Високий</option></select></div>
       </div>
       <div>
         <h3>Вікно виконання</h3>
@@ -128,7 +125,7 @@
         <h3>Додати точку</h3>
         <div class="row"><label class="small" style="min-width:140px">ID точки</label><input id="iso_id" value="ISO-01"></div>
         <div class="row"><label class="small" style="min-width:140px">Опис</label><input id="iso_desc" value="Автомат C16, комірка 4"></div>
-        <div class="row"><label class="small" style="min-width:140px">Дія</label><select id="iso_action"><option selected>Вимкнути</option><option>Витягти плавку вставку</option><option>Роз'єднати штепсель</option><option>Закоротити/заземлити</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">Дія</label><select id="iso_action"><option selected="">Вимкнути</option><option>Витягти плавку вставку</option><option>Роз'єднати штепсель</option><option>Закоротити/заземлити</option></select></div>
         <div class="row"><label class="small" style="min-width:140px">Замок/Бірка</label><input id="iso_tag" value="Замок LOTO #12"></div>
         <div class="row"><button class="btn" onclick="addIso()">➕ Додати</button></div>
       </div>
@@ -452,5 +449,6 @@
   // Автодемо
   seedDemo();
 </script>
-</body>
-</html>
+
+
+</body></html>

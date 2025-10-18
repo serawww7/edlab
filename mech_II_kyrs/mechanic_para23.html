@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 23 (механіки) — ШІ#3: NLP-витяг сутностей з актів ТО + специфікація + QR 58 мм</title>
-<meta name="description" content="Встав текст акта ТО або завантаж файл → NLP витягає деталі/кількість/момент затягування/інструмент → формує специфікацію → генерує чек 58 мм з QR → експорт CSV/TXT."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Встав текст акта ТО або завантаж файл → NLP витягає деталі/кількість/момент затягування/інструмент → формує специфікацію → генерує чек 58 мм з QR → експорт CSV/TXT.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -39,14 +37,14 @@ svg{max-width:100%;height:auto;display:block}
 kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
 .footer{margin-top:20px;color:var(--muted);font-size:.9rem}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/mech_II_kyrs/mechanic_para23.html"><meta property="og:type" content="article"><meta property="og:title" content="Механізація — Пара 23"><meta property="og:description" content="Мета: з українського тексту акта ТО/ремонту автоматично виділити деталі, кількість, момент затягування, інструмент/матеріали; сформувати специфікацію робіт"><meta property="og:url" content="https://edlab.pp.ua/mech_II_kyrs/mechanic_para23.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Механізація — Пара 23","description":"Мета: з українського тексту акта ТО/ремонту автоматично виділити деталі, кількість, момент затягування, інструмент/матеріали; сформувати специфікацію робіт","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/mech_II_kyrs/mechanic_para23.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧾</span>
       <div>
-        <b>Пара 23 — NLP-витяг сутностей з актів ТО</b><br/>
+        <b>Пара 23 — NLP-витяг сутностей з актів ТО</b><br>
         <span class="badge">текст/файл → деталі/к-сть/момент/інструмент → специфікація → QR-квиток 58 мм → CSV/TXT</span>
       </div>
     </div>
@@ -60,13 +58,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>📝 Ввід тексту акта ТО</h2>
       <div class="row">
-        <input id="title" class="input" placeholder="Назва роботи: ТО редуктора жатки, змащення, заміна ременя" style="flex:2"/>
-        <input id="ord" class="input" placeholder="№ заявки / наряд" style="max-width:180px"/>
-        <input id="date" class="input" type="date" />
+        <input id="title" class="input" placeholder="Назва роботи: ТО редуктора жатки, змащення, заміна ременя" style="flex:2">
+        <input id="ord" class="input" placeholder="№ заявки / наряд" style="max-width:180px">
+        <input id="date" class="input" type="date">
       </div>
-      <textarea id="src" class="input" placeholder="Встав приклад акта ТО. Напр.:&#10;Замінили підшипник 6204 (2 шт), затягнули M10 болти головки 45 Н·м, встановили ремінь A42 (1 шт), підтягнули хомут шланга Ø25, долили масло HLP-46 — 0,7 л. Виконано вирівнювання шківів."></textarea>
+      <textarea id="src" class="input" placeholder="Встав приклад акта ТО. Напр.:
+Замінили підшипник 6204 (2 шт), затягнули M10 болти головки 45 Н·м, встановили ремінь A42 (1 шт), підтягнули хомут шланга Ø25, долили масло HLP-46 — 0,7 л. Виконано вирівнювання шківів."></textarea>
       <div class="row" style="margin-top:6px">
-        <input id="file" class="input" type="file" accept=".txt" style="max-width:320px"/>
+        <input id="file" class="input" type="file" accept=".txt" style="max-width:320px">
         <button class="btn" id="loadFile">📥 Завантажити TXT</button>
         <button class="btn good" id="extract">🔍 Витягнути сутності</button>
         <button class="btn secondary" id="clear">🧹 Очистити</button>
@@ -101,7 +100,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <button class="btn" id="print58">🖨️ 58 мм квиток</button>
         <button class="btn secondary" id="qrGen">🔗 QR (посилання/номер)</button>
       </div>
-      <div class="receipt" id="rc" hidden></div>
+      <div class="receipt" id="rc" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
       <small class="muted">QR генерується через відкритий сервіс <span class="mono">api.qrserver.com</span> (може потребувати інтернет). Якщо мережі немає — на чеку буде текстовий код.</small>
     </div>
@@ -129,25 +128,25 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🔌 Схема потоку (SVG)</h2>
     <svg viewBox="0 0 980 260" role="img" aria-label="Акт ТО → NLP → специфікація → чек 58 мм">
-      <rect x="40" y="60" width="210" height="90" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <rect x="40" y="60" width="210" height="90" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
       <text x="145" y="100" fill="#e5e7eb" font-size="14" text-anchor="middle">Акт ТО (UA)</text>
       <text x="145" y="118" fill="#93c5fd" font-size="12" text-anchor="middle">текст/файл</text>
 
-      <rect x="280" y="50" width="220" height="110" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <rect x="280" y="50" width="220" height="110" rx="12" fill="#14532d" stroke="#22c55e"></rect>
       <text x="390" y="92" fill="#dcfce7" font-size="14" text-anchor="middle">NLP-витяг</text>
       <text x="390" y="108" fill="#a7f3d0" font-size="12" text-anchor="middle">правила + словничок</text>
 
-      <rect x="530" y="50" width="220" height="110" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+      <rect x="530" y="50" width="220" height="110" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
       <text x="640" y="92" fill="#e5e7eb" font-size="14" text-anchor="middle">Специфікація</text>
       <text x="640" y="108" fill="#93c5fd" font-size="12" text-anchor="middle">агрегація, одиниці</text>
 
-      <rect x="780" y="50" width="160" height="110" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+      <rect x="780" y="50" width="160" height="110" rx="12" fill="#0b1a2f" stroke="#64748b"></rect>
       <text x="860" y="92" fill="#e5e7eb" font-size="14" text-anchor="middle">Чек 58 мм</text>
       <text x="860" y="108" fill="#93c5fd" font-size="12" text-anchor="middle">QR / TXT</text>
 
-      <line x1="250" y1="105" x2="280" y2="105" stroke="#93c5fd" stroke-width="3"/>
-      <line x1="500" y1="105" x2="530" y2="105" stroke="#22c55e" stroke-width="3"/>
-      <line x1="750" y1="105" x2="780" y2="105" stroke="#64748b" stroke-width="3"/>
+      <line x1="250" y1="105" x2="280" y2="105" stroke="#93c5fd" stroke-width="3"></line>
+      <line x1="500" y1="105" x2="530" y2="105" stroke="#22c55e" stroke-width="3"></line>
+      <line x1="750" y1="105" x2="780" y2="105" stroke="#64748b" stroke-width="3"></line>
 
       <text x="490" y="200" fill="#fbbf24" font-size="12" text-anchor="middle">Експорт: CSV, TXT; друк: 58 мм</text>
     </svg>
@@ -481,5 +480,6 @@ $('#qrGen').addEventListener('click', ()=>{
 
 // ===== Кінець =====
 </script>
-</body>
-</html>
+
+
+</body></html>

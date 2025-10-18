@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 22 (газовики) — AI-розпізнавання показів: фото → OCR → аномалії → квитанція/CSV/TXT/QR</title>
-<meta name="description" content="Камера/фото лічильника, ручне кадрування (ROI), OCR (Tesseract.js), валідації (довжина/відкат/стрибок), графік історії, чек 58 мм, CSV/TXT, QR на докази."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Камера/фото лічильника, ручне кадрування (ROI), OCR (Tesseract.js), валідації (довжина/відкат/стрибок), графік історії, чек 58 мм, CSV/TXT, QR на докази.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -40,14 +38,14 @@ pre.log{max-height:220px;overflow:auto;background:#0c182a;border-radius:12px;pad
 .tag.bad{border-color:#5a1f1f;background:#2a1212}
 .footer{margin-top:20px;color:#94a3b8;font-size:.9rem}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para22.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 22"><meta property="og:description" content="Зніми кадр із вебкамери або завантаж фото лічильника, обведи область цифр (ROI), натисни OCR. Система витягне показ, перевірить аномалії (відкат/стрибок/до"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para22.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 22","description":"Зніми кадр із вебкамери або завантаж фото лічильника, обведи область цифр (ROI), натисни OCR. Система витягне показ, перевірить аномалії (відкат/стрибок/до","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para22.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">📷🔢</span>
       <div>
-        <b>Пара 22 — AI-розпізнавання показів лічильника</b><br/>
+        <b>Пара 22 — AI-розпізнавання показів лічильника</b><br>
         <span class="badge">Камера/фото → ROI → OCR → валідації → графік → чек 58мм → CSV/TXT → QR</span>
       </div>
     </div>
@@ -60,7 +58,7 @@ pre.log{max-height:220px;overflow:auto;background:#0c182a;border-radius:12px;pad
     <div class="row">
       <button class="btn" id="camOn">🎥 Камера</button>
       <button class="btn secondary" id="camShot">📸 Знімок</button>
-      <input id="file" type="file" accept="image/*" class="input" style="max-width:320px"/>
+      <input id="file" type="file" accept="image/*" class="input" style="max-width:320px">
       <button class="btn good" id="runOcr">🔎 OCR (цифри)</button>
       <span class="badge">Статус: <b id="st">готово</b></span>
     </div>
@@ -75,7 +73,7 @@ pre.log{max-height:220px;overflow:auto;background:#0c182a;border-radius:12px;pad
   <div class="grid">
     <div class="card">
       <h2>🖼️ Кадр/ROI/обробка</h2>
-      <video id="v" width="640" height="360" autoplay playsinline style="width:100%;max-height:320px;border:1px solid var(--line);border-radius:12px;background:#0b1220"></video>
+      <video id="v" width="640" height="360" autoplay="" playsinline="" style="width:100%;max-height:320px;border:1px solid var(--line);border-radius:12px;background:#0b1220"></video>
       <canvas id="c" class="view" width="960" height="540"></canvas>
       <small class="muted">Порада: вирівняй кадр, щоб цифри були горизонтальні; скористайся рамкою ROI нижче.</small>
 
@@ -109,7 +107,7 @@ pre.log{max-height:220px;overflow:auto;background:#0c182a;border-radius:12px;pad
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (папка доказів)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div style="margin-top:8px"><canvas id="qr" width="220" height="220" style="background:#0b1220;border:1px solid var(--line);border-radius:12px"></canvas></div>
     </div>
   </div>
@@ -392,5 +390,6 @@ $('#qrGen').addEventListener('click', ()=>{
   chart.width=520; chart.height=220; drawHistory();
 })();
 </script>
-</body>
-</html>
+
+
+</body></html>

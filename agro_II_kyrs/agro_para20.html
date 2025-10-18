@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 20 — CO₂-збагачення + безпека персоналу (сирена, RGB-індикатор, журнал тривог)</title>
-<meta name="description" content="MH-Z19B (UART): керуємо збагаченням CO₂ (клапан/генератор) і вентиляцією з гістерезисом та мінімальним часом увімкнення. Безпека: сирена/буззер, RGB-індикатор зон (зелена/жовта/червона), журнал тривог. Емулятор CO₂, графік, експорт CSV/TXT, генератор прошивки."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="MH-Z19B (UART): керуємо збагаченням CO₂ (клапан/генератор) і вентиляцією з гістерезисом та мінімальним часом увімкнення. Безпека: сирена/буззер, RGB-індикатор зон (зелена/жовта/червона), журнал тривог. Емулятор CO₂, графік, експорт CSV/TXT, генератор прошивки.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -38,14 +36,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 .footer{margin-top:20px;color:var(--muted);font-size:.9rem}
 .log{max-height:160px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;background:#0b1220;font-family:ui-monospace,monospace;font-size:13px;white-space:pre-wrap}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para20.html"><meta property="og:type" content="article"><meta property="og:title" content="Агрономія — Пара 20"><meta property="og:description" content="Мета: тримати CO₂ у цільовому коридорі для підвищення фотосинтезу (напр., 800–1000 ppm), автоматично вмикати збагачення (клапан/генератор CO₂) і вентиляцію"><meta property="og:url" content="https://edlab.pp.ua/agro_II_kyrs/agro_para20.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Агрономія — Пара 20","description":"Мета: тримати CO₂ у цільовому коридорі для підвищення фотосинтезу (напр., 800–1000 ppm), автоматично вмикати збагачення (клапан/генератор CO₂) і вентиляцію","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/agro_II_kyrs/agro_para20.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧪</span>
       <div>
-        <b>Пара 20 — CO₂-збагачення + безпека персоналу</b><br/>
+        <b>Пара 20 — CO₂-збагачення + безпека персоналу</b><br>
         <span class="badge">MH-Z19B → керування збагаченням/вентиляцією · сирена · RGB-індикатор · журнал</span>
       </div>
     </div>
@@ -65,11 +63,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div class="row">
         <div style="flex:1">
           <label for="period">Період опитування, мс</label>
-          <input id="period" class="input" type="number" min="1000" step="500" value="2000"/>
+          <input id="period" class="input" type="number" min="1000" step="500" value="2000">
         </div>
         <div style="flex:1">
           <label for="alpha">EMA згладжування α</label>
-          <input id="alpha" class="input" type="number" min="0" max="1" step="0.05" value="0.2"/>
+          <input id="alpha" class="input" type="number" min="0" max="1" step="0.05" value="0.2">
         </div>
       </div>
 
@@ -77,21 +75,21 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div class="row">
         <div style="flex:1">
           <label for="setLow">Нижня межа (вмикає збагачення)</label>
-          <input id="setLow" class="input" type="number" step="25" value="800"/>
+          <input id="setLow" class="input" type="number" step="25" value="800">
         </div>
         <div style="flex:1">
           <label for="setHigh">Верхня межа (вмикає вентиляцію)</label>
-          <input id="setHigh" class="input" type="number" step="25" value="1000"/>
+          <input id="setHigh" class="input" type="number" step="25" value="1000">
         </div>
       </div>
       <div class="row">
         <div style="flex:1">
           <label for="hyst">Гістерезис, ppm</label>
-          <input id="hyst" class="input" type="number" step="10" value="60"/>
+          <input id="hyst" class="input" type="number" step="10" value="60">
         </div>
         <div style="flex:1">
           <label for="minOn">Мін. час увімкнення реле, с</label>
-          <input id="minOn" class="input" type="number" step="5" value="20"/>
+          <input id="minOn" class="input" type="number" step="5" value="20">
         </div>
       </div>
 
@@ -99,11 +97,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div class="row">
         <div style="flex:1">
           <label for="warn">Увага (жовта зона), ppm</label>
-          <input id="warn" class="input" type="number" step="50" value="1200"/>
+          <input id="warn" class="input" type="number" step="50" value="1200">
         </div>
         <div style="flex:1">
           <label for="alarm">Тривога (червона), ppm</label>
-          <input id="alarm" class="input" type="number" step="50" value="2000"/>
+          <input id="alarm" class="input" type="number" step="50" value="2000">
         </div>
       </div>
       <div class="row">
@@ -113,21 +111,21 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:12px">🧪 Емулятор CO₂</h3>
       <div class="row">
-        <input id="emu" type="checkbox"/><label for="emu">Увімкнути емулятор</label>
+        <input id="emu" type="checkbox"><label for="emu">Увімкнути емулятор</label>
       </div>
       <div class="row" style="width:100%">
         <label style="flex:1">CO₂, ppm
-          <input id="emuCO2" class="input" type="range" min="400" max="4000" step="10" value="750" disabled/>
+          <input id="emuCO2" class="input" type="range" min="400" max="4000" step="10" value="750" disabled="">
         </label>
         <label style="flex:1">Збагачення (імітація)
-          <select id="emuEnr" class="input" disabled>
-            <option value="0" selected>OFF</option>
+          <select id="emuEnr" class="input" disabled="">
+            <option value="0" selected="">OFF</option>
             <option value="1">ON</option>
           </select>
         </label>
         <label style="flex:1">Вентиляція (імітація)
-          <select id="emuVent" class="input" disabled>
-            <option value="0" selected>OFF</option>
+          <select id="emuVent" class="input" disabled="">
+            <option value="0" selected="">OFF</option>
             <option value="1">ON</option>
           </select>
         </label>
@@ -146,14 +144,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <div style="flex:1">
           <label for="rxPin">RX (Arduino читає)</label>
           <select id="rxPin" class="input">
-            <option value="10">D10</option><option value="11" selected>D11</option>
+            <option value="10">D10</option><option value="11" selected="">D11</option>
             <option value="12">D12</option><option value="13">D13</option>
           </select>
         </div>
         <div style="flex:1">
           <label for="txPin">TX (Arduino передає)</label>
           <select id="txPin" class="input">
-            <option value="9">D9</option><option value="8" selected>D8</option>
+            <option value="9">D9</option><option value="8" selected="">D8</option>
             <option value="7">D7</option><option value="6">D6</option>
           </select>
         </div>
@@ -162,13 +160,13 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <div style="flex:1">
           <label for="pinEnr">Пін реле збагачення</label>
           <select id="pinEnr" class="input">
-            <option value="5">D5</option><option value="6" selected>D6</option><option value="7">D7</option><option value="8">D8</option>
+            <option value="5">D5</option><option value="6" selected="">D6</option><option value="7">D7</option><option value="8">D8</option>
           </select>
         </div>
         <div style="flex:1">
           <label for="pinVent">Пін реле вентиляції</label>
           <select id="pinVent" class="input">
-            <option value="3">D3</option><option value="4" selected>D4</option><option value="9">D9</option><option value="10">D10</option>
+            <option value="3">D3</option><option value="4" selected="">D4</option><option value="9">D9</option><option value="10">D10</option>
           </select>
         </div>
       </div>
@@ -176,12 +174,12 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <div style="flex:1">
           <label for="pinBuz">Пін буззера (сирена)</label>
           <select id="pinBuz" class="input">
-            <option value="2" selected>D2</option><option value="3">D3</option><option value="9">D9</option>
+            <option value="2" selected="">D2</option><option value="3">D3</option><option value="9">D9</option>
           </select>
         </div>
         <div style="flex:1">
           <label for="pinRGB">Піни RGB (R,G,B)</label>
-          <input id="pinRGB" class="input" type="text" value="A0,A1,3" />
+          <input id="pinRGB" class="input" type="text" value="A0,A1,3">
           <small class="muted">Через резистори 220–330Ω, спільний катод/анод — підлаштуєш у коді.</small>
         </div>
       </div>
@@ -194,7 +192,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:12px">💾 Протокол і журнал</h3>
       <div class="row">
-        <input id="fio" class="input" placeholder="ПІБ студента"/>
+        <input id="fio" class="input" placeholder="ПІБ студента">
         <button class="btn" id="saveTxt">💾 TXT</button>
         <button class="btn" id="saveCsv">📄 CSV</button>
         <button class="btn secondary" id="saveLog">🧷 Експорт журналу</button>
@@ -207,7 +205,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h2>🔌 Схема підключення (SVG)</h2>
       <svg viewBox="0 0 780 520" role="img" aria-label="Arduino + MH-Z19B + 2 реле + буззер + RGB LED">
         <!-- Arduino -->
-        <rect x="40" y="40" width="250" height="180" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <rect x="40" y="40" width="250" height="180" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
         <text x="165" y="65" fill="#e5e7eb" font-size="16" text-anchor="middle">Arduino UNO/Nano</text>
         <text x="55" y="95" fill="#93c5fd" font-size="12">5V</text>
         <text x="55" y="115" fill="#93c5fd" font-size="12">GND</text>
@@ -217,39 +215,39 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <text x="220" y="205" fill="#93c5fd" font-size="12">D4 → RELAY_VENT</text>
 
         <!-- MH-Z19B -->
-        <rect x="340" y="40" width="210" height="120" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <rect x="340" y="40" width="210" height="120" rx="12" fill="#14532d" stroke="#22c55e"></rect>
         <text x="445" y="64" fill="#dcfce7" font-size="16" text-anchor="middle">MH-Z19B (UART)</text>
         <text x="445" y="84" fill="#a7f3d0" font-size="12" text-anchor="middle">VCC — GND — TX — RX</text>
 
         <!-- Relays -->
-        <rect x="340" y="180" width="210" height="90" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+        <rect x="340" y="180" width="210" height="90" rx="12" fill="#7c2d12" stroke="#fb923c"></rect>
         <text x="445" y="204" fill="#fed7aa" font-size="16" text-anchor="middle">2× Реле</text>
         <text x="445" y="224" fill="#fed7aa" font-size="12" text-anchor="middle">IN_CO₂ — IN_VENT — VCC — GND</text>
 
         <!-- Buzzer -->
-        <rect x="340" y="290" width="210" height="70" rx="12" fill="#3b0764" stroke="#a78bfa"/>
+        <rect x="340" y="290" width="210" height="70" rx="12" fill="#3b0764" stroke="#a78bfa"></rect>
         <text x="445" y="315" fill="#ddd6fe" font-size="16" text-anchor="middle">Буззер</text>
         <text x="445" y="333" fill="#ddd6fe" font-size="12" text-anchor="middle">D2 — VCC — GND</text>
 
         <!-- RGB LED -->
-        <rect x="340" y="380" width="210" height="90" rx="12" fill="#0b3f5a" stroke="#22d3ee"/>
+        <rect x="340" y="380" width="210" height="90" rx="12" fill="#0b3f5a" stroke="#22d3ee"></rect>
         <text x="445" y="405" fill="#a5f3fc" font-size="16" text-anchor="middle">RGB LED</text>
         <text x="445" y="425" fill="#a5f3fc" font-size="12" text-anchor="middle">R=A0 · G=A1 · B=D3 (через резистори)</text>
 
         <!-- Lines -->
-        <line x1="290" y1="90"  x2="340" y2="60"  stroke="#93c5fd" stroke-width="3"/><text x="305" y="78" fill="#93c5fd" font-size="12">5V → VCC</text>
-        <line x1="290" y1="110" x2="340" y2="80"  stroke="#64748b" stroke-width="3"/><text x="305" y="96" fill="#94a3b8" font-size="12">GND → GND</text>
-        <line x1="290" y1="130" x2="340" y2="90"  stroke="#22c55e" stroke-width="3"/><text x="305" y="116" fill="#86efac" font-size="12">D11(RX) ← TX</text>
-        <line x1="290" y1="150" x2="340" y2="100" stroke="#22c55e" stroke-width="3" opacity=".5"/><text x="305" y="136" fill="#86efac" font-size="12" opacity=".8">D8(TX) → RX</text>
+        <line x1="290" y1="90" x2="340" y2="60" stroke="#93c5fd" stroke-width="3"></line><text x="305" y="78" fill="#93c5fd" font-size="12">5V → VCC</text>
+        <line x1="290" y1="110" x2="340" y2="80" stroke="#64748b" stroke-width="3"></line><text x="305" y="96" fill="#94a3b8" font-size="12">GND → GND</text>
+        <line x1="290" y1="130" x2="340" y2="90" stroke="#22c55e" stroke-width="3"></line><text x="305" y="116" fill="#86efac" font-size="12">D11(RX) ← TX</text>
+        <line x1="290" y1="150" x2="340" y2="100" stroke="#22c55e" stroke-width="3" opacity=".5"></line><text x="305" y="136" fill="#86efac" font-size="12" opacity=".8">D8(TX) → RX</text>
 
-        <line x1="290" y1="190" x2="340" y2="205" stroke="#fb923c" stroke-width="3"/><text x="305" y="195" fill="#fdba74" font-size="12">D6 → IN_CO₂</text>
-        <line x1="290" y1="210" x2="340" y2="215" stroke="#fb923c" stroke-width="3"/><text x="305" y="215" fill="#fdba74" font-size="12">D4 → IN_VENT</text>
+        <line x1="290" y1="190" x2="340" y2="205" stroke="#fb923c" stroke-width="3"></line><text x="305" y="195" fill="#fdba74" font-size="12">D6 → IN_CO₂</text>
+        <line x1="290" y1="210" x2="340" y2="215" stroke="#fb923c" stroke-width="3"></line><text x="305" y="215" fill="#fdba74" font-size="12">D4 → IN_VENT</text>
 
-        <line x1="290" y1="300" x2="340" y2="320" stroke="#a78bfa" stroke-width="3"/><text x="305" y="310" fill="#ddd6fe" font-size="12">D2 → BUZZER</text>
+        <line x1="290" y1="300" x2="340" y2="320" stroke="#a78bfa" stroke-width="3"></line><text x="305" y="310" fill="#ddd6fe" font-size="12">D2 → BUZZER</text>
 
-        <line x1="290" y1="410" x2="340" y2="410" stroke="#22d3ee" stroke-width="3"/><text x="305" y="402" fill="#67e8f9" font-size="12">A0 → R</text>
-        <line x1="290" y1="430" x2="340" y2="430" stroke="#22d3ee" stroke-width="3"/><text x="305" y="422" fill="#67e8f9" font-size="12">A1 → G</text>
-        <line x1="290" y1="450" x2="340" y2="450" stroke="#22d3ee" stroke-width="3"/><text x="305" y="442" fill="#67e8f9" font-size="12">D3 → B</text>
+        <line x1="290" y1="410" x2="340" y2="410" stroke="#22d3ee" stroke-width="3"></line><text x="305" y="402" fill="#67e8f9" font-size="12">A0 → R</text>
+        <line x1="290" y1="430" x2="340" y2="430" stroke="#22d3ee" stroke-width="3"></line><text x="305" y="422" fill="#67e8f9" font-size="12">A1 → G</text>
+        <line x1="290" y1="450" x2="340" y2="450" stroke="#22d3ee" stroke-width="3"></line><text x="305" y="442" fill="#67e8f9" font-size="12">D3 → B</text>
       </svg>
 
       <div class="note" style="margin-top:10px">
@@ -278,7 +276,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     </div>
   </div>
 
-  <hr class="sep"/>
+  <hr class="sep">
 
   <div class="card">
     <h2>📋 Підсумок для звіту</h2>
@@ -575,5 +573,6 @@ log('UI ініціалізовано. Додайте точки або прош�
 function init(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); draw(); }
 init();
 </script>
-</body>
-</html>
+
+
+</body></html>

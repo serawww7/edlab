@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 22 (технологи) — ШІ для рецептур: багатокритеріальна оптимізація, графіки, чек/CSV/QR</title>
-<meta name="description" content="AI-оптимізація рецептури: волога/жир/сіль/нітрит/собівартість, обмеження, ваги цілей, стек-діаграма, радар, журнал, чек/CSV/QR."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="AI-оптимізація рецептури: волога/жир/сіль/нітрит/собівартість, обмеження, ваги цілей, стек-діаграма, радар, журнал, чек/CSV/QR.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -40,14 +38,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 .ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
 .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted);margin-right:6px;margin-top:6px}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/tech_II_kyrs/tech_para22.html"><meta property="og:type" content="article"><meta property="og:title" content="Технології тваринництва — Пара 22"><meta property="og:description" content="Мета: побудувати **AI-помічник** для підбору рецептури (варена ковбаса/шинка, пастеризований виріб тощо). Інгредієнти мають **вмісти** (вода/жир/сіль/нітри"><meta property="og:url" content="https://edlab.pp.ua/tech_II_kyrs/tech_para22.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Технології тваринництва — Пара 22","description":"Мета: побудувати **AI-помічник** для підбору рецептури (варена ковбаса/шинка, пастеризований виріб тощо). Інгредієнти мають **вмісти** (вода/жир/сіль/нітри","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/tech_II_kyrs/tech_para22.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧪</span>
       <div>
-        <b>Пара 22 — ШІ для рецептур</b><br/>
+        <b>Пара 22 — ШІ для рецептур</b><br>
         <span class="badge">волога/жир/сіль/нітрит/собівартість → обмеження → ваги цілей → оптимізація → графіки → чек/CSV/QR</span>
       </div>
     </div>
@@ -62,12 +60,12 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h2>🧰 Інгредієнти</h2>
       <small class="muted">Додай/редагуй. Вміст — у % від маси інгредієнта; нітрит — ppm у готовому продукті, який дає 1% цього інгредієнта (для спрощення).</small>
       <div class="row">
-        <label>Назва<input id="i_name" class="input" value="М’ясо нежирне"/></label>
-        <label>Ціна, грн/кг<input id="i_price" class="input" type="number" step="0.1" value="140"/></label>
-        <label>Вода, %<input id="i_w" class="input" type="number" step="0.1" value="72"/></label>
-        <label>Жир, %<input id="i_f" class="input" type="number" step="0.1" value="6"/></label>
-        <label>Сіль, %<input id="i_s" class="input" type="number" step="0.1" value="0.3"/></label>
-        <label>Нітрит, ppm<input id="i_n" class="input" type="number" step="1" value="0"/></label>
+        <label>Назва<input id="i_name" class="input" value="М’ясо нежирне"></label>
+        <label>Ціна, грн/кг<input id="i_price" class="input" type="number" step="0.1" value="140"></label>
+        <label>Вода, %<input id="i_w" class="input" type="number" step="0.1" value="72"></label>
+        <label>Жир, %<input id="i_f" class="input" type="number" step="0.1" value="6"></label>
+        <label>Сіль, %<input id="i_s" class="input" type="number" step="0.1" value="0.3"></label>
+        <label>Нітрит, ppm<input id="i_n" class="input" type="number" step="1" value="0"></label>
         <button class="btn" id="addIng">➕ Додати</button>
         <button class="btn secondary" id="demo">🎲 Демо-набір</button>
         <button class="btn secondary" id="clearIng">🧹 Очистити</button>
@@ -80,25 +78,25 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h2 style="margin-top:10px">🎯 Цілі та обмеження</h2>
       <div class="row">
-        <label>Ціль Волога, %<input id="t_w" class="input" type="number" step="0.1" value="72.0"/></label>
-        <label>Ціль Жир, %<input id="t_f" class="input" type="number" step="0.1" value="18.0"/></label>
-        <label>Ціль Сіль, %<input id="t_s" class="input" type="number" step="0.05" value="1.8"/></label>
-        <label>Макс Нітрит, ppm<input id="c_n_max" class="input" type="number" step="1" value="120"/></label>
+        <label>Ціль Волога, %<input id="t_w" class="input" type="number" step="0.1" value="72.0"></label>
+        <label>Ціль Жир, %<input id="t_f" class="input" type="number" step="0.1" value="18.0"></label>
+        <label>Ціль Сіль, %<input id="t_s" class="input" type="number" step="0.05" value="1.8"></label>
+        <label>Макс Нітрит, ppm<input id="c_n_max" class="input" type="number" step="1" value="120"></label>
       </div>
       <div class="row">
-        <label>Мін. Вода, %<input id="c_w_min" class="input" type="number" step="0.1" value="68"/></label>
-        <label>Макс. Вода, %<input id="c_w_max" class="input" type="number" step="0.1" value="76"/></label>
-        <label>Макс. Сіль, %<input id="c_s_max" class="input" type="number" step="0.05" value="2.2"/></label>
-        <label>Макс. Жир, %<input id="c_f_max" class="input" type="number" step="0.1" value="22"/></label>
+        <label>Мін. Вода, %<input id="c_w_min" class="input" type="number" step="0.1" value="68"></label>
+        <label>Макс. Вода, %<input id="c_w_max" class="input" type="number" step="0.1" value="76"></label>
+        <label>Макс. Сіль, %<input id="c_s_max" class="input" type="number" step="0.05" value="2.2"></label>
+        <label>Макс. Жир, %<input id="c_f_max" class="input" type="number" step="0.1" value="22"></label>
       </div>
 
       <h3 style="margin-top:10px">⚖️ Ваги цілей (0…1)</h3>
       <div class="row">
-        <label>w Волога<input id="w_w" class="input" type="number" step="0.05" value="0.35"/></label>
-        <label>w Жир<input id="w_f" class="input" type="number" step="0.05" value="0.25"/></label>
-        <label>w Сіль<input id="w_s" class="input" type="number" step="0.05" value="0.25"/></label>
-        <label>w Собівартість<input id="w_c" class="input" type="number" step="0.05" value="0.15"/></label>
-        <label>Крок %, для мутацій<input id="step" class="input" type="number" step="0.1" value="0.5"/></label>
+        <label>w Волога<input id="w_w" class="input" type="number" step="0.05" value="0.35"></label>
+        <label>w Жир<input id="w_f" class="input" type="number" step="0.05" value="0.25"></label>
+        <label>w Сіль<input id="w_s" class="input" type="number" step="0.05" value="0.25"></label>
+        <label>w Собівартість<input id="w_c" class="input" type="number" step="0.05" value="0.15"></label>
+        <label>Крок %, для мутацій<input id="step" class="input" type="number" step="0.1" value="0.5"></label>
         <button class="btn good" id="opt">🚀 Оптимізувати</button>
       </div>
 
@@ -109,13 +107,13 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:10px">💾 Експорт/друк</h3>
       <div class="row">
-        <input id="lot" class="input" placeholder="SKU/Лот (напр. Ковбаса варена 2025-10-18)"/>
+        <input id="lot" class="input" placeholder="SKU/Лот (напр. Ковбаса варена 2025-10-18)">
         <button class="btn" id="saveCsv">📄 CSV (рецепт)</button>
         <button class="btn" id="saveTxt">💾 TXT (звіт)</button>
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази/акти)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
       <small class="muted">QR генерується через <span class="mono">api.qrserver.com</span>; офлайн виведеться текст.</small>
 
@@ -141,25 +139,25 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h2 style="margin-top:10px">🔌 Схема процесу (SVG)</h2>
       <svg viewBox="0 0 820 280" role="img" aria-label="Інгредієнти → Обмеження/Цілі → Оптимізація → Рецепт → Звіт">
-        <rect x="40" y="40" width="170" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <rect x="40" y="40" width="170" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
         <text x="125" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Інгредієнти</text>
         <text x="125" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">властивості/ціна</text>
 
-        <rect x="230" y="40" width="190" height="120" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <rect x="230" y="40" width="190" height="120" rx="12" fill="#14532d" stroke="#22c55e"></rect>
         <text x="325" y="80" fill="#dcfce7" font-size="14" text-anchor="middle">Цілі/Обмеження</text>
         <text x="325" y="100" fill="#a7f3d0" font-size="12" text-anchor="middle">волога/жир/сіль/нітрит</text>
 
-        <rect x="440" y="40" width="150" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <rect x="440" y="40" width="150" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
         <text x="515" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Оптимізація</text>
         <text x="515" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">AI-пошук</text>
 
-        <rect x="610" y="40" width="170" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+        <rect x="610" y="40" width="170" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"></rect>
         <text x="695" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Рецепт/Звіт</text>
         <text x="695" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">чек/CSV/QR</text>
 
-        <line x1="210" y1="100" x2="230" y2="100" stroke="#93c5fd" stroke-width="3"/>
-        <line x1="420" y1="100" x2="440" y2="100" stroke="#22c55e" stroke-width="3"/>
-        <line x1="590" y1="100" x2="610" y2="100" stroke="#64748b" stroke-width="3"/>
+        <line x1="210" y1="100" x2="230" y2="100" stroke="#93c5fd" stroke-width="3"></line>
+        <line x1="420" y1="100" x2="440" y2="100" stroke="#22c55e" stroke-width="3"></line>
+        <line x1="590" y1="100" x2="610" y2="100" stroke="#64748b" stroke-width="3"></line>
       </svg>
 
       <h2 style="margin-top:10px">🎯 Завдання для студентів</h2>
@@ -462,5 +460,6 @@ renderTable();
 drawStack([]);
 drawRadar(null);
 </script>
-</body>
-</html>
+
+
+</body></html>

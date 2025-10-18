@@ -3,14 +3,11 @@
      Розрахунок освітлення (люкс-метод), підбір кількості світильників, струмів та автоматів,
      розбиття на групи, оцінка падіння напруги ΔU, пакет наклейок 58 мм, CSV, A4-звіт.
      Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 10 — Освітлення: люкс-метод, групи, автомати, ΔU, друк 58 мм</title>
-<meta name="color-scheme" content="light dark" />
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -81,7 +78,7 @@
     .ticket{ box-shadow:none; width:auto; padding:0 }
   }
 </style>
-</head>
+<meta name="description" content="Розрахувати освітлення приміщення за люкс-методом, визначити кількість світильників та їх схему підключення, розбити на групи, підібрати автомати захисту,"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para10.html"><meta property="og:type" content="article"><meta property="og:title" content="💡 Освітлення: люкс-метод → кількість світильників → групи/автомати → ΔU → 🧾 наклейки 58 мм"><meta property="og:description" content="Розрахувати освітлення приміщення за люкс-методом, визначити кількість світильників та їх схему підключення, розбити на групи, підібрати автомати захисту,"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para10.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"💡 Освітлення: люкс-метод → кількість світильників → групи/автомати → ΔU → 🧾 наклейки 58 мм","description":"Розрахувати освітлення приміщення за люкс-методом, визначити кількість світильників та їх схему підключення, розбити на групи, підібрати автомати захисту,","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para10.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Електрики · Пара 10 · аудиторно</span>
@@ -129,7 +126,7 @@
           <h3>Групування</h3>
           <div class="row"><label class="small" style="min-width:140px">Світильників всього</label><input id="N" type="number" value="0"></div>
           <div class="row"><label class="small" style="min-width:140px">Макс. у групі</label><input id="perGroup" type="number" value="8"></div>
-          <div class="row"><label class="small" style="min-width:140px">К-ть груп (авто)</label><input id="groups" type="number" value="0" readonly></div>
+          <div class="row"><label class="small" style="min-width:140px">К-ть груп (авто)</label><input id="groups" type="number" value="0" readonly=""></div>
           <div class="row"><button class="btn" onclick="makeGroups()">🧩 Розбити на групи</button></div>
           <p class="small">Рівномірно розподіляємо світильники між групами.</p>
         </div>
@@ -137,17 +134,17 @@
           <h3>Лінія (1ф, Cu)</h3>
           <div class="row"><label class="small" style="min-width:140px">Довжина лінії L, м</label><input id="L" type="number" value="35"></div>
           <div class="row"><label class="small" style="min-width:140px">Секція провідника, мм²</label>
-            <select id="S"><option>1.5</option><option selected>2.5</option><option>4</option><option>6</option></select></div>
+            <select id="S"><option>1.5</option><option selected="">2.5</option><option>4</option><option>6</option></select></div>
           <div class="row"><label class="small" style="min-width:140px">Груповий PF</label><input id="pfG" type="number" step="0.05" value="0.95"></div>
           <div class="row"><label class="small" style="min-width:140px">Допустима ΔU, %</label><input id="dropLimit" type="number" step="0.1" value="3"></div>
         </div>
         <div>
           <h3>Автомат (MCB)</h3>
           <div class="row"><label class="small" style="min-width:140px">Крива</label>
-            <select id="curve"><option>B</option><option selected>C</option><option>D</option></select></div>
+            <select id="curve"><option>B</option><option selected="">C</option><option>D</option></select></div>
           <div class="row"><label class="small" style="min-width:140px">Стандарти In, А</label>
             <select id="standard">
-              <option>6</option><option selected>10</option><option>13</option><option>16</option><option>20</option>
+              <option>6</option><option selected="">10</option><option>13</option><option>16</option><option>20</option>
             </select></div>
           <div class="row"><button class="btn" onclick="calcLines()">🧮 Обчислити струми/ΔU/MCB</button></div>
         </div>
@@ -167,7 +164,7 @@
       <p class="small">Подвійне клацання по клітинці — редагування. Статус: <span class="chip ok">PASS</span> — ΔU ≤ ліміт; <span class="chip bad">FAIL</span> — перевищення.</p>
       <div class="row" style="margin-top:8px">
         <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <input id="file" type="file" accept=".csv,text/csv" class="btn">
         <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
       </div>
     </div>
@@ -490,5 +487,6 @@
   // Авто-демо при першому відкритті
   seedDemo();
 </script>
-</body>
-</html>
+
+
+</body></html>
