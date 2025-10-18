@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 13 (газовики) — Акт вводу в експлуатацію ВБД/котла: маршрут безпеки, тяга/CO, камера/мікрофон, підпис, 58 мм, CSV/TXT, QR</title>
+<meta name="description" content="Практика вводу в експлуатацію: поетапний маршрут безпеки з міжзамками, виміри тяги (Па) й CO (ppm) з графіком, фото, аудіо-коментар, підпис абонента, чек 58 мм, CSV/TXT, QR, журнал подій."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1280px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:14px;grid-template-columns:1.2fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:#e6eef9}
+textarea{min-height:90px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:#e6eef9;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+.canvasWrap{overflow:hidden;border-radius:12px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre;min-height:140px}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.photo{width:100%;max-width:240px;border:1px solid var(--line);border-radius:12px;display:block}
+.gallery{display:flex;gap:8px;flex-wrap:wrap}
+.block{border:1px dashed var(--line);border-radius:12px;padding:10px;margin-top:10px;background:#0c182a}
+.sigWrap{border:1px dashed var(--line);border-radius:12px;padding:8px;background:#0c182a}
+#sig{background:#0b1220;border:1px solid var(--line);border-radius:8px;touch-action:none}
+.kpi{display:flex;gap:8px;flex-wrap:wrap}
+.kpi .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 10px;color:#e5e7eb}
+.tag.ok{border-color:#1d3e2a;background:#0f2f1e}
+.tag.warn{border-color:#4a3b13;background:#2b2310}
+.tag.bad{border-color:#5a1f1f;background:#2a1212}
+.step{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:8px;margin:6px 0;background:#0c182a}
+.step[data-ok="true"]{border-color:#1d3e2a;background:#0f2f1e22}
+.step .num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#0b1a2f;border:1px solid #223049}
+hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
+audio{width:100%}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🏭✅</span>
+      <div>
+        <b>Пара 13 — Акт вводу в експлуатацію ВБД/котла</b><br/>
+        <span class="badge">Маршрут безпеки → тяга/CO → графік → камера/мікрофон → підпис → чек 58 мм → CSV/TXT → QR</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <!-- Ввідні -->
+  <div class="card">
+    <h2>📚 Сценарій</h2>
+    <p>Проходимо <b>маршрут безпеки</b> для вводу обладнання в роботу: документи → огляд → герметичність → тяга → CO → пуск → контроль режиму. 
+       Фіксуємо <b>тягу (Па)</b> і <b>CO (ppm)</b> з живим графіком, робимо <b>фото</b>, додаємо <b>аудіо-коментар</b>, беремо <b>підпис</b>, формуємо <b>чек 58 мм</b>, експортуємо <b>CSV/TXT</b>, генеруємо <b>QR</b>.</p>
+    <div class="row">
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котел/ВБД"/></label>
+      <label style="flex:1">Тип обладнання
+        <select id="equip" class="input">
+          <option selected>Котел атмосферний</option><option>Котел із закритою камерою</option><option>ВБД (водонагрівач)</option><option>Інший</option>
+        </select>
+      </label>
+      <label style="flex:1">Модель<input id="model" class="input" placeholder="Напр. AOGV 11, Bosch W11..."/></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+    </div>
+    <div class="row">
+      <button class="btn good" id="mkCase">🧰 Створити кейс</button>
+      <span class="badge" id="cid">Кейс: —</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Ліва: Маршрут + Виміри + Камера + Аудіо + Підпис -->
+    <div class="card">
+      <h2>🧭 Маршрут безпеки (міжзамки)</h2>
+      <div id="steps"></div>
+
+      <h2 style="margin-top:10px">🛰️ Тяга / CO — емулятори та KPI</h2>
+      <div class="block">
+        <div class="row">
+          <label style="flex:1">Тяга, Па<input id="draft" type="range" class="input" min="-5" max="30" step="0.1" value="9.5"/></label>
+          <span class="badge">Поточна тяга: <b id="draftNum">9.5</b> Па</span>
+          <button class="btn" id="markDraft">📍 Точка тяги</button>
+        </div>
+        <div class="row">
+          <label style="flex:1">CO, ppm<input id="co" type="range" class="input" min="0" max="300" step="1" value="12"/></label>
+          <span class="badge">Поточний CO: <b id="coNum">12</b> ppm</span>
+          <button class="btn" id="markCO">📍 Точка CO</button>
+          <button class="btn secondary" id="clearSeries">🧹 Очистити графік</button>
+        </div>
+        <div class="row">
+          <label>Мін. тяга, Па<input id="draftMin" class="input" type="number" step="0.1" value="5.0"/></label>
+          <label>Макс. CO, ppm<input id="coMax" class="input" type="number" step="1" value="50"/></label>
+          <button class="btn secondary" id="applyKPI">⚙️ Застосувати KPI</button>
+        </div>
+        <div class="kpi" style="margin-top:6px">
+          <span class="tag ok">KPI тяги: <b id="kDraft">—</b></span>
+          <span class="tag warn">KPI CO: <b id="kCO">—</b></span>
+          <span class="tag bad">Загальний статус: <b id="kAll">—</b></span>
+        </div>
+      </div>
+
+      <h2 style="margin-top:10px">📈 Графік (Тяга Па / CO ppm)</h2>
+      <div class="canvasWrap"><canvas id="chart" class="chart" width="520" height="240"></canvas></div>
+      <div class="row">
+        <button class="btn" id="autoRun">🎛️ Імітувати проміри (10 c)</button>
+      </div>
+
+      <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
+      <div class="row">
+        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <div>
+          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button class="btn" data-kind="plate">📷 Табличка обладнання</button>
+          <button class="btn" data-kind="flue">📷 Димохід/канал</button>
+          <button class="btn" data-kind="flame">📷 Полум’я/огляд камери</button><br/>
+          <small class="muted">Фото зберігаються у «Галереї доказів».</small>
+        </div>
+      </div>
+      <div class="gallery" id="gal"></div>
+
+      <h2 style="margin-top:10px">🎙️ Аудіо-коментар до акта</h2>
+      <div class="block">
+        <div class="row">
+          <button class="btn" id="audStart">⏺️ Запис</button>
+          <button class="btn secondary" id="audStop">⏹️ Стоп</button>
+          <button class="btn" id="audSave">💾 Зберегти</button>
+          <span class="badge" id="audStat">Немає запису</span>
+        </div>
+        <audio id="audPlay" controls></audio>
+      </div>
+
+      <h2 style="margin-top:10px">✍️ Підпис абонента</h2>
+      <div class="sigWrap">
+        <canvas id="sig" width="520" height="200"></canvas>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" id="sigClear">🧹 Очистити</button>
+          <button class="btn" id="sigSave">💾 Зберегти підпис</button>
+          <span class="badge" id="sigStat">Підпису немає</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Права: Метрики / Експорт -->
+    <div class="card">
+      <h2>📊 Метрики та стан</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>Кейс</th><td id="mCase">—</td></tr>
+          <tr><th>Обладнання</th><td id="mEquip">—</td></tr>
+          <tr><th>Маршрут (етапів ОК)</th><td id="mRoute">0 / 7</td></tr>
+          <tr><th>Точок (тяга/CO)</th><td id="mPts">0 / 0</td></tr>
+          <tr><th>KPI (тяга / CO / заг.)</th><td id="mKPI">—</td></tr>
+          <tr><th>Фото (plate/flue/flame)</th><td id="mPhotos">0 / 0 / 0</td></tr>
+          <tr><th>Аудіо</th><td id="mAud">—</td></tr>
+          <tr><th>Підпис</th><td id="mSig">—</td></tr>
+          <tr><th>Статус</th><td id="mState"><b class="warn">Потрібно виконати кроки</b></td></tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:10px">✅ Оцінювання (10 балів)</h2>
+      <ul>
+        <li>Кейс + параметри обладнання — <b>2</b></li>
+        <li>Маршрут: усі 7 кроків виконано — <b>3</b></li>
+        <li>Графік: ≥10 точок сумарно — <b>2</b></li>
+        <li>KPI в межах (тяга ≥ мін., CO ≤ макс.) — <b>2</b></li>
+        <li>Фото (3) або аудіо + підпис — <b>1</b></li>
+      </ul>
+
+      <h2 style="margin-top:10px">💾 Експорт / друк</h2>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV</button>
+        <button class="btn" id="saveTxt">💾 TXT</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (Case)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
+
+      <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
+      <pre id="alog" class="card" style="max-height:240px;overflow:auto;margin-top:6px">// Поки без подій</pre>
+    </div>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString();const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+function clean(s){return String(s).replace(/\s+/g,' ').trim();}
+$('#upd').textContent=new Date().toLocaleDateString('uk-UA');
+(function(){ const d=new Date(); $('#day').value=d.toISOString().slice(0,10); })();
+
+// ===== Стан кейсу/даних
+let CASE_ID=null;
+let photos={plate:null, flue:null, flame:null};
+let sigUrl=null;
+let audBlob=null, audUrl=null;
+
+// ===== Створення кейсу
+$('#mkCase').addEventListener('click',()=>{
+  const addr=clean($('#addr').value||''); const tech=clean($('#tech').value||''); const day=$('#day').value;
+  if(!addr||!tech||!day){ alert('Вкажи адресу, виконавця та дату'); return; }
+  CASE_ID='I-'+Math.random().toString(36).slice(2,8).toUpperCase();
+  $('#cid').textContent='Кейс: '+CASE_ID;
+  log(`Кейс ${CASE_ID}: ${addr}, ${$('#equip').value}, ${$('#model').value||'-'}, ${tech}, ${day}`);
+  renderSteps(); updateMetrics(); computeKPI(); drawChart();
+});
+
+// ===== Маршрут безпеки (7 кроків з міжзамками)
+const STEPS_DEF=[
+  {k:'docs', name:'Паспорти/інструкції на обладнання'},
+  {k:'inspect', name:'Зовнішній огляд (корпус, димохід, вентиляція)'},
+  {k:'leak', name:'Перевірка герметичності (піна/детектор)'},
+  {k:'draft', name:'Вимір тяги в димоході'},
+  {k:'co', name:'Вимір CO в зоні горіння'},
+  {k:'start', name:'Пуск обладнання'},
+  {k:'stabil', name:'Контроль режиму (5 хв)'}
+];
+let STEPS = STEPS_DEF.map(s=>({...s, ok:false, tsStart:null, tsStop:null, dur:0}));
+
+function renderSteps(){
+  const box=$('#steps'); box.innerHTML='';
+  STEPS.forEach((s,i)=>{
+    const div=document.createElement('div'); div.className='step'; div.dataset.key=s.k; div.dataset.ok=s.ok;
+    div.innerHTML=`
+      <span class="num">${i+1}</span><b>${s.name}</b>
+      <span class="badge mono">${s.k}</span>
+      <button class="btn btn-start">▶️ Start</button>
+      <button class="btn secondary btn-stop">⏹️ Stop</button>
+      <button class="btn good btn-done">✅ Done</button>
+      <span class="badge">Тривалість: <b class="dur">0</b> с</span>`;
+    box.appendChild(div);
+  });
+}
+renderSteps();
+function stepByKey(k){ return STEPS.find(x=>x.k===k); }
+$('#steps').addEventListener('click',(e)=>{
+  const wrap=e.target.closest('.step'); if(!wrap) return; const key=wrap.dataset.key; const s=stepByKey(key); const now=Date.now();
+  // Міжзамки: пуск можливий лише після draft+co Done, стабілізація — після start Done
+  if(e.target.classList.contains('btn-start')){
+    if(key==='start' && (!stepByKey('draft').ok || !stepByKey('co').ok)){ alert('Спершу заверши кроки "Вимір тяги" і "Вимір CO"'); return; }
+    if(key==='stabil' && !stepByKey('start').ok){ alert('Спершу виконай "Пуск обладнання"'); return; }
+    s.tsStart=now; log(`Крок ${key}: Start`);
+  }
+  if(e.target.classList.contains('btn-stop')){
+    if(s.tsStart){ s.tsStop=now; s.dur+=Math.max(0,Math.round((s.tsStop-s.tsStart)/1000)); s.tsStart=null; wrap.querySelector('.dur').textContent=String(s.dur); log(`Крок ${key}: Stop (+${s.dur}s)`); }
+  }
+  if(e.target.classList.contains('btn-done')){
+    if(s.tsStart){ s.tsStop=now; s.dur+=Math.max(0,Math.round((s.tsStop-s.tsStart)/1000)); s.tsStart=null; wrap.querySelector('.dur').textContent=String(s.dur); }
+    s.ok=true; wrap.dataset.ok='true'; log(`Крок ${key}: Done`);
+  }
+  updateMetrics();
+});
+setInterval(()=>{
+  const now=Date.now();
+  STEPS.forEach(s=>{ if(s.tsStart){ const curr=Math.max(0,Math.round((now-s.tsStart)/1000)); const wrap=$(`[data-key="${s.k}"]`); if(wrap){ wrap.querySelector('.dur').textContent=String(s.dur+curr);} }});
+},1000);
+
+// ===== Емулятори/серії/графік (тяга/CO)
+const chart=$('#chart'), gc=chart.getContext('2d');
+let t0=null, sDraft=[], sCO=[];
+function addPoint(series,v){
+  const now=Date.now(); if(!t0) t0=now; series.push({t:now, v}); drawChart(); computeKPI(); updateMetrics();
+}
+$('#draft').addEventListener('input',()=>{ $('#draftNum').textContent=$('#draft').value; });
+$('#co').addEventListener('input',()=>{ $('#coNum').textContent=$('#co').value; });
+$('#markDraft').addEventListener('click',()=>{ const v=parseFloat($('#draft').value); addPoint(sDraft,v); if(!stepByKey('draft').ok) alert('Пора відзначити крок "Вимір тяги" як Done'); log('Точка тяги: '+v.toFixed(1)+' Па'); });
+$('#markCO').addEventListener('click',()=>{ const v=parseFloat($('#co').value); addPoint(sCO,v); if(!stepByKey('co').ok) alert('Пора відзначити крок "Вимір CO" як Done'); log('Точка CO: '+v.toFixed(0)+' ppm'); });
+$('#clearSeries').addEventListener('click',()=>{ sDraft=[]; sCO=[]; t0=null; drawChart(); computeKPI(); updateMetrics(); log('Очищено графік'); });
+
+function drawChart(){
+  const W=chart.width,H=chart.height; gc.clearRect(0,0,W,H);
+  gc.strokeStyle='#223049'; gc.strokeRect(0.5,0.5,W-1,H-1);
+  const left=40,right=W-50,top=24,bottom=H-30;
+  gc.strokeStyle='#1f2a44'; for(let y=0;y<5;y++){ const yy=top+y*(bottom-top)/4; gc.beginPath(); gc.moveTo(left,yy); gc.lineTo(right,yy); gc.stroke(); }
+  if((sDraft.length+sCO.length)<2){ gc.fillStyle='#94a3b8'; gc.fillText('Додавай точки тяги й CO або запусти імітацію', left+8, top+14); return; }
+  const all=[...sDraft.map(x=>x.t), ...sCO.map(x=>x.t)].sort((a,b)=>a-b);
+  const tMin=all[0], tMax=all[all.length-1], span=tMax-tMin||1;
+  const dMax=Math.max(10, ...sDraft.map(p=>Math.abs(p.v)), 1)*1.6;
+  const cMax=Math.max(60, ...sCO.map(p=>p.v), 10);
+  function X(t){ return left + (t - tMin)/span*(right-left); }
+  function Yd(v){ return bottom - ((v+dMax)/(2*dMax))*(bottom-top); } // центр = 0 Па
+  function Yc(v){ return bottom - (v/cMax)*(bottom-top); }
+  // Draft — синя
+  if(sDraft.length){
+    gc.beginPath(); gc.strokeStyle='#38bdf8';
+    sDraft.forEach((p,i)=>{ const x=X(p.t), y=Yd(p.v); if(i===0) gc.moveTo(x,y); else gc.lineTo(x,y); }); gc.stroke();
+    sDraft.forEach(p=>{ const x=X(p.t), y=Yd(p.v); gc.fillStyle='#38bdf8'; gc.fillRect(x-2,y-2,4,4); });
+  }
+  // CO — зелена
+  if(sCO.length){
+    gc.beginPath(); gc.strokeStyle='#22c55e';
+    sCO.forEach((p,i)=>{ const x=X(p.t), y=Yc(p.v); if(i===0) gc.moveTo(x,y); else gc.lineTo(x,y); }); gc.stroke();
+    sCO.forEach(p=>{ const x=X(p.t), y=Yc(p.v); gc.fillStyle='#22c55e'; gc.fillRect(x-2,y-2,4,4); });
+  }
+  // Норми
+  const dMin=parseFloat($('#draftMin').value)||5;
+  const coMax=parseFloat($('#coMax').value)||50;
+  // Лінія 0 Па
+  gc.strokeStyle='#64748b'; gc.beginPath(); gc.moveTo(left, Yd(0)); gc.lineTo(right, Yd(0)); gc.stroke();
+  // Мін. тяга
+  gc.strokeStyle='#fbbf24'; gc.beginPath(); gc.moveTo(left, Yd(dMin)); gc.lineTo(right, Yd(dMin)); gc.stroke();
+  // Макс. CO
+  gc.strokeStyle='#f87171'; gc.beginPath(); gc.moveTo(left, Yc(coMax)); gc.lineTo(right, Yc(coMax)); gc.stroke();
+
+  gc.fillStyle='#94a3b8'; gc.font='11px ui-monospace';
+  gc.fillText('Па (ліва, 0 по центру) / ppm (права)', left, top-6);
+  gc.fillStyle='#38bdf8'; gc.fillRect(right+4, top, 12, 4); gc.fillStyle='#e5e7eb'; gc.fillText('Тяга', right+20, top+4);
+  gc.fillStyle='#22c55e'; gc.fillRect(right+4, top+16, 12, 4); gc.fillStyle='#e5e7eb'; gc.fillText('CO', right+20, top+20);
+  gc.fillStyle='#fbbf24'; gc.fillRect(right+4, top+32, 12, 4); gc.fillStyle='#e5e7eb'; gc.fillText('Мін. тяга', right+20, top+36);
+  gc.fillStyle='#f87171'; gc.fillRect(right+4, top+48, 12, 4); gc.fillStyle='#e5e7eb'; gc.fillText('Макс. CO', right+20, top+52);
+}
+// Імітація 10 с
+let autoTimer=null, autoI=0;
+$('#autoRun').addEventListener('click',()=>{
+  if(autoTimer){ clearInterval(autoTimer); autoTimer=null; }
+  autoI=0; let d=parseFloat($('#draft').value)||9.5; let c=parseFloat($('#co').value)||12;
+  autoTimer=setInterval(()=>{
+    autoI++;
+    d += (Math.random()-0.5)*0.8; d=Math.max(-5,Math.min(30,d));
+    c += (Math.random()-0.5)*5;   c=Math.max(0,Math.min(300,c));
+    $('#draft').value=d.toFixed(1); $('#draftNum').textContent=d.toFixed(1); addPoint(sDraft, parseFloat(d.toFixed(1)));
+    $('#co').value=c.toFixed(0);   $('#coNum').textContent=String(parseInt(c.toFixed(0))); addPoint(sCO, parseInt(c.toFixed(0)));
+    if(autoI>=10){ clearInterval(autoTimer); autoTimer=null; log('Імітацію завершено'); }
+  },1000);
+});
+
+// ===== KPI
+let KPI={draftMin:5.0, coMax:50};
+$('#applyKPI').addEventListener('click',()=>{ KPI.draftMin=parseFloat($('#draftMin').value)||5; KPI.coMax=parseFloat($('#coMax').value)||50; computeKPI(); updateMetrics(); log(`KPI: мін. тяга ${KPI.draftMin} Па, макс. CO ${KPI.coMax} ppm`); });
+function computeKPI(){
+  const dOk = sDraft.length? (sDraft.reduce((a,b)=>a+b.v,0)/sDraft.length)>=KPI.draftMin : (parseFloat($('#draft').value)||0)>=KPI.draftMin;
+  const cOk = sCO.length? (sCO.reduce((a,b)=>a+b.v,0)/sCO.length)<=KPI.coMax : (parseFloat($('#co').value)||0)<=KPI.coMax;
+  $('#kDraft').textContent = dOk? 'OK' : 'LOW';
+  $('#kCO').textContent    = cOk? 'OK' : 'HIGH';
+  $('#kAll').textContent   = (dOk&&cOk)? 'Придатно до пуску' : (dOk||cOk)? 'Частково ОК' : 'Не придатно';
+  updateState();
+}
+
+// ===== Камера / фото
+let stream=null;
+async function startCam(){
+  try{ stream = await navigator.mediaDevices.getUserMedia({video:true,audio:false}); $('#vid').srcObject=stream; log('Камеру увімкнено'); }
+  catch(e){ alert('Камеру заблоковано або недоступно'); }
+}
+$('#camOn').addEventListener('click', startCam);
+function takeShot(kind){
+  const video=$('#vid'); if(!video.srcObject){ alert('Спершу увімкни камеру'); return; }
+  const c=document.createElement('canvas'); c.width=video.videoWidth||640; c.height=video.videoHeight||480;
+  c.getContext('2d').drawImage(video,0,0,c.width,c.height);
+  const url=c.toDataURL('image/png'); photos[kind]=url; renderGallery(); log(`Фото: ${kind}`); updateMetrics();
+}
+$$('button[data-kind]').forEach(b=>b.addEventListener('click',()=>takeShot(b.dataset.kind)));
+function renderGallery(){
+  const gal=$('#gal'); gal.innerHTML='';
+  if(photos.plate){ const i=document.createElement('img'); i.className='photo'; i.src=photos.plate; i.alt='plate'; gal.appendChild(i); }
+  if(photos.flue){ const i=document.createElement('img'); i.className='photo'; i.src=photos.flue; i.alt='flue'; gal.appendChild(i); }
+  if(photos.flame){ const i=document.createElement('img'); i.className='photo'; i.src=photos.flame; i.alt='flame'; gal.appendChild(i); }
+}
+
+// ===== Аудіо (MediaRecorder)
+let mediaStream=null, mediaRec=null, chunks=[];
+$('#audStart').addEventListener('click', async ()=>{
+  try{
+    mediaStream = await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRec = new MediaRecorder(mediaStream); chunks=[];
+    mediaRec.ondataavailable = e=>{ if(e.data.size>0) chunks.push(e.data); };
+    mediaRec.onstop = ()=>{ audBlob=new Blob(chunks,{type:'audio/webm'}); audUrl=URL.createObjectURL(audBlob); $('#audPlay').src=audUrl; $('#audStat').textContent='Є запис'; log('Аудіо: готово'); updateMetrics(); };
+    mediaRec.start(); $('#audStat').textContent='Йде запис...'; log('Аудіо: старт');
+  }catch(e){ alert('Мікрофон недоступний'); }
+});
+$('#audStop').addEventListener('click',()=>{
+  if(mediaRec && mediaRec.state!=='inactive'){ mediaRec.stop(); mediaStream.getTracks().forEach(t=>t.stop()); $('#audStat').textContent='Зупинено'; log('Аудіо: стоп'); }
+});
+$('#audSave').addEventListener('click',()=>{
+  if(!audBlob){ alert('Немає запису'); return; }
+  const a=document.createElement('a'); a.href=audUrl; a.download='audio_'+(CASE_ID||'case')+'_'+stamp()+'.webm'; document.body.appendChild(a); a.click(); a.remove(); log('Аудіо: збережено');
+});
+
+// ===== Підпис
+const sig=$('#sig'), ctx=sig.getContext('2d');
+let drawing=false, last=null, hasInk=false;
+function xy(e){ const r=sig.getBoundingClientRect(); const t=e.touches? e.touches[0]:e; return {x:(t.clientX-r.left)*sig.width/r.width, y:(t.clientY-r.top)*sig.height/r.height}; }
+function line(a,b){ ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.strokeStyle='#e5e7eb'; ctx.lineWidth=2; ctx.lineCap='round'; ctx.stroke(); }
+sig.addEventListener('pointerdown',e=>{ drawing=true; last=xy(e); hasInk=true; });
+sig.addEventListener('pointermove',e=>{ if(!drawing) return; const p=xy(e); line(last,p); last=p; });
+sig.addEventListener('pointerup',()=>{ drawing=false; last=null; });
+sig.addEventListener('pointerleave',()=>{ drawing=false; last=null; });
+$('#sigClear').addEventListener('click',()=>{ ctx.clearRect(0,0,sig.width,sig.height); hasInk=false; $('#sigStat').textContent='Підпису немає'; updateMetrics(); });
+$('#sigSave').addEventListener('click',()=>{ if(!hasInk){ alert('Немає підпису'); return; } sigUrl=sig.toDataURL('image/png'); $('#sigStat').textContent='Підпис збережено'; const a=document.createElement('a'); a.href=sigUrl; a.download='signature_'+(CASE_ID||'case')+'_'+stamp()+'.png'; document.body.appendChild(a); a.click(); a.remove(); log('Підпис збережено (png)'); updateMetrics(); });
+
+// ===== Метрики/стан
+function updateState(){
+  let score=0;
+  const caseOk=!!CASE_ID;
+  const routeOk=STEPS.every(s=>s.ok);
+  const ptsOk=(sDraft.length+sCO.length)>=10;
+  const kpiOk = ($('#kDraft').textContent==='OK' && $('#kCO').textContent==='OK');
+  const mediaOk = (photos.plate && photos.flue && photos.flame) || !!audBlob;
+  const signOk = !!sigUrl;
+
+  if(caseOk)score+=2;
+  if(routeOk)score+=3;
+  if(ptsOk)score+=2;
+  if(kpiOk)score+=2;
+  if(mediaOk && signOk)score+=1;
+
+  const html = score>=9? `<b class="ok">Готово (≈${score}/10)</b>`:
+               score>=6? `<b class="warn">Більшість виконано (≈${score}/10)</b>`:
+                         `<b class="bad">Потрібно доробити (≈${score}/10)</b>`;
+  $('#mState').innerHTML=html;
+}
+function updateMetrics(){
+  $('#mCase').textContent = CASE_ID||'—';
+  $('#mEquip').textContent = `${$('#equip').value||'—'} (${($('#model').value||'—')})`;
+  $('#mRoute').textContent = `${STEPS.filter(s=>s.ok).length} / ${STEPS.length}`;
+  $('#mPts').textContent = `${sDraft.length} / ${sCO.length}`;
+  $('#mKPI').textContent = `${$('#kDraft').textContent} / ${$('#kCO').textContent} / ${$('#kAll').textContent}`;
+  $('#mPhotos').textContent = `${photos.plate?1:0} / ${photos.flue?1:0} / ${photos.flame?1:0}`;
+  $('#mAud').textContent = audBlob?'є':'—';
+  $('#mSig').textContent = sigUrl?'є':'—';
+  computeKPI(); updateState();
+}
+
+// ===== Експорт / чек / QR
+function summary(){
+  const addr=$('#addr').value||'—', tech=$('#tech').value||'—', day=$('#day').value||'—';
+  return {
+    case: CASE_ID||'—', addr, tech, day,
+    equipment: {type: $('#equip').value||'—', model: $('#model').value||'—'},
+    route: Object.fromEntries(STEPS.map(s=>[s.k,{ok:s.ok,dur_s:s.dur}])),
+    points: {
+      draft: sDraft.map(p=>({t:new Date(p.t).toISOString(), Pa:p.v})),
+      co: sCO.map(p=>({t:new Date(p.t).toISOString(), ppm:p.v}))
+    },
+    kpi: {draft: $('#kDraft').textContent, co: $('#kCO').textContent, overall: $('#kAll').textContent},
+    media: {photos: {plate:!!photos.plate, flue:!!photos.flue, flame:!!photos.flame}, audio: !!audBlob},
+    signature: !!sigUrl
+  };
+}
+$('#saveCsv').addEventListener('click',()=>{
+  const s=summary();
+  let csv='field,value\n';
+  for(const [k,v] of Object.entries(s)){
+    if(k==='points') continue;
+    if(typeof v==='object'){ csv+=`${k},${JSON.stringify(v).replace(/,/g,';')}\n`; }
+    else csv+=`${k},${String(v).replace(/,/g,';')}\n`;
+  }
+  csv+='\n# draft_points\niso_time,Pa\n';
+  s.points.draft.forEach(p=>{ csv+=`${p.t},${p.Pa}\n`; });
+  csv+='\n# co_points\niso_time,ppm\n';
+  s.points.co.forEach(p=>{ csv+=`${p.t},${p.ppm}\n`; });
+  download('gas_para13_commission_'+stamp()+'.csv', csv, 'text/csv'); log('Експортовано CSV');
+});
+$('#saveTxt').addEventListener('click',()=>{
+  const s=summary();
+  const lines=[
+    'Пара 13 — Акт вводу в експлуатацію: підсумок',
+    `Кейс: ${s.case}`, `Адреса: ${s.addr}`, `Обладнання: ${s.equipment.type} (${s.equipment.model})`,
+    `Виконавець: ${s.tech}`, `Дата: ${s.day}`,
+    `Маршрут: ${Object.entries(s.route).map(([k,v])=>k+':'+(v.ok?'OK':'—')).join(', ')}`,
+    `KPI: тяга=${s.kpi.draft}, CO=${s.kpi.co}, статус=${s.kpi.overall}`,
+    `Фото (plate/flue/flame): ${s.media.photos.plate?'1':'0'} / ${s.media.photos.flue?'1':'0'} / ${s.media.photos.flame?'1':'0'}; Аудіо: ${s.media.audio?'є':'—'}`,
+    `Підпис: ${s.signature?'є':'—'}`,
+    `--- Точок: Draft=${s.points.draft.length}, CO=${s.points.co.length} ---`
+  ];
+  download('gas_para13_commission_'+stamp()+'.txt', lines.join('\n')); log('Експортовано TXT');
+});
+$('#print58').addEventListener('click',()=>{
+  const s=summary(); const rc=$('#rc'); rc.hidden=false;
+  const lines=[
+'=== COMMISSION (58мм) ===',
+'Case: '+s.case,
+'Date: '+s.day,
+'Equip:'+s.equipment.type,
+'Model:'+s.equipment.model,
+'Route:'+Object.entries(s.route).map(([k,v])=>k[0].toUpperCase()+':'+(v.ok?'Y':'N')).join(' '),
+'KPI:  D:'+s.kpi.draft+' CO:'+s.kpi.co+' '+s.kpi.overall,
+'Pts:  D'+s.points.draft.length+' C'+s.points.co.length,
+'Photo:'+(s.media.photos.plate?1:0)+'/'+(s.media.photos.flue?1:0)+'/'+(s.media.photos.flame?1:0)+' Aud:'+(s.media.audio?'Y':'N')+' Sign:'+(s.signature?'Y':'N'),
+'--------------------------'
+  ];
+  rc.textContent=lines.join('\n');
+  download('gas_para13_receipt_'+stamp()+'.txt', rc.textContent);
+  log('Згенеровано чек 58мм');
+});
+$('#qrGen').addEventListener('click',()=>{
+  const def=CASE_ID||'commission';
+  const data=prompt('Встав URL/ID (Case):', def);
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const img=new Image(); img.crossOrigin='anonymous';
+  img.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(img,0,0,220,220); };
+  img.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  img.src=url; log('Згенеровано QR');
+});
+
+// ===== Ініт
+function initDefaults(){ const d=new Date(); $('#day').value=d.toISOString().slice(0,10); }
+initDefaults(); updateMetrics(); computeKPI(); drawChart();
+
+// Вбудоване відображення (Moodle/iFrame)
+(function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+</script>
+</body>
+</html>
