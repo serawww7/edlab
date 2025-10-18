@@ -11,6 +11,7 @@ const SECTIONS = [
   { dir: 'agro_II_kyrs',  label: 'Агрономія',            pat: /^agro_para(\d+)\.html$/i,       titleFmt: (n)=>`Агрономія — Пара ${n}` },
   { dir: 'elect_II_kyrs', label: 'Електроенергетика',    pat: /^electric_para(\d+)\.html$/i,   titleFmt: (n)=>`Електроенергетика — Пара ${n}` },
   { dir: 'mech_II_kyrs',  label: 'Механізація (механіки)', pat: /^mechanic_para(\d+)\.html$/i, titleFmt: (n)=>`Механізація — Пара ${n}` },
+  { dir: 'gas_II_kyrs',  label: 'Будівництво та цивільна інженерія (газовики)', pat: /^gas_para(\d+)\.html$/i, titleFmt: (n)=>`Газовики — Пара ${n}` },
   { dir: 'tech_II_kyrs',  label: 'Технології тваринництва', pat: /^tech_para(\d+)\.html$/i,    titleFmt: (n)=>`Технології тваринництва — Пара ${n}` },
   { dir: 'coach',         label: 'Coach',                pat: /^(.*)\.html$/i,                 titleFmt: (n, base)=>`Коучинг — ${humanize(base)}` }
 ];
