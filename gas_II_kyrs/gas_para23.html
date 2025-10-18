@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 23 (газовики) — AI-архів актів: PDF/JPEG → реквізити → пошук → дублікати → дашборд → експорт</title>
+<meta name="description" content="AI-архів: завантаж PDF/JPEG актів, автоматичний витяг реквізитів (№, дата, адреса, абонент, телефон, пріоритет, відповідальний), пошук/фільтри, дублікати, дашборд, експорт CSV/TXT, QR."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1320px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.grid{display:grid;gap:14px;grid-template-columns:1.2fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:#e6eef9}
+textarea{min-height:100px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:#e6eef9;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:#e5e7eb;margin-right:6px;margin-top:6px}
+.muted{color:var(--muted)}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+pre.log{max-height:220px;overflow:auto;background:#0c182a;border-radius:12px;padding:10px}
+canvas.chart{display:block;width:100%;height:220px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+canvas.pie{display:block;width:100%;height:220px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre}
+.footer{margin-top:20px;color:#94a3b8;font-size:.9rem}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 10px;color:#e5e7eb}
+.tag.ok{border-color:#1d3e2a;background:#0f2f1e}
+.tag.warn{border-color:#4a3b13;background:#2b2310}
+.tag.bad{border-color:#5a1f1f;background:#2a1212}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.kpi .card{margin-top:0}
+@media(max-width:900px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🗂️🤖</span>
+      <div>
+        <b>Пара 23 — AI-архів актів</b><br/>
+        <span class="badge">PDF/JPEG → текст → реквізити → фільтри/пошук → дублікати → дашборд → експорт</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <!-- Ввід / керування -->
+  <div class="card">
+    <h2>📚 Контекст</h2>
+    <p>Завантаж <b>PDF</b> або <b>зображення</b> актів — система витягне текст, розпарсить <b>№ акта, дату/час, адресу, абонента, телефон, пріоритет (P1/P2/P3), відповідального</b>, 
+    позначить <b>дублікати</b>, надасть <b>пошук</b> і <b>фільтри</b>, побудує <b>дашборд</b>, збереже у <b>CSV/TXT</b> і згенерує <b>QR</b> на папку з оригіналами.</p>
+    <div class="row">
+      <input id="files" type="file" accept=".pdf,image/*" multiple class="input" style="max-width:420px"/>
+      <button class="btn" id="run">▶️ Обробити</button>
+      <button class="btn secondary" id="clear">🧹 Очистити</button>
+      <span class="badge">Файлів: <b id="nFiles">0</b></span>
+      <span class="badge">Актів: <b id="nActs">0</b></span>
+      <span class="badge">Дублікатів: <b id="nDup">0</b></span>
+    </div>
+    <div class="row">
+      <label>Пошук (текст/адреса/№/тел) <input id="q" class="input" placeholder="Напр.: Симиренка 12 або ACT-2025-001"></label>
+      <label>Від <input id="from" class="input" type="date"></label>
+      <label>До <input id="to" class="input" type="date"></label>
+      <label>Пріоритет
+        <select id="prio" class="input">
+          <option value="">всі</option>
+          <option>P1</option><option>P2</option><option>P3</option>
+        </select>
+      </label>
+      <label>Відповідальний <input id="resp" class="input" placeholder="Прізвище/бригада"></label>
+      <button class="btn good" id="apply">🔎 Застосувати фільтри</button>
+      <button class="btn secondary" id="reset">🔄 Скинути</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Ліва колонка: таблиця -->
+    <div class="card">
+      <h2>🧾 Акти (витягнуті реквізити)</h2>
+      <table class="tbl" id="tbl">
+        <thead>
+          <tr>
+            <th>#</th><th>Файл</th><th>№ акта</th><th>Дата/час</th><th>Адреса</th><th>Абонент</th><th>Телефон</th><th>Пріор</th><th>Відповідальний</th><th>Дубль?</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"><tr><td colspan="10" class="muted">— ще порожньо —</td></tr></tbody>
+      </table>
+
+      <h3 style="margin-top:10px">🛎️ Журнал</h3>
+      <pre id="alog" class="log">// Поки без подій</pre>
+
+      <h3 style="margin-top:10px">💾 Експорт / QR</h3>
+      <div class="row">
+        <button class="btn" id="saveCsv">📄 CSV</button>
+        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (папка з оригіналами)</button>
+      </div>
+      <div style="margin-top:8px"><canvas id="qr" width="220" height="220" style="background:#0b1220;border:1px solid var(--line);border-radius:12px"></canvas></div>
+    </div>
+
+    <!-- Права колонка: дашборд -->
+    <div class="card">
+      <h2>📊 Дашборд відповідальності</h2>
+
+      <div class="kpi">
+        <div class="card"><span class="tag ok">Всього актів: <b id="kAll">0</b></span></div>
+        <div class="card"><span class="tag bad">P1: <b id="kP1">0</b></span></div>
+        <div class="card"><span class="tag warn">P2: <b id="kP2">0</b></span></div>
+        <div class="card"><span class="tag ok">P3: <b id="kP3">0</b></span></div>
+      </div>
+
+      <h3 style="margin-top:10px">📈 Гістограма по датах</h3>
+      <canvas id="cBar" class="chart" width="520" height="220"></canvas>
+
+      <h3 style="margin-top:10px">🏅 Топ-відповідальні (за кількістю актів)</h3>
+      <canvas id="cTop" class="chart" width="520" height="220"></canvas>
+
+      <h3 style="margin-top:10px">☀️ «Сонечко» пріоритетів</h3>
+      <canvas id="cPie" class="pie" width="520" height="220"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Завдання для студентів</h2>
+    <ol>
+      <li>Завантаж 5–10 актів у PDF/JPEG. Перевір, що AI правильно витягнув реквізити, і виправи помилки безпосередньо в таблиці (подвійний клік по клітинці).</li>
+      <li>Використай фільтри (дата/пріоритет/відповідальний), сформуй вибірку «ризикових» і експортуй у CSV/TXT.</li>
+      <li>Увімкни виявлення дублікатів (є автоматично): проаналізуй, чому вони виникли, і як уникати на практиці.</li>
+      <li>Покажи дашборд бригадиру: розподіл P1/P2/P3, пікові дні, топ відвовідальні. Сформулюй висновки й рекомендації.</li>
+    </ol>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<!-- Ліби для витягу тексту -->
+<script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js";</script>
+<script src="https://unpkg.com/tesseract.js@5.0.3/dist/tesseract.min.js"></script>
+
+<script>
+/* ===== Утиліти/UI ===== */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString('uk-UA');const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+$('#upd').textContent=new Date().toLocaleDateString('uk-UA');
+function norm(s){return String(s||'').normalize('NFKC').replace(/\s+/g,' ').trim();}
+function onlyDigits(s){return String(s||'').replace(/\D+/g,'');}
+
+/* ===== Стан ===== */
+let FILES=[];           // {name,type,blob}
+let RECORDS=[];         // {id,name,actNo,date,address,abonent,phone,priority,responsible,dupKey,dupFlag,text}
+let FILTERS={q:'',from:'',to:'',prio:'',resp:''};
+
+/* ===== Події керування ===== */
+$('#files').addEventListener('change', (e)=>{
+  FILES = Array.from(e.target.files||[]);
+  $('#nFiles').textContent=String(FILES.length);
+  log(`Обрано файлів: ${FILES.length}`);
+});
+$('#clear').addEventListener('click', ()=>{
+  FILES=[]; RECORDS=[]; $('#files').value=''; $('#nFiles').textContent='0'; $('#nActs').textContent='0'; $('#nDup').textContent='0';
+  $('#tbody').innerHTML='<tr><td colspan="10" class="muted">— ще порожньо —</td></tr>';
+  drawBar([]); drawTop([]); drawPie(0,0,0);
+  kpis(0,0,0,0);
+  log('Скинуто стан');
+});
+$('#run').addEventListener('click', processAll);
+$('#apply').addEventListener('click', ()=>{
+  FILTERS={ q:$('#q').value.trim(), from:$('#from').value, to:$('#to').value, prio:$('#prio').value, resp:$('#resp').value.trim() };
+  renderTable(); renderDash();
+});
+$('#reset').addEventListener('click', ()=>{
+  $('#q').value=''; $('#from').value=''; $('#to').value=''; $('#prio').value=''; $('#resp').value='';
+  FILTERS={q:'',from:'',to:'',prio:'',resp:''}; renderTable(); renderDash();
+});
+
+/* ===== Витяг тексту з PDF/JPEG ===== */
+async function extractFromPDF(file){
+  const array = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data:array}).promise;
+  let text=''; 
+  for(let p=1;p<=pdf.numPages;p++){
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    text += content.items.map(it=>it.str).join(' ') + '\n';
+  }
+  return text;
+}
+async function extractFromImage(file){
+  const data = await file.arrayBuffer();
+  const blob = new Blob([data], {type:file.type});
+  const url = URL.createObjectURL(blob);
+  const img = new Image(); img.src=url; await img.decode();
+  // downscale для стабільності
+  const W=Math.min(img.naturalWidth, 1800), H=Math.round(img.naturalHeight*(W/img.naturalWidth));
+  const c=document.createElement('canvas'); c.width=W; c.height=H; const g=c.getContext('2d');
+  g.drawImage(img,0,0,W,H);
+  URL.revokeObjectURL(url);
+  const { data: { text } } = await Tesseract.recognize(c, 'uk+eng', { preserve_interword_spaces:'1' });
+  return text;
+}
+
+/* ===== Парсер реквізитів ===== */
+const RX={
+  actNo: /(Акт|Акт\s*№|№\s*акта|Act|ACT|№)\s*[:#\-]?\s*([A-ZА-ЯІЇЄҐ]{1,4}[- ]?\d{2,4}[- ]?\d{2,6}|\d{5,10})/ui,
+  date: /(\b\d{4}[-./]\d{1,2}[-./]\d{1,2}\b|\b\d{1,2}[./-]\d{1,2}[./-]\d{2,4}\b)(?:\s+[T ]?(\d{1,2}[:.]\d{2}))?/,
+  phone: /(?:\+?380|0)\s?\d{2}\s?\d{3}\s?\d{2}\s?\d{2}|\+?38\s?0\d{2}[-\s]?\d{3}[-\s]?\d{2}[-\s]?\d{2}/,
+  abon: /(абонент|клієнт|замовник)\s*[:\-]?\s*([A-ZА-ЯІЇЄҐ][\p{L}ʼ’'\-]+(?:\s+[A-ZА-ЯІЇЄҐ][\p{L}ʼ’'\-]+){0,2}|ТОВ «[^»]+»|ФОП [^.,;]+)/ui,
+  addr: /(м\.|місто|Київ|Бровари|Ірпінь|Буча|Біла Церква|Вишневе|Обухів|[\p{Lu}\p{Ll}ʼ’\-]+)\s*,?\s*(вул\.|вулиця|просп\.|проспект|бульв\.|пров\.|провулок|шосе|пр-т)\s*[\p{L}\d\s\-.]+(?:,\s*(?:кв\.|оф\.)\s*\d+)?/ui,
+  prio: /\b(P[123])\b/,
+  resp: /(відповідальн(ий|а)|виконавець|бригада)\s*[:\-]?\s*([A-ZА-ЯІЇЄҐ][\p{L}ʼ’'\-]+(?:\s+[A-ZА-ЯІЇЄҐ][\p{L}ʼ’'\-]+)?)/ui
+};
+function parseText(name, text){
+  const t=norm(text);
+  const mNo=t.match(RX.actNo); const actNo = mNo? mNo[2].replace(/\s+/g,'').toUpperCase() : '';
+  const mDt=t.match(RX.date); let date='', time='';
+  if(mDt){ date=mDt[1].replace(/[.]/g,'-'); time=(mDt[2]||'').replace('.',':'); }
+  const mPh=t.match(RX.phone); const phone=mPh? mPh[0].replace(/\s+/g,''): '';
+  const mAb=t.match(RX.abon); const abonent=mAb? norm(mAb[2]) : '';
+  const mAd=t.match(RX.addr); const address=mAd? norm(mAd[0]) : '';
+  const mPr=t.match(RX.prio); const priority=mPr? mPr[1].toUpperCase() : '';
+  const mRs=t.match(RX.resp); const responsible=mRs? norm(mRs[3]) : '';
+  const iso = toISO(date, time);
+  return {name, actNo, date:iso, address, abonent, phone, priority, responsible, text:t};
+}
+function toISO(d, t){
+  if(!d) return '';
+  let [y,m,dd]=d.includes('-')? d.split('-'): d.split(/[./]/).reverse();
+  if(y.length===2) y='20'+y;
+  m=m.padStart(2,'0'); dd=dd.padStart(2,'0');
+  let hh='00', mm='00';
+  if(t){ [hh,mm]=t.split(':'); hh=hh.padStart(2,'0'); mm=mm.padStart(2,'0'); }
+  return `${y}-${m}-${dd}${t? ' '+hh+':'+mm:''}`;
+}
+
+/* ===== Дублікатор: ключ + схожість адреси ===== */
+function jaccard(a,b){
+  const ta=new Set(norm(a).toLowerCase().split(/[^a-zа-яіїєґ0-9]+/i).filter(Boolean));
+  const tb=new Set(norm(b).toLowerCase().split(/[^a-zа-яіїєґ0-9]+/i).filter(Boolean));
+  const inter=[...ta].filter(x=>tb.has(x)).length;
+  return inter / Math.max(1, new Set([...ta,...tb]).size);
+}
+function duplicateFlag(r, i, all){
+  // дубль якщо: співпав № акта (непорожній) АБО (дата близька і адреса дуже схожа)
+  if(r.actNo){
+    const sameNo = all.findIndex((x,idx)=> idx<i && x.actNo && x.actNo===r.actNo);
+    if(sameNo>=0) return {dup:true, reason:'Однаковий № акта'};
+  }
+  if(r.date && r.address){
+    const sameDay = all.findIndex((x,idx)=>{
+      if(idx>=i || !x.date || !x.address) return false;
+      return x.date.slice(0,10)===r.date.slice(0,10) && jaccard(x.address, r.address)>=0.7;
+    });
+    if(sameDay>=0) return {dup:true, reason:'Схожа адреса в той самий день'};
+  }
+  return {dup:false, reason:''};
+}
+
+/* ===== Обробка всіх файлів ===== */
+async function processAll(){
+  if(!FILES.length){ alert('Не обрано файлів'); return; }
+  RECORDS=[]; $('#tbody').innerHTML='<tr><td colspan="10" class="muted">— обробка… —</td></tr>';
+  for(let i=0;i<FILES.length;i++){
+    const f=FILES[i];
+    try{
+      const text = f.type==='application/pdf'? await extractFromPDF(f) : await extractFromImage(f);
+      const rec = parseText(f.name, text);
+      RECORDS.push({...rec, id:i+1});
+      log(`OK: ${f.name} → акт ${rec.actNo||'—'}; дата ${rec.date||'—'}`);
+    }catch(e){
+      log(`Помилка: ${f.name} (${e.message||e})`);
+    }
+  }
+  // позначити дублікати
+  let dupCount=0;
+  for(let i=0;i<RECORDS.length;i++){
+    const r=RECORDS[i];
+    const d=duplicateFlag(r,i,RECORDS);
+    r.dupFlag=d.dup; r.dupKey=d.reason;
+    if(d.dup) dupCount++;
+  }
+  $('#nActs').textContent=String(RECORDS.length);
+  $('#nDup').textContent=String(dupCount);
+  renderTable(); renderDash();
+}
+
+/* ===== Рендер таблиці + inline-редагування ===== */
+function renderTable(){
+  const tb=$('#tbody'); tb.innerHTML='';
+  const rows = applyFilters(RECORDS);
+  if(rows.length===0){ tb.innerHTML='<tr><td colspan="10" class="muted">— нічого не знайдено —</td></tr>'; return; }
+  rows.forEach((r,idx)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${idx+1}</td>
+      <td>${escapeHtml(r.name)}</td>
+      <td data-k="actNo">${escapeHtml(r.actNo||'—')}</td>
+      <td data-k="date">${escapeHtml(r.date||'—')}</td>
+      <td data-k="address">${escapeHtml(r.address||'—')}</td>
+      <td data-k="abonent">${escapeHtml(r.abonent||'—')}</td>
+      <td data-k="phone">${escapeHtml(r.phone||'—')}</td>
+      <td data-k="priority" class="${r.priority==='P1'?'bad':r.priority==='P2'?'warn':'ok'}"><b>${escapeHtml(r.priority||'—')}</b></td>
+      <td data-k="responsible">${escapeHtml(r.responsible||'—')}</td>
+      <td>${r.dupFlag? '<span class="tag bad">Дубль • '+escapeHtml(r.dupKey)+'</span>':'—'}</td>`;
+    // inline edit
+    tr.querySelectorAll('[data-k]').forEach(td=>{
+      td.addEventListener('dblclick',()=>{
+        const k=td.dataset.k, old=td.textContent.trim();
+        const inp=document.createElement('input'); inp.className='input'; inp.value=old==='—'?'':old;
+        td.innerHTML=''; td.appendChild(inp); inp.focus();
+        inp.addEventListener('blur',()=>{ const v=inp.value.trim(); td.innerHTML=escapeHtml(v||'—'); r[k]=v; renderDash(); });
+        inp.addEventListener('keydown',e=>{ if(e.key==='Enter') inp.blur(); });
+      });
+    });
+    tb.appendChild(tr);
+  });
+}
+
+function applyFilters(arr){
+  const q=FILTERS.q.toLowerCase();
+  const from=FILTERS.from? new Date(FILTERS.from): null;
+  const to=FILTERS.to? new Date(FILTERS.to): null;
+  return arr.filter(r=>{
+    if(q){
+      const hay=(r.name+' '+r.actNo+' '+r.address+' '+r.abonent+' '+r.phone).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    if(from && r.date){ if(new Date(r.date) < from) return false; }
+    if(to && r.date){ if(new Date(r.date) > new Date(to.getTime()+24*3600*1000)) return false; }
+    if(FILTERS.prio && r.priority!==FILTERS.prio) return false;
+    if(FILTERS.resp && !norm(r.responsible).toLowerCase().includes(norm(FILTERS.resp).toLowerCase())) return false;
+    return true;
+  });
+}
+
+/* ===== Дашборд ===== */
+const cBar=$('#cBar'), gb=cBar.getContext('2d');
+const cTop=$('#cTop'), gt=cTop.getContext('2d');
+const cPie=$('#cPie'), gp=cPie.getContext('2d');
+
+function kpis(all,p1,p2,p3){ $('#kAll').textContent=all; $('#kP1').textContent=p1; $('#kP2').textContent=p2; $('#kP3').textContent=p3; }
+
+function renderDash(){
+  const rows=applyFilters(RECORDS);
+  const p1=rows.filter(r=>r.priority==='P1').length;
+  const p2=rows.filter(r=>r.priority==='P2').length;
+  const p3=rows.filter(r=>r.priority==='P3').length;
+  kpis(rows.length,p1,p2,p3);
+
+  // Гістограма по датах (YYYY-MM-DD)
+  const byDay={};
+  rows.forEach(r=>{ const d=(r.date||'').slice(0,10)||'(без дати)'; byDay[d]=(byDay[d]||0)+1; });
+  const X=Object.keys(byDay).sort(); const Y=X.map(k=>byDay[k]);
+  drawBar(X.map((d,i)=>({x:d,y:Y[i]})));
+
+  // Топ відповідальні
+  const byResp={};
+  rows.forEach(r=>{ const k=r.responsible||'(—)'; byResp[k]=(byResp[k]||0)+1; });
+  const top = Object.entries(byResp).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k,v])=>({x:k,y:v}));
+  drawTop(top);
+
+  // Пиріг пріоритетів
+  drawPie(p1,p2,p3);
+}
+
+function drawBar(points){
+  const W=cBar.width,H=cBar.height; gb.clearRect(0,0,W,H);
+  gb.strokeStyle='#223049'; gb.strokeRect(0.5,0.5,W-1,H-1);
+  if(points.length===0){ gb.fillStyle='#94a3b8'; gb.fillText('Немає даних', 16, 24); return; }
+  const left=40,right=W-10,top=20,bottom=H-26;
+  const max=Math.max(...points.map(p=>p.y),1);
+  const bw=(right-left)/points.length;
+  gb.strokeStyle='#1f2a44'; for(let i=0;i<=4;i++){ const y=top+i*(bottom-top)/4; gb.beginPath(); gb.moveTo(left,y); gb.lineTo(right,y); gb.stroke(); }
+  points.forEach((p,i)=>{
+    const x=left+i*bw+4; const h=(p.y/max)*(bottom-top);
+    gb.fillStyle='#38bdf8'; gb.fillRect(x, bottom-h, bw-8, h);
+    if(points.length<=24){ gb.fillStyle='#e5e7eb'; gb.font='10px ui-monospace'; gb.fillText(String(p.x).slice(5), x+2, bottom-4); }
+  });
+}
+
+function drawTop(points){
+  const W=cTop.width,H=cTop.height; gt.clearRect(0,0,W,H);
+  gt.strokeStyle='#223049'; gt.strokeRect(0.5,0.5,W-1,H-1);
+  if(points.length===0){ gt.fillStyle='#94a3b8'; gt.fillText('Немає даних', 16, 24); return; }
+  const left=120,right=W-10,top=20,bottom=H-20;
+  const max=Math.max(...points.map(p=>p.y),1);
+  const rowH=(bottom-top)/points.length;
+  gt.strokeStyle='#1f2a44'; for(let i=0;i<=4;i++){ const x=left+i*(right-left)/4; gt.beginPath(); gt.moveTo(x,top); gt.lineTo(x,bottom); gt.stroke(); }
+  points.forEach((p,i)=>{
+    const y=top+i*rowH+6; const w=(p.y/max)*(right-left-10);
+    gt.fillStyle='#22c55e'; gt.fillRect(left, y, w, rowH-12);
+    gt.fillStyle='#e5e7eb'; gt.font='11px ui-monospace'; gt.fillText(`${p.x} — ${p.y}`, 8, y+rowH/2);
+  });
+}
+
+function drawPie(p1,p2,p3){
+  const W=cPie.width,H=cPie.height; gp.clearRect(0,0,W,H);
+  gp.strokeStyle='#223049'; gp.strokeRect(0.5,0.5,W-1,H-1);
+  const total=p1+p2+p3;
+  if(total===0){ gp.fillStyle='#94a3b8'; gp.fillText('Немає даних', 16, 24); return; }
+  const cx=W/2, cy=H/2, R=Math.min(W,H)/2-20;
+  const segs=[{v:p1,c:'#f87171',t:'P1'},{v:p2,c:'#fbbf24',t:'P2'},{v:p3,c:'#22c55e',t:'P3'}];
+  let a0=0;
+  segs.forEach(s=>{
+    const a1=a0+2*Math.PI*(s.v/total);
+    gp.beginPath(); gp.moveTo(cx,cy); gp.arc(cx,cy,R,a0,a1); gp.closePath(); gp.fillStyle=s.c; gp.fill();
+    const am=(a0+a1)/2; const lx=cx+Math.cos(am)*(R+10), ly=cy+Math.sin(am)*(R+10);
+    gp.fillStyle='#e5e7eb'; gp.font='12px ui-monospace'; gp.fillText(`${s.t} ${s.v}`, lx-16, ly);
+    a0=a1;
+  });
+}
+
+/* ===== Експорт / QR ===== */
+$('#saveCsv').addEventListener('click', ()=>{
+  const rows=applyFilters(RECORDS);
+  let csv='file,act_no,date,address,abonent,phone,priority,responsible,duplicate\n';
+  rows.forEach(r=>{
+    csv+=`"${r.name}","${r.actNo||''}","${r.date||''}","${r.address||''}","${r.abonent||''}","${r.phone||''}","${r.priority||''}","${r.responsible||''}","${r.dupFlag?'YES':''}"\n`;
+  });
+  download('gas_para23_archive_'+stamp()+'.csv', csv, 'text/csv'); log('CSV збережено');
+});
+$('#saveTxt').addEventListener('click', ()=>{
+  const rows=applyFilters(RECORDS);
+  const p1=rows.filter(r=>r.priority==='P1').length, p2=rows.filter(r=>r.priority==='P2').length, p3=rows.filter(r=>r.priority==='P3').length;
+  const lines=[
+    'Пара 23 — AI-архів актів: підсумок',
+    `Вибірка: ${rows.length} акт(и/ів)`,
+    `P1/P2/P3: ${p1}/${p2}/${p3}`,
+    `Дублікатів у вибірці: ${rows.filter(r=>r.dupFlag).length}`,
+    '',
+    ...rows.slice(0,50).map(r=>`• ${r.date||'—'} | ${r.priority||'—'} | ${r.actNo||'—'} | ${r.address||'—'} | ${r.responsible||'—'}`)
+  ];
+  download('gas_para23_summary_'+stamp()+'.txt', lines.join('\n')); log('TXT збережено');
+});
+$('#qrGen').addEventListener('click', ()=>{
+  const data=prompt('Встав URL/текст (папка з оригіналами PDF/JPEG):', 'https://');
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const imgQ=new Image(); imgQ.crossOrigin='anonymous';
+  imgQ.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(imgQ,0,0,220,220); };
+  imgQ.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  imgQ.src=url;
+  log('QR згенеровано');
+});
+
+/* ===== Допоміжні ===== */
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m]));}
+
+/* ===== Ініт ===== */
+renderDash();
+
+</script>
+</body>
+</html>
