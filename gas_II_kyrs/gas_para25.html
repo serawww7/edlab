@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 25 (газовики) — AI-планувальник профілактики: історія → правила → тижневі маршрути → ефект</title>
+<meta name="description" content="Завантаж історію аварій, навчи прості правила ризику, сформуй тижневий план профілактики з маршрутами для бригад, подивись дашборд ефекту, експорт CSV/TXT, чек 58 мм, QR."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1320px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.grid{display:grid;gap:14px;grid-template-columns:1.25fr 1fr}
+@media(max-width:1140px){.grid{grid-template-columns:1fr}}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:#e6eef9}
+textarea{min-height:110px}
+.btn{border:1px solid var(--line);background:#0f1f39;color:#e6eef9;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+small.mono,.mono{font-family:ui-monospace,monospace}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:#e5e7eb;margin-right:6px;margin-top:6px}
+.muted{color:var(--muted)}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+pre.log{max-height:220px;overflow:auto;background:#0c182a;border-radius:12px;padding:10px}
+canvas.chart,canvas.map{display:block;width:100%;height:220px;background:#0b1220;border:1px solid var(--line);border-radius:12px}
+canvas.map{height:360px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace;white-space:pre}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 10px}
+.tag.ok{border-color:#1d3e2a;background:#0f2f1e}
+.tag.warn{border-color:#4a3b13;background:#2b2310}
+.tag.bad{border-color:#5a1f1f;background:#2a1212}
+.footer{margin-top:20px;color:#94a3b8;font-size:.9rem}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.progress{height:14px;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:#0b1220}
+.progress>span{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#38bdf8);width:0%}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🧠🗺️</span>
+      <div>
+        <b>Пара 25 — AI-планувальник профілактики</b><br/>
+        <span class="badge">Історія → правила ризику → тижневі маршрути → ефект → експорт/QR</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <!-- Контекст / вхідні -->
+  <div class="card">
+    <h2>📚 Контекст</h2>
+    <p>Завантаж <b>CSV історії</b> або натисни <b>🧪 Приклади</b>. AI обчислить <b>ваги ознак</b>, сформує <b>правила ризику</b> для секторів, побудує <b>теплову карту</b>, а потім згенерує <b>план тижня</b> з маршрутами для N бригад та оцінить <b>очікуване зниження ризику</b>.</p>
+    <div class="row">
+      <input id="file" type="file" accept=".csv" class="input" style="max-width:380px"/>
+      <button class="btn" id="ex">🧪 Приклади (200 інцидентів)</button>
+      <button class="btn good" id="train">🧠 Навчити правила</button>
+      <button class="btn" id="plan">🗓️ Спланувати тиждень</button>
+      <button class="btn secondary" id="reset">🔄 Скинути</button>
+      <span class="badge">Записів: <b id="nRec">0</b></span>
+      <span class="badge">Сектори: <b id="nSect">0</b></span>
+      <span class="badge">Очікуваний ефект: <b id="eff">—</b></span>
+    </div>
+    <div class="row">
+      <label>Кількість бригад <input id="nCrews" class="input" type="number" step="1" value="3"></label>
+      <label>Ліміт завдань/день на бригаду <input id="limDay" class="input" type="number" step="1" value="6"></label>
+      <label>Горизонт планування (днів) <input id="hDays" class="input" type="number" step="1" value="7"></label>
+      <label>Зниження ризику на візит, % <input id="dropPct" class="input" type="number" step="1" value="35"></label>
+      <label>Макс. довжина рейсу (км) <input id="maxKm" class="input" type="number" step="1" value="40"></label>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Ліва: навчання/правила/карта -->
+    <div class="card">
+      <h2>🧠 Навчені правила ризику</h2>
+      <div class="row">
+        <div class="tag bad">P(аварія) ∝ Вік мережі</div>
+        <div class="tag warn">Температура/сезон</div>
+        <div class="tag ok">Останній сервіс</div>
+      </div>
+      <table class="tbl" id="rulesTbl">
+        <thead><tr><th>#</th><th>Правило</th><th>Вага</th><th>Покриття</th><th>ΔРизику</th></tr></thead>
+        <tbody><tr><td colspan="5" class="muted">— натисни «Навчити правила» —</td></tr></tbody>
+      </table>
+
+      <h3 style="margin-top:10px">🗺️ Теплова карта ризику (сектори міста)</h3>
+      <canvas id="map" class="map" width="820" height="360"></canvas>
+      <small class="muted">Підказка: клацни сектор — додасться в «пріоритетні» вручну.</small>
+    </div>
+
+    <!-- Права: план/маршрути/ефект -->
+    <div class="card">
+      <h2>🗓️ План тижня / маршрути</h2>
+      <table class="tbl" id="planTbl">
+        <thead><tr><th>День</th><th>Бригада</th><th>Маршрут (сектори → км)</th><th>Завдань</th><th>Очікуване ΔРизику</th></tr></thead>
+        <tbody><tr><td colspan="5" class="muted">— натисни «Спланувати тиждень» —</td></tr></tbody>
+      </table>
+
+      <h3 style="margin-top:10px">📈 Очікуваний ефект (анім.)</h3>
+      <div class="progress"><span id="bar" style="width:0%"></span></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="saveCsv">📄 CSV (план)</button>
+        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button class="btn" id="print58">🖨️ Чек 58 мм (бригада)</button>
+        <button class="btn secondary" id="qrGen">🔗 QR (папка з планом)</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+      <div style="margin-top:8px"><canvas id="qr" width="220" height="220" style="background:#0b1220;border:1px solid var(--line);border-radius:12px"></canvas></div>
+
+      <h3 style="margin-top:10px">🛎️ Журнал</h3>
+      <pre id="alog" class="log">// Поки без подій</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Завдання для студентів</h2>
+    <ol>
+      <li>Завантаж власну історію інцидентів (CSV) або згенеруй приклад і натисни <b>«Навчити правила»</b>. Які 3 правила мають найбільшу вагу?</li>
+      <li>Зміни параметри (<b>кількість бригад</b>, <b>ліміт завдань</b>, <b>макс. км</b>) і перерахуй план. Як це вплинуло на очікуваний ефект?</li>
+      <li>Клікни 2–3 «складних» сектори на карті, щоб додати їх в пріоритет. Перебудуй план та порівняй маршрути.</li>
+      <li>Збережи CSV/TXT, надрукуй чек 58 мм для однієї бригади, згенеруй QR на папку з планом і скріншотами карти.</li>
+    </ol>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time id="upd"></time>. Автор: Сергій Поліщук. <span class="muted">Клавіші: <kbd>T</kbd> — навчити, <kbd>P</kbd> — планувати.</span>
+  </div>
+</div>
+
+<script>
+/* ====== Утиліти/UI ====== */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function log(msg){const t=new Date().toLocaleTimeString('uk-UA');const box=$('#alog');if(box.textContent.startsWith('//'))box.textContent='';box.textContent+=`[${t}] ${msg}\n`;box.scrollTop=box.scrollHeight;}
+$('#upd').textContent=new Date().toLocaleDateString('uk-UA');
+
+/* ====== Дані/стан ====== */
+let HIST=[]; // історія інцидентів: {ts, sector, age, soil, temp, season, service_days, leak, cost}
+let SECTORS=[]; // {id,x,y,baseRisk}
+let RULES=[]; // {text,weight,cover,delta}
+let PRIORITY_SET=new Set(); // вручну додані пріоритні
+let PLAN=[]; // записи плану для таблиці
+
+/* ====== Генератор секторів (штучне місто 6x4) ====== */
+const map=$('#map'), gm=map.getContext('2d');
+const GRID_W=6, GRID_H=4;
+function initSectors(){
+  SECTORS=[];
+  const cellW=map.width/(GRID_W+1), cellH=map.height/(GRID_H+1);
+  let id=1;
+  for(let r=0;r<GRID_H;r++){
+    for(let c=0;c<GRID_W;c++){
+      const x=Math.round((c+1)*cellW), y=Math.round((r+1)*cellH);
+      const base = 10 + Math.round(Math.random()*30);
+      SECTORS.push({id, x, y, baseRisk:base});
+      id++;
+    }
+  }
+}
+initSectors();
+
+/* ====== Малювання мапи/heatmap ====== */
+function riskColor(val){
+  // 0..100 -> зелений..червоний
+  const r=Math.min(255, Math.round(2.55*val));
+  const g=Math.min(255, Math.round(2.55*(100-val)));
+  return `rgb(${r},${g},80)`;
+}
+function drawMap(highlight=[]){
+  gm.clearRect(0,0,map.width,map.height);
+  gm.strokeStyle='#223049'; gm.strokeRect(0.5,0.5,map.width-1,map.height-1);
+  // лінії сітки
+  gm.strokeStyle='#1f2a44';
+  for(let r=1;r<=GRID_H;r++){ const y=Math.round(r*map.height/(GRID_H+1)); gm.beginPath(); gm.moveTo(20,y); gm.lineTo(map.width-20,y); gm.stroke(); }
+  for(let c=1;c<=GRID_W;c++){ const x=Math.round(c*map.width/(GRID_W+1)); gm.beginPath(); gm.moveTo(x,20); gm.lineTo(x,map.height-20); gm.stroke(); }
+
+  // квадрати секторів
+  const size=40;
+  SECTORS.forEach(s=>{
+    const risk = currentRiskForSector(s.id);
+    gm.fillStyle=riskColor(Math.min(100,Math.max(0,Math.round(risk))));
+    gm.fillRect(s.x-size/2, s.y-size/2, size, size);
+    // рамка/пріоритет
+    if(PRIORITY_SET.has(s.id) || highlight.includes(s.id)){
+      gm.strokeStyle='#e5e7eb'; gm.lineWidth=2; gm.strokeRect(s.x-size/2-2, s.y-size/2-2, size+4, size+4);
+    }
+    // текст
+    gm.fillStyle='#0b1220'; gm.font='11px ui-monospace';
+    gm.fillText('S'+s.id, s.x-12, s.y+4);
+  });
+}
+map.addEventListener('click', e=>{
+  const r=map.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top;
+  const hit = SECTORS.find(s=> Math.abs(s.x-x)<=20 && Math.abs(s.y-y)<=20 );
+  if(hit){ if(PRIORITY_SET.has(hit.id)) PRIORITY_SET.delete(hit.id); else PRIORITY_SET.add(hit.id); drawMap([hit.id]); log(`Сектор S${hit.id} ${PRIORITY_SET.has(hit.id)?'додано в пріоритет':'знято з пріоритету'}`); }
+});
+
+/* ====== Ввід CSV або приклади ====== */
+$('#file').addEventListener('change', async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const text = await f.text();
+  HIST = parseCSV(text);
+  afterHistLoaded();
+  log(`Завантажено CSV: ${f.name}, рядків: ${HIST.length}`);
+});
+$('#ex').addEventListener('click', ()=>{
+  HIST = synthHistory(200);
+  afterHistLoaded();
+  log('Згенеровано 200 прикладних інцидентів');
+});
+function afterHistLoaded(){
+  $('#nRec').textContent=String(HIST.length);
+  const sectIds=[...new Set(HIST.map(h=>h.sector))]; $('#nSect').textContent=String(sectIds.length);
+  drawMap();
+}
+
+/* ====== CSV парсер/синтеза ====== */
+function parseCSV(t){
+  const lines=t.split(/\r?\n/).filter(Boolean);
+  const head=lines.shift().split(',').map(s=>s.trim());
+  const idx=(k)=>head.indexOf(k);
+  const res=[];
+  lines.forEach(line=>{
+    const parts=line.split(','); // простий CSV (без ком)
+    res.push({
+      ts: parts[idx('ts')]||'',
+      sector: +parts[idx('sector')]||1,
+      age: +parts[idx('age')],
+      soil: parts[idx('soil')]||'loam',
+      temp: +parts[idx('temp')],
+      season: parts[idx('season')]||'winter',
+      service_days: +parts[idx('service_days')],
+      leak: +(parts[idx('leak')]||0),
+      cost: +(parts[idx('cost')]||0)
+    });
+  });
+  return res;
+}
+function synthHistory(n){
+  const soils=['loam','sand','clay']; const seasons=['winter','spring','summer','autumn'];
+  const arr=[];
+  for(let i=0;i<n;i++){
+    const sector = 1 + Math.floor(Math.random()*(GRID_W*GRID_H));
+    const age = 5 + Math.floor(Math.random()*55); // років
+    const soil = soils[Math.floor(Math.random()*soils.length)];
+    const temp = -15 + Math.floor(Math.random()*50);
+    const season = seasons[Math.floor(Math.random()*seasons.length)];
+    const service_days = Math.floor(Math.random()*720); // днів від останнього сервісу
+    // базова ймовірність витоку
+    let p=0.02 + age*0.002 + (service_days>365?0.04:0) + (soil==='clay'?0.02:soil==='sand'?0.01:0);
+    p += (temp<-5?0.03:temp>30?0.01:0) + (season==='winter'?0.02:0);
+    if(Math.random()<0.15) p+=0.05; // латентні фактори
+    const leak = Math.random()<p?1:0;
+    const cost = leak? (200+Math.random()*800): 0;
+    const day = 1+Math.floor(Math.random()*28);
+    const month= 1+Math.floor(Math.random()*12);
+    const ts = `2025-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')} ${String(8+Math.floor(Math.random()*10)).padStart(2,'0')}:${String(Math.floor(Math.random()*60)).padStart(2,'0')}`;
+    arr.push({ts, sector, age, soil, temp, season, service_days, leak, cost});
+  }
+  return arr;
+}
+
+/* ====== Навчання простих правил ======
+  - Біннінг числових ознак (age, temp, service_days) у квантілі
+  - Вага = log-odds (ймовірність витоку у підмножині vs загальна)
+  - Підбір топ-правил за ΔРизику * покриття
+*/
+function quantiles(arr, qs){ const a=arr.slice().sort((x,y)=>x-y); return qs.map(q=>a[Math.floor(q*(a.length-1))]); }
+function binEdges(values){ const qs=quantiles(values,[0.2,0.4,0.6,0.8]); return [...new Set(qs)]; }
+function ruleWeight(mask){
+  const total=HIST.length, pos=HIST.filter(h=>h.leak).length;
+  const sub=HIST.filter(mask), subPos=sub.filter(h=>h.leak).length;
+  if(sub.length<8) return null;
+  const pAll= (pos+1)/(total+2), pSub=(subPos+1)/(sub.length+2);
+  const w = Math.log(pSub/(1-pSub)) - Math.log(pAll/(1-pAll));
+  const delta=(pSub - pAll)*100; // у відсоткових пунктах
+  return {w, cover:sub.length, delta};
+}
+function trainRules(){
+  if(HIST.length===0){ alert('Немає історії'); return; }
+  RULES=[];
+  // категорії
+  const soils=[...new Set(HIST.map(h=>h.soil))];
+  const seasons=[...new Set(HIST.map(h=>h.season))];
+  // біннінг
+  const eAge=binEdges(HIST.map(h=>h.age));
+  const eTemp=binEdges(HIST.map(h=>h.temp));
+  const eServ=binEdges(HIST.map(h=>h.service_days));
+  const bins=(edges,val)=>{ let k=0; while(k<edges.length && val>edges[k]) k++; return k; };
+
+  // кандидати правил
+  const cand=[];
+  soils.forEach(s=>{
+    const r=ruleWeight(h=>h.soil===s); if(r) cand.push({text:`SOIL=${s}`,...r});
+  });
+  seasons.forEach(s=>{
+    const r=ruleWeight(h=>h.season===s); if(r) cand.push({text:`SEASON=${s}`,...r});
+  });
+  // числові бінові
+  for(let i=0;i<eAge.length;i++){
+    const r=ruleWeight(h=>bins(eAge,h.age)>=i); if(r) cand.push({text:`AGE≥Q${i+1} (${eAge[i]}+)`,...r});
+  }
+  for(let i=0;i<eTemp.length;i++){
+    const r=ruleWeight(h=>bins(eTemp,h.temp)<=i); if(r) cand.push({text:`TEMP≤Q${i+1} (${eTemp[i]}-)`,...r});
+  }
+  for(let i=0;i<eServ.length;i++){
+    const r=ruleWeight(h=>bins(eServ,h.service_days)>=i); if(r) cand.push({text:`SERVICE GAP≥Q${i+1} (${eServ[i]}д+)`,...r});
+  }
+
+  // відсортувати за важливістю
+  cand.sort((a,b)=> (b.delta*Math.abs(b.w))*b.cover - (a.delta*Math.abs(a.w))*a.cover );
+  RULES = cand.slice(0,12);
+  renderRules();
+  drawMap();
+  log(`Навчено правил: ${RULES.length}`);
+}
+$('#train').addEventListener('click', trainRules);
+document.addEventListener('keydown',e=>{ if(e.key.toLowerCase()==='t') trainRules(); });
+
+function renderRules(){
+  const tb=$('#rulesTbl tbody'); tb.innerHTML='';
+  RULES.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    const w = r.w.toFixed(2), cov=r.cover, d=(r.delta>=0?'+':'')+r.delta.toFixed(1)+' п.п.';
+    tr.innerHTML=`<td>${i+1}</td><td>${r.text}</td><td>${w}</td><td>${cov}</td><td class="${r.delta>0?'bad':r.delta<0?'ok':'warn'}"><b>${d}</b></td>`;
+    tb.appendChild(tr);
+  });
+}
+
+/* ====== Оцінка ризику сектора ====== */
+function currentRiskForSector(sectorId){
+  const base = (SECTORS.find(s=>s.id===sectorId)?.baseRisk)||20;
+  // середнє значення ознак по сектору з HIST (або синтетика)
+  const sub = HIST.filter(h=>h.sector===sectorId);
+  if(sub.length===0) return base;
+  const avgAge = sub.reduce((a,b)=>a+b.age,0)/sub.length;
+  const avgServ = sub.reduce((a,b)=>a+b.service_days,0)/sub.length;
+  const freqLeak = sub.filter(h=>h.leak).length/sub.length;
+  // застосуємо ваги правил як бонус/штраф
+  let adj=0;
+  RULES.forEach(r=>{
+    if(r.text.startsWith('AGE') && /(\d+)/.test(r.text)){ const t=parseInt(r.text.match(/(\d+)/)[1]); if(avgAge>=t) adj+= r.w*3; }
+    if(r.text.startsWith('SERVICE GAP') && /(\d+)/.test(r.text)){ const t=parseInt(r.text.match(/(\d+)/)[1]); if(avgServ>=t) adj+= r.w*2.5; }
+    if(r.text.startsWith('TEMP') ){ /* сезон/температуру беремо з частоти витоків */ adj+= r.w* (freqLeak>0.1?2:0.5); }
+    if(r.text.startsWith('SOIL=')){ const soil=r.text.split('=')[1]; const share=sub.filter(h=>h.soil===soil).length/sub.length; adj+= r.w*share*2; }
+    if(r.text.startsWith('SEASON=')){ const season=r.text.split('=')[1]; const share=sub.filter(h=>h.season===season).length/sub.length; adj+= r.w*share; }
+  });
+  const risk = Math.max(0, Math.min(100, base + adj*8 + freqLeak*100*0.2));
+  return risk;
+}
+
+/* ====== Планування тижня ======
+   1) Сортуємо сектори за ризиком (і вручну пріоритетні — вище)
+   2) Розкладаємо по днях і бригадах, обмежуючи завдання/день
+   3) Будуємо маршрут «найближчий сусід» з псевдовідстанями між центрами секторів
+   4) Розраховуємо очікуване зниження ризику = dropPct% * risk для відвіданих секторів
+*/
+function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y)/10; } // умовні км
+function planWeek(){
+  if(RULES.length===0) trainRules();
+  const nCrews=Math.max(1, parseInt($('#nCrews').value)||3);
+  const limDay=Math.max(1, parseInt($('#limDay').value)||6);
+  const hDays=Math.max(1, parseInt($('#hDays').value)||7);
+  const maxKm=Math.max(5, parseFloat($('#maxKm').value)||40);
+  const dropPct=Math.max(0, Math.min(100, parseFloat($('#dropPct').value)||35));
+
+  // ранжування секторів
+  const ranked = SECTORS.map(s=>({s, risk: currentRiskForSector(s.id), prio: PRIORITY_SET.has(s.id)?1:0}))
+                        .sort((a,b)=> (b.prio - a.prio) || (b.risk - a.risk));
+  // порожній план
+  PLAN=[];
+  let totalDrop=0;
+
+  for(let d=0; d<hDays; d++){
+    for(let c=0; c<nCrews; c++){
+      // підбираємо завдання з ranked (ще не відвідані)
+      const route=[]; let km=0; let tasks=0;
+      // початкова точка — віртуальний ДЕПО у центрі полотна
+      let cur={x:map.width/2, y:map.height/2};
+
+      while(tasks<limDay){
+        const candidate = ranked.find(rc=> !rc.taken && (route.length===0 || dist(cur, rc.s)<8) );
+        if(!candidate) break;
+        const addKm = dist(cur, candidate.s);
+        if(km+addKm>maxKm) break;
+        route.push(candidate.s.id); candidate.taken=true; km+=addKm; cur=candidate.s; tasks++;
+      }
+      if(route.length>0){
+        const drop = route.reduce((acc,id)=> acc + currentRiskForSector(id)*(dropPct/100), 0);
+        totalDrop += drop;
+        PLAN.push({day:d+1, crew:c+1, route, km:km.toFixed(1), tasks:route.length, drop:Math.round(drop)});
+      }
+    }
+  }
+  renderPlan();
+  drawMap();
+  animateEffect(totalDrop);
+  log(`Сформовано план: записів ${PLAN.length}, очікуване зниження ризику ≈ ${Math.round(totalDrop)}`);
+}
+$('#plan').addEventListener('click', planWeek);
+document.addEventListener('keydown',e=>{ if(e.key.toLowerCase()==='p') planWeek(); });
+
+function renderPlan(){
+  const tb=$('#planTbl tbody'); tb.innerHTML='';
+  PLAN.forEach(p=>{
+    const sectors=p.route.map(id=>'S'+id).join(' → ');
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>День ${p.day}</td><td>Бригада ${p.crew}</td><td>${sectors} · ${p.km} км</td><td>${p.tasks}</td><td class="ok"><b>−${p.drop}</b></td>`;
+    tb.appendChild(tr);
+  });
+  const eff = PLAN.reduce((a,b)=>a+b.drop,0);
+  $('#eff').textContent = `−${eff}`;
+}
+
+function animateEffect(val){
+  const bar=$('#bar'); let t=0, target=Math.max(0,Math.min(100, Math.round(val/ (SECTORS.length*100) * 100)));
+  clearInterval(bar._timer);
+  bar._timer=setInterval(()=>{ t++; bar.style.width=Math.min(t,target)+'%'; if(t>=target) clearInterval(bar._timer); }, 12);
+}
+
+/* ====== Експорт / чек / QR ====== */
+$('#saveCsv').addEventListener('click', ()=>{
+  let csv='day,crew,route,km,tasks,drop\n';
+  PLAN.forEach(p=>{ csv+=`${p.day},${p.crew},"${p.route.join('-')}",${p.km},${p.tasks},${p.drop}\n`; });
+  download('gas_para25_plan_'+stamp()+'.csv', csv, 'text/csv'); log('CSV (план) збережено');
+});
+$('#saveTxt').addEventListener('click', ()=>{
+  const eff=PLAN.reduce((a,b)=>a+b.drop,0);
+  const lines=[
+    'Пара 25 — AI-планувальник профілактики: підсумок',
+    `Бригад: ${$('#nCrews').value}, Ліміт/день: ${$('#limDay').value}, Горизонт: ${$('#hDays').value}`,
+    `Очікуване зниження сумарного ризику: −${eff}`,
+    '',
+    ...PLAN.map(p=>`День ${p.day} • Бр-${p.crew} • ${p.route.map(id=>'S'+id).join(' → ')} • ${p.km} км • завдань ${p.tasks} • Δ−${p.drop}`)
+  ];
+  download('gas_para25_summary_'+stamp()+'.txt', lines.join('\n')); log('TXT збережено');
+});
+$('#print58').addEventListener('click', ()=>{
+  if(PLAN.length===0){ alert('Немає плану'); return; }
+  const p=PLAN[0]; // для прикладу — перший маршрут
+  const rc=$('#rc'); rc.hidden=false;
+  const lines=[
+'=== PREVENTIVE PLAN (58мм) ===',
+`День: ${p.day}  Бригада: ${p.crew}`,
+`Ліміт/день: ${$('#limDay').value}  Гор: ${$('#hDays').value}`,
+`Маршрут:`,
+...p.route.map(id=>('S'+id)).slice(0,6),
+`~${p.km} км`,
+`Очік. Δризику: -${p.drop}`,
+'------------------------------'
+  ];
+  rc.textContent=lines.join('\n');
+  download('gas_para25_receipt_'+stamp()+'.txt', rc.textContent);
+  log('Чек 58 мм збережено (перший маршрут)');
+});
+$('#qrGen').addEventListener('click', ()=>{
+  const data=prompt('Встав URL/текст (папка з планом/картами):', 'https://');
+  if(data===null) return;
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data='+encodeURIComponent(data);
+  const imgQ=new Image(); imgQ.crossOrigin='anonymous';
+  imgQ.onload=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.drawImage(imgQ,0,0,220,220); };
+  imgQ.onerror=()=>{ const q=$('#qr').getContext('2d'); q.clearRect(0,0,220,220); q.fillStyle='#e5e7eb'; q.font='14px ui-monospace'; q.fillText('QR offline', 62,110); q.fillText((data.length>14?data.slice(0,14)+'…':data), 36,132); };
+  imgQ.src=url;
+  log('QR згенеровано');
+});
+
+/* ====== Скидання ====== */
+$('#reset').addEventListener('click', ()=>{
+  HIST=[]; RULES=[]; PLAN=[]; PRIORITY_SET.clear(); initSectors(); drawMap();
+  $('#nRec').textContent='0'; $('#nSect').textContent='0'; $('#eff').textContent='—';
+  $('#rulesTbl tbody').innerHTML='<tr><td colspan="5" class="muted">— натисни «Навчити правила» —</td></tr>';
+  $('#planTbl tbody').innerHTML='<tr><td colspan="5" class="muted">— натисни «Спланувати тиждень» —</td></tr>';
+  $('#rc').hidden=true; $('#qr').getContext('2d').clearRect(0,0,220,220);
+  animateEffect(0);
+  log('Скинуто до початкового стану');
+});
+
+/* ====== Початкова отрисовка ====== */
+drawMap();
+</script>
+</body>
+</html>
