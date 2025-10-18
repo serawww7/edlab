@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 19 (механіки) — Візуальний тахометр і стробоскоп (вебкамера → RPM, биття, журнал)</title>
+<meta name="description" content="Без Arduino: вебкамера → ROI → детекція відбивача → RPM, биття/ексцентриситет, живий графік, аудіо/екран-строб, журнал, експорт PNG/CSV/TXT, чек 58 мм."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1140px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+.small{font-size:.9rem}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+video,canvas{display:block}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.fullflash{position:fixed;inset:0;background:#fff;display:none;z-index:9998}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🎥</span>
+      <div>
+        <b>Пара 19 — Візуальний тахометр і стробоскоп (без Arduino)</b><br/>
+        <span class="badge">вебкамера → RPM, биття/ексцентриситет → графік → аудіо/екран-строб → журнал → експорт</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">Мета: виміряти <b>оберти (RPM)</b> вентилятора/шківа/ВВП за <b>вебкамерою</b> з білим відбивачем, оцінити <b>биття/ексцентриситет</b>, «заморозити» оберт <b>стробоскопом</b> (екран/аудіо), вести журнал і сформувати звіт. Працює у комп’ютерному класі без Arduino.</p>
+
+  <div class="grid" style="display:grid;gap:14px;grid-template-columns:1.3fr 1fr">
+    <!-- ЛІВО: відео + графіки -->
+    <div class="card">
+      <h2>🎛️ Відео-джерело</h2>
+      <div class="row">
+        <div style="flex:1">
+          <label>Камера</label>
+          <select id="cam" class="input"></select>
+        </div>
+        <div style="flex:1">
+          <label>Роздільність</label>
+          <select id="res" class="input">
+            <option value="640x480">640×480</option>
+            <option value="1280x720" selected>1280×720</option>
+            <option value="1920x1080">1920×1080</option>
+          </select>
+        </div>
+        <button class="btn good" id="start">▶️ Старт</button>
+        <button class="btn secondary" id="stop">⏸️ Стоп</button>
+        <span id="stat" class="badge">Статус: idle</span>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <label style="flex:1">Порог яскравості <input id="thr" class="input" type="range" min="10" max="250" step="1" value="180"/></label>
+        <label style="flex:1">EMA α (сигнал) <input id="alpha" class="input" type="range" min="0" max="1" step="0.02" value="0.30"/></label>
+        <label style="flex:1">Діаметр диска, мм <input id="diam" class="input" type="number" min="10" step="1" value="300"/></label>
+      </div>
+      <small class="muted">Порада: наклей 1 смужку білої/срібної стрічки на диск або лопаті. Клацни по відео — це стане центром ROI.</small>
+
+      <div class="canvasWrap" style="margin-top:8px">
+        <canvas id="view" width="960" height="540"></canvas>
+      </div>
+
+      <h3 style="margin-top:12px">📈 Живий графік</h3>
+      <div class="canvasWrap"><canvas id="chart" width="960" height="260"></canvas></div>
+      <div class="row small" style="margin-top:8px">
+        <span id="last" class="badge">RPM=—; період=— мс; биття=— мм</span>
+        <span id="quality" class="badge">Якість сигналу: —</span>
+      </div>
+    </div>
+
+    <!-- ПРАВО: строб, налаштування, журнал -->
+    <div class="card">
+      <h2>💡 Стробоскоп</h2>
+      <div class="row">
+        <div style="flex:1">
+          <label>Ціль RPM</label>
+          <input id="targetRPM" class="input" type="number" step="1" value="600"/>
+        </div>
+        <div style="flex:1">
+          <label>Гармоніка</label>
+          <select id="harm" class="input"><option value="1" selected>1×</option><option value="2">2×</option><option value="3">3×</option><option value="0.5">½×</option></select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <button class="btn" id="flash">🖥️ Екран-строб</button>
+        <button class="btn" id="beep">🔊 Аудіо-строб</button>
+        <button class="btn secondary" id="stopStrobe">⏹️ Стоп</button>
+      </div>
+      <div class="row small" style="margin-top:8px">
+        <span id="sync" class="badge">ΔRPM до цілі: —</span>
+      </div>
+
+      <h2 style="margin-top:14px">🧠 Оцінки та події</h2>
+      <table class="tbl">
+        <tbody>
+          <tr><th>RPM (медіана 5с)</th><td id="rpmMed">—</td></tr>
+          <tr><th>Биття, мм (RMS)</th><td id="runout">—</td></tr>
+          <tr><th>Поріг тривоги биття, мм</th><td><input id="runThr" class="input" type="number" step="0.1" value="0.8"/></td></tr>
+        </tbody>
+      </table>
+
+      <div class="row" style="margin-top:6px">
+        <button class="btn" id="mark">📌 Позначити подію</button>
+        <select id="label" class="input" style="max-width:240px">
+          <option value="ok" selected>ok</option>
+          <option value="belt_slip">ковзання ременя</option>
+          <option value="misalignment">непаралельність</option>
+          <option value="bearing">підшипник</option>
+        </select>
+      </div>
+
+      <h3 style="margin-top:10px">📜 Журнал</h3>
+      <pre id="alog" class="code" style="max-height:200px;overflow:auto">// Поки без записів</pre>
+
+      <h3 style="margin-top:10px">💾 Експорт</h3>
+      <div class="row">
+        <button class="btn" id="savePng">🖼️ PNG (графік+кадр)</button>
+        <button class="btn" id="saveCsv">📄 CSV (серії)</button>
+        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button class="btn secondary" id="receipt">🖨️ 58 мм чек</button>
+      </div>
+      <div id="rc" class="receipt" hidden></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔌 Схема розміщення (SVG)</h2>
+    <svg viewBox="0 0 980 300" role="img" aria-label="Вебкамера → диск/шків із маркером">
+      <rect x="40" y="40" width="260" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <text x="170" y="70" fill="#e5e7eb" font-size="16" text-anchor="middle">Ноутбук/ПК</text>
+      <text x="170" y="92" fill="#93c5fd" font-size="12" text-anchor="middle">вебкамера 30–60 fps</text>
+      <line x1="300" y1="100" x2="420" y2="100" stroke="#93c5fd" stroke-width="3"/>
+      <circle cx="480" cy="100" r="8" fill="#22c55e"/>
+      <text x="520" y="90" fill="#a7f3d0" font-size="12">відстань 30–80 см</text>
+
+      <circle cx="760" cy="120" r="70" fill="#111827" stroke="#9ca3af"/>
+      <path d="M760 50 A70 70 0 0 1 830 120 L760 120 Z" fill="#e5e7eb"/>
+      <text x="760" y="210" fill="#e5e7eb" font-size="14" text-anchor="middle">шків/вентилятор</text>
+      <text x="760" y="228" fill="#93c5fd" font-size="12" text-anchor="middle">біла смужка = відбивач</text>
+
+      <text x="120" y="250" fill="#fbbf24" font-size="12">⚠️ Безпека: не підносити руки/камеру близько до обертових вузлів; фіксуй штатив/ноутбук.</text>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>PNG із кадром + графік (RPM, сигнал), позначені події.</li>
+      <li>CSV 1–2 хв вимірів (час, яскравість, RPM, биття).</li>
+      <li>Висновок: чи в межах биття; що робити (перевірка натягу/паралельності/підшипників/балансу).</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📜 Історична нотатка</h2>
+    <p class="muted small">Стробоскопи для балансування з’явилися в 1930-х у авіації. Сьогодні будь-який ноутбук із камерою дає тахометр і строб прямо в браузері — цього достатньо, щоб виявити проблеми ще до запаху гуми чи перегріву.</p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<div id="flashLayer" class="fullflash"></div>
+
+<script>
+// ========= Утиліти =========
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+
+// ========= Відео/камера =========
+let stream=null, video=null, vCanvas=$('#view'), vctx=vCanvas.getContext('2d');
+let reqId=null, fps=0, lastFpsT=0, frames=0;
+
+const camSel=$('#cam');
+async function listCams(){
+  const devs=await navigator.mediaDevices.enumerateDevices();
+  const cams=devs.filter(d=>d.kind==='videoinput');
+  camSel.innerHTML=''; cams.forEach((c,i)=>{ const o=document.createElement('option'); o.value=c.deviceId; o.textContent=(c.label||('Камера '+(i+1))); camSel.appendChild(o); });
+}
+listCams().catch(()=>{});
+
+// ROI
+let roi={x: vCanvas.width*0.5, y: vCanvas.height*0.5, r: 60};
+vCanvas.addEventListener('click',(e)=>{
+  const rect=vCanvas.getBoundingClientRect();
+  roi.x = (e.clientX - rect.left) * (vCanvas.width/rect.width);
+  roi.y = (e.clientY - rect.top) * (vCanvas.height/rect.height);
+});
+
+// ========= Дані/серії =========
+const sGraph=$('#chart'), gctx=sGraph.getContext('2d');
+const series=[]; // {t, sig, rpm, runout}
+const rpmWindow=[]; // останні N значень для медіани
+const timeSig=[]; // для детекції періоду (останні 8 cек)
+const peakTimes=[];
+
+function ema(prev, val, a){ return (prev==null)? val : a*val + (1-a)*prev; }
+
+// ========= Основні параметри =========
+let emaSig=null, lastFrame=0, lastPeak=0;
+
+// ========= Обчислення кадру =========
+function processFrame(){
+  if(!video) return;
+  const W=vCanvas.width, H=vCanvas.height;
+  vctx.drawImage(video, 0,0,W,H);
+
+  // Виділення ROI
+  vctx.beginPath(); vctx.strokeStyle='#38bdf8'; vctx.lineWidth=2; vctx.arc(roi.x, roi.y, roi.r, 0, Math.PI*2); vctx.stroke();
+  vctx.fillStyle='rgba(56,189,248,0.12)'; vctx.beginPath(); vctx.arc(roi.x, roi.y, roi.r, 0, Math.PI*2); vctx.fill();
+
+  // Яскравість у ROI + центр мас
+  const r=Math.floor(roi.r), x0=Math.max(0, Math.floor(roi.x-r)), y0=Math.max(0, Math.floor(roi.y-r));
+  const x1=Math.min(W-1, Math.floor(roi.x+r)), y1=Math.min(H-1, Math.floor(roi.y+r));
+  const img=vctx.getImageData(x0,y0, x1-x0+1, y1-y0+1);
+  const thr=parseInt($('#thr').value,10);
+  let sum=0, cnt=0, cx=0, cy=0, brightCount=0, cxB=0, cyB=0;
+
+  for(let j=0;j<img.height;j++){
+    for(let i=0;i<img.width;i++){
+      const k=(j*img.width+i)*4;
+      const r=img.data[k], g=img.data[k+1], b=img.data[k+2];
+      const Y=(0.2126*r + 0.7152*g + 0.0722*b);
+      const X=i+x0, Yp=j+y0;
+      // всередині кола?
+      if((X-roi.x)*(X-roi.x)+(Yp-roi.y)*(Yp-roi.y) <= roi.r*roi.r){
+        sum+=Y; cnt++; cx+=X; cy+=Yp;
+        if(Y>thr){ brightCount++; cxB+=X; cyB+=Yp; }
+      }
+    }
+  }
+  const meanY = (cnt>0) ? sum/cnt : 0;
+  const alpha=parseFloat($('#alpha').value)||0.3;
+  emaSig = ema(emaSig, meanY, alpha);
+
+  let spotX=roi.x, spotY=roi.y;
+  if(brightCount>10){ spotX=cxB/brightCount; spotY=cyB/brightCount; }
+
+  // «Биття»: RMS коливання положення яскравої плями від центру ROI → у пікселях → мм
+  const pxFromCenter = Math.hypot(spotX-roi.x, spotY-roi.y);
+  const diamMM = parseFloat($('#diam').value)||300;
+  // масштаб мм/піксель: припустимо, що roi.r пікселів відповідає (diamMM/2) мм
+  const mmPerPx = (diamMM/2) / roi.r;
+  const runoutNow = pxFromCenter * mmPerPx;
+
+  // Детекція піків сигналу (перевищення порога і перехід згори вниз)
+  const t=performance.now();
+  timeSig.push({t, y:emaSig}); if(timeSig.length>800) timeSig.shift();
+
+  const L=timeSig.length;
+  let rpmInst=series.length? series[series.length-1].rpm : 0;
+
+  if(L>=3){
+    const y2=timeSig[L-1].y, y1=timeSig[L-2].y, y0=timeSig[L-3].y;
+    const TH= (thr + 255)/2; // у шкалі ~0..255
+    // локальний максимум поблизу порога
+    if(y1>y0 && y1>y2 && y1>TH){
+      const tPeak=timeSig[L-2].t;
+      if(tPeak - lastPeak > 40){ // мінімальний інтервал ~25 Гц
+        peakTimes.push(tPeak);
+        if(peakTimes.length>8) peakTimes.shift();
+        if(peakTimes.length>=2){
+          let periods=0, n=0;
+          for(let i=1;i<peakTimes.length;i++){ periods += (peakTimes[i]-peakTimes[i-1]); n++; }
+          const meanP = periods/n; // мс
+          rpmInst = 60000.0/meanP;
+          lastPeak=tPeak;
+        }
+      }
+    }
+  }
+
+  // Оновлення серій
+  const point={t:Date.now(), sig:emaSig, rpm:rpmInst, runout:runoutNow};
+  series.push(point); if(series.length>1200) series.shift();
+  rpmWindow.push(rpmInst); if(rpmWindow.length>200) rpmWindow.shift();
+
+  drawGraph();
+
+  // Текстові бейджі
+  const med = rpmWindow.slice().sort((a,b)=>a-b)[Math.floor(rpmWindow.length/2)]||0;
+  $('#rpmMed').textContent = med ? med.toFixed(1) : '—';
+  $('#runout').textContent = stdRunout().toFixed(2);
+  $('#last').textContent = `RPM=${rpmInst?rpmInst.toFixed(1):'—'}; період=${rpmInst?(60000/rpmInst).toFixed(1):'—'} мс; биття=${runoutNow.toFixed(2)} мм`;
+  $('#quality').textContent = `Якість сигналу: ${brightCount>10?'ok':'слабкий'} | fps≈${fps.toFixed(0)}`;
+
+  // Тривога по биттю
+  const thrRun=parseFloat($('#runThr').value)||0.8;
+  if(runoutNow>thrRun){
+    log(`⚠️ Биття перевищує поріг: ${runoutNow.toFixed(2)} мм (поріг ${thrRun} мм)`);
+  }
+
+  // fps
+  frames++; const now=performance.now();
+  if(now-lastFpsT>1000){ fps=frames*1000/(now-lastFpsT); lastFpsT=now; frames=0; }
+}
+
+function drawGraph(){
+  const W=sGraph.width,H=sGraph.height;
+  gctx.clearRect(0,0,W,H);
+  gctx.strokeStyle='#223049'; gctx.strokeRect(0.5,0.5,W-1,H-1);
+  if(series.length<3) return;
+  const maxN=600;
+  const s=series.slice(-maxN);
+  const xs=s.map((_,i)=> 60 + i*((W-80)/(maxN-1)));
+
+  // Нормування сигналу (0..255)
+  const minY = Math.min(...s.map(o=>o.sig)), maxY=Math.max(...s.map(o=>o.sig));
+  gctx.fillStyle='#94a3b8'; gctx.font='12px ui-monospace';
+  gctx.fillText('Signal (Y)', 12, 14); gctx.fillText('RPM', 12, 28);
+
+  // Signal
+  gctx.beginPath(); gctx.strokeStyle='#38bdf8'; gctx.lineWidth=1.6;
+  xs.forEach((x,i)=>{ const v=s[i].sig; const y=H-10 - ((v-minY)/Math.max(1,(maxY-minY))) * (H-20); i?gctx.lineTo(x,y):gctx.moveTo(x,y); });
+  gctx.stroke();
+
+  // RPM (втор. шкала)
+  const rpmMax = Math.max(100, Math.max(...s.map(o=>o.rpm||0))*1.2);
+  gctx.beginPath(); gctx.strokeStyle='#fbbf24'; gctx.lineWidth=1.8;
+  xs.forEach((x,i)=>{ const v=s[i].rpm||0; const y=H-10 - (v/rpmMax)*(H-20); i?gctx.lineTo(x,y):gctx.moveTo(x,y); });
+  gctx.stroke();
+}
+
+function stdRunout(){
+  const arr=series.slice(-200).map(o=>o.runout);
+  if(arr.length<5) return 0;
+  const m=arr.reduce((a,b)=>a+b,0)/arr.length;
+  const v=arr.reduce((a,b)=>a+(b-m)*(b-m),0)/arr.length;
+  return Math.sqrt(v);
+}
+
+// ========= Камера керування =========
+async function startVideo(){
+  try{
+    const [w,h] = $('#res').value.split('x').map(Number);
+    const constraints={video:{deviceId: camSel.value?{exact:camSel.value}:undefined, width:{ideal:w}, height:{ideal:h}}, audio:false};
+    stream = await navigator.mediaDevices.getUserMedia(constraints);
+    video=document.createElement('video'); video.srcObject=stream; video.muted=true; await video.play();
+    $('#stat').textContent='Статус: camera ok';
+
+    // Підлаштувати канвас
+    const vw=video.videoWidth, vh=video.videoHeight;
+    vCanvas.width=vw; vCanvas.height=vh;
+    sGraph.width=vw; sGraph.height=260;
+    roi={x:vw*0.5, y:vh*0.5, r:Math.min(vw,vh)*0.12};
+
+    loop();
+  }catch(err){
+    alert('Помилка доступу до камери: '+err.message);
+    $('#stat').textContent='Статус: помилка';
+  }
+}
+function stopVideo(){
+  if(reqId) cancelAnimationFrame(reqId), reqId=null;
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  video=null;
+  $('#stat').textContent='Статус: idle';
+}
+function loop(){
+  processFrame();
+  reqId = requestAnimationFrame(loop);
+}
+
+// ========= Стробоскоп =========
+let actx=null, osc=null, flashTimer=null;
+function strobeHz(){
+  const rpm=parseFloat($('#targetRPM').value)||600;
+  const k=parseFloat($('#harm').value)||1;
+  return (rpm/60)*k;
+}
+function startBeep(){
+  if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+  const hz=strobeHz();
+  osc=actx.createOscillator(); const g=actx.createGain(); g.gain.value=0.2;
+  osc.type='square'; osc.frequency.value=hz;
+  osc.connect(g).connect(actx.destination); osc.start();
+}
+function stopBeep(){ try{osc.stop();}catch{} osc=null; }
+
+function startFlash(){
+  const layer=$('#flashLayer'); layer.style.display='block';
+  const hz=strobeHz();
+  const period=1000/hz;
+  flashTimer = setInterval(()=>{ layer.style.background = (layer.style.background==='#fff')?'#000':'#fff'; }, period/2);
+}
+function stopFlash(){
+  const layer=$('#flashLayer'); layer.style.display='none'; layer.style.background='#fff';
+  if(flashTimer){ clearInterval(flashTimer); flashTimer=null; }
+}
+
+// Синхронізація з виміряним RPM
+setInterval(()=>{
+  const rpm = series.length? (series[series.length-1].rpm||0) : 0;
+  if(!rpm) { $('#sync').textContent='ΔRPM до цілі: —'; return; }
+  const target = parseFloat($('#targetRPM').value)||0;
+  $('#sync').textContent = 'ΔRPM до цілі: ' + (rpm-target).toFixed(1);
+}, 300);
+
+// ========= Емулятор (без відео) — для тренування алгоритму =========
+function emulate(){
+  // генеруємо «яскравість» як синус + шум → додаємо в серії
+  const f= (parseFloat($('#targetRPM').value)||600)/60; // Гц
+  let t0=performance.now();
+  function tick(){
+    if(stream || video) return; // якщо вже камера — емуль не крутити
+    const t=performance.now(); const dt=(t-t0)/1000; t0=t;
+    const sig = 200 + 40*Math.sin(2*Math.PI*f*(t/1000)) + (Math.random()*8-4);
+    const rpm = (f*60) + (Math.random()*1-0.5);
+    const run = Math.abs(2*Math.sin(2*Math.PI*0.9*(t/1000))) + Math.random()*0.1;
+    series.push({t:Date.now(), sig, rpm, runout:run}); if(series.length>1200) series.shift();
+    drawGraph();
+    reqId=requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// ========= Журнал/експорт =========
+const logbook=[];
+function log(msg){ const t=new Date().toLocaleTimeString(); const box=$('#alog'); if(box.textContent.startsWith('//')) box.textContent=''; box.textContent+=`[${t}] ${msg}\n`; box.scrollTop=box.scrollHeight; logbook.push({t,msg}); }
+
+$('#mark').addEventListener('click', ()=>{
+  const y=$('#label').value;
+  const p=series[series.length-1]||{rpm:0,runout:0};
+  log(`Позначка: ${y} | RPM=${(p.rpm||0).toFixed(1)} | биття=${(p.runout||0).toFixed(2)} мм`);
+});
+
+$('#savePng').addEventListener('click', ()=>{
+  // склейка кадру + графіка
+  const tmp=document.createElement('canvas'); tmp.width=vCanvas.width; tmp.height=vCanvas.height + sGraph.height + 10;
+  const tctx=tmp.getContext('2d'); tctx.drawImage(vCanvas,0,0); tctx.drawImage(sGraph,0,vCanvas.height+10);
+  tmp.toBlob(b=>{ const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='mech_para19_frame_'+stamp()+'.png'; a.click(); URL.revokeObjectURL(u); });
+});
+
+$('#saveCsv').addEventListener('click', ()=>{
+  const head='t_iso,signal,rpm,runout_mm\n';
+  const body=series.map(o=> `${new Date(o.t).toISOString()},${o.sig.toFixed(2)},${(o.rpm||0).toFixed(2)},${(o.runout||0).toFixed(3)}`).join('\n');
+  download('mechanic_para19_series_'+stamp()+'.csv', head+body, 'text/csv');
+});
+
+$('#saveTxt').addEventListener('click', ()=>{
+  const rpmMed=$('#rpmMed').textContent, run=$('#runout').textContent;
+  const lines=['Пара 19 — Візуальний тахометр і стробоскоп','Підсумок:','RPM (медіана 5с): '+rpmMed,'Биття (RMS): '+run+' мм','---','Журнал:'];
+  logbook.forEach(l=>lines.push(`[${l.t}] ${l.msg}`));
+  download('mechanic_para19_summary_'+stamp()+'.txt', lines.join('\n'));
+});
+
+$('#receipt').addEventListener('click', ()=>{
+  const items=logbook.slice(-10);
+  const lines=['=== ЧЕК ВІЗУАЛ.ТАХОМЕТРА (58мм) ===','Дата: '+new Date().toISOString().slice(0,10),'---'];
+  if(items.length===0){ lines.push('Подій не зафіксовано'); } else { items.forEach(l=>lines.push(`[${l.t}] ${l.msg}`)); }
+  const el=$('#rc'); el.hidden=false; el.textContent=lines.join('\n');
+  download('para19_receipt_'+stamp()+'.txt', lines.join('\n'));
+});
+
+// ========= Події UI =========
+$('#start').addEventListener('click', ()=>{ if(stream) return; startVideo(); });
+$('#stop').addEventListener('click', ()=>{ stopVideo(); stopBeep(); stopFlash(); });
+$('#flash').addEventListener('click', ()=>{ stopFlash(); startFlash(); log('Екран-строб увімкнено @ '+strobeHz().toFixed(1)+' Гц'); });
+$('#beep').addEventListener('click', ()=>{ stopBeep(); startBeep(); log('Аудіо-строб увімкнено @ '+strobeHz().toFixed(1)+' Гц'); });
+$('#stopStrobe').addEventListener('click', ()=>{ stopBeep(); stopFlash(); log('Стробоскоп вимкнено'); });
+
+// ========= Ініціалізація =========
+if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
+// Якщо камери немає — дати можливість потренуватись на емуляторі:
+setTimeout(()=>{ if(!stream) emulate(); }, 1000);
+</script>
+</body>
+</html>
