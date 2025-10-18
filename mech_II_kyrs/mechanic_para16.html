@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 16 (механіки) — Arduino: тахометр ВВП/шківів → RPM, ковзання ременя %, алерти, експорт</title>
+<meta name="description" content="Оптичний/Холла тахометр: RPM одного або двох валів, ковзання ременя %, живий графік, алерти, чек 58 мм, CSV/TXT, генератор прошивки (.ino)."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:260px}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.small{font-size:.9rem}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">⚙️</span>
+      <div>
+        <b>Пара 16 — Arduino: тахометр ВВП/шківів</b><br/>
+        <span class="badge">Оптопара/Холл → RPM1/RPM2 → ковзання ременя (%) → графік → алерти → експорт</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">Мета: зібрати <b>тахометр</b> для валу ВВП або шківів на <b>оптичному датчику (TCRT5000)</b> чи <b>датчику Холла (A3144+магніт)</b>, вимірювати <b>RPM</b> одного/двох валів, обчислювати <b>ковзання ременя %</b> відносно очікуваного передаточного, фіксувати <b>тривоги</b>, будувати <b>живий графік</b> і формувати <b>чек 58 мм</b> та CSV.</p>
+
+  <div class="card">
+    <h2>🔧 Налаштування</h2>
+    <div class="row">
+      <div style="flex:1">
+        <label>Сенсор 1 (привід)</label>
+        <select id="s1" class="input"><option>Оптичний (білий маркер)</option><option selected>Холла (магніт)</option></select>
+      </div>
+      <div style="flex:1">
+        <label>Сенсор 2 (ведений)</label>
+        <select id="s2" class="input"><option>Немає</option><option selected>Оптичний (білий маркер)</option><option>Холла (магніт)</option></select>
+      </div>
+      <div style="flex:1">
+        <label>Піни переривань (UNO):</label>
+        <select id="pin1" class="input"><option value="2" selected>D2</option><option value="3">D3</option></select>
+      </div>
+      <div style="flex:1">
+        <label>Другий пін:</label>
+        <select id="pin2" class="input"><option value="-1" selected>—</option><option value="3">D3</option><option value="2">D2</option></select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div style="flex:1">
+        <label>Імпульсів/оберт (вал 1)</label>
+        <input id="ppr1" class="input" type="number" min="1" step="1" value="1"/>
+      </div>
+      <div style="flex:1">
+        <label>Імпульсів/оберт (вал 2)</label>
+        <input id="ppr2" class="input" type="number" min="1" step="1" value="1"/>
+      </div>
+      <div style="flex:1">
+        <label>Діаметр шківа привідного, мм (D1)</label>
+        <input id="d1" class="input" type="number" min="10" step="1" value="150"/>
+      </div>
+      <div style="flex:1">
+        <label>Діаметр шківа веденого, мм (D2)</label>
+        <input id="d2" class="input" type="number" min="10" step="1" value="300"/>
+      </div>
+    </div>
+
+    <div class="row">
+      <div style="flex:1">
+        <label>Вікно усереднення, мс</label>
+        <input id="win" class="input" type="number" min="100" step="100" value="500"/>
+      </div>
+      <div style="flex:1">
+        <label>Дебаунс, мкс</label>
+        <input id="deb" class="input" type="number" min="0" step="50" value="200"/>
+      </div>
+      <div style="flex:1">
+        <label>Поріг тривоги (SLIP %)</label>
+        <input id="thr" class="input" type="number" step="0.5" value="3.0"/>
+      </div>
+      <div style="flex:1">
+        <label>Мітка роботи</label>
+        <input id="job" class="input" placeholder="ТО приводу жатки / ВВП 540 об/хв"/>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧪 Емулятор (без «заліза»)</h2>
+    <div class="row">
+      <label><input id="emu" type="checkbox"/> Увімкнути емулятор</label>
+      <label style="flex:1">RPM вал 1 <input id="rpm1s" class="input" type="range" min="100" max="2500" step="10" value="540" disabled/></label>
+      <label style="flex:1">RPM вал 2 <input id="rpm2s" class="input" type="range" min="50" max="2000" step="10" value="270" disabled/></label>
+      <button class="btn" id="tick">➕ Додати точку</button>
+      <button class="btn secondary" id="clear">🧹 Очистити</button>
+      <span id="stat" class="badge">Статус: —</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📈 Живий графік</h2>
+    <div class="canvasWrap"><canvas id="chart" width="1000" height="260"></canvas></div>
+    <div class="row small" style="margin-top:8px">
+      <span class="badge">Очік. передаточне (без ковзання): n2* = n1 × D1/D2</span>
+      <span id="last" class="badge">RPM1=—, RPM2=—, SLIP=—%</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧩 Згенерований код (Arduino .ino)</h2>
+    <div class="row">
+      <button class="btn good" id="gen">⚙️ Згенерувати прошивку</button>
+      <button class="btn secondary" id="copy">📋 Копіювати</button>
+      <button class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
+    </div>
+    <pre class="code" id="code">// Натисни «Згенерувати прошивку» ↑</pre>
+  </div>
+
+  <div class="card">
+    <h2>💾 Протокол і експорт</h2>
+    <div class="row">
+      <input id="fio" class="input" placeholder="ПІБ механіка"/>
+      <button class="btn" id="saveTxt">💾 TXT</button>
+      <button class="btn" id="saveCsv">📄 CSV</button>
+      <button class="btn" id="receipt">🖨️ 58 мм чек</button>
+    </div>
+    <div id="rc" class="receipt" hidden></div>
+  </div>
+
+  <div class="card">
+    <h2>🔌 Схема підключення (SVG)</h2>
+    <svg viewBox="0 0 900 320" role="img" aria-label="Arduino + A3144/TCRT5000">
+      <!-- Arduino -->
+      <rect x="40" y="40" width="220" height="140" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <text x="150" y="65" fill="#e5e7eb" font-size="16" text-anchor="middle">Arduino UNO/Nano</text>
+      <text x="55" y="95" fill="#93c5fd" font-size="12">5V</text>
+      <text x="55" y="115" fill="#93c5fd" font-size="12">GND</text>
+      <text x="55" y="135" fill="#93c5fd" font-size="12">D2 (INT0)</text>
+      <text x="55" y="155" fill="#93c5fd" font-size="12">D3 (INT1)</text>
+      <!-- Hall A3144 -->
+      <rect x="320" y="40" width="200" height="90" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <text x="420" y="65" fill="#dcfce7" font-size="15" text-anchor="middle">A3144 (Холла)</text>
+      <text x="420" y="85" fill="#a7f3d0" font-size="12" text-anchor="middle">VCC — OUT — GND (потрібен pull-up)</text>
+      <!-- Opto -->
+      <rect x="320" y="150" width="200" height="90" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+      <text x="420" y="175" fill="#fed7aa" font-size="15" text-anchor="middle">TCRT5000 (оптичний)</text>
+      <text x="420" y="195" fill="#fed7aa" font-size="12" text-anchor="middle">VCC — OUT — GND</text>
+      <!-- Resistor -->
+      <line x1="260" y1="130" x2="320" y2="70" stroke="#fbbf24" stroke-width="2"/>
+      <rect x="300" y="60" width="20" height="10" fill="#fbbf24"/>
+      <text x="340" y="68" fill="#fde68a" font-size="12">10k Ω pull-up</text>
+      <!-- Wires -->
+      <line x1="260" y1="90"  x2="320" y2="60"  stroke="#93c5fd" stroke-width="3"/><text x="280" y="80" fill="#93c5fd" font-size="12">5V → VCC</text>
+      <line x1="260" y1="110" x2="320" y2="100" stroke="#64748b" stroke-width="3"/><text x="280" y="110" fill="#94a3b8" font-size="12">GND → GND</text>
+      <line x1="260" y1="130" x2="320" y2="80"  stroke="#22c55e" stroke-width="3"/><text x="280" y="95" fill="#86efac" font-size="12">D2 → OUT (сенсор 1)</text>
+      <line x1="260" y1="150" x2="320" y2="190" stroke="#38bdf8" stroke-width="3"/><text x="280" y="160" fill="#93c5fd" font-size="12">D3 → OUT (сенсор 2)</text>
+      <text x="120" y="210" fill="#fbbf24" font-size="12">⚠️ Маркер: біла/срібна смужка або магніт — 1 імп./оберт</text>
+    </svg>
+    <div class="note small" style="margin-top:8px">
+      <b>Поради:</b> оптичний датчик працює краще з матовим білим маркером; Холла — з неодимовим магнітом Ø6–8 мм. Тримай зазор 2–3 мм, захисти від пилу. Для ВВП 540/1000 об/хв дотримуйся безпечної відстані!
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>Графік RPM1/RPM2 і SLIP% (скрін).</li>
+      <li>CSV-лог 2–3 хв із тривогами.</li>
+      <li>Поясни вплив натягу ременя/паралельності шківів на ковзання та 1X/2X вібрації.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📜 Історична нотатка</h2>
+    <p class="muted small">Перші тахометри у с/г техніці були механічними з гнучким валом. Сьогодні дешевий датчик Холла/оптопара з Arduino дає точність до одиниць об/хв, а ковзання ременя видно «вживу», перш ніж запахне гумою.</p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+
+// ===== Стан і змінні графіка =====
+const cvs=$('#chart'), ctx=cvs.getContext('2d');
+const series=[]; // {t, rpm1, rpm2, slip, alarm}
+let t0=Date.now();
+
+// Емулятор
+const emu=$('#emu'), rpm1s=$('#rpm1s'), rpm2s=$('#rpm2s');
+emu.addEventListener('change',()=>{ rpm1s.disabled=rpm2s.disabled=!emu.checked; });
+
+function expectedRatio(){ const D1=parseFloat($('#d1').value)||1, D2=parseFloat($('#d2').value)||1; return D1/D2; }
+function addPoint(r1, r2){
+  const n1=parseFloat(r1)||0, n2=parseFloat(r2)||0;
+  const ratio=expectedRatio();
+  const n2exp = n1 * ratio * (parseFloat($('#ppr1').value)||1)/(parseFloat($('#ppr2').value)||1) * (parseFloat($('#ppr2').value)||1)/(parseFloat($('#ppr1').value)||1); // скорочується → n1*D1/D2
+  const slip = (n2exp>0)? (100*(n2exp - n2)/n2exp) : 0;
+  const thr=parseFloat($('#thr').value)||3;
+  const alarm = (Math.abs(slip)>=thr);
+  series.push({t:Date.now(), rpm1:n1, rpm2:n2, slip, alarm});
+  if(series.length>600) series.shift();
+  $('#last').textContent = `RPM1=${n1.toFixed(0)}, RPM2=${n2>0?n2.toFixed(0):'—'}, SLIP=${isFinite(slip)?slip.toFixed(2):'—'}%`;
+  $('#stat').textContent = alarm? 'Статус: ⚠️ ковзання' : 'Статус: ок';
+  draw();
+}
+
+// Малювання графіка
+function draw(){
+  const W=cvs.width,H=cvs.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,W-1,H-1);
+  if(series.length<2) return;
+  const maxN=300; const s=series.slice(-maxN);
+  const rpmMax = Math.max(100, Math.max(...s.map(o=>Math.max(o.rpm1, o.rpm2||0))) * 1.2);
+  const slipMax = Math.max(5, Math.max(...s.map(o=>Math.abs(o.slip))) * 1.2);
+
+  const xs=s.map((_,i)=> 60 + i*((W-80)/(maxN-1)));
+
+  // Сітка
+  ctx.fillStyle='#94a3b8'; ctx.font='12px ui-monospace';
+  ctx.fillText('RPM', 12, 14); ctx.fillText('SLIP %', 12, 28);
+
+  // RPM1 (блакитний)
+  ctx.beginPath(); ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2;
+  xs.forEach((x,i)=>{ const y=H-10-(s[i].rpm1/rpmMax)*(H-20); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.stroke();
+
+  // RPM2 (зелений) якщо є
+  ctx.beginPath(); ctx.strokeStyle='#22c55e'; ctx.lineWidth=2;
+  xs.forEach((x,i)=>{ const v=s[i].rpm2||0; const y=H-10-(v/rpmMax)*(H-20); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.stroke();
+
+  // SLIP % як друга шкала (жовта)
+  ctx.beginPath(); ctx.strokeStyle='#fbbf24'; ctx.lineWidth=1.7;
+  xs.forEach((x,i)=>{ const y=H-10-(Math.min(slipMax,Math.max(-slipMax,s[i].slip))/slipMax)*(H-20); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.stroke();
+
+  // Поріг SLIP
+  const thr=parseFloat($('#thr').value)||3;
+  const yThr=H-10-(thr/slipMax)*(H-20);
+  const yThrN=H-10-(-thr/slipMax)*(H-20);
+  ctx.setLineDash([6,4]); ctx.strokeStyle='#fbbf24'; ctx.beginPath(); ctx.moveTo(60,yThr); ctx.lineTo(W-10,yThr); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(60,yThrN); ctx.lineTo(W-10,yThrN); ctx.stroke(); ctx.setLineDash([]);
+
+  // Маркери тривог
+  s.forEach((o,i)=>{ if(o.alarm){ const x=xs[i], y=H-14; ctx.fillStyle='#f87171'; ctx.fillRect(x-2,y,4,4); } });
+}
+
+$('#tick').addEventListener('click', ()=>{
+  if(emu.checked){
+    addPoint(parseFloat(rpm1s.value), parseFloat(rpm2s.value));
+  }else{
+    const a=prompt('Введи RPM вал 1:','540'); if(a===null) return;
+    const b=prompt('Введи RPM вал 2 (якщо є):','270'); if(b===null) return;
+    addPoint(parseFloat(a), parseFloat(b));
+  }
+});
+$('#clear').addEventListener('click', ()=>{ series.length=0; $('#last').textContent='RPM1=—, RPM2=—, SLIP=—%'; draw(); });
+
+// ===== Генератор прошивки =====
+function makeSketch(){
+  const pin1=parseInt($('#pin1').value,10);
+  const pin2=parseInt($('#pin2').value,10);
+  const ppr1=parseInt($('#ppr1').value,10)||1;
+  const ppr2=parseInt($('#ppr2').value,10)||1;
+  const win =parseInt($('#win').value,10)||500;
+  const deb =parseInt($('#deb').value,10)||200;
+
+  const dual = (pin2===2 || pin2===3);
+
+  const code=`/*
+  Пара 16 — Arduino тахометр (оптопара/Холла), 1–2 канали
+  Вимір: RPM по підрахунку імпульсів у вікні ${win} мс + відсікання імпульсів менше ${deb} мкс (debounce).
+  CSV: millis,RPM1,RPM2
+  ⚠ Безпека: працювати подалі від обертових вузлів, фіксувати сенсор!
+*/
+volatile unsigned long lastMicros1=0${dual?', lastMicros2=0':''};
+volatile unsigned long cnt1=0${dual?', cnt2=0':''};
+const byte PIN1=${pin1};${dual?'\nconst byte PIN2='+pin2+';':''}
+const byte PPR1=${ppr1};${dual?'\nconst byte PPR2='+ppr2+';':''}
+const unsigned long DEB=${deb}; // мкс
+const unsigned long WIN=${win}; // мс
+
+void IRAM_ATTR isr1(){
+  unsigned long now=micros();
+  if(now - lastMicros1 >= DEB){ cnt1++; lastMicros1=now; }
+}
+${dual?`void IRAM_ATTR isr2(){
+  unsigned long now=micros();
+  if(now - lastMicros2 >= DEB){ cnt2++; lastMicros2=now; }
+}`:''}
+
+void setup(){
+  Serial.begin(115200);
+  pinMode(PIN1, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(PIN1), isr1, FALLING);
+  ${dual?`pinMode(PIN2, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(PIN2), isr2, FALLING);`:''}
+  Serial.println(F("millis,RPM1,RPM2"));
+}
+
+void loop(){
+  static unsigned long t0=millis();
+  if(millis()-t0 >= WIN){
+    noInterrupts();
+    unsigned long c1=cnt1; cnt1=0;
+    ${dual?`unsigned long c2=cnt2; cnt2=0;`:''}
+    interrupts();
+
+    float rpm1 = (c1 * (60000.0/WIN)) / PPR1;
+    ${dual?`float rpm2 = (c2 * (60000.0/WIN)) / PPR2;`:''}
+
+    Serial.print(millis()); Serial.print(',');
+    Serial.print(rpm1,1); Serial.print(',');
+    ${dual?`Serial.println(rpm2,1);`:`Serial.println(0);`}
+    t0 = millis();
+  }
+}
+`;
+  return code;
+}
+$('#gen').addEventListener('click', ()=>{ const txt=makeSketch(); $('#code').textContent=txt; window.scrollTo({top: $('#code').parentElement.getBoundingClientRect().top + window.scrollY - 12, behavior:'smooth'}); });
+$('#copy').addEventListener('click', ()=>{ const ta=document.createElement('textarea'); ta.value=$('#code').textContent; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); const old=document.title; document.title='✅ Код скопійовано'; setTimeout(()=>document.title=old,900); });
+$('#dl').addEventListener('click', ()=>{ const txt=$('#code').textContent||makeSketch(); download('mechanic_para16_tachometer.ino',txt,'text/x-arduino'); });
+
+// ===== Експорт =====
+$('#saveTxt').addEventListener('click', ()=>{
+  const lines=[
+    'Пара 16 — Arduino: тахометр ВВП/шківів',
+    'Механік: '+($('#fio').value||''),
+    'Робота: '+($('#job').value||''),
+    `Сенсори: 1=${$('#s1').value}, 2=${$('#s2').value}`,
+    `PPR: 1=${$('#ppr1').value}, 2=${$('#ppr2').value}; Вікно=${$('#win').value} мс; Дебаунс=${$('#deb').value} мкс`,
+    `D1=${$('#d1').value} мм, D2=${$('#d2').value} мм, Поріг SLIP=${$('#thr').value}%`,
+    `Останні виміри: ${$('#last').textContent}`
+  ];
+  download('mechanic_para16_'+stamp()+'.txt', lines.join('\n'));
+});
+$('#saveCsv').addEventListener('click', ()=>{
+  const head='t_iso,RPM1,RPM2,SLIP%\n';
+  const body=series.map(o=> new Date(o.t).toISOString()+','+o.rpm1.toFixed(1)+','+(o.rpm2?o.rpm2.toFixed(1):'0')+','+(isFinite(o.slip)?o.slip.toFixed(2):'0')).join('\n');
+  download('mechanic_para16_'+stamp()+'.csv', head+body, 'text/csv');
+});
+$('#receipt').addEventListener('click', ()=>{
+  const lines=['=== ЧЕК ТАХОМЕТРА (58мм) ===','Робота: '+($('#job').value||'-'),'---'];
+  const M=series.slice(-12);
+  M.forEach(o=>lines.push(`${new Date(o.t).toISOString().slice(11,19)} RPM1=${o.rpm1.toFixed(0)} RPM2=${o.rpm2?o.rpm2.toFixed(0):'—'} SLIP=${isFinite(o.slip)?o.slip.toFixed(1):'—'}% ${o.alarm?'!':''}`));
+  const el=$('#rc'); el.hidden=false; el.textContent=lines.join('\n');
+  download('para16_receipt_'+stamp()+'.txt', lines.join('\n'));
+});
+
+// ===== Ініціалізація =====
+draw();
+if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
+</script>
+</body>
+</html>
