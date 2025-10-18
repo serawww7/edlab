@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 20 (механіки) — Акустичний стетоскоп підшипників редуктора (WebAudio)</title>
+<meta name="description" content="Мікрофон гарнітури або WAV → осцилограма, envelope, спектр/спектр огинаючої, кепструм → діагноз підшипника/редуктора → чек-лист дій → журнал → експорт PNG/CSV/TXT."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+.small{font-size:.9rem}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:220px}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🎧</span>
+      <div>
+        <b>Пара 20 — Акустичний стетоскоп підшипників редуктора</b><br/>
+        <span class="badge">мікрофон → envelope → спектр/кепструм → діагноз → чек-лист → журнал → експорт</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">Мета: за допомогою звичайного <b>мікрофона гарнітури</b> прослухати корпус редуктора, отримати <b>огинаючу ударів</b>, спектр і <b>кепструм</b>, розпізнати типові проблеми (<b>1X</b> розбаланс, <b>2X</b> непаралельність, <b>looseness</b> — послаблення кріплення, <b>дефекти підшипників</b>, <b>зачеплення шестерень</b>) і скласти <b>чек-лист дій</b>. Безпечно, дешево, на кожному ПК в аудиторії.</p>
+
+  <div class="card">
+    <h2>🎙️ Джерело сигналу</h2>
+    <div class="row">
+      <div style="flex:1">
+        <label>Режим</label>
+        <select id="src" class="input">
+          <option value="mic" selected>Мікрофон (гарнітура/ноутбук)</option>
+          <option value="file">Аудіофайл (WAV/MP3)</option>
+          <option value="emu">Емулятор (синтетика підшипника)</option>
+        </select>
+      </div>
+      <div class="row" style="gap:8px">
+        <button class="btn good" id="start">▶️ Старт</button>
+        <button class="btn secondary" id="stop">⏹️ Стоп</button>
+        <span id="stat" class="badge">Статус: idle</span>
+      </div>
+    </div>
+    <div id="fileBox" class="row" style="display:none;margin-top:6px">
+      <input id="fileInp" class="input" type="file" accept="audio/*"/>
+      <button class="btn" id="playFile">▶️ Відтворити файл</button>
+    </div>
+    <div id="emuBox" class="note" style="display:none;margin-top:6px">
+      <b>Емулятор:</b>
+      <div class="row">
+        <div style="flex:1">
+          <select id="emuType" class="input">
+            <option value="normal" selected>Норма (тихий підшипник)</option>
+            <option value="outer">Підшипник — доріжка <i>outer race</i></option>
+            <option value="inner">Підшипник — доріжка <i>inner race</i></option>
+            <option value="ball">Підшипник — тіла кочення</option>
+            <option value="gear">Зачеплення шестерень (GMF)</option>
+            <option value="loose">Looseness (послаблення)</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label>Рівень <input id="emuLvl" class="input" type="range" min="0" max="1" step="0.01" value="0.7"/></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>⚙️ Параметри механізму</h2>
+    <div class="row">
+      <div style="flex:1">
+        <label>RPM валу (або оцінка)</label>
+        <input id="rpm" class="input" type="number" min="60" step="1" value="900"/>
+      </div>
+      <div style="flex:1">
+        <label>Зубців на шестерні (якщо редуктор)</label>
+        <input id="teeth" class="input" type="number" min="5" step="1" value="30"/>
+      </div>
+      <div style="flex:1">
+        <label>Смуга огинаючої, кГц (НЧ фільтр)</label>
+        <input id="envLP" class="input" type="number" min="0.2" step="0.1" value="2.0"/>
+      </div>
+      <div style="flex:1">
+        <label>FFT розмір</label>
+        <select id="fft" class="input"><option>2048</option><option selected>4096</option><option>8192</option></select>
+      </div>
+    </div>
+    <small class="muted">Порада: «стетоскоп» працює краще на частинах корпусу, де звук «дзвенить». Притисни мікрофон через гумову прокладку або ізоленту.</small>
+  </div>
+
+  <div class="card">
+    <h2>📈 Осцилограми (сирий та огинаюча)</h2>
+    <div class="canvasWrap"><canvas id="wave" width="1080" height="200"></canvas></div>
+    <div class="canvasWrap" style="margin-top:8px"><canvas id="env" width="1080" height="200"></canvas></div>
+    <div class="row" style="margin-top:8px">
+      <span id="last" class="badge">RMS=—, Kurt=—, Crest=—</span>
+      <button class="btn secondary" id="pngOsci">🖼️ PNG (осцилограми)</button>
+      <button class="btn secondary" id="clear">🧹 Очистити</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔬 Спектр та спектр огинаючої</h2>
+    <div class="canvasWrap"><canvas id="spec" width="1080" height="240"></canvas></div>
+    <div class="canvasWrap" style="margin-top:8px"><canvas id="espec" width="1080" height="240"></canvas></div>
+    <div class="row small" style="margin-top:8px">
+      <span class="badge">Fs=авто; колір зелений — спектр, жовтий — огинаюча</span>
+      <button class="btn secondary" id="pngSpec">🖼️ PNG (спектри)</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧠 Кепструм (пошук періодики ударів)</h2>
+    <div class="canvasWrap"><canvas id="cep" width="1080" height="200"></canvas></div>
+    <div class="row small" style="margin-top:8px">
+      <span id="cepInfo" class="badge">Кепстральні піки: —</span>
+      <button class="btn secondary" id="pngCep">🖼️ PNG (кепструм)</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🩺 Діагноз і чек-лист дій</h2>
+    <div class="row">
+      <span id="diag" class="badge">Діагноз: —</span>
+      <span id="gmf" class="badge">Очікуваний GMF: — Гц</span>
+    </div>
+    <table class="tbl" style="margin-top:8px">
+      <tbody id="checklist">
+        <tr><th>Розбаланс (1X)</th><td>Перевір чистоту вентилятора/шківа, зняти бруд; балансування; огляд кріплення шківів.</td></tr>
+        <tr><th>Непаралельність (2X)</th><td>Вирівнювання валів лазерною лінійкою/щупом; перевір опорні поверхні, проставки.</td></tr>
+        <tr><th>Looseness (послаблення)</th><td>Дотягнути болти корпусу/кришок; перевір посадки підшипників, люфт.</td></tr>
+        <tr><th>Підшипник (BPFO/BPFI/BSF)</th><td>Слухати спектр огинаючої: ряд тонких пік-фреквенцій у діапазоні 5–300 Гц; оглянути мастило, герметичність, заміна при наростанні Kurtosis.</td></tr>
+        <tr><th>Зачеплення шестерень (GMF)</th><td>GMF≈z×f<sub>вал</sub>: сильний тон + бічні смуги → перевір зазор, змащення, знос зубців.</td></tr>
+      </tbody>
+    </table>
+    <div class="note small" style="margin-top:8px">
+      <b>Як читати:</b> <i>1X</i> — частота обертів; <i>2X</i> — удвічі; <i>GMF</i> — частота зачеплення (зубців×об/с). Для підшипників дивись <b>спектр огинаючої</b> та <b>кепструм</b>.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📜 Журнал і експорт</h2>
+    <div class="row">
+      <button class="btn" id="mark">📌 Позначити подію</button>
+      <select id="label" class="input" style="max-width:260px">
+        <option value="ok" selected>ok</option>
+        <option value="unbalance">unbalance</option>
+        <option value="misalignment">misalignment</option>
+        <option value="looseness">looseness</option>
+        <option value="bearing">bearing</option>
+        <option value="gearmesh">gearmesh</option>
+      </select>
+    </div>
+    <pre id="alog" class="code" style="max-height:200px;overflow:auto">// Поки без записів</pre>
+    <div class="row">
+      <button class="btn" id="expCSV">📄 CSV (ознаки/піки)</button>
+      <button class="btn" id="expTXT">💾 TXT (підсумок + чек-лист)</button>
+      <button class="btn" id="expPNG">🖼️ PNG (все разом)</button>
+      <button class="btn secondary" id="receipt">🖨️ 58 мм чек</button>
+    </div>
+    <div id="rc" class="receipt" hidden></div>
+  </div>
+
+  <div class="card">
+    <h2>🔌 Схема розміщення (SVG)</h2>
+    <svg viewBox="0 0 980 300" role="img" aria-label="Мікрофон → корпус редуктора">
+      <rect x="60" y="60" width="300" height="160" rx="16" fill="#0e2a47" stroke="#3b82f6"/>
+      <text x="210" y="90" fill="#e5e7eb" font-size="15" text-anchor="middle">Редуктор</text>
+      <text x="210" y="110" fill="#93c5fd" font-size="12" text-anchor="middle">вхідний вал ліворуч, вихід праворуч</text>
+
+      <circle cx="130" cy="140" r="20" fill="#1f2937" stroke="#9ca3af"/>
+      <circle cx="350" cy="140" r="28" fill="#1f2937" stroke="#9ca3af"/>
+      <rect x="500" y="110" width="160" height="60" rx="10" fill="#14532d" stroke="#22c55e"/>
+      <text x="580" y="145" fill="#dcfce7" font-size="14" text-anchor="middle">🎤 Мікрофон</text>
+      <line x1="360" y1="140" x2="500" y2="140" stroke="#93c5fd" stroke-width="3"/>
+      <text x="640" y="210" fill="#fbbf24" font-size="12" text-anchor="middle">Притиснути до корпуса через гуму/ізолентою</text>
+    </svg>
+    <div class="note small" style="margin-top:8px">
+      <b>Безпека:</b> не торкатися рухомих частин; виключити LOTO перед сервісом; не ставити мікрофон у зону бризок масла.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>PNG: осцилограми, спектри, кепструм із позначеним діагнозом.</li>
+      <li>CSV ознак/піків за 1–2 хв + журнал подій.</li>
+      <li>Короткий чек-лист дій: що зробити зараз, що — при найближчому ТО.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📜 Історична нотатка</h2>
+    <p class="muted small">Перші «стетоскопи механіка» були простою трубкою. Сьогодні браузер робить інакше: огинаюча, спектр, кепструм — і ви вже бачите «удари» дефектів підшипника там, де вухо лише здогадується.</p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+
+// ===== Аудіо пайплайн =====
+let actx=null, analyser=null, srcNode=null, micStream=null, fileBuf=null, fileSrc=null, fs=48000;
+let bp=null, rectifier=null, lp=null; // для огинаючої
+let NFFT=4096;
+
+const wave=$('#wave'), wctx=wave.getContext('2d');
+const env=$('#env'),  ectx=env.getContext('2d');
+const spec=$('#spec'), sctx=spec.getContext('2d');
+const espec=$('#espec'), exctx=espec.getContext('2d');
+const cep=$('#cep'), cctx=cep.getContext('2d');
+
+const featsLog=[], logbook=[];
+
+function log(msg){const t=new Date().toLocaleTimeString(); const box=$('#alog'); if(box.textContent.startsWith('//')) box.textContent=''; box.textContent+=`[${t}] ${msg}\n`; box.scrollTop=box.scrollHeight; logbook.push({t,msg});}
+
+// ===== Графіка =====
+function drawLine(ctx, arr, color='#38bdf8', ymid=false){
+  const W=ctx.canvas.width,H=ctx.canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,W-1,H-1);
+  ctx.beginPath(); ctx.strokeStyle=color; ctx.lineWidth=1.4;
+  const n=arr.length;
+  for(let i=0;i<n;i++){
+    const x=i*(W/(n-1));
+    const y= ymid? (H/2 - arr[i]*(H/2-12)) : (H-10 - arr[i]*(H-20));
+    i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+  }
+  ctx.stroke();
+}
+function drawSpec(ctx, db, maxHz, color='#22c55e'){
+  const W=ctx.canvas.width,H=ctx.canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,W-1,H-1);
+  ctx.fillStyle='#94a3b8'; ctx.font='12px ui-monospace';
+  for(let fk=100; fk<=maxHz; fk+=100){
+    const x=fk*(W/maxHz); ctx.strokeStyle='#18243b'; ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+    if(fk%500===0) ctx.fillText(fk+' Гц', x+2, 12);
+  }
+  ctx.beginPath(); ctx.strokeStyle=color; ctx.lineWidth=1.5;
+  for(let i=0;i<db.length;i++){
+    const x=i*(W/(db.length-1));
+    const y=H-10 - ((Math.max(-100,Math.min(0,db[i]))+100)/100)*(H-20);
+    i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+  }
+  ctx.stroke();
+}
+
+// ===== Буфери =====
+let timeBuf=new Float32Array(4096);
+let envBuf=new Float32Array(4096);
+let specBuf=new Float32Array(2048);
+let especBuf=new Float32Array(2048);
+let cepBuf=new Float32Array(2048);
+
+// ===== DSP =====
+function makeChain(){
+  bp=actx.createBiquadFilter(); bp.type='bandpass'; bp.Q=3; bp.frequency.value=6000; // смуга ударів
+  rectifier=new WaveShaperNode(actx,{curve:new Float32Array([ -1, 0, 1 ])}); // не використовується напряму — замінимо на ScriptProcessor
+  lp=actx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=(parseFloat($('#envLP').value)||2)*1000;
+}
+
+let procNode=null;
+function startMic(){
+  navigator.mediaDevices.getUserMedia({audio:{noiseSuppression:false,echoCancellation:false,autoGainControl:false}})
+    .then(stream=>{
+      micStream=stream; srcNode=actx.createMediaStreamSource(stream);
+      buildPipeline('mic');
+      $('#stat').textContent='Статус: mic';
+      loop();
+      log('Мікрофон увімкнено');
+    }).catch(err=>{ alert('Немає доступу до мікрофона: '+err.message); $('#stat').textContent='Статус: помилка'; });
+}
+
+function startFile(){
+  $('#fileBox').style.display='flex';
+  log('Вибери аудіофайл (WAV/MP3)');
+}
+
+$('#fileInp').addEventListener('change', async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const ab=await f.arrayBuffer();
+  if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+  fileBuf=await actx.decodeAudioData(ab);
+  log('Файл завантажено: '+f.name);
+});
+$('#playFile').addEventListener('click', ()=>{
+  if(!fileBuf){ alert('Немає файлу'); return; }
+  if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+  fileSrc=actx.createBufferSource(); fileSrc.buffer=fileBuf; fileSrc.loop=false;
+  buildPipeline('file');
+  fileSrc.start();
+  $('#stat').textContent='Статус: file';
+  loop(); log('Відтворення файлу');
+});
+
+let emuNodes=[];
+function startEmu(){
+  const g=actx.createGain(); g.gain.value=parseFloat($('#emuLvl').value)||0.7; emuNodes=[g];
+  function mkNoise(center,bw,gain){const buf=actx.createBuffer(1,fs,fs),d=buf.getChannelData(0); for(let i=0;i<fs;i++) d[i]=Math.random()*2-1; const s=actx.createBufferSource(); s.buffer=buf; s.loop=true; const biq=actx.createBiquadFilter(); biq.type='bandpass'; biq.frequency.value=center; biq.Q=center/Math.max(10,bw); const gg=actx.createGain(); gg.gain.value=gain; s.connect(biq).connect(gg).connect(g); s.start(); emuNodes.push(s,biq,gg);}
+  function mkClick(rateHz, gain){ // періодичні удари
+    const osc=actx.createOscillator(); osc.type='square'; osc.frequency.value=rateHz; const sh=actx.createGain(); sh.gain.value=gain; osc.connect(sh).connect(g); osc.start(); emuNodes.push(osc,sh);
+  }
+  const t=$('#emuType').value;
+  const f1x=(parseFloat($('#rpm').value)||900)/60;
+  if(t==='normal'){ mkNoise(3000,3000,0.08); mkNoise(8000,8000,0.04); }
+  if(t==='outer'){ mkNoise(6000,6000,0.08); mkClick(f1x*3.2,0.18); }
+  if(t==='inner'){ mkNoise(7000,7000,0.1); mkClick(f1x*4.8,0.16); }
+  if(t==='ball'){  mkNoise(9000,9000,0.12); mkClick(f1x*2.1,0.14); }
+  if(t==='gear'){  mkNoise(4000,3000,0.1); mkClick((parseFloat($('#teeth').value)||30)*f1x,0.12); }
+  if(t==='loose'){ mkNoise(2500,2000,0.08); mkClick(f1x*2,0.07); mkClick(f1x,0.12); }
+  srcNode=g;
+  buildPipeline('emu');
+  $('#stat').textContent='Статус: емулятор';
+  loop(); log('Емулятор: '+t);
+}
+
+function stopAll(){
+  if(emuNodes.length){ emuNodes.forEach(n=>{try{if(n.stop)n.stop(); if(n.disconnect)n.disconnect();}catch{}}); emuNodes.length=0; }
+  if(fileSrc){ try{fileSrc.stop(); fileSrc.disconnect();}catch{} fileSrc=null; }
+  if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; }
+  if(procNode){ try{procNode.disconnect();}catch{} procNode=null; }
+  if(analyser){ try{analyser.disconnect();}catch{} analyser=null; }
+  if(srcNode){ try{srcNode.disconnect();}catch{} srcNode=null; }
+  if(actx){ try{actx.close();}catch{} }
+  actx=null; $('#stat').textContent='Статус: idle';
+}
+
+function buildPipeline(mode){
+  if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});
+  fs=actx.sampleRate; NFFT=parseInt($('#fft').value)||4096;
+  makeChain();
+  analyser=actx.createAnalyser(); analyser.fftSize=NFFT; analyser.smoothingTimeConstant=0.4;
+
+  // Скриптовий вузол для одночасного доступу до сирого та envelope
+  const bufSize=2048;
+  procNode=actx.createScriptProcessor(bufSize, 1, 1);
+  const bp1=actx.createBiquadFilter(); bp1.type='highpass'; bp1.frequency.value=200; // прибрати інфранизькі
+  const fullGain=actx.createGain(); fullGain.gain.value=1.0;
+
+  // envelope: |BP(audio)| -> LP
+  const absGain=actx.createGain(); absGain.gain.value=1.0;
+  const envLP=actx.createBiquadFilter(); envLP.type='lowpass'; envLP.frequency.value=(parseFloat($('#envLP').value)||2)*1000;
+
+  // Підключення
+  if(mode==='mic') srcNode.connect(fullGain);
+  if(mode==='file') fileSrc.connect(fullGain);
+  if(mode==='emu') srcNode.connect(fullGain);
+
+  // Сирий → аналізатор та осцилограма
+  fullGain.connect(bp1).connect(analyser);
+  // Для огинаючої
+  const bpHi=actx.createBiquadFilter(); bpHi.type='bandpass'; bpHi.Q=3; bpHi.frequency.value=6000;
+  fullGain.connect(bpHi).connect(absGain).connect(envLP);
+
+  // Отримаємо envelope у ScriptProcessor
+  envLP.connect(procNode);
+  procNode.connect(actx.destination); // без звуку (майже нульовий)
+
+  // Буферизація
+  let rawStore=new Float32Array(0), envStore=new Float32Array(0);
+  procNode.onaudioprocess=(e)=>{
+    const ch=e.inputBuffer.getChannelData(0);
+    // «Абсолют» як детектор огинаючої (приблизно)
+    const tmp=new Float32Array(ch.length);
+    for(let i=0;i<ch.length;i++){ tmp[i]=Math.abs(ch[i]); }
+    // збережемо у масивах фіксованої довжини
+    rawStore = concatKeep(rawStore, ch, 4096);
+    envStore = concatKeep(envStore, tmp, 4096);
+    timeBuf=rawStore; envBuf=envStore;
+  };
+
+  function concatKeep(dst, add, keep){
+    const out=new Float32Array(Math.min(keep, dst.length+add.length));
+    const start=Math.max(0, dst.length+add.length-keep);
+    let k=0;
+    for(let i=start;i<dst.length;i++) out[k++]=dst[i];
+    for(let i=0;i<add.length && k<out.length;i++) out[k++]=add[i];
+    return out;
+  }
+}
+
+// ===== Обчислення ознак та діагноз =====
+function computeOnce(){
+  if(!analyser || !timeBuf.length) return null;
+
+  // Візуалізація осцилограм
+  const normRaw = norm01(timeBuf);
+  const normEnv = norm01(envBuf);
+  drawLine(wctx, normRaw, '#38bdf8', true);
+  drawLine(ectx, normEnv, '#fbbf24', false);
+
+  // Спектр сирого
+  const ftime=new Float32Array(NFFT); analyser.getFloatTimeDomainData(ftime);
+  const ffrq=new Float32Array(NFFT/2); analyser.getFloatFrequencyData(ffrq);
+  specBuf=ffrq.slice();
+  drawSpec(sctx, specBuf, fs/2, '#22c55e');
+
+  // Спектр envelope (огинаючої): самі рахуємо FFT через Analyser неможливо — зробимо примітивну DFT
+  const envArr=envBuf.slice(-NFFT);
+  const mag=fftMag(envArr); especBuf=mag.db;
+  drawSpec(exctx, especBuf, mag.maxHz, '#fbbf24');
+
+  // Кепструм (реальний кепструм від log|FFT|)
+  const cepObj=cepstrumFromMag(mag.mag);
+  cepBuf=cepObj.cep; drawLine(cctx, norm01(cepBuf.slice(0,cepBuf.length/2)), '#34d399', false);
+  const peaksC=cepObj.peaks.slice(0,3).map(p=>`${p.q.toFixed(4)}c (${(1/p.q).toFixed(1)} Гц)`).join(', ');
+  $('#cepInfo').textContent='Кепстральні піки: '+(peaksC||'—');
+
+  // Ознаки
+  const rms = Math.sqrt(normRaw.reduce((s,x)=>s+x*x,0)/normRaw.length);
+  const mean = normRaw.reduce((s,x)=>s+x,0)/normRaw.length;
+  const std = Math.sqrt(normRaw.reduce((s,x)=>s+(x-mean)*(x-mean),0)/normRaw.length);
+  const kurt = normRaw.reduce((s,x)=>s+Math.pow((x-mean)/std,4),0)/normRaw.length;
+  const crest = (Math.max(...normRaw)+1e-9)/(rms+1e-9);
+  const cent = spectralCentroid(specBuf, fs/2);
+  const peak = specPeak(specBuf, fs/2);
+  const pratio = peak.db - medianDb(specBuf);
+
+  $('#last').textContent = `RMS=${rms.toFixed(3)}, Kurt=${kurt.toFixed(2)}, Crest=${crest.toFixed(2)}`;
+
+  // Очікувані частоти
+  const fr1x = (parseFloat($('#rpm').value)||900)/60;
+  const z = parseFloat($('#teeth').value)||30;
+  const gmf = fr1x*z; $('#gmf').textContent='Очікуваний GMF: '+gmf.toFixed(1)+' Гц';
+
+  // Діагностика правилами + підказки з огинаючої
+  const envPeaks = topPeaks(especBuf, fs/(2*NFFT), 5, 5, 5); // масив {f,db}
+  const oneX = nearPeak(specBuf, fs/2, fr1x, 0.1*fr1x);
+  const twoX = nearPeak(specBuf, fs/2, 2*fr1x, 0.1*fr1x);
+  const gmfHit = nearPeak(specBuf, fs/2, gmf, Math.max(2,0.05*gmf));
+
+  let diag='normal';
+  if(oneX.hit && !twoX.hit && pratio>12 && kurt<4) diag='unbalance';
+  if(oneX.hit && twoX.hit && pratio>10) diag='misalignment';
+  if(kurt>6 || crest>4.0 || envPeaks.length>=2) diag='bearing';
+  if(gmfHit.hit) diag='gearmesh';
+  if((std>0.22 && crest>3.5) || (oneX.hit && envPeaks.some(p=>Math.abs(p.f-fr1x)<0.2*fr1x))) diag='looseness';
+
+  $('#diag').textContent = 'Діагноз: ' + diag;
+
+  const featRow={t:new Date().toISOString(), rms, kurt, crest, cent, peakF:peak.f, peakDb:peak.db, pratio, oneX:oneX.db, twoX:twoX.db, envTop:envPeaks.map(p=>p.f.toFixed(1)).join('|'), diag};
+  featsLog.push(featRow);
+  return featRow;
+}
+
+function norm01(arr){
+  if(!arr || !arr.length) return new Float32Array(0);
+  let mi=Infinity, ma=-Infinity; for(let i=0;i<arr.length;i++){ const v=arr[i]; if(v<mi) mi=v; if(v>ma) ma=v; }
+  const out=new Float32Array(arr.length); const den=(ma-mi)||1;
+  for(let i=0;i<arr.length;i++) out[i]=(arr[i]-mi)/den;
+  for(let i=0;i<out.length;i++) out[i]=(out[i]-0.5)*2; // -1..1
+  return out;
+}
+
+function spectralCentroid(db, maxHz){
+  const step=maxHz/(db.length-1);
+  let num=0,den=0;
+  for(let i=1;i<db.length;i++){ const a=Math.pow(10, db[i]/20); num+=i*step*a; den+=a; }
+  return den>0? num/den : 0;
+}
+function specPeak(db, maxHz){
+  let im=1, mx=-1e9;
+  for(let i=1;i<db.length;i++){ if(db[i]>mx){mx=db[i]; im=i;} }
+  return {f: im*(maxHz/(db.length-1)), db: mx};
+}
+function medianDb(db){
+  const a=db.slice(1).map(x=>x).sort((x,y)=>x-y);
+  return a[Math.floor(a.length/2)];
+}
+function nearPeak(db, maxHz, f0, tol){
+  const step=maxHz/(db.length-1);
+  const i0=Math.round(f0/step);
+  let mx=-1e9, idx=-1;
+  for(let i=Math.max(1,i0-Math.round(tol/step)); i<=Math.min(db.length-1,i0+Math.round(tol/step)); i++){
+    if(db[i]>mx){mx=db[i]; idx=i;}
+  }
+  return {hit: mx>-40, f: idx*step, db: mx};
+}
+function topPeaks(db, stepHz, n=5, minSep=5, floor=8){
+  // пошук локальних максимумів у dB-масиві
+  const peaks=[];
+  for(let i=2;i<db.length-2;i++){
+    if(db[i]>db[i-1] && db[i]>db[i+1]){
+      const f=i*stepHz;
+      const val=db[i]-medianDb(db);
+      if(val>floor){
+        if(!peaks.some(p=>Math.abs(p.f-f)<minSep)) peaks.push({f,db:db[i]});
+      }
+    }
+  }
+  peaks.sort((a,b)=>b.db-a.db);
+  return peaks.slice(0,n);
+}
+
+// Примітивна FFT-магнітуда через Analyser недоступна; тут — Goertzel-подібна ДПФ (для навчального масштабу)
+function fftMag(x){
+  const N=nearestPow2(x.length); const arr=x.slice(x.length-N);
+  const mag=new Float32Array(N/2);
+  for(let k=1;k<N/2;k++){
+    let re=0, im=0;
+    const w=-2*Math.PI*k/N;
+    for(let n=0;n<N;n++){ const ph=w*n; const v=arr[n]; re+=v*Math.cos(ph); im+=v*Math.sin(ph); }
+    mag[k]=Math.sqrt(re*re+im*im)/N;
+  }
+  const db=new Float32Array(N/2);
+  for(let k=1;k<N/2;k++){ db[k]=20*Math.log10(mag[k]+1e-9); }
+  return {mag, db, maxHz: fs/2};
+}
+function nearestPow2(n){ let p=1; while(p*2<=n) p*=2; return p; }
+
+function cepstrumFromMag(m){
+  const N=m.length*2; // симетрія
+  // лог спектра
+  const L=new Float32Array(m.length);
+  for(let i=1;i<m.length;i++){ L[i]=Math.log(m[i]+1e-9); }
+  // IDFT(log|X|) — реальний кепструм
+  const cep=new Float32Array(m.length);
+  for(let n=1;n<m.length;n++){
+    let s=0;
+    for(let k=1;k<m.length;k++){ s+= L[k]*Math.cos(2*Math.PI*k*n/(m.length*2)); }
+    cep[n]=s/m.length;
+  }
+  // пошук піків у кепструмі (queffrency сек)
+  const peaks=[];
+  for(let n=2;n<cep.length/2;n++){
+    if(cep[n]>cep[n-1] && cep[n]>cep[n+1]){
+      const q=n/fs; // секунди
+      const val=cep[n];
+      peaks.push({q,val});
+    }
+  }
+  peaks.sort((a,b)=>b.val-a.val);
+  return {cep, peaks:peaks.slice(0,5)};
+}
+
+// ===== Цикл =====
+let reqId=null;
+function loop(){
+  computeOnce();
+  reqId=requestAnimationFrame(loop);
+}
+
+// ===== Експорт/кнопки =====
+$('#pngOsci').addEventListener('click', ()=> savePNGs([wave,env], 'osci'));
+$('#pngSpec').addEventListener('click', ()=> savePNGs([spec,espec], 'spec'));
+$('#pngCep').addEventListener('click', ()=> savePNGs([cep], 'cep'));
+$('#expPNG').addEventListener('click', ()=> savePNGs([wave,env,spec,espec,cep], 'all'));
+
+function savePNGs(canvases, tag){
+  const pad=10;
+  const W=Math.max(...canvases.map(c=>c.width));
+  const H=canvases.reduce((s,c)=>s+c.height+pad,0);
+  const tmp=document.createElement('canvas'); tmp.width=W; tmp.height=H;
+  const tctx=tmp.getContext('2d'); let y=0;
+  canvases.forEach(c=>{ tctx.drawImage(c,0,y); y+=c.height+pad; });
+  tmp.toBlob(b=>{ const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='mech_para20_'+tag+'_'+stamp()+'.png'; a.click(); URL.revokeObjectURL(u); });
+}
+
+$('#clear').addEventListener('click', ()=>{ featsLog.length=0; wctx.clearRect(0,0,wave.width,wave.height); ectx.clearRect(0,0,env.width,env.height); sctx.clearRect(0,0,spec.width,spec.height); exctx.clearRect(0,0,espec.width,espec.height); cctx.clearRect(0,0,cep.width,cep.height); });
+
+$('#mark').addEventListener('click', ()=>{
+  const lab=$('#label').value;
+  const last=featsLog[featsLog.length-1]||{};
+  log(`Позначка: ${lab} | diag=${last.diag||'—'} | Kurt=${(last.kurt||0).toFixed?.(2)??'—'} | crest=${(last.crest||0).toFixed?.(2)??'—'}`);
+});
+
+$('#expCSV').addEventListener('click', ()=>{
+  const head='t_iso,rms,kurt,crest,centroid,peakF,peakDb,pratio,oneXdb,twoXdb,envTopHz,diag\n';
+  const body=featsLog.map(r=>`${r.t},${r.rms?.toFixed(4)||''},${r.kurt?.toFixed(2)||''},${r.crest?.toFixed(2)||''},${r.cent?.toFixed(1)||''},${r.peakF?.toFixed(1)||''},${r.peakDb?.toFixed(1)||''},${r.pratio?.toFixed(1)||''},${r.oneX?.toFixed(1)||''},${r.twoX?.toFixed(1)||''},"${r.envTop||''}",${r.diag||''}`).join('\n');
+  download('mechanic_para20_feats_'+stamp()+'.csv', head+body, 'text/csv');
+});
+$('#expTXT').addEventListener('click', ()=>{
+  const last=featsLog[featsLog.length-1]||{};
+  const lines=[
+    'Пара 20 — Акустичний стетоскоп підшипників редуктора',
+    'RPM валу: '+$('#rpm').value+'; зубців: '+$('#teeth').value+'; LP(env): '+$('#envLP').value+' кГц',
+    'Діагноз: '+(last.diag||'—'),
+    'Ознаки: RMS='+fmt(last.rms)+' Kurt='+fmt(last.kurt)+' Crest='+fmt(last.crest)+' Centroid='+fmt(last.cent)+'Hz Peak='+fmt(last.peakF)+'Hz ('+fmt(last.peakDb)+' dB)',
+    'ENV топ піки (Гц): '+(last.envTop||'—'),
+    '--- Чек-лист дій ---',
+    '- Якщо 1X домінує → очистити/відбалансувати колесо, перевірити шпонку/посадку.',
+    '- Якщо 2X домінує → перевірити співвісність, підкладки, перекоси.',
+    '- Якщо Kurtosis росте, ENV має гребінь → перевірити мастило/герметичність, планувати заміну підшипника.',
+    '- Якщо GMF і бічні смуги → перевір вестику/зазор зубців, змащення, знос.'
+  ];
+  download('mechanic_para20_summary_'+stamp()+'.txt', lines.join('\n'));
+});
+$('#receipt').addEventListener('click', ()=>{
+  const items=logbook.slice(-10);
+  const lines=['=== ЧЕК СТЕТОСКОПА (58мм) ===','Дата: '+new Date().toISOString().slice(0,10),'---'];
+  if(items.length===0){ lines.push('Подій не зафіксовано'); } else { items.forEach(l=>lines.push(`[${l.t}] ${l.msg}`)); }
+  const el=$('#rc'); el.hidden=false; el.textContent=lines.join('\n');
+  download('para20_receipt_'+stamp()+'.txt', lines.join('\n'));
+});
+
+function fmt(x){ return (x==null||isNaN(x))?'—':(typeof x==='number'?x.toFixed?.(2):x); }
+
+// ===== Кнопки старт/стоп =====
+$('#start').addEventListener('click', ()=>{
+  if(actx) return;
+  actx=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});
+  fs=actx.sampleRate; NFFT=parseInt($('#fft').value)||4096;
+  const mode=$('#src').value;
+  if(mode==='mic') startMic();
+  if(mode==='file') startFile();
+  if(mode==='emu'){ $('#emuBox').style.display='block'; startEmu(); }
+});
+$('#stop').addEventListener('click', ()=>{ if(reqId) cancelAnimationFrame(reqId), reqId=null; stopAll(); });
+$('#src').addEventListener('change', ()=>{
+  $('#fileBox').style.display = ($('#src').value==='file')?'flex':'none';
+  $('#emuBox').style.display  = ($('#src').value==='emu')?'block':'none';
+});
+$('#fft').addEventListener('change', ()=>{ if(actx){ alert('Змініть FFT після Стоп'); }});
+
+// ===== Ініціалізація =====
+if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
+</script>
+</body>
+</html>
