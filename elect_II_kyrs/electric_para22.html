@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 22 (Електрика) — ШІ: класифікація станів мережі + аномалії (k-NN)</title>
+<meta name="description" content="Імпорт CSV із метриками (Vrms, Irms, PF, THD, Temp), навчання k-NN, детектор аномалій (реконструкційна похибка), матриця помилок, емулятор, журнал тривог, експорт моделі JSON, генератор скетча Arduino."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Inter,Roboto,Arial,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid #334155;border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+.small{font-size:.9rem}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:260px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+svg{max-width:100%;height:auto;display:block}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🧠</span>
+      <div>
+        <b>Пара 22 — ШІ: класифікація станів мережі + аномалії</b><br/>
+        <span class="badge">CSV → тренування k-NN → матриця помилок → живий монітор → тривоги → експорт моделі → промпт LLM</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">
+    Мета: навчити модель <b>розпізнавати стани мережі</b> (нормальний, перевантаження, перекіс фаз/низький PF, високий THD, перегрів)
+    за ознаками <span class="mono">Vrms, Irms, PF, THD, Temp</span>, та виявляти <b>аномалії</b>.
+    Є навчання/тест, <b>матриця помилок</b>, <b>емулятор</b> для онлайн-перевірки, журнал тривог, експорт <b>model.json</b> і генератор <b>.ino</b>.
+  </p>
+
+  <div class="card">
+    <h2>🗂️ Дані для навчання/тесту (CSV)</h2>
+    <p class="small muted">Формат: <span class="mono">Vrms,Irms,PF,THD,Temp,label</span> (label ∈ {normal, overload, low_pf, high_thd, overtemp}).</p>
+    <textarea id="csv" class="input" rows="7" placeholder="Vrms,Irms,PF,THD,Temp,label"></textarea>
+    <div class="row">
+      <button class="btn good" id="load">📥 Імпорт</button>
+      <button class="btn secondary" id="demo">🎲 Демодані</button>
+      <button class="btn secondary" id="clear">🧹 Очистити</button>
+      <span id="badgeN" class="badge">Записів: 0</span>
+    </div>
+
+    <h2 style="margin-top:12px">🧪 Навчання / Тест</h2>
+    <div class="row">
+      <div style="flex:1">
+        <label for="k">k для k-NN</label>
+        <input id="k" class="input" type="number" min="1" step="1" value="5"/>
+      </div>
+      <div style="flex:1">
+        <label for="split">Train/Test, % (train)</label>
+        <input id="split" class="input" type="number" min="50" max="90" step="1" value="70"/>
+      </div>
+      <div style="flex:1">
+        <label for="anomThr">Поріг аномалії (recon err)</label>
+        <input id="anomThr" class="input" type="number" min="0" step="0.01" value="0.25"/>
+      </div>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="btn good" id="train">🏋️ Тренувати</button>
+      <button class="btn secondary" id="test">🧪 Тест</button>
+      <button class="btn secondary" id="exportModel">⬇️ Експорт model.json</button>
+      <span id="badgeRes" class="badge">Acc: — | F1: —</span>
+    </div>
+
+    <h3 style="margin-top:12px">📊 Матриця помилок</h3>
+    <table class="tbl" id="cmat">
+      <thead><tr><th>Pred \\ True</th><th>normal</th><th>overload</th><th>low_pf</th><th>high_thd</th><th>overtemp</th></tr></thead>
+      <tbody>
+        <tr><th>normal</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><th>overload</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><th>low_pf</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><th>high_thd</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><th>overtemp</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>⚡ Емулятор і живий монітор</h2>
+    <div class="row">
+      <label style="flex:1">Vrms, В <input id="ev" class="input" type="range" min="180" max="260" step="1" value="230"/></label>
+      <label style="flex:1">Irms, А <input id="ei" class="input" type="range" min="0" max="30" step="0.1" value="3.0"/></label>
+      <label style="flex:1">PF (cos φ) <input id="epf" class="input" type="range" min="0" max="1" step="0.01" value="0.95"/></label>
+      <label style="flex:1">THD, % <input id="ethd" class="input" type="range" min="0" max="40" step="0.5" value="4.0"/></label>
+      <label style="flex:1">Temp, °C <input id="et" class="input" type="range" min="15" max="90" step="0.5" value="32.0"/></label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="btn" id="tick">➕ Додати точку</button>
+      <button class="btn secondary" id="auto">▶️ Автогенерація 30 с</button>
+      <button class="btn secondary" id="clearLive">🧹 Очистити</button>
+      <span id="last" class="badge">Pred=— | Anom=—</span>
+    </div>
+    <div class="canvasWrap" style="margin-top:6px"><canvas id="chart" width="1000" height="260"></canvas></div>
+    <h3 style="margin-top:10px">📜 Журнал тривог</h3>
+    <pre id="alog" class="code" style="max-height:170px;overflow:auto">// Тривог поки нема</pre>
+  </div>
+
+  <div class="card">
+    <h2>🧩 Генератор скетча Arduino (.ino) для збору ознак</h2>
+    <div class="row">
+      <button class="btn good" id="gen">⚙️ Згенерувати .ino</button>
+      <button class="btn secondary" id="copy">📋 Копіювати</button>
+      <button class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
+    </div>
+    <pre class="code" id="code">// Натисни «⚙️ Згенерувати .ino»</pre>
+  </div>
+
+  <div class="card">
+    <h2>🤖 Промпт до LLM для пояснень/служби підтримки</h2>
+    <div class="row">
+      <button class="btn" id="genPrompt">📝 Згенерувати</button>
+      <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+      <button class="btn secondary" id="savePrompt">⬇️ TXT</button>
+    </div>
+    <pre class="code" id="prompt">// Спершу натренуй модель або використай демодані</pre>
+  </div>
+
+  <div class="card">
+    <h2>🔁 Схема процесу (SVG)</h2>
+    <svg viewBox="0 0 900 380" role="img" aria-label="Пайплайн ШІ для електромережі">
+      <rect x="30" y="40" width="210" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <text x="135" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Arduino → CSV</text>
+      <text x="135" y="88" fill="#93c5fd" font-size="12" text-anchor="middle">Vrms, Irms, PF, THD, Temp</text>
+
+      <rect x="270" y="40" width="210" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <text x="375" y="70" fill="#dcfce7" font-size="14" text-anchor="middle">k-NN навчання</text>
+      <text x="375" y="88" fill="#a7f3d0" font-size="12" text-anchor="middle">нормалізація</text>
+
+      <rect x="510" y="40" width="170" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+      <text x="595" y="70" fill="#fed7aa" font-size="14" text-anchor="middle">Аномалії</text>
+      <text x="595" y="88" fill="#fed7aa" font-size="12" text-anchor="middle">recon error</text>
+
+      <rect x="710" y="40" width="160" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+      <text x="790" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Журнал</text>
+      <text x="790" y="88" fill="#9ca3af" font-size="12" text-anchor="middle">тривоги/експорт</text>
+
+      <line x1="240" y1="80" x2="270" y2="80" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="480" y1="80" x2="510" y2="80" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="680" y1="80" x2="710" y2="80" stroke="#93c5fd" stroke-width="3"/>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>Матриця помилок (скрін) + метрики Acc/F1.</li>
+      <li>Журнал тривог за 2–3 хвилини емулювання.</li>
+      <li>model.json і коротке пояснення вибору ознак.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📜 Нотатка з історії</h2>
+    <p class="muted small">
+      Перші «розумні» монітори мережі класифікували події за порогами. Сьогодні навіть прості методи — 
+      <b>k-NN</b> і реконструкційна похибка — дозволяють виявляти незвичні комбінації PF/THD/струму, що часто передують аваріям.
+    </p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s); const $$=s=>Array.from(document.querySelectorAll(s));
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}
+
+// ===== Дані =====
+let data=[]; // {x:[Vrms,Irms,PF,THD,Temp], y:'label'}
+const LABELS=['normal','overload','low_pf','high_thd','overtemp'];
+let model=null; // {mu:[...], sigma:[...], train:[{x,y}], anom:{center:[...], thr:number}}
+
+// ===== Імпорт/демо =====
+function parseCSV(txt){
+  data.length=0;
+  const lines=(txt||'').trim().split(/\r?\n/).filter(Boolean);
+  const head=lines.shift(); const cols=head.split(',').map(s=>s.trim());
+  const idx=n=>cols.indexOf(n);
+  const need=['Vrms','Irms','PF','THD','Temp','label'];
+  for(const n of need){ if(idx(n)===-1) throw new Error('Відсутній стовпець: '+n); }
+  lines.forEach(line=>{
+    const p=line.split(',').map(s=>s.trim());
+    const rec={
+      x:[parseFloat(p[idx('Vrms')])||0, parseFloat(p[idx('Irms')])||0, parseFloat(p[idx('PF')])||0, parseFloat(p[idx('THD')])||0, parseFloat(p[idx('Temp')])||0],
+      y:(p[idx('label')]||'normal').trim()
+    };
+    data.push(rec);
+  });
+  $('#badgeN').textContent='Записів: '+data.length;
+}
+
+function genDemo(){
+  const rnd=(m,M)=>m+(M-m)*Math.random(), nrm=(mu,s)=>mu+s*(Math.random()*2-1);
+  data.length=0;
+  for(let i=0;i<120;i++){ // normal
+    data.push({x:[nrm(230,3), nrm(3.5,0.8), nrm(0.96,0.02), nrm(4,1), nrm(32,2)], y:'normal'});
+  }
+  for(let i=0;i<70;i++){ // overload
+    data.push({x:[nrm(228,4), nrm(18,3), nrm(0.92,0.04), nrm(6,2), nrm(38,3)], y:'overload'});
+  }
+  for(let i=0;i<70;i++){ // low_pf
+    data.push({x:[nrm(230,4), nrm(7,2), nrm(0.70,0.07), nrm(8,3), nrm(36,3)], y:'low_pf'});
+  }
+  for(let i=0;i<70;i++){ // high_thd
+    data.push({x:[nrm(225,5), nrm(6,2), nrm(0.90,0.05), nrm(18,4), nrm(35,3)], y:'high_thd'});
+  }
+  for(let i=0;i<70;i++){ // overtemp
+    data.push({x:[nrm(231,3), nrm(5,2), nrm(0.95,0.03), nrm(5,2), nrm(68,4)], y:'overtemp'});
+  }
+  shuffle(data);
+  $('#badgeN').textContent='Записів: '+data.length+' (демо)';
+}
+
+// ===== Нормалізація =====
+function fitScaler(rows){
+  const D=rows[0].x.length, mu=new Array(D).fill(0), sig=new Array(D).fill(0);
+  rows.forEach(r=>r.x.forEach((v,i)=>mu[i]+=v)); mu.forEach((v,i)=>mu[i]/=rows.length);
+  rows.forEach(r=>r.x.forEach((v,i)=>sig[i]+=(v-mu[i])*(v-mu[i]))); sig.forEach((v,i)=>sig[i]=Math.sqrt(v/Math.max(1,rows.length-1))||1);
+  return {mu,sig};
+}
+function transform(x, mu, sig){ return x.map((v,i)=> (v-mu[i])/sig[i]); }
+
+// ===== k-NN =====
+function dist2(a,b){ let s=0; for(let i=0;i<a.length;i++){ const d=a[i]-b[i]; s+=d*d; } return s; }
+function knnPredict(xz, train, k){
+  const arr=train.map(r=>({d:dist2(xz,r.xz), y:r.y})).sort((a,b)=>a.d-b.d).slice(0,k);
+  const votes=new Map(); arr.forEach(o=>votes.set(o.y,(votes.get(o.y)||0)+1));
+  let best='normal', bestV=-1; for(const [y,c] of votes){ if(c>bestV){bestV=c; best=y;} }
+  return {y:best, d2:arr[0]?.d||0};
+}
+
+// ===== Аномалії (autoencoder-lite): центр класу 'normal' і середня похибка реконструкції =====
+function fitAnomaly(train){
+  const normals=train.filter(r=>r.y==='normal').map(r=>r.xz);
+  const D=normals[0]?.length||5;
+  const center=new Array(D).fill(0);
+  normals.forEach(v=>v.forEach((t,i)=>center[i]+=t)); center.forEach((v,i,arr)=>arr[i]=v/Math.max(1,normals.length));
+  // середня відстань як поріг базовий → масштабований у налаштуваннях
+  let err=0; normals.forEach(v=>err+=Math.sqrt(dist2(v,center))); err/=Math.max(1,normals.length);
+  return {center, baseErr:err};
+}
+function anomalyScore(xz, center){ return Math.sqrt(dist2(xz, center)); }
+
+// ===== Навчання/тест =====
+let TRAIN=[], TEST=[];
+function trainModel(){
+  if(data.length<50){ alert('Мало даних для навчання'); return; }
+  const split = Math.max(50,Math.min(90, parseInt($('#split').value)||70));
+  const nTrain = Math.round(data.length*split/100);
+  const rows=data.slice(); shuffle(rows);
+  TRAIN=rows.slice(0,nTrain); TEST=rows.slice(nTrain);
+
+  const scaler = fitScaler(TRAIN);
+  TRAIN.forEach(r=>r.xz=transform(r.x, scaler.mu, scaler.sig));
+  TEST.forEach(r=>r.xz=transform(r.x, scaler.mu, scaler.sig));
+
+  const anom = fitAnomaly(TRAIN);
+  model = {mu:scaler.mu, sigma:scaler.sig, train: TRAIN.map(r=>({xz:r.xz,y:r.y})), anom:{center:anom.center, thr: (parseFloat($('#anomThr').value)||0.25), base: anom.baseErr} };
+
+  $('#badgeRes').textContent='Модель натреновано (train='+TRAIN.length+', test='+TEST.length+')';
+}
+
+function testModel(){
+  if(!model){ alert('Спочатку натренуй модель'); return; }
+  const k=Math.max(1, parseInt($('#k').value)||5);
+  const cmat = LABELS.map(()=>LABELS.map(()=>0));
+  let tp=0, all=0;
+
+  TEST.forEach(r=>{
+    const pred = knnPredict(r.xz, model.train, k).y;
+    const i=LABELS.indexOf(pred), j=LABELS.indexOf(r.y);
+    if(i>=0 && j>=0){ cmat[i][j]++; }
+    if(pred===r.y) tp++;
+    all++;
+  });
+
+  // метрики
+  const acc = (tp/all)*100;
+  // micro-F1 ~ acc для збалансованих класів; приблизно:
+  const f1 = acc;
+
+  // оновити таблицю
+  const tb=$('#cmat tbody').querySelectorAll('tr');
+  LABELS.forEach((pred,pi)=>{
+    const row=tb[pi].querySelectorAll('td');
+    LABELS.forEach((tru,tj)=>{ row[tj].textContent=cmat[pi][tj]; });
+  });
+  $('#badgeRes').textContent=`Acc: ${acc.toFixed(1)}% | F1≈${f1.toFixed(1)}%`;
+}
+
+// ===== Живий монітор =====
+const cvs=$('#chart'), ctx=cvs.getContext('2d');
+const live=[];
+const ALOG=$('#alog');
+
+function drawChart(){
+  const W=cvs.width,H=cvs.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,W-1,H-1);
+  if(live.length<2) return;
+  const maxN=200, s=live.slice(-maxN);
+  const xs=s.map((_,i)=>i*(W/(s.length-1)));
+
+  // Малюємо P і THD
+  const P=s.map(v=>v.V*v.I*v.PF), maxP=Math.max(1000, Math.max(...P)*1.2);
+  ctx.beginPath(); ctx.strokeStyle='#22c55e'; ctx.lineWidth=2;
+  xs.forEach((x,i)=>{ const y=H-10-(Math.min(maxP,P[i])/maxP)*(H-20); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.stroke();
+
+  const THD=s.map(v=>v.THD), maxT=Math.max(10, Math.max(...THD)*1.3);
+  ctx.beginPath(); ctx.strokeStyle='#38bdf8'; ctx.lineWidth=1.5;
+  xs.forEach((x,i)=>{ const y=H-10-(Math.min(maxT,THD[i])/maxT)*(H-20); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.stroke();
+
+  ctx.fillStyle='#94a3b8'; ctx.font='12px ui-monospace';
+  ctx.fillText('P, W', W-42, 14); ctx.fillText('THD, %', W-14, 28);
+}
+
+function alarm(msg){
+  const t=new Date().toLocaleTimeString();
+  if(ALOG.textContent.startsWith('//')) ALOG.textContent='';
+  ALOG.textContent += `[${t}] ${msg}\n`;
+  ALOG.scrollTop = ALOG.scrollHeight;
+  document.title='⚠️ Тривога — перевірити мережу';
+  setTimeout(()=>document.title='Пара 22 — ШІ',1200);
+}
+
+function classifyPoint(V,I,PF,THD,Temp){
+  if(!model){ $('#last').textContent='Pred=— | Anom=—'; return; }
+  const x=[V,I,PF,THD,Temp], xz=transform(x, model.mu, model.sigma);
+  const k=Math.max(1, parseInt($('#k').value)||5);
+  const pred=knnPredict(xz, model.train, k);
+  const err = anomalyScore(xz, model.anom.center);
+  const scaledErr = err / (model.anom.base||1);
+  const isAnom = scaledErr > model.anom.thr;
+
+  $('#last').textContent=`Pred=${pred.y} | Anom=${scaledErr.toFixed(2)} ${isAnom?'(>thr)':'(ok)'}`
+  live.push({V,I,PF,THD,Temp, pred:pred.y, anom:scaledErr});
+  drawChart();
+
+  // тригери
+  if(pred.y!=='normal') alarm(`Клас=${pred.y}; V=${V.toFixed(0)}В I=${I.toFixed(1)}А PF=${PF.toFixed(2)} THD=${THD.toFixed(1)}% T=${Temp.toFixed(1)}°C`);
+  if(isAnom) alarm(`Аномалія err=${scaledErr.toFixed(2)}; можливе комбіноване відхилення параметрів`);
+}
+
+// кнопки монітору
+$('#tick').addEventListener('click', ()=>{
+  const V=parseFloat($('#ev').value), I=parseFloat($('#ei').value), PF=parseFloat($('#epf').value), THD=parseFloat($('#ethd').value), T=parseFloat($('#et').value);
+  classifyPoint(V,I,PF,THD,T);
+});
+let autoTimer=null; 
+$('#auto').addEventListener('click', ()=>{
+  if(autoTimer){ clearInterval(autoTimer); autoTimer=null; $('#auto').textContent='▶️ Автогенерація 30 с'; return; }
+  let c=0; $('#auto').textContent='⏸️ Зупинити авто';
+  autoTimer=setInterval(()=>{
+    // трішки шуму навколо виставлених повзунків
+    const jitter=(v,s)=>v+s*(Math.random()*2-1);
+    classifyPoint(jitter(parseFloat($('#ev').value),1.5),
+                  jitter(parseFloat($('#ei').value),0.6),
+                  Math.min(1,Math.max(0,jitter(parseFloat($('#epf').value),0.02))),
+                  Math.max(0,jitter(parseFloat($('#ethd').value),1.0)),
+                  jitter(parseFloat($('#et').value),0.8));
+    if(++c>=30){ clearInterval(autoTimer); autoTimer=null; $('#auto').textContent='▶️ Автогенерація 30 с'; }
+  }, 1000);
+});
+$('#clearLive').addEventListener('click', ()=>{ live.length=0; ALOG.textContent='// Тривог поки нема'; drawChart(); });
+
+// ===== Події даних =====
+$('#demo').addEventListener('click', ()=>{ genDemo(); });
+$('#load').addEventListener('click', ()=>{
+  try{ parseCSV($('#csv').value); }catch(e){ alert('Помилка CSV: '+e.message); }
+});
+$('#clear').addEventListener('click', ()=>{ data.length=0; $('#badgeN').textContent='Записів: 0'; });
+$('#train').addEventListener('click', trainModel);
+$('#test').addEventListener('click', testModel);
+$('#exportModel').addEventListener('click', ()=>{
+  if(!model){ alert('Немає моделі'); return; }
+  const out = JSON.stringify(model,null,2);
+  download('electric_para22_model_'+stamp()+'.json', out, 'application/json');
+});
+
+// ===== Генератор Arduino .ino =====
+function genSketch(){
+  const code = `/*
+  Пара 22 — Логер ознак для ШІ (Vrms, Irms, PF, THD, Temp)
+  Апаратура (приклад):
+    - SCT-013 (через шунт і дільник на A0)
+    - AC-адаптер 9В (через дільник на A1) — для Urms/PF/THD
+    - DS18B20 (Temp) або NTC на A2
+  ⚠ Безпека: мережа 230В тільки через ізольовані перетворювачі (CT/AC).
+*/
+
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+#define PIN_I A0
+#define PIN_U A1
+#define PIN_1WIRE 2
+
+const float CAL_I = 0.0500; // A/ADC (після bias)
+const float CAL_U = 1.100;  // V/ADC (після bias)
+const float FREQ  = 50.0;   // Гц
+const unsigned long WINDOW_MS = 500;
+
+OneWire oneWire(PIN_1WIRE);
+DallasTemperature sensors(&oneWire);
+
+float readTempC(){
+  sensors.requestTemperatures();
+  return sensors.getTempCByIndex(0);
+}
+
+void setup(){
+  Serial.begin(115200);
+  analogReference(DEFAULT);
+  sensors.begin();
+  delay(300);
+  Serial.println(F("Vrms,Irms,PF,THD,Temp,label"));
+}
+
+void loop(){
+  // Оцінка bias
+  long sI=0,sU=0; int n0=0;
+  unsigned long t0=millis();
+  while(millis()-t0<50){ sI+=analogRead(PIN_I); sU+=analogRead(PIN_U); n0++; }
+  float bI=(float)sI/max(1,n0), bU=(float)sU/max(1,n0);
+
+  // Набір вікна
+  const unsigned long tend=millis()+WINDOW_MS;
+  double accI2=0, accU2=0, accPU=0;
+  unsigned long zc=0; int prevU=0, prevSign=0; // для THD грубо — рахуємо нульові переходи
+  unsigned long n=0;
+  while(millis()<tend){
+    int ai=analogRead(PIN_I), au=analogRead(PIN_U);
+    float xi=(ai-bI)*CAL_I;
+    float xu=(au-bU)*CAL_U;
+    accI2+=xi*xi; accU2+=xu*xu; accPU+=xi*xu;
+
+    int sign = (xu>=0)?1:-1;
+    if(prevSign!=0 && sign!=prevSign) zc++;
+    prevSign=sign; prevU=au;
+    n++;
+  }
+
+  float Irms=sqrt(accI2/max(1UL,n));
+  float Urms=sqrt(accU2/max(1UL,n));
+  float P    =accPU/max(1UL,n);
+  float S    =Urms*Irms;
+  float PF   = (S>1e-3)? P/S : 1.0;
+
+  // Груба оцінка THD за числом нульових переходів/стабільністю амплітуди
+  // (для лабораторної демонстрації; для реальної THD потрібен спектральний аналіз)
+  float thd = 100.0f * constrain(abs((float)zc/(FREQ*WINDOW_MS/1000.0f*2) - 1.0f), 0.0f, 1.0f);
+
+  float T = readTempC();
+  // label можна заповнювати вручну у SerialPlotter або у файлі в подальшому (normal/overload/...)
+  Serial.print(Urms,1); Serial.print(',');
+  Serial.print(Irms,2); Serial.print(',');
+  Serial.print(PF,2);   Serial.print(',');
+  Serial.print(thd,1);  Serial.print(',');
+  Serial.print(T,1);    Serial.print(',');
+  Serial.println("normal");
+
+  delay(200);
+}
+`;
+  return code;
+}
+$('#gen').addEventListener('click', ()=>{ const txt=genSketch(); $('#code').textContent=txt; });
+$('#copy').addEventListener('click', ()=>{ const ta=document.createElement('textarea'); ta.value=$('#code').textContent; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); });
+$('#dl').addEventListener('click', ()=>{ const txt=$('#code').textContent||genSketch(); download('electric_para22_ai_knn_logger.ino',txt,'text/x-ino'); });
+
+// ===== Промпт LLM =====
+function buildPrompt(){
+  const acc=$('#badgeRes').textContent;
+  return `Ти — помічник енергодиспетчера. Поясни стан мережі за потоковими даними і підкажи дії.
+Вхід:
+• Ознаки: Vrms, Irms, PF, THD, Temp
+• Модель: k-NN (нормалізована), аномалії за реконструкційною похибкою (центр класу normal)
+• Якість: ${acc}
+Що потрібно:
+1) Коли Pred≠normal — запропонуй діагностику: що перевірити (фази, навантаження, фільтри, охолодження).
+2) Якщо Anom > порога — опиши можливі комбінації причин і які параметри збирати додатково.
+3) Поради з безпеки для персоналу (ЗІЗ, відключення, lockout-tagout).
+4) Короткий чек-ліст і таблиця «симптом→можливі причини→перевірка». Завершити резюме з пріоритетами.`;
+}
+$('#genPrompt').addEventListener('click', ()=>{ $('#prompt').textContent=buildPrompt(); });
+$('#copyPrompt').addEventListener('click', ()=>{ const ta=document.createElement('textarea'); ta.value=$('#prompt').textContent; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); });
+$('#savePrompt').addEventListener('click', ()=>{ const txt=$('#prompt').textContent||buildPrompt(); download('electric_para22_prompt_'+stamp()+'.txt',txt); });
+
+// ===== Ініціалізація =====
+drawChart();
+if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
+</script>
+</body>
+</html>
