@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 17 (механіки) — Arduino: тензодатчик натягу ременя (HX711) + SLIP% тригери</title>
+<meta name="description" content="Тензоміст + HX711: калібрування 2-точки, вимір натягу (Н/кгс), EMA-фільтр, живий графік, алерти за натягом і SLIP%, експорт CSV/TXT/квиток 58 мм, генератор прошивки (.ino)."/>
+<meta name="color-scheme" content="light dark"/>
+<style>
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .emoji{font-size:28px}
+.logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+h1{margin:.2em 0 .3em 0}
+.muted{color:var(--muted)}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+.btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn.secondary{background:transparent}
+.btn.good{border-color:#204b2a;background:#12341b}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+canvas{display:block;width:100%;height:260px}
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.tbl th{background:#0b1a2f}
+.small{font-size:.9rem}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
+kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <span class="emoji">🧰</span>
+      <div>
+        <b>Пара 17 — Arduino: тензонатяг ременя (HX711)</b><br/>
+        <span class="badge">калібрування → Н/кгс → EMA → графік → тригери (натяг/SLIP%) → експорт</span>
+      </div>
+    </div>
+    <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
+  </header>
+
+  <p class="muted">
+    Мета: зібрати вимірювач <b>натягу ременя</b> на <b>тензомості + HX711</b>, відкалібрувати «нуль» та «еталон», отримати натяг у <b>Н</b> (або <b>кгс</b>), 
+    візуалізувати живий графік, виявляти <b>перенатяг/недотяг</b> і прив’язати до <b>SLIP%</b> з Пара-16 для робочого тригера.
+  </p>
+
+  <div class="card">
+    <h2>🔧 Налаштування та калібрування</h2>
+    <div class="row">
+      <div style="flex:1">
+        <label>Піни HX711</label>
+        <div class="row">
+          <label>DT <input id="dt" class="input" type="number" min="2" max="13" value="3"/></label>
+          <label>SCK <input id="sck" class="input" type="number" min="2" max="13" value="2"/></label>
+          <label>Канал <select id="chan" class="input"><option value="128" selected>A (gain128)</option><option value="64">A (gain64)</option><option value="32">B (gain32)</option></select></label>
+        </div>
+      </div>
+      <div style="flex:1">
+        <label>Одиниці</label>
+        <select id="units" class="input"><option value="N" selected>Н (Ньютони)</option><option value="kgf">кгс</option></select>
+      </div>
+      <div style="flex:1">
+        <label>EMA згладжування α (0..1)</label>
+        <input id="alpha" class="input" type="number" min="0" max="1" step="0.05" value="0.25"/>
+      </div>
+      <div style="flex:1">
+        <label>Період зчитування, мс</label>
+        <input id="period" class="input" type="number" min="50" step="10" value="100"/>
+      </div>
+    </div>
+
+    <div class="row">
+      <div style="flex:1">
+        <label>Калібрування</label>
+        <div class="row">
+          <button class="btn" id="calZero">⚖️ Записати «нуль»</button>
+          <input id="calMass" class="input" type="number" step="0.1" value="10" title="Маса еталону в кг"/>
+          <button class="btn secondary" id="calRef">🏋️ Записати «еталон»</button>
+        </div>
+        <small class="muted">Алгоритм: <span class="mono">scale = (Fref)/(rawRef - rawZero)</span>, де <span class="mono">Fref = m*g</span> (для кгс — <span class="mono">Fref = m</span>).</small>
+      </div>
+      <div style="flex:1">
+        <label>Діапазон робочого натягу, Н</label>
+        <div class="row">
+          <label>Min <input id="tmin" class="input" type="number" step="1" value="120"/></label>
+          <label>Max <input id="tmax" class="input" type="number" step="1" value="250"/></label>
+        </div>
+      </div>
+      <div style="flex:1">
+        <label>SLIP% з Пара-16 (необов.)</label>
+        <div class="row">
+          <input id="slip" class="input" type="number" step="0.1" value="0" title="Встав тут миттєве SLIP% із тахометра"/>
+          <label>Поріг SLIP% <input id="slipThr" class="input" type="number" step="0.5" value="3.0"/></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧪 Емулятор (без «заліза»)</h2>
+    <div class="row">
+      <label><input id="emu" type="checkbox"/> Увімкнути емулятор</label>
+      <label style="flex:1">Натяг (Н) <input id="emuF" class="input" type="range" min="50" max="400" step="1" value="180" disabled/></label>
+      <button class="btn" id="tick">➕ Додати точку</button>
+      <button class="btn secondary" id="clear">🧹 Очистити</button>
+      <span id="badge" class="badge">Калібровано: ні</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📈 Живий графік натягу</h2>
+    <div class="canvasWrap"><canvas id="chart" width="1000" height="260"></canvas></div>
+    <div class="row small" style="margin-top:8px">
+      <span id="last" class="badge">F=—, F(EMA)=—, SLIP=—%</span>
+      <span id="status" class="badge">Статус: —</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧩 Згенерований код (Arduino .ino)</h2>
+    <div class="row">
+      <button class="btn good" id="gen">⚙️ Згенерувати прошивку</button>
+      <button class="btn secondary" id="copy">📋 Копіювати</button>
+      <button class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
+    </div>
+    <pre class="code" id="code">// Натисни «Згенерувати прошивку» ↑</pre>
+  </div>
+
+  <div class="card">
+    <h2>💾 Протокол і експорт</h2>
+    <div class="row">
+      <input id="fio" class="input" placeholder="ПІБ механіка"/>
+      <input id="job" class="input" placeholder="Робота (ремінний привід жатки, секція Х)"/>
+      <button class="btn" id="saveTxt">💾 TXT</button>
+      <button class="btn" id="saveCsv">📄 CSV</button>
+      <button class="btn" id="receipt">🖨️ 58 мм чек</button>
+    </div>
+    <div id="rc" class="receipt" hidden></div>
+  </div>
+
+  <div class="card">
+    <h2>🔌 Схема підключення (SVG)</h2>
+    <svg viewBox="0 0 900 360" role="img" aria-label="Arduino + HX711 + тензоміст">
+      <!-- Arduino -->
+      <rect x="40" y="40" width="220" height="140" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <text x="150" y="65" fill="#e5e7eb" font-size="16" text-anchor="middle">Arduino UNO/Nano</text>
+      <text x="55" y="95" fill="#93c5fd" font-size="12">5V</text>
+      <text x="55" y="115" fill="#93c5fd" font-size="12">GND</text>
+      <text x="55" y="135" fill="#93c5fd" font-size="12">D2…D13</text>
+      <!-- HX711 -->
+      <rect x="320" y="40" width="220" height="140" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <text x="430" y="65" fill="#dcfce7" font-size="16" text-anchor="middle">HX711</text>
+      <text x="430" y="85" fill="#a7f3d0" font-size="12" text-anchor="middle">VCC — GND — DT — SCK</text>
+      <text x="430" y="105" fill="#a7f3d0" font-size="12" text-anchor="middle">A+ A- B+ B- (тензоміст)</text>
+      <!-- Load cell -->
+      <rect x="600" y="40" width="240" height="140" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+      <text x="720" y="65" fill="#fed7aa" font-size="16" text-anchor="middle">Тензодатчик (міст)</text>
+      <text x="720" y="85" fill="#fed7aa" font-size="12" text-anchor="middle">4 дроти: EXC+/EXC- SIG+/SIG-</text>
+
+      <!-- Проводи -->
+      <line x1="260" y1="90" x2="320" y2="80" stroke="#93c5fd" stroke-width="3"/><text x="280" y="80" fill="#93c5fd" font-size="12">5V → VCC</text>
+      <line x1="260" y1="110" x2="320" y2="100" stroke="#64748b" stroke-width="3"/><text x="280" y="110" fill="#94a3b8" font-size="12">GND → GND</text>
+      <line x1="260" y1="130" x2="320" y2="120" stroke="#22c55e" stroke-width="3"/><text x="280" y="125" fill="#86efac" font-size="12">D3 → DT</text>
+      <line x1="260" y1="150" x2="320" y2="140" stroke="#38bdf8" stroke-width="3"/><text x="280" y="150" fill="#93c5fd" font-size="12">D2 → SCK</text>
+
+      <line x1="540" y1="90" x2="600" y2="80" stroke="#fde68a" stroke-width="3"/><text x="560" y="78" fill="#fde68a" font-size="12">A+ ↔ SIG+</text>
+      <line x1="540" y1="110" x2="600" y2="100" stroke="#fde68a" stroke-width="3"/><text x="560" y="98" fill="#fde68a" font-size="12">A- ↔ SIG-</text>
+      <line x1="540" y1="130" x2="600" y2="120" stroke="#fde68a" stroke-width="3"/><text x="560" y="118" fill="#fde68a" font-size="12">E+ ↔ EXC+</text>
+      <line x1="540" y1="150" x2="600" y2="140" stroke="#fde68a" stroke-width="3"/><text x="560" y="138" fill="#fde68a" font-size="12">E- ↔ EXC-</text>
+
+      <text x="150" y="210" fill="#fbbf24" font-size="12">⚠️ Фіксуй датчик і прес-ролик! Не торкайся обертових вузлів.</text>
+    </svg>
+    <div class="note small" style="margin-top:8px">
+      <b>Поради:</b> для ременів профілю A/B типовий натяг у роботі 120–250 Н на гілці; точні значення — з мануалу виробника. Після виставлення натягу повторно перевір <i>SLIP%</i> із Пара-16.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Підсумок для звіту</h2>
+    <ul>
+      <li>Скрін графіка натягу з позначеними порогами.</li>
+      <li>CSV-лог 2–3 хв; TXT-підсумок і чек 58 мм.</li>
+      <li>Коротко: як змінився SLIP% після корекції натягу; чи потрібне вирівнювання шківів.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📜 Історична нотатка</h2>
+    <p class="muted small">Від «гусакових ваг» і динамометрів майстерень ми перейшли до тензомостів: тепер натяг оцінюється у ньотонах із фільтрацією шумів і журналом подій — як на сучасних лініях.</p>
+  </div>
+
+  <div class="footer">
+    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+  </div>
+</div>
+
+<script>
+// ===== Утиліти =====
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
+
+// ===== Стан =====
+let rawZero=null, rawRef=null, scale=1, ema=null;
+const g=$('#chart'), ctx=g.getContext('2d');
+const series=[]; // {t, F, Fema, slip, alarm}
+let unit='N';
+
+$('#units').addEventListener('change',()=>{ unit=$('#units').value; draw(); });
+
+// Емулятор
+const emu=$('#emu'), emuF=$('#emuF');
+emu.addEventListener('change',()=>{ emuF.disabled=!emu.checked; });
+
+// Обчислення
+function toForce(raw){
+  if(rawZero==null || rawRef==null) return NaN;
+  const units=$('#units').value;
+  const mkg=parseFloat($('#calMass').value)||10;
+  const g0=9.80665;
+  const Fref = (units==='N')? (mkg*g0) : (mkg); // кгс — умовна одиниця
+  const sc = (rawRef - rawZero)!==0 ? (Fref/(rawRef - rawZero)) : 1;
+  scale=sc;
+  const val = (raw - rawZero)*sc;
+  return val;
+}
+
+function addPointFromValue(F){
+  const alpha=parseFloat($('#alpha').value)||0.25;
+  if(isNaN(F)) return;
+  if(ema==null) ema=F;
+  ema = alpha*F + (1-alpha)*ema;
+
+  const slip=parseFloat($('#slip').value)||0;
+  const tmin=parseFloat($('#tmin').value)||0;
+  const tmax=parseFloat($('#tmax').value)||1e9;
+  const slipThr=parseFloat($('#slipThr').value)||3;
+
+  // логіка тригерів
+  let alarm=false, status='ok';
+  if(F<tmin){ alarm=true; status='недотяг'; }
+  if(F>tmax){ alarm=true; status='перенатяг'; }
+  if(slip>=slipThr){ alarm=true; status = (F<tmin)? 'недотяг + SLIP' : 'SLIP'; }
+
+  series.push({t:Date.now(), F, Fema:ema, slip, alarm, status});
+  if(series.length>360) series.shift();
+  $('#last').textContent = `F=${F.toFixed(1)} ${unit}, F(EMA)=${ema.toFixed(1)} ${unit}, SLIP=${slip.toFixed(1)}%`;
+  $('#status').textContent = 'Статус: ' + (alarm? '⚠️ '+status : 'ок');
+  draw();
+}
+
+function addPoint(){
+  // у реалі код читає raw з Arduino по Serial; тут — емулятор/ручний ввід
+  if(emu.checked){
+    const F=parseFloat(emuF.value)||0;
+    addPointFromValue(F);
+  }else{
+    const r=prompt('Введи значення сили (Н або кгс залежно від одиниць):', '180');
+    if(r==null) return;
+    const F=parseFloat(r);
+    if(!isNaN(F)) addPointFromValue(F);
+  }
+}
+$('#tick').addEventListener('click', addPoint);
+$('#clear').addEventListener('click', ()=>{ series.length=0; ema=null; $('#last').textContent='F=—, F(EMA)=—, SLIP=—%'; draw(); });
+
+// Графік
+function draw(){
+  const W=g.width,H=g.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='#223049'; ctx.strokeRect(0.5,0.5,W-1,H-1);
+  if(series.length<2) return;
+
+  const s=series.slice(-300);
+  const maxF = Math.max(50, Math.max(...s.map(o=>Math.max(o.F,o.Fema))) * 1.25);
+  const xs=s.map((_,i)=> 60 + i*((W-80)/299));
+
+  // сітка
+  ctx.fillStyle='#94a3b8'; ctx.font='12px ui-monospace';
+  ctx.fillText('F ('+unit+')', 12, 14); ctx.fillText('SLIP %', 12, 28);
+
+  // Лінії порогів
+  const tmin=parseFloat($('#tmin').value)||0, tmax=parseFloat($('#tmax').value)||0;
+  const yMin=H-10-(tmin/maxF)*(H-20), yMax=H-10-(tmax/maxF)*(H-20);
+  ctx.setLineDash([6,4]); ctx.strokeStyle='#fbbf24';
+  ctx.beginPath(); ctx.moveTo(60,yMin); ctx.lineTo(W-10,yMin); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(60,yMax); ctx.lineTo(W-10,yMax); ctx.stroke(); ctx.setLineDash([]);
+
+  // F (сирий)
+  ctx.beginPath(); ctx.strokeStyle='#38bdf8'; ctx.lineWidth=1.8;
+  xs.forEach((x,i)=>{ const y=H-10-(s[i].F/maxF)*(H-20); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.stroke();
+
+  // F EMA
+  ctx.beginPath(); ctx.strokeStyle='#22c55e'; ctx.lineWidth=2;
+  xs.forEach((x,i)=>{ const y=H-10-(s[i].Fema/maxF)*(H-20); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.stroke();
+
+  // SLIP маркери (низ графіка)
+  s.forEach((o,i)=>{ if(o.slip>=(parseFloat($('#slipThr').value)||3)){ const x=xs[i]; ctx.fillStyle='#f87171'; ctx.fillRect(x-2,H-12,4,4); } });
+
+  // Аварії
+  s.forEach((o,i)=>{ if(o.alarm){ const x=xs[i], y=H-14; ctx.fillStyle='#f87171'; ctx.fillRect(x-2,y,4,4); } });
+}
+
+// Калібрування (імітація «сирих» лічильників)
+let mockRaw=0;
+function mockReadRawFromF(F){
+  // лінійна модель: raw = rawZero + F/scale; scale задаємо під час calRef
+  const sc = scale||10; return Math.round((rawZero??100000) + F/sc);
+}
+$('#calZero').addEventListener('click', ()=>{
+  // у реалі — середнє N читань HX711 без навантаження
+  rawZero = 100000; // демо
+  $('#badge').textContent='Калібровано: нуль ✔';
+});
+$('#calRef').addEventListener('click', ()=>{
+  if(rawZero==null){ alert('Спочатку «нуль»'); return; }
+  const units=$('#units').value;
+  const mkg=parseFloat($('#calMass').value)||10;
+  const g0=9.80665;
+  const Fref=(units==='N')? (mkg*g0) : mkg;
+  rawRef = (rawZero||100000) + Math.round(Fref/10); // демо; справжній rawRef зчитується з HX711
+  $('#badge').textContent='Калібровано: нуль+еталон ✔';
+});
+
+// ===== Генератор прошивки =====
+function makeSketch(){
+  const dt = parseInt($('#dt').value,10);
+  const sck= parseInt($('#sck').value,10);
+  const gainSel=parseInt($('#chan').value,10);
+  const alpha=parseFloat($('#alpha').value)||0.25;
+  const period=parseInt($('#period').value,10)||100;
+  const units=$('#units').value;
+  const mkg=parseFloat($('#calMass').value)||10;
+
+  const code = `/*
+  Пара 17 — Тензонатяг ременя (HX711) + EMA + тригери
+  Піни: DT=${dt}, SCK=${sck}, GainSel=${gainSel}.
+  Період вибірки: ${period} мс, EMA α=${alpha.toFixed(2)}.
+  Одиниці: ${units}. Калібрування: «нуль» + «еталон» масою ${mkg} кг.
+  Вивід CSV: millis,F,Fema,alarm
+  ⚠ Безпека: не заводь руки між ременями/шківами; фіксуй датчик!
+*/
+#include <HX711.h>
+HX711 scale;
+const byte PIN_DT=${dt};
+const byte PIN_SCK=${sck};
+const byte GAIN_SEL=${gainSel}; // 128=A, 64=A, 32=B
+
+// Калібрувальні параметри (заповнюються після процедури калібрування)
+long RAW_ZERO = 0;
+long RAW_REF  = 100000;
+float SCALE = 1.0; // F = (raw - RAW_ZERO)*SCALE
+
+const float ALPHA = ${alpha.toFixed(3)};
+const unsigned long PERIOD_MS = ${period};
+
+float ema = NAN;
+
+void setup(){
+  Serial.begin(115200);
+  scale.begin(PIN_DT, PIN_SCK);
+  // Встановлення каналу/коеф. підсилення:
+  // HX711 бібліотека визначає gain через set_gain(128/64/32) або read_average з поч. конфігом,
+  // для сумісності викликаємо:
+  scale.set_gain(GAIN_SEL);
+  delay(400);
+  Serial.println(F("millis,F,Fema,alarm"));
+}
+
+float toForce(long raw){
+  // Якщо немає еталонів — повернемо NaN
+  if(RAW_REF==RAW_ZERO) return NAN;
+  // Fref: для Н = m*g, для кгс = m
+  #if 1
+    const float g0 = 9.80665f;
+    const float Fref = ${units==='N' ? `${mkg}*g0` : `${mkg}.0`};
+  #endif
+  SCALE = Fref / float(RAW_REF - RAW_ZERO);
+  return (raw - RAW_ZERO) * SCALE;
+}
+
+void loop(){
+  static unsigned long t0=millis();
+  if(millis()-t0 >= PERIOD_MS){
+    t0 = millis();
+    long raw = scale.read_average(4); // 4 зразки
+    float F = toForce(raw);
+    if(isnan(ema)) ema = F;
+    ema = ALPHA*F + (1.0-ALPHA)*ema;
+
+    // Тригери тут будуть реалізовані на стороні браузера/PLC; залишимо біт alarm=false
+    bool alarm=false;
+
+    Serial.print(millis()); Serial.print(',');
+    Serial.print(F,2); Serial.print(',');
+    Serial.print(ema,2); Serial.print(',');
+    Serial.println(alarm?1:0);
+  }
+}
+`;
+  return code;
+}
+$('#gen').addEventListener('click', ()=>{ const txt=makeSketch(); $('#code').textContent=txt; window.scrollTo({top: $('#code').parentElement.getBoundingClientRect().top + window.scrollY - 12, behavior:'smooth'}); });
+$('#copy').addEventListener('click', ()=>{ const ta=document.createElement('textarea'); ta.value=$('#code').textContent; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); const old=document.title; document.title='✅ Код скопійовано'; setTimeout(()=>document.title=old,900); });
+$('#dl').addEventListener('click', ()=>{ const txt=$('#code').textContent||makeSketch(); download('mechanic_para17_hx711_tension.ino',txt,'text/x-arduino'); });
+
+// ===== Експорти =====
+$('#saveTxt').addEventListener('click', ()=>{
+  const lines=[
+    'Пара 17 — Тензонатяг ременя (HX711)',
+    'Механік: '+($('#fio').value||''),
+    'Робота: '+($('#job').value||''),
+    `HX711: DT=${$('#dt').value}, SCK=${$('#sck').value}, Gain=${$('#chan').value}`,
+    `Одиниці: ${$('#units').value}, EMA α=${$('#alpha').value}, Період=${$('#period').value} мс`,
+    `Діапазон: ${$('#tmin').value}..${$('#tmax').value} ${$('#units').value}`,
+    `SLIP: ${$('#slip').value}% (поріг ${$('#slipThr').value}%)`,
+    `Калібрування: rawZero=${rawZero??'—'}, rawRef=${rawRef??'—'}, scale≈${scale.toFixed(6)}`
+  ];
+  download('mechanic_para17_'+stamp()+'.txt', lines.join('\n'));
+});
+$('#saveCsv').addEventListener('click', ()=>{
+  const head='t_iso,F,Fema,SLIP%,alarm\n';
+  const body=series.map(o=> new Date(o.t).toISOString()+','+o.F.toFixed(2)+','+o.Fema.toFixed(2)+','+o.slip.toFixed(1)+','+(o.alarm?1:0)).join('\n');
+  download('mechanic_para17_'+stamp()+'.csv', head+body, 'text/csv');
+});
+$('#receipt').addEventListener('click', ()=>{
+  const M=series.slice(-12);
+  const lines=['=== ЧЕК ТЕНЗОНАТЯГУ (58мм) ===','Механік: '+($('#fio').value||'-'),'Робота: '+($('#job').value||'-'),'---'];
+  M.forEach(o=>lines.push(`${new Date(o.t).toISOString().slice(11,19)} F=${o.F.toFixed(0)}${unit} F(EMA)=${o.Fema.toFixed(0)}${unit} SLIP=${o.slip.toFixed(1)}% ${o.alarm?'!':''}`));
+  const el=$('#rc'); el.hidden=false; el.textContent=lines.join('\n');
+  download('para17_receipt_'+stamp()+'.txt', lines.join('\n'));
+});
+
+// ===== Демо цикл (лише для емуляції) =====
+// (у полі — читаємо з Serial; тут — вручну або слайдер)
+function demoTick(){
+  if(emu.checked){
+    const F=parseFloat(emuF.value)||0;
+    addPointFromValue(F + (Math.random()*4-2)); // трохи шуму
+  }
+  requestAnimationFrame(demoTick);
+}
+demoTick();
+</script>
+</body>
+</html>
