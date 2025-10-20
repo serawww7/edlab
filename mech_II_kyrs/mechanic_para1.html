@@ -56,7 +56,7 @@
     width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
   }
 
-  /* Чек 58 мм (вид на екрані) */
+  /* Чек 58 мм (вигляд на екрані) */
   .ticket{ width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
   .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
   .ticket p{margin:2px 0; font-size:12px}
@@ -442,27 +442,74 @@
     byId('tNote').textContent = `Прим.: Автогенерація · Ref:${Math.random().toString(36).slice(2,8).toUpperCase()}`;
   }
 
-  // ✅ ДРУК ТІЛЬКИ ЧЕКА — ЧИСТЕ ВІКНО (не ламає інші сторінки)
+  // ✅ ДРУК ЧЕРЕЗ ПРИХОВАНИЙ IFRAME (стабільно для Moodle/WebView)
   function printTicket(){
     const ticket = document.getElementById('ticket');
     if(!ticket){ alert('Немає #ticket'); return; }
-    const w = window.open('', '_blank', 'width=420,height=800,noopener,noreferrer');
+
+    // Якщо чек порожній — спробуємо зібрати
+    try{
+      const idText = document.getElementById('tId')?.textContent?.trim() || '—';
+      if(idText === '—') { buildTicket(); }
+    }catch(e){}
+
+    // CSS лише для рулону 58 мм у фреймі
     const css = `
       @page { size:58mm auto; margin:0 }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       html,body{ margin:0; padding:0; background:#fff; color:#000 }
-      .ticket{ width:58mm; margin:0; padding:6mm 4mm; background:#fff; color:#000;
-               font-family:"Courier New",ui-monospace,monospace; border:none; box-shadow:none; border-radius:0 }
+      .ticket{
+        width:58mm; margin:0; padding:6mm 4mm;
+        background:#fff; color:#000;
+        font-family:"Courier New",ui-monospace,monospace;
+        border:none; box-shadow:none; border-radius:0
+      }
       .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
       .ticket p{margin:2px 0; font-size:12px}
       .line{border-top:1px dashed #111; margin:6px 0}
       small{font-size:10px}
     `;
-    w.document.write(
-      `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}<script>
-        window.onload = function(){ window.print(); setTimeout(()=>window.close(), 200); };
-      <\/script></body></html>`
-    );
-    w.document.close();
+
+    const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head>
+<body>${ticket.outerHTML}</body>
+</html>`;
+
+    // Створюємо/перевикористовуємо прихований фрейм
+    let frame = document.getElementById('printFrame');
+    if(!frame){
+      frame = document.createElement('iframe');
+      frame.id = 'printFrame';
+      frame.style.position = 'fixed';
+      frame.style.right = '0';
+      frame.style.bottom = '0';
+      frame.style.width = '0';
+      frame.style.height = '0';
+      frame.style.border = '0';
+      frame.style.visibility = 'hidden';
+      document.body.appendChild(frame);
+    }
+
+    const win = frame.contentWindow;
+    const doc = win.document;
+    doc.open(); doc.write(html); doc.close();
+
+    // Дочекаємось відмальовки і друкуємо
+    const tryPrint = () => {
+      try{
+        win.focus();
+        win.print();
+      }finally{
+        setTimeout(()=>{ if(frame && frame.parentNode) frame.parentNode.removeChild(frame); }, 500);
+      }
+    };
+
+    if('requestAnimationFrame' in win){
+      win.requestAnimationFrame(()=>win.requestAnimationFrame(tryPrint));
+    }else{
+      setTimeout(tryPrint, 120);
+    }
   }
 
   // ====== УТИЛІТИ ======
