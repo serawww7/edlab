@@ -96,13 +96,27 @@ textarea{min-height:140px; resize:vertical}
   color:#c7d2fe;
 }
 .footer-inner{
-  max-width:1100px; margin:0 auto; padding:22px 16px; display:grid; gap:16px; grid-template-columns:1.1fr 1fr 0.8fr;
+    max-width:1100px; margin:0 auto; padding:22px 16px;
+  display:grid; gap:16px;
+  /* Не даємо колонкам розпухати на мобілках: */
+  grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,0.8fr);
 }
-.footer-inner .col{padding:6px 8px}
+.footer-inner .col{
+  padding:6px 8px;
+  /* Дозволяємо вмісту стискатися всередині грід-комірок */
+  min-width:0;
+}
 .footer-inner .brand .brand-line{display:flex; align-items:center; gap:10px; font-size:18px; margin-bottom:6px}
 .footer-inner h3{margin:4px 0 6px; font-size:16px; color:#e2e8f0}
 .site-footer p{margin:6px 0}
-.site-footer a{color:#9ec5ff; text-decoration:none}
+.site-footer a{
+ color:#9ec5ff; text-decoration:none;
+  /* Переносимо довгі посилання/слова, щоб не ламали ширину */
+  overflow-wrap:anywhere; word-break:break-word;
+}
+.site-footer li, .site-footer p{
+  overflow-wrap:anywhere; word-break:break-word;
+}
 .site-footer a:hover{opacity:.9; text-decoration:underline}
 .footer-inner ul{margin:6px 0; padding:0; list-style:none}
 .footer-inner li{margin:4px 0}
@@ -110,7 +124,18 @@ textarea{min-height:140px; resize:vertical}
   border-top:1px solid var(--footer-line);
   text-align:center; padding:10px 16px; font-size:12px; color:#9fb0c8
 }
-
+/* Респонсив: 3→2→1 колонки */
+@media (max-width:900px){
+  .footer-inner{
+    grid-template-columns:repeat(2, minmax(0,1fr));
+  }
+}
+@media (max-width:560px){
+  .footer-inner{
+    grid-template-columns:1fr;
+    padding:18px 12px;
+  }
+}
 /* Вбудовано в Moodle → спрощений вигляд */
 html.embedded body{background:#fff; color:#111}
 html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
