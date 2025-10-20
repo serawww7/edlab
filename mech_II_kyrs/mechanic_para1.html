@@ -41,12 +41,18 @@
   .table tbody tr:nth-child(even){background:#0b1324; color:#e5e7eb}
   .out{background:#0b1324; color:#e5e7eb; border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
 
-  /* Чек 58 мм (вигляд на екрані) */
-  .ticket{ width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
-  .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
-  .ticket p{margin:2px 0; font-size:12px}
+  /* Чек 58 мм (вигляд на екрані) — ЖИРНИЙ для термопринтера */
+  .ticket{
+    width:58mm; background:#fff; color:#000; padding:6mm 4mm;
+    border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset;
+    font-family:"Courier New", Courier, monospace;
+    font-weight:700; letter-spacing:0.1px;
+  }
+  .ticket h4{margin:0 0 6px; font-size:13px; text-align:center; font-weight:700}
+  .ticket p{margin:2px 0; font-size:12px; font-weight:700}
   .ticket .line{border-top:1px dashed #111; margin:6px 0}
-  .ticket small{font-size:10px}
+  .ticket small{font-size:10px; font-weight:700}
+  .ticket b, .ticket strong, .ticket span{font-weight:700}
 
   /* Світлий вигляд у вбудуванні (Moodle iFrame) */
   html.embedded body{background:#fff; color:#111}
@@ -143,7 +149,7 @@
           <h3>Наряд-замовлення (чек 58 мм)</h3>
           <div class="row">
             <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-            <button class="btn" onclick="printTicket()">🖨️ Друк</button>
+            <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
             <button class="btn" onclick="openTicketOnly()">↗️ Відкрити тільки чек</button>
           </div>
           <div class="ticket" id="ticket" style="margin-top:8px">
@@ -364,56 +370,29 @@
     byId('tNote').textContent = `Прим.: Автогенерація · Ref:${Math.random().toString(36).slice(2,8).toUpperCase()}`;
   }
 
-  // ====== ДРУК ЛИШЕ ЧЕКА ЧЕРЕЗ ПРИХОВАНИЙ IFRAME ======
-  function printTicket(){
-    const ticket = document.getElementById('ticket');
+  // ====== Новий стабільний друк через окрему сторінку ======
+  function printTicketNewTab(){
+    var ticket = document.getElementById('ticket');
     if(!ticket){ alert('Немає #ticket'); return; }
-    // Якщо чек порожній — згенеруємо
-    if((document.getElementById('tId')?.textContent||'—').trim()==='—'){ buildTicket(); }
+    try{
+      var idText = (document.getElementById('tId')||{}).textContent||'';
+      if(!idText || idText.trim()==='—'){ if(typeof buildTicket==='function') buildTicket(); }
+    }catch(e){}
 
-    const css = `
-      @page { size:58mm auto; margin:0 }
-      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      html,body{ margin:0; padding:0; background:#fff; color:#000 }
-      .ticket{ width:58mm; margin:0; padding:6mm 4mm; background:#fff; color:#000;
-               font-family:"Courier New",ui-monospace,monospace; border:none; box-shadow:none; border-radius:0 }
-      .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
-      .ticket p{margin:2px 0; font-size:12px}
-      .line{border-top:1px dashed #111; margin:6px 0}
-      small{font-size:10px}
-    `;
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}</body></html>`;
-
-    let frame = document.getElementById('printFrame');
-    if(!frame){
-      frame = document.createElement('iframe');
-      frame.id = 'printFrame';
-      frame.style.position = 'fixed';
-      frame.style.right = '0';
-      frame.style.bottom = '0';
-      frame.style.width = '1px';
-      frame.style.height = '1px';
-      frame.style.border = '0';
-      frame.style.opacity = '0';
-      document.body.appendChild(frame);
+    var id  = Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+    var key = 'print_job_' + id;
+    try{
+      localStorage.setItem(key, JSON.stringify({ html: ticket.outerHTML }));
+    }catch(e){
+      alert('Не вдалось підготувати чек до друку (localStorage).'); return;
     }
 
-    const doc = frame.contentWindow.document;
-    doc.open(); doc.write(html); doc.close();
-
-    // Дочекаємось побудови та викличемо друк
-    const tryPrint = () => {
-      try { frame.contentWindow.focus(); frame.contentWindow.print(); }
-      finally { setTimeout(()=>{ frame.remove(); }, 800); }
-    };
-    if('requestAnimationFrame' in frame.contentWindow){
-      frame.contentWindow.requestAnimationFrame(()=>frame.contentWindow.requestAnimationFrame(tryPrint));
-    }else{
-      setTimeout(tryPrint, 150);
-    }
+    var base = (location.origin + location.pathname).replace(/[^/]*$/,'');
+    var url  = base + 'print-ticket.html?id=' + encodeURIComponent(id);
+    window.open(url, '_blank');
   }
 
-  // ====== ВІДКРИТИ ТІЛЬКИ ЧЕК У НОВІЙ ВКЛАДЦІ (фолбек для вередливих вебв’ю) ======
+  // ====== Фолбек: відкрити тільки чек у новій вкладці та одразу друк ======
   function openTicketOnly(){
     const ticket = document.getElementById('ticket');
     if(!ticket){ alert('Немає #ticket'); return; }
@@ -423,11 +402,13 @@
       @page { size:58mm auto; margin:0 }
       body{ margin:0; background:#fff; color:#000 }
       .ticket{ width:58mm; margin:0; padding:6mm 4mm; background:#fff; color:#000;
-               font-family:"Courier New",ui-monospace,monospace; border:none; box-shadow:none; border-radius:0 }
-      .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
-      .ticket p{margin:2px 0; font-size:12px}
+               font-family:"Courier New", Courier, monospace; font-weight:700; letter-spacing:0.1px;
+               border:none; box-shadow:none; border-radius:0 }
+      .ticket h4{margin:0 0 6px; font-size:13px; text-align:center; font-weight:700}
+      .ticket p{margin:2px 0; font-size:12px; font-weight:700}
+      .ticket b, .ticket strong, .ticket span{font-weight:700}
       .line{border-top:1px dashed #111; margin:6px 0}
-      small{font-size:10px}
+      small{font-size:10px; font-weight:700}
     `;
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}
 <script>window.addEventListener('load',()=>{ try{ window.focus(); window.print(); }catch(e){} });<\/script>
@@ -435,9 +416,7 @@
 
     const blob = new Blob([html], {type:'text/html'});
     const url = URL.createObjectURL(blob);
-    // Відкриємо у новій вкладці (або у тій самій у WebView) — там точно тільки чек
     window.open(url, '_blank');
-    // URL звільнимо пізніше
     setTimeout(()=>URL.revokeObjectURL(url), 60000);
   }
 
