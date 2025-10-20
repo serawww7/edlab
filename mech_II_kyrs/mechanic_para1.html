@@ -371,25 +371,31 @@
   }
 
   // ====== Новий стабільний друк через окрему сторінку ======
-  function printTicketNewTab(){
-    var ticket = document.getElementById('ticket');
+function printTicketNewTab(){
+    const ticket = document.getElementById('ticket');
     if(!ticket){ alert('Немає #ticket'); return; }
-    try{
-      var idText = (document.getElementById('tId')||{}).textContent||'';
-      if(!idText || idText.trim()==='—'){ if(typeof buildTicket==='function') buildTicket(); }
-    }catch(e){}
+    const idText = (document.getElementById('tId')||{}).textContent||'';
+    if(!idText || idText.trim()==='—'){ if(typeof buildTicket==='function') buildTicket(); }
 
-    var id  = Date.now().toString(36) + Math.random().toString(36).slice(2,8);
-    var key = 'print_job_' + id;
-    try{
-      localStorage.setItem(key, JSON.stringify({ html: ticket.outerHTML }));
-    }catch(e){
-      alert('Не вдалось підготувати чек до друку (localStorage).'); return;
-    }
+    const css = `
+      @media print { @page { size:58mm auto; margin:0 } }
+      html,body{ margin:0; padding:0; background:#fff; color:#000 }
+      .ticket{ width:58mm; margin:0; padding:6mm 4mm; background:#fff; color:#000;
+               font-family:"Courier New", Courier, monospace; font-weight:700; letter-spacing:0.1px;
+               border:none; box-shadow:none; border-radius:0 }
+      .ticket h4{margin:0 0 6px; font-size:13px; text-align:center; font-weight:700}
+      .ticket p{margin:2px 0; font-size:12px; font-weight:700}
+      .ticket b,.ticket strong,.ticket span{font-weight:700}
+      .line{border-top:1px dashed #111; margin:6px 0}
+      small{font-size:10px; font-weight:700}
+    `;
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}
+    <script>window.addEventListener('load',()=>{ try{ window.focus(); window.print(); }catch(e){} });<\/script>
+    </body></html>`;
 
-    var base = (location.origin + location.pathname).replace(/[^/]*$/,'');
-    var url  = base + 'print-ticket.html?id=' + encodeURIComponent(id);
-    window.open(url, '_blank');
+    const w = window.open('', '_blank');
+    if(!w){ alert('Браузер заблокував відкриття нової вкладки. Дозволь спливаючі вікна для сайту.'); return; }
+    w.document.open(); w.document.write(html); w.document.close();
   }
 
   // ====== Фолбек: відкрити тільки чек у новій вкладці та одразу друк ======
