@@ -1,0 +1,515 @@
+<!-- mechanic_para1.html
+     ПАРА 1 (аудиторно) для механіків
+     Тема: ЦИФРОВИЙ ЖУРНАЛ ТО ТА ОБЛІК РОБІТ — техніка, наряд-замовлення, розрахунок «коли на сервіс», чек 58 мм, NFC-тег, CSV
+     Фокус: телефони/ПК; без зовнішніх бібліотек. Працює на GitHub Pages / у Moodle (iframe).
+     Обладнання: телефони, 58 мм термопринтер (USB/BT), NFC-мітки (опційно), Arduino (опційно для лічильника мотогодин).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 1 (механіки) — Цифровий журнал ТО, чек 58 мм, NFC, CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .small{font-size:12px; color:#9fb0c8}
+  .muted{color:#93a3b5}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)}
+  .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
+  .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+
+  input[type="text"], input[type="number"], input[type="date"], select, textarea{
+    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
+  }
+
+  /* Чек 58 мм */
+  .ticket{ width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
+  .ticket p{margin:2px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:6px 0}
+  .ticket small{font-size:10px}
+
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+  html.embedded .box{background:#f8fafc; color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+
+  /* 🖨️ ДРУК ТІЛЬКИ ЧЕКА (58 мм) */
+  @media print {
+  @page {
+    size: 58mm auto;
+    margin: 0;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+    overflow: hidden !important;
+  }
+
+  body * {
+    display: none !important;
+  }
+
+  #ticket, #ticket * {
+    display: block !important;
+  }
+
+  #ticket {
+    width: 58mm !important;
+    margin: 0 auto !important;
+    padding: 6mm 4mm !important;
+    background: #fff !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .wrap {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 1 · аудиторно · механіки</span>
+    <h1>🔧 Цифровий журнал ТО: техніка, наряд-замовлення, чек 58 мм, NFC, CSV</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        За пару студенти створюють <b>довідник машин</b>, заповнюють <b>журнал робіт</b>, розраховують <b>коли наступне ТО</b>
+        (за мотогодинами/датою), формують <b>чек 58 мм</b> (наряд-замовлення) для друку та <b>NFC-текст</b> для мітки.
+        В кінці — <b>CSV</b> у Google Sheets і короткі висновки.
+      </p>
+      <p class="small">Правило інтервалу: ТО настає раніше з двох — за <span class="mono">мотогодинами</span> або за <span class="mono">календарем</span>.</p>
+    </div>
+
+    <!-- ДОВІДНИК МАШИН -->
+    <div class="card">
+      <h2>🚜 Довідник машин</h2>
+      <div class="row">
+        <button class="btn" onclick="addMachine()">➕ Додати машину</button>
+        <button class="btn" onclick="demoMachines()">🧪 Приклад</button>
+        <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+        <button class="btn" onclick="copyCSV('csvM')">📋 CSV (машини)</button>
+      </div>
+      <div style="overflow:auto; margin-top:8px">
+        <table class="table" id="tblM">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Машина ID</th>
+              <th>Модель</th>
+              <th>Мотогод., h (поточні)</th>
+              <th>ТО останнє: дата</th>
+              <th>ТО останнє: h</th>
+              <th>Інтервал ТО: h</th>
+              <th>Інтервал ТО: днів</th>
+              <th class="dark">Залишок до ТО, h</th>
+              <th class="dark">Залишок до ТО, днів</th>
+              <th class="dark">Статус</th>
+              <th>Примітка</th>
+            </tr>
+          </thead>
+          <tbody id="bodyM"></tbody>
+        </table>
+      </div>
+      <div id="csvM" class="out" style="margin-top:8px">—</div>
+      <p class="small muted">Темні клітинки (<span class="mono">.dark</span>) — зі світлим текстом для читабельності.</p>
+    </div>
+
+    <!-- ЖУРНАЛ РОБІТ -->
+    <div class="card">
+      <h2>🧱 Журнал робіт</h2>
+      <div class="row">
+        <button class="btn" onclick="addJob()">➕ Додати запис</button>
+        <button class="btn" onclick="demoJobs()">🧪 Приклад</button>
+        <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+        <button class="btn" onclick="copyCSV('csvJ')">📋 CSV (роботи)</button>
+      </div>
+      <div style="overflow:auto; margin-top:8px">
+        <table class="table" id="tblJ">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Дата</th>
+              <th>Машина ID</th>
+              <th>Тип робіт</th>
+              <th>Години праці, люд.-год</th>
+              <th>Запчастини/матеріали, грн</th>
+              <th class="dark">Вартість робіт, грн (довідкова)</th>
+              <th class="dark">Разом, грн</th>
+              <th>Нотатка</th>
+            </tr>
+          </thead>
+          <tbody id="bodyJ"></tbody>
+        </table>
+      </div>
+      <div id="csvJ" class="out" style="margin-top:8px">—</div>
+      <p class="small">Оцінка вартості робіт: <span class="mono">люд.-год × тариф</span> (див. «Налаштування»).</p>
+    </div>
+
+    <!-- НАЛАШТУВАННЯ + NFC + ЧЕК -->
+    <div class="card">
+      <h2>⚙️ Налаштування / NFC / Чек 58 мм</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Налаштування</h3>
+          <div class="row">
+            <div style="flex:1"><label>Тариф, грн/год</label><input id="rate" type="number" step="1" value="220"></div>
+            <div style="flex:1"><label>Дата «сьогодні»</label><input id="today" type="date"></div>
+          </div>
+          <p class="small">Дата «сьогодні» впливає на розрахунок залишку днів до ТО.</p>
+        </div>
+
+        <div class="box">
+          <h3>NFC — текст для мітки машини</h3>
+          <div class="row">
+            <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
+            <div style="flex:1"><label>Сервіс-контакт</label><input id="nfcContact" type="text" value="+380XXXXXXXXX"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+            <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          </div>
+          <div id="nfcOut" class="out">—</div>
+        </div>
+
+        <div class="box">
+          <h3>Наряд-замовлення (чек 58 мм)</h3>
+          <div class="row">
+            <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+            <button class="btn" onclick="window.print()">🖨️ Друк</button>
+          </div>
+          <div class="ticket" id="ticket" style="margin-top:8px">
+            <h4>НАРЯД-ЗАМОВЛЕННЯ</h4>
+            <p id="tDate"><small>Дата: —</small></p>
+            <div class="line"></div>
+            <p><b>Машина:</b> <span id="tId">—</span> · <b>Модель:</b> <span id="tModel">—</span></p>
+            <p><b>Поточні h:</b> <span id="tH">—</span> · <b>Наст. ТО через:</b> <span id="tDue">—</span></p>
+            <div class="line"></div>
+            <p><b>Робота:</b> <span id="tJob">—</span></p>
+            <p><b>Трудомісткість:</b> <span id="tHours">—</span> год × <span id="tRate">—</span> = <span id="tWorkCost">—</span> грн</p>
+            <p><b>Матеріали:</b> <span id="tParts">—</span> грн</p>
+            <p><b>Разом:</b> <span id="tTotal">—</span> грн</p>
+            <div class="line"></div>
+            <p><small id="tNote">Прим.: —</small></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ХІД РОБОТИ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+      <ol>
+        <li>Заповни <b>Довідник машин</b> (мінімум 3 записи), задай інтервали ТО.</li>
+        <li>Додай 3–5 записів у <b>Журнал робіт</b> (різні типи робіт).</li>
+        <li>Перевір <b>залишок до ТО</b> (год/дні) і статус («OK / скоро / терміново»).</li>
+        <li>Згенеруй <b>NFC</b>-текст для однієї машини та <b>чек 58 мм</b> по одній роботі.</li>
+        <li>Скопіюй <b>CSV</b> у Google Sheets (аркуші <span class="mono">Machines</span> та <span class="mono">Jobs</span>).</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Заповнений довідник і коректний розрахунок ТО (год/дні)</td><td>4</td></tr>
+          <tr><td>Журнал робіт заповнений (3–5 записів), підсумки логічні</td><td>3</td></tr>
+          <tr><td>Чек 58 мм та NFC-текст сформовані</td><td>2</td></tr>
+          <tr><td>CSV у Sheets + короткі висновки</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">🧰 ТО</p><p class="pill">🧾 Наряд</p><p class="pill">🔖 NFC</p><p class="pill">📊 CSV</p>
+    </div>
+  </div>
+
+<script>
+  // Режим вбудування (для Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  // Елементи
+  const bodyM = document.getElementById('bodyM');
+  const bodyJ = document.getElementById('bodyJ');
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2) => Number((+n).toFixed(d));
+
+  // Поточна дата за замовчуванням
+  (function setToday(){
+    const d = new Date().toISOString().slice(0,10);
+    byId('today').value = d;
+  })();
+
+  // ====== ДОВІДНИК МАШИН ======
+  function addMachine(sample){
+    const d = new Date().toISOString().slice(0,10);
+    const def = {
+      id:'TR-001', model:'МТЗ-82', h: 4200, lastDate: d, lastH: 4000, intH: 250, intD: 180, note:''
+    };
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.id}"></td>
+      <td><input type="text" value="${s.model}"></td>
+      <td><input type="number" step="1" value="${s.h}"></td>
+      <td><input type="date" value="${s.lastDate}"></td>
+      <td><input type="number" step="1" value="${s.lastH}"></td>
+      <td><input type="number" step="1" value="${s.intH}"></td>
+      <td><input type="number" step="1" value="${s.intD}"></td>
+      <td class="dark dueH">—</td>
+      <td class="dark dueD">—</td>
+      <td class="dark status">—</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyM.appendChild(tr);
+    reindex(bodyM);
+  }
+  function reindex(tbody){ [...tbody.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  function demoMachines(){
+    bodyM.innerHTML='';
+    addMachine({id:'TR-001', model:'МТЗ-82',   h:4200, lastDate:'2025-06-15', lastH:4000, intH:250, intD:180});
+    addMachine({id:'COM-12', model:'John Deere S', h:1350, lastDate:'2025-08-20', lastH:1200, intH:200, intD:150});
+    addMachine({id:'SPR-07', model:'TeeJet 18м', h:800,  lastDate:'2025-07-10', lastH:700,  intH:150, intD:120});
+    recalc();
+  }
+
+  // ====== ЖУРНАЛ РОБІТ ======
+  function addJob(sample){
+    const d = new Date().toISOString().slice(0,10);
+    const def = { date:d, id:'TR-001', job:'Заміна масла', hours:2.5, parts:1800, note:'' };
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="date" value="${s.date}"></td>
+      <td><input type="text" value="${s.id}"></td>
+      <td><input type="text" value="${s.job}"></td>
+      <td><input type="number" step="0.1" value="${s.hours}"></td>
+      <td><input type="number" step="1" value="${s.parts}"></td>
+      <td class="dark workCost">—</td>
+      <td class="dark total">—</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyJ.appendChild(tr);
+    reindex(bodyJ);
+  }
+
+  function demoJobs(){
+    bodyJ.innerHTML='';
+    addJob({id:'TR-001', job:'Заміна масла', hours:2.5, parts:1800});
+    addJob({id:'COM-12', job:'Регулювання ланцюгів', hours:1.2, parts:450});
+    addJob({id:'SPR-07', job:'Промивка форсунок', hours:1.0, parts:220});
+    recalc();
+  }
+
+  // ====== РОЗРАХУНКИ ======
+  function recalc(){
+    // Машини: обчислення термінів ТО
+    const today = new Date(byId('today').value||new Date().toISOString().slice(0,10));
+    [...bodyM.querySelectorAll('tr')].forEach(tr=>{
+      const h = +tr.children[3].querySelector('input').value || 0;
+      const lastDate = tr.children[4].querySelector('input').value;
+      const lastH = +tr.children[5].querySelector('input').value || 0;
+      const intH = +tr.children[6].querySelector('input').value || 0;
+      const intD = +tr.children[7].querySelector('input').value || 0;
+
+      const dueH = (lastH + intH) - h; // годин до ТО
+      tr.querySelector('.dueH').textContent = (isFinite(dueH)? Math.round(dueH) : '—');
+
+      // Дні до ТО
+      let dueDays = '—';
+      if(lastDate){
+        const next = new Date(lastDate); next.setDate(next.getDate() + intD);
+        dueDays = Math.ceil((next - today)/(1000*60*60*24));
+      }
+      tr.querySelector('.dueD').textContent = isFinite(+dueDays)? dueDays : '—';
+
+      // Статус
+      let status='OK';
+      const riskH = (isFinite(dueH) && dueH<=20);
+      const riskD = (isFinite(+dueDays) && +dueDays<=7);
+      if((isFinite(dueH) && dueH<=0) || (isFinite(+dueDays) && +dueDays<=0)) status='ТЕРМІНОВО';
+      else if(riskH || riskD) status='СКОРО';
+      tr.querySelector('.status').textContent = status;
+      tr.querySelector('.status').style.color = status==='ТЕРМІНОВО'? '#ef4444' : (status==='СКОРО'? '#f59e0b' : '#10b981');
+    });
+
+    // Роботи: суми
+    const rate = +byId('rate').value || 0;
+    [...bodyJ.querySelectorAll('tr')].forEach(tr=>{
+      const hours = +tr.children[4].querySelector('input').value || 0;
+      const parts = +tr.children[5].querySelector('input').value || 0;
+      const work = hours * rate;
+      const total = work + parts;
+      tr.querySelector('.workCost').textContent = Math.round(work).toLocaleString('uk-UA');
+      tr.querySelector('.total').textContent = Math.round(total).toLocaleString('uk-UA');
+    });
+
+    // Оновити CSV
+    buildCSV();
+  }
+
+  function buildCSV(){
+    // Машини
+    const linesM = [...bodyM.querySelectorAll('tr')].map(tr=>{
+      const idx = tr.querySelector('.idx').textContent.trim();
+      const id  = tr.children[1].querySelector('input').value.trim();
+      const model = tr.children[2].querySelector('input').value.trim();
+      const h = tr.children[3].querySelector('input').value.trim();
+      const lastDate = tr.children[4].querySelector('input').value.trim();
+      const lastH = tr.children[5].querySelector('input').value.trim();
+      const intH = tr.children[6].querySelector('input').value.trim();
+      const intD = tr.children[7].querySelector('input').value.trim();
+      const dueH = tr.querySelector('.dueH').textContent.trim();
+      const dueD = tr.querySelector('.dueD').textContent.trim();
+      const status = tr.querySelector('.status').textContent.trim();
+      const note = tr.children[11].querySelector('input').value.trim();
+      return [idx,id,model,h,lastDate,lastH,intH,intD,dueH,dueD,status,note].join(' | ');
+    });
+    byId('csvM').textContent = linesM.join('\n') || '—';
+
+    // Роботи
+    const linesJ = [...bodyJ.querySelectorAll('tr')].map(tr=>{
+      const idx = tr.querySelector('.idx').textContent.trim();
+      const d   = tr.children[1].querySelector('input').value.trim();
+      const id  = tr.children[2].querySelector('input').value.trim();
+      const job = tr.children[3].querySelector('input').value.trim();
+      const hours = tr.children[4].querySelector('input').value.trim();
+      const parts = tr.children[5].querySelector('input').value.trim();
+      const work  = tr.querySelector('.workCost').textContent.trim();
+      const total = tr.querySelector('.total').textContent.trim();
+      const note  = tr.children[8].querySelector('input').value.trim();
+      return [idx,d,id,job,hours,parts,work,total,note].join(' | ');
+    });
+    byId('csvJ').textContent = linesJ.join('\n') || '—';
+  }
+
+  function copyCSV(id){
+    const t = byId(id).textContent.trim();
+    if(!t || t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+
+  // ====== NFC і ЧЕК ======
+  function buildNFC(){
+    const id = byId('nfcId').value.trim();
+    const contact = byId('nfcContact').value.trim();
+    let model='—', h='—', due='—';
+    const tr = bodyM.querySelector('tr');
+    if(tr){
+      model = tr.children[2].querySelector('input').value.trim();
+      h     = tr.children[3].querySelector('input').value.trim();
+      const dueH = tr.querySelector('.dueH').textContent.trim();
+      const dueD = tr.querySelector('.dueD').textContent.trim();
+      due = `h:${dueH}; d:${dueD}`;
+    }
+    const text = [
+      `ID:${id}`,
+      `MODEL:${model}`,
+      `HOURS:${h}`,
+      `NEXT:${due}`,
+      `CONTACT:${contact}`,
+      `DATE:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = text;
+  }
+
+  function buildTicket(){
+    const trJ = bodyJ.querySelector('tr');
+    const trM = bodyM.querySelector('tr');
+    if(!trJ || !trM){ alert('Додай хоча б одну машину і один запис роботи.'); return; }
+
+    const date = trJ.children[1].querySelector('input').value.trim();
+    const id = trJ.children[2].querySelector('input').value.trim();
+    const job = trJ.children[3].querySelector('input').value.trim();
+    const hours = parseFloat(trJ.children[4].querySelector('input').value||'0');
+    const parts = parseFloat(trJ.children[5].querySelector('input').value||'0');
+
+    const model = trM.children[2].querySelector('input').value.trim();
+    const hNow = trM.children[3].querySelector('input').value.trim();
+    const dueH = trM.querySelector('.dueH').textContent.trim();
+    const dueD = trM.querySelector('.dueD').textContent.trim();
+
+    const rate = +byId('rate').value || 0;
+    const workCost = Math.round(hours*rate);
+    const total = Math.round(workCost + parts);
+
+    byId('tDate').innerHTML = `<small>Дата: ${date}</small>`;
+    byId('tId').textContent = id;
+    byId('tModel').textContent = model;
+    byId('tH').textContent = hNow;
+    byId('tDue').textContent = `h:${dueH} / д:${dueD}`;
+    byId('tJob').textContent = job;
+    byId('tHours').textContent = hours.toFixed(1);
+    byId('tRate').textContent = rate;
+    byId('tWorkCost').textContent = workCost.toLocaleString('uk-UA');
+    byId('tParts').textContent = parts.toLocaleString('uk-UA');
+    byId('tTotal').textContent = total.toLocaleString('uk-UA');
+    byId('tNote').textContent = `Прим.: Автогенерація · Ref:${Math.random().toString(36).slice(2,8).toUpperCase()}`;
+  }
+
+  // ====== УТИЛІТИ ======
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // Ініціалізація
+  (function init(){ addMachine(); addJob(); recalc(); })();
+</script>
+</body>
+</html>
