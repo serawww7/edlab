@@ -150,7 +150,7 @@
           <div class="row">
             <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
             <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
-            <button class="btn" onclick="openTicketOnly()">↗️ Відкрити тільки чек</button>
+            <button id="openOnlyBtn" class="btn" style="display:none" title="Фолбек, якщо звичайний друк недоступний" onclick="openTicketOnly()">↗️ Відкрити тільки чек</button>
           </div>
           <div class="ticket" id="ticket" style="margin-top:8px">
             <h4>НАРЯД-ЗАМОВЛЕННЯ</h4>
@@ -389,13 +389,45 @@ function printTicketNewTab(){
       .line{border-top:1px dashed #111; margin:6px 0}
       small{font-size:10px; font-weight:700}
     `;
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}
-    <script>window.addEventListener('load',()=>{ try{ window.focus(); window.print(); }catch(e){} });<\/script>
-    </body></html>`;
+const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}
+  <script>
+    window.addEventListener('load',()=>{
+      try{
+        window.focus();
+        window.print();
+        // повідомимо «батька», що друк викликано
+        if(window.opener){ window.opener.postMessage({type:'ticketPrint', status:'invoked'}, '*'); }
+      }catch(e){
+        if(window.opener){ window.opener.postMessage({type:'ticketPrint', status:'error'}, '*'); }
+      }
+    });
+  <\/script>
+  </body></html>`;
 
-    const w = window.open('', '_blank');
-    if(!w){ alert('Браузер заблокував відкриття нової вкладки. Дозволь спливаючі вікна для сайту.'); return; }
-    w.document.open(); w.document.write(html); w.document.close();
+const fallbackBtn = document.getElementById('openOnlyBtn')
+  const w = window.open('', '_blank');
+  if(!w){
+    // попап заблокований — показуємо кнопку-фолбек і одразу відкриваємо варіант «тільки чек»
+    if(fallbackBtn) fallbackBtn.style.display = 'inline-block';
+    openTicketOnly();
+    return;
+  }
+  w.document.open(); w.document.write(html); w.document.close();
+
+  // якщо в дочірньому вікні друк не стартував — увімкнемо фолбек
+  let timer = setTimeout(()=>{
+    if(fallbackBtn) fallbackBtn.style.display = 'inline-block';
+  }, 1200);
+  window.addEventListener('message', (ev)=>{
+    if(ev && ev.data && ev.data.type==='ticketPrint'){
+      clearTimeout(timer);
+      // якщо помилка — покажемо кнопку-фолбек і запропонуємо альтернативу
+      if(ev.data.status==='error' && fallbackBtn){
+        fallbackBtn.style.display = 'inline-block';
+        openTicketOnly();
+      }
+    }
+  }, {once:true});
   }
 
   // ====== Фолбек: відкрити тільки чек у новій вкладці та одразу друк ======
