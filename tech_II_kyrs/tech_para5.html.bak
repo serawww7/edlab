@@ -1,0 +1,511 @@
+<!-- tech_para5.html
+     ПАРА 5 (аудиторно) для технологів з переробки продукції тваринництва
+     Тема: ПРИЙМАННЯ СИРОВИНИ, ТЕМПЕРАТУРНИЙ КОНТРОЛЬ, FEFO, ЛОКАЦІЇ СКЛАДУ.
+           Акт невідповідності, етикетка палети 58 мм, NFC, QR-payload, CSV-журнал.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; (опц.) термопринтер 58 мм; NFC-мітки.
+
+     Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 5 (технологи) — Приймання сировини: T-контроль, FEFO, локації, акт, квиток 58 мм, NFC, CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  textarea{min-height:84px}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано в Moodle (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 5 · аудиторно · технологи переробки</span>
+  <h1>🚚 Приймання сировини: T-контроль, FEFO, локації, акт, квиток 58 мм, NFC, CSV</h1>
+
+  <div class="card">
+    <h2>🎯 Мета пари</h2>
+    <p>
+      За заняття студенти оформлять <b>приймання сировини</b>: перевірять <b>температуру</b>, строки <b>FEFO</b>,
+      згенерують <b>локацію складу</b> і <b>етикетку палети (58 мм)</b>, створять <b>акт невідповідності</b>, <b>QR/NFC</b> та <b>CSV-журнал</b>.
+    </p>
+    <p class="small muted">Правила: холодовий ланцюг, документальний супровід (ветдовідка/CoA), маркування лотів, FEFO (first expired — first out).</p>
+  </div>
+
+  <!-- 1. ВХІДНІ ДАНІ ПОСТАВКИ -->
+  <div class="card">
+    <h2>📦 Дані поставки</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Постачальник / товар</h3>
+        <div class="row">
+          <div style="flex:1"><label>Постачальник</label><input id="supplier" type="text" value="ТОВ “МʼясТрейд”"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Категорія</label>
+            <select id="category">
+              <option value="chilled" selected>Охолоджене мʼясо</option>
+              <option value="frozen">Заморожене мʼясо</option>
+              <option value="milk">Молочна сировина</option>
+              <option value="spice">Спеції/добавки</option>
+              <option value="pack">Пакувальні матеріали</option>
+            </select>
+          </div>
+          <div style="flex:1"><label>Найменування</label><input id="item" type="text" value="Свинина охолоджена, півтуша"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Партія і строки</h3>
+        <div class="row">
+          <div style="flex:1"><label>Лот</label><input id="lot" type="text" value="S-25041-AC"></div>
+          <div style="flex:1"><label>Дата виробн.</label><input id="prodDate" type="date"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>“Вжити до”</label><input id="expDate" type="date"></div>
+          <div style="flex:1"><label>Кількість, кг</label><input id="qtyKg" type="number" step="0.1" value="800"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Температура / документи</h3>
+        <div class="row">
+          <div style="flex:1"><label>Температура при прийманні, °C</label><input id="temp" type="number" step="0.1" value="3.0"></div>
+          <div style="flex:1"><label>Упакування</label>
+            <select id="pack">
+              <option value="bulk">Навал</option>
+              <option value="vac" selected>Вакуум</option>
+              <option value="map">MAP</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1">
+            <label>Документи</label>
+            <select id="docs">
+              <option value="ok" selected>Повні (ветдовідка/CoA/накладна)</option>
+              <option value="partial">Н неповні</option>
+              <option value="missing">Відсутні</option>
+            </select>
+          </div>
+          <div style="flex:1"><label>Видима чистота тари</label>
+            <select id="packClean">
+              <option>Так</option><option>Ні</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="calcAll()">🔁 Перерахувати</button>
+          <button class="btn" onclick="preset()">🧪 Приклад</button>
+          <button class="btn" onclick="copyCSV('csvCore')">📋 CSV</button>
+        </div>
+        <div id="csvCore" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+    <p class="small muted">Ліміти T (навчально): охолоджене 0…+4 °C; молочна сировина 0…+6 °C; заморожене ≤ −12 °C.</p>
+  </div>
+
+  <!-- 2. FEFO та ЛОКАЦІЯ СКЛАДУ -->
+  <div class="card">
+    <h2>🧭 FEFO та локація</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Результат FEFO</h3>
+        <p>Залишок до “вжити до”: <b><span id="daysLeft">—</span></b> днів</p>
+        <p>Пріоритет відбору: <b><span id="prio">—</span></b></p>
+        <p>Рекоменд. дата відбору (D−2): <b><span id="pickDate">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Локація складу</h3>
+        <p>Зона: <b><span id="zone">—</span></b></p>
+        <p>Стелаж/осередок: <b><span id="bin">—</span></b></p>
+        <p class="small muted">Схема: CH-2 (0…+4 °C), ML-6 (0…+6 °C), FRZ-18 (−18 °C), DRY-18 (сухий).</p>
+      </div>
+      <div class="box">
+        <h3>Статус приймання</h3>
+        <p>Температура/документи: <b><span id="status">—</span></b></p>
+        <p>Пояснення: <b><span id="reason">—</span></b></p>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildDeviation()">📝 Акт невідповідності</button>
+          <button class="btn" onclick="copyEl('devOut')">📋 Копіювати</button>
+        </div>
+        <div id="devOut" class="out">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. ЖУРНАЛ ПРИЙМАННЯ -->
+  <div class="card">
+    <h2>📒 Журнал приймання</h2>
+    <div class="row">
+      <button class="btn" onclick="addRow()">➕ Додати рядок</button>
+      <button class="btn" onclick="presetRows()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblLog">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Товар</th>
+            <th class="dark">Лот</th>
+            <th class="dark">“Вжити до”</th>
+            <th class="dark">T, °C</th>
+            <th>Зона</th>
+            <th>Осередок</th>
+            <th>Статус</th>
+            <th>Примітка</th>
+          </tr>
+        </thead>
+        <tbody id="bodyLog"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 4. КВИТОК 58 мм + NFC + QR -->
+  <div class="card">
+    <h2>🧾 Етикетка палети 58 мм, NFC і QR-payload</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>NFC — “RAW INBOUND CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Контакт/техн.</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label>К-ть палет</label><input id="pallets" type="number" step="1" value="2"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+        <h3 style="margin-top:12px">QR-payload</h3>
+        <div class="row">
+          <button class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
+          <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
+        </div>
+        <div id="qrOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток для принтера 58 мм</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>RAW MATERIAL PALLET</h4>
+          <p><b>Постачальник:</b> <span id="tSupp">—</span></p>
+          <p><b>Товар:</b> <span id="tItem">—</span></p>
+          <p><b>Лот:</b> <span id="tLot">—</span></p>
+          <div class="line"></div>
+          <p><b>Виробн.:</b> <span id="tProdD">—</span> · <b>Вжити до:</b> <span id="tExpD">—</span></p>
+          <p><b>FEFO:</b> <span id="tFEFO">—</span> · <b>Пріо:</b> <span id="tPrio">—</span></p>
+          <p><b>Зона:</b> <span id="tZone">—</span> · <b>Осередок:</b> <span id="tBin">—</span></p>
+          <div class="line"></div>
+          <p><b>T прийм.:</b> <span id="tTemp">—</span> °C · <b>К-ть:</b> <span id="tQty">—</span> кг</p>
+          <p><b>Статус:</b> <span id="tStatus">—</span></p>
+          <div class="line"></div>
+          <p><small id="tNote">Дотримуватись холодового ланцюга. Відбір за FEFO.</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Заповни дані поставки; виміряй/внеси <b>температуру</b>, задай строки.</li>
+      <li>Натисни “Перерахувати”: перевір <b>статус</b>, <b>зону/осередок</b>, <b>FEFO</b>.</li>
+      <li>За потреби сформуй <b>акт невідповідності</b>.</li>
+      <li>Додай 2–3 записи в <b>журнал</b>; згенеруй <b>NFC</b>, <b>QR</b> та <b>квиток</b>, скопіюй <b>CSV</b>.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Коректний T-контроль, FEFO, зона/осередок</td><td>4</td></tr>
+        <tr><td>Журнал приймання + CSV</td><td>3</td></tr>
+        <tr><td>Квиток 58 мм, NFC/QR</td><td>2</td></tr>
+        <tr><td>Акт невідповідності (за кейсом)</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const bodyLog = byId('bodyLog');
+
+  // Допоміжні
+  function daysBetween(a,b){ return Math.round((b - a)/(1000*60*60*24)); }
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function fmtDate(d){ return d.toISOString().slice(0,10); }
+
+  // Норми температур (навчальні)
+  const tempLimits = {
+    chilled: {min:0, max:4, zone:'CH-2'},
+    milk:    {min:0, max:6, zone:'ML-6'},
+    frozen:  {min:-25, max:-12, zone:'FRZ-18'},
+    spice:   {min:10, max:25, zone:'DRY-18'},
+    pack:    {min:10, max:25, zone:'DRY-18'}
+  };
+
+  function randomBin(zone){
+    // Простий генератор осередку: зона-стелаж-ряд-полиця
+    const shelf = Math.floor(1+Math.random()*8);
+    const row = String.fromCharCode(65 + Math.floor(Math.random()*6)); // A..F
+    const lvl = Math.floor(1+Math.random()*4);
+    return `${zone}-${shelf}${row}-${lvl}`;
+  }
+
+  function calcAll(){
+    const cat = byId('category').value;
+    const lim = tempLimits[cat] || tempLimits.chilled;
+
+    // дати
+    const now = new Date();
+    const prod = byId('prodDate').value ? new Date(byId('prodDate').value) : now;
+    const exp  = byId('expDate').value  ? new Date(byId('expDate').value)  : new Date(now.getFullYear(), now.getMonth(), now.getDate()+7);
+
+    // FEFO
+    const daysLeft = daysBetween(now, exp);
+    const pick = new Date(exp); pick.setDate(pick.getDate()-2);
+    const prio = (daysLeft<=2)?'🔴 Високий' : (daysLeft<=5)?'🟠 Середній' : '🟢 Звичайний';
+
+    // Локація
+    const zone = lim.zone;
+    const bin = randomBin(zone);
+
+    // Статус приймання (T + документи + чистота)
+    const T = Number(byId('temp').value);
+    const docs = byId('docs').value;
+    const clean = byId('packClean').value==='Так';
+
+    let status='🟢 ДОПУСТИТИ', reason='У межах норм';
+    if(isNaN(T)) { status='🟠 УМОВНО'; reason='Не вказано температуру'; }
+    else if(T<lim.min || T>lim.max) { status='🔴 ВІДХИЛЕННЯ'; reason=`T=${T}°C поза межами ${lim.min}…${lim.max}°C`; }
+    if(docs!=='ok'){ status = (status==='🔴 ВІДХИЛЕННЯ')?'🔴 ВІДХИЛЕННЯ':'🟠 УМОВНО'; reason += `; документи: ${docs}`; }
+    if(!clean){ status = (status==='🔴 ВІДХИЛЕННЯ')?'🔴 ВІДХИЛЕННЯ':'🟠 УМОВНО'; reason += '; забруднена тара'; }
+
+    // Вивід
+    byId('daysLeft').textContent = daysLeft;
+    byId('pickDate').textContent = fmtDate(pick);
+    byId('prio').textContent = prio;
+    byId('zone').textContent = zone;
+    byId('bin').textContent = bin;
+    byId('status').textContent = status;
+    byId('reason').textContent = reason;
+
+    const csv = [
+      `INBOUND|supp=${byId('supplier').value}|cat=${byId('category').value}|item=${byId('item').value}|lot=${byId('lot').value}`,
+      `PROD=${byId('prodDate').value||fmtDate(prod)}|EXP=${byId('expDate').value||fmtDate(exp)}|QTY=${byId('qtyKg').value}kg`,
+      `TEMP=${isNaN(T)?'NA':T+'C'}|LIMIT=${lim.min}..${lim.max}C|DOCS=${docs}|CLEAN=${clean?'ok':'no'}`,
+      `FEFO_daysLeft=${daysLeft}|PRIO=${prio}|ZONE=${zone}|BIN=${bin}|STATUS=${status}|WHY=${reason}`
+    ].join('\n');
+    byId('csvCore').textContent = csv;
+
+    // Повернути для інших блоків
+    return {zone, bin, status, reason, daysLeft, pickDate:fmtDate(pick)};
+  }
+
+  function preset(){
+    const now = new Date();
+    byId('category').value='frozen';
+    byId('item').value='Яловичина заморожена, блок';
+    byId('pack').value='bulk';
+    byId('docs').value='partial';
+    byId('packClean').value='Так';
+    byId('prodDate').value=fmtDate(new Date(now.getFullYear(), now.getMonth(), now.getDate()-20));
+    byId('expDate').value=fmtDate(new Date(now.getFullYear(), now.getMonth(), now.getDate()+120));
+    byId('temp').value='-15';
+    byId('qtyKg').value='1200';
+    calcAll();
+  }
+
+  // Журнал
+  function reindex(){ [...bodyLog.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+  function addRow(sample){
+    const r = calcAll();
+    const def = {
+      item: byId('item').value,
+      lot: byId('lot').value,
+      exp: byId('expDate').value,
+      temp: byId('temp').value,
+      zone: r.zone, bin: r.bin,
+      status: r.status,
+      note: ''
+    };
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.item}"></td>
+      <td class="dark">${s.lot}</td>
+      <td class="dark">${s.exp}</td>
+      <td class="dark">${s.temp}</td>
+      <td>${s.zone}</td>
+      <td>${s.bin}</td>
+      <td>${s.status}</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyLog.appendChild(tr); reindex(); buildCSVlog();
+  }
+  function presetRows(){
+    bodyLog.innerHTML='';
+    addRow({note:'палета 1'});
+    byId('temp').value='5.5'; byId('docs').value='ok'; byId('category').value='milk'; byId('item').value='Молоко-сировина'; calcAll();
+    addRow({note:'молочна сировина'});
+    buildCSVlog();
+  }
+  function buildCSVlog(){
+    const rows = [...bodyLog.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const item=r.children[1].querySelector('input').value.trim();
+      const lot=r.children[2].textContent.trim();
+      const exp=r.children[3].textContent.trim();
+      const t=r.children[4].textContent.trim();
+      const zone=r.children[5].textContent.trim();
+      const bin=r.children[6].textContent.trim();
+      const status=r.children[7].textContent.trim();
+      const note=r.children[8].querySelector('input').value.trim();
+      return [idx,item,lot,exp,t,zone,bin,status,note].join(' | ');
+    });
+    byId('csvLog').textContent = rows.join('\n') || '—';
+  }
+
+  // Акт невідповідності
+  function buildDeviation(){
+    const r = calcAll();
+    const txt = [
+      `NONCONFORMANCE_REPORT`,
+      `DATE:${new Date().toISOString().slice(0,19).replace('T',' ')}`,
+      `SUPPLIER:${byId('supplier').value}`,
+      `ITEM:${byId('item').value} LOT:${byId('lot').value} QTY:${byId('qtyKg').value}kg`,
+      `TEMP:${byId('temp').value}C | LIMIT:${(tempLimits[byId('category').value]||{}).min}..${(tempLimits[byId('category').value]||{}).max}C`,
+      `DOCS:${byId('docs').value} | CLEAN:${byId('packClean').value}`,
+      `STATUS:${r.status} | REASON:${r.reason}`,
+      `ACTION: ізоляція/повернення/знижений статус/аналіз постачальника`
+    ].join('\n');
+    byId('devOut').textContent = txt;
+  }
+
+  // Квиток 58 мм
+  function buildTicket(){
+    const r = calcAll();
+    byId('tSupp').textContent = byId('supplier').value;
+    byId('tItem').textContent = byId('item').value;
+    byId('tLot').textContent  = byId('lot').value;
+    byId('tProdD').textContent= byId('prodDate').value || '—';
+    byId('tExpD').textContent = byId('expDate').value  || '—';
+    byId('tFEFO').textContent = byId('pickDate').textContent || '—';
+    byId('tPrio').textContent = byId('prio').textContent || '—';
+    byId('tZone').textContent = r.zone;
+    byId('tBin').textContent  = r.bin;
+    byId('tTemp').textContent = byId('temp').value || '—';
+    byId('tQty').textContent  = byId('qtyKg').value || '—';
+    byId('tStatus').textContent= r.status;
+  }
+
+  // NFC / QR
+  function buildNFC(){
+    const r = calcAll();
+    const txt = [
+      `RAW_IN_NFC`,
+      `SUPP:${byId('supplier').value}`,
+      `ITEM:${byId('item').value}`,
+      `LOT:${byId('lot').value} QTY:${byId('qtyKg').value}kg`,
+      `PROD:${byId('prodDate').value||'—'} EXP:${byId('expDate').value||'—'} FEFO:${byId('pickDate').textContent||'—'}`,
+      `ZONE:${r.zone} BIN:${r.bin} STATUS:${r.status}`,
+      `TEMP:${byId('temp').value}C PACK:${byId('pack').value} DOCS:${byId('docs').value}`,
+      `CONTACT:${byId('nfcPhone').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = txt;
+  }
+  function buildQR(){
+    const payload = {
+      supplier: byId('supplier').value,
+      item: byId('item').value, lot: byId('lot').value,
+      prod: byId('prodDate').value, exp: byId('expDate').value,
+      qty_kg: byId('qtyKg').value,
+      zone: byId('zone').textContent, bin: byId('bin').textContent,
+      status: byId('status').textContent
+    };
+    byId('qrOut').textContent = JSON.stringify(payload);
+  }
+
+  // Копіювання
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // Ініціалізація
+  (function init(){
+    const now = new Date();
+    byId('prodDate').value = fmtDate(new Date(now.getFullYear(), now.getMonth(), now.getDate()-2));
+    byId('expDate').value  = fmtDate(new Date(now.getFullYear(), now.getMonth(), now.getDate()+10));
+    calcAll();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select,textarea')) { calcAll(); buildCSVlog(); }
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,604 @@
+<!-- tech_para9.html
+     ПАРА 9 (аудиторно) для технологів з переробки продукції тваринництва
+     Тема: ПРОСТЕЖУВАНІСТЬ (TRACEABILITY) ТА ВІДКЛИКАННЯ — генеалогія партій RAW→WIP→FG,
+           симуляція відкликання, обсяг ураженої продукції, CSV-звіти, квиток 58 мм, QR/NFC.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; (опц.) термопринтер 58 мм; NFC-мітки.
+
+     Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 9 (технологи) — Traceability & Recall: генеалогія партій, симуляція, квиток/QR/NFC/CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  textarea{min-height:84px}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано в Moodle (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+  /* ASCII-граф генеалогії */
+  .graph{font:12px/14px ui-monospace,monospace;white-space:pre;background:#fff;color:#000;padding:8px;border-radius:8px;border:1px solid #e5e7eb;overflow:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 9 · аудиторно · технологи переробки</span>
+  <h1>🔗 Traceability & Recall: генеалогія партій, симуляція, квиток/QR/NFC/CSV</h1>
+
+  <div class="card">
+    <h2>🎯 Мета пари</h2>
+    <p>
+      За заняття студенти зберуть <b>дані про партії RAW→WIP→FG</b>, побудують <b>генеалогію</b>,
+      запустять <b>симуляцію відкликання</b> (за лотом/датою/постачальником), порахують <b>урожену кількість</b>,
+      сформують <b>журнал/CSV</b>, <b>квиток 58 мм</b>, <b>QR/NFC</b> для команд відкликання.
+    </p>
+    <p class="small muted">Навчальна модель ISO 22005/BRCGS. Реальні процедури див. у вашому HACCP-плані та СОП відкликання.</p>
+  </div>
+
+  <!-- 1. RAW: вхідні партії -->
+  <div class="card">
+    <h2>🥩 RAW — вхідні партії</h2>
+    <div class="row">
+      <button class="btn" onclick="addRAW()">➕ Додати RAW</button>
+      <button class="btn" onclick="presetRAW()">🧪 Приклад RAW</button>
+      <button class="btn" onclick="copyCSV('csvRAW')">📋 CSV (RAW)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblRAW">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Лот RAW</th>
+            <th class="dark">Постачальник</th>
+            <th class="dark">Дата прийм.</th>
+            <th class="dark">К-ть, кг</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyRAW"></tbody>
+      </table>
+    </div>
+    <div id="csvRAW" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 2. WIP: змішування / напівфабрикат -->
+  <div class="card">
+    <h2>🛠️ WIP — змішування/напівфабрикат</h2>
+    <div class="row">
+      <button class="btn" onclick="addWIP()">➕ Додати WIP</button>
+      <button class="btn" onclick="presetWIP()">🧪 Приклад WIP</button>
+      <button class="btn" onclick="copyCSV('csvWIP')">📋 CSV (WIP)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblWIP">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>WIP ID</th>
+            <th class="dark">Дата</th>
+            <th class="dark">Склад: RAW лот → %</th>
+            <th>Вихід, кг</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyWIP"></tbody>
+      </table>
+    </div>
+    <div id="csvWIP" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 3. FG: готова продукція -->
+  <div class="card">
+    <h2>📦 FG — готова продукція</h2>
+    <div class="row">
+      <button class="btn" onclick="addFG()">➕ Додати FG</button>
+      <button class="btn" onclick="presetFG()">🧪 Приклад FG</button>
+      <button class="btn" onclick="copyCSV('csvFG')">📋 CSV (FG)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblFG">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Лот FG</th>
+            <th class="dark">Дата випуску</th>
+            <th class="dark">WIP → %</th>
+            <th>К-ть, кг</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyFG"></tbody>
+      </table>
+    </div>
+    <div id="csvFG" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 4. ГЕНЕАЛОГІЯ + ASCII-граф -->
+  <div class="card">
+    <h2>🧬 Генеалогія партій RAW→WIP→FG</h2>
+    <div class="row">
+      <button class="btn" onclick="buildGraph()">🧩 Побудувати граф</button>
+      <button class="btn" onclick="copyEl('graphOut')">📋 Копіювати</button>
+    </div>
+    <div id="graphOut" class="graph" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 5. СИМУЛЯТОР ВІДКЛИКАННЯ -->
+  <div class="card">
+    <h2>🚨 Симуляція відкликання</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Критерії пошуку</h3>
+        <div class="row">
+          <div style="flex:1"><label>RAW-лот (частина/повний)</label><input id="fltRaw" type="text" placeholder="наприклад: S-25041"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Постачальник (містить)</label><input id="fltSupp" type="text" placeholder="наприклад: Мʼяс"></div>
+          <div style="flex:1"><label>FG дата ≥</label><input id="fltFrom" type="date"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>FG дата ≤</label><input id="fltTo" type="date"></div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn" onclick="runRecall()">🚨 Запустити відкликання</button>
+          <button class="btn" onclick="copyCSV('csvRecall')">📋 CSV (recall)</button>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Результати</h3>
+        <p>Уражено FG-лотів: <b><span id="rcLots">—</span></b></p>
+        <p>Орієнт. кількість, кг: <b><span id="rcKg">—</span></b></p>
+        <p>Список FG: <b><span id="rcList">—</span></b></p>
+      </div>
+
+      <div class="box">
+        <h3>Дії (draft)</h3>
+        <div id="rcActions" class="out">—</div>
+      </div>
+    </div>
+    <div id="csvRecall" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 6. ЖУРНАЛ / КВИТОК / QR / NFC -->
+  <div class="card">
+    <h2>📒 Журнал / Квиток 58 мм / QR / NFC</h2>
+    <div class="row">
+      <button class="btn" onclick="addLog()">➕ Додати у журнал</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblLog">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Підстава (RAW/Supp/діапазон дат)</th>
+            <th class="dark">FG-лоти</th>
+            <th class="dark">Оцінка, кг</th>
+            <th>Дії</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyLog"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+
+    <div class="grid g2" style="margin-top:12px">
+      <div class="box">
+        <h3>Квиток 58 мм — “RECALL TASK”</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>RECALL TASK</h4>
+          <p><b>Підстава:</b> <span id="tReason">—</span></p>
+          <div class="line"></div>
+          <p><b>FG-лоти:</b> <span id="tFGLots">—</span></p>
+          <p><b>Орієнт. кг:</b> <span id="tKg">—</span></p>
+          <div class="line"></div>
+          <p><small id="tAction">Ідентифікувати, ізолювати, інформувати склад/збут. Див. NFC/QR.</small></p>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>QR / NFC для бригади відкликання</h3>
+        <div class="row">
+          <button class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
+          <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
+        </div>
+        <div id="qrOut" class="out">—</div>
+
+        <h3 style="margin-top:12px">NFC — “RECALL CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label>Керівник</label><input id="rcLead" type="text" value="Студент ТПТ"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Створіть 3–5 RAW, 2–3 WIP з міксами RAW, 3–6 FG, що походять із WIP.</li>
+      <li>Побудуйте генеалогію; перевірте зв’язки RAW→WIP→FG.</li>
+      <li>Запустіть симуляцію відкликання (за RAW або постачальником + датами FG).</li>
+      <li>Занесіть результат у журнал; згенеруйте квиток, QR і NFC, скопіюйте CSV.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Коректно зібрані RAW/WIP/FG та генеалогія</td><td>4</td></tr>
+        <tr><td>Симуляція відкликання і підрахунок обсягу</td><td>4</td></tr>
+        <tr><td>Журнал + квиток/NFC/QR + CSV</td><td>2</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const pad2 = n => String(n).padStart(2,'0');
+
+  // ===== Допоміжні =====
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+  function fmtDate(d){ return d instanceof Date ? d.toISOString().slice(0,10) : (d||''); }
+
+  // ===== RAW =====
+  const bodyRAW = byId('bodyRAW');
+  function reindex(tb){ [...tb.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+  function addRAW(sample){
+    const s = Object.assign({lot:'', supp:'', date:'', kg:''}, sample||{});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.lot}"></td>
+      <td class="dark"><input type="text" value="${s.supp}"></td>
+      <td class="dark"><input type="date" value="${s.date}"></td>
+      <td class="dark"><input type="number" step="0.1" value="${s.kg}"></td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyRAW); buildCSV_RAW();">✖</button></td>
+    `;
+    bodyRAW.appendChild(tr); reindex(bodyRAW); buildCSV_RAW();
+  }
+  function presetRAW(){
+    bodyRAW.innerHTML='';
+    addRAW({lot:'S-25041-AC', supp:'ТОВ “МʼясТрейд”', date:fmtDate(new Date()), kg:800});
+    addRAW({lot:'B-25039-Z1', supp:'ФОП “АгроПродукт”', date:fmtDate(new Date()), kg:500});
+    addRAW({lot:'M-25040-D',  supp:'МолПостач', date:fmtDate(new Date()), kg:600});
+  }
+  function buildCSV_RAW(){
+    const rows=[...bodyRAW.querySelectorAll('tr')].map(r=>{
+      return [
+        r.querySelector('.idx').textContent.trim(),
+        r.children[1].querySelector('input').value.trim(),
+        r.children[2].querySelector('input').value.trim(),
+        r.children[3].querySelector('input').value.trim(),
+        r.children[4].querySelector('input').value.trim()
+      ].join(' | ');
+    });
+    byId('csvRAW').textContent = rows.join('\n') || '—';
+  }
+
+  // ===== WIP =====
+  const bodyWIP = byId('bodyWIP');
+  function addWIP(sample){
+    const s=Object.assign({id:'', date:'', comp:'', outKg:''}, sample||{});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.id}"></td>
+      <td class="dark"><input type="date" value="${s.date}"></td>
+      <td class="dark"><input type="text" value="${s.comp}" placeholder="S-25041-AC:60%;B-25039-Z1:40%"></td>
+      <td><input type="number" step="0.1" value="${s.outKg}"></td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyWIP); buildCSV_WIP();">✖</button></td>
+    `;
+    bodyWIP.appendChild(tr); reindex(bodyWIP); buildCSV_WIP();
+  }
+  function presetWIP(){
+    bodyWIP.innerHTML='';
+    addWIP({id:'WIP-101', date:fmtDate(new Date()), comp:'S-25041-AC:70%;B-25039-Z1:30%', outKg:700});
+    addWIP({id:'WIP-102', date:fmtDate(new Date()), comp:'M-25040-D:100%', outKg:550});
+  }
+  function buildCSV_WIP(){
+    const rows=[...bodyWIP.querySelectorAll('tr')].map(r=>{
+      return [
+        r.querySelector('.idx').textContent.trim(),
+        r.children[1].querySelector('input').value.trim(),
+        r.children[2].querySelector('input').value.trim(),
+        r.children[3].querySelector('input').value.trim(),
+        r.children[4].querySelector('input').value.trim()
+      ].join(' | ');
+    });
+    byId('csvWIP').textContent = rows.join('\n') || '—';
+  }
+
+  // ===== FG =====
+  const bodyFG = byId('bodyFG');
+  function addFG(sample){
+    const s=Object.assign({lot:'', date:'', comp:'', kg:''}, sample||{});
+    const tr=document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.lot}"></td>
+      <td class="dark"><input type="date" value="${s.date}"></td>
+      <td class="dark"><input type="text" value="${s.comp}" placeholder="WIP-101:60%;WIP-102:40%"></td>
+      <td><input type="number" step="0.1" value="${s.kg}"></td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyFG); buildCSV_FG();">✖</button></td>
+    `;
+    bodyFG.appendChild(tr); reindex(bodyFG); buildCSV_FG();
+  }
+  function presetFG(){
+    bodyFG.innerHTML='';
+    addFG({lot:'FG-001', date:fmtDate(new Date()), comp:'WIP-101:100%', kg:680});
+    addFG({lot:'FG-002', date:fmtDate(new Date()), comp:'WIP-101:50%;WIP-102:50%', kg:600});
+    addFG({lot:'FG-003', date:fmtDate(new Date()), comp:'WIP-102:100%', kg:520});
+  }
+  function buildCSV_FG(){
+    const rows=[...bodyFG.querySelectorAll('tr')].map(r=>{
+      return [
+        r.querySelector('.idx').textContent.trim(),
+        r.children[1].querySelector('input').value.trim(),
+        r.children[2].querySelector('input').value.trim(),
+        r.children[3].querySelector('input').value.trim(),
+        r.children[4].querySelector('input').value.trim()
+      ].join(' | ');
+    });
+    byId('csvFG').textContent = rows.join('\n') || '—';
+  }
+
+  // ===== Парсер "A:60%;B:40%" → {A:0.6, B:0.4} =====
+  function parseMix(s){
+    const out={}; if(!s) return out;
+    s.split(';').forEach(pair=>{
+      const [k,v]=pair.split(':').map(x=>x.trim());
+      if(!k||!v) return;
+      const m = /([\d.]+)\s*%/.exec(v);
+      const frac = m? (parseFloat(m[1])/100) : parseFloat(v);
+      if(!isNaN(frac)) out[k]=frac;
+    });
+    return out;
+  }
+
+  // ===== Побудова генеалогії =====
+  function getRAW(){ return [...bodyRAW.querySelectorAll('tr')].map(r=>({lot:r.children[1].querySelector('input').value.trim(), supp:r.children[2].querySelector('input').value.trim(), date:r.children[3].querySelector('input').value.trim(), kg:+r.children[4].querySelector('input').value||0})).filter(x=>x.lot); }
+  function getWIP(){ return [...bodyWIP.querySelectorAll('tr')].map(r=>({id:r.children[1].querySelector('input').value.trim(), date:r.children[2].querySelector('input').value.trim(), comp:parseMix(r.children[3].querySelector('input').value.trim()), outKg:+r.children[4].querySelector('input').value||0})).filter(x=>x.id); }
+  function getFG(){  return [...bodyFG.querySelectorAll('tr')].map(r=>({lot:r.children[1].querySelector('input').value.trim(), date:r.children[2].querySelector('input').value.trim(), comp:parseMix(r.children[3].querySelector('input').value.trim()), kg:+r.children[4].querySelector('input').value||0})).filter(x=>x.lot); }
+
+  function buildGraph(){
+    const RAW=getRAW(), WIP=getWIP(), FG=getFG();
+    if(!RAW.length && !WIP.length && !FG.length){ byId('graphOut').textContent='—'; return; }
+    const lines=[];
+    lines.push('RAW → WIP → FG (ваги в %)');
+    lines.push('-------------------------------------------');
+    // RAW → WIP
+    WIP.forEach(w=>{
+      const mix=w.comp;
+      const parts=Object.keys(mix).map(k=>`${k}→${w.id} (${rnd(mix[k]*100,1)}%)`).join(', ');
+      lines.push(`WIP ${w.id} [${w.outKg} кг] <= ${parts}`);
+    });
+    // WIP → FG
+    FG.forEach(f=>{
+      const mix=f.comp;
+      const parts=Object.keys(mix).map(k=>`${k}→${f.lot} (${rnd(mix[k]*100,1)}%)`).join(', ');
+      lines.push(`FG ${f.lot} [${f.kg} кг] <= ${parts}`);
+    });
+    byId('graphOut').textContent = lines.join('\n');
+  }
+
+  // ===== Симуляція відкликання =====
+  function runRecall(){
+    const RAW=getRAW(), WIP=getWIP(), FG=getFG();
+    // Індекс допоміжних зв'язків
+    const rawByLot = {}; RAW.forEach(r=>rawByLot[r.lot]=r);
+    const wipUsesRaw = {}; // RAW lot -> [{wipId, frac}]
+    WIP.forEach(w=>{
+      Object.entries(w.comp).forEach(([rawLot,frac])=>{
+        if(!wipUsesRaw[rawLot]) wipUsesRaw[rawLot]=[];
+        wipUsesRaw[rawLot].push({wipId:w.id, frac});
+      });
+    });
+    const fgUsesWip = {}; // WIP id -> [{fgLot, frac}]
+    FG.forEach(f=>{
+      Object.entries(f.comp).forEach(([wipId,frac])=>{
+        if(!fgUsesWip[wipId]) fgUsesWip[wipId]=[];
+        fgUsesWip[wipId].push({fgLot:f.lot, frac, date:f.date, kg:f.kg});
+      });
+    });
+
+    // Фільтри
+    const fRaw = byId('fltRaw').value.trim().toLowerCase();
+    const fSupp= byId('fltSupp').value.trim().toLowerCase();
+    const fFrom= byId('fltFrom').value ? new Date(byId('fltFrom').value) : null;
+    const fTo  = byId('fltTo').value ? new Date(byId('fltTo').value) : null;
+
+    // 1) Знайти підозрілі RAW
+    const suspectRAW = RAW.filter(r=>{
+      const matchLot = !fRaw || r.lot.toLowerCase().includes(fRaw);
+      const matchSupp= !fSupp|| r.supp.toLowerCase().includes(fSupp);
+      return matchLot && matchSupp;
+    });
+
+    // 2) Через WIP → FG
+    const affectedFG = {};
+    suspectRAW.forEach(r=>{
+      (wipUsesRaw[r.lot]||[]).forEach(wref=>{
+        (fgUsesWip[wref.wipId]||[]).forEach(fref=>{
+          // фільтр по даті FG
+          const d = fref.date ? new Date(fref.date) : null;
+          if( (fFrom && d && d < fFrom) || (fTo && d && d > fTo) ) return;
+          // Частка RAW у FG: raw→wip (frac) * wip→fg (frac)
+          const frac = (wref.frac||0) * (fref.frac||0);
+          const kg = rnd((fref.kg||0) * frac,2);
+          if(!affectedFG[fref.fgLot]) affectedFG[fref.fgLot]={kg:0, parts:[]};
+          affectedFG[fref.fgLot].kg += kg;
+          affectedFG[fref.fgLot].parts.push(`${r.lot}@${rnd(frac*100,2)}%`);
+        });
+      });
+    });
+
+    const lots = Object.keys(affectedFG);
+    const sumKg = rnd(lots.reduce((acc,l)=>acc + (affectedFG[l].kg||0),0),2);
+
+    // Вивід
+    byId('rcLots').textContent = lots.length || '0';
+    byId('rcKg').textContent   = lots.length ? sumKg : '0';
+    byId('rcList').textContent = lots.length ? lots.join(', ') : '—';
+
+    const act = (lots.length)
+      ? [
+          'ДІЇ ВІДКЛИКАННЯ:',
+          '- Негайна ідентифікація та ізоляція наведених FG-лотів.',
+          '- Блокування відвантаження/реалізації, маркування “HOLD/RECALL”.',
+          '- Інформування відділів: склад, збут, QA, керівництво.',
+          '- Якщо частина вже відвантажена — повідомлення клієнтів, зворотна логістика.',
+          '- Розслідування першопричини, CAPA.'
+        ].join('\n')
+      : 'Збігів не знайдено за заданими фільтрами.';
+    byId('rcActions').textContent = act;
+
+    // CSV звіт
+    const reason = `RAW~${fRaw||'*'};SUPP~${fSupp||'*'};DATE~${byId('fltFrom').value||'*'}..${byId('fltTo').value||'*'}`;
+    const lines = [`RECALL|reason=${reason}|lots=${lots.length}|kg=${lots.length?sumKg:0}`];
+    lots.forEach(l=> lines.push(`FG|${l}|affected_kg=${rnd(affectedFG[l].kg,2)}|from=${affectedFG[l].parts.join(';')}`));
+    byId('csvRecall').textContent = lines.join('\n');
+
+    // Оновити квиток
+    byId('tReason').textContent = reason;
+    byId('tFGLots').textContent = lots.length ? lots.join(', ') : '—';
+    byId('tKg').textContent     = lots.length ? sumKg : '0';
+    byId('tAction').textContent = lots.length ? 'Ідентифікувати та ізолювати всі позначені FG-лоти. Повідомити склад/збут.' : 'Збігів не знайдено.';
+  }
+
+  // ===== Журнал / квиток / QR / NFC =====
+  const bodyLog = byId('bodyLog');
+  function addLog(){
+    const reason = byId('tReason').textContent || '—';
+    const fgs    = byId('tFGLots').textContent || '—';
+    const kg     = byId('tKg').textContent || '0';
+    const act    = byId('rcActions').textContent.slice(0,120)+'…';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${reason}"></td>
+      <td class="dark">${fgs}</td>
+      <td class="dark">${kg}</td>
+      <td>${act}</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
+    `;
+    bodyLog.appendChild(tr); reindex(bodyLog); buildCSV_Log();
+  }
+  function buildCSV_Log(){
+    const rows=[...bodyLog.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const reason=r.children[1].querySelector('input').value.trim();
+      const fgs=r.children[2].textContent.trim();
+      const kg=r.children[3].textContent.trim();
+      const act=r.children[4].textContent.trim();
+      return [idx,reason,fgs,kg,act].join(' | ');
+    });
+    byId('csvLog').textContent = rows.join('\n') || '—';
+  }
+  function buildTicket(){
+    window.scrollTo({top: document.getElementById('ticket').getBoundingClientRect().top + window.scrollY - 60, behavior:'smooth'});
+  }
+  function buildQR(){
+    const payload = {
+      reason: byId('tReason').textContent,
+      fg_lots: byId('tFGLots').textContent,
+      est_kg: byId('tKg').textContent
+    };
+    byId('qrOut').textContent = JSON.stringify(payload);
+  }
+  function buildNFC(){
+    const txt = [
+      `RECALL_NFC`,
+      `REASON:${byId('tReason').textContent}`,
+      `FG_LOTS:${byId('tFGLots').textContent}`,
+      `EST_KG:${byId('tKg').textContent}`,
+      `LEAD:${byId('rcLead').value} CONTACT:${byId('nfcPhone').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = txt;
+  }
+
+  // ===== Ініціалізація =====
+  (function init(){
+    presetRAW(); presetWIP(); presetFG(); buildGraph();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select,textarea')){
+        if(e.target.closest('#tblRAW')) buildCSV_RAW();
+        if(e.target.closest('#tblWIP')) buildCSV_WIP();
+        if(e.target.closest('#tblFG'))  buildCSV_FG();
+      }
+    });
+  })();
+</script>
+</body>
+</html>

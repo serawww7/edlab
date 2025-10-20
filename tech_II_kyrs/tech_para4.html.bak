@@ -1,0 +1,560 @@
+<!-- tech_para4.html
+     ПАРА 4 (аудиторно) для технологів з переробки продукції тваринництва
+     Тема: МАРКУВАННЯ ТА ЕТИКЕТКА — склад і алергени (виділення), харчова цінність,
+           штрихкод EAN-13 (GTIN), QR-дані партії, чек 58 мм, NFC, CSV-журнал.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; (опц.) термопринтер 58 мм; NFC-мітки.
+
+     Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
+     УВАГА: це навчальний інструмент. Остаточні макети узгоджуйте з чинним законодавством та внутрішніми процедурами.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 4 (технологи) — Етикетка: склад/алергени, харчова цінність, EAN-13, QR, чек 58 мм, NFC, CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,Menlo,Consolas,Monaco,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  textarea{min-height:84px}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано в Moodle (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+  /* Мікро-«штрихкод» (ASCII-псевдографіка) для наочності без бібліотек */
+  .bars{font:12px/10px ui-monospace,monospace;letter-spacing:1px;white-space:pre;background:#fff;color:#000;padding:6px;border-radius:6px;border:1px solid #e5e7eb;display:inline-block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 4 · аудиторно · технологи переробки</span>
+  <h1>🏷️ Етикетка: склад/алергени, харчова цінність, EAN-13 (GTIN), QR, чек 58 мм, NFC</h1>
+
+  <div class="card">
+    <h2>🎯 Мета пари</h2>
+    <p>
+      За заняття студенти: (1) сформують <b>склад</b> з виділенням <b>алергенів</b>, (2) оформлять <b>харчову цінність</b> на 100 г,
+      (3) згенерують <b>GTIN (EAN-13)</b> з контрольним розрядом, (4) підготують <b>QR-дані партії</b>,
+      (5) створять <b>квиток 58 мм</b>, <b>NFC</b> та <b>CSV-журнал</b>.
+    </p>
+    <p class="small muted">Пам’ятайте: обов’язкові реквізити та правила маркування регулюються законодавством України та/або ЄС. Це навчальний конструктор.</p>
+  </div>
+
+  <!-- 1. ОСНОВНІ ДАНІ ЕТИКЕТКИ -->
+  <div class="card">
+    <h2>🧾 Основні дані етикетки</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Продукт</h3>
+        <div class="row">
+          <div style="flex:1"><label>Назва виробу</label><input id="prodName" type="text" value="Ковбаса варена “Класична”"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Торгова марка</label><input id="brand" type="text" value="AgroTech Foods"></div>
+          <div style="flex:1"><label>Маса нетто, г</label><input id="netto" type="number" step="1" value="500"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Дата виробн.</label><input id="prodDate" type="date"></div>
+          <div style="flex:1"><label>“Вжити до”</label><input id="expDate" type="date"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Ідентифікація</h3>
+        <div class="row">
+          <div style="flex:1"><label>GTIN-12 (без ч/ц)</label><input id="gtin12" type="text" value="482000123456"></div>
+          <div style="flex:1"><label>Згенерований EAN-13</label><input id="ean13" type="text" readonly placeholder="—"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>ЛОТ (партія)</label><input id="lot" type="text" value="25041-L1-A-1030"></div>
+          <div style="flex:1"><label>URL продукту</label><input id="url" type="text" value="https://example.com/p/klassic"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Зберігання / Виробник</h3>
+        <div class="row">
+          <div style="flex:1"><label>Умови зберігання</label><input id="storage" type="text" value="Зберігати при 0…+6°C"></div>
+          <div style="flex:1"><label>Країна/виробник</label><input id="maker" type="text" value="Виробник: ТОВ “АгроТех”, Україна"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="autoDates()">🕒 Автодата</button>
+          <button class="btn" onclick="genEAN()">🔢 Згенерувати EAN-13</button>
+          <button class="btn" onclick="copyCSV('csvCore')">📋 CSV (core)</button>
+        </div>
+        <div id="csvCore" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. СКЛАД ТА АЛЕРГЕНИ -->
+  <div class="card">
+    <h2>🥗 Склад та виділення алергенів</h2>
+    <div class="row">
+      <button class="btn" onclick="addIngred()">➕ Додати інгредієнт</button>
+      <button class="btn" onclick="presetIngred()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvIngred')">📋 CSV (ingredients)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblIngred">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Назва</th>
+            <th>% (за рецептурою)</th>
+            <th>АЛЕРГЕН?</th>
+            <th>Примітка</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyIngred"></tbody>
+      </table>
+    </div>
+    <div class="box" style="margin-top:8px">
+      <h3>Згенерований рядок “Склад”</h3>
+      <div id="composition" class="out">—</div>
+      <p class="small muted">Примітка: алергени виділяються ВЕЛИКИМИ ЛІТЕРАМИ.</p>
+    </div>
+    <div id="csvIngred" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 3. ХАРЧОВА ЦІННІСТЬ НА 100 г -->
+  <div class="card">
+    <h2>🍽️ Харчова цінність (на 100 г)</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Показники</h3>
+        <div class="row">
+          <div style="flex:1"><label>Енергія, ккал</label><input id="kcal" type="number" step="1" value="260"></div>
+          <div style="flex:1"><label>Білки, г</label><input id="prot" type="number" step="0.1" value="15.0"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Жири, г</label><input id="fat" type="number" step="0.1" value="20.0"></div>
+          <div style="flex:1"><label>Вуглеводи, г</label><input id="carb" type="number" step="0.1" value="1.5"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Сіль, г</label><input id="salt100" type="number" step="0.01" value="2.0"></div>
+          <div style="flex:1"><label>Натрій, мг (опц.)</label><input id="na_mg" type="number" step="1" value="—"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Рядок для етикетки</h3>
+        <div id="nutriLine" class="out">—</div>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="buildNutri()">🔁 Зібрати</button>
+          <button class="btn" onclick="copyCSV('csvNutri')">📋 CSV (nutrition)</button>
+        </div>
+        <div id="csvNutri" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ШТРИХКОД EAN-13 + QR ДАНІ -->
+  <div class="card">
+    <h2>🔳 EAN-13 та QR-дані</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>Псевдо-штрихкод (ASCII) та номер</h3>
+        <div class="row">
+          <button class="btn" onclick="genEAN()">🔢 Перерахувати EAN-13</button>
+          <button class="btn" onclick="randomGTIN()">🎲 Випадковий GTIN-12 (482…)</button>
+          <button class="btn" onclick="copyEl('eanOut')">📋 Копіювати EAN</button>
+        </div>
+        <div id="eanOut" class="out" style="margin-top:8px">—</div>
+        <div id="asciiBars" class="bars" style="margin-top:8px">[штрихкод]</div>
+      </div>
+      <div class="box">
+        <h3>QR-дані партії (payload)</h3>
+        <div class="row">
+          <button class="btn" onclick="buildQR()">🧩 Зібрати QR-payload</button>
+          <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
+        </div>
+        <div id="qrOut" class="out" style="margin-top:8px">—</div>
+        <p class="small muted">QR не рендериться тут, це вміст для генерування QR у зовнішніх системах.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ЖУРНАЛ ЕТИКЕТОК -->
+  <div class="card">
+    <h2>📒 Журнал етикеток</h2>
+    <div class="row">
+      <button class="btn" onclick="addRow()">➕ Додати рядок</button>
+      <button class="btn" onclick="presetRows()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblLog">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Виріб</th>
+            <th class="dark">EAN-13</th>
+            <th class="dark">ЛОТ</th>
+            <th class="dark">Вжити до</th>
+            <th>Алергени</th>
+            <th>Короткий “Склад”</th>
+            <th>Примітка</th>
+          </tr>
+        </thead>
+        <tbody id="bodyLog"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 6. КВИТОК 58 мм + NFC -->
+  <div class="card">
+    <h2>🧾 Квиток 58 мм та NFC</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>NFC — “FOOD LABEL CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Контакт/техн.</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label>Партія, кг</label><input id="batchKg" type="number" step="0.1" value="300"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток для принтера 58 мм</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>PRODUCT LABEL TICKET</h4>
+          <p><b>Виріб:</b> <span id="tProd">—</span></p>
+          <p><b>EAN-13:</b> <span id="tEAN">—</span></p>
+          <div class="line"></div>
+          <p><b>Нетто:</b> <span id="tNet">—</span> г</p>
+          <p><b>ЛОТ:</b> <span id="tLot">—</span></p>
+          <p><b>Виробн.:</b> <span id="tProdD">—</span></p>
+          <p><b>Вжити до:</b> <span id="tExpD">—</span></p>
+          <div class="line"></div>
+          <p><b>Склад:</b> <span id="tComp">—</span></p>
+          <p><b>Харч. цінність/100г:</b> <span id="tNutri">—</span></p>
+          <div class="line"></div>
+          <p><small id="tMaker">—</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Заповніть основні поля (назва, дати, GTIN-12, лот, умови).</li>
+      <li>Додайте 6–10 інгредієнтів, позначте алергени — згенеруйте рядок “Склад”.</li>
+      <li>Заповніть харчову цінність — сформуйте рядок для етикетки.</li>
+      <li>Згенеруйте <b>EAN-13</b> і <b>QR-payload</b>, внесіть у <b>журнал</b>, підготуйте <b>NFC</b> і <b>квиток</b>, збережіть <b>CSV</b>.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Коректний склад з виділенням алергенів</td><td>3</td></tr>
+        <tr><td>Харчова цінність оформлена</td><td>3</td></tr>
+        <tr><td>EAN-13 / QR-дані / журнал + CSV</td><td>3</td></tr>
+        <tr><td>Квиток/NFC сформовані</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const bodyIngred = byId('bodyIngred');
+  const bodyLog = byId('bodyLog');
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const pad = (n,w=2)=>String(n).padStart(w,'0');
+
+  // ===== 0) Базові утиліти / CSV / копіювання =====
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // ===== 1) Основні дані: дати / EAN =====
+  function autoDates(){
+    const now = new Date();
+    byId('prodDate').value = now.toISOString().slice(0,10);
+    const exp = new Date(now); exp.setDate(exp.getDate()+14);
+    byId('expDate').value = exp.toISOString().slice(0,10);
+    buildCoreCSV();
+  }
+  function luhnEAN13CheckDigit(d12){
+    // EAN-13: сума непарних + 3*сума парних (позиції зліва 1..12), cd = (10 - sum%10)%10
+    const digits = d12.replace(/\D/g,'').slice(0,12).split('').map(Number);
+    if(digits.length<12) return null;
+    let sum=0;
+    for(let i=0;i<12;i++){
+      const pos=i+1;
+      sum += (pos%2===0)? digits[i]*3 : digits[i];
+    }
+    return (10 - (sum%10))%10;
+  }
+  function genEAN(){
+    const base = byId('gtin12').value.replace(/\D/g,'').slice(0,12);
+    if(base.length<12){ alert('Введіть 12 цифр GTIN-12'); return; }
+    const cd = luhnEAN13CheckDigit(base);
+    const ean = base + String(cd);
+    byId('ean13').value = ean;
+    byId('eanOut').textContent = `EAN13:${ean}`;
+    drawAsciiBars(ean);
+    buildCoreCSV();
+    return ean;
+  }
+  function randomGTIN(){
+    // Український префікс GS1 частіше 482 — використаємо як демонстраційний
+    let base = '482' + String(Math.floor(Math.random()*1e9)).padStart(9,'0'); // 12 цифр
+    byId('gtin12').value = base;
+    genEAN();
+  }
+  function drawAsciiBars(ean){
+    // Дуже спрощене "бар-відображення" — для навчальної наочності (не для сканування)
+    if(!ean || ean.length!==13){ byId('asciiBars').textContent='[штрихкод]'; return; }
+    const map = {'0':'||','1':'| ','2':' |','3':'|| ','4':' | ','5':'  |','6':'|||','7':'| |','8':' ||','9':'  | '};
+    let s='| | '; // старт
+    for(const ch of ean) s += (map[ch]||' |')+' ';
+    s += '| |'; // стоп
+    byId('asciiBars').textContent = s + '\n' + ean;
+  }
+  function buildCoreCSV(){
+    const csv = `CORE|prod=${byId('prodName').value}|brand=${byId('brand').value}|net=${byId('netto').value}g|prod=${byId('prodDate').value}|exp=${byId('expDate').value}|lot=${byId('lot').value}|ean13=${byId('ean13').value||'NA'}|url=${byId('url').value}|storage=${byId('storage').value}|maker=${byId('maker').value}`;
+    byId('csvCore').textContent = csv;
+  }
+
+  // ===== 2) СКЛАД і алергени =====
+  function reindex(tbody){ [...tbody.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+  function addIngred(sample){
+    const s = Object.assign({name:'', pct:'', allergen:false, note:''}, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.name}"></td>
+      <td><input type="number" step="0.1" value="${s.pct}"></td>
+      <td><select>${['ні','так'].map(v=>`<option ${ (s.allergen && v==='так')?'selected':'' }>${v}</option>`).join('')}</select></td>
+      <td><input type="text" value="${s.note}"></td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyIngred); buildComposition();">✖</button></td>
+    `;
+    bodyIngred.appendChild(tr); reindex(bodyIngred); buildComposition();
+  }
+  function presetIngred(){
+    bodyIngred.innerHTML='';
+    addIngred({name:'Свинина', pct:60, allergen:false});
+    addIngred({name:'Яловичина', pct:15, allergen:false});
+    addIngred({name:'Вода', pct:18, allergen:false});
+    addIngred({name:'Білковий ізолят СОЄВИЙ', pct:3, allergen:true});
+    addIngred({name:'МОЛОЧНИЙ білок', pct:2, allergen:true});
+    addIngred({name:'Сіль кухонна', pct:1.5, allergen:false});
+    addIngred({name:'Суміш прянощів', pct:0.5, allergen:false});
+  }
+  function buildComposition(){
+    const rows = [...bodyIngred.querySelectorAll('tr')].map(r=>{
+      const name=r.children[1].querySelector('input').value.trim();
+      const pct=r.children[2].querySelector('input').value.trim();
+      const all=r.children[3].querySelector('select').value==='так';
+      return {name,pct: pct? Number(pct): null, all};
+    }).filter(x=>x.name);
+    // сортування за % (спадання) якщо задано
+    rows.sort((a,b)=> (b.pct??0)-(a.pct??0));
+    const list = rows.map(x=>{
+      const nm = x.all ? x.name.toUpperCase() : x.name;
+      return x.pct!=null ? `${nm} (${x.pct}%)` : nm;
+    });
+    const text = list.length ? `Склад: ${list.join(', ')}.` : '—';
+    byId('composition').textContent = text;
+
+    // CSV
+    const csv = rows.map((x,i)=> [i+1,x.name,x.pct??'',x.all?'ALLERGEN':''].join(' | ')).join('\n') || '—';
+    byId('csvIngred').textContent = csv;
+    return {rows,text, allergens: rows.filter(x=>x.all).map(x=>x.name.toUpperCase())};
+  }
+
+  // ===== 3) Харчова цінність =====
+  function buildNutri(){
+    const kcal = +byId('kcal').value||0;
+    const prot = +byId('prot').value||0;
+    const fat  = +byId('fat').value ||0;
+    const carb = +byId('carb').value||0;
+    const salt = +byId('salt100').value||0;
+    const na   = byId('na_mg').value;
+    const line = `Енергетична цінність ${kcal} ккал; Білки ${prot} г; Жири ${fat} г; Вуглеводи ${carb} г; Сіль ${salt} г${na!=='—'&&na!==''?`; Натрій ${na} мг`:''} — на 100 г продукту.`;
+    byId('nutriLine').textContent = line;
+    byId('csvNutri').textContent = `NUTRITION|${line}`;
+    return line;
+  }
+
+  // ===== 4) QR-payload =====
+  function buildQR(){
+    const ean = byId('ean13').value || genEAN();
+    const payload = {
+      prod: byId('prodName').value,
+      brand: byId('brand').value,
+      gtin: ean,
+      lot: byId('lot').value,
+      prod_date: byId('prodDate').value,
+      exp_date: byId('expDate').value,
+      url: byId('url').value
+    };
+    const text = JSON.stringify(payload);
+    byId('qrOut').textContent = text;
+    return text;
+  }
+
+  // ===== 5) Журнал =====
+  function addRow(sample){
+    const ean = byId('ean13').value || genEAN();
+    const comp = buildComposition();
+    const line = buildNutri();
+    const def = {
+      prod: byId('prodName').value,
+      ean, lot: byId('lot').value, exp: byId('expDate').value,
+      allergens: comp.allergens.join(', ') || '—',
+      compShort: (comp.text.length>80? comp.text.slice(0,77)+'…' : comp.text),
+      note:''
+    };
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.prod}"></td>
+      <td class="dark">${s.ean}</td>
+      <td class="dark">${s.lot}</td>
+      <td class="dark">${s.exp}</td>
+      <td>${s.allergens}</td>
+      <td>${s.compShort}</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyLog.appendChild(tr); reindex(bodyLog); buildCSVlog();
+  }
+  function presetRows(){
+    bodyLog.innerHTML='';
+    presetIngred(); genEAN(); buildNutri();
+    addRow({note:'макет v1'});
+    // друга позиція, інший GTIN
+    randomGTIN(); buildNutri();
+    addRow({prod:'Сосиски молочні', note:'алергени: МОЛОКО'});
+    buildCSVlog();
+  }
+  function buildCSVlog(){
+    const rows = [...bodyLog.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const prod=r.children[1].querySelector('input').value.trim();
+      const ean=r.children[2].textContent.trim();
+      const lot=r.children[3].textContent.trim();
+      const exp=r.children[4].textContent.trim();
+      const alg=r.children[5].textContent.trim();
+      const comp=r.children[6].textContent.trim();
+      const note=r.children[7].querySelector('input').value.trim();
+      return [idx,prod,ean,lot,exp,alg,comp,note].join(' | ');
+    });
+    byId('csvLog').textContent = rows.join('\n') || '—';
+  }
+
+  // ===== 6) Квиток / NFC =====
+  function buildTicket(){
+    const ean = byId('ean13').value || genEAN();
+    const comp = buildComposition();
+    const nutri = buildNutri();
+    byId('tProd').textContent = byId('prodName').value;
+    byId('tEAN').textContent  = ean;
+    byId('tNet').textContent  = byId('netto').value;
+    byId('tLot').textContent  = byId('lot').value;
+    byId('tProdD').textContent= byId('prodDate').value || '—';
+    byId('tExpD').textContent = byId('expDate').value || '—';
+    byId('tComp').textContent = comp.text;
+    byId('tNutri').textContent= nutri;
+    byId('tMaker').textContent= `${byId('storage').value}. ${byId('maker').value}`;
+  }
+  function buildNFC(){
+    const ean = byId('ean13').value || genEAN();
+    const txt = [
+      `FOOD_LABEL_NFC`,
+      `PROD:${byId('prodName').value} (${byId('brand').value})`,
+      `EAN13:${ean} LOT:${byId('lot').value}`,
+      `NET:${byId('netto').value}g PROD:${byId('prodDate').value} EXP:${byId('expDate').value}`,
+      `URL:${byId('url').value}`,
+      `BATCH:${byId('batchKg').value||'—'}kg`,
+      `CONTACT:${byId('nfcPhone').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = txt;
+  }
+
+  // ===== Слухачі змін / ініціалізація =====
+  (function init(){
+    const now = new Date();
+    byId('prodDate').value = byId('prodDate').value || now.toISOString().slice(0,10);
+    const exp = new Date(now); exp.setDate(exp.getDate()+14);
+    byId('expDate').value = byId('expDate').value || exp.toISOString().slice(0,10);
+    genEAN(); buildComposition(); buildNutri(); buildCoreCSV();
+
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select,textarea')) {
+        buildComposition(); buildNutri(); buildCoreCSV();
+      }
+    });
+  })();
+</script>
+</body>
+</html>

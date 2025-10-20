@@ -1,0 +1,412 @@
+<!-- ПАРА 5 (аудиторно) для агрономів
+     Тема: ТЕХКАРТА ОБПРИСКУВАННЯ — норми, баки, пофорсунковий витрат, чек-завдання 58 мм
+     Фокус: робота в коледжі, максимум телефону/ПК + термопринтер 58 мм (опційно).
+     Усе локально, без зовнішніх бібліотек. Готово для GitHub Pages / iFrame у Moodle. -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 5 — Техкарта обприскування: норми, баки, пофорсунково, чек 58 мм</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --good:#10b981; --bad:#ef4444; --line:#1f2937;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1080px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:980px){.g2,.g3{grid-template-columns:1fr}}
+  .kpi{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px dashed #263042; border-radius:12px}
+  .kpi b{font-size:14px}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+  .step{display:flex; gap:12px; align-items:flex-start; padding:10px 12px; border:1px solid #1f2937; border-radius:12px; background:#0b1324; margin:8px 0}
+  .step .n{min-width:30px; height:30px; border-radius:8px; background:#0e1a2e; display:grid; place-items:center; color:#a5b4fc; font-weight:700}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .muted{color:#93a3b5}
+  .small{font-size:12px; color:#9fb0c8}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:#0b1324}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .field{display:flex; gap:8px; margin:6px 0; align-items:center}
+  .field label{min-width:200px; color:#cbd5e1}
+  .field input, .field select{
+    flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb
+  }
+  .out{background:#0b1324; border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+
+  /* Блок квитанції 58 мм */
+  .ticket-wrap{display:grid; gap:16px; grid-template-columns:1fr 1fr}
+  @media (max-width:980px){.ticket-wrap{grid-template-columns:1fr}}
+  .ticket{
+    width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px;
+    box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace;
+  }
+  .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
+  .ticket p{margin:2px 0; font-size:12px}
+  .ticket .center{text-align:center}
+  .ticket .line{border-top:1px dashed #111; margin:6px 0}
+  .ticket small{font-size:10px}
+
+  /* Вбудовано (iframe) → стриманий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+
+  @media print{
+    @page{ size:58mm auto; margin:4mm }
+    body{ background:#fff; color:#000 }
+    .no-print{ display:none !important }
+    .ticket{ box-shadow:none; width:auto; padding:0 }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 5 · аудиторно · агрономи</span>
+    <h1>🚜 Техкарта обприскування: норми, баки, пофорсунковий витрат + чек 58 мм</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        За пару студент формує <b>повний розрахунок обприскування</b> для конкретного поля: загальна суміш, кількість баків,
+        <b>пофорсунковий витрат (L/хв)</b> за шириною/кроком, розкладка по баках, і друкує <b>чек-завдання 58 мм</b> для механізатора.
+      </p>
+      <div class="grid g3">
+        <div class="kpi"><span>📐</span><div><b>Формули</b><br/><span class="mono">q_форс = (Нв * V * S) / 600</span></div></div>
+        <div class="kpi"><span>🧪</span><div><b>Суміш</b><br/>вода + продукт(и), кількість баків</div></div>
+        <div class="kpi"><span>🖨️</span><div><b>Чек 58 мм</b><br/>«Завдання на зміну»</div></div>
+      </div>
+      <p class="small">Де: Нв — норма виливу (л/га), V — швидкість (км/год), S — міжфорсункова відстань (м), 600 — коеф. перерахунку.</p>
+    </div>
+
+    <!-- ВХІДНІ ПАРАМЕТРИ -->
+    <div class="card">
+      <h2>🧰 Вхідні дані</h2>
+      <div class="grid g2">
+        <div class="box">
+          <h3>Поле та препарат</h3>
+          <div class="field"><label for="fieldCode">Код поля</label><input id="fieldCode" type="text" value="F-01" /></div>
+          <div class="field"><label for="area">Площа, га</label><input id="area" type="number" step="0.01" value="25" /></div>
+          <div class="field"><label for="product">Продукт (назва)</label><input id="product" type="text" value="Гербіцид Х" /></div>
+          <div class="field"><label for="dose">Доза продукту, л/га</label><input id="dose" type="number" step="0.01" value="0.8" /></div>
+          <div class="field"><label for="waterRate">Норма виливу (вода), л/га</label><input id="waterRate" type="number" step="0.1" value="200" /></div>
+        </div>
+        <div class="box">
+          <h3>Обприскувач</h3>
+          <div class="field"><label for="boomWidth">Ширина штанги, м</label><input id="boomWidth" type="number" step="0.1" value="18" /></div>
+          <div class="field"><label for="spacing">Крок форсунок (S), м</label><input id="spacing" type="number" step="0.01" value="0.5" /></div>
+          <div class="field"><label for="speed">Робоча швидкість (V), км/год</label><input id="speed" type="number" step="0.1" value="7.0" /></div>
+          <div class="field"><label for="tank">Обʼєм бака, л</label><input id="tank" type="number" step="1" value="3000" /></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" type="button" onclick="calcAll()">🔁 Розрахувати</button>
+        <button class="btn" type="button" onclick="fillDemo()">🧪 Приклад</button>
+      </div>
+    </div>
+
+    <!-- ПІДСУМКИ -->
+    <div class="card">
+      <h2>📊 Підсумок розрахунків</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Загальне</h3>
+          <p><b>Площа:</b> <span id="o_area">—</span> га</p>
+          <p><b>Суміш всього:</b> <span id="o_mix">—</span> л (вода + продукт)</p>
+          <p><b>Вода всього:</b> <span id="o_water">—</span> л</p>
+          <p><b>Продукт всього:</b> <span id="o_prod">—</span> л</p>
+          <p><b>Кількість баків:</b> <span id="o_tanks">—</span> шт</p>
+        </div>
+        <div class="box">
+          <h3>Пофорсунково</h3>
+          <p><b>К-сть форсунок:</b> <span id="o_nozzles">—</span> шт</p>
+          <p><b>Витрата на форсунку q</b> = <span id="o_q">—</span> л/хв</p>
+          <p class="small">Формула: q = (Нв · V · S) / 600</p>
+        </div>
+        <div class="box">
+          <h3>План за баками</h3>
+          <div id="tankPlan" class="out">—</div>
+          <p class="small">Залишок останнього бака враховано автоматично.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ТАБЛИЦЯ ПЛАНУ ПО БАКАХ -->
+    <div class="card">
+      <h2>🧱 Таблиця «Баки»</h2>
+      <div style="overflow:auto">
+        <table class="table" id="tanksTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Заправити, л (вода)</th>
+              <th>Додати продукт, л</th>
+              <th>Покриває, га</th>
+              <th>Коментар</th>
+            </tr>
+          </thead>
+          <tbody id="tanksBody"><tr><td colspan="5">—</td></tr></tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" type="button" onclick="copyTanks()">📋 Скопіювати як CSV</button>
+      </div>
+      <div id="csvTanks" class="out" style="margin-top:8px">—</div>
+    </div>
+
+    <!-- ЧЕК-ЗАВДАННЯ 58 ММ -->
+    <div class="card">
+      <h2>🧾 Чек-завдання 58 мм (для механізатора)</h2>
+      <div class="ticket-wrap">
+        <div class="box">
+          <div class="row">
+            <button class="btn" type="button" onclick="buildTicket()">🧩 Зібрати чек</button>
+            <button class="btn" type="button" onclick="window.print()">🖨️ Друк 58 мм</button>
+            <button class="btn" type="button" onclick="downloadTXT()">📥 Зберегти як TXT</button>
+          </div>
+          <p class="small muted">Порада: у діалозі друку встанови мінімальні поля, якщо обрізає текст.</p>
+        </div>
+        <div>
+          <div id="ticket" class="ticket" aria-live="polite">
+            <h4>ЗАВДАННЯ — ОБПРИСКУВАННЯ</h4>
+            <p class="center"><small id="t-date">Дата: —</small></p>
+            <div class="line"></div>
+            <p><b>Поле:</b> <span id="t-field">—</span> · <b>Площа:</b> <span id="t-area">—</span> га</p>
+            <p><b>Продукт:</b> <span id="t-prod">—</span> · <b>Доза:</b> <span id="t-dose">—</span> л/га</p>
+            <p><b>Норма виливу:</b> <span id="t-waterRate">—</span> л/га</p>
+            <p><b>Ширина:</b> <span id="t-width">—</span> м · <b>Крок:</b> <span id="t-spacing">—</span> м</p>
+            <p><b>Швидкість:</b> <span id="t-speed">—</span> км/год</p>
+            <div class="line"></div>
+            <p><b>Форсунок:</b> <span id="t-nozzles">—</span> · <b>q (л/хв):</b> <span id="t-q">—</span></p>
+            <p><b>Баки:</b> <span id="t-tanks">—</span> шт · <b>За бак:</b> вода <span id="t-tankWater">—</span> л + продукт <span id="t-tankProd">—</span> л</p>
+            <div class="line"></div>
+            <p><small id="t-ref">Ref: —</small></p>
+            <p class="center"><small>Підпис механізатора: __________</small></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ХІД РОБОТИ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+      <div class="step"><div class="n">1</div><div><b>Ввід вихідних</b> (5–7 хв): поле, площа, продукт, доза, норма виливу, параметри обприскувача.</div></div>
+      <div class="step"><div class="n">2</div><div><b>Розрахунок</b> (2 хв): кнопка «Розрахувати» → перевірити пофорсунковий витрат, кількість баків, суміші.</div></div>
+      <div class="step"><div class="n">3</div><div><b>План за баками</b> (10–15 хв): обговорити логіку заправок, нерівний останній бак, безпеку змішування.</div></div>
+      <div class="step"><div class="n">4</div><div><b>Чек-завдання</b> (5 хв): зібрати, надрукувати 58 мм або зберегти TXT.</div></div>
+      <div class="step"><div class="n">5</div><div><b>Запис у Sheets</b> (10 хв): вставити CSV плану «Баки», побудувати стовпчикову діаграму «л/бак».</div></div>
+      <div class="step"><div class="n">6</div><div><b>Підсумок</b> (3–5 хв): що впливає на q, як зміниться при V±1 км/год, S±0.1 м, Нв±20 л/га.</div></div>
+    </div>
+
+    <!-- ОЦІНЮВАННЯ -->
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Коректні обчислення суміші, баків, q (л/хв) при заданих V,S,Нв</td><td>4</td></tr>
+          <tr><td>CSV «Баки» вставлено у Sheets + діаграма</td><td>3</td></tr>
+          <tr><td>Чек-завдання зібрано та роздруковано / збережено TXT</td><td>2</td></tr>
+          <tr><td>Короткий усний висновок про вплив V/S/Нв</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">🧪 Норми</p><p class="pill">🧯 Безпека змішування</p><p class="pill">🖨️ Чек для зміни</p>
+    </div>
+  </div>
+
+<script>
+  // Стриманий вигляд у вбудуванні
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  function round(n, d=2){ return Number((+n).toFixed(d)); }
+  function ceil(n){ return Math.ceil(n); }
+
+  function calcAll(){
+    const fieldCode = get('fieldCode'), area = num('area');
+    const product = get('product'), dose = num('dose');
+    const waterRate = num('waterRate');
+    const boomWidth = num('boomWidth'), spacing = num('spacing');
+    const speed = num('speed'), tank = num('tank');
+
+    // Перевірки мінімальні
+    if(area<=0||waterRate<=0||dose<0||boomWidth<=0||spacing<=0||speed<=0||tank<=0){
+      alert('Перевір вхідні дані: жодне значення не може бути нуль/відʼємне.'); return;
+    }
+
+    // Загальні
+    const totalWater = area * waterRate;               // л
+    const totalProd  = area * dose;                    // л
+    const totalMix   = totalWater + totalProd;         // л
+
+    // Форсунки/витрати
+    const nozzles = Math.round(boomWidth / spacing);   // шт (округл до найближчого)
+    const qPerNozzle = (waterRate * speed * spacing) / 600; // л/хв
+
+    // Баки
+    const tankCount = Math.max(1, ceil(totalMix / tank));
+    const areaPerTank = tank / waterRate;              // га, що покриває повний бак
+    const fullTanks = Math.max(0, Math.floor(totalMix / tank)); // повні баки
+    const lastTankMix = totalMix - fullTanks * tank;   // л у останньому
+    const lastTankWater = Math.max(0, lastTankMix * (totalWater/totalMix) ); // пропорційно
+    const lastTankProd  = Math.max(0, lastTankMix * (totalProd/totalMix) );
+
+    // Вивід підсумків
+    byId('o_area').textContent = round(area,2);
+    byId('o_water').textContent = Math.round(totalWater);
+    byId('o_prod').textContent  = round(totalProd,2);
+    byId('o_mix').textContent   = Math.round(totalMix);
+    byId('o_tanks').textContent = tankCount;
+    byId('o_nozzles').textContent = nozzles;
+    byId('o_q').textContent = round(qPerNozzle,2);
+
+    // План за баками (текст короткий)
+    const planLines = [];
+    for(let i=1;i<=tankCount;i++){
+      const isLast = (i===tankCount);
+      const mix = isLast ? (lastTankMix || tank) : tank; // якщо ділиться рівно — last = tank
+      const water = mix * (totalWater/totalMix);
+      const prod  = mix * (totalProd/totalMix);
+      const ha = mix / waterRate;
+      planLines.push(`#${i}: вода ${Math.round(water)} л + продукт ${round(prod,2)} л → ≈ ${round(ha,2)} га`);
+    }
+    byId('tankPlan').textContent = planLines.join('\n');
+
+    // Таблиця «Баки»
+    const tb = byId('tanksBody');
+    tb.innerHTML = '';
+    for(let i=1;i<=tankCount;i++){
+      const isLast = (i===tankCount);
+      const mix = isLast ? (lastTankMix || tank) : tank;
+      const water = mix * (totalWater/totalMix);
+      const prod  = mix * (totalProd/totalMix);
+      const ha = mix / waterRate;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i}</td>
+        <td>${Math.round(water)}</td>
+        <td>${round(prod,2)}</td>
+        <td>${round(ha,2)}</td>
+        <td>${isLast && (mix!==tank) ? 'Неповний бак' : '—'}</td>
+      `;
+      tb.appendChild(tr);
+    }
+
+    // Оновити чек попереднього перегляду (без друку)
+    buildTicket();
+  }
+
+  function fillDemo(){
+    set('fieldCode','F-03'); set('area',32);
+    set('product','Фунгіцид Y'); set('dose',0.6);
+    set('waterRate',220);
+    set('boomWidth',21); set('spacing',0.5);
+    set('speed',7.5); set('tank',3000);
+    calcAll();
+  }
+
+  function copyTanks(){
+    const rows = [...byId('tanksBody').querySelectorAll('tr')].map(tr=>{
+      return [...tr.children].map(td=>td.textContent).join(' | ');
+    });
+    const txt = rows.join('\n');
+    byId('csvTanks').textContent = txt || '—';
+    if(txt) navigator.clipboard.writeText(txt).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося скопіювати'));
+  }
+
+  // ЧЕК 58 мм
+  function buildTicket(){
+    const fieldCode = get('fieldCode'), area = num('area');
+    const product = get('product'), dose = num('dose');
+    const waterRate = num('waterRate');
+    const boomWidth = num('boomWidth'), spacing = num('spacing');
+    const speed = num('speed'), tank = num('tank');
+
+    const totalWater = area * waterRate;
+    const totalProd  = area * dose;
+    const totalMix   = totalWater + totalProd;
+
+    const nozzles = Math.round(boomWidth / spacing);
+    const qPerNozzle = (waterRate * speed * spacing) / 600;
+
+    const tankCount = Math.max(1, Math.ceil(totalMix / tank));
+    const mixPerTank = Math.min(tank, totalMix); // для чека «типовий бак»
+    const waterPerTank = mixPerTank * (totalWater/totalMix);
+    const prodPerTank  = mixPerTank * (totalProd/totalMix);
+
+    // дати/реф
+    const now = new Date();
+    const pad = n => n.toString().padStart(2,'0');
+    const stamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    byId('t-date').textContent = `Дата: ${stamp}`;
+
+    byId('t-field').textContent = fieldCode;
+    byId('t-area').textContent = round(area,2);
+    byId('t-prod').textContent = product;
+    byId('t-dose').textContent = round(dose,2);
+    byId('t-waterRate').textContent = round(waterRate,1);
+    byId('t-width').textContent = round(boomWidth,1);
+    byId('t-spacing').textContent = round(spacing,2);
+    byId('t-speed').textContent = round(speed,1);
+    byId('t-nozzles').textContent = nozzles;
+    byId('t-q').textContent = round(qPerNozzle,2);
+    byId('t-tanks').textContent = tankCount;
+    byId('t-tankWater').textContent = Math.round(waterPerTank);
+    byId('t-tankProd').textContent  = round(prodPerTank,2);
+
+    byId('t-ref').textContent = `Ref: SPR-${Math.random().toString(36).slice(2,8).toUpperCase()}`;
+  }
+
+  function downloadTXT(){
+    const lines = [
+      'JOB: SPRAYING TASK',
+      byId('t-date').textContent,
+      `Поле: ${byId('t-field').textContent}  Площа: ${byId('t-area').textContent} га`,
+      `Продукт: ${byId('t-prod').textContent}  Доза: ${byId('t-dose').textContent} л/га`,
+      `Норма виливу: ${byId('t-waterRate').textContent} л/га`,
+      `Ширина: ${byId('t-width').textContent} м  Крок: ${byId('t-spacing').textContent} м  Швидкість: ${byId('t-speed').textContent} км/год`,
+      `Форсунок: ${byId('t-nozzles').textContent}  q: ${byId('t-q').textContent} л/хв`,
+      `Баки: ${byId('t-tanks').textContent}  За бак: вода ${byId('t-tankWater').textContent} л + продукт ${byId('t-tankProd').textContent} л`,
+      byId('t-ref').textContent,
+      'Підпис: ____________'
+    ];
+    const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'spray_job_58mm.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  // Утиліти
+  function byId(id){ return document.getElementById(id); }
+  function get(id){ return byId(id).value.trim(); }
+  function set(id,v){ byId(id).value = v; }
+  function num(id){ return parseFloat(byId(id).value||'0'); }
+  function flash(msg){ const old=document.title; document.title=msg; setTimeout(()=>document.title=old,900); }
+
+  // Стартові обчислення
+  calcAll();
+</script>
+</body>
+</html>

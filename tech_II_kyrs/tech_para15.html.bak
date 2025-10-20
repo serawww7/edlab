@@ -1,0 +1,570 @@
+<!-- tech_para15.html
+     ПАРА 15 (аудиторно, підсумкова) для технологів з переробки продукції тваринництва
+     Тема: ПІДСУМКОВИЙ ПРОЄКТ — міні-HACCP/FSMS: продукт→маршрут процесу, небезпеки/ризики,
+           рішення щодо CCP, внутрішній аудит (чек-лист) з рейтингом, план CAPA,
+           портфоліо-експорт (CSV/QR/NFC), квиток 58 мм.
+
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; (опц.) термопринтер 58 мм; NFC-мітки.
+
+     Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
+     УВАГА: навчальна симуляція. Реальні HACCP/FSMS-документи готуються за СОП підприємства.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 15 (технологи) — Підсумковий проєкт: HACCP/FSMS, аудит, CAPA, портфоліо</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,Monaco,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  textarea{min-height:84px}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано в Moodle (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid #20314a;background:#0c182a;color:#e5edfb;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 15 · аудиторно · технологи переробки</span>
+  <h1>🏁 Підсумковий проєкт: міні-HACCP/FSMS, аудит, CAPA, портфоліо</h1>
+
+  <div class="card">
+    <h2>🎯 Завдання пари</h2>
+    <p>
+      Сформуйте <b>міні-HACCP</b> для обраного продукту: опишіть процес, ідентифікуйте <b>небезпеки</b>,
+      оцініть <b>ризики</b>, прийміть рішення щодо <b>CCP</b>, проведіть <b>внутрішній аудит</b> по чек-листу,
+      складіть <b>план CAPA</b>, зберіть <b>портфоліо</b> (CSV/QR/NFC) та підсумковий <b>квиток 58 мм</b>.
+    </p>
+    <p class="small muted">Навчальна модель. Для виробничого застосування — узгодити з HACCP-групою та QA.</p>
+  </div>
+
+  <!-- 1. ПРОДУКТ І МАРШРУТ ПРОЦЕСУ -->
+  <div class="card">
+    <h2>🧩 Продукт і маршрут процесу</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Паспорт продукту</h3>
+        <div class="row">
+          <div style="flex:1"><label>Назва продукту</label><input id="pName" type="text" value="Шинка варена «Домашня» 400 г"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Категорія</label><input id="pCat" type="text" value="Мʼясопродукти, охолоджені"></div>
+          <div style="flex:1"><label>Термін (ціль), діб</label><input id="pShelf" type="number" step="1" value="20"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Етапи процесу</h3>
+        <p class="small muted">Вкажіть 5–10 етапів (через «;»). Напр.: <span class="mono">Приймання; Засіл; Тумблер; Термообробка; Охолодження; Пакування; Зберігання</span></p>
+        <textarea id="pSteps">Приймання; Засіл; Тумблер; Термообробка; Охолодження; Пакування; Зберігання</textarea>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildSteps()">🔁 Оновити етапи</button>
+          <button class="btn" onclick="copyCSV('csvSteps')">📋 CSV (steps)</button>
+        </div>
+        <div id="csvSteps" class="out" style="margin-top:8px">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Короткий опис</h3>
+        <textarea id="pDesc">Варена шинка з охолодженої свинини; вакуумне пакування; зберігання +0…+6°C.</textarea>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="summaryHead()">🧠 Згенерувати резюме</button>
+          <button class="btn" onclick="copyCSV('csvHead')">📋 CSV (header)</button>
+        </div>
+        <div id="headOut" class="out" style="margin-top:8px">—</div>
+        <div id="csvHead" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. НЕБЕЗПЕКИ/РИЗИКИ + РІШЕННЯ ЩОДО CCP -->
+  <div class="card">
+    <h2>⚠️ Небезпеки/ризики та рішення щодо CCP</h2>
+    <div class="row">
+      <button class="btn" onclick="addHaz()">➕ Додати небезпеку</button>
+      <button class="btn" onclick="presetHaz()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvHaz')">📋 CSV (hazards)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblHaz">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Етап</th>
+            <th class="dark">Небезпека (Б/Х/Ф)</th>
+            <th class="dark">Ймовірн. (1–5)</th>
+            <th class="dark">Тяжкість (1–5)</th>
+            <th>Ризик = L×S</th>
+            <th>Заходи контролю</th>
+            <th>CCP?</th>
+            <th>Ліміт/моніторинг</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyHaz"></tbody>
+      </table>
+    </div>
+    <div id="csvHaz" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 3. ВНУТРІШНІЙ АУДИТ (ЧЕК-ЛІСТ) -->
+  <div class="card">
+    <h2>🧮 Внутрішній аудит (чек-ліст)</h2>
+    <div class="row">
+      <button class="btn" onclick="addAudit()">➕ Додати пункт</button>
+      <button class="btn" onclick="presetAudit()">🧪 Приклад чек-ліста</button>
+      <button class="btn" onclick="calcAudit()">✅ Порахувати бал</button>
+      <button class="btn" onclick="copyCSV('csvAudit')">📋 CSV (audit)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblAudit">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Питання</th>
+            <th class="dark">Вага (1–3)</th>
+            <th class="dark">O (так/ні/н/д)</th>
+            <th>Бал</th>
+            <th>Примітка</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyAudit"></tbody>
+      </table>
+    </div>
+    <div id="auditSum" class="out" style="margin-top:8px">—</div>
+    <div id="csvAudit" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 4. ПЛАН CAPA -->
+  <div class="card">
+    <h2>🛠️ План CAPA</h2>
+    <div class="row">
+      <button class="btn" onclick="addCAPA()">➕ Додати CAPA</button>
+      <button class="btn" onclick="presetCAPA()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvCAPA')">📋 CSV (capa)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblCAPA">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Проблема</th>
+            <th class="dark">Root cause</th>
+            <th class="dark">Коригувальні</th>
+            <th>Запобіжні</th>
+            <th>Відповідальний</th>
+            <th>Термін</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyCAPA"></tbody>
+      </table>
+    </div>
+    <div id="csvCAPA" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 5. ПОРТФОЛІО / ЖУРНАЛ / КВИТОК / QR / NFC -->
+  <div class="card">
+    <h2>📦 Портфоліо / Журнал / Квиток 58 мм / QR / NFC</h2>
+    <div class="row">
+      <button class="btn" onclick="addLog()">➕ Додати запис</button>
+      <button class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
+      <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати QR-payload</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblLog">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Продукт</th>
+            <th class="dark">Етапів</th>
+            <th class="dark">CCP (к-ть)</th>
+            <th>Аудит %</th>
+            <th>CAPA (к-ть)</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyLog"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+
+    <div class="grid g2" style="margin-top:12px">
+      <div class="box">
+        <h3>QR / NFC</h3>
+        <div id="qrOut" class="out">—</div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>NFC: контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label>NFC: автор</label><input id="nfcOper" type="text" value="Студент ТПТ"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">📲 Згенерувати NFC-payload</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток 58 мм — “HACCP SUMMARY”</h3>
+        <div class="row">
+          <button class="btn" onclick="scrollTicket()">🧾 Показати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>HACCP SUMMARY</h4>
+          <p><b>Продукт:</b> <span id="tProd">—</span></p>
+          <p><b>Етапів:</b> <span id="tSteps">—</span> · <b>CCP:</b> <span id="tCCP">—</span></p>
+          <p><b>Аудит:</b> <span id="tAudit">—</span>% · <b>CAPA:</b> <span id="tCapa">—</span></p>
+          <div class="line"></div>
+          <p><b>Ключове CCP:</b> <span id="tKey">—</span></p>
+          <p><small>Навчальна симуляція. Для впровадження — погодити з HACCP-групою.</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–90 хв)</h2>
+    <ol>
+      <li>Опишіть продукт і етапи; сформуйте резюме.</li>
+      <li>Додайте небезпеки, оцініть L×S, прийміть рішення щодо CCP і визначте ліміти/моніторинг.</li>
+      <li>Сформуйте чек-лист аудиту (10–15 пунктів) і порахуйте % відповідності.</li>
+      <li>Створіть 2–4 записи CAPA за результатами ризиків/аудиту.</li>
+      <li>Запишіть підсумок у журнал; згенеруйте QR/NFC і квиток.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Паспорт продукту та маршрут процесу</td><td>2</td></tr>
+        <tr><td>Небезпеки/ризики, рішення щодо CCP, ліміти/моніторинг</td><td>4</td></tr>
+        <tr><td>Аудит (методика, підрахунок %)</td><td>2</td></tr>
+        <tr><td>План CAPA та портфоліо (CSV/QR/NFC/квиток)</td><td>2</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+
+  function copyCSV(id){ const t=byId(id).textContent.trim(); if(!t||t==='—'){alert('Немає даних для копіювання');return;} navigator.clipboard.writeText(t); }
+  function copyEl(id){ const t=byId(id).textContent.trim(); if(!t||t==='—'){alert('Немає даних');return;} navigator.clipboard.writeText(t); }
+  function reindex(tb){ [...tb.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx')?.textContent=i+1); }
+
+  // ===== 1) HEAD & STEPS =====
+  function buildSteps(){
+    const steps = byId('pSteps').value.split(';').map(s=>s.trim()).filter(Boolean);
+    byId('csvSteps').textContent = steps.map((s,i)=> `${i+1} | ${s}`).join('\n') || '—';
+    return steps;
+  }
+  function summaryHead(){
+    const name = byId('pName').value.trim();
+    const cat  = byId('pCat').value.trim();
+    const shelf= +byId('pShelf').value||0;
+    const steps= buildSteps();
+    const txt = `PRODUCT:${name} | CAT:${cat} | TARGET_SHELF:${shelf} діб | STEPS:${steps.length} (${steps.join(' → ')}) | NOTE:${byId('pDesc').value.trim()}`;
+    byId('headOut').textContent = txt;
+    byId('csvHead').textContent = 'HEAD|' + txt;
+    updateTicket();
+    return {name,cat,shelf,steps};
+  }
+
+  // ===== 2) HAZARDS / CCP =====
+  const bodyHaz = byId('bodyHaz');
+  function addHaz(sample){
+    const steps = buildSteps(); const defaultStep = steps[3] || 'Термообробка';
+    const s = Object.assign({step:defaultStep, type:'Біологічна', L:3, S:4, ctrl:'Пастеризація 72°C/15с', ccp:'так', lim:'≥72°C/15с; безперервний запис T'}, sample||{});
+    const risk = (s.L*s.S);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.step}"></td>
+      <td class="dark"><input type="text" value="${s.type}"></td>
+      <td class="dark"><input type="number" step="1" value="${s.L}" onchange="recalcRisk(this)"></td>
+      <td class="dark"><input type="number" step="1" value="${s.S}" onchange="recalcRisk(this)"></td>
+      <td class="risk">${risk}</td>
+      <td><input type="text" value="${s.ctrl}"></td>
+      <td>
+        <select onchange="markCCP(this)">
+          <option ${s.ccp==='так'?'selected':''}>так</option>
+          <option ${s.ccp!=='так'?'selected':''}>ні</option>
+        </select>
+      </td>
+      <td><input type="text" value="${s.lim}"></td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyHaz); buildCSV_Haz(); updateTicket();">✖</button></td>
+    `;
+    bodyHaz.appendChild(tr); reindex(bodyHaz); buildCSV_Haz(); updateTicket();
+  }
+  function recalcRisk(el){
+    const r = el.closest('tr');
+    const L = +r.children[3].querySelector('input').value||1;
+    const S = +r.children[4].querySelector('input').value||1;
+    const risk = L*S;
+    r.querySelector('.risk').textContent = risk;
+    // авто-CCP (спрощено): якщо S>=4 та L>=3 і є контроль — “так”
+    const ctrl = r.children[6].querySelector('input').value.trim();
+    const sel = r.children[7].querySelector('select');
+    if(S>=4 && L>=3 && ctrl) sel.value='так';
+    buildCSV_Haz(); updateTicket();
+  }
+  function markCCP(sel){ buildCSV_Haz(); updateTicket(); }
+  function presetHaz(){
+    bodyHaz.innerHTML='';
+    addHaz({step:'Термообробка', type:'Біологічна', L:3, S:5, ctrl:'Досягнення core ≥72°C/15с', ccp:'так', lim:'Core ≥72°C/15с; частота: кожна партія'});
+    addHaz({step:'Охолодження', type:'Біологічна', L:3, S:4, ctrl:'≤+6°C за ≤6 год', ccp:'ні', lim:'Крива охолодження; t запис кожні 30 хв'});
+    addHaz({step:'Пакування (вакуум)', type:'Фізична', L:2, S:3, ctrl:'Інтегриті/герметичність', ccp:'ні', lim:'Бульбашковий тест; 1/палету'});
+    addHaz({step:'Зберігання', type:'Біологічна', L:2, S:4, ctrl:'+0…+6°C; FEFO', ccp:'ні', lim:'t-лог; дотримання FEFO'});
+  }
+  function buildCSV_Haz(){
+    const rows=[...bodyHaz.querySelectorAll('tr')].map(r=>{
+      const step=r.children[1].querySelector('input').value.trim();
+      const type=r.children[2].querySelector('input').value.trim();
+      const L=r.children[3].querySelector('input').value.trim();
+      const S=r.children[4].querySelector('input').value.trim();
+      const risk=r.children[5].textContent.trim();
+      const ctrl=r.children[6].querySelector('input').value.trim();
+      const ccp=r.children[7].querySelector('select').value.trim();
+      const lim=r.children[8].querySelector('input').value.trim();
+      return [step,type,L,S,risk,ctrl,ccp,lim].join(' | ');
+    });
+    byId('csvHaz').textContent = rows.join('\n') || '—';
+    return rows;
+  }
+
+  // ===== 3) AUDIT =====
+  const bodyAudit = byId('bodyAudit');
+  function addAudit(sample){
+    const s = Object.assign({q:'Перевірка калібрування термодатчиків', w:3, o:'так', note:''}, sample||{});
+    const tr=document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.q}"></td>
+      <td class="dark"><input type="number" step="1" value="${s.w}"></td>
+      <td class="dark">
+        <select>
+          <option ${s.o==='так'?'selected':''}>так</option>
+          <option ${s.o==='ні'?'selected':''}>ні</option>
+          <option ${s.o==='н/д'?'selected':''}>н/д</option>
+        </select>
+      </td>
+      <td class="score">—</td>
+      <td><input type="text" value="${s.note}"></td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyAudit); calcAudit();">✖</button></td>
+    `;
+    bodyAudit.appendChild(tr); reindex(bodyAudit);
+  }
+  function presetAudit(){
+    bodyAudit.innerHTML='';
+    addAudit({q:'Доступність записів термообробки (core T)', w:3, o:'так'});
+    addAudit({q:'Валідація процесу охолодження', w:3, o:'ні', note:'Потрібен графік t'});
+    addAudit({q:'Перевірка герметичності пакування', w:2, o:'так'});
+    addAudit({q:'FEFO/адресація на складі', w:2, o:'так'});
+    addAudit({q:'Алергени/етикетка (EAN-13/дата/лот)', w:2, o:'так'});
+    addAudit({q:'Трасування RM→FG→клієнт', w:3, o:'так'});
+    calcAudit();
+  }
+  function calcAudit(){
+    const rows=[...bodyAudit.querySelectorAll('tr')];
+    let max=0, got=0;
+    rows.forEach(r=>{
+      const w=+r.children[2].querySelector('input').value||1;
+      const o=r.children[3].querySelector('select').value;
+      max += w;
+      const s = (o==='так')? w : (o==='н/д'? 0 : 0);
+      if(o==='так') got += w;
+      r.querySelector('.score').textContent = s;
+    });
+    const pct = max? rnd(got/max*100,1) : 0;
+    const tag = pct>=90? '🟢' : (pct>=75? '🟠' : '🔴');
+    byId('auditSum').textContent = `Аудит: ${got}/${max} балів → ${pct}% ${tag}`;
+    byId('csvAudit').textContent = rows.map((r,i)=>{
+      return [i+1,
+              r.children[1].querySelector('input').value.trim(),
+              r.children[2].querySelector('input').value.trim(),
+              r.children[3].querySelector('select').value.trim(),
+              r.children[4].textContent.trim(),
+              r.children[5].querySelector('input').value.trim()].join(' | ');
+    }).join('\n') || '—';
+    updateTicket();
+    return pct;
+  }
+
+  // ===== 4) CAPA =====
+  const bodyCAPA = byId('bodyCAPA');
+  function addCAPA(sample){
+    const s = Object.assign({p:'Охолодження перевищує 6 год', root:'Недостатня продуктивність чиллера', corr:'Зменшити завантаження партії', prev:'ТО чиллера; моніторинг', resp:'Студент ТПТ', due:new Date().toISOString().slice(0,10)}, sample||{});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.p}"></td>
+      <td class="dark"><input type="text" value="${s.root}"></td>
+      <td class="dark"><input type="text" value="${s.corr}"></td>
+      <td><input type="text" value="${s.prev}"></td>
+      <td><input type="text" value="${s.resp}"></td>
+      <td><input type="date" value="${s.due}"></td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyCAPA); buildCSV_CAPA(); updateTicket();">✖</button></td>
+    `;
+    bodyCAPA.appendChild(tr); reindex(bodyCAPA); buildCSV_CAPA(); updateTicket();
+  }
+  function presetCAPA(){
+    bodyCAPA.innerHTML='';
+    addCAPA({p:'Відсутній графік t охолодження', root:'Не налаштований реєстратор', corr:'Налаштувати логер t з інтервалом 5 хв', prev:'Щоденна перевірка логів', resp:'Студент ТПТ', due:new Date().toISOString().slice(0,10)});
+    addCAPA({p:'Часткові витоки пакування', root:'Невідповідний тиск/плівка', corr:'Підібрати режим вакууму/плівку', prev:'Батч-тести герметичності', resp:'Студент ТПТ', due:new Date().toISOString().slice(0,10)});
+  }
+  function buildCSV_CAPA(){
+    const rows=[...bodyCAPA.querySelectorAll('tr')].map(r=>{
+      return [
+        r.querySelector('.idx').textContent.trim(),
+        r.children[1].querySelector('input').value.trim(),
+        r.children[2].querySelector('input').value.trim(),
+        r.children[3].querySelector('input').value.trim(),
+        r.children[4].querySelector('input').value.trim(),
+        r.children[5].querySelector('input').value.trim(),
+        r.children[6].querySelector('input').value.trim()
+      ].join(' | ');
+    });
+    byId('csvCAPA').textContent = rows.join('\n') || '—';
+    return rows;
+  }
+
+  // ===== 5) PORTFOLIO / LOG / TICKET / QR / NFC =====
+  const bodyLog = byId('bodyLog');
+  function addLog(){
+    const head = summaryHead();
+    const ccpCount = [...bodyHaz.querySelectorAll('tr')].filter(r=>r.children[7].querySelector('select').value==='так').length;
+    const auditPct = calcAudit();
+    const capaCount = [...bodyCAPA.querySelectorAll('tr')].length;
+    const tr=document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${head.name}"></td>
+      <td class="dark">${head.steps.length}</td>
+      <td class="dark">${ccpCount}</td>
+      <td>${auditPct}</td>
+      <td>${capaCount}</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
+    `;
+    bodyLog.appendChild(tr); reindex(bodyLog); buildCSV_Log();
+    updateTicket();
+  }
+  function buildCSV_Log(){
+    const rows=[...bodyLog.querySelectorAll('tr')].map(r=>{
+      return [
+        r.querySelector('.idx').textContent.trim(),
+        r.children[1].querySelector('input').value.trim(),
+        r.children[2].textContent.trim(),
+        r.children[3].textContent.trim(),
+        r.children[4].textContent.trim(),
+        r.children[5].textContent.trim()
+      ].join(' | ');
+    });
+    byId('csvLog').textContent = rows.join('\n') || '—';
+  }
+  function buildQR(){
+    const head = summaryHead();
+    const hazards = buildCSV_Haz();
+    const audit = byId('auditSum').textContent.trim();
+    const capa = buildCSV_CAPA();
+    const payload = {
+      product: head.name,
+      steps: head.steps.length,
+      key_ccp: [...bodyHaz.querySelectorAll('tr')].find(r=>r.children[7].querySelector('select').value==='так')?.children[1].querySelector('input').value || '—',
+      audit: audit,
+      capa: capa.length
+    };
+    byId('qrOut').textContent = JSON.stringify(payload);
+    updateTicket();
+  }
+  function buildNFC(){
+    const head = summaryHead();
+    const txt = [
+      `HACCP_CARD`,
+      `PRODUCT:${head.name}`,
+      `STEPS:${head.steps.length}`,
+      `AUDIT:${byId('auditSum').textContent.trim()}`,
+      `CAPA:${[...bodyCAPA.querySelectorAll('tr')].length}`,
+      `CONTACT:${byId('nfcPhone').value} AUTHOR:${byId('nfcOper').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = txt;
+  }
+  function updateTicket(){
+    const head = summaryHead();
+    const ccpCount = [...bodyHaz.querySelectorAll('tr')].filter(r=>r.children[7].querySelector('select').value==='так').length;
+    const key = [...bodyHaz.querySelectorAll('tr')].find(r=>r.children[7].querySelector('select').value==='так')?.children[1].querySelector('input').value || '—';
+    const capaCount = [...bodyCAPA.querySelectorAll('tr')].length;
+    const auditPct = (byId('auditSum').textContent.match(/(\d+(?:\.\d+)?)%/)||[])[1] || '—';
+    byId('tProd').textContent = head.name;
+    byId('tSteps').textContent = head.steps.length;
+    byId('tCCP').textContent = ccpCount;
+    byId('tAudit').textContent = auditPct;
+    byId('tCapa').textContent = capaCount;
+    byId('tKey').textContent = key;
+  }
+  function scrollTicket(){ byId('ticket').scrollIntoView({behavior:'smooth',block:'center'}); }
+
+  // ===== INIT =====
+  (function init(){
+    buildSteps(); summaryHead(); presetHaz(); presetAudit(); presetCAPA(); calcAudit(); buildQR(); updateTicket();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select,textarea')){
+        if(e.target.closest('#tblHaz')){ buildCSV_Haz(); updateTicket(); }
+        if(e.target.closest('#tblAudit')){ calcAudit(); }
+        if(e.target.closest('#tblCAPA')){ buildCSV_CAPA(); updateTicket(); }
+        if(['pName','pCat','pShelf','pSteps','pDesc'].includes(e.target.id)){ summaryHead(); updateTicket(); }
+      }
+    });
+  })();
+</script>
+</body>
+</html>

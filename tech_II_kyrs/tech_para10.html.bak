@@ -1,0 +1,644 @@
+<!-- tech_para10.html
+     ПАРА 10 (аудиторно) для технологів з переробки продукції тваринництва
+     Тема: САНІТАРІЯ ТА ГІГІЄНА — SSOP/GMP: зони/ризики, план прибирання, розчини (конц./експозиція),
+           графік санітарних вікон, ATP/мікро-тести (симуляція), аудит чек-лист, квиток 58 мм, NFC, CSV.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; (опц.) термопринтер 58 мм; NFC-мітки.
+
+     Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
+     УВАГА: навчальна модель. Фактичні SSOP затверджуються на підприємстві та в HACCP-плані.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 10 (технологи) — Санітарія та гігієна: SSOP/GMP, графік, тести, аудит, квиток/NFC/CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  textarea{min-height:84px}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано в Moodle (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+  /* Легенда ризиків */
+  .legend span{display:inline-block;margin-right:8px;padding:3px 8px;border-radius:999px;border:1px solid #223049;background:#0d1a2e}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 10 · аудиторно · технологи переробки</span>
+  <h1>🧼 Санітарія та гігієна: SSOP/GMP, графік, тести, аудит, квиток/NFC/CSV</h1>
+
+  <div class="card">
+    <h2>🎯 Мета пари</h2>
+    <p>
+      За заняття студенти: (1) опишуть <b>виробничі зони</b> та їх ризики, (2) сформують <b>SSOP-план прибирання</b> з розчинами,
+      експозицією та ЗІЗ, (3) побудують <b>графік санітарних вікон</b>, (4) внесуть результати <b>ATP/мікро-тестів</b> (симуляція),
+      (5) проведуть <b>аудит GMP</b> за чек-листом, (6) оформлять <b>CSV</b>, <b>квиток 58 мм</b> та <b>NFC</b>.
+    </p>
+    <p class="small muted">Модель для навчання. На виробництві — дотримуйтесь чинних SSOP/SOP, карт безпеки (SDS) та інструкцій постачальника деззасобів.</p>
+  </div>
+
+  <!-- 1. ЗОНИ/РИЗИКИ -->
+  <div class="card">
+    <h2>🏷️ Зони та ризики</h2>
+    <div class="legend small muted">
+      <span>Ризик: 1 — низький</span><span>2 — середній</span><span>3 — високий</span>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="btn" onclick="addZone()">➕ Додати зону</button>
+      <button class="btn" onclick="presetZones()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvZones')">📋 CSV (zones)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblZones">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Зона</th>
+            <th class="dark">Тип (RAW/COOK/PKG)</th>
+            <th class="dark">Ризик (1–3)</th>
+            <th>Частота прибирання</th>
+            <th>Критичні точки</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyZones"></tbody>
+      </table>
+    </div>
+    <div id="csvZones" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 2. SSOP-ПЛАН ПРИБИРАННЯ -->
+  <div class="card">
+    <h2>🧽 SSOP — План прибирання/дезінфекції</h2>
+    <div class="row">
+      <button class="btn" onclick="addSSOP()">➕ Додати SSOP</button>
+      <button class="btn" onclick="presetSSOP()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvSSOP')">📋 CSV (ssop)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblSSOP">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Об’єкт/Зона</th>
+            <th class="dark">Розчин (конц. %)</th>
+            <th class="dark">Експозиція, хв</th>
+            <th class="dark">ЗІЗ</th>
+            <th>Метод/Інструмент</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodySSOP"></tbody>
+      </table>
+    </div>
+    <div id="csvSSOP" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 3. ГРАФІК САНІТАРНИХ ВІКОН -->
+  <div class="card">
+    <h2>🗓️ Графік санітарних вікон</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Параметри</h3>
+        <div class="row">
+          <div style="flex:1"><label>Початок (HH:MM)</label><input id="winStart" type="time" value="18:00"></div>
+          <div style="flex:1"><label>Тривалість, хв</label><input id="winDur" type="number" step="5" value="60"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>К-ть вікон</label><input id="winCount" type="number" step="1" value="2"></div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn" onclick="buildWindows()">🧮 Побудувати</button>
+          <button class="btn" onclick="copyCSV('csvWin')">📋 CSV (windows)</button>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Список вікон</h3>
+        <div id="winOut" class="out">—</div>
+      </div>
+      <div class="box">
+        <h3>Призначення завдань</h3>
+        <div id="assignOut" class="out">—</div>
+      </div>
+    </div>
+    <div id="csvWin" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 4. ATP/МІКРО-ТЕСТИ -->
+  <div class="card">
+    <h2>🧫 ATP/мікро-тести (симуляція)</h2>
+    <div class="row">
+      <button class="btn" onclick="addTest()">➕ Додати тест</button>
+      <button class="btn" onclick="presetTests()">🧪 Приклад</button>
+      <button class="btn" onclick="evaluateTests()">✅ Порахувати</button>
+      <button class="btn" onclick="copyCSV('csvTests')">📋 CSV (tests)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblTests">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Поверхня/об’єкт</th>
+            <th class="dark">Тип (ATP/TPC)</th>
+            <th class="dark">Значення (RLU/CFU)</th>
+            <th>Поріг</th>
+            <th>Статус</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyTests"></tbody>
+      </table>
+    </div>
+    <div id="sumTests" class="out" style="margin-top:8px">—</div>
+    <div id="csvTests" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 5. АУДИТ GMP (чек-лист) -->
+  <div class="card">
+    <h2>📝 Аудит GMP — чек-лист</h2>
+    <div class="row">
+      <button class="btn" onclick="addAudit()">➕ Додати пункт</button>
+      <button class="btn" onclick="presetAudit()">🧪 Приклад</button>
+      <button class="btn" onclick="scoreAudit()">✅ Оцінити</button>
+      <button class="btn" onclick="copyCSV('csvAudit')">📋 CSV (audit)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblAudit">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Пункт</th>
+            <th class="dark">Вага (1–5)</th>
+            <th class="dark">Оцінка (0–1)</th>
+            <th>Бал</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyAudit"></tbody>
+      </table>
+    </div>
+    <div id="sumAudit" class="out" style="margin-top:8px">—</div>
+    <div id="csvAudit" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 6. ЖУРНАЛ / КВИТОК / NFC -->
+  <div class="card">
+    <h2>📒 Журнал / Квиток 58 мм / NFC</h2>
+    <div class="row">
+      <button class="btn" onclick="addLog()">➕ Додати у журнал</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblLog">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Завдання (SSOP)</th>
+            <th class="dark">Вікно</th>
+            <th class="dark">Виконавець</th>
+            <th>Тести (PASS%)</th>
+            <th>Аудит (Score%)</th>
+            <th>Висновок</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyLog"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+
+    <div class="grid g2" style="margin-top:12px">
+      <div class="box">
+        <h3>NFC — “SSOP TASK CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label>Виконавець</label><input id="nfcOper" type="text" value="Студент ТПТ"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток 58 мм — “SSOP TASK”</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>SSOP TASK</h4>
+          <p><b>Зона/Об’єкт:</b> <span id="tObj">—</span></p>
+          <p><b>Розчин:</b> <span id="tSol">—</span> · <b>Експ.:</b> <span id="tExp">—</span> хв</p>
+          <div class="line"></div>
+          <p><b>Вікно:</b> <span id="tWin">—</span></p>
+          <p><b>Виконавець:</b> <span id="tOper">—</span></p>
+          <div class="line"></div>
+          <p><small>GMP/SSOP: засоби індивідуального захисту, безпечне поводження з хімією, документування у журналі.</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Створіть 3–5 зон із ризиками та частотою прибирання.</li>
+      <li>Додайте 4–8 SSOP-завдань з розчинами, експозицією, ЗІЗ.</li>
+      <li>Побудуйте 1–3 санітарні вікна, розподіліть завдання по вікнах.</li>
+      <li>Внесіть 5–10 ATP/TPC вимірів, оцініть PASS%.</li>
+      <li>Заповніть чек-лист GMP, отримайте сумарний бал.</li>
+      <li>Додайте запис у журнал, сформуйте NFC та квиток, скопіюйте CSV.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Зони/ризики та SSOP-план</td><td>4</td></tr>
+        <tr><td>Графік вікон + призначення завдань</td><td>2</td></tr>
+        <tr><td>ATP/мікро-тести та PASS%</td><td>2</td></tr>
+        <tr><td>Аудит GMP, журнал, квиток/NFC/CSV</td><td>2</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const pad2 = n => String(n).padStart(2,'0');
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t);
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t);
+  }
+  function reindex(tb){ [...tb.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  // ===== 1) ЗОНИ =====
+  const bodyZones = byId('bodyZones');
+  function addZone(sample){
+    const s=Object.assign({name:'', type:'RAW', risk:2, freq:'щозміни', ccp:''}, sample||{});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.name}"></td>
+      <td class="dark">
+        <select>
+          <option ${s.type==='RAW'?'selected':''}>RAW</option>
+          <option ${s.type==='COOK'?'selected':''}>COOK</option>
+          <option ${s.type==='PKG'?'selected':''}>PKG</option>
+        </select>
+      </td>
+      <td class="dark"><input type="number" min="1" max="3" step="1" value="${s.risk}"></td>
+      <td><input type="text" value="${s.freq}"></td>
+      <td><input type="text" value="${s.ccp}"></td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyZones); buildCSV_Zones();">✖</button></td>
+    `;
+    bodyZones.appendChild(tr); reindex(bodyZones); buildCSV_Zones();
+  }
+  function presetZones(){
+    bodyZones.innerHTML='';
+    addZone({name:'Приймання сировини', type:'RAW', risk:3, freq:'щозміни', ccp:'контамін. від тари'});
+    addZone({name:'Термообробка', type:'COOK', risk:2, freq:'щозміни', ccp:'конденсат'});
+    addZone({name:'Фасування/пакування', type:'PKG', risk:2, freq:'щозміни', ccp:'контакт із тарою'});
+  }
+  function buildCSV_Zones(){
+    const rows=[...bodyZones.querySelectorAll('tr')].map(r=>{
+      return [
+        r.querySelector('.idx').textContent.trim(),
+        r.children[1].querySelector('input').value.trim(),
+        r.children[2].querySelector('select').value.trim(),
+        r.children[3].querySelector('input').value.trim(),
+        r.children[4].querySelector('input').value.trim(),
+        r.children[5].querySelector('input').value.trim()
+      ].join(' | ');
+    });
+    byId('csvZones').textContent = rows.join('\n') || '—';
+  }
+
+  // ===== 2) SSOP =====
+  const bodySSOP = byId('bodySSOP');
+  function addSSOP(sample){
+    const s=Object.assign({obj:'', sol:'Хлор 0.05', exp:15, ppe:'рукав., окуляри', tool:'щітка/піна'}, sample||{});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.obj}"></td>
+      <td class="dark"><input type="text" value="${s.sol}"></td>
+      <td class="dark"><input type="number" step="1" value="${s.exp}"></td>
+      <td class="dark"><input type="text" value="${s.ppe}"></td>
+      <td><input type="text" value="${s.tool}"></td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodySSOP); buildCSV_SSOP();">✖</button></td>
+    `;
+    bodySSOP.appendChild(tr); reindex(bodySSOP); buildCSV_SSOP();
+  }
+  function presetSSOP(){
+    bodySSOP.innerHTML='';
+    addSSOP({obj:'Столи пакування', sol:'QAC 0.2', exp:10, ppe:'рукав., фартух', tool:'піногенератор'});
+    addSSOP({obj:'Візки та лотки',  sol:'Хлор 0.05', exp:15, ppe:'рукав., окуляри', tool:'щітка'});
+    addSSOP({obj:'Підлога COOK-зони', sol:'Піноутворювач 2%', exp:20, ppe:'рукав., чоботи', tool:'щітка/швабра'});
+  }
+  function buildCSV_SSOP(){
+    const rows=[...bodySSOP.querySelectorAll('tr')].map(r=>{
+      return [
+        r.querySelector('.idx').textContent.trim(),
+        r.children[1].querySelector('input').value.trim(),
+        r.children[2].querySelector('input').value.trim(),
+        r.children[3].querySelector('input').value.trim(),
+        r.children[4].querySelector('input').value.trim(),
+        r.children[5].querySelector('input').value.trim()
+      ].join(' | ');
+    });
+    byId('csvSSOP').textContent = rows.join('\n') || '—';
+  }
+
+  // ===== 3) ВІКНА + ПРИЗНАЧЕННЯ =====
+  function parseTime(s){ const m=/^(\d{2}):(\d{2})$/.exec(s||''); if(!m) return null; const d=new Date(); d.setHours(+m[1],+m[2],0,0); return d; }
+  function addMinutes(d,m){ const x=new Date(d); x.setMinutes(x.getMinutes()+m); return x; }
+  function fmtHHMM(d){ return pad2(d.getHours())+':'+pad2(d.getMinutes()); }
+  function buildWindows(){
+    const start=parseTime(byId('winStart').value)||parseTime('18:00');
+    const dur=+byId('winDur').value||60;
+    const n=+byId('winCount').value||1;
+    const lines=[], csv=[];
+    const ssopRows=[...bodySSOP.querySelectorAll('tr')];
+    let idx=0;
+    for(let i=0;i<n;i++){
+      const s=addMinutes(start, i*dur);
+      const e=addMinutes(s,dur);
+      const slot=`${fmtHHMM(s)}–${fmtHHMM(e)}`;
+      // призначаємо до 2 завдань на вікно
+      const tasks=[];
+      for(let k=0;k<2 && idx<ssopRows.length;k++,idx++){
+        const obj=ssopRows[idx].children[1].querySelector('input').value.trim()||`Об’єкт #${idx+1}`;
+        const sol=ssopRows[idx].children[2].querySelector('input').value.trim();
+        tasks.push(`${obj} [${sol}]`);
+      }
+      lines.push(`${slot} → ${tasks.join('; ')||'—'}`);
+      csv.push(`WIN|${slot}|tasks=${tasks.join(', ')||'none'}`);
+    }
+    byId('winOut').textContent = lines.join('\n')||'—';
+    byId('assignOut').textContent = 'Порада: розподіліть співробітників так, щоб високоризикові зони (3) виконувались у першому вікні.';
+    byId('csvWin').textContent = csv.join('\n')||'—';
+
+    // Оновити квиток попереднім вікном/SSOP
+    const firstLine = lines[0]||'—';
+    const firstTask = (firstLine.split('→')[1]||'—').trim();
+    byId('tWin').textContent = firstLine.split('→')[0]?.trim()||'—';
+    const firstSSOP = ssopRows[0];
+    if(firstSSOP){
+      const obj=firstSSOP.children[1].querySelector('input').value.trim();
+      const sol=firstSSOP.children[2].querySelector('input').value.trim();
+      const exp=firstSSOP.children[3].querySelector('input').value.trim();
+      byId('tObj').textContent = obj||'—';
+      byId('tSol').textContent = sol||'—';
+      byId('tExp').textContent = exp||'—';
+    }
+  }
+
+  // ===== 4) ТЕСТИ =====
+  const bodyTests = byId('bodyTests');
+  function addTest(sample){
+    const s=Object.assign({surf:'', type:'ATP', val:'', thr:200, status:'—'}, sample||{});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.surf}"></td>
+      <td class="dark">
+        <select>
+          <option ${s.type==='ATP'?'selected':''}>ATP</option>
+          <option ${s.type==='TPC'?'selected':''}>TPC</option>
+        </select>
+      </td>
+      <td class="dark"><input type="number" step="0.1" value="${s.val}"></td>
+      <td><input type="number" step="1" value="${s.thr}"></td>
+      <td class="status">—</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyTests); buildCSV_Tests();">✖</button></td>
+    `;
+    bodyTests.appendChild(tr); reindex(bodyTests); buildCSV_Tests();
+  }
+  function presetTests(){
+    bodyTests.innerHTML='';
+    addTest({surf:'Стіл PKG', type:'ATP', val:120, thr:200});
+    addTest({surf:'Ніж COOK', type:'ATP', val:260, thr:200});
+    addTest({surf:'Лоток', type:'TPC', val:15, thr:50});
+    addTest({surf:'Підлога', type:'TPC', val:120, thr:100});
+    evaluateTests();
+  }
+  function evaluateTests(){
+    const rows=[...bodyTests.querySelectorAll('tr')];
+    let pass=0, n=0;
+    rows.forEach(r=>{
+      const type=r.children[2].querySelector('select').value;
+      const val=Number(r.children[3].querySelector('input').value);
+      const thr=Number(r.children[4].querySelector('input').value);
+      if(!isNaN(val)&&!isNaN(thr)){ n++;
+        const ok = type==='ATP' ? (val<=thr) : (val<=thr);
+        r.querySelector('.status').textContent = ok?'PASS':'FAIL';
+        r.querySelector('.status').style.color = ok? '#10b981' : '#ef4444';
+        if(ok) pass++;
+      }else{
+        r.querySelector('.status').textContent='н/д'; r.querySelector('.status').style.color='#f59e0b';
+      }
+    });
+    const rate = n? Math.round(pass/n*100) : 0;
+    byId('sumTests').textContent = `Вибірка: ${n}; PASS: ${pass}; PASS% = ${rate}%`;
+    buildCSV_Tests();
+    return rate;
+  }
+  function buildCSV_Tests(){
+    const lines=[...bodyTests.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const s=r.children[1].querySelector('input').value.trim();
+      const t=r.children[2].querySelector('select').value.trim();
+      const v=r.children[3].querySelector('input').value.trim();
+      const thr=r.children[4].querySelector('input').value.trim();
+      const st=r.children[5].textContent.trim();
+      return [idx,s,t,v,thr,st].join(' | ');
+    });
+    byId('csvTests').textContent = lines.join('\n') || '—';
+  }
+
+  // ===== 5) АУДИТ =====
+  const bodyAudit = byId('bodyAudit');
+  function addAudit(sample){
+    const s=Object.assign({q:'', w:3, s:1}, sample||{});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.q}"></td>
+      <td class="dark"><input type="number" min="1" max="5" step="1" value="${s.w}"></td>
+      <td class="dark"><input type="number" min="0" max="1" step="0.1" value="${s.s}"></td>
+      <td class="pt">—</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyAudit); buildCSV_Audit();">✖</button></td>
+    `;
+    bodyAudit.appendChild(tr); reindex(bodyAudit); buildCSV_Audit();
+  }
+  function presetAudit(){
+    bodyAudit.innerHTML='';
+    addAudit({q:'Чисті/цілі ЗІЗ', w:3, s:1});
+    addAudit({q:'Стан розчинів (конц./маркування)', w:4, s:0.8});
+    addAudit({q:'Розмежування RAW/COOK потоків', w:5, s:0.9});
+    addAudit({q:'Ведення журналів SSOP', w:3, s:1});
+    addAudit({q:'Гігієна рук/сан.барʼєри', w:4, s:0.7});
+    scoreAudit();
+  }
+  function scoreAudit(){
+    const rows=[...bodyAudit.querySelectorAll('tr')];
+    let wsum=0, pts=0;
+    rows.forEach(r=>{
+      const w=Number(r.children[2].querySelector('input').value);
+      const s=Number(r.children[3].querySelector('input').value);
+      const p = (isNaN(w)||isNaN(s))?0: w*s;
+      r.querySelector('.pt').textContent = rnd(p,2);
+      if(!isNaN(w)) wsum+=w;
+      if(!isNaN(p)) pts+=p;
+    });
+    const score = wsum? rnd(pts/wsum*100,1) : 0;
+    byId('sumAudit').textContent = `Сума ваг: ${wsum}; Нараховано балів: ${rnd(pts,2)}; Підсумок: ${score}%`;
+    buildCSV_Audit();
+    return score;
+  }
+  function buildCSV_Audit(){
+    const lines=[...bodyAudit.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const q=r.children[1].querySelector('input').value.trim();
+      const w=r.children[2].querySelector('input').value.trim();
+      const s=r.children[3].querySelector('input').value.trim();
+      const p=r.children[4].textContent.trim();
+      return [idx,q,w,s,p].join(' | ');
+    });
+    byId('csvAudit').textContent = lines.join('\n') || '—';
+  }
+
+  // ===== 6) ЖУРНАЛ / КВИТОК / NFC =====
+  const bodyLog = byId('bodyLog');
+  function addLog(sample){
+    const passRate = evaluateTests();
+    const auditScore = scoreAudit();
+    // Візьмемо перше SSOP та перше вікно для прикладу
+    const ss = bodySSOP.querySelector('tr');
+    const obj = ss? ss.children[1].querySelector('input').value.trim() : '—';
+    const sol = ss? ss.children[2].querySelector('input').value.trim() : '—';
+    const exp = ss? ss.children[3].querySelector('input').value.trim() : '—';
+    const win = (byId('winOut').textContent.split('\n')[0]||'—').split('→')[0]?.trim()||'—';
+    const exec = byId('nfcOper').value||'Студент ТПТ';
+
+    const verdict = (passRate>=80 && auditScore>=85)? '🟢 ДОПУСТИТИ' : (passRate>=60 && auditScore>=70)? '🟠 УМОВНО' : '🔴 ПОВТОРИТИ/CAPA';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${obj} [${sol}, ${exp} хв]"></td>
+      <td class="dark">${win}</td>
+      <td class="dark">${exec}</td>
+      <td>${passRate}%</td>
+      <td>${auditScore}%</td>
+      <td>${verdict}</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
+    `;
+    bodyLog.appendChild(tr); reindex(bodyLog); buildCSV_Log();
+
+    // Оновити квиток
+    byId('tObj').textContent = obj;
+    byId('tSol').textContent = sol;
+    byId('tExp').textContent = exp;
+    byId('tWin').textContent = win;
+    byId('tOper').textContent = exec;
+  }
+  function buildCSV_Log(){
+    const rows=[...bodyLog.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const task=r.children[1].querySelector('input').value.trim();
+      const win=r.children[2].textContent.trim();
+      const oper=r.children[3].textContent.trim();
+      const pass=r.children[4].textContent.trim();
+      const audit=r.children[5].textContent.trim();
+      const v=r.children[6].textContent.trim();
+      return [idx,task,win,oper,pass,audit,v].join(' | ');
+    });
+    byId('csvLog').textContent = rows.join('\n') || '—';
+  }
+  function buildTicket(){
+    window.scrollTo({top: document.getElementById('ticket').getBoundingClientRect().top + window.scrollY - 60, behavior:'smooth'});
+  }
+  function buildNFC(){
+    const txt = [
+      `SSOP_NFC`,
+      `OBJ:${byId('tObj').textContent}`,
+      `SOL:${byId('tSol').textContent}`,
+      `EXP:${byId('tExp').textContent}min`,
+      `WIN:${byId('tWin').textContent}`,
+      `OPER:${byId('nfcOper').value} CONTACT:${byId('nfcPhone').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = txt;
+  }
+
+  // ===== ІНІЦІАЛІЗАЦІЯ =====
+  (function init(){
+    presetZones(); presetSSOP(); buildWindows(); presetTests(); presetAudit();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select,textarea')){
+        if(e.target.closest('#tblZones')) buildCSV_Zones();
+        if(e.target.closest('#tblSSOP')) buildCSV_SSOP();
+        if(e.target.closest('#tblTests')) evaluateTests();
+        if(e.target.closest('#tblAudit')) scoreAudit();
+      }
+    });
+  })();
+</script>
+</body>
+</html>

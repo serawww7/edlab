@@ -1,0 +1,544 @@
+<!-- mechanic_para4.html
+     ПАРА 4 (аудиторно) для механіків
+     Тема: ПРИВОДИ ТА ОБЕРТИ — ВВП (PTO), ремінні/ланцюгові передачі, передатні числа, оберти, лінійна швидкість, підбір шківів/зірочок
+     Фокус: телефони/ПК; без бібліотек; локально; працює на GitHub Pages і в Moodle (iframe).
+     Обладнання: телефони, термопринтер 58 мм (опц.), NFC-мітки (опц.).
+
+     Що вміє:
+     • Розрахунок обертів веденої вали/механізму від двигуна або ВВП 540/1000.
+     • Для кожного вузла: тип приводу (прямий/ремінь/ланцюг), параметри (діаметри шківів або кількість зубів), коло/діаметр барабана.
+     • Обчислення лінійної швидкості конвеєра/валика; порівняння з цільовою (rpm або м/с).
+     • Підбір: потрібні оберти двигуна під ціль, або рекомендація близької пари шківів/зірочок (із заданого списку).
+     • Квиток 58 мм «Налаштування приводу» та NFC-текст; експорт CSV.
+
+     Формули (навчально):
+     • Для ременя: i = ωвих/ωвх = Dведучого / Dведеного  (за діаметрами шківів)
+     • Для ланцюга: i = zведучої / zведеної  (за числом зубів)
+     • ωвих = ωвх × i;  vлін = (π·Dбарабана) × ωвих / 60
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 4 (механіки) — Приводи: ВВП, ремені/ланцюги, rpm, м/с, підбір шківів/зірочок, чек 58 мм, NFC</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .small{font-size:12px; color:#9fb0c8}
+  .muted{color:#93a3b5}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)}
+  .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
+  .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+
+  input[type="text"], input[type="number"], input[type="date"], select, textarea{
+    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
+  }
+
+  /* Чек 58 мм */
+  .ticket{ width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
+  .ticket p{margin:2px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:6px 0}
+  .ticket small{font-size:10px}
+
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+  html.embedded .box{background:#f8fafc; color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+
+  @media print{
+    @page{ margin:4mm }
+    .no-print{ display:none !important }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 4 · аудиторно · механіки</span>
+    <h1>⚙️ Приводи: ВВП, ремені/ланцюги → rpm, м/с, підбір шківів/зірочок, чек 58 мм, NFC</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        За пару студенти для кількох вузлів приводу розрахують <b>оберти</b> та <b>лінійну швидкість</b>,
+        порівняють із <b>цільовими</b>, підберуть <b>оберти двигуна</b> або <b>пару шківів/зірочок</b>,
+        сформують <b>квиток 58 мм</b> та <b>NFC</b>-текст. Результати — у <b>CSV</b>.
+      </p>
+      <p class="small">PTO: 540 або 1000 rpm. Для безпечної роботи не перевищуйте паспортні оберти вузла.</p>
+    </div>
+
+    <!-- ВХІДНІ ДАНІ: ДВИГУН / ВВП / НАБІР ШКІВІВ -->
+    <div class="card">
+      <h2>🛠️ Джерело обертів і варіанти шківів/зірочок</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Джерело</h3>
+          <div class="row">
+            <div style="flex:1">
+              <label>Режим</label>
+              <select id="srcMode">
+                <option value="engine" selected>Двигун</option>
+                <option value="pto">ВВП (PTO)</option>
+              </select>
+            </div>
+            <div style="flex:1">
+              <label>Оберти двигуна, rpm</label>
+              <input id="engRpm" type="number" step="10" value="1800">
+            </div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1">
+              <label>PTO, rpm (якщо вибрано ВВП)</label>
+              <select id="ptoRpm">
+                <option value="540">540</option>
+                <option value="1000" selected>1000</option>
+              </select>
+            </div>
+            <div style="flex:1">
+              <label>Передатне двигун→PTO (довідково)</label>
+              <input id="eng2pto" type="number" step="0.01" value="1.88">
+            </div>
+          </div>
+          <p class="small">При <span class="mono">engine</span> джерелом є <b>engRpm</b>. При <span class="mono">pto</span> — <b>ptoRpm</b>.</p>
+        </div>
+
+        <div class="box">
+          <h3>Доступні шківи/зірочки (підбір)</h3>
+          <p class="small">Через кому: <span class="mono">діаметри мм</span> для ременя або <span class="mono">зуби</span> для ланцюга.</p>
+          <div class="row">
+            <div style="flex:1"><label>Ремені — діаметри, мм</label><input id="pulleyList" type="text" value="80,100,120,140,160,180,200"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Зірочки — зуби</label><input id="sprocketList" type="text" value="12,14,15,16,18,20,22,24"></div>
+          </div>
+          <p class="small">Підбір шукає найближче передатне до цільових обертів/швидкості.</p>
+        </div>
+
+        <div class="box">
+          <h3>Керування</h3>
+          <div class="row">
+            <button class="btn" onclick="addRow()">➕ Додати вузол</button>
+            <button class="btn" onclick="preset()">🧪 Приклад</button>
+            <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+            <button class="btn" onclick="copyCSV()">📋 CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ТАБЛИЦЯ ВУЗЛІВ -->
+    <div class="card">
+      <h2>🧱 Вузли приводу</h2>
+      <div style="overflow:auto">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Вузол</th>
+              <th>Тип</th>
+              <th>Ведучий (D мм / зуби)</th>
+              <th>Ведений (D мм / зуби)</th>
+              <th>Барабан D, мм</th>
+              <th>Ціль rpm</th>
+              <th>Ціль м/с</th>
+              <th class="dark">i (вих/вх)</th>
+              <th class="dark">rpm вих.</th>
+              <th class="dark">м/с</th>
+              <th class="dark">Відхилення</th>
+              <th class="dark">Потр. rpm двигуна</th>
+              <th class="dark">Рекоменд. пара</th>
+              <th>Примітка</th>
+            </tr>
+          </thead>
+          <tbody id="body"></tbody>
+          <tfoot>
+            <tr>
+              <th class="dark" colspan="9">Середні відхилення</th>
+              <th class="dark" colspan="2">—</th>
+              <th class="dark" id="avgDev">—</th>
+              <th class="dark" colspan="2">—</th>
+              <th></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="csv" class="out" style="margin-top:8px">—</div>
+      <p class="small">CSV: <span class="mono"># | Вузол | Тип | Ведучий | Ведений | Dбарабана | Ціль_rpm | Ціль_мс | i | rpm_вих | м_с | Відхилення% | Потр_engine_rpm | Реком_пара | Прим.</span></p>
+      <p class="small muted">Контраст забезпечено: темні клітинки (<span class="mono">.dark</span>) мають світлий текст.</p>
+    </div>
+
+    <!-- КВИТОК 58 ММ + NFC -->
+    <div class="card">
+      <h2>🧾 Квиток 58 мм та NFC</h2>
+      <div class="grid g2">
+        <div class="box">
+          <h3>NFC — налаштування вузла</h3>
+          <div class="row">
+            <div style="flex:1"><label>ID машини</label><input id="nfcId" type="text" value="TR-001"></div>
+            <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+            <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          </div>
+          <div id="nfcOut" class="out">—</div>
+        </div>
+
+        <div class="box">
+          <h3>Квиток (обраний рядок)</h3>
+          <div class="row">
+            <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+            <button class="btn" onclick="window.print()">🖨️ Друк</button>
+          </div>
+          <div class="ticket" id="ticket" style="margin-top:8px">
+            <h4>НАЛАШТУВАННЯ ПРИВОДУ</h4>
+            <p id="tDate"><small>Дата: —</small></p>
+            <div class="line"></div>
+            <p><b>Вузол:</b> <span id="tNode">—</span> · <b>Тип:</b> <span id="tType">—</span></p>
+            <p><b>Пара:</b> <span id="tPair">—</span> · <b>i:</b> <span id="tI">—</span></p>
+            <p><b>rpm вих.:</b> <span id="tRpm">—</span> · <b>м/с:</b> <span id="tMs">—</span></p>
+            <div class="line"></div>
+            <p><b>Цілі:</b> rpm <span id="tRpmT">—</span> · м/с <span id="tMsT">—</span></p>
+            <p><b>Потр. rpm двигуна:</b> <span id="tNeed">—</span></p>
+            <p><small id="tRec">Рекомендація: —</small></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ХІД РОБОТИ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+      <ol>
+        <li>Вибери <b>джерело обертів</b> (двигун або ВВП) і задай стартові rpm.</li>
+        <li>Додай 2–4 вузли: тип приводу, пари шківів/зірочок, діаметр барабана (якщо є), цілі <b>rpm</b> або <b>м/с</b>.</li>
+        <li>Перерахуй, проаналізуй відхилення, підбери <b>engine rpm</b> або альтернативну пару.</li>
+        <li>Згенеруй <b>NFC</b>-текст та <b>квиток 58 мм</b>. Експортуй <b>CSV</b> у Sheets (<span class="mono">Drives</span>).</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Коректні розрахунки i, rpm та м/с по вузлах</td><td>4</td></tr>
+          <tr><td>Аргументований підбір engine rpm або пари шківів/зірочок</td><td>3</td></tr>
+          <tr><td>Квиток 58 мм і NFC-текст</td><td>2</td></tr>
+          <tr><td>CSV у Sheets + висновки</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">🌀 ВВП</p><p class="pill">🧮 Передатні</p><p class="pill">📏 м/с</p><p class="pill">🧾 Чек</p><p class="pill">🔖 NFC</p>
+    </div>
+  </div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const bodyEl = document.getElementById('body');
+  const csvEl  = document.getElementById('csv');
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2) => Number((+n).toFixed(d));
+
+  function srcRPM(){
+    const mode = byId('srcMode').value;
+    if(mode==='engine') return +byId('engRpm').value || 0;
+    const pto = +byId('ptoRpm').value || 0;
+    return pto;
+  }
+
+  function addRow(sample){
+    const def = { node:'Конвеєр насіння', type:'belt', drv:120, drn:200, drum:160, rpmT:180, msT:0.0, note:'' };
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.node}"></td>
+      <td>
+        <select>
+          <option value="direct" ${s.type==='direct'?'selected':''}>direct</option>
+          <option value="belt" ${s.type==='belt'?'selected':''}>belt</option>
+          <option value="chain" ${s.type==='chain'?'selected':''}>chain</option>
+        </select>
+      </td>
+      <td><input type="number" step="1" value="${s.drv}"></td>
+      <td><input type="number" step="1" value="${s.drn}"></td>
+      <td><input type="number" step="1" value="${s.drum}"></td>
+      <td><input type="number" step="1" value="${s.rpmT}"></td>
+      <td><input type="number" step="0.01" value="${s.msT}"></td>
+      <td class="dark i">—</td>
+      <td class="dark rpm">—</td>
+      <td class="dark ms">—</td>
+      <td class="dark dev">—</td>
+      <td class="dark need">—</td>
+      <td class="dark rec">—</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyEl.appendChild(tr);
+    reindex();
+  }
+
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  function ratio(type, drv, drn){
+    if(type==='direct') return 1;
+    if(type==='belt'){ // i = Ddrive/Ddriven
+      return (drv>0 && drn>0)? (drv/drn) : 0;
+    }
+    if(type==='chain'){ // i = zdrive/zdriven
+      return (drv>0 && drn>0)? (drv/drn) : 0;
+    }
+    return 0;
+  }
+
+  function toMs(drum_mm, rpm){
+    if(!(drum_mm>0 && rpm>0)) return 0;
+    const circumference_m = Math.PI * (drum_mm/1000);
+    return (circumference_m * rpm) / 60;
+  }
+
+  function neededEngineRPM(type, drv, drn, drum, targetRPM, targetMS){
+    // повертає потрібні оберти джерела щоб досягти цілі
+    const i = ratio(type, drv, drn);
+    if(i<=0) return 0;
+    if(targetRPM>0) return targetRPM / i;
+    if(targetMS>0 && drum>0){
+      const rpmOut = (targetMS * 60) / (Math.PI * (drum/1000));
+      return rpmOut / i;
+    }
+    return 0;
+  }
+
+  function parseList(str){
+    return str.split(',').map(s=>+s.trim()).filter(x=>x>0).sort((a,b)=>a-b);
+  }
+
+  function suggestPair(type, want_i){
+    if(!(want_i>0)) return null;
+    if(type==='belt'){
+      const arr = parseList(byId('pulleyList').value);
+      let best=null, bestErr=1e9, pair='—';
+      for(const d1 of arr) for(const d2 of arr){
+        const i = d1/d2;
+        const err = Math.abs(i - want_i)/want_i;
+        if(err<bestErr){ bestErr=err; best={d1,d2,i}; }
+      }
+      if(best) pair = `${best.d1}/${best.d2} (i=${rnd(best.i,3)})`;
+      return { text: pair, err: bestErr };
+    } else if(type==='chain'){
+      const arr = parseList(byId('sprocketList').value);
+      let best=null, bestErr=1e9, pair='—';
+      for(const z1 of arr) for(const z2 of arr){
+        const i = z1/z2;
+        const err = Math.abs(i - want_i)/want_i;
+        if(err<bestErr){ bestErr=err; best={z1,z2,i}; }
+      }
+      if(best) pair = `${best.z1}T/${best.z2}T (i=${rnd(best.i,3)})`;
+      return { text: pair, err: bestErr };
+    }
+    return null;
+  }
+
+  function recalc(){
+    const src = srcRPM();
+    let devSum=0, nDev=0;
+
+    [...bodyEl.querySelectorAll('tr')].forEach(tr=>{
+      const type = tr.children[2].querySelector('select').value;
+      const drv  = +tr.children[3].querySelector('input').value || 0;
+      const drn  = +tr.children[4].querySelector('input').value || 0;
+      const drum = +tr.children[5].querySelector('input').value || 0;
+      const rpmT = +tr.children[6].querySelector('input').value || 0;
+      const msT  = +tr.children[7].querySelector('input').value || 0;
+
+      const i = ratio(type, drv, drn);
+      const rpmOut = src * i;
+      const ms = toMs(drum, rpmOut);
+
+      let devPct = 0, basis=0;
+      if(rpmT>0){ basis=rpmT; devPct = (rpmOut - rpmT)/rpmT*100; }
+      else if(msT>0){ basis=msT; devPct = (ms - msT)/msT*100; }
+
+      if(basis>0){ devSum += Math.abs(devPct); nDev++; }
+
+      const needSrc = neededEngineRPM(type, drv, drn, drum, rpmT, msT);
+      let rec='—';
+      if(needSrc>0){
+        // Якщо режим — PTO, підбір неможливий зміною engine rpm напряму (фіксовані 540/1000).
+        if(byId('srcMode').value==='pto'){
+          // Тоді підбираємо пару з бажаним i_target = rpmT/src або з msT
+          let i_target = 0;
+          if(rpmT>0) i_target = rpmT / src;
+          else if(msT>0 && drum>0){
+            const rpmFromMs = (msT*60)/(Math.PI*(drum/1000));
+            i_target = rpmFromMs / src;
+          }
+          const sug = suggestPair(type, i_target);
+          rec = sug? sug.text : '—';
+        } else {
+          // Можемо просто змінити оберти двигуна
+          rec = `engine ≈ ${Math.round(needSrc)} rpm`;
+        }
+      }
+
+      tr.querySelector('.i').textContent   = i? rnd(i,3) : '—';
+      tr.querySelector('.rpm').textContent = rpmOut? rnd(rpmOut,1) : '—';
+      tr.querySelector('.ms').textContent  = ms? rnd(ms,2) : '—';
+      tr.querySelector('.dev').textContent = (basis>0)? rnd(devPct,1)+'%' : '—';
+      tr.querySelector('.dev').style.color = (basis>0)? (Math.abs(devPct)<=5?'#10b981':(Math.abs(devPct)<=12?'#f59e0b':'#ef4444')) : '';
+      tr.querySelector('.need').textContent= (needSrc>0 && byId('srcMode').value==='engine')? Math.round(needSrc) : '—';
+      tr.querySelector('.rec').textContent = rec;
+    });
+
+    byId('avgDev').textContent = nDev? rnd(devSum/nDev,1)+'%' : '—';
+    buildCSV();
+  }
+
+  function buildCSV(){
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx=tr.querySelector('.idx').textContent.trim();
+      const node=tr.children[1].querySelector('input').value.trim();
+      const type=tr.children[2].querySelector('select').value.trim();
+      const drv =tr.children[3].querySelector('input').value.trim();
+      const drn =tr.children[4].querySelector('input').value.trim();
+      const drum=tr.children[5].querySelector('input').value.trim();
+      const rpmT=tr.children[6].querySelector('input').value.trim();
+      const msT =tr.children[7].querySelector('input').value.trim();
+      const i   =tr.querySelector('.i').textContent.trim();
+      const rpm =tr.querySelector('.rpm').textContent.trim();
+      const ms  =tr.querySelector('.ms').textContent.trim();
+      const dev =tr.querySelector('.dev').textContent.trim();
+      const need=tr.querySelector('.need').textContent.trim();
+      const rec =tr.querySelector('.rec').textContent.trim();
+      const note=tr.children[14].querySelector('input').value.trim();
+      return [idx,node,type,drv,drn,drum,rpmT,msT,i,rpm,ms,dev,need,rec,note].join(' | ');
+    });
+    csvEl.textContent = lines.join('\n') || '—';
+  }
+
+  function copyCSV(){
+    const t = csvEl.textContent.trim();
+    if(!t || t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+
+  function preset(){
+    bodyEl.innerHTML='';
+    // 3 приклади: ремінь на конвеєр, ланцюг на вентилятор, прямий PTO вал
+    addRow({node:'Конвеєр насіння', type:'belt',  drv:120, drn:200, drum:160, rpmT:180, msT:0.0, note:'шків 120/200'});
+    addRow({node:'Вентилятор охолодж.', type:'chain', drv:15, drn:20, drum:0, rpmT:2200, msT:0.0, note:'зірочки 15/20'});
+    addRow({node:'Насос гідро', type:'direct', drv:1, drn:1, drum:0, rpmT:1500, msT:0.0, note:'вал напряму'});
+    recalc();
+  }
+
+  // ===== Квиток 58 мм =====
+  function buildTicket(){
+    const tr = bodyEl.querySelector('tr') || null;
+    const d  = new Date().toISOString().slice(0,10);
+    byId('tDate').innerHTML = `<small>Дата: ${d}</small>`;
+    if(!tr){ return; }
+    const node = tr.children[1].querySelector('input').value.trim();
+    const type = tr.children[2].querySelector('select').value.trim();
+    const drv  = tr.children[3].querySelector('input').value.trim();
+    const drn  = tr.children[4].querySelector('input').value.trim();
+    const i    = tr.querySelector('.i').textContent.trim();
+    const rpm  = tr.querySelector('.rpm').textContent.trim();
+    const ms   = tr.querySelector('.ms').textContent.trim();
+    const rpmT = tr.children[6].querySelector('input').value.trim();
+    const msT  = tr.children[7].querySelector('input').value.trim();
+    const need = tr.querySelector('.need').textContent.trim();
+    const rec  = tr.querySelector('.rec').textContent.trim();
+
+    byId('tNode').textContent = node;
+    byId('tType').textContent = type;
+    byId('tPair').textContent = `${drv}/${drn}`;
+    byId('tI').textContent    = i;
+    byId('tRpm').textContent  = rpm;
+    byId('tMs').textContent   = ms;
+    byId('tRpmT').textContent = rpmT || '—';
+    byId('tMsT').textContent  = msT  || '—';
+    byId('tNeed').textContent = need || '—';
+    byId('tRec').textContent  = `Рекомендація: ${rec || '—'} · Src:${byId('srcMode').value==='engine'? byId('engRpm').value+' rpm' : ('PTO '+byId('ptoRpm').value+' rpm')}`;
+  }
+
+  // ===== NFC =====
+  function buildNFC(){
+    const tr = bodyEl.querySelector('tr') || null;
+    if(!tr){ alert('Додай хоча б один вузол.'); return; }
+    const text = [
+      `DRIVE_NFC`,
+      `MACHINE:${byId('nfcId').value}`,
+      `CONTACT:${byId('nfcPhone').value}`,
+      `MODE:${byId('srcMode').value==='engine'?'ENGINE':'PTO'}`,
+      `SRC_RPM:${srcRPM()}`,
+      `NODE:${tr.children[1].querySelector('input').value.trim()}`,
+      `TYPE:${tr.children[2].querySelector('select').value.trim()}`,
+      `PAIR:${tr.children[3].querySelector('input').value.trim()}/${tr.children[4].querySelector('input').value.trim()}`,
+      `I:${tr.querySelector('.i').textContent.trim()}`,
+      `RPM_OUT:${tr.querySelector('.rpm').textContent.trim()}`,
+      `MS:${tr.querySelector('.ms').textContent.trim()}`,
+      `TARGET_RPM:${tr.children[6].querySelector('input').value.trim()}`,
+      `TARGET_MS:${tr.children[7].querySelector('input').value.trim()}`,
+      `NEED_ENGINE_RPM:${tr.querySelector('.need').textContent.trim()}`,
+      `REC:${tr.querySelector('.rec').textContent.trim()}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = text;
+  }
+
+  // ===== Утиліти =====
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // Ініціалізація
+  (function init(){ addRow(); addRow(); recalc(); })();
+
+  // Слухачі
+  ['srcMode','engRpm','ptoRpm','eng2pto','pulleyList','sprocketList'].forEach(id=>{
+    document.getElementById(id).addEventListener('change', recalc);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!-- mechanic_para14.html
+     ПАРА 14 (аудиторно) для механіків
+     Тема: ДВИГУН І ТЕПЛОВІ РЕЖИМИ — витрата палива, питома витрата (BSFC),
+           теплова потужність до охолодження, концентрація антифризу (замерзання/закипання),
+           тиск кришки радіатора, тест термостата, журнал, квиток 58 мм, NFC, CSV.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; (опц.) витратомір/мірна колба, термометр OBD/сканер, принтер 58 мм, NFC.
+
+     Примітка щодо контрасту: темні клітинки таблиць мають світлий текст (.dark).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 14 (механіки) — Двигун і теплові режими: витрата, BSFC, антифриз, тиск, термостат, квиток 58 мм, NFC</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 14 · аудиторно · механіки</span>
+  <h1>🔥 Двигун і теплові режими: витрата, BSFC, охолодження, антифриз, тиск, термостат, квиток 58 мм, NFC</h1>
+
+  <div class="card">
+    <h2>🎯 Мета</h2>
+    <p>
+      За пару студенти навчаться визначати <b>годинну витрату палива</b> та <b>питому витрату (BSFC)</b>,
+      оцінювати <b>теплове навантаження на систему охолодження</b>, підбирати <b>концентрацію антифризу</b> під клімат,
+      враховувати <b>тиск кришки радіатора</b> і <b>стан термостата</b>, формувати <b>журнал</b>, <b>квиток 58 мм</b>,
+      <b>NFC</b> і <b>CSV</b>.
+    </p>
+    <p class="small">Дизпаливо: <span class="mono">ρ≈0.84 кг/л</span>, <span class="mono">LHV≈42.6 МДж/кг</span>.
+      Типові ККД дизеля на повному навантаженні ~ <span class="mono">35–42%</span>. Антифриз (етиленгліколь): максимум захисту ~ <span class="mono">50–60%</span>.</p>
+  </div>
+
+  <!-- 1. ВИТРАТА ПАЛИВА / BSFC -->
+  <div class="card">
+    <h2>⛽ Витрата палива та питома витрата (BSFC)</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Вимір / умови</h3>
+        <div class="row">
+          <div style="flex:1"><label>Метод</label>
+            <select id="fuelMode">
+              <option value="mass" selected>маса/час (кг/год)</option>
+              <option value="vol">об'єм/час (л/год)</option>
+              <option value="volTime">об'єм і час (л за t)</option>
+            </select>
+          </div>
+          <div style="flex:1"><label>Маса, кг/год · об'єм, л/год · л</label><input id="fuelA" type="number" step="0.01" value="20"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Час t, хв (для методу “л за t”)</label><input id="fuelT" type="number" step="0.1" value="10"></div>
+          <div style="flex:1"><label>Густина ρ, кг/л</label><input id="rho" type="number" step="0.01" value="0.84"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Ефективна потужність, кВт</label><input id="Pout" type="number" step="0.1" value="120"></div>
+          <div style="flex:1"><label>Нижча теплота LHV, МДж/кг</label><input id="LHV" type="number" step="0.1" value="42.6"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Результат</h3>
+        <p>Витрата <b>ṁ</b>: <b><span id="mDot">—</span></b> кг/год ( <span id="lph">—</span> л/год )</p>
+        <p>BSFC: <b><span id="bsfc">—</span></b> г/кВт·год</p>
+        <p>ККД енергетичний: <b><span id="eta">—</span></b> %</p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcFuel()">🔁 Перерахувати</button>
+          <button class="btn" onclick="presetFuel()">🧪 Приклад</button>
+          <button class="btn" onclick="copyCSV('csvFuel')">📋 CSV (fuel)</button>
+        </div>
+        <div id="csvFuel" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+    <p class="small muted">BSFC = <span class="mono">ṁ пал (г/год) / Pвих (кВт)</span>. ККД ≈ <span class="mono">Pвих / (ṁ·LHV)</span>.</p>
+  </div>
+
+  <!-- 2. ТЕПЛОВА ПОТУЖНІСТЬ ДО ОХОЛОДЖЕННЯ -->
+  <div class="card">
+    <h2>🌡️ Теплова потужність до охолодження</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Вихідні</h3>
+        <div class="row">
+          <div style="flex:1"><label>Частка втрат на охолодження, %</label><input id="coolFrac" type="number" step="1" value="25"></div>
+          <div style="flex:1"><label>Дебіт ОЖ, л/хв</label><input id="coolFlow" type="number" step="1" value="120"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Вхід ОЖ, °C</label><input id="Tin" type="number" step="0.1" value="85"></div>
+          <div style="flex:1"><label>Вихід ОЖ, °C</label><input id="Tout" type="number" step="0.1" value="95"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Результат</h3>
+        <p>Q̇ охол. (оцінка): <b><span id="Qcool">—</span></b> кВт</p>
+        <p>За витратою ОЖ: <b><span id="Qmeas">—</span></b> кВт</p>
+        <p>Статус: <b><span id="coolFlag">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcCool()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvCool')">📋 CSV (cooling)</button>
+        </div>
+        <div id="csvCool" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+    <p class="small muted">Оцінка: <span class="mono">Q̇охол ≈ частка% · Pпалива</span>, де <span class="mono">Pпалива = ṁ·LHV</span>.
+      Перевірка по витраті: <span class="mono">Q̇=ṁОЖ·c·ΔT</span>, з <span class="mono">c≈3.6 кДж/(кг·°C)</span>, <span class="mono">ρОЖ≈1.05 кг/л</span>.</p>
+  </div>
+
+  <!-- 3. АНТИФРИЗ: КОНЦЕНТРАЦІЯ / ТОЧКИ -->
+  <div class="card">
+    <h2>🧪 Антифриз: концентрація, замерзання та закипання</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Параметри</h3>
+        <div class="row">
+          <div style="flex:1"><label>% етиленгліколю</label><input id="eg" type="number" step="1" value="50"></div>
+          <div style="flex:1"><label>Тиск кришки, бар</label><input id="cap" type="number" step="0.05" value="1.2"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Атмосф. тиск, бар</label><input id="atm" type="number" step="0.01" value="1.0"></div>
+          <div style="flex:1"><label>Мета мін. T, °C</label><input id="TminTarget" type="number" step="1" value="-30"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Результат</h3>
+        <p>Замерзання: <b><span id="Tf">—</span></b> °C</p>
+        <p>Закипання (під тиском): <b><span id="Tb">—</span></b> °C</p>
+        <p>Статус суміші: <b><span id="mixFlag">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcAF()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvAF')">📋 CSV (antifreeze)</button>
+        </div>
+        <div id="csvAF" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+    <p class="small muted">Наближені характеристики етиленгліколю: 40% ≈ −25°C / +105°C@1.1 бар; 50% ≈ −37°C / +108–110°C@1.1–1.2; 60% ≈ −55°C / +112°C, але теплоємність гірша.</p>
+  </div>
+
+  <!-- 4. ТЕРМОСТАТ: ТЕСТ -->
+  <div class="card">
+    <h2>🧩 Термостат: відкриття та стабілізація</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Виміри</h3>
+        <div class="row">
+          <div style="flex:1"><label>T початку відкриття (паспорт), °C</label><input id="TopenSpec" type="number" step="0.1" value="82"></div>
+          <div style="flex:1"><label>T стабілізації під навантаж., °C</label><input id="Tstab" type="number" step="0.1" value="92"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Темп. навкол., °C</label><input id="Tamb" type="number" step="0.1" value="15"></div>
+          <div style="flex:1"><label>Навантаження, %</label><input id="loadPct" type="number" step="1" value="70"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Оцінка</h3>
+        <p>Офсет відкриття: <b><span id="Tofs">—</span></b> °C</p>
+        <p>Статус термостата: <b><span id="thermFlag">—</span></b></p>
+        <p>Порада: <b><span id="thermTip">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="calcTherm()">🔁 Перерахувати</button>
+          <button class="btn" onclick="copyCSV('csvTherm')">📋 CSV (thermostat)</button>
+        </div>
+        <div id="csvTherm" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ЖУРНАЛ -->
+  <div class="card">
+    <h2>📒 Журнал вимірів</h2>
+    <div class="row">
+      <button class="btn" onclick="addRow()">➕ Додати запис</button>
+      <button class="btn" onclick="presetRows()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tbl">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Режим/вузол</th>
+            <th>ṁ, кг/год</th>
+            <th class="dark">BSFC, г/кВт·год</th>
+            <th class="dark">Qохол, кВт</th>
+            <th class="dark">AF °C (F/B)</th>
+            <th>Термостат</th>
+            <th>Примітка</th>
+          </tr>
+        </thead>
+        <tbody id="body"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 6. КВИТОК + NFC -->
+  <div class="card">
+    <h2>🧾 Квиток 58 мм та NFC</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>NFC — “ENGINE HEAT CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Машина/двигун</label><input id="nfcId" type="text" value="TR-001/Engine-A"></div>
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+      <div class="box">
+        <h3>Квиток “ENGINE HEAT CHECK”</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>ENGINE HEAT CHECK</h4>
+          <p id="tDate"><small>Дата: —</small></p>
+          <div class="line"></div>
+          <p><b>ṁ:</b> <span id="tMDot">—</span> кг/год ( <span id="tLPH">—</span> л/год )</p>
+          <p><b>BSFC:</b> <span id="tBSFC">—</span> г/кВт·год · <b>η:</b> <span id="tEta">—</span> %</p>
+          <p><b>Qохол:</b> <span id="tQcool">—</span> кВт</p>
+          <p><b>AF F/B:</b> <span id="tAF">—</span> °C</p>
+          <p><b>Thermostat:</b> <span id="tTherm">—</span></p>
+          <div class="line"></div>
+          <p><small id="tNote">Прим.: —</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Визнач <b>витрату</b> (будь-яким із 3 методів) і <b>BSFC</b> при заданій потужності.</li>
+      <li>Оціни <b>Q̇ охолодження</b> двома способами (частка від палива та за витратою ОЖ).</li>
+      <li>Підібрай <b>концентрацію антифризу</b> під мінімальну температуру регіону; перевір <b>точку закипання</b> з урахуванням тиску.</li>
+      <li>Проаналізуй <b>термостат</b> за стабілізацією температури.</li>
+      <li>Заповни <b>журнал</b> (≥3 рядки), сформуй <b>NFC</b>, <b>квиток</b> та <b>CSV</b> (<span class="mono">EngineHeat</span>).</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Витрата/BSFC та ККД розраховані коректно</td><td>4</td></tr>
+        <tr><td>Оцінка Q̇ охолодження (2 методи) збігається в межах розумного</td><td>3</td></tr>
+        <tr><td>Антифриз/тиск/термостат — адекватні висновки</td><td>2</td></tr>
+        <tr><td>Квиток/NFC + CSV</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const bodyEl = document.getElementById('body');
+
+  // ===== 1) Паливо / BSFC =====
+  function calcFuel(){
+    const mode = byId('fuelMode').value;
+    const A = +byId('fuelA').value||0; // кг/год або л/год або л
+    const Tm = +byId('fuelT').value||0; // хв
+    const rho = +byId('rho').value||0.84; // кг/л
+    const P = +byId('Pout').value||0; // кВт
+    const LHV = (+byId('LHV').value||42.6) * 1e6; // Дж/кг
+
+    let mDot = 0, lph = 0;
+    if(mode==='mass'){ mDot = A; lph = (rho>0)? mDot/rho : 0; }
+    else if(mode==='vol'){ lph = A; mDot = lph * rho; }
+    else { // volTime
+      const l = A, h = (Tm>0)? (l * 60 / Tm) : 0; // л/год
+      lph = h; mDot = h * rho;
+    }
+
+    const bsfc = (P>0)? (mDot*1000)/P : 0; // г/кВт·год
+    const Pin = mDot * LHV / 3600; // Вт (бо mDot у кг/год → /3600)
+    const eta = (Pin>0)? (P*1000)/Pin : 0;
+
+    byId('mDot').textContent = rnd(mDot,2);
+    byId('lph').textContent = rnd(lph,2);
+    byId('bsfc').textContent = rnd(bsfc,0);
+    byId('eta').textContent = rnd(eta*100,1);
+
+    const csv = `FUEL|mode=${mode}|mDot=${rnd(mDot,2)}kgph|lph=${rnd(lph,2)}lph|Pout=${P}kW|BSFC=${rnd(bsfc,0)}g/kWh|eta=${rnd(eta*100,1)}%`;
+    byId('csvFuel').textContent = csv;
+
+    return {mDot,lph,bsfc,eta,P,LHV};
+  }
+  function presetFuel(){
+    byId('fuelMode').value='volTime'; byId('fuelA').value=3.5; byId('fuelT').value=10; byId('rho').value=0.84; byId('Pout').value=110; byId('LHV').value=42.6;
+    calcFuel();
+  }
+
+  // ===== 2) Охолодження =====
+  function calcCool(){
+    const f = calcFuel();
+    const frac = (+byId('coolFrac').value||25)/100;
+    const coolFlow = +byId('coolFlow').value||0; // л/хв
+    const Tin = +byId('Tin').value||0;
+    const Tout = +byId('Tout').value||0;
+    const dT = Math.max(0, Tout - Tin);
+
+    // Оцінка від палива
+    const Pin = f.mDot * (f.LHV) / 3600; // Вт
+    const Qcool = frac * Pin / 1000; // кВт
+
+    // За витратою ОЖ
+    const rho = 1.05; // кг/л
+    const c = 3600;   // Дж/(кг·°C) ~ 3.6 кДж/кг°C
+    const mDotCool = coolFlow * rho / 60; // кг/с
+    const Qmeas = mDotCool * c * dT / 1000; // кВт
+
+    let flag='🟢 узгоджено', color='#10b981';
+    if(Qmeas>0 && Math.abs(Qmeas - Qcool) > Math.max(10, 0.2*Qcool)){
+      flag='🟠 розбіжність — перевірити дані/датчики'; color='#f59e0b';
+    }
+
+    byId('Qcool').textContent = rnd(Qcool,1);
+    byId('Qmeas').textContent = rnd(Qmeas,1);
+    byId('coolFlag').textContent = flag; byId('coolFlag').style.color = color;
+
+    const csv = `COOL|frac=${(frac*100).toFixed(0)}%|Qcool≈${rnd(Qcool,1)}kW|Qmeas≈${rnd(Qmeas,1)}kW|Tin=${Tin}C|Tout=${Tout}C|Flow=${coolFlow}lpm|flag=${flag}`;
+    byId('csvCool').textContent = csv;
+
+    return {Qcool,Qmeas,flag};
+  }
+
+  // ===== 3) Антифриз =====
+  function mapEGtoFreeze(eg){
+    // Груба апроксимація кривої замерзання (етиленгліколь, % мас.)
+    // 0%: 0°C; 30%: -15; 40%: -25; 50%: -37; 60%: -55
+    if(eg<=0) return 0;
+    if(eg<=30) return 0 + (eg/30)*(-15);
+    if(eg<=40) return -15 + ((eg-30)/10)*(-10);
+    if(eg<=50) return -25 + ((eg-40)/10)*(-12);
+    if(eg<=60) return -37 + ((eg-50)/10)*(-18);
+    return -55 + (eg-60)*(-0.5); // далі погіршення
+  }
+  function mapEGtoBoilBase(eg){
+    // Темп. кипіння при 1 бар (атм): вода 100°C; 50% EG ≈ 108°C
+    if(eg<=0) return 100;
+    if(eg<=50) return 100 + (eg/50)*8;
+    if(eg<=60) return 108 + ((eg-50)/10)*4; // до ~112
+    return 112 + (eg-60)*0.2;
+  }
+  function calcAF(){
+    const eg = +byId('eg').value||0;
+    const cap = +byId('cap').value||1.2; // додатковий тиск над атм
+    const atm = +byId('atm').value||1.0;
+    const target = +byId('TminTarget').value||-30;
+
+    const Tf = mapEGtoFreeze(eg);
+    const Tb0 = mapEGtoBoilBase(eg);
+    // Підняття точки кипіння з тиском (набл.): ~+10°C на кожен +1 бар відносного
+    const Tb = Tb0 + cap*10;
+
+    let flag='🟢 ок', color='#10b981';
+    if(Tf>target){ flag='🔴 суміш слабка для регіону'; color='#ef4444'; }
+    else if(eg>60){ flag='🟠 занадто концентрована (низька теплоємність)'; color='#f59e0b'; }
+
+    byId('Tf').textContent = rnd(Tf,0);
+    byId('Tb').textContent = rnd(Tb,0);
+    byId('mixFlag').textContent = flag; byId('mixFlag').style.color = color;
+
+    const csv = `AF|EG=${eg}%|Freeze=${rnd(Tf,0)}C|Boil@${cap+atm}bar=${rnd(Tb,0)}C|TargetMin=${target}C|flag=${flag}`;
+    byId('csvAF').textContent = csv;
+
+    return {Tf,Tb,flag,eg,cap};
+  }
+
+  // ===== 4) Термостат =====
+  function calcTherm(){
+    const Tspec = +byId('TopenSpec').value||0;
+    const Tstab = +byId('Tstab').value||0;
+    const Tamb = +byId('Tamb').value||0;
+    const load = +byId('loadPct').value||0;
+
+    const ofs = Tstab - Tspec;
+    let flag='🟢 ок', tip='стабільна робота';
+    if(Tstab< Tspec-2){ flag='🔴 застрягає відкритим / рано відкривається'; tip='довге прогрівання, низька ефективність опалення'; }
+    else if(Tstab> Tspec+12){ flag='🔴 пізнє відкриття / недостатній потік'; tip='перевірити термостат, насос, радіатор'; }
+    else if(ofs>8 && load<50){ flag='🟠 висока стабілізація без навантаження'; tip='забруднення сот / низький обдув'; }
+
+    byId('Tofs').textContent = rnd(ofs,1);
+    byId('thermFlag').textContent = flag; byId('thermFlag').style.color = (flag.includes('🔴')?'#ef4444':flag.includes('🟠')?'#f59e0b':'#10b981');
+    byId('thermTip').textContent = tip;
+
+    const csv = `THERM|Spec=${Tspec}C|Stab=${Tstab}C|Offset=${rnd(ofs,1)}C|Load=${load}%|Tamb=${Tamb}C|Flag=${flag}|Tip=${tip}`;
+    byId('csvTherm').textContent = csv;
+
+    return {ofs,flag,tip};
+  }
+
+  // ===== 5) Журнал =====
+  function addRow(sample){
+    const f = calcFuel(); const c = calcCool(); const af = calcAF(); const t = calcTherm();
+    const def = {
+      node:'Польовий режим 75%',
+      md:rnd(f.mDot,2),
+      bsfc:rnd(f.bsfc,0),
+      q:rnd(c.Qcool,1),
+      af:`${rnd(af.Tf,0)}/${rnd(af.Tb,0)}`,
+      th:`${rnd(t.ofs,1)}°C ${t.flag}`,
+      note:'ок'
+    };
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.node}"></td>
+      <td>${s.md}</td>
+      <td class="dark">${s.bsfc}</td>
+      <td class="dark">${s.q}</td>
+      <td class="dark">${s.af}</td>
+      <td>${s.th}</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyEl.appendChild(tr); reindex(); buildCSVlog();
+  }
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+  function presetRows(){
+    bodyEl.innerHTML='';
+    addRow({node:'Транспорт 50%', md:'12.6', bsfc:'235', q:'35.2', af:'-37/120', th:'7.0°C 🟢 ок', note:'норма'});
+    addRow({node:'Оранка 90%', md:'24.3', bsfc:'218', q:'62.5', af:'-37/120', th:'14.0°C 🔴', note:'прочистити радіатор'});
+    addRow({node:'Холостий 0%', md:'3.1',  bsfc:'—',  q:'5.2',  af:'-25/112', th:'-4.0°C 🔴', note:'термостат відкритий'});
+    buildCSVlog();
+  }
+  function buildCSVlog(){
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx=tr.querySelector('.idx').textContent.trim();
+      const node=tr.children[1].querySelector('input').value.trim();
+      const md  =tr.children[2].textContent.trim();
+      const bsfc=tr.children[3].textContent.trim();
+      const q   =tr.children[4].textContent.trim();
+      const af  =tr.children[5].textContent.trim();
+      const th  =tr.children[6].textContent.trim();
+      const note=tr.children[7].querySelector('input').value.trim();
+      return [idx,node,md,bsfc,q,af,th,note].join(' | ');
+    });
+    byId('csvLog').textContent = lines.join('\n') || '—';
+  }
+
+  // ===== 6) Квиток / NFC =====
+  function buildTicket(){
+    const f = calcFuel(); const c = calcCool(); const af = calcAF(); const t = calcTherm();
+    const d = new Date().toISOString().slice(0,10);
+    byId('tDate').innerHTML = `<small>Дата: ${d}</small>`;
+    byId('tMDot').textContent = rnd(f.mDot,2);
+    byId('tLPH').textContent = rnd(f.lph,2);
+    byId('tBSFC').textContent = rnd(f.bsfc,0);
+    byId('tEta').textContent = rnd(f.eta*100,1);
+    byId('tQcool').textContent = rnd(c.Qcool,1);
+    byId('tAF').textContent = `${rnd(af.Tf,0)}/${rnd(af.Tb,0)}`;
+    byId('tTherm').textContent = byId('thermFlag').textContent || '—';
+    byId('tNote').textContent = `EG=${byId('eg').value}%; cap=${byId('cap').value} бар; Tin/Tout=${byId('Tin').value}/${byId('Tout').value}°C`;
+  }
+  function buildNFC(){
+    const f = calcFuel(); const c = calcCool(); const af = calcAF(); const t = calcTherm();
+    const text = [
+      `ENGINE_HEAT_NFC`,
+      `ID:${byId('nfcId').value}`,
+      `FUEL:mDot=${rnd(f.mDot,2)}kgph (${rnd(f.lph,2)}lph); BSFC=${rnd(f.bsfc,0)}g/kWh; eta=${rnd(f.eta*100,1)}%`,
+      `COOL:Q≈${rnd(c.Qcool,1)}kW (Tin=${byId('Tin').value}C, Tout=${byId('Tout').value}C, Flow=${byId('coolFlow').value}lpm)`,
+      `AF:Freeze=${byId('Tf').textContent}C; Boil=${byId('Tb').textContent}C; EG=${byId('eg').value}%`,
+      `THERM:${byId('thermFlag').textContent}`,
+      `CONTACT:${byId('nfcPhone').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = text;
+  }
+
+  // ===== Утиліти =====
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // ===== Ініціалізація =====
+  (function init(){
+    calcFuel(); calcCool(); calcAF(); calcTherm();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select')) { calcFuel(); calcCool(); calcAF(); calcTherm(); }
+    });
+  })();
+</script>
+</body>
+</html>

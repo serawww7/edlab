@@ -1,0 +1,539 @@
+<!-- mechanic_para5.html
+     ПАРА 5 (аудиторно) для механіків
+     Тема: ГІДРАВЛІКА — тиск, витрата, потужність; циліндри й гідромотори; підбір шлангів; нагрів мастила; чек 58 мм; NFC; CSV
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages / Moodle (iframe).
+     Обладнання: телефони, 58 мм термопринтер (опц.), NFC-мітки (опц.).
+
+     Що вміє:
+     • Насос: Q з роб.об’єму та об/хв; Pгідр = p·Q/600 (кВт); ККД: об’ємний/механічний → фактичний Q, кВт.
+     • Споживачі: циліндр/мотор → сила/швидкість/час ходу, крутний момент/оберти/потужність.
+     • Шланги: швидкість потоку, орієнтовний Δp, рекомендація діаметра за цілями швидкості.
+     • Тепло: оцінка втрат кВт та мінімального об’єму бака, орієнтовна оцінка підвищення T за зміну.
+     • Квиток 58 мм “Гідрозавдання”, NFC-текст; CSV-експорт.
+     Формули (навчально):
+       Q[L/min] = (Vg[см³/об] · n[об/хв]) / 1000
+       Pгідр[kW] = p[bar] · Q[L/min] / 600
+       F[N] = p[Pa] · A[м²],  A = π·D²/4;  p[Pa] = p[bar]·1e5
+       vцил[м/с] = (Qчастки[L/хв]/60) / A
+       tхід[с] = хід[м] / vцил
+       Tмот[Н·м] ≈ (p[bar] · Vd[см³/об]) / (2π) · 0.1
+       nмот[об/хв] = (Qчастки[L/хв] · 1000) / Vd[см³/об]
+       vшланга[м/с] = (Q[L/хв]/60) / (π·(Dвн[м])²/4)
+       Δp[bar] ≈ K · L[м] · (Q[L/хв])² / (Dвн[мм])⁵   (K≈1.2e-6 навч.)
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 5 (механіки) — Гідравліка: насос, споживачі, шланги, тепло, чек 58 мм, NFC, CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px}
+  h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  .ok{color:#10b981}.warn{color:#f59e0b}.bad{color:#ef4444}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 5 · аудиторно · механіки</span>
+  <h1>💧 Гідравліка: насос → споживачі → шланги → тепло → чек 58 мм, NFC, CSV</h1>
+
+  <div class="card">
+    <h2>🎯 Мета</h2>
+    <p>
+      За пару студенти прорахують <b>насос/тиск/витрату/потужність</b>, параметри <b>циліндрів/моторів</b>, підберуть <b>шланги</b>,
+      оцінять <b>втрати та нагрів</b>, сформують <b>квиток 58 мм</b> і <b>NFC</b>-текст, вивантажать <b>CSV</b>.
+    </p>
+    <p class="small">Рекомендовані швидкості: всмоктувальна лінія <span class="mono">0.5–1.5 м/с</span>, напірна <span class="mono">2–4 м/с</span>, злив <span class="mono">1–2 м/с</span>.</p>
+  </div>
+
+  <!-- НАСОС + ТИСК + ККД -->
+  <div class="card">
+    <h2>⚙️ Насос і тиск</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Параметри насоса</h3>
+        <div class="row">
+          <div style="flex:1"><label>Vg, см³/об</label><input id="Vg" type="number" step="0.1" value="45"></div>
+          <div style="flex:1"><label>n, об/хв</label><input id="n" type="number" step="10" value="1800"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>ηᵥ (обʼємний)</label><input id="etaV" type="number" step="0.01" value="0.92"></div>
+          <div style="flex:1"><label>ηₘ (мех.)</label><input id="etaM" type="number" step="0.01" value="0.88"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Робочі умови</h3>
+        <div class="row">
+          <div style="flex:1"><label>Тиск системи, bar</label><input id="pBar" type="number" step="1" value="180"></div>
+          <div style="flex:1"><label>Частка навантаження, % часу</label><input id="duty" type="number" step="5" value="60"></div>
+        </div>
+        <p class="small">Для оцінки тепла береться середня потужність за цикл.</p>
+      </div>
+      <div class="box">
+        <h3>Підсумки насоса</h3>
+        <p>Qтеор: <b><span id="Qth">—</span></b> л/хв · Qфакт (ηᵥ): <b><span id="Qact">—</span></b> л/хв</p>
+        <p>Pгідр: <b><span id="Phyd">—</span></b> кВт · Pвалу (ηₘ): <b><span id="Pshaft">—</span></b> кВт</p>
+        <p>Середня Pвтрат ≈ <b><span id="Ploss">—</span></b> кВт</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- СПОЖИВАЧІ -->
+  <div class="card">
+    <h2>🧱 Споживачі (циліндри / мотори)</h2>
+    <div class="row">
+      <button class="btn" onclick="addCons()">➕ Додати</button>
+      <button class="btn" onclick="presetCons()">🧪 Приклад</button>
+      <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+      <button class="btn" onclick="copyCSV('csvC')">📋 CSV</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblC">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Тип</th>
+            <th>Назва</th>
+            <th>Qчастки, л/хв</th>
+            <th>p, bar</th>
+            <th>D цил., мм / Vd мотор, см³/об</th>
+            <th>Шток, мм</th>
+            <th>Хід, мм</th>
+            <th class="dark">F, кН / T, Н·м</th>
+            <th class="dark">vцил, мм/с / n, об/хв</th>
+            <th class="dark">tхід, с / P, кВт</th>
+            <th>Прим.</th>
+          </tr>
+        </thead>
+        <tbody id="bodyC"></tbody>
+      </table>
+    </div>
+    <div id="csvC" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- ШЛАНГИ -->
+  <div class="card">
+    <h2>🔩 Шланги (діаметр, швидкість, Δp)</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Параметри лінії</h3>
+        <div class="row">
+          <div style="flex:1"><label>Q, л/хв</label><input id="hoseQ" type="number" step="0.1" value="60"></div>
+          <div style="flex:1"><label>Довжина L, м</label><input id="hoseL" type="number" step="0.1" value="8"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Dвнутр, мм</label><input id="hoseD" type="number" step="1" value="12"></div>
+          <div style="flex:1"><label>Призначення</label>
+            <select id="hoseRole">
+              <option value="suction">всмоктувальна</option>
+              <option value="pressure" selected>напірна</option>
+              <option value="return">злив/повернення</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>Рекомендації діаметра</h3>
+        <p>Список діаметрів (мм):</p>
+        <input id="diamList" type="text" value="8,10,12,16,19,25">
+        <p class="small">Пошук мін. діаметра, що дає v у межах допустимого діапазону.</p>
+      </div>
+      <div class="box">
+        <h3>Розрахунок</h3>
+        <p>Швидкість v: <b><span id="hoseV">—</span></b> м/с · Δp: <b><span id="hoseDp">—</span></b> bar</p>
+        <p>Рекоменд. D: <b><span id="hoseRec">—</span></b> мм</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ТЕПЛО -->
+  <div class="card">
+    <h2>🌡️ Тепло та бак</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>Оцінка нагріву за зміну (навчально)</h3>
+        <div class="row">
+          <div style="flex:1"><label>Тривалість, год</label><input id="shiftH" type="number" step="0.5" value="6"></div>
+          <div style="flex:1"><label>Обʼєм бака, л</label><input id="tankL" type="number" step="1" value="120"></div>
+        </div>
+        <p>ΔT≈ <b><span id="dT">—</span></b> °C · Мін. бак ≈ <b><span id="tankMin">—</span></b> л</p>
+        <p class="small">Оцінка груба (тепловідвід не враховано): ΔT ≈ (Pвтрат[kW] · 860 · год) / (масу масла[кг]). ρ≈0.87 кг/л.</p>
+      </div>
+      <div class="box">
+        <h3>Підсумки системи</h3>
+        <p>ΣPспоживачів: <b><span id="sumPcons">—</span></b> кВт · Pвтрат (насос–спож.): <b><span id="lossSys">—</span></b> кВт</p>
+        <p class="small">Якщо Pвтрат висока → перевір шланги (v/Δp), тиск у лініях, редукційні клапани, теплообмінник.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- КВИТОК + NFC -->
+  <div class="card">
+    <h2>🧾 Квиток 58 мм та NFC</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>NFC — гідрозавдання</h3>
+        <div class="row">
+          <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток “Гідрозавдання”</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>ГІДРОЗАВДАННЯ</h4>
+          <p id="tDate"><small>Дата: —</small></p>
+          <div class="line"></div>
+          <p><b>Насос:</b> Q=<span id="tQ">—</span> л/хв; p=<span id="tP">—</span> bar</p>
+          <p><b>Потужність:</b> гідр <span id="tPh">—</span> кВт; вал <span id="tPs">—</span> кВт</p>
+          <p><b>Шланг:</b> Q=<span id="tHQ">—</span> л/хв; D=<span id="tHD">—</span> мм; v=<span id="tHV">—</span> м/с</p>
+          <div class="line"></div>
+          <p><b>Споживач:</b> <span id="tCons">—</span></p>
+          <p><b>Режим:</b> <span id="tConsMode">—</span></p>
+          <p><b>Орієнт. Δp:</b> <span id="tHdp">—</span> bar; <b>Pвтрат:</b> <span id="tLoss">—</span> кВт</p>
+          <div class="line"></div>
+          <p><small id="tNote">Прим.: —</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- КЕРУВАННЯ + CSV -->
+  <div class="card">
+    <h2>🪜 Хід роботи та CSV</h2>
+    <ol>
+      <li>Задай <b>насос</b> (Vg, n, η), тиск та частку навантаження.</li>
+      <li>Додай 2–4 <b>споживачі</b> (циліндр/мотор) з параметрами — перерахуй.</li>
+      <li>Підібери <b>шланг</b> за швидкістю потоку та Δp, перевір <b>тепло</b>.</li>
+      <li>Згенеруй <b>NFC</b> і <b>квиток 58 мм</b>. Скопіюй <b>CSV</b> у Sheets (<span class="mono">Hydraulics</span>).</li>
+    </ol>
+    <div class="row">
+      <button class="btn" onclick="copyCSV('csvFull')">📋 CSV (система+шланг)</button>
+    </div>
+    <div id="csvFull" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Насос: коректні Q, Pгідр, Pвалу</td><td>3</td></tr>
+        <tr><td>Споживачі: вірні розрахунки (сила/швидкість/час або момент/оберти/потужність)</td><td>3</td></tr>
+        <tr><td>Шланг: підбір діаметра за швидкістю, адекватний Δp; теплова оцінка</td><td>3</td></tr>
+        <tr><td>Квиток/NFC + CSV</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2) => Number((+n).toFixed(d));
+
+  // ==== Насос ====
+  function pumpCalc(){
+    const Vg = +byId('Vg').value||0;   // см3/об
+    const n  = +byId('n').value||0;    // об/хв
+    const etaV = +byId('etaV').value||0;
+    const etaM = +byId('etaM').value||0;
+    const pBar = +byId('pBar').value||0;
+
+    const Qth = (Vg*n)/1000;          // л/хв
+    const Qact = Qth * etaV;          // л/хв
+    const Phyd = (pBar * Qact)/600;   // кВт
+    const Pshaft = Phyd / (etaM>0?etaM:1); // кВт
+
+    byId('Qth').textContent = rnd(Qth,1);
+    byId('Qact').textContent = rnd(Qact,1);
+    byId('Phyd').textContent = rnd(Phyd,2);
+    byId('Pshaft').textContent = rnd(Pshaft,2);
+
+    const duty = (+byId('duty').value||0)/100;
+    const Ploss = Math.max(0, (Pshaft-Phyd) * duty);
+    byId('Ploss').textContent = rnd(Ploss,2);
+
+    return {Qth,Qact,Phyd,Pshaft,Ploss};
+  }
+
+  // ==== Споживачі ====
+  const bodyC = document.getElementById('bodyC');
+
+  function addCons(sample){
+    const def = { type:'cyl', name:'Підіймач', Q:20, p:160, D:60, rod:30, stroke:400, note:'' };
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td>
+        <select>
+          <option value="cyl" ${s.type==='cyl'?'selected':''}>циліндр</option>
+          <option value="mot" ${s.type==='mot'?'selected':''}>мотор</option>
+        </select>
+      </td>
+      <td><input type="text" value="${s.name}"></td>
+      <td><input type="number" step="0.1" value="${s.Q}"></td>
+      <td><input type="number" step="1" value="${s.p}"></td>
+      <td><input type="number" step="0.1" value="${s.D}"></td>
+      <td><input type="number" step="0.1" value="${s.rod}"></td>
+      <td><input type="number" step="1" value="${s.stroke}"></td>
+      <td class="dark ft">—</td>
+      <td class="dark v">—</td>
+      <td class="dark tP">—</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyC.appendChild(tr);
+    reindex(bodyC);
+  }
+  function reindex(tbody){[...tbody.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1);}
+
+  function presetCons(){
+    bodyC.innerHTML='';
+    addCons({type:'cyl',name:'Підіймач навіски',Q:18,p:170,D:70,rod:35,stroke:350});
+    addCons({type:'mot',name:'Гідромотор шнеку',Q:25,p:150,D:160,rod:0,stroke:0}); // D поле використаємо як Vd для мотора
+    recalc();
+  }
+
+  function calcConsumers(){
+    let sumP=0, anyName='—', anyMode='—';
+    [...bodyC.querySelectorAll('tr')].forEach((tr,idx)=>{
+      const type = tr.children[1].querySelector('select').value;
+      const name = tr.children[2].querySelector('input').value.trim();
+      const Q = +tr.children[3].querySelector('input').value||0; // л/хв
+      const p = +tr.children[4].querySelector('input').value||0; // bar
+      const D = +tr.children[5].querySelector('input').value||0; // для цил іннер діам; для моторів — тут будемо брати як Vd (см3/об)
+      const rod = +tr.children[6].querySelector('input').value||0;
+      const stroke = +tr.children[7].querySelector('input').value||0; // мм
+
+      if(idx===0){ anyName = name || (type==='cyl'?'циліндр':'мотор'); anyMode = (type==='cyl'?'хід':'оберт'); }
+
+      if(type==='cyl'){
+        const A = Math.PI * Math.pow(D/1000,2) / 4; // D мм → м
+        const Qm3s = (Q/1000)/60;                   // л/хв → м³/с
+        const v = A>0 ? Qm3s / A : 0;               // м/с
+        const F = (p*1e5) * A;                      // N
+        const t = (stroke/1000) / (v||1);           // с
+        const PkW = (p*Q)/600;                      // кВт (гідр потужність на цьому споживачі)
+
+        tr.querySelector('.ft').textContent = `${rnd(F/1000,1)} кН`;
+        tr.querySelector('.v').textContent  = `${rnd(v*1000,1)} мм/с`;
+        tr.querySelector('.tP').textContent = `${isFinite(t)?rnd(t,1):'—'} с / ${rnd(PkW,2)} кВт`;
+
+        sumP += PkW;
+      } else {
+        const Vd = Math.max(0,D);                   // см3/об (перевикористали поле D)
+        const nMot = Vd>0 ? (Q*1000)/Vd : 0;        // об/хв
+        const Tnm = (p * Vd * 0.1) / (2*Math.PI);   // Н·м (наближено)
+        const PkW = (p*Q)/600;                      // кВт
+
+        tr.querySelector('.ft').textContent = `${rnd(Tnm,1)} Н·м`;
+        tr.querySelector('.v').textContent  = `${rnd(nMot,0)} об/хв`;
+        tr.querySelector('.tP').textContent = `— / ${rnd(PkW,2)} кВт`;
+
+        sumP += PkW;
+      }
+    });
+    byId('sumPcons').textContent = rnd(sumP,2);
+    return {sumP, anyName, anyMode};
+  }
+
+  // ==== Шланги ====
+  function hoseCalc(){
+    const Q = +byId('hoseQ').value||0;      // л/хв
+    const L = +byId('hoseL').value||0;      // м
+    const Dmm = +byId('hoseD').value||0;    // мм
+    const role = byId('hoseRole').value;
+
+    const Dm = Dmm/1000;
+    const area = Math.PI*Math.pow(Dm,2)/4;
+    const v = area>0 ? ((Q/1000)/60)/area : 0; // м/с
+
+    // Орієнтовна втратна формула (навчально)
+    const K = 1.2e-6; // емпірична константа
+    const dp = L>0 && Dmm>0 ? K * L * Math.pow(Q,2) / Math.pow(Dmm,5) : 0; // bar
+
+    byId('hoseV').textContent  = rnd(v,2);
+    byId('hoseDp').textContent = rnd(dp,2);
+
+    // Підбір діаметра за швидкістю
+    let vMin=0.5, vMax=1.5;
+    if(role==='pressure'){ vMin=2; vMax=4; }
+    if(role==='return'){ vMin=1; vMax=2; }
+    const list = (byId('diamList').value||'').split(',').map(s=>+s.trim()).filter(x=>x>0).sort((a,b)=>a-b);
+    let rec = '—';
+    for(const d of list){
+      const area2 = Math.PI*Math.pow(d/1000,2)/4;
+      const v2 = ((Q/1000)/60)/area2;
+      if(v2>=vMin && v2<=vMax){ rec = d; break; }
+    }
+    byId('hoseRec').textContent = rec;
+
+    return {Q,L,Dmm,v,dp,rec};
+  }
+
+  // ==== Тепло ====
+  function heatCalc(PlossPump, sumPcons){
+    const shiftH = +byId('shiftH').value||0;
+    const tankL  = +byId('tankL').value||0;
+    const rho = 0.87;               // кг/л
+    const mass = tankL * rho;       // кг
+    // Втрати системні ≈ Pвалу – ΣPкорисна (грубо)
+    const lossSys = Math.max(0, PlossPump + Math.max(0, (pumpCalc().Phyd - sumPcons)));
+    byId('lossSys').textContent = rnd(lossSys,2);
+
+    // ΔT грубо без радіатора
+    const dT = mass>0 ? (lossSys * 860 * shiftH) / mass : 0; // °C
+    byId('dT').textContent = rnd(dT,1);
+
+    // Мін. бак: ~ 3×Qнасоса (емпірично)
+    const tankMin = 3 * pumpCalc().Qact;
+    byId('tankMin').textContent = rnd(tankMin,0);
+
+    return {lossSys,dT,tankMin};
+  }
+
+  // ==== Квиток/NFC/CSV ====
+  function buildTicket(){
+    const p = pumpCalc(), h = hoseCalc(), c = calcConsumers();
+    const d = new Date().toISOString().slice(0,10);
+    byId('tDate').innerHTML = `<small>Дата: ${d}</small>`;
+    byId('tQ').textContent = rnd(p.Qact,1);
+    byId('tP').textContent = (+byId('pBar').value||0);
+    byId('tPh').textContent = rnd(p.Phyd,2);
+    byId('tPs').textContent = rnd(p.Pshaft,2);
+    byId('tHQ').textContent = h.Q;
+    byId('tHD').textContent = h.Dmm;
+    byId('tHV').textContent = rnd(h.v,2);
+    byId('tCons').textContent = c.anyName;
+    byId('tConsMode').textContent = c.anyMode;
+    byId('tHdp').textContent = rnd(h.dp,2);
+    byId('tLoss').textContent = rnd(heatCalc(p.Ploss, c.sumP).lossSys,2);
+    byId('tNote').textContent = `Прим.: Автогенерація · Ref:${Math.random().toString(36).slice(2,8).toUpperCase()}`;
+  }
+
+  function buildNFC(){
+    const p = pumpCalc(), h = hoseCalc(), c = calcConsumers();
+    const text = [
+      `HYDRO_NFC`,
+      `MACHINE:${byId('nfcId').value}`,
+      `CONTACT:${byId('nfcPhone').value}`,
+      `PUMP_Q:${rnd(p.Qact,1)}LPM; P_SYS:${(+byId('pBar').value||0)}bar`,
+      `HOSE:Q=${h.Q}LPM; D=${h.Dmm}mm; v=${rnd(h.v,2)}mps; dP=${rnd(h.dp,2)}bar`,
+      `CONSUMER:${c.anyName}; MODE:${c.anyMode}; Psum=${rnd(c.sumP,2)}kW`,
+      `HEAT_LOSS:${rnd(heatCalc(p.Ploss,c.sumP).lossSys,2)}kW`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = text;
+  }
+
+  function buildCSV(){
+    const p = pumpCalc(), h = hoseCalc(), c = calcConsumers(), heat = heatCalc(p.Ploss,c.sumP);
+    const sys = [
+      `PUMP|Vg=${byId('Vg').value}cc_rev|n=${byId('n').value}rpm|etaV=${byId('etaV').value}|etaM=${byId('etaM').value}|p=${byId('pBar').value}bar|Q=${rnd(p.Qact,1)}|Phyd=${rnd(p.Phyd,2)}|Pshaft=${rnd(p.Pshaft,2)}|Ploss=${rnd(p.Ploss,2)}`,
+      `HOSE|Q=${h.Q}|L=${h.L}|D=${h.Dmm}|v=${rnd(h.v,2)}|dP=${rnd(h.dp,2)}|recD=${h.rec}`,
+      `HEAT|lossSys=${rnd(heat.lossSys,2)}|shift=${byId('shiftH').value}h|tank=${byId('tankL').value}L|dT=${rnd(heat.dT,1)}|tankMin=${rnd(heat.tankMin,0)}`
+    ].join('\n');
+    byId('csvFull').textContent = sys;
+
+    // Consumers CSV
+    const lines = [...bodyC.querySelectorAll('tr')].map(tr=>{
+      const idx=tr.querySelector('.idx').textContent.trim();
+      const type=tr.children[1].querySelector('select').value.trim();
+      const name=tr.children[2].querySelector('input').value.trim();
+      const Q=tr.children[3].querySelector('input').value.trim();
+      const p=tr.children[4].querySelector('input').value.trim();
+      const D=tr.children[5].querySelector('input').value.trim();
+      const rod=tr.children[6].querySelector('input').value.trim();
+      const stroke=tr.children[7].querySelector('input').value.trim();
+      const ft=tr.querySelector('.ft').textContent.trim();
+      const v =tr.querySelector('.v').textContent.trim();
+      const tP=tr.querySelector('.tP').textContent.trim();
+      return [idx,type,name,Q,p,D,rod,stroke,ft,v,tP].join(' | ');
+    });
+    byId('csvC').textContent = lines.join('\n') || '—';
+  }
+
+  function copyCSV(id){
+    const t = byId(id).textContent.trim();
+    if(!t || t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+  function recalc(){ pumpCalc(); calcConsumers(); hoseCalc(); heatCalc(pumpCalc().Ploss, calcConsumers().sumP); buildCSV(); }
+
+  // Ініціалізація
+  (function init(){
+    addCons(); addCons({type:'mot',name:'Гідромотор конвеєра',Q:22,p:140,D:160,rod:0,stroke:0});
+    recalc();
+  })();
+
+  // Слухачі
+  ['Vg','n','etaV','etaM','pBar','duty','hoseQ','hoseL','hoseD','hoseRole','diamList','shiftH','tankL']
+    .forEach(id=>byId(id).addEventListener('change', recalc));
+
+  // Експорт кнопки
+  document.addEventListener('change', e=>{
+    if(e.target.closest('#tblC')) recalc();
+  });
+
+  // Корисні alias для інтерфейсу
+  function addConsRow(){ addCons(); }
+  window.addCons = addCons;
+</script>
+</body>
+</html>

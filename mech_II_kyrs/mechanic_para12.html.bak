@@ -1,0 +1,514 @@
+<!-- mechanic_para12.html
+     ПАРА 12 (аудиторно) для механіків
+     Тема: РІЗЬБОВІ З’ЄДНАННЯ ТА МОМЕНТ ЗАТЯГУВАННЯ —
+           розрахунок попереднього натягу, моменту за K-фактором, поправка ключа з подовжувачем,
+           послідовність затягування (шаблони 4/5/6/8 болтів), чек-лист, квиток 58 мм, NFC, CSV.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: торцевий/динамометричний ключ (демо значення вводяться вручну), принтер 58 мм (опц.), NFC-мітки (опц.).
+
+     Що вміє:
+     • Обчислює площу різьби As (коеф. формули для метричної різьби), довільні d/p, клас міцності 8.8/10.9/12.9.
+     • Визначає цільовий натяг F (частка від границі текучості), момент T=K·F·d і перерахунок для подовжувача Tset=T·L/(L+E).
+     • Конвертації: Н·м ↔ кгс·м; рекомендації по мастилу й крокам затягування (30% → 60% → 100%).
+     • Генерує послідовність затягування для 4/5/6/8 болтів (SVG), журнал, 58 мм квиток, NFC, CSV.
+     Примітка: темні клітинки мають світлий текст (.dark) — добрий контраст у Moodle.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 12 (механіки) — Болти та момент затягування: K-фактор, подовжувач, шаблони, чек, NFC, CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+  .svgwrap{background:#0b1324;border:1px solid #223049;border-radius:12px;padding:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 12 · аудиторно · механіки</span>
+  <h1>🔩 Болти та момент затягування: K-фактор, подовжувач, шаблони, чек, NFC, CSV</h1>
+
+  <div class="card">
+    <h2>🎯 Мета</h2>
+    <p>
+      За пару студенти навчаться <b>підбирати момент затягування</b> під потрібний <b>натяг</b> болта,
+      враховувати <b>мастило</b> (K-фактор), робити <b>поправку динамометричного ключа з подовжувачем</b>,
+      застосовувати <b>правильну послідовність стягування</b> фланців/дисків, формувати <b>журнал</b>,
+      <b>квиток 58 мм</b>, <b>NFC</b> та <b>CSV</b>.
+    </p>
+    <p class="small">Формули (навчально): As≈0.7854·(d−0.9382·p)²; F≈φ·Sp·As, де φ=0.7…0.8; T=K·F·d (d — НОМІНАЛ діаметра у метрах);
+      K: сухо≈0.20, олива≈0.16, молібден≈0.12. Подовжувач (в лінію): <span class="mono">Tset=T·L/(L+E)</span>, при 90° — без змін.</p>
+  </div>
+
+  <!-- ВХІДНІ ДАНІ БОЛТА -->
+  <div class="card">
+    <h2>🧮 Розрахунок моменту та натягу</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Болт / умови</h3>
+        <div class="row">
+          <div style="flex:1"><label>Позначення (довільно)</label><input id="boltName" type="text" value="M12×1.75, фланець насоса"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>d, мм (номінал)</label><input id="d" type="number" step="0.1" value="12"></div>
+          <div style="flex:1"><label>Крок p, мм</label><input id="p" type="number" step="0.01" value="1.75"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Клас міцності</label>
+            <select id="grade">
+              <option value="8.8">8.8 (Sp≈640 МПа)</option>
+              <option value="10.9" selected>10.9 (Sp≈830 МПа)</option>
+              <option value="12.9">12.9 (Sp≈970 МПа)</option>
+            </select>
+          </div>
+          <div style="flex:1"><label>Частка φ від Sp</label><input id="phi" type="number" step="0.05" value="0.75"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Мастило (K-фактор)</label>
+            <select id="kfact">
+              <option value="0.20">сухо (K≈0.20)</option>
+              <option value="0.16" selected>олива (K≈0.16)</option>
+              <option value="0.12">молібден (K≈0.12)</option>
+            </select>
+          </div>
+          <div style="flex:1"><label>Кроки затягування</label>
+            <select id="steps">
+              <option value="30,60,100" selected>30% → 60% → 100%</option>
+              <option value="40,80,100">40% → 80% → 100%</option>
+              <option value="50,100">50% → 100%</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Ключ / подовжувач</h3>
+        <div class="row">
+          <div style="flex:1"><label>Довжина ключа L, мм</label><input id="L" type="number" step="1" value="300"></div>
+          <div style="flex:1"><label>Подовжувач E, мм (в лінію)</label><input id="E" type="number" step="1" value="0"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Орієнтація</label>
+            <select id="angle">
+              <option value="inline" selected>в лінію (зміна Tset)</option>
+              <option value="90">прибл. 90° (без зміни)</option>
+            </select>
+          </div>
+          <div style="flex:1"><label>К-ть болтів, шт</label>
+            <select id="nBolts">
+              <option>4</option><option selected>6</option><option>5</option><option>8</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Результати</h3>
+        <p>Площа різьби As: <b><span id="As">—</span></b> мм²</p>
+        <p>Натяг F: <b><span id="F">—</span></b> кН</p>
+        <p>Момент T: <b><span id="T">—</span></b> Н·м (<span id="Tkg">—</span> кгс·м)</p>
+        <p>Установка ключа Tset: <b><span id="Tset">—</span></b> Н·м</p>
+        <p>Кроки: <b><span id="Tsteps">—</span></b> Н·м</p>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="calc()">🔁 Перерахувати</button>
+          <button class="btn" onclick="preset()">🧪 Приклад</button>
+          <button class="btn" onclick="copyCSV('csvBolt')">📋 CSV</button>
+        </div>
+        <div id="csvBolt" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ШАБЛОН ПОСЛІДОВНОСТІ -->
+  <div class="card">
+    <h2>🌀 Послідовність затягування (фланець/диск)</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>Генератор шаблону</h3>
+        <div class="row">
+          <div style="flex:1"><label>К-ть болтів</label>
+            <select id="nBolts2">
+              <option>4</option><option>5</option><option selected>6</option><option>8</option>
+            </select>
+          </div>
+          <div style="flex:1"><label>Діаметр кола, мм</label><input id="pcd" type="number" step="1" value="180"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="drawPattern()">🎯 Побудувати</button>
+          <button class="btn" onclick="copyEl('seqText')">📋 Копіювати порядок</button>
+        </div>
+        <div id="seqText" class="out" style="margin-top:8px">—</div>
+      </div>
+      <div class="box svgwrap">
+        <svg id="seqSVG" viewBox="0 0 300 300" width="100%" height="300" role="img" aria-label="Порядок затягування"></svg>
+      </div>
+    </div>
+    <p class="small muted">Правило: стягувати “зіркою/хрестом”, рухаючись від центра до периферії; після 100% — контрольний дотяг у тому ж порядку.</p>
+  </div>
+
+  <!-- ЖУРНАЛ -->
+  <div class="card">
+    <h2>📒 Журнал затягувань</h2>
+    <div class="row">
+      <button class="btn" onclick="addRow()">➕ Додати рядок</button>
+      <button class="btn" onclick="presetRows()">🧪 Приклад</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tbl">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Вузол</th>
+            <th>d×p, мм</th>
+            <th>Клас</th>
+            <th class="dark">K</th>
+            <th class="dark">F, кН</th>
+            <th class="dark">T, Н·м</th>
+            <th class="dark">Tset, Н·м</th>
+            <th>Кроки</th>
+            <th>Примітка</th>
+          </tr>
+        </thead>
+        <tbody id="body"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- КВИТОК + NFC -->
+  <div class="card">
+    <h2>🧾 Квиток 58 мм та NFC</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>NFC — “BOLT CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Машина/вузол ID</label><input id="nfcId" type="text" value="TR-001/FLANGE-A"></div>
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток “TORQUE CARD”</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>TORQUE CARD</h4>
+          <p id="tDate"><small>Дата: —</small></p>
+          <div class="line"></div>
+          <p><b>Вузол:</b> <span id="tNode">—</span></p>
+          <p><b>d×p/клас:</b> <span id="tDP">—</span></p>
+          <p><b>K/φ:</b> <span id="tK">—</span> / <span id="tPhi">—</span></p>
+          <p><b>T / Tset:</b> <span id="tT">—</span> / <span id="tTset">—</span> Н·м</p>
+          <p><b>Кроки:</b> <span id="tSteps">—</span></p>
+          <p><b>Порядок:</b> <span id="tSeq">—</span></p>
+          <div class="line"></div>
+          <p><small id="tNote">Прим.: —</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Введи <b>d, p, клас</b>, обери <b>мастило (K)</b> і <b>φ</b> — натисни “Перерахувати”.</li>
+      <li>Задай <b>L/E</b> ключа — отримай <b>Tset</b>; определи <b>кроки затягування</b>.</li>
+      <li>Згенеруй <b>послідовність</b> для 4/5/6/8 болтів — дотримуйся “зірки”.</li>
+      <li>Заповни <b>журнал</b> (мін. 3 рядки), створи <b>квиток</b>, <b>NFC</b> та <b>CSV</b> (<span class="mono">Torque</span>).</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Розрахунок As, F, T, Tset коректний</td><td>4</td></tr>
+        <tr><td>Правильні кроки та послідовність стягування</td><td>3</td></tr>
+        <tr><td>Журнал (≥3 рядки) і квиток/NFC/CSV</td><td>3</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const bodyEl = document.getElementById('body');
+
+  // ====== Розрахунок болта ======
+  function proofMPa(grade){
+    if(grade==='8.8') return 640;
+    if(grade==='10.9') return 830;
+    if(grade==='12.9') return 970;
+    return 700;
+  }
+  function areaStress(d, p){
+    // As ≈ 0.7854 · (d − 0.9382·p)^2  [мм²], для метричної ISO coarse/metric (наближено)
+    return 0.7854 * Math.pow(d - 0.9382*p, 2);
+  }
+  function calc(){
+    const name = byId('boltName').value.trim();
+    const d = +byId('d').value||0;           // мм
+    const p = +byId('p').value||0;           // мм
+    const grade = byId('grade').value;
+    const phi = +byId('phi').value||0.75;
+    const K = +byId('kfact').value||0.16;
+    const Lmm = +byId('L').value||300;
+    const Emm = +byId('E').value||0;
+    const angle = byId('angle').value;
+
+    const As = areaStress(d,p);              // мм²
+    const Sp = proofMPa(grade);              // МПа = Н/мм²
+    const F = phi * Sp * As;                 // Н
+    const T = K * F * (d/1000);              // Н·м (d у метрах)
+    const Tkgm = T / 9.80665;                // кгс·м
+
+    let Tset = T;
+    if(angle==='inline' && (Lmm+Emm)>0) Tset = T * (Lmm/(Lmm+Emm)); // Tset=T·L/(L+E)
+
+    // Кроки
+    const steps = byId('steps').value.split(',').map(x=>+x);
+    const tSteps = steps.map(x=>rnd(Tset*x/100,1)).join(' / ');
+
+    // Вивід
+    byId('As').textContent = rnd(As,1);
+    byId('F').textContent  = rnd(F/1000,1);   // кН
+    byId('T').textContent  = rnd(T,1);
+    byId('Tkg').textContent= rnd(Tkgm,2);
+    byId('Tset').textContent = rnd(Tset,1);
+    byId('Tsteps').textContent = tSteps;
+
+    // CSV
+    const csv = [
+      `BOLT|${name}|d=${d}mm|p=${p}mm|grade=${grade}|K=${K}|phi=${phi}`,
+      `As=${rnd(As,1)}mm2|F=${rnd(F/1000,1)}kN|T=${rnd(T,1)}Nm|Tset=${rnd(Tset,1)}Nm|steps=${tSteps}`,
+      `TOOL|L=${Lmm}mm|E=${Emm}mm|angle=${angle}`
+    ].join('\n');
+    byId('csvBolt').textContent = csv;
+
+    return {name,d,p,grade,phi,K,As,F,T,Tkgm,Tset,tSteps,Lmm,Emm,angle};
+  }
+  function preset(){
+    byId('boltName').value = 'M16×2.0, кріплення шківа';
+    byId('d').value = 16; byId('p').value = 2.0; byId('grade').value='10.9';
+    byId('phi').value = 0.75; byId('kfact').value = 0.16;
+    byId('L').value = 350; byId('E').value = 50; byId('angle').value='inline';
+    byId('steps').value = '30,60,100';
+    calc();
+  }
+
+  // ====== Послідовність затягування (SVG) ======
+  function generateSequence(n){
+    // Для парної кількості — класична зірка; для 5 — “зірка пент”.
+    const seq = [];
+    if(n===4){ return [1,3,2,4]; }
+    if(n===6){ return [1,4,2,5,3,6]; }
+    if(n===8){ return [1,5,3,7,2,6,4,8]; }
+    if(n===5){ return [1,3,5,2,4]; }
+    // fallback: просто 1..n
+    for(let i=1;i<=n;i++) seq.push(i);
+    return seq;
+  }
+  function drawPattern(){
+    const svg = byId('seqSVG'); svg.innerHTML='';
+    const n = +byId('nBolts2').value||6;
+    const D = +byId('pcd').value||180;
+    const r = (Math.min(svg.clientWidth||300, 300) / 2) - 20;
+    const cx=150, cy=150;
+    // коло
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx',cx); circle.setAttribute('cy',cy); circle.setAttribute('r',r);
+    circle.setAttribute('fill','none'); circle.setAttribute('stroke','#4b5563'); circle.setAttribute('stroke-width','2');
+    svg.appendChild(circle);
+    const seq = generateSequence(n);
+    const positions=[];
+    for(let i=0;i<n;i++){
+      const a = -Math.PI/2 + i*(2*Math.PI/n);
+      const x = cx + r*Math.cos(a), y = cy + r*Math.sin(a);
+      positions.push({x,y});
+    }
+    // лінії порядку
+    for(let i=0;i<seq.length-1;i++){
+      const from = positions[seq[i]-1], to = positions[seq[i+1]-1];
+      const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+      ln.setAttribute('x1',from.x); ln.setAttribute('y1',from.y);
+      ln.setAttribute('x2',to.x); ln.setAttribute('y2',to.y);
+      ln.setAttribute('stroke','#60a5fa'); ln.setAttribute('stroke-width','2');
+      svg.appendChild(ln);
+    }
+    // точки та номери
+    positions.forEach((p,idx)=>{
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',p.x); c.setAttribute('cy',p.y); c.setAttribute('r',10);
+      c.setAttribute('fill','#22c55e'); svg.appendChild(c);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x',p.x); t.setAttribute('y',p.y+4);
+      t.setAttribute('fill','#0b1220'); t.setAttribute('font-size','12');
+      t.setAttribute('text-anchor','middle'); t.setAttribute('font-weight','700');
+      t.textContent = (idx+1);
+      svg.appendChild(t);
+    });
+    const seqText = 'Порядок: ' + seq.join(' → ');
+    byId('seqText').textContent = seqText;
+    return {seqText};
+  }
+
+  // ====== Журнал ======
+  function addRow(sample){
+    const r = calc();
+    const s = Object.assign({
+      name: r.name, dp: `${r.d}×${r.p}`, grade: r.grade, K: r.K,
+      F: rnd(r.F/1000,1), T: rnd(r.T,1), Tset: rnd(r.Tset,1), steps: r.tSteps, note:''
+    }, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.name}"></td>
+      <td>${s.dp}</td>
+      <td>${s.grade}</td>
+      <td class="dark">${s.K}</td>
+      <td class="dark">${s.F}</td>
+      <td class="dark">${s.T}</td>
+      <td class="dark">${s.Tset}</td>
+      <td>${s.steps}</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyEl.appendChild(tr);
+    reindex(); buildCSVlog();
+  }
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+  function presetRows(){
+    bodyEl.innerHTML='';
+    calc();
+    addRow({name:'Фланець насоса', dp:'M12×1.75', grade:'10.9', K:0.16, F:'28.5', T:'54', Tset:'49', steps:'15.0 / 30.0 / 49.0', note:'олива'});
+    addRow({name:'Шків колінвала', dp:'M16×2.0', grade:'10.9', K:0.16, F:'53.0', T:'136', Tset:'121', steps:'36.3 / 72.6 / 121.0', note:'подовжувач 50 мм'});
+    addRow({name:'Ступиця колеса', dp:'M14×2.0', grade:'10.9', K:0.16, F:'43.0', T:'120', Tset:'120', steps:'48.0 / 96.0 / 120.0', note:'без подовж.'});
+    buildCSVlog();
+  }
+  function buildCSVlog(){
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx=tr.querySelector('.idx').textContent.trim();
+      const node=tr.children[1].querySelector('input').value.trim();
+      const dp = tr.children[2].textContent.trim();
+      const grade = tr.children[3].textContent.trim();
+      const K = tr.children[4].textContent.trim();
+      const F = tr.children[5].textContent.trim();
+      const T = tr.children[6].textContent.trim();
+      const Tset = tr.children[7].textContent.trim();
+      const steps = tr.children[8].textContent.trim();
+      const note = tr.children[9].querySelector('input').value.trim();
+      return [idx,node,dp,grade,K,F,T,Tset,steps,note].join(' | ');
+    });
+    byId('csvLog').textContent = lines.join('\n') || '—';
+  }
+
+  // ====== Квиток / NFC ======
+  function buildTicket(){
+    const r = calc();
+    const seq = drawPattern();
+    const d = new Date().toISOString().slice(0,10);
+    byId('tDate').innerHTML = `<small>Дата: ${d}</small>`;
+    byId('tNode').textContent = r.name || '—';
+    byId('tDP').textContent   = `${r.d}×${r.p}, ${r.grade}`;
+    byId('tK').textContent    = r.K;
+    byId('tPhi').textContent  = r.phi;
+    byId('tT').textContent    = rnd(r.T,1);
+    byId('tTset').textContent = rnd(r.Tset,1);
+    byId('tSteps').textContent= r.tSteps;
+    byId('tSeq').textContent  = byId('seqText').textContent || '—';
+    byId('tNote').textContent = `L=${r.Lmm||byId('L').value}мм; E=${r.Emm||byId('E').value}мм; angle=${r.angle}`;
+  }
+  function buildNFC(){
+    const r = calc();
+    const seq = byId('seqText').textContent || '—';
+    const text = [
+      `BOLT_NFC`,
+      `NODE:${r.name}`,
+      `THREAD:M${r.d}x${r.p} grade ${r.grade}`,
+      `K=${r.K}; phi=${r.phi}`,
+      `T=${rnd(r.T,1)}Nm; Tset=${rnd(r.Tset,1)}Nm; steps=${r.tSteps}`,
+      `SEQ:${seq}`,
+      `CONTACT:${byId('nfcPhone').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = text;
+  }
+
+  // ====== Утиліти ======
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // ====== Ініціалізація ======
+  (function init(){
+    calc();
+    drawPattern();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select')) { calc(); }
+      if(e.target.id==='nBolts2' || e.target.id==='pcd') drawPattern();
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,586 @@
+<!-- tech_para11.html
+     ПАРА 11 (аудиторно) для технологів з переробки продукції тваринництва
+     Тема: УПАКОВКА, МАРКУВАННЯ, ТЕРМІН ПРИДАТНОСТІ — MAP/вакуум, етикетка (GS1/EAN-13),
+           дата/лот, Q10-оцінка терміну з урахуванням холодового логу, перевірка герметичності,
+           план палетування, квиток 58 мм, NFC/QR, CSV.
+     Фокус: телефони/ПК; без зовнішніх бібліотек; готово для GitHub Pages та Moodle (iframe).
+     Обладнання: телефони; (опц.) термопринтер 58 мм 58мм; NFC-мітки.
+
+     Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
+     УВАГА: навчальна модель. Реальні вимоги етикетування і термінів — за чинним законодавством та СОП підприємства.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 11 (технологи) — Пакування/Маркування: MAP, EAN-13, термін, холодовий ланцюг, квиток/NFC/CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,Monaco,"Courier New",monospace}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  textarea{min-height:84px}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано в Moodle (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+  .graph{font:12px/14px ui-monospace,monospace;white-space:pre;background:#fff;color:#000;padding:8px;border-radius:8px;border:1px solid #e5e7eb;overflow:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 11 · аудиторно · технологи переробки</span>
+  <h1>📦 Пакування/Маркування: MAP/вакуум, етикетка EAN-13, термін, холодовий ланцюг, квиток/NFC/CSV</h1>
+
+  <div class="card">
+    <h2>🎯 Мета пари</h2>
+    <p>
+      За заняття студенти: (1) підберуть <b>режим пакування</b> (MAP/вакуум), (2) сформують <b>етикетку</b> з EAN-13,
+      датою/лотом та обов’язковими полями, (3) зберуть <b>холодовий лог</b> і оцінять <b>термін придатності</b> за Q10-моделлю,
+      (4) виконають <b>перевірку герметичності</b>, (5) побудують <b>план палетування</b>, (6) оформлять <b>CSV</b>, <b>QR/NFC</b> і <b>квиток 58 мм</b>.
+    </p>
+    <p class="small muted">Навчальна модель. Реальні етикетки погоджуються з QA/маркетингом та відповідають законодавству.</p>
+  </div>
+
+  <!-- 1. ПАРАМЕТРИ ПАКУВАННЯ -->
+  <div class="card">
+    <h2>🛠️ Параметри пакування</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Виріб/лот</h3>
+        <div class="row">
+          <div style="flex:1"><label>Виріб</label><input id="prodName" type="text" value="Шинка варена “Домашня”"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>ЛОТ</label><input id="lot" type="text" value="H-25101-A1"></div>
+          <div style="flex:1"><label>Маса нетто, г</label><input id="netto" type="number" step="1" value="400"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Режим</h3>
+        <div class="row">
+          <div style="flex:1"><label>Тип</label>
+            <select id="pkType">
+              <option selected>Вакуум</option>
+              <option>MAP</option>
+            </select>
+          </div>
+          <div style="flex:1"><label>Вакуум, кПа (мін.)</label><input id="vacReq" type="number" step="0.1" value="30.0"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>MAP O₂, %</label><input id="o2" type="number" step="0.1" value="2.0"></div>
+          <div style="flex:1"><label>MAP CO₂, %</label><input id="co2" type="number" step="0.1" value="30.0"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" onclick="evalPack()">✅ Оцінити режим</button>
+          <button class="btn" onclick="copyCSV('csvPack')">📋 CSV (pack)</button>
+        </div>
+        <div id="packOut" class="out" style="margin-top:8px">—</div>
+        <div id="csvPack" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ЕТИКЕТКА / EAN-13 -->
+  <div class="card">
+    <h2>🏷️ Етикетка: обов’язкові поля, EAN-13, дата/лот</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>Поля етикетки</h3>
+        <div class="row">
+          <div style="flex:1"><label>Назва продукту</label><input id="lblName" type="text" value="Шинка варена “Домашня”"></div>
+          <div style="flex:1"><label>Виробник</label><input id="lblMfg" type="text" value="ТОВ «Харчі-Експерт»"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Склад (скорочено)</label><input id="lblComp" type="text" value="Свинина, сіль, спеції, антиоксидант, стабілізатори (Е451, Е407)."></div>
+          <div style="flex:1"><label>Алергени</label><input id="lblAll" type="text" value="—"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Умови зберігання</label><input id="lblStg" type="text" value="+0…+6°C"></div>
+          <div style="flex:1"><label>Енергетична цінність (ккал/100г)</label><input id="lblKcal" type="number" step="1" value="220"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>EAN-13 та дати</h3>
+        <div class="row">
+          <div style="flex:1"><label>Префікс EAN-12</label><input id="ean12" type="text" value="482123456789"></div>
+          <div style="flex:1"><label>EAN-13 (контрольна)</label><input id="ean13" type="text" value=""></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Дата виробництва</label><input id="mfgDate" type="date"></div>
+          <div style="flex:1"><label>Вжити до (розрах.)</label><input id="expDate" type="date"></div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn" onclick="makeEAN()">📐 Обчислити EAN-13</button>
+          <button class="btn" onclick="buildLabel()">🧩 Зібрати етикетку</button>
+          <button class="btn" onclick="copyCSV('csvLabel')">📋 CSV (label)</button>
+        </div>
+        <div id="labelOut" class="out" style="margin-top:8px">—</div>
+        <div id="csvLabel" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. ХОЛОДОВИЙ ЛАНЦЮГ + Q10-ТЕРМІН -->
+  <div class="card">
+    <h2>❄️ Холодовий лог і Q10-оцінка терміну</h2>
+    <div class="row">
+      <button class="btn" onclick="addTemp()">➕ Додати запис T–t</button>
+      <button class="btn" onclick="presetTemp()">🧪 Приклад</button>
+      <button class="btn" onclick="calcShelf()">🧮 Розрахувати термін</button>
+      <button class="btn" onclick="copyCSV('csvTemp')">📋 CSV (cold chain)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblTemp">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Стадія</th>
+            <th class="dark">T, °C</th>
+            <th class="dark">Час, год</th>
+            <th>Еквівалент при 4°C, год</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyTemp"></tbody>
+      </table>
+    </div>
+    <div id="shelfOut" class="out" style="margin-top:8px">—</div>
+    <div id="csvTemp" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- 4. ГЕРМЕТИЧНІСТЬ / ВАКУУМ / ПРОТІКАННЯ -->
+  <div class="card">
+    <h2>🧪 Перевірка герметичності</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Параметри тесту</h3>
+        <div class="row">
+          <div style="flex:1"><label>Вакуум, кПа (факт)</label><input id="vacFact" type="number" step="0.1" value="31.0"></div>
+          <div style="flex:1"><label>Тест “ванна/бульбашки”</label>
+            <select id="leak"><option>Ні</option><option>Так</option></select>
+          </div>
+        </div>
+        <p class="small muted">Якщо MAP — допустимий O₂ (факт) ≤ цілі.</p>
+      </div>
+
+      <div class="box">
+        <h3>Оцінка</h3>
+        <p>Статус: <b><span id="sealStatus">—</span></b></p>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="evalSeal()">✅ Перевірити</button>
+          <button class="btn" onclick="copyCSV('csvSeal')">📋 CSV (seal)</button>
+        </div>
+        <div id="csvSeal" class="out" style="margin-top:8px">—</div>
+      </div>
+
+      <div class="box">
+        <h3>План палетування</h3>
+        <div class="row">
+          <div style="flex:1"><label>Упак./ящик</label><input id="perCase" type="number" step="1" value="24"></div>
+          <div style="flex:1"><label>Ящиків/палета</label><input id="perPallet" type="number" step="1" value="48"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>План партії, упак.</label><input id="planPacks" type="number" step="1" value="1200"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="planPallets()">📦 Розрахувати</button>
+          <button class="btn" onclick="copyCSV('csvPal')">📋 CSV (pallets)</button>
+        </div>
+        <div id="palOut" class="out" style="margin-top:8px">—</div>
+        <div id="csvPal" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ЖУРНАЛ / КВИТОК / QR / NFC -->
+  <div class="card">
+    <h2>📒 Журнал / Квиток 58 мм / QR / NFC</h2>
+    <div class="row">
+      <button class="btn" onclick="addLog()">➕ Додати у журнал</button>
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tblLog">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Виріб/лот</th>
+            <th class="dark">Режим</th>
+            <th class="dark">EAN-13</th>
+            <th>EXP</th>
+            <th>Холод. індекс</th>
+            <th>Гермет.</th>
+            <th>×</th>
+          </tr>
+        </thead>
+        <tbody id="bodyLog"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+
+    <div class="grid g2" style="margin-top:12px">
+      <div class="box">
+        <h3>QR-payload</h3>
+        <div class="row">
+          <button class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
+          <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
+        </div>
+        <div id="qrOut" class="out">—</div>
+
+        <h3 style="margin-top:12px">NFC — “PACK LABEL CARD”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label>Оператор</label><input id="nfcOper" type="text" value="Студент ТПТ"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток 58 мм — “PACK & LABEL”</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>PACK & LABEL</h4>
+          <p><b>Виріб:</b> <span id="tProd">—</span></p>
+          <p><b>ЛОТ:</b> <span id="tLot">—</span> · <b>EAN-13:</b> <span id="tEAN">—</span></p>
+          <div class="line"></div>
+          <p><b>Режим:</b> <span id="tMode">—</span></p>
+          <p><b>Вжити до:</b> <span id="tEXP">—</span></p>
+          <p><b>Індекс холоду:</b> <span id="tCHI">—</span></p>
+          <div class="line"></div>
+          <p><small>Етикетка відповідає навчальним вимогам. Перевірити зразок QA/юристом.</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Задайте параметри пакування, оцініть режим (вакуум/MAP).</li>
+      <li>Сформуйте етикетку з EAN-13 та датами; збережіть CSV.</li>
+      <li>Заповніть холодовий лог (3–6 записів), розрахуйте експозицію та експ. термін.</li>
+      <li>Перевірте герметичність та сплануйте палетування.</li>
+      <li>Занесіть у журнал, згенеруйте QR/NFC і квиток, скопіюйте CSV.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Коректний режим пакування (вакуум/MAP) та параметри</td><td>3</td></tr>
+        <tr><td>Етикетка з EAN-13, датами та обов’язковими полями</td><td>3</td></tr>
+        <tr><td>Холодовий лог + Q10-оцінка терміну</td><td>3</td></tr>
+        <tr><td>Герметичність/палетування/журнал/квиток/CSV</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const pad2 = n => String(n).padStart(2,'0');
+
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t);
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t);
+  }
+
+  // ===== 1) Оцінка пакування =====
+  function evalPack(){
+    const type = byId('pkType').value;
+    const vacReq = +byId('vacReq').value||0;
+    const o2 = +byId('o2').value||0;
+    const co2= +byId('co2').value||0;
+    let status='—', note='';
+    if(type==='Вакуум'){
+      status = (vacReq>=30)? '🟢 Вакуум достатній' : '🟠 Перевірити насоси/плівку';
+      note = `Мін. вакуум ${vacReq} кПа; контроль відсутності протікань.`;
+    }else{
+      const okMix = (o2<=3 && co2>=20 && co2<=40);
+      status = okMix? '🟢 MAP суміш у межах' : '🟠 Уточніть суміш (мʼясні варені: O₂≤3%, CO₂≈20–40%)';
+      note = `Задано O₂=${o2}%, CO₂=${co2}%.`;
+    }
+    byId('packOut').textContent = `PACK|type=${type}|status=${status}|note=${note}|netto=${byId('netto').value}g|lot=${byId('lot').value}`;
+    byId('csvPack').textContent = byId('packOut').textContent;
+    updateTicket();
+    return status.includes('🟢');
+  }
+
+  // ===== 2) EAN-13, етикетка =====
+  function eanChecksum12(e12){
+    const d = e12.replace(/\D/g,'').slice(0,12).padStart(12,'0').split('').map(Number);
+    const sum = d.reduce((a,x,i)=> a + x*(i%2?3:1), 0);
+    const mod = sum%10;
+    return (10-mod)%10;
+  }
+  function makeEAN(){
+    const e12 = byId('ean12').value;
+    const cs = eanChecksum12(e12);
+    const e13 = (e12.replace(/\D/g,'').slice(0,12).padStart(12,'0')) + String(cs);
+    byId('ean13').value = e13;
+    updateTicket();
+    return e13;
+  }
+  function buildLabel(){
+    const name=byId('lblName').value;
+    const mfg =byId('lblMfg').value;
+    const comp=byId('lblComp').value;
+    const all =byId('lblAll').value;
+    const stg =byId('lblStg').value;
+    const kcal=byId('lblKcal').value;
+    const e13 =byId('ean13').value||makeEAN();
+    const mfgD=byId('mfgDate').value;
+    const expD=byId('expDate').value;
+    const txt = [
+      `NAME:${name}`,
+      `MFG:${mfg}`,
+      `COMP:${comp}`,
+      `ALLERGENS:${all}`,
+      `STORAGE:${stg}`,
+      `NETTO:${byId('netto').value}g`,
+      `EAN13:${e13}`,
+      `MFG_DATE:${mfgD}`,
+      `EXP_DATE:${expD}`,
+      `LOT:${byId('lot').value}`,
+      `NUTR: ${kcal} ккал/100г`
+    ].join(' | ');
+    byId('labelOut').textContent = txt;
+    byId('csvLabel').textContent = 'LABEL|' + txt;
+    updateTicket();
+    return txt;
+  }
+
+  // ===== 3) Холодовий лог + Q10 =====
+  const bodyTemp = byId('bodyTemp');
+  function reindex(tb){ [...tb.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+  function addTemp(sample){
+    const s = Object.assign({stage:'Склад', T:4, h:12}, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.stage}"></td>
+      <td class="dark"><input type="number" step="0.1" value="${s.T}"></td>
+      <td class="dark"><input type="number" step="0.1" value="${s.h}"></td>
+      <td class="chi">—</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyTemp); calcShelf();">✖</button></td>
+    `;
+    bodyTemp.appendChild(tr); reindex(bodyTemp); calcShelf();
+  }
+  function presetTemp(){
+    bodyTemp.innerHTML='';
+    addTemp({stage:'Охолодження', T:2, h:6});
+    addTemp({stage:'Зберігання',  T:4, h:48});
+    addTemp({stage:'Відвантаження', T:6, h:8});
+    addTemp({stage:'Транспорт', T:8, h:5});
+    calcShelf();
+  }
+  // Q10 модель: швидкість псування зростає в Q10 разів на +10°C; еквівалентні години при 4°C:
+  // eq_h = h * Q10^((T - 4)/10). Візьмемо Q10=2.5 (типово для охолодженої вареної мʼясопродукції)
+  function calcShelf(){
+    const Q10 = 2.5, Tref=4;
+    let eqSum=0, lines=[];
+    [...bodyTemp.querySelectorAll('tr')].forEach(r=>{
+      const T=Number(r.children[2].querySelector('input').value);
+      const h=Number(r.children[3].querySelector('input').value);
+      if(!isNaN(T)&&!isNaN(h)){
+        const eq = h * Math.pow(Q10, (T - Tref)/10);
+        r.querySelector('.chi').textContent = rnd(eq,2);
+        eqSum += eq;
+        lines.push(`${r.querySelector('.idx').textContent.trim()}:${T}°C×${h}h→${rnd(eq,2)}h@4°C`);
+      }
+    });
+    // Базовий термін при 4°C (навчально): 20 діб для вареної шинка у вакуумі
+    const baseDays = 20;
+    const usedDays = eqSum/24;
+    const leftDays = Math.max(0, baseDays - usedDays);
+    const today = new Date(byId('mfgDate').value || new Date().toISOString().slice(0,10));
+    const expDate = new Date(today.getTime() + leftDays*24*3600*1000);
+    const expStr = expDate.toISOString().slice(0,10);
+    byId('shelfOut').textContent = `Q10=2.5; Еквівалент @4°C = ${rnd(eqSum,2)} год (~${rnd(usedDays,2)} діб); Залишок ≈ ${rnd(leftDays,2)} діб; EXP≈ ${expStr}`;
+    byId('csvTemp').textContent = lines.join('\n') || '—';
+    if(!byId('expDate').value){ byId('expDate').value = expStr; }
+    updateTicket();
+    return {eqSum, usedDays, leftDays, expStr};
+  }
+
+  // ===== 4) Герметичність / Палети =====
+  function evalSeal(){
+    const type = byId('pkType').value;
+    const vacReq= +byId('vacReq').value||0;
+    const vac= +byId('vacFact').value||0;
+    const leak = byId('leak').value==='Так';
+    let pass = true; let msg=[];
+    if(type==='Вакуум'){ pass = pass && (vac>=vacReq); msg.push(`Vac ${vac}≥${vacReq}`); }
+    if(leak){ pass = false; msg.push('Leak=yes'); }
+    const status = pass? '🟢 PASS' : '🔴 FAIL';
+    byId('sealStatus').textContent = status;
+    byId('csvSeal').textContent = `SEAL|type=${type}|vac_req=${vacReq}|vac_fact=${vac}|leak=${leak?'yes':'no'}|status=${status}`;
+    updateTicket();
+    return pass;
+  }
+
+  function planPallets(){
+    const perCase=+byId('perCase').value||1;
+    const perPal =+byId('perPallet').value||1;
+    const plan   =+byId('planPacks').value||0;
+    const cases = Math.ceil(plan/perCase);
+    const pallets = Math.ceil(cases/perPal);
+    const lastCase = plan%perCase || perCase;
+    const lastPalCases = cases%perPal || perPal;
+    const txt = `План: ${plan} упак. → ${cases} ящ. → ${pallets} палет(и); останній ящик: ${lastCase} упак.; остання палета: ${lastPalCases} ящ.`;
+    byId('palOut').textContent = txt;
+    byId('csvPal').textContent = `PALLET|packs=${plan}|per_case=${perCase}|per_pallet=${perPal}|cases=${cases}|pallets=${pallets}|last_case=${lastCase}|last_pal_cases=${lastPalCases}`;
+    return {cases,pallets,lastCase,lastPalCases};
+  }
+
+  // ===== 5) Журнал / Квиток / QR / NFC =====
+  const bodyLog = byId('bodyLog');
+  function reindexLog(){ [...bodyLog.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+  function addLog(){
+    const mode = byId('pkType').value==='Вакуум' ? `VAC ${byId('vacReq').value}kPa` : `MAP O₂${byId('o2').value}%/CO₂${byId('co2').value}%`;
+    const chi = byId('shelfOut').textContent.split('Еквівалент')[1]? byId('shelfOut').textContent.split('Еквівалент')[1].trim() : '—';
+    const seal= byId('sealStatus').textContent || '—';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="idx">1</td>
+      <td><input type="text" value="${byId('prodName').value} [${byId('lot').value}]"></td>
+      <td class="dark">${mode}</td>
+      <td class="dark">${byId('ean13').value}</td>
+      <td>${byId('expDate').value||'—'}</td>
+      <td>${chi.replace(/\s+/g,' ')}</td>
+      <td>${seal}</td>
+      <td><button class="btn" onclick="this.closest('tr').remove(); reindexLog(); buildLogCSV();">✖</button></td>
+    `;
+    bodyLog.appendChild(tr); reindexLog(); buildLogCSV();
+    updateTicket();
+  }
+  function buildLogCSV(){
+    const rows=[...bodyLog.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const prod=r.children[1].querySelector('input').value.trim();
+      const mode=r.children[2].textContent.trim();
+      const ean=r.children[3].textContent.trim();
+      const exp=r.children[4].textContent.trim();
+      const chi=r.children[5].textContent.trim();
+      const seal=r.children[6].textContent.trim();
+      return [idx,prod,mode,ean,exp,chi,seal].join(' | ');
+    });
+    byId('csvLog').textContent = rows.join('\n') || '—';
+  }
+  function updateTicket(){
+    byId('tProd').textContent = byId('prodName').value;
+    byId('tLot').textContent  = byId('lot').value;
+    byId('tEAN').textContent  = byId('ean13').value || makeEAN();
+    byId('tMode').textContent = (byId('pkType').value==='Вакуум' ? `Вакуум ≥${byId('vacReq').value} кПа` : `MAP O₂${byId('o2').value}%/CO₂${byId('co2').value}%`);
+    byId('tEXP').textContent  = byId('expDate').value || '—';
+    const chiTxt = byId('shelfOut').textContent || '—';
+    const m = chiTxt.match(/~([0-9.]+) діб/);
+    byId('tCHI').textContent = m? (m[1]+' діб використано') : '—';
+  }
+  function buildQR(){
+    const payload = {
+      prod: byId('prodName').value,
+      lot: byId('lot').value,
+      ean13: byId('ean13').value || makeEAN(),
+      mode: byId('pkType').value==='Вакуум' ? `VAC ${byId('vacReq').value}kPa` : `MAP O2 ${byId('o2').value}% CO2 ${byId('co2').value}%`,
+      mfg: byId('mfgDate').value,
+      exp: byId('expDate').value
+    };
+    byId('qrOut').textContent = JSON.stringify(payload);
+  }
+  function buildNFC(){
+    const txt = [
+      `PACK_LABEL_NFC`,
+      `PROD:${byId('prodName').value} LOT:${byId('lot').value}`,
+      `EAN13:${byId('ean13').value || makeEAN()}`,
+      `MODE:${byId('pkType').value==='Вакуум' ? ('VAC '+byId('vacReq').value+'kPa') : ('MAP O2 '+byId('o2').value+'% CO2 '+byId('co2').value+'%')}`,
+      `MFG:${byId('mfgDate').value} EXP:${byId('expDate').value}`,
+      `OPER:${byId('nfcOper').value} CONTACT:${byId('nfcPhone').value}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = txt;
+  }
+  function buildTicket(){
+    window.scrollTo({top: document.getElementById('ticket').getBoundingClientRect().top + window.scrollY - 60, behavior:'smooth'});
+  }
+
+  // ===== Ініціалізація =====
+  (function init(){
+    const today = new Date().toISOString().slice(0,10);
+    byId('mfgDate').value = today;
+    evalPack(); makeEAN(); buildLabel(); presetTemp(); evalSeal(); planPallets();
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select,textarea')){
+        if(e.target.closest('#tblTemp')) calcShelf();
+        if(['pkType','vacReq','o2','co2','netto','lot'].includes(e.target.id)) evalPack();
+        if(['lblName','lblMfg','lblComp','lblAll','lblStg','lblKcal','mfgDate','expDate','ean12','ean13'].includes(e.target.id)) buildLabel();
+        if(['vacFact','leak'].includes(e.target.id)) evalSeal();
+        if(['perCase','perPallet','planPacks'].includes(e.target.id)) planPallets();
+      }
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,544 @@
+<!-- mechanic_para7.html
+     ПАРА 7 (аудиторно) для механіків
+     Тема: ТЯГА, БУКСУВАННЯ, БАЛАСТ, ТИСК У ШИНАХ — розрахунок тяги, потужності на дишлі, коефіцієнт зчеплення, цільовий букс, розподіл баласту,
+           рекомендації тиску в шинах, журнал вимірів (GPS/хронометр), чек 58 мм, NFC, CSV
+     Фокус: телефони/ПК; без бібліотек; працює на GitHub Pages і в Moodle (iframe).
+     Примітка щодо контрасту: темні клітинки таблиць мають світлий текст (.dark).
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 7 (механіки) — Тяга, буксування, баласт, тиск у шинах, чек 58 мм, NFC, CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .small{font-size:12px; color:#9fb0c8}
+  .muted{color:#93a3b5}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)}
+  .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
+  .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+
+  input[type="text"], input[type="number"], input[type="date"], select, textarea{
+    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
+  }
+
+  /* Чек 58 мм */
+  .ticket{ width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
+  .ticket p{margin:2px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:6px 0}
+  .ticket small{font-size:10px}
+
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .box{background:#f8fafc; color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+
+  @media print{
+    @page{ margin:4mm }
+    .no-print{ display:none !important }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 7 · аудиторно · механіки</span>
+    <h1>🚜 Тяга, буксування, баласт і тиск у шинах — розрахунки, журнал вимірів, чек 58 мм, NFC</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        За пару студенти розрахують <b>потрібну тягу</b> і <b>потужність на дишлі</b>, оцінять <b>обмеження за зчепленням</b>,
+        підберуть <b>баласт і розподіл по осях</b>, визначать <b>цільовий букс (8–15%)</b> і <b>рекомендований тиск у шинах</b>,
+        зберуть <b>журнал вимірів</b> (теор. vs факт. швидкість), згенерують <b>квиток 58 мм</b>, <b>NFC</b>-текст і <b>CSV</b>.
+      </p>
+      <p class="small">Пам’ятка: для MFWD (передній привід підключається) бажаний статичний розподіл маси <span class="mono">35–40% перед / 60–65% зад</span> (без знаряддя),
+        цільовий букс у полі <span class="mono">8–15%</span> (до 20% на важких роботах), коеф. зчеплення ґрунт/шини <span class="mono">0.4…0.6</span> (умовно).</p>
+    </div>
+
+    <!-- ВХІДНІ ДАНІ ТРАКТОРА / ЗНАРЯДДЯ -->
+    <div class="card">
+      <h2>⚙️ Трактор та завдання</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Маса та осі</h3>
+          <div class="row">
+            <div style="flex:1"><label>Маса трактора, т</label><input id="massT" type="number" step="0.01" value="6.5"></div>
+            <div style="flex:1"><label>Частка на перед., %</label><input id="frontPct" type="number" step="1" value="38"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Привід</label>
+              <select id="drive"><option value="mfwd" selected>MFWD (4×4 підключ.)</option><option value="2wd">2WD (задній)</option><option value="4wd">Пост. 4×4</option></select>
+            </div>
+            <div style="flex:1"><label>Діаметр шини (еф.), м</label><input id="tireDia" type="number" step="0.01" value="1.5"></div>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Тягова задача</h3>
+          <div class="row">
+            <div style="flex:1"><label>Потрібна тяга F, кН</label><input id="needF" type="number" step="0.1" value="25"></div>
+            <div style="flex:1"><label>Швидкість, км/год</label><input id="speed" type="number" step="0.1" value="8.0"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Коеф. зчеплення μ</label><input id="mu" type="number" step="0.01" value="0.5"></div>
+            <div style="flex:1"><label>Цільовий букс, %</label><input id="slipTarget" type="number" step="1" value="12"></div>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Керування</h3>
+          <div class="row">
+            <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+            <button class="btn" onclick="preset()">🧪 Приклад</button>
+            <button class="btn" onclick="copyCSV('csvSys')">📋 CSV (система)</button>
+          </div>
+          <div id="csvSys" class="out" style="margin-top:8px">—</div>
+        </div>
+      </div>
+
+      <div class="grid g3" style="margin-top:8px">
+        <div class="box">
+          <h3>Потужність на дишлі</h3>
+          <p>Pᵈ = F·v = <b><span id="Pdraw">—</span></b> кВт</p>
+          <p class="small">v = км/год ÷ 3.6 → м/с; F у кН → кН·м/с = кВт.</p>
+        </div>
+        <div class="box">
+          <h3>Обмеження за зчепленням</h3>
+          <p>Навантаження на ведучу(і) вісь(і): <b><span id="Wdrive">—</span></b> кН</p>
+          <p>Макс. тягова сила μ·Wdrive: <b><span id="Fmax">—</span></b> кН</p>
+          <p>Дефіцит тяги: <b><span id="Fgap">—</span></b> кН</p>
+        </div>
+        <div class="box">
+          <h3>Баласт та розподіл</h3>
+          <p>Дод. баласт на ведучу(і): <b><span id="BallastNeed">—</span></b> т</p>
+          <p>Рекоменд. статичний розподіл: <b><span id="SplitRec">—</span></b></p>
+          <p class="small">Розміщення: <span class="mono">60–65% зад</span> / <span class="mono">35–40% перед</span> (MFWD).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ТИСК У ШИНАХ / КОНТАКТНИЙ ТИСК -->
+    <div class="card">
+      <h2>🛞 Тиск у шинах та контактний тиск</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Вихідні</h3>
+          <div class="row">
+            <div style="flex:1"><label>К-ть шин на вісь (пара)</label><input id="tiresPerAxle" type="number" step="1" value="2"></div>
+            <div style="flex:1"><label>Цільовий контактний тиск, кПа</label><input id="pTarget" type="number" step="5" value="110"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Коеф. запасу тиску</label><input id="pSF" type="number" step="0.05" value="1.10"></div>
+            <div style="flex:1"><label>Коеф. площі плями k</label><input id="areaK" type="number" step="0.05" value="1.10"></div>
+          </div>
+          <p class="small">Спрощення: <span class="mono">Pшини ≈ Pконтакт × коеф.запасу</span>; площа ≈ <span class="mono">k·Навантаження/тиск</span>.</p>
+        </div>
+        <div class="box">
+          <h3>Передня вісь</h3>
+          <p>Навантаження на вісь: <b><span id="loadFront">—</span></b> кН → на шину: <b><span id="perTireF">—</span></b> кН</p>
+          <p>Рекоменд. тиск (холодний): <b><span id="pFront">—</span></b> кПа</p>
+          <p>Оцінка площі плями: <b><span id="areaFront">—</span></b> дм²/шину</p>
+        </div>
+        <div class="box">
+          <h3>Задня вісь</h3>
+          <p>Навантаження на вісь: <b><span id="loadRear">—</span></b> кН → на шину: <b><span id="perTireR">—</span></b> кН</p>
+          <p>Рекоменд. тиск (холодний): <b><span id="pRear">—</span></b> кПа</p>
+          <p>Оцінка площі плями: <b><span id="areaRear">—</span></b> дм²/шину</p>
+        </div>
+      </div>
+      <p class="small muted">На практиці уточнювати за таблицями виробника шин (модель/розмір/швидкість). Ці розрахунки — навчальна оцінка.</p>
+    </div>
+
+    <!-- ЖУРНАЛ БУКСУВАННЯ -->
+    <div class="card">
+      <h2>📒 Журнал буксування (теор. vs факт.)</h2>
+      <div class="row">
+        <button class="btn" onclick="addRow()">➕ Додати запис</button>
+        <button class="btn" onclick="presetRows()">🧪 Приклад</button>
+        <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+        <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
+      </div>
+      <div style="overflow:auto; margin-top:8px">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Поле/ділянка</th>
+              <th>Обертів двиг., rpm</th>
+              <th>Передача (коеф.)</th>
+              <th>Радіус кочення, м</th>
+              <th>V теор., км/год</th>
+              <th>V факт., км/год</th>
+              <th class="dark">Букс, %</th>
+              <th class="dark">Статус</th>
+              <th>Примітка</th>
+            </tr>
+          </thead>
+          <tbody id="body"></tbody>
+          <tfoot>
+            <tr>
+              <th class="dark" colspan="7">Середній букс</th>
+              <th class="dark" id="avgSlip">—</th>
+              <th class="dark" colspan="2">—</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="csvLog" class="out" style="margin-top:8px">—</div>
+      <p class="small muted">V теор. ≈ ωкола×2πR; ωкола = rpm_двиг / i_заг, де i — загальний передатний (двигун→колеса). Букс = (Vтеор − Vфакт)/Vтеор·100%.</p>
+    </div>
+
+    <!-- КВИТОК + NFC -->
+    <div class="card">
+      <h2>🧾 Квиток 58 мм та NFC</h2>
+      <div class="grid g2">
+        <div class="box">
+          <h3>NFC — “TR-SLIP/BALLAST”</h3>
+          <div class="row">
+            <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
+            <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+            <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          </div>
+          <div id="nfcOut" class="out">—</div>
+        </div>
+
+        <div class="box">
+          <h3>Квиток “Баласт & Тиск шин”</h3>
+          <div class="row">
+            <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+            <button class="btn" onclick="window.print()">🖨️ Друк</button>
+          </div>
+          <div class="ticket" id="ticket" style="margin-top:8px">
+            <h4>БАЛАСТ & ТИСК ШИН</h4>
+            <p id="tDate"><small>Дата: —</small></p>
+            <div class="line"></div>
+            <p><b>Fпотр:</b> <span id="tF">—</span> кН · <b>Pᵈ:</b> <span id="tPd">—</span> кВт</p>
+            <p><b>μ·Wdrive:</b> <span id="tFmax">—</span> кН · <b>ΔF:</b> <span id="tFgap">—</span> кН</p>
+            <p><b>Баласт (ведучі):</b> <span id="tBall">—</span> т</p>
+            <div class="line"></div>
+            <p><b>Тиск шин F/R:</b> <span id="tPF">—</span> / <span id="tPR">—</span> кПа</p>
+            <p><b>Цільовий букс:</b> <span id="tSlipT">—</span> %</p>
+            <div class="line"></div>
+            <p><small id="tNote">Прим.: —</small></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ХІД РОБОТИ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+      <ol>
+        <li>Задай <b>маси/розподіл</b>, <b>потрібну тягу</b>, <b>швидкість</b>, <b>μ</b> та <b>цільовий букс</b> → перевір дефіцит/надлишок тяги.</li>
+        <li>Розрахуй <b>баласт</b> і онови <b>тиск у шинах</b> до цільового контактного тиску.</li>
+        <li>Заповни 3–5 рядків <b>журналу</b> (двигун rpm, передатний, радіус, факт. швидкість від GPS/хронометра) → оцінка буксу.</li>
+        <li>Згенеруй <b>NFC</b>, <b>квиток 58 мм</b> і <b>CSV</b> для звіту (<span class="mono">Traction</span>).</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Коректні Pᵈ, перевірка μ·Wdrive і обґрунтований баласт</td><td>4</td></tr>
+          <tr><td>Рекомендований тиск у шинах (логіка/висновки)</td><td>2</td></tr>
+          <tr><td>Журнал буксування (≥3 рядки) та аналіз</td><td>3</td></tr>
+          <tr><td>Квиток/NFC + CSV</td><td>1</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2) => Number((+n).toFixed(d));
+  const bodyEl = document.getElementById('body');
+
+  function weights(){
+    const mT = (+byId('massT').value||0);          // т
+    const g = 9.81;                                // м/с²
+    const Wtot = mT * g;                            // кН (бо т*9.81 = кН приблизно)
+    const fPct = (+byId('frontPct').value||0)/100;
+    const Wfront = Wtot * fPct;
+    const Wright = Wtot - Wfront;
+
+    // Яка вісь ведуча?
+    const drive = byId('drive').value;
+    let Wdrive = 0;
+    if(drive==='2wd') Wdrive = Wright;            // задня ведуча
+    else if(drive==='mfwd' || drive==='4wd') Wdrive = Wtot; // обидві ведучі (спрощено)
+
+    return {Wtot,Wfront,Wright,Wdrive};
+  }
+
+  function tractionCalc(){
+    const F = (+byId('needF').value||0);          // кН
+    const V = (+byId('speed').value||0);          // км/год
+    const mu = (+byId('mu').value||0);
+    const slipT = (+byId('slipTarget').value||0);
+    const w = weights();
+
+    const Pdraw = F * (V/3.6);                    // кВт
+    const Fmax = mu * w.Wdrive;                   // кН
+    const Fgap = F - Fmax;                        // кН (позитивне = не вистачає зчеплення)
+    // Мін. додатковий баласт на ведучу(і), щоб F ≤ μ·(Wdrive+ΔW): ΔW ≥ (F/μ - Wdrive)/g? Ми вже в кН → поділимо на g(≈9.81) для тонн.
+    let ballastT = 0;
+    if(Fgap>0 && mu>0){
+      const add_kN = (F/mu) - w.Wdrive;          // кН
+      ballastT = Math.max(0, add_kN / 9.81);     // т
+    }
+
+    // Реком. статичний розподіл (текст)
+    let split = '35–40% перед / 60–65% зад (MFWD)';
+    if(byId('drive').value==='2wd') split = '25–35% перед / 65–75% зад (2WD)';
+    if(byId('drive').value==='4wd') split = '50/50 (постійний 4×4)';
+
+    // Вивід
+    byId('Pdraw').textContent = rnd(Pdraw,1);
+    byId('Wdrive').textContent= rnd(w.Wdrive,1);
+    byId('Fmax').textContent  = rnd(Fmax,1);
+    byId('Fgap').textContent  = rnd(Fgap,1);
+    byId('BallastNeed').textContent = rnd(ballastT,2);
+    byId('SplitRec').textContent = split;
+
+    // CSV
+    const csv = [
+      `TRACTOR|m=${byId('massT').value}t|front%=${byId('frontPct').value}|drive=${byId('drive').value}`,
+      `TASK|F=${F}kN|V=${V}kmh|mu=${mu}|slipT=${slipT}%|Pdraw=${rnd(Pdraw,1)}kW`,
+      `GRIP|Wdrive=${rnd(w.Wdrive,1)}kN|Fmax=${rnd(Fmax,1)}kN|Fgap=${rnd(Fgap,1)}kN|BallastNeed=${rnd(ballastT,2)}t|Split=${split}`
+    ].join('\n');
+    byId('csvSys').textContent = csv;
+
+    return {F,V,mu,slipT,Pdraw,Fmax,Fgap,ballastT,split,weights:w};
+  }
+
+  function tires(){
+    const t = tractionCalc();
+    const tiresPerAxle = (+byId('tiresPerAxle').value||2);
+    const pT = (+byId('pTarget').value||110); // кПа
+    const pSF = (+byId('pSF').value||1.1);    // коеф. запасу
+    const kA  = (+byId('areaK').value||1.1);  // коеф. площі
+
+    // КН → Н: *1000; кПа = кН/м²
+    const loadF_kN = t.weights.Wfront;
+    const loadR_kN = t.weights.Wright;
+    const perTireF_kN = loadF_kN / tiresPerAxle;
+    const perTireR_kN = loadR_kN / tiresPerAxle;
+
+    const pFront = rnd(pT * pSF, 0);
+    const pRear  = rnd(pT * pSF, 0);
+
+    // Площа плями (навчальна оцінка): A ≈ k * (Навантаження кН / тиск кПа) м²; переведемо у дм² (×100)
+    const areaF_dm2 = rnd( kA * (perTireF_kN / pT) * 100 , 1);
+    const areaR_dm2 = rnd( kA * (perTireR_kN / pT) * 100 , 1);
+
+    byId('loadFront').textContent = rnd(loadF_kN,1);
+    byId('loadRear').textContent  = rnd(loadR_kN,1);
+    byId('perTireF').textContent  = rnd(perTireF_kN,2);
+    byId('perTireR').textContent  = rnd(perTireR_kN,2);
+    byId('pFront').textContent    = pFront;
+    byId('pRear').textContent     = pRear;
+    byId('areaFront').textContent = areaF_dm2;
+    byId('areaRear').textContent  = areaR_dm2;
+
+    return {pFront,pRear,perTireF_kN,perTireR_kN,areaF_dm2,areaR_dm2};
+  }
+
+  // ==== Журнал буксування ====
+  function addRow(sample){
+    const def = { field:'F-01', rpm:1800, ratio:30, R: (+byId('tireDia').value||1.5)/2, vfact:7.2, note:'' };
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${s.field}"></td>
+      <td><input type="number" step="10" value="${s.rpm}"></td>
+      <td><input type="number" step="0.1" value="${s.ratio}"></td>
+      <td><input type="number" step="0.001" value="${s.R}"></td>
+      <td class="vth">—</td>
+      <td><input type="number" step="0.1" value="${s.vfact}"></td>
+      <td class="dark slip">—</td>
+      <td class="dark flag">—</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyEl.appendChild(tr);
+    reindex();
+  }
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+
+  function recalcLog(){
+    let sum=0, n=0;
+    [...bodyEl.querySelectorAll('tr')].forEach(tr=>{
+      const rpm  = +tr.children[2].querySelector('input').value||0;
+      const ratio= +tr.children[3].querySelector('input').value||0; // загальний
+      const R    = +tr.children[4].querySelector('input').value||0;
+      const vfact= +tr.children[6].querySelector('input').value||0;
+
+      const w_wheel = ratio>0 ? rpm/ratio : 0;             // об/хв
+      const vth = w_wheel>0 ? (2*Math.PI*R) * (w_wheel/60) : 0; // м/с
+      const vth_kmh = vth*3.6;
+      const slip = (vth_kmh>0) ? ( (vth_kmh - vfact)/vth_kmh * 100 ) : 0;
+
+      tr.querySelector('.vth').textContent = vth_kmh? rnd(vth_kmh,2) : '—';
+      tr.querySelector('.slip').textContent= isFinite(slip)? rnd(slip,1) : '—';
+
+      // Статус за цільовим буксом
+      const t = (+byId('slipTarget').value||0);
+      let flag='—', color='';
+      if(vth_kmh>0){
+        if(slip<t-3) { flag='🟢 низький (можна зменшити тиск/додати навантаження/вища передача)'; color='#10b981'; }
+        else if(slip<=t+3) { flag='🟠 в цілі (±3%)'; color='#f59e0b'; }
+        else { flag='🔴 завеликий (знизити тиск/зменшити швидкість/додати баласт)'; color='#ef4444'; }
+      }
+      tr.querySelector('.flag').textContent = flag;
+      tr.querySelector('.flag').style.color = color;
+
+      if(vth_kmh>0){ sum += Math.max(0,slip); n++; }
+    });
+    byId('avgSlip').textContent = n? rnd(sum/n,1)+'%' : '—';
+
+    // CSV журнал
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx=tr.querySelector('.idx').textContent.trim();
+      const field=tr.children[1].querySelector('input').value.trim();
+      const rpm =tr.children[2].querySelector('input').value.trim();
+      const ratio=tr.children[3].querySelector('input').value.trim();
+      const R   =tr.children[4].querySelector('input').value.trim();
+      const vth =tr.querySelector('.vth').textContent.trim();
+      const vf  =tr.children[6].querySelector('input').value.trim();
+      const slip=tr.querySelector('.slip').textContent.trim();
+      const flag=tr.querySelector('.flag').textContent.trim();
+      const note=tr.children[9].querySelector('input').value.trim();
+      return [idx,field,rpm,ratio,R,vth,vf,slip,flag,note].join(' | ');
+    });
+    byId('csvLog').textContent = lines.join('\n') || '—';
+  }
+
+  function recalc(){
+    tractionCalc();
+    tires();
+    recalcLog();
+  }
+
+  function preset(){
+    byId('massT').value = 7.2;
+    byId('frontPct').value = 40;
+    byId('drive').value = 'mfwd';
+    byId('needF').value = 28;
+    byId('speed').value = 7.5;
+    byId('mu').value = 0.48;
+    byId('slipTarget').value = 12;
+    byId('tireDia').value = 1.6;
+    recalc();
+  }
+
+  function presetRows(){
+    bodyEl.innerHTML='';
+    addRow({field:'F-01', rpm:1800, ratio:28, R:(+byId('tireDia').value||1.6)/2, vfact:6.6, note:'оранка'});
+    addRow({field:'F-02', rpm:2000, ratio:30, R:(+byId('tireDia').value||1.6)/2, vfact:7.1, note:'культивація'});
+    addRow({field:'F-03', rpm:1700, ratio:26, R:(+byId('tireDia').value||1.6)/2, vfact:6.9, note:'посів'});
+    recalc();
+  }
+
+  // ==== Квиток / NFC / CSV копіювання ====
+  function buildTicket(){
+    const t = tractionCalc();
+    const pr = tires();
+    const d = new Date().toISOString().slice(0,10);
+    byId('tDate').innerHTML = `<small>Дата: ${d}</small>`;
+    byId('tF').textContent = rnd(t.F,1);
+    byId('tPd').textContent = rnd(t.Pdraw,1);
+    byId('tFmax').textContent = rnd(t.Fmax,1);
+    byId('tFgap').textContent = rnd(t.Fgap,1);
+    byId('tBall').textContent = rnd(t.ballastT,2);
+    byId('tPF').textContent = pr.pFront;
+    byId('tPR').textContent = pr.pRear;
+    byId('tSlipT').textContent = t.slipT;
+    byId('tNote').textContent = `Розподіл: ${t.split}; Tires/axle: ${byId('tiresPerAxle').value}; k=${byId('areaK').value}`;
+  }
+
+  function buildNFC(){
+    const t = tractionCalc();
+    const pr = tires();
+    const text = [
+      `TR_SLIP_BAL_NFC`,
+      `MACHINE:${byId('nfcId').value}`,
+      `CONTACT:${byId('nfcPhone').value}`,
+      `TASK:F=${rnd(t.F,1)}kN; V=${rnd(t.V,1)}kmh; mu=${t.mu}; SlipT=${t.slipT}%`,
+      `GRIP:Wdrive=${rnd(t.weights.Wdrive,1)}kN; Fmax=${rnd(t.Fmax,1)}kN; BallastNeed=${rnd(t.ballastT,2)}t`,
+      `TIRES:Front=${pr.pFront}kPa;Rear=${pr.pRear}kPa; perTireF=${rnd(pr.perTireF_kN,2)}kN; perTireR=${rnd(pr.perTireR_kN,2)}kN`,
+      `NOTE:Split=${t.split}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = text;
+  }
+
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // Ініціалізація
+  (function init(){
+    addRow(); addRow();
+    recalc();
+  })();
+
+  // Перерахунок при змінах
+  document.addEventListener('change', e=>{
+    if(e.target.matches('input,select')) recalc();
+  });
+</script>
+</body>
+</html>

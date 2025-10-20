@@ -1,0 +1,552 @@
+<!-- mechanic_para8.html
+     ПАРА 8 (аудиторно) для механіків
+     Тема: ВІБРОДІАГНОСТИКА — вимір з акселерометра телефону, RMS g, піки 1X/2X/3X, оцінка дисбалансу/розцентрування/послаблення,
+           порівняння з очікуваною частотою (rpm), журнал, чек 58 мм, NFC, CSV
+     Фокус: телефони/ПК; без зовнішніх бібліотек; працює на GitHub Pages та в Moodle (iframe).
+     Обладнання: смартфони з акселерометром (у браузері), термопринтер 58 мм (опц.), NFC-мітки (опц.).
+
+     Що вміє:
+     • Доступ до акселерометра (за згодою користувача); збір сигналу 3-осей, модуль a=√(ax²+ay²+az²), видалення g статичної.
+     • Розрахунок: RMS/Peak (g), домінантна частота, амплітуди на 1X/2X/3X (Goertzel), коеф. дисбалансу/розцентрування (на підставі відносних піків).
+     • Порівняння “очікувана 1X” із введених rpm та “виміряна 1X” → висновок (ковзання ременя/невідповідність швидкості).
+     • Журнал вимірів; квиток 58 мм “VIBRO CHECK”; NFC-текст; експорт CSV.
+     Примітка: це навчальний інструмент; граничні значення спрощені.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Пара 8 (механіки) — Вібраційна діагностика: RMS g, 1X/2X/3X, журнал, чек 58 мм, NFC, CSV</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
+         font-size:12px;color:var(--muted);letter-spacing:.3px}
+  h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:22px;margin:28px 0 12px} h3{font-size:18px;margin:20px 0 8px;color:#cbd5e1}
+  p{margin:10px 0}.small{font-size:12px;color:#9fb0c8}.muted{color:#93a3b5}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#dbeafe;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049;border-radius:12px;padding:12px;background:var(--darkcell);color:var(--darkink)}
+  .table{width:100%;border-collapse:separate;border-spacing:0;overflow:auto;border-radius:12px;border:1px solid #223049}
+  .table th,.table td{padding:8px 10px;border-bottom:1px solid #1f2937;font-size:14px;vertical-align:top}
+  .table thead th{background:#0c1629;color:#a5b4fc;text-align:left;position:sticky;top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell);color:var(--darkink2)}
+  .table td.dark,.table th.dark{background:var(--darkcell)!important;color:var(--darkink2)!important}
+  .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
+  input[type="text"],input[type="number"],input[type="date"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
+  .ok{color:#10b981}.warn{color:#f59e0b}.bad{color:#ef4444}
+  /* Чек 58 мм */
+  .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
+  .ticket small{font-size:10px}
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff;color:#111}
+  html.embedded .card{background:#fff;border:1px solid #e5e7eb;box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial;background:none;color:#111}
+  html.embedded .box{background:#f8fafc;color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
+  @media print{@page{margin:4mm}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Пара 8 · аудиторно · механіки</span>
+  <h1>📳 Вібраційна діагностика: RMS g, 1X/2X/3X, журнал вимірів, чек 58 мм, NFC</h1>
+
+  <div class="card">
+    <h2>🎯 Мета</h2>
+    <p>
+      За пару студенти виконають <b>вимір вібрацій телефоном</b>, прорахують <b>RMS/Peak</b>, амплітуди на <b>1X/2X/3X</b>,
+      порівняють з <b>очікуваною частотою обертання</b>, зроблять <b>висновок</b> (дисбаланс/розцентрування/послаблення),
+      сформують <b>журнал</b>, <b>квиток 58 мм</b>, <b>NFC</b>-текст і <b>CSV</b>.
+    </p>
+    <p class="small">1X — основна частота (об/с); 2X — типово розцентрування; 3X та широкосмугова — послаблення/люфт. Пороги умовні й навчальні.</p>
+  </div>
+
+  <!-- ВХІДНІ ДАНІ МАШИНИ -->
+  <div class="card">
+    <h2>⚙️ Обʼєкт контролю та режим</h2>
+    <div class="grid g3">
+      <div class="box">
+        <h3>Паспортні/робочі</h3>
+        <div class="row">
+          <div style="flex:1"><label>Назва вузла</label><input id="nodeName" type="text" value="Вал вентилятора охолодження"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Оберти, rpm</label><input id="rpm" type="number" step="1" value="1800"></div>
+          <div style="flex:1"><label>Очікувана 1X, Гц</label><input id="f1exp" type="number" step="0.01" value="30.0"></div>
+        </div>
+        <p class="small">Підказка: 1X = rpm/60. Кнопка “⟳ Обчислити 1X” нижче.</p>
+      </div>
+
+      <div class="box">
+        <h3>Параметри виміру</h3>
+        <div class="row">
+          <div style="flex:1"><label>Вікно, с</label><input id="winSec" type="number" step="0.5" value="6"></div>
+          <div style="flex:1"><label>Знормувати g (видалити DC)</label>
+            <select id="detrend"><option value="on" selected>так</option><option value="off">ні</option></select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <div style="flex:1"><label>Режим Goertzel</label>
+            <select id="gMode"><option value="multi" selected>1X/2X/3X</option><option value="fine">тонкий ±5%</option></select>
+          </div>
+          <div style="flex:1"><label>Поріг тривоги, g RMS</label><input id="thrRMS" type="number" step="0.01" value="0.4"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Керування</h3>
+        <div class="row">
+          <button class="btn" id="permBtn">🔓 Дозвіл на сенсори</button>
+          <button class="btn" id="startBtn">▶️ Пуск</button>
+          <button class="btn" id="stopBtn" disabled>⏹️ Стоп</button>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="calcF1()">⟳ Обчислити 1X</button>
+          <button class="btn" onclick="addLog()">🧩 В журнал</button>
+          <button class="btn" onclick="copyCSV('csvSys')">📋 CSV (сесія)</button>
+        </div>
+        <div id="csvSys" class="out" style="margin-top:8px">—</div>
+      </div>
+    </div>
+
+    <div class="grid g3" style="margin-top:8px">
+      <div class="box">
+        <h3>Поточні метрики</h3>
+        <p>RMS: <b><span id="rms">—</span></b> g · Peak: <b><span id="peak">—</span></b> g</p>
+        <p>f домінантна: <b><span id="fdom">—</span></b> Гц</p>
+        <p>Статус: <b><span id="status">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Спектральні піки</h3>
+        <p>1X: <b><span id="a1">—</span></b> g · 2X: <b><span id="a2">—</span></b> g · 3X: <b><span id="a3">—</span></b> g</p>
+        <p>Висновок: <b><span id="diag">—</span></b></p>
+      </div>
+      <div class="box">
+        <h3>Калібрування/порівняння</h3>
+        <p>Очік. 1X: <b><span id="f1lbl">—</span></b> Гц · Вимір. 1X: <b><span id="f1meas">—</span></b> Гц</p>
+        <p>Різниця: <b><span id="f1diff">—</span></b> %</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ЖУРНАЛ -->
+  <div class="card">
+    <h2>📒 Журнал вимірів</h2>
+    <div class="row">
+      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
+      <button class="btn" onclick="presetLog()">🧪 Приклад</button>
+    </div>
+    <div style="overflow:auto;margin-top:8px">
+      <table class="table" id="tbl">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Вузол</th>
+            <th>rpm</th>
+            <th>1X очік., Гц</th>
+            <th>RMS g</th>
+            <th>Peak g</th>
+            <th class="dark">1X g</th>
+            <th class="dark">2X g</th>
+            <th class="dark">3X g</th>
+            <th class="dark">Δ1X, %</th>
+            <th class="dark">Діагноз</th>
+            <th>Примітка</th>
+          </tr>
+        </thead>
+        <tbody id="body"></tbody>
+      </table>
+    </div>
+    <div id="csvLog" class="out" style="margin-top:8px">—</div>
+  </div>
+
+  <!-- КВИТОК + NFC -->
+  <div class="card">
+    <h2>🧾 Квиток 58 мм та NFC</h2>
+    <div class="grid g2">
+      <div class="box">
+        <h3>NFC — “VIBRO CHECK”</h3>
+        <div class="row">
+          <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
+          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+        </div>
+        <div id="nfcOut" class="out">—</div>
+      </div>
+
+      <div class="box">
+        <h3>Квиток “VIBRO CHECK”</h3>
+        <div class="row">
+          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        </div>
+        <div class="ticket" id="ticket" style="margin-top:8px">
+          <h4>VIBRO CHECK</h4>
+          <p id="tDate"><small>Дата: —</small></p>
+          <div class="line"></div>
+          <p><b>Вузол:</b> <span id="tNode">—</span></p>
+          <p><b>rpm/1X:</b> <span id="tRpm">—</span> / <span id="tF1">—</span> Гц</p>
+          <p><b>RMS/Peak:</b> <span id="tRMS">—</span> / <span id="tPeak">—</span> g</p>
+          <p><b>1X/2X/3X:</b> <span id="tH1">—</span>/<span id="tH2">—</span>/<span id="tH3">—</span> g</p>
+          <p><b>Δ1X:</b> <span id="tD1">—</span> % · <b>Висновок:</b> <span id="tDiag">—</span></p>
+          <div class="line"></div>
+          <p><small id="tNote">Прим.: —</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ХІД РОБОТИ + ОЦІНЮВАННЯ -->
+  <div class="card">
+    <h2>🪜 Хід роботи (45–70 хв)</h2>
+    <ol>
+      <li>Задай <b>rpm</b> або натисни “⟳ Обчислити 1X”. Попроси дозвіл на сенсори і натисни <b>Пуск</b> — тримай телефон біля вузла.</li>
+      <li>Після <b>вікна</b> збору переглянь <b>RMS/Peak</b>, <b>1X/2X/3X</b>, <b>Δ1X</b> і <b>висновок</b>.</li>
+      <li>Додай запис у <b>журнал</b> (мін. 3 рядки: різні RPM або різні вузли).</li>
+      <li>Згенеруй <b>квиток 58 мм</b>, <b>NFC</b> і <b>CSV</b> для звіту (<span class="mono">Vibration</span>).</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>✅ Оцінювання (10 балів)</h2>
+    <table class="table">
+      <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+      <tbody>
+        <tr><td>Вимір з акселерометра (дозвіл, коректне вікно)</td><td>3</td></tr>
+        <tr><td>Розрахунок RMS/Peak, 1X/2X/3X та Δ1X</td><td>3</td></tr>
+        <tr><td>Журнал (≥3 рядки) і вірний висновок</td><td>3</td></tr>
+        <tr><td>Квиток/NFC + CSV</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2)=>Number((+n).toFixed(d));
+  const bodyEl = document.getElementById('body');
+
+  // ---------- Допоміжні ----------
+  function calcF1(){
+    const rpm = +byId('rpm').value||0;
+    const f1 = rpm/60;
+    byId('f1exp').value = f1.toFixed(2);
+    updateLabels();
+  }
+  function updateLabels(){
+    byId('f1lbl').textContent = (+byId('f1exp').value||0).toFixed(2);
+  }
+
+  // ---------- Збір даних з акселерометра ----------
+  let collecting=false, samples=[], times=[];
+  let lastStamp=null;
+
+  async function requestPermission(){
+    try{
+      if (typeof(DeviceMotionEvent)!=='undefined' && typeof DeviceMotionEvent.requestPermission==='function'){
+        const st = await DeviceMotionEvent.requestPermission();
+        if(st!=='granted'){ alert('Доступ до сенсорів відхилено'); return; }
+      }
+      flash('✅ Доступ до сенсорів дозволено');
+    }catch(e){ alert('Браузер не підтримує запит дозволу для сенсорів'); }
+  }
+
+  function onMotion(e){
+    if(!collecting) return;
+    const a = e.accelerationIncludingGravity || e.acceleration || {x:0,y:0,z:0};
+    const ax=a.x||0, ay=a.y||0, az=a.z||0;
+    // модуль прискорення в g; приблизно ділимо на 9.81
+    let g = Math.sqrt(ax*ax+ay*ay+az*az)/9.81;
+    // видалення DC (видалити середнє по ходу збору)
+    if(byId('detrend').value==='on'){
+      // будемо віднімати ковзне середнє ~ просте: збережемо і віднімемо пізніше при обробці
+    }
+    const t = e.timeStamp || performance.now();
+    samples.push(g); times.push(t);
+  }
+
+  function startCollect(){
+    samples=[]; times=[]; lastStamp=null;
+    collecting=true;
+    window.addEventListener('devicemotion', onMotion, {passive:true});
+    byId('startBtn').disabled=true; byId('stopBtn').disabled=false;
+    const dur = (+byId('winSec').value||6)*1000;
+    setTimeout(stopCollect, dur);
+  }
+
+  function stopCollect(){
+    if(!collecting) return;
+    collecting=false;
+    window.removeEventListener('devicemotion', onMotion);
+    byId('startBtn').disabled=false; byId('stopBtn').disabled=true;
+    processData();
+  }
+
+  // ---------- Обробка ----------
+  function detrend(arr){
+    const mean = arr.reduce((a,b)=>a+b,0)/(arr.length||1);
+    return arr.map(x=>x-mean);
+  }
+
+  function rms(arr){
+    if(!arr.length) return 0;
+    let s=0; for(const x of arr) s+=x*x;
+    return Math.sqrt(s/arr.length);
+  }
+  function peak(arr){
+    let p=0; for(const x of arr) p=Math.max(p,Math.abs(x));
+    return p;
+  }
+
+  function estimateFs(ts){
+    if(ts.length<2) return 50; // припущення
+    let ms = 0, n=0;
+    for(let i=1;i<ts.length;i++){ const dt = ts[i]-ts[i-1]; if(dt>0 && dt<200){ ms += dt; n++; } }
+    const avg = n? ms/n : 20;
+    return 1000/avg;
+  }
+
+  // Goertzel для частоти f0
+  function goertzel(arr, fs, f0){
+    const n = arr.length;
+    if(n===0 || fs<=0 || f0<=0) return 0;
+    const k = Math.round(0.5 + (n * f0)/fs);
+    const w = (2*Math.PI*k)/n;
+    const cw = Math.cos(w), sw = Math.sin(w);
+    const coeff = 2*cw;
+    let s0=0, s1=0, s2=0;
+    for(let i=0;i<n;i++){
+      s0 = arr[i] + coeff*s1 - s2;
+      s2 = s1; s1 = s0;
+    }
+    const real = s1 - s2*cw;
+    const imag = s2*sw;
+    const mag = Math.sqrt(real*real + imag*imag)/n*2; // нормована амплітуда
+    return mag;
+  }
+
+  function dominantFreq(arr, fs){
+    // Груба оцінка: автокореляція для періоду 0.5…50 Гц
+    const fmin=0.5, fmax=Math.min(50, fs/2-1);
+    let bestF=0, bestR=0;
+    for(let f=fmin; f<=fmax; f+=0.5){
+      const T = Math.round(fs/f);
+      if(T<=1) continue;
+      let r=0, m=0;
+      for(let i=0;i+T<arr.length;i++){ r += arr[i]*arr[i+T]; m++; }
+      if(m>0){ r/=m; if(r>bestR){bestR=r; bestF=f;} }
+    }
+    return bestF;
+  }
+
+  function diagHeuristic(a1,a2,a3,rmsVal,thrRMS){
+    let notes=[];
+    if(rmsVal>thrRMS) notes.push('рівень високий');
+    if(a1>Math.max(a2,a3)*1.5 && a1>0.15) notes.push('дисбаланс (1X)');
+    if(a2>Math.max(a1,a3)*1.3 && a2>0.1) notes.push('розцентрування (2X)');
+    if(a3>0.1 && a3>0.7*a2) notes.push('послаблення/люфт (3X)');
+    if(notes.length===0) return 'норма/без зауважень';
+    return notes.join('; ');
+  }
+
+  function processData(){
+    if(samples.length<20){ flash('Мало даних'); return; }
+    const fs = estimateFs(times);
+    let x = samples.slice();
+    if(byId('detrend').value==='on') x = detrend(x);
+
+    const r = rms(x), p = peak(x);
+    const f1exp = +byId('f1exp').value || 0;
+    const f1 = f1exp>0? f1exp : dominantFreq(x, fs);
+
+    // Goertzel на 1X/2X/3X; в режимі "fine" беремо ±5% і обираємо пік
+    function pickAround(f){
+      const mode = byId('gMode').value;
+      if(mode==='multi') return goertzel(x,fs,f);
+      let best=0;
+      for(let ff=f*0.95; ff<=f*1.05; ff+=f*0.005){ best = Math.max(best, goertzel(x,fs,ff)); }
+      return best;
+    }
+    const a1 = f1>0? pickAround(f1) : 0;
+    const a2 = f1>0? pickAround(2*f1) : 0;
+    const a3 = f1>0? pickAround(3*f1) : 0;
+
+    const fdom = dominantFreq(x,fs);
+    const diff = f1exp>0? ((fdom - f1exp)/f1exp*100) : 0;
+
+    // Висновки/статуси
+    const thr = +byId('thrRMS').value||0.4;
+    const status = (r<=thr? '🟢 ок' : (r<=thr*1.5? '🟠 підвищено' : '🔴 високо'));
+    const diag = diagHeuristic(a1,a2,a3,r,thr);
+
+    byId('rms').textContent = rnd(r,3);
+    byId('peak').textContent= rnd(p,3);
+    byId('fdom').textContent= rnd(fdom,2);
+    byId('a1').textContent  = rnd(a1,3);
+    byId('a2').textContent  = rnd(a2,3);
+    byId('a3').textContent  = rnd(a3,3);
+    byId('status').textContent = status;
+    byId('diag').textContent   = diag;
+    byId('f1lbl').textContent  = f1exp? rnd(f1exp,2) : '—';
+    byId('f1meas').textContent = rnd(fdom,2);
+    byId('f1diff').textContent = f1exp? rnd(diff,1) : '—';
+
+    // CSV сесії
+    const csv = [
+      `NODE|${byId('nodeName').value}`,
+      `RPM|${byId('rpm').value}|F1exp|${byId('f1exp').value}|Fs|${rnd(fs,1)}`,
+      `RMS|${rnd(r,3)}|Peak|${rnd(p,3)}`,
+      `HARM|1X:${rnd(a1,3)}|2X:${rnd(a2,3)}|3X:${rnd(a3,3)}`,
+      `FREQ|fdom:${rnd(fdom,2)}|diff%:${f1exp?rnd(diff,1):'—'}`,
+      `STATUS|${status}|DIAG|${diag}`
+    ].join('\n');
+    byId('csvSys').textContent = csv;
+  }
+
+  // ---------- Журнал ----------
+  function addLog(){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="text" value="${byId('nodeName').value}"></td>
+      <td><input type="number" step="1" value="${byId('rpm').value}"></td>
+      <td><input type="number" step="0.01" value="${byId('f1exp').value}"></td>
+      <td class="rms">`+byId('rms').textContent+`</td>
+      <td class="peak">`+byId('peak').textContent+`</td>
+      <td class="dark h1">`+byId('a1').textContent+`</td>
+      <td class="dark h2">`+byId('a2').textContent+`</td>
+      <td class="dark h3">`+byId('a3').textContent+`</td>
+      <td class="dark d1">`+byId('f1diff').textContent+`</td>
+      <td class="dark dg">`+byId('diag').textContent+`</td>
+      <td><input type="text" value=""></td>
+    `;
+    bodyEl.appendChild(tr);
+    reindex();
+    buildCSVlog();
+  }
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
+  function buildCSVlog(){
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx=tr.querySelector('.idx').textContent.trim();
+      const node=tr.children[1].querySelector('input').value.trim();
+      const rpm =tr.children[2].querySelector('input').value.trim();
+      const f1e =tr.children[3].querySelector('input').value.trim();
+      const rms =tr.querySelector('.rms').textContent.trim();
+      const pk  =tr.querySelector('.peak').textContent.trim();
+      const h1  =tr.querySelector('.h1').textContent.trim();
+      const h2  =tr.querySelector('.h2').textContent.trim();
+      const h3  =tr.querySelector('.h3').textContent.trim();
+      const d1  =tr.querySelector('.d1').textContent.trim();
+      const dg  =tr.querySelector('.dg').textContent.trim();
+      const note=tr.children[11].querySelector('input').value.trim();
+      return [idx,node,rpm,f1e,rms,pk,h1,h2,h3,d1,dg,note].join(' | ');
+    });
+    byId('csvLog').textContent = lines.join('\n') || '—';
+  }
+  function presetLog(){
+    bodyEl.innerHTML='';
+    // Приклади трьох вузлів/режимів
+    const add=(n,r,f1,rms,pk,h1,h2,h3,d1,dg,note)=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td class="idx">1</td>
+        <td><input type="text" value="${n}"></td>
+        <td><input type="number" step="1" value="${r}"></td>
+        <td><input type="number" step="0.01" value="${f1}"></td>
+        <td class="rms">${rms}</td>
+        <td class="peak">${pk}</td>
+        <td class="dark h1">${h1}</td>
+        <td class="dark h2">${h2}</td>
+        <td class="dark h3">${h3}</td>
+        <td class="dark d1">${d1}</td>
+        <td class="dark dg">${dg}</td>
+        <td><input type="text" value="${note}"></td>
+      `;
+      bodyEl.appendChild(tr);
+    };
+    add('Вентилятор', 1800, 30.00, '0.28','0.85','0.22','0.08','0.05','-1.2','норма/без зауважень','базова точка');
+    add('Шків ременя', 1500, 25.00, '0.52','1.30','0.80','0.25','0.18','+3.5','рівень високий; дисбаланс (1X)','перевірити бруд/баланс');
+    add('Насос', 1200, 20.00, '0.45','1.10','0.30','0.40','0.28','-4.0','рівень високий; розцентрування (2X)','співвісність муфти');
+    reindex(); buildCSVlog();
+  }
+
+  // ---------- Квиток / NFC / CSV ----------
+  function buildTicket(){
+    const d = new Date().toISOString().slice(0,10);
+    byId('tDate').innerHTML = `<small>Дата: ${d}</small>`;
+    byId('tNode').textContent = byId('nodeName').value;
+    byId('tRpm').textContent  = byId('rpm').value;
+    byId('tF1').textContent   = (+byId('f1exp').value||0).toFixed(2);
+    byId('tRMS').textContent  = byId('rms').textContent;
+    byId('tPeak').textContent = byId('peak').textContent;
+    byId('tH1').textContent   = byId('a1').textContent;
+    byId('tH2').textContent   = byId('a2').textContent;
+    byId('tH3').textContent   = byId('a3').textContent;
+    byId('tD1').textContent   = byId('f1diff').textContent;
+    byId('tDiag').textContent = byId('diag').textContent;
+    byId('tNote').textContent = `Win:${byId('winSec').value}s; Mode:${byId('gMode').value}; Norm:${byId('thrRMS').value}g RMS`;
+  }
+
+  function buildNFC(){
+    const text = [
+      `VIBRO_NFC`,
+      `MACHINE:${byId('nfcId').value}`,
+      `CONTACT:${byId('nfcPhone').value}`,
+      `NODE:${byId('nodeName').value}`,
+      `RPM:${byId('rpm').value}; F1exp:${byId('f1exp').value}`,
+      `RMS:${byId('rms').textContent}g; Peak:${byId('peak').textContent}g`,
+      `HARM:1X=${byId('a1').textContent}g;2X=${byId('a2').textContent}g;3X=${byId('a3').textContent}g`,
+      `DIAG:${byId('diag').textContent}`,
+      `STAMP:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = text;
+  }
+
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t || t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // ---------- Ініціалізація та слухачі ----------
+  (function init(){
+    updateLabels();
+    // Кнопки
+    byId('permBtn').addEventListener('click', requestPermission);
+    byId('startBtn').addEventListener('click', startCollect);
+    byId('stopBtn').addEventListener('click', stopCollect);
+    // Перерахунок міток
+    ['rpm','f1exp'].forEach(id=>byId(id).addEventListener('change', updateLabels));
+  })();
+</script>
+</body>
+</html>

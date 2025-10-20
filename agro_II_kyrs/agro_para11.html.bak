@@ -1,0 +1,469 @@
+<!-- agro_para11.html
+     ПАРА 11 (аудиторно) для агрономів
+     Тема: ВОЛОГІСТЬ ЗЕРНА, УСУШКА/УМОЛОТ, СОБІВАРТІСТЬ СУШІННЯ ТА СУМІШІВАННЯ ПАРТІЙ
+     Фокус: телефони/ПК; без зовнішніх бібліотек; контраст темних клітинок → світлий текст.
+     Результат: таблиця партій (т, %волог.), обчислення усушки, енерговитрат і вартості, підказки «сушити/склад», підбір змішування до цільової вологості, CSV.
+     Додатково: генератор тексту для NFC-міток силоса/партії та чек 58 мм для вагаря (за бажанням).
+
+     Готово для GitHub Pages / iFrame у Moodle.
+-->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Пара 11 — Вологість зерна: усушка, сушіння, сумішування, вартість</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
+    --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+  h2{font-size:22px; margin:28px 0 12px}
+  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+  p{margin:10px 0}
+  .small{font-size:12px; color:#9fb0c8}
+  .muted{color:#93a3b5}
+  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+  .btn:hover{background:#0f1f39}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
+
+  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
+  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+  .table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)}
+  .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
+  .table td .tag{display:inline-block; padding:3px 8px; border-radius:999px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; font-size:12px}
+
+  input[type="text"], input[type="number"], input[type="date"], select, textarea{
+    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
+  }
+  .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+
+  /* Чек 58 мм */
+  .ticket{ width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
+  .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
+  .ticket p{margin:2px 0; font-size:12px}
+  .ticket .line{border-top:1px dashed #111; margin:6px 0}
+  .ticket small{font-size:10px}
+
+  /* Вбудовано (iframe) → світлий вигляд */
+  html.embedded body{background:#fff; color:#111}
+  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+  html.embedded .box{background:#f8fafc; color:#111}
+  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+
+  @media print{
+    @page{ margin:4mm }
+    .no-print{ display:none !important }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="badge">Пара 11 · аудиторно · агрономи</span>
+    <h1>🌾 Вологість зерна: усушка, сушіння, підбір сумішування та вартість</h1>
+
+    <div class="card">
+      <h2>🎯 Мета</h2>
+      <p>
+        За пару студенти ведуть <b>журнал партій зерна</b> (вага, вологість), обчислюють <b>усушку</b>, <b>витрати на сушіння</b> та
+        формують <b>рішення</b>: «склад (без сушіння)» або «на сушарку». Додатково — <b>калькулятор сумішування</b> двох партій до цілі
+        та <b>чек 58 мм</b> для вагаря/оператора.
+      </p>
+      <p class="small">Формули: <span class="mono">Mсуха = Mволога × (100 − W₀)/(100 − Wц)</span>; <span class="mono">Усушка = Mволога − Mсуха</span>.
+        Вартість сушіння (навчально): <span class="mono">Енергія = kₑ × Mволога(т) × (W₀ − Wц)</span>; <span class="mono">Вартість = Енергія × Цінаₑ</span>.
+      </p>
+    </div>
+
+    <!-- ПАРАМЕТРИ ТА НАЛАШТУВАННЯ -->
+    <div class="card">
+      <h2>⚙️ Налаштування</h2>
+      <div class="grid g3">
+        <div class="box">
+          <h3>Ціль вологості</h3>
+          <div class="row">
+            <div style="flex:1"><label>Культура</label><input id="crop" type="text" value="Кукурудза"></div>
+            <div style="flex:1"><label>Wц, %</label><input id="Wtarget" type="number" step="0.1" value="14.0"></div>
+          </div>
+          <p class="small">Типові навчальні: пшениця 13–14%, кукурудза 14%, соняшник 8–9%.</p>
+        </div>
+        <div class="box">
+          <h3>Енерговитрати сушіння</h3>
+          <div class="row">
+            <div style="flex:1"><label>kₑ, кВт·год/т·%вол.</label><input id="ke" type="number" step="1" value="18"></div>
+            <div style="flex:1"><label>Ціна кВт·год, грн</label><input id="pE" type="number" step="0.1" value="4.5"></div>
+          </div>
+          <p class="small">Або інтерпретуй kₑ як «умовні одиниці енергії» — головне, щоб пропорції були коректні.</p>
+        </div>
+        <div class="box">
+          <h3>Керування</h3>
+          <div class="row">
+            <button class="btn" onclick="addRow()">➕ Додати партію</button>
+            <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
+            <button class="btn" onclick="example()">🧪 Приклад</button>
+            <button class="btn" onclick="copyCSV()">📋 CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ТАБЛИЦЯ ПАРТІЙ -->
+    <div class="card">
+      <h2>🧱 Партії зерна</h2>
+      <div style="overflow:auto">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Дата/час</th>
+              <th>Поле</th>
+              <th>Культура</th>
+              <th>Вага, т</th>
+              <th>W₀, %</th>
+              <th class="dark">Mсуха, т</th>
+              <th class="dark">Усушка, т</th>
+              <th class="dark">Енергія, кВт·год</th>
+              <th class="dark">Вартість, грн</th>
+              <th class="dark">Рішення</th>
+              <th>Нотатка</th>
+            </tr>
+          </thead>
+          <tbody id="body"></tbody>
+          <tfoot>
+            <tr>
+              <th class="dark" colspan="4">Разом</th>
+              <th class="dark" id="sumW">—</th>
+              <th class="dark">—</th>
+              <th class="dark" id="sumDry">—</th>
+              <th class="dark" id="sumLoss">—</th>
+              <th class="dark" id="sumE">—</th>
+              <th class="dark" id="sumCost">—</th>
+              <th class="dark" id="sumNote">Оновлено</th>
+              <th></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="csv" class="out" style="margin-top:8px">—</div>
+      <p class="small">CSV: <span class="mono"># | Дата | Поле | Культура | Вага_т | W0_% | Msуха_т | Усушка_т | Енергія_кВтгод | Вартість_грн | Рішення | Нотатка</span></p>
+      <p class="small muted">Контраст: темні клітинки (<span class="mono">.dark</span>) мають світлий текст.</p>
+    </div>
+
+    <!-- СУМІШУВАННЯ ДВОХ ПАРТІЙ -->
+    <div class="card">
+      <h2>🧪 Сумішування 2 партій до цілі</h2>
+      <div class="grid g2">
+        <div class="box">
+          <h3>Ввід</h3>
+          <div class="row">
+            <div style="flex:1"><label>Партія A — вага, т</label><input id="mA" type="number" step="0.01" value="20"></div>
+            <div style="flex:1"><label>Партія A — Wₐ, %</label><input id="wA" type="number" step="0.1" value="18.5"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Партія B — вага, т</label><input id="mB" type="number" step="0.01" value="15"></div>
+            <div style="flex:1"><label>Партія B — Wᵦ, %</label><input id="wB" type="number" step="0.1" value="12.5"></div>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" onclick="blend()">🔁 Обчислити суміш</button>
+          </div>
+        </div>
+        <div class="box">
+          <h3>Результат</h3>
+          <p><b>Wсум, %:</b> <span id="wMix" class="mono">—</span></p>
+          <p class="mono" id="mixDecision">—</p>
+          <div class="out" id="mixExplain">—</div>
+        </div>
+      </div>
+      <p class="small">Формула: <span class="mono">Wсум = (mA·Wₐ + mB·Wᵦ)/(mA + mB)</span>.</p>
+    </div>
+
+    <!-- NFC ТА ЧЕК -->
+    <div class="card">
+      <h2>🔖 NFC-текст для силоса / 🧾 Чек 58 мм</h2>
+      <div class="grid g2">
+        <div class="box">
+          <h3>Генератор тексту для NFC</h3>
+          <div class="row">
+            <div style="flex:1"><label>Силос/Бункер</label><input id="bin" type="text" value="SIL-1"></div>
+            <div style="flex:1"><label>Партія (код)</label><input id="lot" type="text" value="LOT-001"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <div style="flex:1"><label>Культура</label><input id="nfcCrop" type="text" value="Кукурудза"></div>
+            <div style="flex:1"><label>W, % (факт)</label><input id="nfcW" type="number" step="0.1" value="15.8"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <button class="btn" onclick="buildNFC()">🧩 Зібрати текст</button>
+            <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          </div>
+          <div id="nfcOut" class="out">—</div>
+          <p class="small">Запиши цей текст у NDEF (Text) через будь-який NFC-додаток на телефоні.</p>
+        </div>
+        <div class="box">
+          <h3>Чек 58 мм для вагаря</h3>
+          <div class="row">
+            <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+            <button class="btn" onclick="window.print()">🖨️ Друк</button>
+          </div>
+          <div class="ticket" id="ticket" style="margin-top:8px">
+            <h4>ЖУРНАЛ ПАРТІЇ</h4>
+            <p id="tDate"><small>Дата: —</small></p>
+            <div class="line"></div>
+            <p><b>Поле:</b> <span id="tField">—</span></p>
+            <p><b>Культ.:</b> <span id="tCrop">—</span> · <b>W₀:</b> <span id="tW0">—</span>%</p>
+            <p><b>Вага:</b> <span id="tW">—</span> т</p>
+            <p><b>Wц:</b> <span id="tWtar">—</span>% · <b>Mсуха:</b> <span id="tMd">—</span> т</p>
+            <p><b>Енергія:</b> <span id="tE">—</span> кВт·год · <b>Вартість:</b> <span id="tCost">—</span> грн</p>
+            <div class="line"></div>
+            <p><small id="tNote">Прим.: —</small></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ХІД РОБОТИ, ОЦІНЮВАННЯ -->
+    <div class="card">
+      <h2>🪜 Хід роботи (45–70 хв)</h2>
+      <ol>
+        <li>Занеси 6–10 партій (дата/поле/вага/вологость) → <b>Перерахувати</b>.</li>
+        <li>Оціни рішення: «склад» якщо W₀ ≤ Wц; «сушити» якщо W₀ > Wц. Переглянь усушку та вартість.</li>
+        <li>Перевір змішування двох партій до цільової вологості.</li>
+        <li>Згенеруй NFC-текст для силоса та/або роздрукуй чек 58 мм для партії.</li>
+        <li>Скопіюй CSV у Google Sheets (аркуш <span class="mono">DryingLog</span>), побудуй графік «Вартість/партія».</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
+      <table class="table">
+        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
+        <tbody>
+          <tr><td>Коректні розрахунки Mсуха/усушка та енерговитрати</td><td>4</td></tr>
+          <tr><td>Аргументоване рішення «склад/сушити» для кожної партії</td><td>3</td></tr>
+          <tr><td>Калькулятор сумішування використано та пояснено результат</td><td>2</td></tr>
+          <tr><td>CSV у Sheets + короткі висновки</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <p class="pill">🌽 Вологість</p><p class="pill">⚙️ Усушка</p><p class="pill">⚡ Енерговартість</p><p class="pill">🧪 Сумішування</p>
+    </div>
+  </div>
+
+<script>
+  // Вбудований режим (Moodle iFrame)
+  (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
+
+  const bodyEl = document.getElementById('body');
+  const csvEl = document.getElementById('csv');
+
+  // Утиліти
+  const byId = id => document.getElementById(id);
+  const rnd = (n,d=2) => Number((+n).toFixed(d));
+  function copyEl(id){ const t = byId(id).textContent.trim(); if(!t||t==='—'){alert('Немає даних');return;} navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося')); }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  function addRow(sample){
+    const now = new Date();
+    const def = {
+      date: new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes()).toISOString().slice(0,16),
+      field:'F-01', crop: byId('crop').value || 'Кукурудза',
+      weight: 22.0, W0: 18.0, note: ''
+    };
+    const s = Object.assign(def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td><input type="datetime-local" value="${s.date}"></td>
+      <td><input type="text" value="${s.field}"></td>
+      <td><input type="text" value="${s.crop}"></td>
+      <td><input type="number" step="0.01" value="${s.weight}"></td>
+      <td><input type="number" step="0.1" value="${s.W0}"></td>
+      <td class="dark md">—</td>
+      <td class="dark loss">—</td>
+      <td class="dark en">—</td>
+      <td class="dark cost">—</td>
+      <td class="dark dec">—</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyEl.appendChild(tr);
+    reindex();
+  }
+
+  function reindex(){ [...bodyEl.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent = i+1); }
+
+  function recalc(){
+    const Wt = parseFloat(byId('Wtarget').value||'14');   // %
+    const ke  = parseFloat(byId('ke').value||'18');       // кВт·год/т·%вол.
+    const pE  = parseFloat(byId('pE').value||'4.5');      // грн/кВт·год
+
+    let sumW=0, sumDry=0, sumLoss=0, sumE=0, sumCost=0;
+
+    [...bodyEl.querySelectorAll('tr')].forEach(tr=>{
+      const W0 = parseFloat(tr.children[5].querySelector('input').value||'0');
+      const M  = parseFloat(tr.children[4].querySelector('input').value||'0');
+
+      // Msуха та усушка до цілі (якщо вже суха — Msуха=M)
+      const Md = (W0<=Wt) ? M : M * ((100 - W0)/(100 - Wt));
+      const loss = M - Md;
+
+      // Енергія/вартість (тільки якщо W0>Wt)
+      const dW = Math.max(0, W0 - Wt);
+      const E = M * dW * ke;
+      const cost = E * pE;
+
+      tr.querySelector('.md').textContent   = rnd(Md,3);
+      tr.querySelector('.loss').textContent = rnd(loss,3);
+      tr.querySelector('.en').textContent   = (dW>0)? rnd(E,0) : 0;
+      tr.querySelector('.cost').textContent = (dW>0)? rnd(cost,0).toLocaleString('uk-UA') : '0';
+
+      const dec = (W0<=Wt) ? 'Склад (OK)' : 'На сушарку';
+      tr.querySelector('.dec').textContent = dec;
+      tr.querySelector('.dec').style.color = (W0<=Wt)? '#10b981' : '#f59e0b';
+
+      sumW += M; sumDry += Md; sumLoss += loss; sumE += (dW>0)?E:0; sumCost += (dW>0)?cost:0;
+    });
+
+    byId('sumW').textContent    = rnd(sumW,2);
+    byId('sumDry').textContent  = rnd(sumDry,2);
+    byId('sumLoss').textContent = rnd(sumLoss,2);
+    byId('sumE').textContent    = rnd(sumE,0);
+    byId('sumCost').textContent = rnd(sumCost,0).toLocaleString('uk-UA');
+
+    buildCSV();
+  }
+
+  function buildCSV(){
+    const lines = [...bodyEl.querySelectorAll('tr')].map(tr=>{
+      const idx=tr.querySelector('.idx').textContent.trim();
+      const d  = tr.children[1].querySelector('input').value.trim();
+      const f  = tr.children[2].querySelector('input').value.trim();
+      const c  = tr.children[3].querySelector('input').value.trim();
+      const M  = tr.children[4].querySelector('input').value.trim();
+      const W0 = tr.children[5].querySelector('input').value.trim();
+      const Md = tr.querySelector('.md').textContent.trim();
+      const L  = tr.querySelector('.loss').textContent.trim();
+      const E  = tr.querySelector('.en').textContent.trim();
+      const Ct = tr.querySelector('.cost').textContent.trim();
+      const Dc = tr.querySelector('.dec').textContent.trim();
+      const Nt = tr.children[11].querySelector('input').value.trim();
+      return [idx,d,f,c,M,W0,Md,L,E,Ct,Dc,Nt].join(' | ');
+    });
+    csvEl.textContent = lines.join('\n') || '—';
+  }
+
+  function copyCSV(){
+    const t = csvEl.textContent.trim();
+    if(!t || t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+
+  function example(){
+    bodyEl.innerHTML='';
+    addRow({field:'F-01', crop:'Кукурудза', weight:22.8, W0:18.7});
+    addRow({field:'F-02', crop:'Кукурудза', weight:19.6, W0:16.5});
+    addRow({field:'F-03', crop:'Кукурудза', weight:24.2, W0:13.8});
+    addRow({field:'F-01', crop:'Кукурудза', weight:18.1, W0:20.2});
+    addRow({field:'F-02', crop:'Кукурудза', weight:21.7, W0:14.0});
+    recalc();
+  }
+
+  // Сумішування
+  function blend(){
+    const mA = parseFloat(byId('mA').value||'0');
+    const wA = parseFloat(byId('wA').value||'0');
+    const mB = parseFloat(byId('mB').value||'0');
+    const wB = parseFloat(byId('wB').value||'0');
+    const Wt = parseFloat(byId('Wtarget').value||'14');
+
+    if(mA<=0||mB<=0){ alert('Вкажи додатні ваги партій.'); return; }
+
+    const wMix = (mA*wA + mB*wB)/(mA+mB);
+    byId('wMix').textContent = rnd(wMix,2);
+
+    let msg='', expl='';
+    if(wMix <= Wt){
+      msg = `✅ Wсум = ${rnd(wMix,2)}% ≤ Wц = ${Wt}% → Можна на склад без сушіння.`;
+      expl = 'Суха або в межах норми після сумішування.';
+    }else{
+      const over = rnd(wMix - Wt,2);
+      msg = `⚠️ Wсум = ${rnd(wMix,2)}% > Wц = ${Wt}% (на ${over} п.п.) → Потрібне сушіння.`;
+      // Підказка: яку частку сухішої партії треба взяти до обмеження mA чи mB (навчально)
+      const needMB = (mA*(wA - Wt))/(Wt - wB); // mB, щоб досягти Wt (якщо wB < Wt)
+      if(wB < Wt && needMB>0){
+        expl = `Щоб отримати рівно ${Wt}%, при фіксованій партії A (${mA} т) потрібно взяти B ≈ ${rnd(needMB,2)} т (за умови, що це ≤ ${mB} т).`;
+      }else{
+        expl = 'Обери сухішу партію або зменшуй частку вологішої.';
+      }
+    }
+    byId('mixDecision').textContent = msg;
+    byId('mixExplain').textContent = expl;
+  }
+
+  // NFC та чек
+  function buildNFC(){
+    const text = [
+      `BIN:${byId('bin').value.trim()}`,
+      `LOT:${byId('lot').value.trim()}`,
+      `CROP:${byId('nfcCrop').value.trim()}`,
+      `W:${byId('nfcW').value.trim()}%`,
+      `DATE:${new Date().toISOString().slice(0,19).replace('T',' ')}`
+    ].join('\n');
+    byId('nfcOut').textContent = text;
+  }
+
+  function buildTicket(){
+    // беру перший рядок як активну партію для чека
+    const tr = bodyEl.querySelector('tr');
+    if(!tr){ alert('Немає жодної партії.'); return; }
+    const d  = tr.children[1].querySelector('input').value.trim();
+    const f  = tr.children[2].querySelector('input').value.trim();
+    const c  = tr.children[3].querySelector('input').value.trim();
+    const M  = parseFloat(tr.children[4].querySelector('input').value||'0');
+    const W0 = parseFloat(tr.children[5].querySelector('input').value||'0');
+    const Wt = parseFloat(byId('Wtarget').value||'14');
+    const Md = (W0<=Wt) ? M : M * ((100 - W0)/(100 - Wt));
+    const dW = Math.max(0, W0 - Wt);
+    const E = dW>0 ? M*dW*parseFloat(byId('ke').value||'18') : 0;
+    const Ct = dW>0 ? E*parseFloat(byId('pE').value||'4.5') : 0;
+
+    byId('tDate').innerHTML = `<small>Дата: ${d}</small>`;
+    byId('tField').textContent = f;
+    byId('tCrop').textContent  = c;
+    byId('tW0').textContent    = rnd(W0,1);
+    byId('tW').textContent     = rnd(M,2);
+    byId('tWtar').textContent  = rnd(Wt,1);
+    byId('tMd').textContent    = rnd(Md,2);
+    byId('tE').textContent     = dW>0 ? rnd(E,0) : 0;
+    byId('tCost').textContent  = dW>0 ? rnd(Ct,0) : 0;
+    byId('tNote').textContent  = `Прим.: ${dW>0?'Сушіння потрібне':'Склад (OK)'} · Ref: LOT-${Math.random().toString(36).slice(2,8).toUpperCase()}`;
+  }
+
+  // Ініціалізація
+  (function init(){
+    addRow(); addRow(); addRow();
+    recalc();
+  })();
+</script>
+</body>
+</html>

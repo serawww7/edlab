@@ -62,6 +62,18 @@
   html.embedded .box{background:#f8fafc; color:#111}
   html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
 </style>
+
+<style>
+/* PRINT PATCH v1 CSS (auto) */
+.ticket{ font-weight:700; letter-spacing:0.1px }
+.ticket h4{ font-weight:700 }
+.ticket p,
+.ticket b,
+.ticket strong,
+.ticket span,
+.ticket small{ font-weight:700 }
+</style>
+
 </head>
 <body>
   <div class="wrap">
@@ -389,12 +401,24 @@ function printTicketNewTab(){
       .line{border-top:1px dashed #111; margin:6px 0}
       small{font-size:10px; font-weight:700}
     `;
-const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}
+const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style>
+<style>
+/* PRINT PATCH v1 CSS (auto) */
+.ticket{ font-weight:700; letter-spacing:0.1px }
+.ticket h4{ font-weight:700 }
+.ticket p,
+.ticket b,
+.ticket strong,
+.ticket span,
+.ticket small{ font-weight:700 }
+</style>
+
+</head><body>${ticket.outerHTML}
   <script>
     window.addEventListener('load',()=>{
       try{
         window.focus();
-        window.print();
+        printTicketNewTab();
         // повідомимо «батька», що друк викликано
         if(window.opener){ window.opener.postMessage({type:'ticketPrint', status:'invoked'}, '*'); }
       }catch(e){
@@ -402,7 +426,83 @@ const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 
       }
     });
   <\/script>
+  
+<script>
+// PRINT PATCH v1 (auto)
+function printTicketNewTab(){
+  var ticket = document.getElementById('ticket');
+  if(!ticket){ alert('Немає #ticket на сторінці'); return; }
+  try{
+    var someTxt = (document.querySelector('#ticket span, #ticket p, #ticket h4')||{}).textContent||'';
+    if(!someTxt || someTxt.trim()==='—'){ if(typeof buildTicket==='function') buildTicket(); }
+  }catch(_){}
+
+  var css = `
+    @media print { @page { size:58mm auto; margin:0 } }
+    html,body{ margin:0; padding:0; background:#fff; color:#000 }
+    .ticket{
+      width:58mm; margin:0; padding:6mm 4mm; background:#fff; color:#000;
+      font-family:"Courier New", Courier, monospace; font-weight:700; letter-spacing:0.1px;
+      border:none; box-shadow:none; border-radius:0
+    }
+    .ticket h4{ margin:0 0 6px; font-size:13px; text-align:center; font-weight:700 }
+    .ticket p{ margin:2px 0; font-size:12px; font-weight:700 }
+    .ticket b,.ticket strong,.ticket span{ font-weight:700 }
+    .line{ border-top:1px dashed #111; margin:6px 0 }
+    small{ font-size:10px; font-weight:700 }
+  `;
+  var html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}
+  <script>
+    window.addEventListener('load',()=>{
+      try{ window.focus(); window.print(); if(window.opener) window.opener.postMessage({type:'ticketPrint',status:'invoked'},'*'); }
+      catch(e){ if(window.opener) window.opener.postMessage({type:'ticketPrint',status:'error'},'*'); }
+    });
+  <\/script>
   </body></html>`;
+
+  var w = window.open('', '_blank');
+  if(!w){ openTicketOnly(); return; }  // попап заблоковано — фолбек
+  w.document.open(); w.document.write(html); w.document.close();
+
+  var timer = setTimeout(()=>{ openTicketOnly(); }, 1200);
+  window.addEventListener('message', (ev)=>{
+    if(ev && ev.data && ev.data.type==='ticketPrint'){ clearTimeout(timer); }
+  }, {once:true});
+}
+
+function openTicketOnly(){
+  var ticket = document.getElementById('ticket');
+  if(!ticket){ alert('Немає #ticket на сторінці'); return; }
+  try{
+    var someTxt = (document.querySelector('#ticket span, #ticket p, #ticket h4')||{}).textContent||'';
+    if(!someTxt || someTxt.trim()==='—'){ if(typeof buildTicket==='function') buildTicket(); }
+  }catch(_){}
+
+  var css = `
+    @media print { @page { size:58mm auto; margin:0 } }
+    html,body{ margin:0; background:#fff; color:#000 }
+    .ticket{
+      width:58mm; margin:0; padding:6mm 4mm; background:#fff; color:#000;
+      font-family:"Courier New", Courier, monospace; font-weight:700; letter-spacing:0.1px;
+      border:none; box-shadow:none; border-radius:0
+    }
+    .ticket h4{ margin:0 0 6px; font-size:13px; text-align:center; font-weight:700 }
+    .ticket p{ margin:2px 0; font-size:12px; font-weight:700 }
+    .line{ border-top:1px dashed #111; margin:6px 0 }
+    small{ font-size:10px; font-weight:700 }
+  `;
+  var html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}
+<script>window.addEventListener('load',()=>{ try{ window.focus(); window.print(); }catch(e){} });<\/script>
+</body></html>`;
+
+  var blob = new Blob([html], {type:'text/html'});
+  var url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  setTimeout(()=>URL.revokeObjectURL(url), 60000);
+}
+</script>
+
+</body></html>`;
 
 const fallbackBtn = document.getElementById('openOnlyBtn')
   const w = window.open('', '_blank');
@@ -448,8 +548,96 @@ const fallbackBtn = document.getElementById('openOnlyBtn')
       .line{border-top:1px dashed #111; margin:6px 0}
       small{font-size:10px; font-weight:700}
     `;
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style>
+<style>
+/* PRINT PATCH v1 CSS (auto) */
+.ticket{ font-weight:700; letter-spacing:0.1px }
+.ticket h4{ font-weight:700 }
+.ticket p,
+.ticket b,
+.ticket strong,
+.ticket span,
+.ticket small{ font-weight:700 }
+</style>
+
+</head><body>${ticket.outerHTML}
+<script>window.addEventListener('load',()=>{ try{ window.focus(); printTicketNewTab(); }catch(e){} });<\/script>
+
+<script>
+// PRINT PATCH v1 (auto)
+function printTicketNewTab(){
+  var ticket = document.getElementById('ticket');
+  if(!ticket){ alert('Немає #ticket на сторінці'); return; }
+  try{
+    var someTxt = (document.querySelector('#ticket span, #ticket p, #ticket h4')||{}).textContent||'';
+    if(!someTxt || someTxt.trim()==='—'){ if(typeof buildTicket==='function') buildTicket(); }
+  }catch(_){}
+
+  var css = `
+    @media print { @page { size:58mm auto; margin:0 } }
+    html,body{ margin:0; padding:0; background:#fff; color:#000 }
+    .ticket{
+      width:58mm; margin:0; padding:6mm 4mm; background:#fff; color:#000;
+      font-family:"Courier New", Courier, monospace; font-weight:700; letter-spacing:0.1px;
+      border:none; box-shadow:none; border-radius:0
+    }
+    .ticket h4{ margin:0 0 6px; font-size:13px; text-align:center; font-weight:700 }
+    .ticket p{ margin:2px 0; font-size:12px; font-weight:700 }
+    .ticket b,.ticket strong,.ticket span{ font-weight:700 }
+    .line{ border-top:1px dashed #111; margin:6px 0 }
+    small{ font-size:10px; font-weight:700 }
+  `;
+  var html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}
+  <script>
+    window.addEventListener('load',()=>{
+      try{ window.focus(); window.print(); if(window.opener) window.opener.postMessage({type:'ticketPrint',status:'invoked'},'*'); }
+      catch(e){ if(window.opener) window.opener.postMessage({type:'ticketPrint',status:'error'},'*'); }
+    });
+  <\/script>
+  </body></html>`;
+
+  var w = window.open('', '_blank');
+  if(!w){ openTicketOnly(); return; }  // попап заблоковано — фолбек
+  w.document.open(); w.document.write(html); w.document.close();
+
+  var timer = setTimeout(()=>{ openTicketOnly(); }, 1200);
+  window.addEventListener('message', (ev)=>{
+    if(ev && ev.data && ev.data.type==='ticketPrint'){ clearTimeout(timer); }
+  }, {once:true});
+}
+
+function openTicketOnly(){
+  var ticket = document.getElementById('ticket');
+  if(!ticket){ alert('Немає #ticket на сторінці'); return; }
+  try{
+    var someTxt = (document.querySelector('#ticket span, #ticket p, #ticket h4')||{}).textContent||'';
+    if(!someTxt || someTxt.trim()==='—'){ if(typeof buildTicket==='function') buildTicket(); }
+  }catch(_){}
+
+  var css = `
+    @media print { @page { size:58mm auto; margin:0 } }
+    html,body{ margin:0; background:#fff; color:#000 }
+    .ticket{
+      width:58mm; margin:0; padding:6mm 4mm; background:#fff; color:#000;
+      font-family:"Courier New", Courier, monospace; font-weight:700; letter-spacing:0.1px;
+      border:none; box-shadow:none; border-radius:0
+    }
+    .ticket h4{ margin:0 0 6px; font-size:13px; text-align:center; font-weight:700 }
+    .ticket p{ margin:2px 0; font-size:12px; font-weight:700 }
+    .line{ border-top:1px dashed #111; margin:6px 0 }
+    small{ font-size:10px; font-weight:700 }
+  `;
+  var html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}
 <script>window.addEventListener('load',()=>{ try{ window.focus(); window.print(); }catch(e){} });<\/script>
+</body></html>`;
+
+  var blob = new Blob([html], {type:'text/html'});
+  var url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  setTimeout(()=>URL.revokeObjectURL(url), 60000);
+}
+</script>
+
 </body></html>`;
 
     const blob = new Blob([html], {type:'text/html'});
@@ -469,5 +657,81 @@ const fallbackBtn = document.getElementById('openOnlyBtn')
   // Ініціалізація
   (function init(){ addMachine(); addJob(); recalc(); })();
 </script>
+
+<script>
+// PRINT PATCH v1 (auto)
+function printTicketNewTab(){
+  var ticket = document.getElementById('ticket');
+  if(!ticket){ alert('Немає #ticket на сторінці'); return; }
+  try{
+    var someTxt = (document.querySelector('#ticket span, #ticket p, #ticket h4')||{}).textContent||'';
+    if(!someTxt || someTxt.trim()==='—'){ if(typeof buildTicket==='function') buildTicket(); }
+  }catch(_){}
+
+  var css = `
+    @media print { @page { size:58mm auto; margin:0 } }
+    html,body{ margin:0; padding:0; background:#fff; color:#000 }
+    .ticket{
+      width:58mm; margin:0; padding:6mm 4mm; background:#fff; color:#000;
+      font-family:"Courier New", Courier, monospace; font-weight:700; letter-spacing:0.1px;
+      border:none; box-shadow:none; border-radius:0
+    }
+    .ticket h4{ margin:0 0 6px; font-size:13px; text-align:center; font-weight:700 }
+    .ticket p{ margin:2px 0; font-size:12px; font-weight:700 }
+    .ticket b,.ticket strong,.ticket span{ font-weight:700 }
+    .line{ border-top:1px dashed #111; margin:6px 0 }
+    small{ font-size:10px; font-weight:700 }
+  `;
+  var html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}
+  <script>
+    window.addEventListener('load',()=>{
+      try{ window.focus(); window.print(); if(window.opener) window.opener.postMessage({type:'ticketPrint',status:'invoked'},'*'); }
+      catch(e){ if(window.opener) window.opener.postMessage({type:'ticketPrint',status:'error'},'*'); }
+    });
+  <\/script>
+  </body></html>`;
+
+  var w = window.open('', '_blank');
+  if(!w){ openTicketOnly(); return; }  // попап заблоковано — фолбек
+  w.document.open(); w.document.write(html); w.document.close();
+
+  var timer = setTimeout(()=>{ openTicketOnly(); }, 1200);
+  window.addEventListener('message', (ev)=>{
+    if(ev && ev.data && ev.data.type==='ticketPrint'){ clearTimeout(timer); }
+  }, {once:true});
+}
+
+function openTicketOnly(){
+  var ticket = document.getElementById('ticket');
+  if(!ticket){ alert('Немає #ticket на сторінці'); return; }
+  try{
+    var someTxt = (document.querySelector('#ticket span, #ticket p, #ticket h4')||{}).textContent||'';
+    if(!someTxt || someTxt.trim()==='—'){ if(typeof buildTicket==='function') buildTicket(); }
+  }catch(_){}
+
+  var css = `
+    @media print { @page { size:58mm auto; margin:0 } }
+    html,body{ margin:0; background:#fff; color:#000 }
+    .ticket{
+      width:58mm; margin:0; padding:6mm 4mm; background:#fff; color:#000;
+      font-family:"Courier New", Courier, monospace; font-weight:700; letter-spacing:0.1px;
+      border:none; box-shadow:none; border-radius:0
+    }
+    .ticket h4{ margin:0 0 6px; font-size:13px; text-align:center; font-weight:700 }
+    .ticket p{ margin:2px 0; font-size:12px; font-weight:700 }
+    .line{ border-top:1px dashed #111; margin:6px 0 }
+    small{ font-size:10px; font-weight:700 }
+  `;
+  var html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}
+<script>window.addEventListener('load',()=>{ try{ window.focus(); window.print(); }catch(e){} });<\/script>
+</body></html>`;
+
+  var blob = new Blob([html], {type:'text/html'});
+  var url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  setTimeout(()=>URL.revokeObjectURL(url), 60000);
+}
+</script>
+
 </body>
 </html>
