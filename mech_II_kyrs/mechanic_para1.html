@@ -23,14 +23,13 @@
     color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
   }
   .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
-  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9fb0c8; letter-spacing:.3px}
   h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
      background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
   h2{font-size:22px; margin:28px 0 12px}
   h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
   p{margin:10px 0}
   .small{font-size:12px; color:#9fb0c8}
-  .muted{color:#93a3b5}
   .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
   .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
   .btn:hover{background:#0f1f39}
@@ -41,20 +40,15 @@
   @media (max-width:1000px){.g2,.g3{grid-template-columns:1fr}}
 
   .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
-  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
-  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:#e6eef9}
   .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
 
   .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
   .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
   .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
-  .table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)}
-  .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
-  .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
-
-  input[type="text"], input[type="number"], input[type="date"], select, textarea{
-    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
-  }
+  .table tbody tr:nth-child(even){background:#0b1324; color:#e5e7eb}
+  .table td.dark, .table th.dark{background:#0b1324 !important; color:#e5e7eb !important}
+  .out{background:#0b1324; color:#e5e7eb; border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
 
   /* Чек 58 мм (вигляд на екрані) */
   .ticket{ width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
@@ -70,6 +64,30 @@
   html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
   html.embedded .box{background:#f8fafc; color:#111}
   html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+
+  /* 🖨️ КЕРОВАНИЙ ДРУК ЛИШЕ ЧЕКА
+     ПРАЦЮЄ ТІЛЬКИ, КОЛИ <html> має клас .ticket-print (додається JS на час друку) */
+  @media print{
+    /* Розмір сторінки під рулон 58 мм */
+    @page{ size:58mm auto; margin:0 }
+
+    /* Активується лише під час нашого друку */
+    html.ticket-print body{ margin:0 !important; padding:0 !important; background:#fff !important; color:#000 !important }
+    html.ticket-print body *{ display:none !important }
+
+    html.ticket-print #ticket, 
+    html.ticket-print #ticket *{
+      display:initial !important; 
+      visibility:visible !important;
+    }
+    html.ticket-print #ticket{
+      width:58mm !important;
+      margin:0 !important; padding:6mm 4mm !important;
+      background:#fff !important; color:#000 !important;
+      border:none !important; box-shadow:none !important; border-radius:0 !important;
+      -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    }
+  }
 </style>
 </head>
 <body>
@@ -82,7 +100,6 @@
       <p>
         За пару студенти створюють <b>довідник машин</b>, заповнюють <b>журнал робіт</b>, розраховують <b>коли наступне ТО</b>
         (за мотогодинами/датою), формують <b>чек 58 мм</b> (наряд-замовлення) для друку та <b>NFC-текст</b> для мітки.
-        В кінці — <b>CSV</b> у Google Sheets і короткі висновки.
       </p>
       <p class="small">Правило інтервалу: ТО настає раніше з двох — за <span class="mono">мотогодинами</span> або за <span class="mono">календарем</span>.</p>
     </div>
@@ -118,7 +135,6 @@
         </table>
       </div>
       <div id="csvM" class="out" style="margin-top:8px">—</div>
-      <p class="small muted">Темні клітинки (<span class="mono">.dark</span>) — зі світлим текстом для читабельності.</p>
     </div>
 
     <!-- ЖУРНАЛ РОБІТ -->
@@ -149,7 +165,6 @@
         </table>
       </div>
       <div id="csvJ" class="out" style="margin-top:8px">—</div>
-      <p class="small">Оцінка вартості робіт: <span class="mono">люд.-год × тариф</span> (див. «Налаштування»).</p>
     </div>
 
     <!-- НАЛАШТУВАННЯ + NFC + ЧЕК -->
@@ -210,22 +225,8 @@
         <li>Додай 3–5 записів у <b>Журнал робіт</b> (різні типи робіт).</li>
         <li>Перевір <b>залишок до ТО</b> (год/дні) і статус («OK / скоро / терміново»).</li>
         <li>Згенеруй <b>NFC</b>-текст для однієї машини та <b>чек 58 мм</b> по одній роботі.</li>
-        <li>Скопіюй <b>CSV</b> у Google Sheets (аркуші <span class="mono">Machines</span> та <span class="mono">Jobs</span>).</li>
+        <li>Скопіюй <b>CSV</b> у Google Sheets.</li>
       </ol>
-    </div>
-
-    <div class="card">
-      <h2>✅ Оцінювання (10 балів)</h2>
-      <table class="table">
-        <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
-        <tbody>
-          <tr><td>Заповнений довідник і коректний розрахунок ТО (год/дні)</td><td>4</td></tr>
-          <tr><td>Журнал робіт заповнений (3–5 записів), підсумки логічні</td><td>3</td></tr>
-          <tr><td>Чек 58 мм та NFC-текст сформовані</td><td>2</td></tr>
-          <tr><td>CSV у Sheets + короткі висновки</td><td>1</td></tr>
-        </tbody>
-      </table>
-      <p class="pill">🧰 ТО</p><p class="pill">🧾 Наряд</p><p class="pill">🔖 NFC</p><p class="pill">📊 CSV</p>
     </div>
   </div>
 
@@ -442,74 +443,39 @@
     byId('tNote').textContent = `Прим.: Автогенерація · Ref:${Math.random().toString(36).slice(2,8).toUpperCase()}`;
   }
 
-  // ✅ ДРУК ЧЕРЕЗ ПРИХОВАНИЙ IFRAME (стабільно для Moodle/WebView)
+  // ✅ ДРУК ТІЛЬКИ ЧЕКА — КЛАС-КЕРОВАНИЙ СЦЕНАРІЙ
   function printTicket(){
     const ticket = document.getElementById('ticket');
     if(!ticket){ alert('Немає #ticket'); return; }
 
-    // Якщо чек порожній — спробуємо зібрати
+    // Якщо чек ще порожній — зберемо
     try{
       const idText = document.getElementById('tId')?.textContent?.trim() || '—';
       if(idText === '—') { buildTicket(); }
     }catch(e){}
 
-    // CSS лише для рулону 58 мм у фреймі
-    const css = `
-      @page { size:58mm auto; margin:0 }
-      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      html,body{ margin:0; padding:0; background:#fff; color:#000 }
-      .ticket{
-        width:58mm; margin:0; padding:6mm 4mm;
-        background:#fff; color:#000;
-        font-family:"Courier New",ui-monospace,monospace;
-        border:none; box-shadow:none; border-radius:0
-      }
-      .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
-      .ticket p{margin:2px 0; font-size:12px}
-      .line{border-top:1px dashed #111; margin:6px 0}
-      small{font-size:10px}
-    `;
+    const root = document.documentElement;
 
-    const html = `<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head>
-<body>${ticket.outerHTML}</body>
-</html>`;
-
-    // Створюємо/перевикористовуємо прихований фрейм
-    let frame = document.getElementById('printFrame');
-    if(!frame){
-      frame = document.createElement('iframe');
-      frame.id = 'printFrame';
-      frame.style.position = 'fixed';
-      frame.style.right = '0';
-      frame.style.bottom = '0';
-      frame.style.width = '0';
-      frame.style.height = '0';
-      frame.style.border = '0';
-      frame.style.visibility = 'hidden';
-      document.body.appendChild(frame);
-    }
-
-    const win = frame.contentWindow;
-    const doc = win.document;
-    doc.open(); doc.write(html); doc.close();
-
-    // Дочекаємось відмальовки і друкуємо
-    const tryPrint = () => {
-      try{
-        win.focus();
-        win.print();
-      }finally{
-        setTimeout(()=>{ if(frame && frame.parentNode) frame.parentNode.removeChild(frame); }, 500);
-      }
+    const cleanup = ()=>{
+      root.classList.remove('ticket-print');
+      mq && mq.removeListener && mq.removeListener(mqHandler);
+      window.removeEventListener('afterprint', cleanup);
     };
 
-    if('requestAnimationFrame' in win){
-      win.requestAnimationFrame(()=>win.requestAnimationFrame(tryPrint));
-    }else{
-      setTimeout(tryPrint, 120);
-    }
+    // Додаємо клас, який активує друк-режим «лише чек»
+    root.classList.add('ticket-print');
+
+    // Підстрахуємося на всіх движках
+    const mq = window.matchMedia && window.matchMedia('print');
+    const mqHandler = e => { if(!e.matches) cleanup(); };
+    mq && mq.addListener && mq.addListener(mqHandler);
+    window.addEventListener('afterprint', cleanup);
+
+    // Запускаємо друк
+    window.print();
+
+    // Фолбек: якщо події не спрацювали, приберемо клас через 2 с
+    setTimeout(cleanup, 2000);
   }
 
   // ====== УТИЛІТИ ======
