@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /scripts/
+Disallow: /assets/
+Disallow: /tools/
+Allow: /
+
+Sitemap: https://edlab.pp.ua/sitemap.xml
+Host: edlab.pp.ua
