@@ -56,7 +56,7 @@
     width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
   }
 
-  /* Чек 58 мм */
+  /* Чек 58 мм (вид на екрані) */
   .ticket{ width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}
   .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
   .ticket p{margin:2px 0; font-size:12px}
@@ -70,51 +70,6 @@
   html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
   html.embedded .box{background:#f8fafc; color:#111}
   html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
-
-  /* 🖨️ ДРУК ТІЛЬКИ ЧЕКА (58 мм) */
-  @media print {
-  @page {
-    size: 58mm auto;
-    margin: 0;
-  }
-
-  * {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  body {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #fff !important;
-    color: #000 !important;
-    overflow: hidden !important;
-  }
-
-  body * {
-    display: none !important;
-  }
-
-  #ticket, #ticket * {
-    display: block !important;
-  }
-
-  #ticket {
-    width: 58mm !important;
-    margin: 0 auto !important;
-    padding: 6mm 4mm !important;
-    background: #fff !important;
-    color: #000 !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-  }
-
-  .wrap {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-}
-
 </style>
 </head>
 <body>
@@ -227,7 +182,7 @@
           <h3>Наряд-замовлення (чек 58 мм)</h3>
           <div class="row">
             <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-            <button class="btn" onclick="window.print()">🖨️ Друк</button>
+            <button class="btn" onclick="printTicket()">🖨️ Друк</button>
           </div>
           <div class="ticket" id="ticket" style="margin-top:8px">
             <h4>НАРЯД-ЗАМОВЛЕННЯ</h4>
@@ -356,7 +311,6 @@
 
   // ====== РОЗРАХУНКИ ======
   function recalc(){
-    // Машини: обчислення термінів ТО
     const today = new Date(byId('today').value||new Date().toISOString().slice(0,10));
     [...bodyM.querySelectorAll('tr')].forEach(tr=>{
       const h = +tr.children[3].querySelector('input').value || 0;
@@ -365,10 +319,9 @@
       const intH = +tr.children[6].querySelector('input').value || 0;
       const intD = +tr.children[7].querySelector('input').value || 0;
 
-      const dueH = (lastH + intH) - h; // годин до ТО
+      const dueH = (lastH + intH) - h;
       tr.querySelector('.dueH').textContent = (isFinite(dueH)? Math.round(dueH) : '—');
 
-      // Дні до ТО
       let dueDays = '—';
       if(lastDate){
         const next = new Date(lastDate); next.setDate(next.getDate() + intD);
@@ -376,7 +329,6 @@
       }
       tr.querySelector('.dueD').textContent = isFinite(+dueDays)? dueDays : '—';
 
-      // Статус
       let status='OK';
       const riskH = (isFinite(dueH) && dueH<=20);
       const riskD = (isFinite(+dueDays) && +dueDays<=7);
@@ -386,7 +338,6 @@
       tr.querySelector('.status').style.color = status==='ТЕРМІНОВО'? '#ef4444' : (status==='СКОРО'? '#f59e0b' : '#10b981');
     });
 
-    // Роботи: суми
     const rate = +byId('rate').value || 0;
     [...bodyJ.querySelectorAll('tr')].forEach(tr=>{
       const hours = +tr.children[4].querySelector('input').value || 0;
@@ -397,12 +348,10 @@
       tr.querySelector('.total').textContent = Math.round(total).toLocaleString('uk-UA');
     });
 
-    // Оновити CSV
     buildCSV();
   }
 
   function buildCSV(){
-    // Машини
     const linesM = [...bodyM.querySelectorAll('tr')].map(tr=>{
       const idx = tr.querySelector('.idx').textContent.trim();
       const id  = tr.children[1].querySelector('input').value.trim();
@@ -420,7 +369,6 @@
     });
     byId('csvM').textContent = linesM.join('\n') || '—';
 
-    // Роботи
     const linesJ = [...bodyJ.querySelectorAll('tr')].map(tr=>{
       const idx = tr.querySelector('.idx').textContent.trim();
       const d   = tr.children[1].querySelector('input').value.trim();
@@ -434,12 +382,6 @@
       return [idx,d,id,job,hours,parts,work,total,note].join(' | ');
     });
     byId('csvJ').textContent = linesJ.join('\n') || '—';
-  }
-
-  function copyCSV(id){
-    const t = byId(id).textContent.trim();
-    if(!t || t==='—'){ alert('Немає даних для копіювання'); return; }
-    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
   }
 
   // ====== NFC і ЧЕК ======
@@ -498,6 +440,29 @@
     byId('tParts').textContent = parts.toLocaleString('uk-UA');
     byId('tTotal').textContent = total.toLocaleString('uk-UA');
     byId('tNote').textContent = `Прим.: Автогенерація · Ref:${Math.random().toString(36).slice(2,8).toUpperCase()}`;
+  }
+
+  // ✅ ДРУК ТІЛЬКИ ЧЕКА — ЧИСТЕ ВІКНО (не ламає інші сторінки)
+  function printTicket(){
+    const ticket = document.getElementById('ticket');
+    if(!ticket){ alert('Немає #ticket'); return; }
+    const w = window.open('', '_blank', 'width=420,height=800,noopener,noreferrer');
+    const css = `
+      @page { size:58mm auto; margin:0 }
+      html,body{ margin:0; padding:0; background:#fff; color:#000 }
+      .ticket{ width:58mm; margin:0; padding:6mm 4mm; background:#fff; color:#000;
+               font-family:"Courier New",ui-monospace,monospace; border:none; box-shadow:none; border-radius:0 }
+      .ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
+      .ticket p{margin:2px 0; font-size:12px}
+      .line{border-top:1px dashed #111; margin:6px 0}
+      small{font-size:10px}
+    `;
+    w.document.write(
+      `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}<script>
+        window.onload = function(){ window.print(); setTimeout(()=>window.close(), 200); };
+      <\/script></body></html>`
+    );
+    w.document.close();
   }
 
   // ====== УТИЛІТИ ======
