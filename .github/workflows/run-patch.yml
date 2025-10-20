@@ -1,0 +1,20 @@
+name: Run patch_print_all.py
+
+on:
+  workflow_dispatch:  # дозволяє запуск вручну з інтерфейсу GitHub
+
+jobs:
+  run-patch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout репозиторію
+        uses: actions/checkout@v3
+
+      - name: Встановити Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Запустити patch_print_all.py
+        run: python3 patch_print_all.py
