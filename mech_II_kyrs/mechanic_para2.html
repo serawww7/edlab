@@ -475,8 +475,9 @@
     const id = createPrintJob(html);
     if(!id){ return; }
 
-    // !!! Якщо файл має іншу назву/шлях — зміни нижче
-    const url = new URL('print-58mm.html', location.href);
+    // абсолютний URL до файлу друку
+    const printUrl = resolvePrintUrl();
+    const url = new URL(printUrl);
     url.searchParams.set('id', id);
     const w = window.open(url.toString(), '_blank', 'noopener,noreferrer,width=480,height=800');
     if(!w){
@@ -497,7 +498,16 @@
       return null;
     }
   }
-
+ // Будуємо абсолютний шлях до print-58mm.html:
+ // 1) якщо в <head> є <link id="printFileHref"> — беремо звідти (зручно міняти шлях в одному місці)
+  // 2) інакше — вважаємо, що print-58mm.html лежить поруч із цією сторінкою
+  function resolvePrintUrl(){
+    const el = document.getElementById('printFileHref');
+    if(el && el.href) return el.href;      // абсолютний href від браузера
+    const base = (document.baseURI || location.href).replace(/[?#].*$/, '');
+    const dir  = base.endsWith('/') ? base : base.replace(/[^/]*$/, '');
+    return dir + 'print-58mm.html';
+  }
   // ===== Утиліти =====
   function copyEl(id){
     const t = byId(id).textContent.trim();
