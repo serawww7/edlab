@@ -1,7 +1,7 @@
 <!-- ПАРА 2 (аудиторно) для агрономів
-     Тема: Паспорт поля: QR/NFC → мобільна форма → таблиця/дашборд
+     Тема: Паспорт поля: QR/NFC → мобільна форма → дашборд
      Фокус: максимум телефону — скани QR/NFC, фото з геоміткою, короткі нотатки, миттєва аналітика.
-     Готово для розміщення на GitHub Pages або вставки в Moodle через iFrame.
+     Готово для розміщення на GitHub Pages або вставки в Moodle через iFrame. Без друку.
 -->
 <!DOCTYPE html>
 <html lang="uk">
@@ -28,13 +28,16 @@
   h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
   p{margin:10px 0}
   ul,ol{margin:8px 0 12px 22px}
+
   .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
   .grid{display:grid; gap:12px}
   .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
-  @media (max-width:820px){.g2{grid-template-columns:1fr}}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:820px){.g2,.g3{grid-template-columns:1fr}}
+
   .kpi{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px dashed #263042; border-radius:12px}
   .kpi b{font-size:14px}
-  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
   .table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px; border:1px solid #223049}
   .table th,.table td{padding:10px 12px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
   .table thead th{background:#0c1629; color:#a5b4fc; text-align:left}
@@ -45,8 +48,17 @@
   .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
   .btn:hover{background:#0f1f39}
   .muted{color:#93a3b5}
-  .ok{color:var(--good)} .warn{color:var(--warn)}
+  .crit{color:#f87171}
+  .ok{color:#10b981}
+  .bar{height:18px;border-radius:6px;background:#0b1324;border:1px solid #223049;overflow:hidden}
+  .bar > div{height:100%;background:#60a5fa}
+  .soft{color:#cbd5e1}
+  .hint{font-size:12px;color:#9fb0c8;margin-top:4px}
   .no-print{display:block}
+
+  .progress{height:10px;border-radius:999px;background:#0b1324;overflow:hidden;border:1px solid #223049}
+  .progress > div{height:100%;background:linear-gradient(90deg,#60a5fa,#22c55e)}
+  .badgeNum{display:inline-grid;place-items:center;min-width:34px;height:28px;border-radius:8px;background:#0e1a2e;color:#a5b4fc;font-weight:700}
 
   /* Вбудовано (iframe) → стриманий вигляд */
   html.embedded body{background:#fff; color:#111}
@@ -58,7 +70,17 @@
   .flex{display:flex; gap:10px; flex-wrap:wrap}
   .field{display:flex; gap:8px; margin:6px 0}
   .field label{min-width:150px; color:#cbd5e1}
-  .field input{flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb}
+  .field input, .field select{flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb}
+
+  /* Міні-мапа 5×5 */
+  .mini-map{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .cell{height:42px;border:1px solid #223049;border-radius:8px;display:grid;place-items:center;cursor:pointer;background:#0b1324;color:#e2e8f0;font-size:12px}
+  .cell.norma{background:#0f2a1f;color:#a7f3d0}
+  .cell.weed{background:#2a201f;color:#fecaca}
+  .cell.pest{background:#2a1f29;color:#fbcfe8}
+  .cell.wet{background:#1f242a;color:#bfdbfe}
+  .cell.dry{background:#2a2620;color:#fde68a}
+  .cell.other{background:#1f1f2a;color:#ddd6fe}
 
   @media print{
     @page{ margin:12mm }
@@ -81,6 +103,20 @@
         <div class="kpi"><span>📍</span><div><b>Ідентифікація поля</b><br/>QR або NFC-стікер на табличці/папці</div></div>
         <div class="kpi"><span>📷</span><div><b>Фото з EXIF</b><br/>геомітка + час + короткий опис стану</div></div>
       </div>
+      <div class="grid g3" style="margin-top:8px">
+        <div class="kpi"><span>⚡</span><div><b>Швидкість рішень</b><br/>оперативний дашборд підказує де діяти першочергово</div></div>
+        <div class="kpi"><span>🎯</span><div><b>Точність спостережень</b><br/>стандартизована форма мінімізує «вільні трактування»</div></div>
+        <div class="kpi"><span>🧠</span><div><b>Навички управління даними</b><br/>від збору → до простих аналітичних висновків</div></div>
+      </div>
+      <p class="muted">Користь: реальна практика <i>оперативного моніторингу</i>, <i>геопідписаних медіа</i> і <i>швидкого аналізу</i> — 1:1 переноситься у сезонні завдання.</p>
+    </div>
+
+    <div class="card">
+      <h2>🎮 Місії пари (інтерактив)</h2>
+      <div class="step"><div class="n">1</div><div><label><input type="checkbox" class="mission" data-id="m1"> Зібрати URL форми з автозаповненням для свого коду поля</label><div class="hint">Підготує основу для QR/NFC.</div></div></div>
+      <div class="step"><div class="n">2</div><div><label><input type="checkbox" class="mission" data-id="m2"> Додати 3+ записи у симуляторі (різні поля/стани)</label><div class="hint">Тренує структуру відповіді.</div></div></div>
+      <div class="step"><div class="n">3</div><div><label><input type="checkbox" class="mission" data-id="m3"> Побудувати дашборд і сформулювати висновок</label><div class="hint">1–2 речення: «де проблема» і «що робимо завтра».</div></div></div>
+      <div class="progress" style="margin-top:10px"><div id="progressBar" style="width:0%"></div></div>
     </div>
 
     <div class="card">
@@ -90,7 +126,7 @@
         <li>Google Form (для збору даних) + Google Sheets (відповіді/дашборд).</li>
         <li>QR-стікери <i>або</i> NFC-мітки (наклейки/брелоки).</li>
       </ul>
-      <p class="muted">💡 Якщо NFC недоступний — використовуй QR. Головне — стабільний URL форми з попередньо заповненим кодом поля.</p>
+      <p class="muted">Якщо NFC недоступний — використовуй QR. Головне — стабільний URL форми з кодом поля.</p>
     </div>
 
     <div class="card">
@@ -98,79 +134,158 @@
       <table class="table">
         <thead><tr><th>#</th><th>Поле</th><th>Тип</th><th>Призначення</th></tr></thead>
         <tbody>
-          <tr><td>1</td><td><b>Код поля</b> (наприклад, F-01)</td><td>Short text (обов’язково)</td><td>Ідентифікує поле (підставляється через QR/NFC)</td></tr>
-          <tr><td>2</td><td><b>Оператор</b> (ПІБ)</td><td>Short text</td><td>Хто робив огляд</td></tr>
-          <tr><td>3</td><td><b>Стан</b></td><td>Dropdown/Multiple choice</td><td>«норма / бур’ян / шкідник / перезволоження / засуха / інше»</td></tr>
-          <tr><td>4</td><td><b>Коментар</b></td><td>Paragraph</td><td>Коротко: що саме помічено</td></tr>
-          <tr><td>5</td><td><b>Фото (1–3 шт.)</b></td><td>File upload</td><td>З увімкненою геоміткою (EXIF)</td></tr>
-          <tr><td>6</td><td><b>Координати</b></td><td>Short text (необов.)</td><td>Якщо EXIF нема — встав широту/довготу вручну</td></tr>
+          <tr><td>1</td><td><b>Код поля</b> (наприклад, F-01)</td><td>Short text (обов’язково)</td><td>Ідентифікатор поля (підставляється через QR/NFC).</td></tr>
+          <tr><td>2</td><td><b>Оператор</b> (ПІБ)</td><td>Short text</td><td>Хто робив огляд.</td></tr>
+          <tr><td>3</td><td><b>Стан</b></td><td>Dropdown/Multiple choice</td><td>«норма / бур’ян / шкідник / перезволоження / засуха / інше».</td></tr>
+          <tr><td>4</td><td><b>Коментар</b></td><td>Paragraph</td><td>Коротко: що саме помічено.</td></tr>
+          <tr><td>5</td><td><b>Фото (1–3 шт.)</b></td><td>File upload</td><td>З увімкненою геоміткою (EXIF).</td></tr>
+          <tr><td>6</td><td><b>Координати</b></td><td>Short text (необов.)</td><td>Якщо EXIF нема — встав широту/довготу вручну.</td></tr>
         </tbody>
       </table>
-      <p class="muted">Порада: ввімкни в Камера → Налаштування → «Геомітка/Location tags». На iOS — дозволи геолокацію для Камери.</p>
+      <p class="muted">Увімкни в Камері «Геомітка/Location tags». На iOS — дозволи геолокацію для Камери.</p>
     </div>
 
     <div class="card">
       <h2>🧪 Хід роботи (45–60 хв)</h2>
-
-      <div class="step"><div class="n">1</div><div>
-        <b>Готуємо код поля</b> (5 хв). Створіть список: <span class="mono">F-01, F-02, F-03…</span>
-        Виберіть своє поле (або навчальне). Збережіть код.
-      </div></div>
-
-      <div class="step"><div class="n">2</div><div>
-        <b>Збираємо URL форми з автозаповненням</b> (8–10 хв). У Google Form відкрий «Попередній перегляд» (іконка ока) — скопіюй базовий URL.
-        Додай параметр <span class="mono">?field=F-01</span> (або власний ключ форми, якщо використовуєш entries). <br/>
-        Приклад: <span class="mono">https://docs.google.com/forms/d/e/ABC/viewform?field=F-01</span>
-      </div></div>
-
-      <div class="step"><div class="n">3</div><div>
-        <b>QR або NFC</b> (10 хв). Згенеруй QR на цей URL (будь-який локальний/онлайн-генератор) або запиши URL в NFC-мітку через додаток <i>NFC Tools</i>.
-        Наклей на «паспорт поля»/папку. Перевір скан з телефона.
-      </div></div>
-
-      <div class="step"><div class="n">4</div><div>
-        <b>Польове заповнення (імітація)</b> (10–15 хв). Скануй QR/NFC → відкрита форма вже з кодом поля.
-        Додай 1–3 фото (крупний план + загальний). Короткий коментар: «бур’ян осот, край поля», тощо. Відправ.
-      </div></div>
-
-      <div class="step"><div class="n">5</div><div>
-        <b>Відповіді у Sheets</b> (10 хв). У формі → «Відповіді» → Створити таблицю. Перевір колонки (час, код поля, стан, коментар, посилання на фото).
-        Додай умовне форматування для «критичних станів» (червоний).
-      </div></div>
-
-      <div class="step"><div class="n">6</div><div>
-        <b>Міні-дашборд</b> (5–8 хв). Створи діаграму «Стан за категоріями», і табличку «Останні огляди по полях» (фільтр по часу).
-      </div></div>
+      <div class="step"><div class="n">1</div><div><b>Готуємо код поля</b> (5 хв). Створіть список: <span class="mono">F-01, F-02, F-03…</span> Обери своє поле.</div></div>
+      <div class="step"><div class="n">2</div><div><b>URL з автозаповненням</b> (8–10 хв). У Google Form відкрий «Попередній перегляд» → скопіюй URL → додай параметр для коду поля.</div></div>
+      <div class="step"><div class="n">3</div><div><b>QR або NFC</b> (10 хв). Згенеруй QR або запиши URL в NFC-мітку → наклей на «паспорт поля» → перевір скан.</div></div>
+      <div class="step"><div class="n">4</div><div><b>Польове заповнення (імітація)</b> (10–15 хв). Скан → форма з кодом поля → 1–3 фото + короткий коментар → Надіслати.</div></div>
+      <div class="step"><div class="n">5</div><div><b>Відповіді у Sheets</b> (10 хв). «Відповіді» → Створити таблицю → умовне форматування «критичних станів».</div></div>
+      <div class="step"><div class="n">6</div><div><b>Міні-дашборд</b> (5–8 хв). Діаграма «Стан за категоріями» + таблиця «Останні огляди».</div></div>
     </div>
 
     <div class="card">
-      <h2>🔗 Генератор URL для QR/NFC (локально, без зовнішніх бібліотек)</h2>
+      <h2>🔗 Генератор URL для QR/NFC (локально)</h2>
       <p class="muted">Введи базову адресу своєї форми і код поля — отримаєш готовий URL для QR/NFC.</p>
-
       <div class="field">
         <label for="formUrl">Базовий URL форми (viewform)</label>
-        <input id="formUrl" type="text" value="https://docs.google.com/forms/d/e/XXXXXXXXXXXX/viewform" />
+        <input id="formUrl" type="text" value="" placeholder="встав свій URL Google Form" />
       </div>
       <div class="field">
         <label for="param">Параметр для поля (наприклад, field або entry.123456)</label>
-        <input id="param" type="text" value="field" />
+        <input id="param" type="text" value="" placeholder="field або entry.XXXXXX" />
       </div>
       <div class="field">
         <label for="code">Код поля (наприклад, F-01)</label>
-        <input id="code" type="text" value="F-01" />
+        <input id="code" type="text" value="" placeholder="F-01" />
       </div>
-
       <div class="flex no-print">
         <button class="btn" type="button" onclick="buildURL()">🔁 Зібрати URL</button>
         <button class="btn" type="button" onclick="copyURL()">📋 Скопіювати</button>
         <a class="btn" id="openURL" href="#" target="_blank" rel="noopener">🔗 Відкрити</a>
+        <button class="btn" type="button" onclick="geoTest()">📌 Гео-тест (додати запис)</button>
       </div>
-
       <p class="muted" id="builtUrl" style="word-break:break-all; margin-top:10px">—</p>
     </div>
 
     <div class="card">
-      <h2>✅ Контроль якості та оцінювання (10 балів)</h2>
+      <h2>🧩 Симулятор польових відповідей (локально)</h2>
+      <p class="muted">Це тренажер <b>без серверів</b>: дані зберігаються у твоєму браузері (localStorage). Додай 3+ записи.</p>
+      <div class="grid g3">
+        <div class="step"><div class="n">A</div><div>
+          <div class="field"><label>Код поля</label><input id="f_code" type="text"></div>
+          <div class="field"><label>Стан</label>
+            <select id="f_state">
+              <option>норма</option>
+              <option>бур’ян</option>
+              <option>шкідник</option>
+              <option>перезволоження</option>
+              <option>засуха</option>
+              <option>інше</option>
+            </select>
+          </div>
+          <div class="field"><label>Коментар</label><input id="f_comment" type="text"></div>
+          <div class="field"><label>Фото URL</label><input id="f_photo" type="text"></div>
+          <div class="flex">
+            <button class="btn" type="button" onclick="addRecord()">➕ Додати запис</button>
+            <button class="btn" type="button" onclick="clearRecords()">🗑️ Очистити</button>
+          </div>
+        </div></div>
+        <div class="step"><div class="n">B</div><div>
+          <b>Показники (KPI):</b>
+          <div class="kpi" style="margin-top:8px"><span class="badgeNum" id="k_total">0</span><div>Записів у тренажері</div></div>
+          <div class="kpi"><span class="badgeNum" id="k_fields">0</span><div>Охоплених полів (унікальних кодів)</div></div>
+          <div class="kpi"><span class="badgeNum crit" id="k_crit">0</span><div class="crit">Критичні стани: бур’ян/шкідник/перезволоження/засуха</div></div>
+          <div class="hint">Мета: ≥3 записи, ≥2 поля, ≥1 критичний стан.</div>
+        </div></div>
+        <div class="step"><div class="n">C</div><div>
+          <b>Розподіл станів</b>
+          <div id="chartWrap" style="display:grid;gap:8px;margin-top:8px"></div>
+          <div class="hint">Чим довша синя смуга — тим більше таких кейсів. Це «міні-дашборд».</div>
+        </div></div>
+      </div>
+
+      <div style="overflow:auto;margin-top:10px">
+        <table class="table">
+          <thead><tr><th>#</th><th>Час</th><th>Поле</th><th>Стан</th><th>Коментар</th><th>Фото</th></tr></thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🗺️ Міні-мапа поля (5×5)</h2>
+      <p class="muted">Клацай по клітинках і змінюй стан ділянки — дашборд вище автоматично оновиться.</p>
+      <div class="flex" style="align-items:center">
+        <label>Код поля для мапи</label>
+        <input id="mapCode" type="text" style="max-width:160px">
+        <select id="mapState" style="max-width:220px">
+          <option value="норма">норма</option>
+          <option value="бур’ян">бур’ян</option>
+          <option value="шкідник">шкідник</option>
+          <option value="перезволоження">перезволоження</option>
+          <option value="засуха">засуха</option>
+          <option value="інше">інше</option>
+        </select>
+        <button class="btn" type="button" onclick="mapClear()">🧼 Очистити</button>
+      </div>
+      <div id="miniMap" class="mini-map" style="margin-top:10px"></div>
+      <p class="hint">Режим: вибери стан у списку і клацни по клітинці. Запис автоматично потрапить у журнал вище.</p>
+    </div>
+
+    <div class="card">
+      <h2>🎲 Кейс-рандомізатор</h2>
+      <p class="muted">Отримай випадкову ситуацію, обери дію і отримай миттєвий фідбек. Тримай серію правильних рішень!</p>
+      <div id="caseBox" class="step">
+        <div class="n">🎲</div>
+        <div>
+          <div id="caseText" class="soft">Натисни «Згенерувати кейс»</div>
+          <div class="flex" style="margin-top:8px">
+            <button class="btn" onclick="newCase()">🎯 Згенерувати кейс</button>
+            <select id="caseAction">
+              <option value="">— Обери дію —</option>
+              <option value="огляд_сьогодні">Терміновий огляд сьогодні</option>
+              <option value="локальна_обробка">Локальна обробка</option>
+              <option value="масштабна_обробка">Масштабна обробка</option>
+              <option value="моніторинг_48г">Спостереження 48 год</option>
+              <option value="без_дії">Без дій</option>
+            </select>
+            <button class="btn" onclick="checkCase()">✅ Перевірити</button>
+          </div>
+          <div id="caseFeedback" class="hint" style="margin-top:6px"></div>
+          <div class="kpi" style="margin-top:8px"><span class="badgeNum" id="streak">0</span><div>Серія вдалих рішень</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🧠 Висновок і наступний крок</h2>
+      <p>Сформулюй на основі міні-дашборду (2–3 речення):</p>
+      <ul>
+        <li>Які поля потребують уваги <b>сьогодні</b> і чому?</li>
+        <li>Що робимо <b>завтра зранку</b> (конкретна дія)?</li>
+      </ul>
+      <div class="field"><label>Текст висновку</label><input id="conclusion" type="text" value=""></div>
+      <div class="flex no-print">
+        <button class="btn" type="button" onclick="saveConclusion()">💾 Зберегти</button>
+        <button class="btn" type="button" onclick="copyConclusion()">📋 Скопіювати</button>
+      </div>
+      <p class="hint">Висновок збережеться у браузері.</p>
+    </div>
+
+    <div class="card">
+      <h2>✅ Оцінювання (10 балів)</h2>
       <table class="table">
         <thead><tr><th>Критерій</th><th>Бали</th></tr></thead>
         <tbody>
@@ -183,22 +298,27 @@
       <p class="pill">📱 Максимум телефону</p>
       <p class="pill">🔖 QR/NFC</p>
       <p class="pill">📊 Швидка аналітика</p>
+      <p class="pill">🎮 Місії</p>
+      <p class="pill">🧩 Симулятор</p>
+      <p class="pill">🗺️ Міні-мапа</p>
+      <p class="pill">📌 Гео-тест</p>
     </div>
 
     <div class="card">
       <h2>🆘 Поради</h2>
       <ul>
         <li><b>EXIF немає?</b> Дозволь геолокацію для Камери або додай координати в окреме поле.</li>
-        <li><b>URL занадто довгий?</b> Можна скоротити (але не використовуй сервіси, які блокує школа/коледж).</li>
-        <li><b>Формат вигляду entries:</b> для Google Form кожне поле має свій <i>entry.xxxxxxx</i>. Якщо не знаєш ID — використовуй один спільний параметр <span class="mono">field=F-01</span> і зчитай його окремою колонкою.</li>
+        <li><b>URL довгий?</b> Можна скоротити внутрішнім сервісом закладу.</li>
+        <li><b>Не знаєш entry-ID?</b> Використовуй спільний параметр <span class="mono">field=F-01</span> і зчитай його окремою колонкою.</li>
       </ul>
     </div>
   </div>
 
 <script>
-  // Стриманий вигляд у вбудуванні
+  // Вбудований режим (Moodle iFrame)
   (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
 
+  // ===== Генератор URL
   function buildURL(){
     const u = document.getElementById('formUrl').value.trim();
     const p = document.getElementById('param').value.trim();
@@ -208,6 +328,7 @@
     const url = `${u}${sep}${encodeURIComponent(p)}=${encodeURIComponent(c)}`;
     document.getElementById('builtUrl').textContent = url;
     document.getElementById('openURL').href = url;
+    markMissionAuto('m1');
   }
   function copyURL(){
     const t = document.getElementById('builtUrl').textContent.trim();
@@ -219,8 +340,217 @@
     document.title = msg;
     setTimeout(()=>document.title = old, 900);
   }
-  // Початковий приклад
-  buildURL();
+
+  // ===== LocalStorage keys
+  const LS_KEY = 'agro_para2_sim_records';
+  const LS_CONC = 'agro_para2_conclusion';
+  const LS_MISS = 'agro_para2_missions';
+  const LS_MAP  = 'agro_para2_mapgrid';
+
+  // ===== Симулятор
+  const byId = id => document.getElementById(id);
+  function loadRecords(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'[]'); }catch(_){ return []; } }
+  function saveRecords(arr){ try{ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }catch(_){ } }
+
+  function addRecord(){
+    const code = byId('f_code').value.trim();
+    const state = byId('f_state').value.trim();
+    const comment = byId('f_comment').value.trim();
+    const photo = byId('f_photo').value.trim();
+    if(!code || !state){ show('Введи код поля і стан.'); return; }
+    const rec = {ts:new Date().toISOString(), code, state, comment, photo};
+    const data = loadRecords(); data.push(rec); saveRecords(data);
+    renderAll(); markMissionAuto('m2');
+  }
+  function clearRecords(){
+    if(!confirm('Очистити всі записи симулятора?')) return;
+    saveRecords([]); renderAll();
+  }
+
+  function renderTable(){
+    const body = byId('logBody');
+    const data = loadRecords();
+    body.innerHTML = data.map((r,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td>${r.ts.replace('T',' ').slice(0,19)}</td>
+        <td>${r.code}</td>
+        <td>${r.state}</td>
+        <td>${r.comment||'—'}</td>
+        <td>${r.photo?`<a href="${r.photo}" target="_blank" rel="noopener">відкрити</a>`:'—'}</td>
+      </tr>
+    `).join('') || '<tr><td colspan="6" class="soft">Немає записів</td></tr>';
+  }
+  function uniq(arr){ return Array.from(new Set(arr)); }
+  function isCritical(state){
+    return ['бур’ян','шкідник','перезволоження','засуха'].includes((state||'').toLowerCase());
+  }
+  function renderKPI(){
+    const data = loadRecords();
+    byId('k_total').textContent = data.length;
+    byId('k_fields').textContent = uniq(data.map(x=>x.code)).length;
+    byId('k_crit').textContent = data.filter(x=>isCritical(x.state)).length;
+  }
+  function renderChart(){
+    const data = loadRecords();
+    const wrap = byId('chartWrap'); wrap.innerHTML='';
+    const counts = {};
+    data.forEach(r=>{ counts[r.state] = (counts[r.state]||0)+1; });
+    const entries = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+    const max = Math.max(1, ...entries.map(x=>x[1]));
+    if(entries.length===0){ wrap.innerHTML='<div class="soft">Ще нема даних для графіка</div>'; return; }
+    entries.forEach(([state,cnt])=>{
+      const row = document.createElement('div');
+      row.innerHTML = `
+        <div style="display:grid;grid-template-columns:120px 1fr 40px;gap:8px;align-items:center">
+          <div>${state}</div>
+          <div class="bar"><div style="width:${Math.round(cnt/max*100)}%"></div></div>
+          <div style="text-align:right">${cnt}</div>
+        </div>
+      `;
+      wrap.appendChild(row);
+    });
+  }
+  function renderAll(){ renderTable(); renderKPI(); renderChart(); updateProgress(); }
+
+  // ===== Гео-тест (додає запис автоматично)
+  function geoTest(){
+    if(!navigator.geolocation){ show('Геолокація недоступна у цьому браузері'); return; }
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const {latitude, longitude, accuracy} = pos.coords;
+      const code = byId('f_code').value.trim() || 'F-GEO';
+      const state = 'норма';
+      const comment = `GPS ${latitude.toFixed(5)}, ${longitude.toFixed(5)} ±${Math.round(accuracy)}м`;
+      const rec = {ts:new Date().toISOString(), code, state, comment, photo:''};
+      const data = loadRecords(); data.push(rec); saveRecords(data);
+      renderAll(); markMissionAuto('m2'); show('✅ Гео-запис додано');
+    }, err=>{
+      show('Геолокацію відхилено або помилка: '+(err&&err.message?err.message:''));
+    }, {enableHighAccuracy:true, timeout:8000, maximumAge:0});
+  }
+
+  // ===== Міні-мапа 5×5
+  const MAP_SIZE = 5;
+  function loadMap(){ try{ return JSON.parse(localStorage.getItem(LS_MAP)||'[]'); }catch(_){ return []; } }
+  function saveMap(arr){ try{ localStorage.setItem(LS_MAP, JSON.stringify(arr)); }catch(_){ } }
+  function mapStateClass(s){
+    if(s==='норма') return 'norma';
+    if(s==='бур’ян') return 'weed';
+    if(s==='шкідник') return 'pest';
+    if(s==='перезволоження') return 'wet';
+    if(s==='засуха') return 'dry';
+    return 'other';
+  }
+  function mapInit(){
+    const wrap = byId('miniMap'); wrap.innerHTML='';
+    const grid = loadMap();
+    for(let i=0;i<MAP_SIZE*MAP_SIZE;i++){
+      const cell = document.createElement('div');
+      const cur = grid[i] || {state:''};
+      cell.className = 'cell ' + (cur.state? mapStateClass(cur.state): '');
+      cell.textContent = cur.state || '';
+      cell.addEventListener('click', ()=>{
+        const code = byId('mapCode').value.trim() || 'F-MAP';
+        const s = byId('mapState').value;
+        const data = loadMap();
+        data[i] = {state:s};
+        saveMap(data);
+        cell.className = 'cell ' + mapStateClass(s);
+        cell.textContent = s;
+        // автоматично додаємо у журнал симулятора
+        const rec = {ts:new Date().toISOString(), code, state:s, comment:`мапа, клітинка ${i+1}`, photo:''};
+        const list = loadRecords(); list.push(rec); saveRecords(list);
+        renderAll(); markMissionAuto('m2');
+      });
+      wrap.appendChild(cell);
+    }
+  }
+  function mapClear(){ saveMap([]); mapInit(); }
+
+  // ===== Висновок
+  function saveConclusion(){
+    const t = byId('conclusion').value.trim();
+    try{ localStorage.setItem(LS_CONC, t); show('✅ Збережено'); }catch(_){}
+    if(t) markMissionAuto('m3');
+  }
+  function copyConclusion(){
+    const t = byId('conclusion').value.trim();
+    if(!t){ show('Спершу введи висновок'); return; }
+    navigator.clipboard.writeText(t).then(()=>show('✅ Скопійовано'),()=>show('Не вдалося'));
+  }
+  (function loadConclusion(){
+    try{
+      const t = localStorage.getItem(LS_CONC)||'';
+      if(t) byId('conclusion').value = t;
+    }catch(_){}
+  })();
+
+  // ===== Місії + прогрес
+  function loadMissions(){ try{ return JSON.parse(localStorage.getItem(LS_MISS)||'{}'); }catch(_){ return {}; } }
+  function saveMissions(obj){ try{ localStorage.setItem(LS_MISS, JSON.stringify(obj)); }catch(_){} }
+  function updateProgress(){
+    const miss = loadMissions();
+    const all = ['m1','m2','m3'];
+    const done = all.filter(k=>miss[k]).length;
+    const pct = Math.round(done/all.length*100);
+    byId('progressBar').style.width = pct+'%';
+    document.querySelectorAll('.mission').forEach(ch=>{ ch.checked = !!miss[ch.dataset.id]; });
+  }
+  function markMissionAuto(id){
+    const miss = loadMissions();
+    miss[id] = true;
+    saveMissions(miss);
+    updateProgress();
+  }
+  document.querySelectorAll('.mission').forEach(ch=>{
+    ch.addEventListener('change',()=>{
+      const miss = loadMissions();
+      miss[ch.dataset.id] = ch.checked;
+      saveMissions(miss);
+      updateProgress();
+    });
+  });
+
+  // ===== Кейс-рандомізатор
+  const CASES = [
+    {t:'F-02, край поля після дощу: поява осоту на 15% площі', ok:['огляд_сьогодні','локальна_обробка'], bad:['без_дії']},
+    {t:'F-03, гарячий тиждень: в’янення на високих ділянках', ok:['моніторинг_48г'], bad:[]},
+    {t:'F-05, вологі «кишені»: стоїть вода', ok:['огляд_сьогодні','локальна_обробка'], bad:['без_дії']},
+    {t:'F-01, поодинокі жуки (поріг далеко)', ok:['моніторинг_48г'], bad:['масштабна_обробка']},
+    {t:'F-04, масовий бур’ян по межі', ok:['локальна_обробка','огляд_сьогодні'], bad:['без_дії']}
+  ];
+  let CASE_IDX = -1, STREAK = 0;
+  function newCase(){
+    CASE_IDX = Math.floor(Math.random()*CASES.length);
+    byId('caseText').textContent = CASES[CASE_IDX].t;
+    byId('caseFeedback').textContent = '';
+    byId('caseAction').value = '';
+  }
+  function checkCase(){
+    if(CASE_IDX<0){ show('Спочатку згенеруй кейс'); return; }
+    const act = byId('caseAction').value;
+    if(!act){ show('Обери дію'); return; }
+    const c = CASES[CASE_IDX];
+    if(c.ok.includes(act)){
+      STREAK++; byId('caseFeedback').textContent = '✅ Гарне рішення';
+      byId('caseFeedback').className = 'hint ok';
+    }else if(c.bad.includes(act)){
+      STREAK = 0; byId('caseFeedback').textContent = '❌ Погане рішення (ризик запізнення або перевитрат)';
+      byId('caseFeedback').className = 'hint crit';
+    }else{
+      STREAK = Math.max(0, STREAK-1); byId('caseFeedback').textContent = 'ℹ️ Прийнятно, але є кращі варіанти';
+      byId('caseFeedback').className = 'hint';
+    }
+    byId('streak').textContent = STREAK;
+  }
+
+  // ===== Ініціалізація
+  (function init(){
+    renderAll();
+    mapInit();
+    // Автонатяк для buildURL
+    // (нічого не підставляю у value, щоб не було «плейсхолдерної травми»)
+  })();
 </script>
 </body>
 </html>
