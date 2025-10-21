@@ -48,6 +48,8 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0}
 .score{font-weight:700}
 svg{max-width:100%;height:auto;display:block}
 @media (max-width:700px){ header a.btn{width:100%} }
+.help{font-size:.9rem;color:#a5b4fc}
+.disabled{opacity:.6;pointer-events:none}
 </style>
 </head>
 <body>
@@ -60,7 +62,6 @@ svg{max-width:100%;height:auto;display:block}
         <span class="badge">Етикетки → суміш → перевірки FRAC/pH/порядок/заборони → матриця ризиків → журнал → промпт LLM</span>
       </div>
     </div>
-    
   </header>
 
   <div class="card">
@@ -100,6 +101,7 @@ svg{max-width:100%;height:auto;display:block}
       <button class="btn secondary" id="clearLabels">🧹 Очистити</button>
       <span id="badgeN" class="badge">Препаратів: 0</span>
     </div>
+    <p class="help">Порада: натисни «Еталонні етикетки» — вони <b>автоматично</b> імпортуються і селект нижче заповниться.</p>
 
     <hr class="sep"/>
 
@@ -117,7 +119,9 @@ svg{max-width:100%;height:auto;display:block}
     <div class="row">
       <div style="flex:2">
         <label for="productSel">Додати препарат</label>
-        <select id="productSel" class="input"></select>
+        <select id="productSel" class="input disabled" disabled>
+          <option>— спочатку імпортуй етикетки —</option>
+        </select>
       </div>
       <div style="flex:1">
         <label for="dose">Норма на га</label>
@@ -127,7 +131,7 @@ svg{max-width:100%;height:auto;display:block}
         <label for="unit">Одиниця</label>
         <select id="unit" class="input"><option>л/га</option><option>кг/га</option></select>
       </div>
-      <button class="btn" id="add">➕ Додати</button>
+      <button class="btn disabled" id="add" disabled>➕ Додати</button>
     </div>
 
     <table class="tbl" id="mixTbl" style="margin-top:8px">
@@ -160,7 +164,7 @@ svg{max-width:100%;height:auto;display:block}
     <pre class="code" id="order">// Натисни «🧪 Перевірити сумісність»</pre>
   </div>
 
-  <!-- МАТРИЦЯ РИЗИКІВ + ЖУРНАЛ (ПЕРЕНЕСЕНО УНИЗ) -->
+  <!-- МАТРИЦЯ РИЗИКІВ + ЖУРНАЛ -->
   <div class="card">
     <h2>🧯 Матриця ризиків і журнал</h2>
     <table class="tbl" id="riskTbl">
@@ -275,9 +279,9 @@ function parseCSV(txt){
   const need=['product','ai','group','form','dose_per_ha','unit','crops','targets','water_l_ha','rei_h','phi_d','ph_min','ph_max','incompat','notes'];
   for(const n of need){ if(idx(n)===-1) throw new Error('Відсутній стовпець: '+n); }
   for(const line of lines){
-    const parts=line.split(','); // проста розбивка (для навчальних сетів достатньо)
+    const parts=line.split(','); // навчальна, проста розбивка
     const r={};
-    need.forEach((n,i)=>r[n]= (parts[idx(n)]||'').trim());
+    need.forEach((n)=>r[n]= (parts[idx(n)]||'').trim());
     r.dose_per_ha=parseFloat(r.dose_per_ha)||0;
     r.water_l_ha=parseFloat(r.water_l_ha)||0;
     r.rei_h=parseFloat(r.rei_h)||0;
@@ -290,11 +294,21 @@ function parseCSV(txt){
 
 function refreshProductList(){
   PRODSEL.innerHTML='';
-  labels.forEach(l=>{
+  if(labels.length===0){
+    PRODSEL.classList.add('disabled'); PRODSEL.disabled=true;
+    $('#add').classList.add('disabled'); $('#add').disabled=true;
     const opt=document.createElement('option');
-    opt.value=l.product; opt.textContent=`${l.product} — ${l.ai} (${l.group})`;
+    opt.textContent='— спочатку імпортуй етикетки —';
     PRODSEL.appendChild(opt);
-  });
+  }else{
+    labels.forEach(l=>{
+      const opt=document.createElement('option');
+      opt.value=l.product; opt.textContent=`${l.product} — ${l.ai} (${l.group})`;
+      PRODSEL.appendChild(opt);
+    });
+    PRODSEL.classList.remove('disabled'); PRODSEL.disabled=false;
+    $('#add').classList.remove('disabled'); $('#add').disabled=false;
+  }
   $('#badgeN').textContent='Препаратів: '+labels.length;
   byId('k_labels').textContent = labels.length;
   updateProgress();
@@ -304,7 +318,7 @@ function refreshProductList(){
 let mix=[]; // [{product, dose, unit, group, form}]
 
 function addToMix(){
-  const product=PRODSEL.value; if(!product) return;
+  const product=PRODSEL.value; if(!product || labels.length===0) return;
   const dose=parseFloat($('#dose').value)||0;
   const unit=$('#unit').value;
   const lab=labels.find(l=>l.product===product);
@@ -326,7 +340,7 @@ function renderMix(){
   $('#order').textContent='// Натисни «🧪 Перевірити сумісність»';
   $('#mixAdvice').textContent='';
   byId('k_mix').textContent = mix.length;
-  calcRiskScore(); // оновлюємо показник
+  calcRiskScore();
 }
 
 // ===== Перевірки сумісності =====
@@ -391,9 +405,9 @@ function checkDoseAgainstLabel(mix, labels){
     const lab=labels.find(l=>l.product===m.product);
     if(!lab) return;
     const unitOk = (lab.unit||'').toLowerCase() === (m.unit||'').toLowerCase();
-    const doseOk = unitOk && m.dose>0 && m.dose<=lab.dose_per_ha*1.1 && m.dose>=lab.dose_per_ha*0.5; // 50–110% як навчальний коридор
+    const doseOk = unitOk && m.dose>0 && m.dose<=lab.dose_per_ha*1.1 && m.dose>=lab.dose_per_ha*0.5; // 50–110% навч. коридор
     if(!unitOk) probs.push(`${m.product}: одиниці в етикетці ${lab.unit}, у суміші ${m.unit}`);
-    if(!doseOk) probs.push(`${m.product}: доза ${m.dose} ${m.unit}/га поза довідковим коридором ~${lab.dose_per_ha} ${lab.unit}/га`);
+    if(!doseOk) probs.push(`${м.product || m.product}: доза ${m.dose} ${m.unit}/га поза довідковим коридором ~${lab.dose_per_ha} ${lab.unit}/га`);
   });
   return {ok: probs.length===0, msg: probs.join('\n')||'Дози коректні відносно етикеткових.'};
 }
@@ -427,14 +441,12 @@ function runChecks(){
   RISK.innerHTML=''; LOG.textContent='';
   if(mix.length===0){ log('Суміш порожня'); $('#badgeRisk').textContent='Статус: суміш порожня'; return; }
 
-  const rows=[];
   function push(name, res, level='ok'){
     const tr=document.createElement('tr');
     const cls = res.ok ? 'risk-ok' : (level==='warn'?'risk-warn':'risk-bad');
     tr.innerHTML = `<td>${name}</td><td class="small">${(res.msg||'—').replace(/\n/g,'<br/>')}</td><td class="${cls}">${res.ok?'OK':(level==='warn'?'WARN':'BAD')}</td>`;
     RISK.appendChild(tr);
     log(`${name}: ${res.ok?'OK':(level==='warn'?'WARN':'BAD')} — ${res.msg.replace(/\n/g,'; ')}`);
-    rows.push({name,ok:res.ok,level,msg:res.msg});
   }
 
   const r1=checkFRAC(mix,labels);            push('FRAC/HRAC ротація', r1, r1.ok?'ok':'warn');
@@ -448,6 +460,7 @@ function runChecks(){
   $('#badgeRisk').textContent = 'Статус: ' + (allOk?'умовно сумісна':'є суперечності');
   $('#mixAdvice').textContent = allOk ? '✅ Чітко: можеш віддати на фінальну верифікацію' : 'ℹ️ Підказка: зменш ризик-бал до ≤2: уникай дублювань FRAC, звір pH та порядок.';
   updateProgress();
+
   // Порядок змішування
   const detailed = mix.map(m=>{
     const lab=labels.find(l=>l.product===m.product)||{};
@@ -499,7 +512,6 @@ function markMissionAuto(id){
 function updateProgress(){
   const miss=loadMissions();
   const all=['m1','m2','m3','m4'];
-  // Авто-оцінка деяких
   if(labels.length>=4) miss.m1=true;
   if(mix.length>=2) miss.m2=true;
   const score=parseInt(byId('riskScore').textContent||'0',10);
@@ -550,8 +562,8 @@ function checkCase(){
   byId('streak').textContent=STREAK;
 }
 
-// ===== Події UI =====
-$('#demo').addEventListener('click', ()=>{
+// ===== Еталонні етикетки (одноразовий лоадер) =====
+function loadDemo(){
   $('#csv').value =
 `product,ai,group,form,dose_per_ha,unit,crops,targets,water_l_ha,rei_h,phi_d,ph_min,ph_max,incompat,notes
 Тебуконазол 250,тебуконазол,DMI G3,EC,0.5,л/га,пшениця,септоріоз|іржа,200,24,35,5,7,,Стандартний триазол
@@ -559,9 +571,12 @@ $('#demo').addEventListener('click', ()=>{
 Хлорталоніл 720,хлорталоніл,Мультисайт M5,SC,1.0,л/га,картопля,фітофтороз,200,48,7,6,7.5,,Захисна дія
 Гліфосат 480,гліфосат,EPSPS G,SL,3.0,л/га,пари,бур’яни,200,12,0,4,6,амонійні сульфати,Післяжнивне внесення
 Мідний купорос,мідь,M1,WP,3.0,кг/га,сад,бактеріози,800,24,30,6.5,8,стробілурини,Уникай змішування зі стробілуринами`;
-  log('Завантажено еталонні етикетки');
-});
+  try{ parseCSV($('#csv').value); refreshProductList(); log('Завантажено та імпортовано еталонні етикетки'); markMissionAuto('m1'); }
+  catch(e){ alert('Помилка CSV: '+e.message); }
+}
 
+// ===== Події UI =====
+$('#demo').addEventListener('click', loadDemo);
 $('#load').addEventListener('click', ()=>{
   try{ parseCSV($('#csv').value); refreshProductList(); log('Етикетки імпортовано'); markMissionAuto('m1'); }
   catch(e){ alert('Помилка CSV: '+e.message); }
@@ -584,10 +599,11 @@ $('#exportLog').addEventListener('click', ()=>{
 });
 $('#resetLog').addEventListener('click', ()=>{ LOG.textContent=''; });
 
-// Ініціалізація
+// Ініціалізація: одразу підкинемо еталонні етикетки для зручності
 refreshProductList();
 if (window.self !== window.top) document.documentElement.classList.add('embedded'); // Moodle-friendly
 updateProgress();
+loadDemo(); // автоімпорт на старті — селект одразу заповнений
 </script>
 </body>
 </html>
