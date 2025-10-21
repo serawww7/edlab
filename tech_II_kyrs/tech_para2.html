@@ -17,14 +17,14 @@
 <meta name="color-scheme" content="light dark">
 <style>
   :root{
-    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e6eef9;
     --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
     --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
   }
   *{box-sizing:border-box}
   body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);color:var(--text);
        font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
-  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px; position:relative; z-index:999999} /* підняли шар, якщо є сторонній оверлей */
   .badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);background:#0b1220;border-radius:999px;
          font-size:12px;color:var(--muted);letter-spacing:.3px}
   h1{font-size:34px;margin:6px 0 12px;line-height:1.15;
@@ -47,7 +47,7 @@
   .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
   input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
   textarea{min-height:88px}
-  /* Чек 58 мм */
+  /* Чек 58 мм (тільки для попереднього перегляду в основному вікні) */
   .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
   .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
   .ticket small{font-size:10px}
@@ -58,6 +58,12 @@
   html.embedded .box{background:#f8fafc;color:#111}
   html.embedded .table tbody tr:nth-child(even){background:#f3f4f6;color:#111}
   @media print{@page{margin:4mm}.no-print{display:none!important}}
+</style>
+
+<!-- Interaction Guard: гарантує клікабельність елементів навіть після спроб друку всередині iframe -->
+<style>
+  /* Нічого агресивного: тільки основні елементи керування */
+  button, .btn, input, select, textarea, a { pointer-events:auto !important; }
 </style>
 </head>
 <body>
@@ -248,7 +254,7 @@
         <h3>Квиток для принтера 58 мм</h3>
         <div class="row">
           <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="window.print()">🖨️ Друк</button>
+          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>HACCP — CCP TICKET</h4>
@@ -337,7 +343,6 @@
   }
   function presetPoints(){
     clearPoints();
-    // Демонстрація для пастеризації (T навколо 72°C)
     const demo = [
       {time:'10:00:00', temp:68.0},
       {time:'10:00:30', temp:71.0},
@@ -353,7 +358,7 @@
   }
   function clearPoints(){ bodyPoints.innerHTML=''; buildCSVpoints(); }
   function parseTime(hms){
-    const m = /^(\d{2}):(\d{2}):(\d{2})$/.exec(hms.trim());
+    const m = /^(\d{2}):(\d{2}):(\d{2})$/.exec((hms||'').trim());
     if(!m) return null;
     const d = new Date(); d.setHours(+m[1],+m[2],+m[3],0); return d;
   }
@@ -364,7 +369,6 @@
       const t = Number(r.children[2].querySelector('input').value);
       return {date: parseTime(hms), T: t};
     }).filter(p=>p.date && !isNaN(p.T));
-    // сортуємо за часом
     pts.sort((a,b)=>a.date-b.date);
     return pts;
   }
@@ -387,26 +391,21 @@
     if(ccp==='sanit')   return evalSanit();
   }
 
-  // 3.1 Пастеризація: сумарний час Т>=Tcrit (сек)
   function evalPasteur(){
     const Tcrit = +byId('p_Tcrit').value||72;
     const tHold = +byId('p_tHold').value||15;
     const pts = getPoints();
     if(pts.length<2){ setStatus('Недостатньо точок','—','🟠 Додайте щонайменше 2 точки'); return; }
-    // Інтегруємо ділянки, де T >= Tcrit, лінійна інтерполяція
     let secAbove = 0;
     for(let i=1;i<pts.length;i++){
       const t0=pts[i-1], t1=pts[i];
       const dt = (t1.date - t0.date)/1000; if(dt<=0) continue;
       const T0=t0.T, T1=t1.T;
       if(T0>=Tcrit && T1>=Tcrit){ secAbove += dt; }
-      else if((T0>=Tcrit && T1<TTcrit=Tcrit) || (T0<Tcrit && T1>=Tcrit)){
-        // перетин порогу — знайдемо частку часу вище порога
-        const m = (T1-T0)/dt; // °C/с
+      else if((T0>=Tcrit && T1<Tcrit) || (T0<Tcrit && T1>=Tcrit)){
+        const m = (T1-T0)/dt;
         if(m!==0){
-          const tCross = (Tcrit - T0)/m; // сек від t0
-          const tAbove = (T0>=Tcrit) ? Math.max(0, dt - tCross) : Math.max(0, dt - (dt - tCross));
-          // Уніфікуємо:
+          const tCross = (Tcrit - T0)/m;
           const above = (T0>=Tcrit) ? Math.max(0, tCross) : Math.max(0, dt - tCross);
           secAbove += above;
         }
@@ -420,14 +419,12 @@
     return {status,metrics};
   }
 
-  // 3.2 Охолодження: знайти часи досягнення 21°C та 5°C
   function evalCooling(){
     const pts = getPoints();
     if(pts.length<2){ setStatus('Недостатньо точок','—','🟠 Додайте щонайменше 2 точки'); return; }
-    const w1 = (+byId('c_w1').value||2)*3600; // сек
+    const w1 = (+byId('c_w1').value||2)*3600;
     const w2 = (+byId('c_w2').value||4)*3600;
     function timeToTemp(Ttarget){
-      // інтерполяція між точками
       for(let i=1;i<pts.length;i++){
         const a=pts[i-1], b=pts[i];
         const T0=a.T, T1=b.T;
@@ -451,15 +448,13 @@
     return {status,metrics:m};
   }
 
-  // 3.3 Дезінфекція: обчислити об'єм концентрату
   function evalSanit(){
     const type = byId('s_type').value;
-    const stock = +byId('s_stock').value||0; // %
-    const target = +byId('s_target').value||100; // ppm
-    const V = +byId('s_volume').value||10; // л
-    // 1% = 10 000 ppm активу
+    const stock = +byId('s_stock').value||0;
+    const target = +byId('s_target').value||100;
+    const V = +byId('s_volume').value||10;
     const stock_ppm = stock*10000;
-    const mL = (target*V)/ (stock_ppm/1000); // мл концентрату
+    const mL = (target*V)/ (stock_ppm/1000);
     const status = '🟢 РОЗРАХОВАНО';
     const m = `${rnd(mL,1)} мл концентрату ${type} на ${V} л для ${target} ppm (за припущення 1%≈10 000 ppm активу)`;
     setStatus(status, m, 'Перевірити етикетку виробника щодо активу/контактного часу');
@@ -467,7 +462,6 @@
     return {status,metrics:m};
   }
 
-  // Хелпери статусу й часу
   function setStatus(status, metrics, hint){
     byId('status').textContent = status;
     byId('metrics').textContent = metrics;
@@ -495,7 +489,7 @@
     byId('devOut').textContent = dev;
   }
 
-  // ==== Журнал моніторингу ====
+  // ==== Журнал ====
   const bodyLog = byId('bodyLog');
   function addLog(sample){
     const ccp = byId('ccp').value;
@@ -517,6 +511,7 @@
     `;
     bodyLog.appendChild(tr); reindex(bodyLog); buildCSVlog();
   }
+  function reindex(tbody){ [...tbody.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.idx').textContent=i+1); }
   function presetLog(){
     bodyLog.innerHTML='';
     addLog({ccp:'pasteur', limits:'T≥72°C; t≥15s', metrics:'T≥72°C: 18 с', status:'🟢 ВИКОНАНО', note:'режим стабільний'});
@@ -578,12 +573,70 @@
   }
   function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
 
-  // ==== Ініціалізація ====
-  (function init(){
-    document.addEventListener('change', e=>{
-      if(e.target.matches('input,select,textarea')) { buildCSVpoints(); }
+  // === Interaction Guard JS: знімаємо глобальні блокування вводу, якщо вони були інжектовані середовищем ===
+  (function unlockInteraction(){
+    function enable(){
+      document.querySelectorAll('button, .btn, input, select, textarea, a').forEach(el=>{
+        el.disabled = false;
+        el.style.pointerEvents = 'auto';
+      });
+      // прибираємо типові сторонні оверлеї
+      document.querySelectorAll('[data-print-overlay], .print-overlay, .print__overlay, .overlay, [aria-hidden="true"][style*="position: fixed"]').forEach(el=>{
+        if(getComputedStyle(el).position === 'fixed'){ el.parentNode && el.parentNode.removeChild(el); }
+      });
+    }
+    enable();
+    // кілька повторів на випадок пізнього інжекту
+    setTimeout(enable, 200);
+    setTimeout(enable, 600);
+    setTimeout(enable, 1200);
+    // на всякий — при поверненні у фокус
+    window.addEventListener('focus', enable, {passive:true});
+    // і після завершення друку з нового вікна (повідомлення відтуда)
+    window.addEventListener('message', (ev)=>{
+      if(ev && ev.data && ev.data.type==='ticketPrintDone'){ enable(); }
     });
   })();
 </script>
+
+<script>
+/* ДРУК ЛИШЕ ЧЕКА (58 мм) — без впливу на головну сторінку */
+function printTicketNewTab(){
+  var ticket = document.getElementById('ticket');
+  if(!ticket){ alert('Немає #ticket на сторінці'); return; }
+
+  try{
+    var someTxt = (ticket.querySelector('span, p, h4')||{}).textContent||'';
+    if(!someTxt || someTxt.trim()==='—'){ if(typeof buildTicket==='function') buildTicket(); }
+  }catch(_){}
+
+  var css = `
+    @media print { @page { size:58mm auto; margin:0 } }
+    html,body{ margin:0; padding:0; background:#fff; color:#000 }
+    .ticket{
+      width:58mm; margin:0; padding:6mm 4mm; background:#fff; color:#000;
+      font-family:"Courier New", Courier, monospace; font-weight:700; letter-spacing:0.1px;
+      border:none; box-shadow:none; border-radius:0
+    }
+    .ticket h4{ margin:0 0 6px; font-size:13px; text-align:center; font-weight:700 }
+    .ticket p{ margin:2px 0; font-size:12px; font-weight:700 }
+    .line{ border-top:1px dashed #111; margin:6px 0 }
+    small{ font-size:10px; font-weight:700 }
+  `;
+  var html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}
+<script>
+  window.addEventListener('load',()=>{ try{ window.focus(); window.print(); }catch(e){} });
+  window.addEventListener('afterprint',()=>{ try{ if(window.opener) window.opener.postMessage({type:'ticketPrintDone'},'*'); }catch(_){}})
+<\/script>
+</body></html>`;
+
+  var blob = new Blob([html], {type:'text/html'});
+  var url = URL.createObjectURL(blob);
+  var w = window.open(url, '_blank');
+  if(!w){ alert('Браузер блокує нові вікна. Дозволь попапи для цього сайту.'); }
+  setTimeout(()=>URL.revokeObjectURL(url), 60000);
+}
+</script>
+
 </body>
 </html>
