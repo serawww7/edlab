@@ -460,61 +460,78 @@
   }
 
  
-// PRINT v2: Відправляємо ЛИШЕ HTML чека у localStorage й відкриваємо окрему сторінку друку
-  function printTicketNewTab(){
-    const ticket = document.getElementById('ticket');
-    if(!ticket){ alert('Немає #ticket на сторінці'); return; }
-    // Якщо чек ще не зібраний — згенеруємо
-    try{
-      const txt = (ticket.textContent||'').replace(/\s+/g,'');
-      const hasRealText = txt && txt.replace(/—/g,'') !== '';
-      if(!hasRealText && typeof buildTicket==='function') buildTicket();
-    }catch(_){}
+// PRINT PATCH (як у mechanic_para12.html): about:blank + fallback через Blob; друкуємо ЛИШЕ чек
+function printTicketNewTab(){
+  var ticket = document.getElementById('ticket');
+  if(!ticket){ alert('Немає #ticket на сторінці'); return; }
+  try{
+    var someTxt = (document.querySelector('#ticket span, #ticket p, #ticket h4')||{}).textContent||'';
+    if(!someTxt || someTxt.trim()==='—'){ if(typeof buildTicket==='function') buildTicket(); }
+  }catch(_){}
 
-    const html = document.getElementById('ticket').outerHTML;
-    const id = createPrintJob(html);
-    if(!id){ return; }
-
-    // абсолютний URL до файлу друку
-    const printUrl = resolvePrintUrl();
-    const url = new URL(printUrl);
-    url.searchParams.set('id', id);
-    const w = window.open(url.toString(), '_blank', 'noopener,noreferrer,width=480,height=800');
-    if(!w){
-      alert('Браузер заблокував попап. Дозволь спливні вікна для сайту і натисни ще раз.');
+  var css = `
+    @media print { @page { size:58mm auto; margin:0 } }
+    html,body{ margin:0; padding:0; background:#fff; color:#000 }
+    .ticket{
+      width:58mm; margin:0; padding:6mm 4mm; background:#fff; color:#000;
+      font-family:"Courier New", Courier, monospace; font-weight:700; letter-spacing:0.1px;
+      border:none; box-shadow:none; border-radius:0
     }
-  }
+    .ticket h4{ margin:0 0 6px; font-size:13px; text-align:center; font-weight:700 }
+    .ticket p{ margin:2px 0; font-size:12px; font-weight:700 }
+    .ticket b,.ticket strong,.ticket span{ font-weight:700 }
+    .line{ border-top:1px dashed #111; margin:6px 0 }
+    small{ font-size:10px; font-weight:700 }
+  `;
+  var html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}
+  <script>
+    window.addEventListener('load',()=>{
+      try{ window.focus(); window.print(); if(window.opener) window.opener.postMessage({type:'ticketPrint',status:'invoked'},'*'); }
+      catch(e){ if(window.opener) window.opener.postMessage({type:'ticketPrint',status:'error'},'*'); }
+    });
+  <\/script>
+  </body></html>`;
 
-  // Кладемо завдання друку у localStorage під ключем print_job_<id>
-  function createPrintJob(html){
-    const id = Date.now().toString(36) + Math.random().toString(36).slice(2,8);
-    const key = 'print_job_' + id;
-    try{
-     localStorage.setItem(key, JSON.stringify({ html: String(html) }));
-      return id;
-    }catch(e){
-      console.error('localStorage error:', e);
-      alert('Не вдалося зберегти дані для друку. Перевір доступ/квоту localStorage.');
-      return null;
+  var w = window.open('', '_blank');
+  if(!w){ openTicketOnly(); return; }  // попап заблоковано — фолбек
+  w.document.open(); w.document.write(html); w.document.close();
+
+  var timer = setTimeout(()=>{ openTicketOnly(); }, 1200);
+  window.addEventListener('message', (ev)=>{
+    if(ev && ev.data && ev.data.type==='ticketPrint'){ clearTimeout(timer); }
+  }, {once:true});
+}
+
+function openTicketOnly(){
+  var ticket = document.getElementById('ticket');
+  if(!ticket){ alert('Немає #ticket на сторінці'); return; }
+  try{
+    var someTxt = (document.querySelector('#ticket span, #ticket p, #ticket h4')||{}).textContent||'';
+    if(!someTxt || someTxt.trim()==='—'){ if(typeof buildTicket==='function') buildTicket(); }
+  }catch(_){}
+
+  var css = `
+    @media print { @page { size:58mm auto; margin:0 } }
+    html,body{ margin:0; background:#fff; color:#000 }
+    .ticket{
+      width:58mm; margin:0; padding:6mm 4mm; background:#fff; color:#000;
+      font-family:"Courier New", Courier, monospace; font-weight:700; letter-spacing:0.1px;
+      border:none; box-shadow:none; border-radius:0
     }
-  }
- // Будуємо абсолютний шлях до print-58mm.html:
- // 1) якщо в <head> є <link id="printFileHref"> — беремо звідти (зручно міняти шлях в одному місці)
-  // 2) інакше — вважаємо, що print-58mm.html лежить поруч із цією сторінкою
-  function resolvePrintUrl(){
-    const el = document.getElementById('printFileHref');
-    if(el && el.href) return el.href;      // абсолютний href від браузера
-    const base = (document.baseURI || location.href).replace(/[?#].*$/, '');
-    const dir  = base.endsWith('/') ? base : base.replace(/[^/]*$/, '');
-    return dir + 'print-58mm.html';
-  }
-  // ===== Утиліти =====
-  function copyEl(id){
-    const t = byId(id).textContent.trim();
-    if(!t||t==='—'){ alert('Немає даних'); return; }
-    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
-  }
-  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+    .ticket h4{ margin:0 0 6px; font-size:13px; text-align:center; font-weight:700 }
+   .ticket p{ margin:2px 0; font-size:12px; font-weight:700 }
+    .line{ border-top:1px dashed #111; margin:6px 0 }
+    small{ font-size:10px; font-weight:700 }
+  `;
+  var html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Чек 58 мм</title><style>${css}</style></head><body>${ticket.outerHTML}
+<script>window.addEventListener('load',()=>{ try{ window.focus(); window.print(); }catch(e){} });<\/script>
+</body></html>`;
+
+  var blob = new Blob([html], {type:'text/html'});
+  var url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  setTimeout(()=>URL.revokeObjectURL(url), 60000);
+}
 
   // Ініціалізація
   (function init(){ addRow(); addRow(); recalc(); })();
