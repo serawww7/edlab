@@ -4,14 +4,18 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 23 — ШІ-чекер етикеток і сумісності бакових сумішей</title>
-<meta name="description" content="Імпорт етикеток ЗЗР → конструктор бакової суміші → автоматична перевірка сумісності (FRAC/HRAC, pH, послідовність, заборони), матриця ризиків, журнал суперечностей, розрахунки під бак і гектар, 58мм чек, генератор промпта для LLM."/>
+<meta name="description" content="Етикетки ЗЗР → конструктор бакової суміші → автоматичні перевірки (FRAC/HRAC, pH, порядок змішування, заборони), матриця ризиків, журнал, промпт до LLM, кейс-квіз і місії з прогресом."/>
 <meta name="color-scheme" content="light dark"/>
 <style>
-:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+:root{
+  --bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;
+  --brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171;
+}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Inter,Roboto,Arial,sans-serif}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",Inter,Roboto,Arial,sans-serif}
 .wrap{max-width:1060px;margin:0 auto;padding:16px}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;flex-wrap:wrap}
 .logo{display:flex;align-items:center;gap:10px}
 .logo .emoji{font-size:28px}
 .logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
@@ -24,23 +28,26 @@ h1{margin:.2em 0 .3em 0}
 .btn.good{border-color:#204b2a;background:#12341b}
 .input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
 small.mono,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace}
-.grid{display:grid;gap:14px;grid-template-columns:1.35fr 1fr}
-@media(max-width:1060px){.grid{grid-template-columns:1fr}}
-hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0}
-.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
-svg{max-width:100%;height:auto;display:block}
-pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
-kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
-.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
 .badge{display:inline-block;border:1px solid #334155;border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
 .tbl{width:100%;border-collapse:collapse;font-size:.95rem}
 .tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
 .tbl th{background:#0b1a2f}
 .risk-ok{color:var(--ok)}.risk-warn{color:var(--warn)}.risk-bad{color:var(--bad)}
-.log{max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;background:#0b1220;font-family:ui-monospace,monospace;font-size:13px;white-space:pre-wrap}
-.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.log{max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;background:#0b1220;
+  font-family:ui-monospace,monospace;font-size:13px;white-space:pre-wrap}
+pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0}
 .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
-.receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
+.footer{margin-top:20px;color:var(--muted);font-size:.9rem}
+.note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
+.progress{height:10px;border-radius:999px;background:#0b1324;overflow:hidden;border:1px solid #223049}
+.progress > div{height:100%;background:linear-gradient(90deg,#60a5fa,#22c55e)}
+.badgeNum{display:inline-grid;place-items:center;min-width:34px;height:26px;border-radius:8px;background:#0e1a2e;color:#a5b4fc;font-weight:700}
+.kpi{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px dashed var(--line);border-radius:12px}
+.kpi b{font-size:14px}
+.score{font-weight:700}
+svg{max-width:100%;height:auto;display:block}
+@media (max-width:700px){ header a.btn{width:100%} }
 </style>
 </head>
 <body>
@@ -50,171 +57,199 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <span class="emoji">🧯</span>
       <div>
         <b>Пара 23 — ШІ-чекер етикеток і сумісності бакових сумішей</b><br/>
-        <span class="badge">Етикетки → план суміші → перевірка FRAC/HRAC/pH/порядок → матриця ризиків → журнал → промпт LLM</span>
+        <span class="badge">Етикетки → суміш → перевірки FRAC/pH/порядок/заборони → матриця ризиків → журнал → промпт LLM</span>
       </div>
     </div>
     <a class="btn" href="../index.html" target="_blank" rel="noopener">🏠 На головну</a>
   </header>
 
-  <p class="muted">
-    Мета: зібрати з етикеток дані по ЗЗР, сконструювати бакову суміш, автоматично перевірити <b>сумісність</b> (МоА FRAC/HRAC, <b>pH</b>, <b>порядок змішування</b>, попередження), зафіксувати <b>суперечності</b>, розрахувати норми на бак/га й сформувати <b>промпт до ШІ</b> для остаточної верифікації плану IPM.
-  </p>
-
-  <div class="grid">
-    <!-- ЛІВА КОЛОНКА -->
-    <div class="card">
-      <h2>🗂️ Етикетки (CSV)</h2>
-      <p class="small muted">Формат стовпців: <span class="mono">product,ai,group,form,dose_per_ha,unit,crops,targets,water_l_ha,rei_h,phi_d,ph_min,ph_max,incompat,notes</span></p>
-      <textarea id="csv" class="input" rows="7" placeholder="product,ai,group,form,dose_per_ha,unit,crops,targets,water_l_ha,rei_h,phi_d,ph_min,ph_max,incompat,notes"></textarea>
-      <div class="row">
-        <button class="btn good" id="load">📥 Імпорт</button>
-        <button class="btn secondary" id="demo">🎲 Еталонні етикетки</button>
-        <button class="btn secondary" id="clearLabels">🧹 Очистити</button>
-        <span id="badgeN" class="badge">Препаратів: 0</span>
-      </div>
-
-      <h2 style="margin-top:12px">🧩 Конструктор бакової суміші</h2>
-      <div class="row">
-        <div style="flex:1">
-          <label for="crop">Культура</label>
-          <input id="crop" class="input" placeholder="Пшениця озима"/>
-        </div>
-        <div style="flex:1">
-          <label for="target">Ціль (шкідник/хвороба/бур’ян)</label>
-          <input id="target" class="input" placeholder="септоріоз, борошниста роса"/>
-        </div>
-      </div>
-      <div class="row">
-        <div style="flex:2">
-          <label for="productSel">Додати препарат</label>
-          <select id="productSel" class="input"></select>
-        </div>
-        <div style="flex:1">
-          <label for="dose">Норма на га</label>
-          <input id="dose" class="input" type="number" step="0.01" value="0.5"/>
-        </div>
-        <div style="flex:1">
-          <label for="unit">Одиниця</label>
-          <select id="unit" class="input">
-            <option>л/га</option><option>кг/га</option>
-          </select>
-        </div>
-        <button class="btn" id="add">➕ Додати</button>
-      </div>
-
-      <table class="tbl" id="mixTbl" style="margin-top:8px">
-        <thead><tr><th>#</th><th>Препарат</th><th>МоА (FRAC/HRAC)</th><th>Форма</th><th>Доза</th><th>Дія</th></tr></thead>
-        <tbody></tbody>
-      </table>
-
-      <div class="row">
-        <div style="flex:1">
-          <label for="water">Вода, л/га</label>
-          <input id="water" class="input" type="number" step="10" value="200"/>
-        </div>
-        <div style="flex:1">
-          <label for="tank">Об’єм бака, л</label>
-          <input id="tank" class="input" type="number" step="10" value="2000"/>
-        </div>
-        <div style="flex:1">
-          <label for="area">Площа обробки, га</label>
-          <input id="area" class="input" type="number" step="0.1" value="10"/>
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:6px">
-        <button class="btn good" id="check">🧪 Перевірити сумісність</button>
-        <button class="btn secondary" id="receiptBtn">🖨️ 58мм чек</button>
-        <span id="badgeRisk" class="badge">Статус: —</span>
-      </div>
-
-      <div class="receipt" id="receipt" hidden></div>
-
-      <h3 style="margin-top:12px">🧭 Рекомендований порядок змішування (tank order)</h3>
-      <pre class="code" id="order">// Натисни «🧪 Перевірити сумісність»</pre>
+  <div class="card">
+    <h2>🎯 Що ви робите і навіщо це агроному</h2>
+    <p><b>Мета пари</b> — навчитися з етикеток швидко збирати ключові параметри ЗЗР, конструювати бакову суміш і <b>автоматично</b>
+      знаходити конфлікти: дублювання FRAC/HRAC (ризик резистентності), несумісні пари з етикеток, <b>вікна pH</b> та <b>порядок змішування</b>.
+      Далі — за хвилину згенерувати <b>промпт</b> для моделі ШІ, щоб перевірити себе й отримати пропозиції до IPM-плану.</p>
+    <div class="row" style="margin-top:6px">
+      <div class="kpi"><span class="badgeNum" id="k_labels">0</span><div><b>Етикеток імпортовано</b></div></div>
+      <div class="kpi"><span class="badgeNum" id="k_mix">0</span><div><b>Препаратів у суміші</b></div></div>
+      <div class="kpi"><span class="badgeNum" id="riskScore">0</span><div><b>Риск-бал</b> <span class="muted">(0 — ідеально)</span></div></div>
     </div>
-
-    <!-- ПРАВА КОЛОНКА -->
-    <div class="card">
-      <h2>🧯 Матриця ризиків і журнал</h2>
-      <table class="tbl" id="riskTbl">
-        <thead><tr><th>Перевірка</th><th>Деталі</th><th>Статус</th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <div class="row" style="margin-top:8px">
-        <button class="btn" id="exportLog">📄 Експорт журналу</button>
-        <button class="btn secondary" id="resetLog">🧹 Очистити журнал</button>
-      </div>
-      <div id="log" class="log" aria-live="polite"></div>
-
-      <h2 style="margin-top:12px">🤖 Генератор промпта для LLM</h2>
-      <div class="row">
-        <button class="btn good" id="genPrompt">⚙️ Згенерувати</button>
-        <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
-        <button class="btn secondary" id="savePrompt">⬇️ TXT</button>
-      </div>
-      <pre class="code" id="prompt">// Спочатку імпорт етикеток і «🧪 Перевірити сумісність»</pre>
-
-      <h2 style="margin-top:12px">🔌 Схема процесу (SVG)</h2>
-      <svg viewBox="0 0 760 420" role="img" aria-label="Пайплайн сумісності">
-        <rect x="40" y="40" width="220" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
-        <text x="150" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Етикетки ЗЗР (CSV)</text>
-        <text x="150" y="88" fill="#93c5fd" font-size="12" text-anchor="middle">ai/FRAC/pH/REI/PHI</text>
-
-        <rect x="300" y="40" width="200" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
-        <text x="400" y="70" fill="#dcfce7" font-size="14" text-anchor="middle">Конструктор суміші</text>
-        <text x="400" y="88" fill="#a7f3d0" font-size="12" text-anchor="middle">дози/вода/площа</text>
-
-        <rect x="540" y="40" width="180" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"/>
-        <text x="630" y="70" fill="#fed7aa" font-size="14" text-anchor="middle">Перевірки</text>
-        <text x="630" y="88" fill="#fed7aa" font-size="12" text-anchor="middle">FRAC/pH/order</text>
-
-        <line x1="260" y1="80" x2="300" y2="80" stroke="#93c5fd" stroke-width="3"/>
-        <line x1="500" y1="80" x2="540" y2="80" stroke="#93c5fd" stroke-width="3"/>
-
-        <rect x="40" y="170" width="280" height="90" rx="12" fill="#0b3f5a" stroke="#22d3ee"/>
-        <text x="180" y="200" fill="#a5f3fc" font-size="14" text-anchor="middle">Розрахунки</text>
-        <text x="180" y="220" fill="#a5f3fc" font-size="12" text-anchor="middle">на бак і на гектар</text>
-
-        <rect x="360" y="170" width="170" height="90" rx="12" fill="#1f2937" stroke="#9ca3af"/>
-        <text x="445" y="200" fill="#e5e7eb" font-size="14" text-anchor="middle">58мм чек</text>
-        <text x="445" y="220" fill="#9ca3af" font-size="12" text-anchor="middle">для бригадира</text>
-
-        <rect x="560" y="170" width="160" height="90" rx="12" fill="#111827" stroke="#4b5563"/>
-        <text x="640" y="200" fill="#e5e7eb" font-size="14" text-anchor="middle">Промпт до ШІ</text>
-        <text x="640" y="220" fill="#9ca3af" font-size="12" text-anchor="middle">валідація IPM</text>
-      </svg>
-
-      <div class="card" style="margin-top:12px">
-        <h3>📜 Нотатка з історії</h3>
-        <p class="muted small">
-          Перші стандарти <b>порядку змішування</b> (WP→WG→SC→EC→SL→ад’юванти) сформувались у ХХ ст. за підсумками інцидентів осадження/піни.
-          Сучасні системи поєднують етикетки, <b>FRAC/HRAC</b>-ротацію та <b>pH</b>-вікна з алгоритмами перевірки й підказками ШІ.
-        </p>
-      </div>
-
-      <h3 style="margin-top:12px">🧷 Теги</h3>
-      <div>
-        <span class="tag">#labels</span>
-        <span class="tag">#compatibility</span>
-        <span class="tag">#FRAC_HRAC</span>
-        <span class="tag">#tank_mix</span>
-        <span class="tag">#IPM</span>
-      </div>
+    <div class="note" style="margin-top:8px">
+      <b>Практична користь:</b> ви тренуєте той самий чек-лист, що знімає 70–80% «польових» залипань (осад, піна, втрата дії, подвійний FRAC).
+      Алгоритм переноситься 1:1 у сезон на господарстві.
     </div>
   </div>
 
+  <!-- МІСІЇ -->
   <div class="card">
-    <h2>📋 Підсумок для звіту</h2>
+    <h2>🎮 Місії пари</h2>
+    <label><input type="checkbox" class="mission" data-id="m1"> Імпортуй хоча б 4 етикетки (CSV або «Еталонні»)</label><br/>
+    <label><input type="checkbox" class="mission" data-id="m2"> Збери суміш із 2–4 препаратів і задай воду/бак/площу</label><br/>
+    <label><input type="checkbox" class="mission" data-id="m3"> Пройди перевірки, добийся <b>ризик-бал ≤ 2</b></label><br/>
+    <label><input type="checkbox" class="mission" data-id="m4"> Згенеруй промпт до LLM і випиши 2 пропозиції покращення</label>
+    <div class="progress" style="margin-top:10px"><div id="progressBar" style="width:0%"></div></div>
+  </div>
+
+  <!-- ЕТИКЕТКИ + МІКСЕР -->
+  <div class="card">
+    <h2>🗂️ Етикетки (CSV)</h2>
+    <p class="small muted">Стовпці: <span class="mono">product,ai,group,form,dose_per_ha,unit,crops,targets,water_l_ha,rei_h,phi_d,ph_min,ph_max,incompat,notes</span></p>
+    <textarea id="csv" class="input" rows="7" placeholder="product,ai,group,form,dose_per_ha,unit,crops,targets,water_l_ha,rei_h,phi_d,ph_min,ph_max,incompat,notes"></textarea>
+    <div class="row">
+      <button class="btn good" id="load">📥 Імпорт</button>
+      <button class="btn secondary" id="demo">🎲 Еталонні етикетки</button>
+      <button class="btn secondary" id="clearLabels">🧹 Очистити</button>
+      <span id="badgeN" class="badge">Препаратів: 0</span>
+    </div>
+
+    <hr class="sep"/>
+
+    <h2>🧩 Конструктор бакової суміші</h2>
+    <div class="row">
+      <div style="flex:1">
+        <label for="crop">Культура</label>
+        <input id="crop" class="input" placeholder="Пшениця озима"/>
+      </div>
+      <div style="flex:1">
+        <label for="target">Ціль (шкідник/хвороба/бур’ян)</label>
+        <input id="target" class="input" placeholder="септоріоз, борошниста роса"/>
+      </div>
+    </div>
+    <div class="row">
+      <div style="flex:2">
+        <label for="productSel">Додати препарат</label>
+        <select id="productSel" class="input"></select>
+      </div>
+      <div style="flex:1">
+        <label for="dose">Норма на га</label>
+        <input id="dose" class="input" type="number" step="0.01" value="0.5"/>
+      </div>
+      <div style="flex:1">
+        <label for="unit">Одиниця</label>
+        <select id="unit" class="input"><option>л/га</option><option>кг/га</option></select>
+      </div>
+      <button class="btn" id="add">➕ Додати</button>
+    </div>
+
+    <table class="tbl" id="mixTbl" style="margin-top:8px">
+      <thead><tr><th>#</th><th>Препарат</th><th>МоА (FRAC/HRAC)</th><th>Форма</th><th>Доза</th><th>Дія</th></tr></thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="row" style="margin-top:8px">
+      <div style="flex:1">
+        <label for="water">Вода, л/га</label>
+        <input id="water" class="input" type="number" step="10" value="200"/>
+      </div>
+      <div style="flex:1">
+        <label for="tank">Об’єм бака, л</label>
+        <input id="tank" class="input" type="number" step="10" value="2000"/>
+      </div>
+      <div style="flex:1">
+        <label for="area">Площа обробки, га</label>
+        <input id="area" class="input" type="number" step="0.1" value="10"/>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <button class="btn good" id="check">🧪 Перевірити сумісність</button>
+      <span id="badgeRisk" class="badge">Статус: —</span>
+      <span id="mixAdvice" class="muted"></span>
+    </div>
+
+    <h3 style="margin-top:12px">🧭 Рекомендований порядок змішування (tank order)</h3>
+    <pre class="code" id="order">// Натисни «🧪 Перевірити сумісність»</pre>
+  </div>
+
+  <!-- МАТРИЦЯ РИЗИКІВ + ЖУРНАЛ (ПЕРЕНЕСЕНО УНИЗ) -->
+  <div class="card">
+    <h2>🧯 Матриця ризиків і журнал</h2>
+    <table class="tbl" id="riskTbl">
+      <thead><tr><th>Перевірка</th><th>Деталі</th><th>Статус</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" id="exportLog">📄 Експорт журналу</button>
+      <button class="btn secondary" id="resetLog">🧹 Очистити журнал</button>
+    </div>
+    <div id="log" class="log" aria-live="polite"></div>
+  </div>
+
+  <!-- ПРОМПТ -->
+  <div class="card">
+    <h2>🤖 Генератор промпта для LLM</h2>
+    <p class="muted">Згенеруй інструкцію для моделі ШІ (ChatGPT, Claude тощо), щоб вона перевірила твою суміш і запропонувала покращення IPM.</p>
+    <div class="row">
+      <button class="btn good" id="genPrompt">⚙️ Згенерувати</button>
+      <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+      <button class="btn secondary" id="savePrompt">⬇️ TXT</button>
+    </div>
+    <pre class="code" id="prompt">// Спочатку імпорт етикеток і «🧪 Перевірити сумісність»</pre>
+  </div>
+
+  <!-- КЕЙС-КВІЗ -->
+  <div class="card">
+    <h2>🎲 Кейс-квіз: що робити з цим конфліктом?</h2>
+    <p class="muted">Отримай випадковий конфлікт суміші та обери дію. Тримай серію вдалих рішень!</p>
+    <div class="row">
+      <button class="btn" onclick="newCase()">🎯 Згенерувати конфлікт</button>
+      <select id="caseAction" class="input" style="max-width:340px">
+        <option value="">— Обери дію —</option>
+        <option value="заміна_FRAC">Замінити препарат на іншу FRAC-групу</option>
+        <option value="скоригувати_pH">Додати коректор pH/воду в інше джерело</option>
+        <option value="змінити_порядок">Змінити порядок змішування</option>
+        <option value="вилучити_заборонену_пару">Вилучити несумісну пару</option>
+        <option value="нічого_не_робити">Нічого не робити</option>
+      </select>
+      <button class="btn" onclick="checkCase()">✅ Перевірити</button>
+    </div>
+    <div id="caseText" class="note" style="margin-top:8px">Натисни «Згенерувати конфлікт»</div>
+    <div class="row" style="margin-top:8px">
+      <div class="kpi"><span class="badgeNum" id="streak">0</span><div>Серія вдалих рішень</div></div>
+      <div id="caseFeedback" class="muted"></div>
+    </div>
+  </div>
+
+  <!-- СХЕМА -->
+  <div class="card">
+    <h2>🔌 Схема процесу (SVG)</h2>
+    <svg viewBox="0 0 760 300" role="img" aria-label="Пайплайн сумісності">
+      <rect x="40" y="40" width="220" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <text x="150" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Етикетки ЗЗР (CSV)</text>
+      <text x="150" y="88" fill="#93c5fd" font-size="12" text-anchor="middle">ai/FRAC/pH/REI/PHI</text>
+
+      <rect x="300" y="40" width="200" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <text x="400" y="70" fill="#dcfce7" font-size="14" text-anchor="middle">Конструктор суміші</text>
+      <text x="400" y="88" fill="#a7f3d0" font-size="12" text-anchor="middle">дози/вода/площа</text>
+
+      <rect x="540" y="40" width="180" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+      <text x="630" y="70" fill="#fed7aa" font-size="14" text-anchor="middle">Перевірки</text>
+      <text x="630" y="88" fill="#fed7aa" font-size="12" text-anchor="middle">FRAC/pH/order</text>
+
+      <line x1="260" y1="80" x2="300" y2="80" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="500" y1="80" x2="540" y2="80" stroke="#93c5fd" stroke-width="3"/>
+
+      <rect x="180" y="160" width="190" height="80" rx="12" fill="#111827" stroke="#4b5563"/>
+      <text x="275" y="192" fill="#e5e7eb" font-size="14" text-anchor="middle">Промпт до ШІ</text>
+      <text x="275" y="210" fill="#9ca3af" font-size="12" text-anchor="middle">валідація IPM</text>
+
+      <rect x="420" y="160" width="220" height="80" rx="12" fill="#0b3f5a" stroke="#22d3ee"/>
+      <text x="530" y="192" fill="#a5f3fc" font-size="14" text-anchor="middle">Матриця ризиків і журнал</text>
+      <text x="530" y="210" fill="#a5f3fc" font-size="12" text-anchor="middle">рішення й пояснення</text>
+    </svg>
+  </div>
+
+  <!-- ПІДСУМОК -->
+  <div class="card">
+    <h2>📋 Що здати в кінці пари</h2>
     <ul>
-      <li>Скрін матриці ризиків і журналу.</li>
-      <li>58-мм чек та CSV з розрахунками на бак/га.</li>
-      <li>Промпт до LLM і коротка відповідь-мемо з рішенням.</li>
+      <li>Скрін матриці ризиків та журналу (після «🧪 Перевірити»).</li>
+      <li>TXT з промптом до LLM + 2 короткі рекомендації, які ви прийняли.</li>
+      <li>Скрін квізу з вашою серією (не обов’язково максимум, важливе обґрунтування).</li>
     </ul>
   </div>
 
   <div class="footer">
-    Останнє оновлення: <time datetime="2025-10-18">18.10.2025</time>. Автор: Сергій Поліщук.
+    Останнє оновлення: <time datetime="2025-10-21">21.10.2025</time>. Автор: Сергій Поліщук.
   </div>
 </div>
 
@@ -225,6 +260,7 @@ const $$=s=>Array.from(document.querySelectorAll(s));
 function download(name,text,type="text/plain"){const b=new Blob([text],{type:type+";charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
 function stamp(){return new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);}
 function log(msg){const t=new Date().toLocaleTimeString(); LOG.textContent+=`[${t}] ${msg}\n`; LOG.scrollTop=LOG.scrollHeight;}
+const byId = (id)=>document.getElementById(id);
 
 // ===== Дані етикеток =====
 let labels=[]; // {product,ai,group,form,dose_per_ha,unit,crops,targets,water_l_ha,rei_h,phi_d,ph_min,ph_max,incompat,notes}
@@ -239,10 +275,9 @@ function parseCSV(txt){
   const need=['product','ai','group','form','dose_per_ha','unit','crops','targets','water_l_ha','rei_h','phi_d','ph_min','ph_max','incompat','notes'];
   for(const n of need){ if(idx(n)===-1) throw new Error('Відсутній стовпець: '+n); }
   for(const line of lines){
-    const parts=line.split(','); // просто, без quoted CSV
+    const parts=line.split(','); // проста розбивка (для навчальних сетів достатньо)
     const r={};
     need.forEach((n,i)=>r[n]= (parts[idx(n)]||'').trim());
-    // числові
     r.dose_per_ha=parseFloat(r.dose_per_ha)||0;
     r.water_l_ha=parseFloat(r.water_l_ha)||0;
     r.rei_h=parseFloat(r.rei_h)||0;
@@ -261,10 +296,12 @@ function refreshProductList(){
     PRODSEL.appendChild(opt);
   });
   $('#badgeN').textContent='Препаратів: '+labels.length;
+  byId('k_labels').textContent = labels.length;
+  updateProgress();
 }
 
 // ===== Конструктор суміші =====
-let mix=[]; // [{product, dose, unit}]
+let mix=[]; // [{product, dose, unit, group, form}]
 
 function addToMix(){
   const product=PRODSEL.value; if(!product) return;
@@ -273,6 +310,7 @@ function addToMix(){
   const lab=labels.find(l=>l.product===product);
   mix.push({product, dose, unit, group:lab?.group||'', form:lab?.form||''});
   renderMix();
+  updateProgress();
 }
 function removeFromMix(idx){ mix.splice(idx,1); renderMix(); }
 
@@ -286,12 +324,14 @@ function renderMix(){
   MIXTBL.querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>removeFromMix(parseInt(b.dataset.i)));
   $('#badgeRisk').textContent='Статус: —';
   $('#order').textContent='// Натисни «🧪 Перевірити сумісність»';
-  $('#receipt').hidden=true;
+  $('#mixAdvice').textContent='';
+  byId('k_mix').textContent = mix.length;
+  calcRiskScore(); // оновлюємо показник
 }
 
 // ===== Перевірки сумісності =====
-// Базові правила (демо-набір): порядок, pH, FRAC/HRAC дублювання, несумісні пари (з етикеток)
 const FORM_ORDER = ['WP','WG','WDG','DF','SG','SC','SE','EC','EW','SL','SP','OD','UL','CS','ADJ']; // спрощений
+
 function orderAdvice(list){
   const groups=list.map(x=>({name:x.product, form:(x.form||'').toUpperCase()}));
   groups.sort((a,b)=>(FORM_ORDER.indexOf(a.form) - FORM_ORDER.indexOf(b.form)));
@@ -351,7 +391,7 @@ function checkDoseAgainstLabel(mix, labels){
     const lab=labels.find(l=>l.product===m.product);
     if(!lab) return;
     const unitOk = (lab.unit||'').toLowerCase() === (m.unit||'').toLowerCase();
-    const doseOk = unitOk && m.dose>0 && m.dose<=lab.dose_per_ha*1.1 && m.dose>=lab.dose_per_ha*0.5; // 50–110% від довідкової як базовий контроль
+    const doseOk = unitOk && m.dose>0 && m.dose<=lab.dose_per_ha*1.1 && m.dose>=lab.dose_per_ha*0.5; // 50–110% як навчальний коридор
     if(!unitOk) probs.push(`${m.product}: одиниці в етикетці ${lab.unit}, у суміші ${m.unit}`);
     if(!doseOk) probs.push(`${m.product}: доза ${m.dose} ${m.unit}/га поза довідковим коридором ~${lab.dose_per_ha} ${lab.unit}/га`);
   });
@@ -370,6 +410,19 @@ function checkREI_PHI(mix, labels){
   return {ok:true, msg};
 }
 
+function calcRiskScore(){
+  // Невеликий індикатор ризику: BAD=2, WARN=1, OK=0
+  const rows=$$('#riskTbl tbody tr');
+  let score=0;
+  rows.forEach(tr=>{
+    const status=tr.querySelector('td:last-child')?.textContent||'';
+    if(status.includes('BAD')) score+=2;
+    else if(status.includes('WARN')) score+=1;
+  });
+  byId('riskScore').textContent = score;
+  return score;
+}
+
 function runChecks(){
   RISK.innerHTML=''; LOG.textContent='';
   if(mix.length===0){ log('Суміш порожня'); $('#badgeRisk').textContent='Статус: суміш порожня'; return; }
@@ -384,15 +437,17 @@ function runChecks(){
     rows.push({name,ok:res.ok,level,msg:res.msg});
   }
 
-  const r1=checkFRAC(mix,labels);           push('FRAC/HRAC ротація', r1, r1.ok?'ok':'warn');
-  const r2=checkPH(mix,labels);             push('Вікна pH (перетин)', r2, r2.ok?'ok':'bad');
-  const r3=checkLabelIncompat(mix,labels);  push('Етикеткові заборони', r3, r3.ok?'ok':'bad');
+  const r1=checkFRAC(mix,labels);            push('FRAC/HRAC ротація', r1, r1.ok?'ok':'warn');
+  const r2=checkPH(mix,labels);              push('Вікна pH (перетин)', r2, r2.ok?'ok':'bad');
+  const r3=checkLabelIncompat(mix,labels);   push('Етикеткові заборони', r3, r3.ok?'ok':'bad');
   const r4=checkDoseAgainstLabel(mix,labels);push('Дози проти етикетки', r4, r4.ok?'ok':'warn');
-  const r5=checkREI_PHI(mix,labels);        push('REI/PHI зведення', r5, 'ok');
+  const r5=checkREI_PHI(mix,labels);         push('REI/PHI зведення', r5, 'ok');
 
-  const allOk = [...RISK.querySelectorAll('td.risk-bad')].length===0;
-  $('#badgeRisk').textContent = 'Статус: ' + (allOk?'умовно сумісна':'є критичні суперечності');
-
+  const score = calcRiskScore();
+  const allOk = score===0;
+  $('#badgeRisk').textContent = 'Статус: ' + (allOk?'умовно сумісна':'є суперечності');
+  $('#mixAdvice').textContent = allOk ? '✅ Чітко: можеш віддати на фінальну верифікацію' : 'ℹ️ Підказка: зменш ризик-бал до ≤2: уникай дублювань FRAC, звір pH та порядок.';
+  updateProgress();
   // Порядок змішування
   const detailed = mix.map(m=>{
     const lab=labels.find(l=>l.product===m.product)||{};
@@ -401,39 +456,9 @@ function runChecks(){
   $('#order').textContent = orderAdvice(detailed);
 }
 
-// ===== Розрахунки та чек =====
-function buildReceipt(){
-  const area=parseFloat($('#area').value)||0;
-  const water=parseFloat($('#water').value)||0; // л/га
-  const tank =parseFloat($('#tank').value)||0; // л
-  const perTankArea = tank / water; // га на бак
-  const lines=[];
-  lines.push('=== ТЕХКАРТА — БАКОВА СУМІШ ===');
-  lines.push(`Дата: ${new Date().toLocaleString()}`);
-  lines.push(`Культура: ${$('#crop').value||'-'}`);
-  lines.push(`Ціль: ${$('#target').value||'-'}`);
-  lines.push(`Вода: ${water} л/га | Бак: ${tank} л → ${perTankArea.toFixed(2)} га/бак`);
-  lines.push('--- СКЛАД НА 1 ГА ---');
-  mix.forEach(m=>{ lines.push(`${m.product.padEnd(16,' ')} ${m.dose} ${m.unit}/га`); });
-  lines.push('--- НА 1 БАК ---');
-  mix.forEach(m=>{
-    const q = (m.dose * perTankArea).toFixed(2);
-    lines.push(`${m.product.padEnd(16,' ')} ${q} ${m.unit}/бак`);
-  });
-  lines.push('--- НА ВСЮ ПЛОЩУ ---');
-  mix.forEach(m=>{
-    const q = (m.dose * area).toFixed(2);
-    lines.push(`${m.product.padEnd(16,' ')} ${q} ${m.unit}/все`);
-  });
-  lines.push('REI/PHI: див. матрицю ризиків.');
-  lines.push('Порядок змішування: див. секцію нижче.');
-  lines.push('=== УДАЧІ! Дотримуйся ЗІЗ та інструкцій ===');
-  return lines.join('\n');
-}
-
 // ===== Промпт до LLM =====
 function buildPrompt(){
-  const riskRows=[...RISK.querySelectorAll('tr')].slice(0).map(tr=>{
+  const riskRows=[...RISK.querySelectorAll('tr')].map(tr=>{
     const tds=tr.querySelectorAll('td');
     return {check:tds[0]?.textContent||'', details:tds[1]?.textContent||'', status:tds[2]?.textContent||''};
   });
@@ -447,7 +472,7 @@ function buildPrompt(){
     };
   });
 
-  return `Ти — агроном-консультант (IPM). Перевір та за потреби скоригуй бакову суміш.
+  return `Ти — агроном-консультант (IPM). Перевір та, за потреби, скоригуй бакову суміш.
 Поле: культура="${$('#crop').value||'-'}", ціль="${$('#target').value||'-'}".
 Параметри: вода=${$('#water').value} л/га, бак=${$('#tank').value} л, площа=${$('#area').value} га.
 Суміш (JSON):
@@ -455,13 +480,74 @@ ${JSON.stringify(mixJson, null, 2)}
 Матриця перевірок:
 ${riskRows.map(r=>`- ${r.check}: [${r.status}] ${r.details}`).join('\n')}
 
-Що потрібно:
-1) Підтвердь/зміни дози з посиланнями на етикетки або офіційні довідники.
-2) Оціни FRAC/HRAC-ротацію та запропонуй альтернативу для антирезистентної стратегії.
-3) Перевір pH-вікно, порядок змішування (WP→WG→SC→EC→SL→ад’юванти), потребу у ПАР.
-4) Вкажи REI/PHI для всієї суміші, попередження та ЗІЗ.
-5) Дай 2 варіанти спрощення суміші без втрати ефективності.
+Завдання:
+1) Підтвердь/зміни дози з посиланнями на етикетки/довідники.
+2) Оціни FRAC/HRAC-ротацію і запропонуй альтернативу (анти-резистентність).
+3) Перевір pH-вікно, порядок (WP→WG→SC→EC→SL→ад’юванти) та потребу в ПАР.
+4) Вкажи REI/PHI для всієї суміші, попередження й ЗІЗ.
+5) Запропонуй 2 варіанти спрощення без втрати ефективності.
 Формат відповіді: структурований план із підзаголовками, списками та джерелами.`;
+}
+
+// ===== Місії + прогрес =====
+const LS_MISS='para23_missions';
+function loadMissions(){ try{ return JSON.parse(localStorage.getItem(LS_MISS)||'{}'); }catch(_){ return {}; } }
+function saveMissions(obj){ try{ localStorage.setItem(LS_MISS, JSON.stringify(obj)); }catch(_){} }
+function markMissionAuto(id){
+  const miss=loadMissions(); miss[id]=true; saveMissions(miss); updateProgress();
+}
+function updateProgress(){
+  const miss=loadMissions();
+  const all=['m1','m2','m3','m4'];
+  // Авто-оцінка деяких
+  if(labels.length>=4) miss.m1=true;
+  if(mix.length>=2) miss.m2=true;
+  const score=parseInt(byId('riskScore').textContent||'0',10);
+  if(score<=2 && mix.length>0) miss.m3=true;
+
+  saveMissions(miss);
+  const done=all.filter(k=>miss[k]).length;
+  const pct=Math.round(done/all.length*100);
+  byId('progressBar').style.width=pct+'%';
+  $$('.mission').forEach(ch=>ch.checked=!!miss[ch.dataset.id]);
+}
+$$('.mission').forEach(ch=>{
+  ch.addEventListener('change',()=>{
+    const miss=loadMissions();
+    miss[ch.dataset.id]=ch.checked; saveMissions(miss); updateProgress();
+  });
+});
+
+// ===== Кейс-квіз =====
+const CASES = [
+  {t:'У суміші дві діючі однієї FRAC-групи (QoI C3).', best:['заміна_FRAC'], ok:['нічого_не_робити'], bad:[]},
+  {t:'Вікна pH препаратів не перетинаються.', best:['скоригувати_pH'], ok:[], bad:['нічого_не_робити']},
+  {t:'Етикетка А каже «не змішувати з міддю», а в суміші є мідь.', best:['вилучити_заборонену_пару'], ok:[], bad:['нічого_не_робити']},
+  {t:'У бак спершу налили EC, потім WG → пішла піна/пластівці.', best:['змінити_порядок'], ok:[], bad:['нічого_не_робити']},
+];
+let CASE_IDX=-1, STREAK=0;
+function newCase(){
+  CASE_IDX=Math.floor(Math.random()*CASES.length);
+  byId('caseText').textContent=CASES[CASE_IDX].t;
+  byId('caseFeedback').textContent='';
+  byId('caseAction').value='';
+}
+function checkCase(){
+  if(CASE_IDX<0){ alert('Спочатку згенеруй конфлікт'); return; }
+  const act=byId('caseAction').value;
+  if(!act){ alert('Обери дію'); return; }
+  const c=CASES[CASE_IDX];
+  if(c.best.includes(act)){
+    STREAK++; byId('caseFeedback').textContent='✅ Оптимальне рішення';
+    byId('caseFeedback').style.color='var(--ok)';
+  }else if(c.ok.includes(act)){
+    STREAK=Math.max(0,STREAK-1); byId('caseFeedback').textContent='ℹ️ Прийнятно, але можна краще';
+    byId('caseFeedback').style.color='';
+  }else{
+    STREAK=0; byId('caseFeedback').textContent='❌ Невдала дія — високий ризик';
+    byId('caseFeedback').style.color='var(--bad)';
+  }
+  byId('streak').textContent=STREAK;
 }
 
 // ===== Події UI =====
@@ -477,21 +563,15 @@ $('#demo').addEventListener('click', ()=>{
 });
 
 $('#load').addEventListener('click', ()=>{
-  try{ parseCSV($('#csv').value); refreshProductList(); log('Етикетки імпортовано'); }
+  try{ parseCSV($('#csv').value); refreshProductList(); log('Етикетки імпортовано'); markMissionAuto('m1'); }
   catch(e){ alert('Помилка CSV: '+e.message); }
 });
 $('#clearLabels').addEventListener('click', ()=>{ labels.length=0; refreshProductList(); log('Етикетки очищено'); });
 
-$('#add').addEventListener('click', addToMix);
-$('#check').addEventListener('click', runChecks);
+$('#add').addEventListener('click', ()=>{ addToMix(); markMissionAuto('m2'); });
+$('#check').addEventListener('click', ()=>{ runChecks(); });
 
-$('#receiptBtn').addEventListener('click', ()=>{
-  const txt=buildReceipt();
-  const el=$('#receipt'); el.hidden=false; el.textContent=txt;
-  download('para23_receipt_'+stamp()+'.txt',txt);
-});
-
-$('#genPrompt').addEventListener('click', ()=>{ $('#prompt').textContent=buildPrompt(); log('Промпт згенеровано'); });
+$('#genPrompt').addEventListener('click', ()=>{ $('#prompt').textContent=buildPrompt(); log('Промпт згенеровано'); markMissionAuto('m4'); });
 $('#copyPrompt').addEventListener('click', ()=>{
   const ta=document.createElement('textarea'); ta.value=$('#prompt').textContent; document.body.appendChild(ta);
   ta.select(); document.execCommand('copy'); ta.remove(); log('Промпт скопійовано');
@@ -507,6 +587,7 @@ $('#resetLog').addEventListener('click', ()=>{ LOG.textContent=''; });
 // Ініціалізація
 refreshProductList();
 if (window.self !== window.top) document.documentElement.classList.add('embedded'); // Moodle-friendly
+updateProgress();
 </script>
 </body>
 </html>
