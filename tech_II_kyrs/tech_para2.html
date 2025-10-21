@@ -47,7 +47,7 @@
   .out{background:var(--darkcell);color:var(--darkink2);border:1px dashed #263042;padding:10px 12px;border-radius:10px;word-break:break-all}
   input[type="text"],input[type="number"],input[type="date"],input[type="time"],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e6eef9}
   textarea{min-height:88px}
-  /* Чек 58 мм (на екрані) */
+  /* Чек 58 мм */
   .ticket{width:58mm;background:#fff;color:#000;padding:6mm 4mm;border-radius:6px;box-shadow:0 0 0 1px #e5e7eb inset;font-family:"Courier New",ui-monospace,monospace}
   .ticket h4{margin:0 0 6px;font-size:13px;text-align:center}.ticket p{margin:2px 0;font-size:12px}.ticket .line{border-top:1px dashed #111;margin:6px 0}
   .ticket small{font-size:10px}
@@ -248,7 +248,7 @@
         <h3>Квиток для принтера 58 мм</h3>
         <div class="row">
           <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button class="btn" onclick="window.print()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>HACCP — CCP TICKET</h4>
@@ -337,6 +337,7 @@
   }
   function presetPoints(){
     clearPoints();
+    // Демонстрація для пастеризації (T навколо 72°C)
     const demo = [
       {time:'10:00:00', temp:68.0},
       {time:'10:00:30', temp:71.0},
@@ -352,7 +353,7 @@
   }
   function clearPoints(){ bodyPoints.innerHTML=''; buildCSVpoints(); }
   function parseTime(hms){
-    const m = /^(\d{2}):(\d{2}):(\d{2})$/.exec((hms||'').trim());
+    const m = /^(\d{2}):(\d{2}):(\d{2})$/.exec(hms.trim());
     if(!m) return null;
     const d = new Date(); d.setHours(+m[1],+m[2],+m[3],0); return d;
   }
@@ -363,6 +364,7 @@
       const t = Number(r.children[2].querySelector('input').value);
       return {date: parseTime(hms), T: t};
     }).filter(p=>p.date && !isNaN(p.T));
+    // сортуємо за часом
     pts.sort((a,b)=>a.date-b.date);
     return pts;
   }
@@ -385,17 +387,203 @@
     if(ccp==='sanit')   return evalSanit();
   }
 
-  // 3.1 Пастеризація
+  // 3.1 Пастеризація: сумарний час Т>=Tcrit (сек)
   function evalPasteur(){
     const Tcrit = +byId('p_Tcrit').value||72;
     const tHold = +byId('p_tHold').value||15;
     const pts = getPoints();
     if(pts.length<2){ setStatus('Недостатньо точок','—','🟠 Додайте щонайменше 2 точки'); return; }
+    // Інтегруємо ділянки, де T >= Tcrit, лінійна інтерполяція
     let secAbove = 0;
     for(let i=1;i<pts.length;i++){
       const t0=pts[i-1], t1=pts[i];
       const dt = (t1.date - t0.date)/1000; if(dt<=0) continue;
       const T0=t0.T, T1=t1.T;
       if(T0>=Tcrit && T1>=Tcrit){ secAbove += dt; }
-      else if((T0>=Tcrit && T1<Tcrit) || (T0<Tcrit && T1>=Tcrit)){
-        const m =
+      else if((T0>=Tcrit && T1<TTcrit=Tcrit) || (T0<Tcrit && T1>=Tcrit)){
+        // перетин порогу — знайдемо частку часу вище порога
+        const m = (T1-T0)/dt; // °C/с
+        if(m!==0){
+          const tCross = (Tcrit - T0)/m; // сек від t0
+          const tAbove = (T0>=Tcrit) ? Math.max(0, dt - tCross) : Math.max(0, dt - (dt - tCross));
+          // Уніфікуємо:
+          const above = (T0>=Tcrit) ? Math.max(0, tCross) : Math.max(0, dt - tCross);
+          secAbove += above;
+        }
+      }
+    }
+    const pass = secAbove >= tHold;
+    const status = pass? '🟢 ВИКОНАНО' : '🔴 НЕ ВИКОНАНО';
+    const metrics = `T≥${Tcrit}°C: ${rnd(secAbove,0)} с (мін. ${tHold} с)`;
+    setStatus(status, metrics, pass?'Підтримуйте режим':'Ізолюйте партію, розгляньте повторну обробку');
+    byId('csvEval').textContent = `EVAL|CCP=pasteur|Tcrit=${Tcrit}C|tHold=${tHold}s|tAbove=${rnd(secAbove,0)}s|status=${status}`;
+    return {status,metrics};
+  }
+
+  // 3.2 Охолодження: знайти часи досягнення 21°C та 5°C
+  function evalCooling(){
+    const pts = getPoints();
+    if(pts.length<2){ setStatus('Недостатньо точок','—','🟠 Додайте щонайменше 2 точки'); return; }
+    const w1 = (+byId('c_w1').value||2)*3600; // сек
+    const w2 = (+byId('c_w2').value||4)*3600;
+    function timeToTemp(Ttarget){
+      // інтерполяція між точками
+      for(let i=1;i<pts.length;i++){
+        const a=pts[i-1], b=pts[i];
+        const T0=a.T, T1=b.T;
+        if((T0>=Ttarget && T1<=Ttarget) || (T0<=Ttarget && T1>=Ttarget)){
+          const dt=(b.date-a.date)/1000, dT=T1-T0;
+          if(dT===0) return (b.date-pts[0].date)/1000;
+          const frac=(Ttarget - T0)/dT;
+          return ((a.date - pts[0].date)/1000) + frac*dt;
+        }
+      }
+      return null;
+    }
+    const t21 = timeToTemp(21);
+    const t05 = timeToTemp(5);
+    const ok1 = (t21!==null) && (t21 <= w1);
+    const ok2 = (t21!==null && t05!==null) && ((t05 - t21) <= w2);
+    const status = (ok1 && ok2)? '🟢 ВИКОНАНО' : '🔴 НЕ ВИКОНАНО';
+    const m = `60→21: ${t21?fmtHMS(t21):'—'} (≤ ${fmtHMS(w1)}); 21→5: ${ (t05&&t21)?fmtHMS(t05 - t21):'—'} (≤ ${fmtHMS(w2)})`;
+    setStatus(status, m, ok1&&ok2?'Партія безпечна за охолодженням':'Ізолювати/перехолодити; аналіз причин');
+    byId('csvEval').textContent = `EVAL|CCP=cooling|t21=${t21?Math.round(t21):'NA'}s|t21max=${w1}s|t05=${t05?Math.round(t05):'NA'}s|win2=${t05&&t21?Math.round(t05-t21):'NA'}s|win2max=${w2}s|status=${status}`;
+    return {status,metrics:m};
+  }
+
+  // 3.3 Дезінфекція: обчислити об'єм концентрату
+  function evalSanit(){
+    const type = byId('s_type').value;
+    const stock = +byId('s_stock').value||0; // %
+    const target = +byId('s_target').value||100; // ppm
+    const V = +byId('s_volume').value||10; // л
+    // 1% = 10 000 ppm активу
+    const stock_ppm = stock*10000;
+    const mL = (target*V)/ (stock_ppm/1000); // мл концентрату
+    const status = '🟢 РОЗРАХОВАНО';
+    const m = `${rnd(mL,1)} мл концентрату ${type} на ${V} л для ${target} ppm (за припущення 1%≈10 000 ppm активу)`;
+    setStatus(status, m, 'Перевірити етикетку виробника щодо активу/контактного часу');
+    byId('csvEval').textContent = `EVAL|CCP=sanit|type=${type}|stock=${stock}%|target=${target}ppm|V=${V}L|dose=${rnd(mL,1)}mL|status=${status}`;
+    return {status,metrics:m};
+  }
+
+  // Хелпери статусу й часу
+  function setStatus(status, metrics, hint){
+    byId('status').textContent = status;
+    byId('metrics').textContent = metrics;
+    byId('hint').textContent = hint || '';
+  }
+  function fmtHMS(sec){
+    const s=Math.max(0,Math.round(sec)); const h=Math.floor(s/3600); const m=Math.floor((s%3600)/60); const ss=s%60;
+    const pad=n=>String(n).padStart(2,'0'); return `${pad(h)}:${pad(m)}:${pad(ss)}`;
+  }
+
+  // ==== Звіт про відхилення ====
+  function buildDeviation(){
+    const ccp = byId('ccp').value;
+    const st = byId('status').textContent || '—';
+    const met = byId('metrics').textContent || '—';
+    const act = (byId('actions').value||'').trim() || '—';
+    const dev = [
+      `HACCP_DEVIATION`,
+      `DATE:${new Date().toISOString().slice(0,19).replace('T',' ')}`,
+      `LINE:${byId('lineId').value} SHIFT:${byId('shift').value}`,
+      `CCP:${ccp} STATUS:${st}`,
+      `METRICS:${met}`,
+      `ACTIONS:${act}`
+    ].join('\n');
+    byId('devOut').textContent = dev;
+  }
+
+  // ==== Журнал моніторингу ====
+  const bodyLog = byId('bodyLog');
+  function addLog(sample){
+    const ccp = byId('ccp').value;
+    const limits = (ccp==='pasteur')? `T≥${byId('p_Tcrit').value}°C; t≥${byId('p_tHold').value}s` :
+                    (ccp==='cooling')? `60→21 ≤${byId('c_w1').value}год; 21→5 ≤${byId('c_w2').value}год` :
+                    `Доза ${byId('s_target').value}ppm`;
+    const met = byId('metrics').textContent || '—';
+    const st  = byId('status').textContent || '—';
+    const def = {ccp, limits, metrics:met, status:st, note:''};
+    const s = Object.assign({}, def, sample||{});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="idx">1</td>
+      <td>${s.ccp}</td>
+      <td class="dark">${s.limits}</td>
+      <td class="dark">${s.metrics}</td>
+      <td class="dark">${s.status}</td>
+      <td><input type="text" value="${s.note}"></td>
+    `;
+    bodyLog.appendChild(tr); reindex(bodyLog); buildCSVlog();
+  }
+  function presetLog(){
+    bodyLog.innerHTML='';
+    addLog({ccp:'pasteur', limits:'T≥72°C; t≥15s', metrics:'T≥72°C: 18 с', status:'🟢 ВИКОНАНО', note:'режим стабільний'});
+    addLog({ccp:'cooling', limits:'60→21 ≤2год; 21→5 ≤4год', metrics:'60→21: 02:05:00; 21→5: 03:30:00', status:'🔴 НЕ ВИКОНАНО', note:'охолодження підсилити'});
+    addLog({ccp:'sanit', limits:'Доза 100ppm', metrics:'100ppm @ 10л → 20.0 мл 5% NaOCl', status:'🟢 РОЗРАХОВАНО', note:'контакт 5 хв'});
+    buildCSVlog();
+  }
+  function buildCSVlog(){
+    const rows = [...bodyLog.querySelectorAll('tr')].map(r=>{
+      const idx=r.querySelector('.idx').textContent.trim();
+      const ccp=r.children[1].textContent.trim();
+      const lim=r.children[2].textContent.trim();
+      const met=r.children[3].textContent.trim();
+      const st=r.children[4].textContent.trim();
+      const note=r.children[5].querySelector('input').value.trim();
+      return [idx,ccp,lim,met,st,note].join(' | ');
+    });
+    byId('csvLog').textContent = rows.join('\n') || '—';
+  }
+
+  // ==== Квиток та NFC ====
+  function buildTicket(){
+    const ccp = byId('ccp').value;
+    const limits = (ccp==='pasteur')? `T≥${byId('p_Tcrit').value}°C; t≥${byId('p_tHold').value}s` :
+                    (ccp==='cooling')? `60→21 ≤${byId('c_w1').value}год; 21→5 ≤${byId('c_w2').value}год` :
+                    `Доза ${byId('s_target').value}ppm (${byId('s_type').value})`;
+    byId('tCCP').textContent = ccp;
+    byId('tCL').textContent = limits;
+    byId('tMetrics').textContent = byId('metrics').textContent || '—';
+    byId('tStatus').textContent = byId('status').textContent || '—';
+    byId('tLine').textContent = byId('lineId').value || '—';
+    byId('tShift').textContent = byId('shift').value || '—';
+    byId('tLot').textContent = byId('lotId').value || '—';
+  }
+  function buildNFC(){
+    const txt = [
+      `HACCP_CCP_NFC`,
+      `DATE:${new Date().toISOString().slice(0,19).replace('T',' ')}`,
+      `LINE:${byId('lineId').value} SHIFT:${byId('shift').value} LOT:${byId('lotId').value}`,
+      `CCP:${byId('ccp').value}`,
+      `LIMITS:${(byId('tCL').textContent||'').replace(/\n/g,' ')}`,
+      `METRICS:${byId('metrics').textContent||'—'}`,
+      `STATUS:${byId('status').textContent||'—'}`,
+      `CONTACT:${byId('nfcPhone').value}`
+    ].join('\n');
+    byId('nfcOut').textContent = txt;
+  }
+
+  // ==== CSV копіювання / утиліти ====
+  function copyCSV(id){
+    const t = document.getElementById(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних для копіювання'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ CSV скопійовано'),()=>flash('Не вдалося'));
+  }
+  function copyEl(id){
+    const t = byId(id).textContent.trim();
+    if(!t||t==='—'){ alert('Немає даних'); return; }
+    navigator.clipboard.writeText(t).then(()=>flash('✅ Скопійовано'),()=>flash('Не вдалося'));
+  }
+  function flash(msg){ const o=document.title; document.title=msg; setTimeout(()=>document.title=o,900); }
+
+  // ==== Ініціалізація ====
+  (function init(){
+    document.addEventListener('change', e=>{
+      if(e.target.matches('input,select,textarea')) { buildCSVpoints(); }
+    });
+  })();
+</script>
+</body>
+</html>
