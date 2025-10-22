@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ук">
+<html lang="uk">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="assets/edlab.css"/>
 <style>
 .header-mini{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.grid2{display:grid;gap:16px;grid-template-columns:2fr 1fr}
+.grid2{display:grid;gap:16px;grid-template-columns:2fr 1fr;align-items:start}
 @media(max-width:980px){.grid2{grid-template-columns:1fr}}
 .lesson-list .lesson{position:relative;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
 .lesson-list .btn{position:relative;z-index:2}
@@ -27,8 +27,11 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
 
 /* === Анімована абстракція (іконка) === */
 .lesson .thumb{
-  width:44px;height:44px;display:grid;place-items:center;border-radius:12px;
-  background:linear-gradient(135deg,#0b1220,#0f1f39);border:1px solid #223049;
+  width:44px;height:44px;
+  display:grid;place-items:center;
+  border-radius:12px;
+  background:linear-gradient(135deg,#0b1220,#0f1f39);
+  border:1px solid #223049;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.02), 0 4px 14px rgba(0,0,0,.25);
 }
 .lesson .thumb svg{width:24px;height:24px;display:block}
@@ -37,36 +40,41 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
   @keyframes spin{to{transform:rotate(360deg)}}
 }
 
-/* Липкий генератор (звичайний) */
+/* ЛИШЕ “липкий” генератор на десктопі (без фіксації та без зміни ширини лівої колонки) */
 @media(min-width:981px){
-  #generator{ position: sticky; top: 12px; }
-}
-
-/* Режим «закріплено праворуч» — фіксований сайдбар */
-@media(min-width:981px){
-  body.pin-generator #generator{
-    position: fixed;
-    top: 12px; right: 16px;
-    width: min(38vw, 420px);
-    max-height: calc(100vh - 24px);
-    overflow: auto;
-    z-index: 50;
-  }
-  /* Щоб контент зліва не заходив під панель */
-  body.pin-generator #listCard{
-    margin-right: calc(min(38vw, 420px) + 24px);
+  #generator{
+    position: sticky;
+    top: 12px;
+    align-self: start;
+    height: max-content;
   }
 }
 
 /* Toast */
-#toast{position: fixed; right: 16px; bottom: 16px; display: grid; gap: 8px; z-index: 9999;}
+#toast{
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  display: grid;
+  gap: 8px;
+  z-index: 9999;
+}
 .toast-item{
-  background: rgba(17,24,39,0.95); color: #e5e7eb; border: 1px solid #334155;
-  padding: 10px 12px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.35);
-  font-size: 14px; opacity: 0; transform: translateY(10px);
+  background: rgba(17,24,39,0.95);
+  color: #e5e7eb;
+  border: 1px solid #334155;
+  padding: 10px 12px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(10px);
   transition: opacity .2s ease, transform .2s ease;
 }
-.toast-item.show{opacity:1;transform:translateY(0)}
+.toast-item.show{
+  opacity: 1;
+  transform: translateY(0);
+}
 </style>
 </head>
 <body>
@@ -100,6 +108,7 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
           </div>
         </div>
         <div class="tester">
+          <!-- Прев’ю без sandbox, з робочими allow/allowfullscreen/referrerpolicy -->
           <iframe id="previewFrame" src="about:blank"
                   allow="clipboard-write *; fullscreen *; geolocation *; autoplay *"
                   allowfullscreen="allowfullscreen"
@@ -112,15 +121,11 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
     <div class="card" id="generator">
       <h2>🔧 Генератор коду для Moodle (iFrame)</h2>
 
-      <!-- Перемикачі -->
-      <div class="row" style="align-items:center; gap:14px; margin-bottom:8px; flex-wrap:wrap">
+      <!-- ЛИШЕ перемикач прев’ю (режим “закріпити” повністю прибрано) -->
+      <div class="row" style="align-items:center; gap:10px; margin-bottom:8px">
         <label class="muted" for="showPreview" style="display:flex; align-items:center; gap:8px; cursor:pointer">
           <input id="showPreview" type="checkbox" />
           <span>Показувати прев’ю після генерації</span>
-        </label>
-        <label class="muted" for="pinToggle" style="display:flex; align-items:center; gap:8px; cursor:pointer">
-          <input id="pinToggle" type="checkbox" />
-          <span>Закріпити праворуч</span>
         </label>
       </div>
 
@@ -267,7 +272,9 @@ function extractTitleDescFromHTML(html){
 async function fetchTitleDesc(url){
   const cacheKey = 'titlecache:'+url;
   const cached = localStorage.getItem(cacheKey);
-  if(cached){ try{ return JSON.parse(cached); }catch{} }
+  if(cached){
+    try{ return JSON.parse(cached); }catch{}
+  }
   try{
     const abs = absoluteUrl(url);
     const r = await fetch(abs,{method:'GET',cache:'force-cache',mode:'cors'});
@@ -324,9 +331,11 @@ async function buildSection(key){
   }));
   byId('lessons').innerHTML = initial.map(lessonCard).join('');
 
+  // ПІДСТАВЛЯЄМО URL у генератор, але НЕ СКРОЛИМО І НЕ ГЕНЕРУЄМО АВТОМАТИЧНО
   const firstAbs = initial[0]?.url ? absoluteUrl(initial[0].url) : '';
-  byId('url').value = firstAbs; gen();
+  byId('url').value = firstAbs;
 
+  // Асинхронно покращуємо заголовки/описи (без скролів)
   const promises = initial.map(async (it, idx) => {
     if (rawList[idx].title) return it;
     const meta = await fetchTitleDesc(it.url);
@@ -362,14 +371,14 @@ function renderSelector(){
     </div>`;
 }
 
-// === Прев’ю + iFrame-генератор
+// === Прев’ю
 function openPreview(u){
   const abs = absoluteUrl(u);
   byId('previewUrl').textContent = abs;
   byId('previewFrame').src = abs;
   byId('previewBox').style.display = '';
   byId('previewNote').style.display = '';
-  window.scrollTo({top: byId('previewBox').getBoundingClientRect().top + window.scrollY - 20, behavior:'smooth'});
+  // БІЛЬШЕ НЕ СКРОЛИМО ДО НИЗУ!
 }
 function closePreview(){
   byId('previewFrame').src = 'about:blank';
@@ -388,52 +397,39 @@ function showToast(message){
   setTimeout(()=>{ div.classList.remove('show'); setTimeout(()=>div.remove(), 220); }, 1800);
 }
 
-function gen(){
-  const url = byId('url').value.trim();
-  const h   = (byId('height').value || '80vh').trim();
-  const html =
-`<p><iframe style="width: 100%; height: ${h}; border: 0;"
+/* ===== Генерація коду ===== */
+function buildIframeHTML(url, h){
+  return `<p><iframe style="width: 100%; height: ${h}; border: 0;"
     src="${url}"
     allow="clipboard-write *; fullscreen *; geolocation *; autoplay *"
     allowfullscreen="allowfullscreen"
     referrerpolicy="no-referrer-when-downgrade"></iframe></p>`;
-  byId('code').value = html;
+}
+function genInteractive(){
+  const url = byId('url').value.trim();
+  const h   = (byId('height').value || '80vh').trim();
+  byId('code').value = buildIframeHTML(url, h);
 
-  document.getElementById('generator').scrollIntoView({behavior:'smooth', block:'start'});
-  const ta = byId('code'); ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length);
+  // Виділяємо код ДЛЯ ЗРУЧНОСТІ, але БЕЗ СКРОЛУ
+  const ta = byId('code');
+  ta.focus();
+  ta.select();
+  ta.setSelectionRange(0, ta.value.length);
+
   showToast('✅ Код згенеровано');
 }
-
-function genAndMaybePreview(u){
+function genFromLesson(u){
   const abs = absoluteUrl(u);
   byId('url').value = abs;
-  gen();
+  genInteractive();
   const show = byId('showPreview')?.checked;
   if(show){ openPreview(u); showToast('👀 Відкрито прев’ю'); } else { closePreview(); }
 }
-
 function copyCode(){
   const ta = byId('code');
   ta.select(); ta.setSelectionRange(0, ta.value.length);
   document.execCommand('copy');
   showToast('✅ HTML скопійовано');
-}
-
-/* Закріплення праворуч */
-function applyPinState(checked){
-  const isDesktop = window.matchMedia('(min-width: 981px)').matches;
-  const willPin = checked && isDesktop;
-  document.body.classList.toggle('pin-generator', willPin);
-  byId('pinToggle').checked = !!willPin;
-  showToast(willPin ? '📌 Закріплено праворуч' : '📌 Відкріплено');
-}
-function syncPinOnResize(){
-  const isDesktop = window.matchMedia('(min-width: 981px)').matches;
-  const wantPinned = byId('pinToggle').checked;
-  document.body.classList.toggle('pin-generator', wantPinned && isDesktop);
-  if(!isDesktop && wantPinned){
-    showToast('ℹ️ Закріплення вимкнено на вузькому екрані');
-  }
 }
 
 // === Події
@@ -442,29 +438,15 @@ document.addEventListener('click', (e)=>{
   if(p){ openPreview(p.dataset.url); showToast('👀 Відкрито прев’ю'); return; }
 
   const i = e.target.closest('.js-iframe');
-  if(i){ genAndMaybePreview(i.dataset.url); return; }
+  if(i){ genFromLesson(i.dataset.url); return; }
 
   if(e.target.id==='closePrev'){ closePreview(); }
   if(e.target.id==='toGen'){
-    document.getElementById('generator').scrollIntoView({behavior:'smooth',block:'start'});
+    // Раніше скролили — тепер просто фокус на код без скролу
     const ta = byId('code'); ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length);
   }
-  if(e.target.id==='btnGen'){
-    const curr = byId('url').value.trim();
-    if(curr){ genAndMaybePreview(curr); } else { gen(); }
-  }
+  if(e.target.id==='btnGen'){ genInteractive(); }
   if(e.target.id==='btnCopy'){ copyCode(); }
-});
-
-function applyPinState(checked){
-  const isDesktop = window.matchMedia('(min-width: 981px)').matches;
-  // Закріплюємо ТІЛЬКИ на десктопі, на мобільному завжди вимкнено
-  document.body.classList.toggle('pin-generator', !!checked && isDesktop);
-}
-window.addEventListener('resize', ()=>{
-  // якщо звузили до мобільного — закріплення автоматично вимикаємо
-  const pin = document.getElementById('pinToggle');
-  applyPinState(pin ? pin.checked : false);
 });
 
 // === Ініціалізація
@@ -486,9 +468,6 @@ window.addEventListener('resize', ()=>{
 
   CURRENT_SPEC = key;
   await buildSection(key);
-
-  // Стартовий стан закріплення (вимкнено)
-  applyPinState(false);
 })();
 </script>
 </body>
