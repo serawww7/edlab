@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 13 (газовики) — Акт вводу в експлуатацію ВБД/котла: маршрут безпеки, тяга/CO, камера/мікрофон, підпис, 58 мм, CSV/TXT, QR</title>
-<meta name="description" content="Практика вводу в експлуатацію: поетапний маршрут безпеки з міжзамками, виміри тяги (Па) й CO (ppm) з графіком, фото, аудіо-коментар, підпис абонента, чек 58 мм, CSV/TXT, QR, журнал подій."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Практика вводу в експлуатацію: поетапний маршрут безпеки з міжзамками, виміри тяги (Па) й CO (ppm) з графіком, фото, аудіо-коментар, підпис абонента, чек 58 мм, CSV/TXT, QR, журнал подій.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -52,14 +50,14 @@ canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px
 hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 audio{width:100%}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para13.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 13"><meta property="og:description" content="Проходимо маршрут безпеки для вводу обладнання в роботу: документи → огляд → герметичність → тяга → CO → пуск → контроль режиму. Фіксуємо тягу (Па) і CO (p"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para13.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 13","description":"Проходимо маршрут безпеки для вводу обладнання в роботу: документи → огляд → герметичність → тяга → CO → пуск → контроль режиму. Фіксуємо тягу (Па) і CO (p","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para13.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🏭✅</span>
       <div>
-        <b>Пара 13 — Акт вводу в експлуатацію ВБД/котла</b><br/>
+        <b>Пара 13 — Акт вводу в експлуатацію ВБД/котла</b><br>
         <span class="badge">Маршрут безпеки → тяга/CO → графік → камера/мікрофон → підпис → чек 58 мм → CSV/TXT → QR</span>
       </div>
     </div>
@@ -72,15 +70,15 @@ audio{width:100%}
     <p>Проходимо <b>маршрут безпеки</b> для вводу обладнання в роботу: документи → огляд → герметичність → тяга → CO → пуск → контроль режиму. 
        Фіксуємо <b>тягу (Па)</b> і <b>CO (ppm)</b> з живим графіком, робимо <b>фото</b>, додаємо <b>аудіо-коментар</b>, беремо <b>підпис</b>, формуємо <b>чек 58 мм</b>, експортуємо <b>CSV/TXT</b>, генеруємо <b>QR</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котел/ВБД"/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котел/ВБД"></label>
       <label style="flex:1">Тип обладнання
         <select id="equip" class="input">
-          <option selected>Котел атмосферний</option><option>Котел із закритою камерою</option><option>ВБД (водонагрівач)</option><option>Інший</option>
+          <option selected="">Котел атмосферний</option><option>Котел із закритою камерою</option><option>ВБД (водонагрівач)</option><option>Інший</option>
         </select>
       </label>
-      <label style="flex:1">Модель<input id="model" class="input" placeholder="Напр. AOGV 11, Bosch W11..."/></label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">Модель<input id="model" class="input" placeholder="Напр. AOGV 11, Bosch W11..."></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"></label>
     </div>
     <div class="row">
       <button class="btn good" id="mkCase">🧰 Створити кейс</button>
@@ -97,19 +95,19 @@ audio{width:100%}
       <h2 style="margin-top:10px">🛰️ Тяга / CO — емулятори та KPI</h2>
       <div class="block">
         <div class="row">
-          <label style="flex:1">Тяга, Па<input id="draft" type="range" class="input" min="-5" max="30" step="0.1" value="9.5"/></label>
+          <label style="flex:1">Тяга, Па<input id="draft" type="range" class="input" min="-5" max="30" step="0.1" value="9.5"></label>
           <span class="badge">Поточна тяга: <b id="draftNum">9.5</b> Па</span>
           <button class="btn" id="markDraft">📍 Точка тяги</button>
         </div>
         <div class="row">
-          <label style="flex:1">CO, ppm<input id="co" type="range" class="input" min="0" max="300" step="1" value="12"/></label>
+          <label style="flex:1">CO, ppm<input id="co" type="range" class="input" min="0" max="300" step="1" value="12"></label>
           <span class="badge">Поточний CO: <b id="coNum">12</b> ppm</span>
           <button class="btn" id="markCO">📍 Точка CO</button>
           <button class="btn secondary" id="clearSeries">🧹 Очистити графік</button>
         </div>
         <div class="row">
-          <label>Мін. тяга, Па<input id="draftMin" class="input" type="number" step="0.1" value="5.0"/></label>
-          <label>Макс. CO, ppm<input id="coMax" class="input" type="number" step="1" value="50"/></label>
+          <label>Мін. тяга, Па<input id="draftMin" class="input" type="number" step="0.1" value="5.0"></label>
+          <label>Макс. CO, ppm<input id="coMax" class="input" type="number" step="1" value="50"></label>
           <button class="btn secondary" id="applyKPI">⚙️ Застосувати KPI</button>
         </div>
         <div class="kpi" style="margin-top:6px">
@@ -127,12 +125,12 @@ audio{width:100%}
 
       <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
       <div class="row">
-        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <video id="vid" class="photo" autoplay="" playsinline="" muted=""></video>
         <div>
           <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
           <button class="btn" data-kind="plate">📷 Табличка обладнання</button>
           <button class="btn" data-kind="flue">📷 Димохід/канал</button>
-          <button class="btn" data-kind="flame">📷 Полум’я/огляд камери</button><br/>
+          <button class="btn" data-kind="flame">📷 Полум’я/огляд камери</button><br>
           <small class="muted">Фото зберігаються у «Галереї доказів».</small>
         </div>
       </div>
@@ -146,7 +144,7 @@ audio{width:100%}
           <button class="btn" id="audSave">💾 Зберегти</button>
           <span class="badge" id="audStat">Немає запису</span>
         </div>
-        <audio id="audPlay" controls></audio>
+        <audio id="audPlay" controls=""></audio>
       </div>
 
       <h2 style="margin-top:10px">✍️ Підпис абонента</h2>
@@ -193,7 +191,7 @@ audio{width:100%}
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (Case)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
 
       <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
@@ -527,5 +525,6 @@ initDefaults(); updateMetrics(); computeKPI(); drawChart();
 // Вбудоване відображення (Moodle/iFrame)
 (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
 </script>
-</body>
-</html>
+
+
+</body></html>

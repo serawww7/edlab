@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 19 (механіки) — Візуальний тахометр і стробоскоп (вебкамера → RPM, биття, журнал)</title>
-<meta name="description" content="Без Arduino: вебкамера → ROI → детекція відбивача → RPM, биття/ексцентриситет, живий графік, аудіо/екран-строб, журнал, експорт PNG/CSV/TXT, чек 58 мм."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Без Arduino: вебкамера → ROI → детекція відбивача → RPM, биття/ексцентриситет, живий графік, аудіо/екран-строб, журнал, експорт PNG/CSV/TXT, чек 58 мм.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -38,14 +36,14 @@ video,canvas{display:block}
 kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
 .fullflash{position:fixed;inset:0;background:#fff;display:none;z-index:9998}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/mech_II_kyrs/mechanic_para19.html"><meta property="og:type" content="article"><meta property="og:title" content="Механізація — Пара 19"><meta property="og:description" content="Мета: виміряти оберти (RPM) вентилятора/шківа/ВВП за вебкамерою з білим відбивачем, оцінити биття/ексцентриситет, «заморозити» оберт стробоскопом (екран/ау"><meta property="og:url" content="https://edlab.pp.ua/mech_II_kyrs/mechanic_para19.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Механізація — Пара 19","description":"Мета: виміряти оберти (RPM) вентилятора/шківа/ВВП за вебкамерою з білим відбивачем, оцінити биття/ексцентриситет, «заморозити» оберт стробоскопом (екран/ау","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/mech_II_kyrs/mechanic_para19.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🎥</span>
       <div>
-        <b>Пара 19 — Візуальний тахометр і стробоскоп (без Arduino)</b><br/>
+        <b>Пара 19 — Візуальний тахометр і стробоскоп (без Arduino)</b><br>
         <span class="badge">вебкамера → RPM, биття/ексцентриситет → графік → аудіо/екран-строб → журнал → експорт</span>
       </div>
     </div>
@@ -67,7 +65,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
           <label>Роздільність</label>
           <select id="res" class="input">
             <option value="640x480">640×480</option>
-            <option value="1280x720" selected>1280×720</option>
+            <option value="1280x720" selected="">1280×720</option>
             <option value="1920x1080">1920×1080</option>
           </select>
         </div>
@@ -77,9 +75,9 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       </div>
 
       <div class="row" style="margin-top:8px">
-        <label style="flex:1">Порог яскравості <input id="thr" class="input" type="range" min="10" max="250" step="1" value="180"/></label>
-        <label style="flex:1">EMA α (сигнал) <input id="alpha" class="input" type="range" min="0" max="1" step="0.02" value="0.30"/></label>
-        <label style="flex:1">Діаметр диска, мм <input id="diam" class="input" type="number" min="10" step="1" value="300"/></label>
+        <label style="flex:1">Порог яскравості <input id="thr" class="input" type="range" min="10" max="250" step="1" value="180"></label>
+        <label style="flex:1">EMA α (сигнал) <input id="alpha" class="input" type="range" min="0" max="1" step="0.02" value="0.30"></label>
+        <label style="flex:1">Діаметр диска, мм <input id="diam" class="input" type="number" min="10" step="1" value="300"></label>
       </div>
       <small class="muted">Порада: наклей 1 смужку білої/срібної стрічки на диск або лопаті. Клацни по відео — це стане центром ROI.</small>
 
@@ -101,11 +99,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div class="row">
         <div style="flex:1">
           <label>Ціль RPM</label>
-          <input id="targetRPM" class="input" type="number" step="1" value="600"/>
+          <input id="targetRPM" class="input" type="number" step="1" value="600">
         </div>
         <div style="flex:1">
           <label>Гармоніка</label>
-          <select id="harm" class="input"><option value="1" selected>1×</option><option value="2">2×</option><option value="3">3×</option><option value="0.5">½×</option></select>
+          <select id="harm" class="input"><option value="1" selected="">1×</option><option value="2">2×</option><option value="3">3×</option><option value="0.5">½×</option></select>
         </div>
       </div>
       <div class="row" style="margin-top:6px">
@@ -122,14 +120,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <tbody>
           <tr><th>RPM (медіана 5с)</th><td id="rpmMed">—</td></tr>
           <tr><th>Биття, мм (RMS)</th><td id="runout">—</td></tr>
-          <tr><th>Поріг тривоги биття, мм</th><td><input id="runThr" class="input" type="number" step="0.1" value="0.8"/></td></tr>
+          <tr><th>Поріг тривоги биття, мм</th><td><input id="runThr" class="input" type="number" step="0.1" value="0.8"></td></tr>
         </tbody>
       </table>
 
       <div class="row" style="margin-top:6px">
         <button class="btn" id="mark">📌 Позначити подію</button>
         <select id="label" class="input" style="max-width:240px">
-          <option value="ok" selected>ok</option>
+          <option value="ok" selected="">ok</option>
           <option value="belt_slip">ковзання ременя</option>
           <option value="misalignment">непаралельність</option>
           <option value="bearing">підшипник</option>
@@ -146,22 +144,22 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
         <button class="btn secondary" id="receipt">🖨️ 58 мм чек</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
     </div>
   </div>
 
   <div class="card">
     <h2>🔌 Схема розміщення (SVG)</h2>
     <svg viewBox="0 0 980 300" role="img" aria-label="Вебкамера → диск/шків із маркером">
-      <rect x="40" y="40" width="260" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <rect x="40" y="40" width="260" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
       <text x="170" y="70" fill="#e5e7eb" font-size="16" text-anchor="middle">Ноутбук/ПК</text>
       <text x="170" y="92" fill="#93c5fd" font-size="12" text-anchor="middle">вебкамера 30–60 fps</text>
-      <line x1="300" y1="100" x2="420" y2="100" stroke="#93c5fd" stroke-width="3"/>
-      <circle cx="480" cy="100" r="8" fill="#22c55e"/>
+      <line x1="300" y1="100" x2="420" y2="100" stroke="#93c5fd" stroke-width="3"></line>
+      <circle cx="480" cy="100" r="8" fill="#22c55e"></circle>
       <text x="520" y="90" fill="#a7f3d0" font-size="12">відстань 30–80 см</text>
 
-      <circle cx="760" cy="120" r="70" fill="#111827" stroke="#9ca3af"/>
-      <path d="M760 50 A70 70 0 0 1 830 120 L760 120 Z" fill="#e5e7eb"/>
+      <circle cx="760" cy="120" r="70" fill="#111827" stroke="#9ca3af"></circle>
+      <path d="M760 50 A70 70 0 0 1 830 120 L760 120 Z" fill="#e5e7eb"></path>
       <text x="760" y="210" fill="#e5e7eb" font-size="14" text-anchor="middle">шків/вентилятор</text>
       <text x="760" y="228" fill="#93c5fd" font-size="12" text-anchor="middle">біла смужка = відбивач</text>
 
@@ -493,5 +491,6 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
 // Якщо камери немає — дати можливість потренуватись на емуляторі:
 setTimeout(()=>{ if(!stream) emulate(); }, 1000);
 </script>
-</body>
-</html>
+
+
+</body></html>

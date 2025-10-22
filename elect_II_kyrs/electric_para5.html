@@ -1,14 +1,11 @@
 <!-- electric_para5.html
      Пара 5 (Електрики, аудиторно): План/Факт вимірювань U,I · журнал · PASS/FAIL · друк 58 мм · експорт CSV
      Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 5 — План/Факт вимірювань, журнал, друк 58 мм</title>
-<meta name="color-scheme" content="light dark" />
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -78,7 +75,7 @@
 .ticket small{ font-weight:700 }
 </style>
 
-</head>
+<meta name="description" content="Звірити розрахунок лінії з реальними вимірюваннями: імпорт line_calc.csv з Пара 4, виміряти U та I в точках, розрахувати відхилення, присвоїти PASS/FAIL, н"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para5.html"><meta property="og:type" content="article"><meta property="og:title" content="📏 План/Факт вимірювань U,I · журнал · 🧾 «ПЕРЕВІРЕНО 58 мм»"><meta property="og:description" content="Звірити розрахунок лінії з реальними вимірюваннями: імпорт line_calc.csv з Пара 4, виміряти U та I в точках, розрахувати відхилення, присвоїти PASS/FAIL, н"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para5.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"📏 План/Факт вимірювань U,I · журнал · 🧾 «ПЕРЕВІРЕНО 58 мм»","description":"Звірити розрахунок лінії з реальними вимірюваннями: імпорт line_calc.csv з Пара 4, виміряти U та I в точках, розрахувати відхилення, присвоїти PASS/FAIL, н","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para5.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Електрики · Пара 5 · аудиторно</span>
@@ -88,7 +85,7 @@
       <h2>🎯 Мета</h2>
       <p>Звірити розрахунок лінії з реальними вимірюваннями: імпорт <span class="mono">line_calc.csv</span> з Пара 4, виміряти U та I в точках, розрахувати відхилення, присвоїти PASS/FAIL, надрукувати «ПЕРЕВІРЕНО» та експортувати журнал у CSV.</p>
       <div class="row">
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <input id="file" type="file" accept=".csv,text/csv" class="btn">
         <button class="btn" type="button" onclick="pasteSample()">⬇️ Навчальний CSV</button>
         <button class="btn" type="button" onclick="parseLine()">🔎 Імпорт плану</button>
       </div>
@@ -100,11 +97,11 @@
       <div class="grid g2">
         <div class="field">
           <label for="tolU">Допуск напруги, %</label>
-          <input id="tolU" type="number" step="0.1" value="10" />
+          <input id="tolU" type="number" step="0.1" value="10">
         </div>
         <div class="field">
           <label for="tolI">Допуск струму, %</label>
-          <input id="tolI" type="number" step="0.1" value="20" />
+          <input id="tolI" type="number" step="0.1" value="20">
         </div>
       </div>
       <p class="small">В реальній практиці допуски залежать від нормативів та типу об’єкта — тут спрощена навчальна модель.</p>
@@ -114,9 +111,9 @@
       <h2>➕ Додати точку вимірювання</h2>
       <div class="grid g2">
         <div>
-          <div class="field"><label for="ptName">Назва точки</label><input id="ptName" type="text" value="Щит / Ввід" /></div>
-          <div class="field"><label for="Umeas">U факт, В</label><input id="Umeas" type="number" step="0.1" /></div>
-          <div class="field"><label for="Imeas">I факт, А</label><input id="Imeas" type="number" step="0.01" /></div>
+          <div class="field"><label for="ptName">Назва точки</label><input id="ptName" type="text" value="Щит / Ввід"></div>
+          <div class="field"><label for="Umeas">U факт, В</label><input id="Umeas" type="number" step="0.1"></div>
+          <div class="field"><label for="Imeas">I факт, А</label><input id="Imeas" type="number" step="0.01"></div>
           <div class="row">
             <button class="btn" type="button" onclick="addPoint()">➕ Додати в журнал</button>
             <button class="btn" type="button" onclick="seedPoints()">🔄 Приклад точок</button>
@@ -167,7 +164,7 @@
           </div>
         </div>
         <div>
-          <div class="field"><label for="resp">Відповідальний</label><input id="resp" type="text" value="Студент ПІБ / група" /></div>
+          <div class="field"><label for="resp">Відповідальний</label><input id="resp" type="text" value="Студент ПІБ / група"></div>
           <div class="field"><label for="stickPt">Точка для мітки</label>
             <select id="stickPt"></select>
           </div>
@@ -470,5 +467,6 @@ function openTicketOnly(){
 }
 </script>
 
-</body>
-</html>
+
+
+</body></html>

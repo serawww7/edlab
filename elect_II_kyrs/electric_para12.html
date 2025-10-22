@@ -3,14 +3,11 @@
      Розрахунок In, Iпуск (за методом пуску), добір захистів (MCB/MPCB + теплове реле),
      оцінка падіння напруги під час пуску/роботи, наклейки 58 мм, A4-звіт, CSV імпорт/експорт.
      Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 12 — Пускові струми двигунів: In, Iпуск, захисти, ΔU, 58 мм</title>
-<meta name="color-scheme" content="light dark" />
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -81,7 +78,7 @@
     .ticket{ box-shadow:none; width:auto; padding:0 }
   }
 </style>
-</head>
+<meta name="description" content="Оцінити номінальний струм In, пусковий струм Iпуск для різних методів пуску (DOL/зірка-трикутник/софт-стартер), підібрати захисти (MCB/MPCB + теплове реле)"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para12.html"><meta property="og:type" content="article"><meta property="og:title" content="🛞 Пускові струми двигунів: In → Iпуск → захисти (MCB/MPCB, ТР) → ΔU → 🧾 58 мм"><meta property="og:description" content="Оцінити номінальний струм In, пусковий струм Iпуск для різних методів пуску (DOL/зірка-трикутник/софт-стартер), підібрати захисти (MCB/MPCB + теплове реле)"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para12.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🛞 Пускові струми двигунів: In → Iпуск → захисти (MCB/MPCB, ТР) → ΔU → 🧾 58 мм","description":"Оцінити номінальний струм In, пусковий струм Iпуск для різних методів пуску (DOL/зірка-трикутник/софт-стартер), підібрати захисти (MCB/MPCB + теплове реле)","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para12.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Електрики · Пара 12 · аудиторно</span>
@@ -94,7 +91,7 @@
       <div class="row">
         <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
         <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <input id="file" type="file" accept=".csv,text/csv" class="btn">
         <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
       </div>
       <p class="small">CSV поля: <span class="mono">id,name,kW,U_LL,PF,eta,method,cable_mm2,length_m,starter,curve,stdA,run_drop_limit,start_drop_limit,notes,url</span></p>
@@ -116,7 +113,7 @@
           <h3>Метод пуску</h3>
           <div class="row"><label class="small" style="min-width:150px">Метод</label>
             <select id="method">
-              <option value="DOL" selected>DOL (прямий пуск)</option>
+              <option value="DOL" selected="">DOL (прямий пуск)</option>
               <option value="YΔ">Зірка-трикутник (Y/Δ)</option>
               <option value="SOFT">Софт-стартер</option>
             </select>
@@ -124,16 +121,16 @@
           <div class="row"><label class="small" style="min-width:150px">k (множник Iпуск)</label><input id="k" type="number" step="0.1" value="7.0"></div>
           <div class="row"><label class="small" style="min-width:150px">Стартер/Пускач</label><input id="starter" value="Контактор + ТР"></div>
           <div class="row"><label class="small" style="min-width:150px">Крива MCB</label>
-            <select id="curve"><option>B</option><option selected>C</option><option>D</option></select>
+            <select id="curve"><option>B</option><option selected="">C</option><option>D</option></select>
           </div>
           <div class="row"><label class="small" style="min-width:150px">Ряд In (А)</label>
-            <select id="stdA"><option>6</option><option>10</option><option>13</option><option selected>16</option><option>20</option><option>25</option><option>32</option><option>40</option></select>
+            <select id="stdA"><option>6</option><option>10</option><option>13</option><option selected="">16</option><option>20</option><option>25</option><option>32</option><option>40</option></select>
           </div>
         </div>
         <div>
           <h3>Лінія</h3>
           <div class="row"><label class="small" style="min-width:150px">Кабель, мм²</label>
-            <select id="S"><option>2.5</option><option selected>4</option><option>6</option><option>10</option></select></div>
+            <select id="S"><option>2.5</option><option selected="">4</option><option>6</option><option>10</option></select></div>
           <div class="row"><label class="small" style="min-width:150px">Довжина L, м</label><input id="L" type="number" value="28"></div>
           <div class="row"><label class="small" style="min-width:150px">Ліміт ΔU (робота), %</label><input id="runLimit" type="number" step="0.1" value="5"></div>
           <div class="row"><label class="small" style="min-width:150px">Ліміт ΔU (пуск), %</label><input id="startLimit" type="number" step="0.1" value="10"></div>
@@ -467,5 +464,6 @@
   // Авто-демо при старті
   seedDemo();
 </script>
-</body>
-</html>
+
+
+</body></html>

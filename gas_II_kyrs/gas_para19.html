@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 19 (газовики) — Комерційний облік: профілі навантаження, агрегація, піки, ліміти</title>
-<meta name="description" content="Погодинні профілі вузлів, групування, контрактні ліміти (добовий обсяг та погодинний пік), алерти, графіки (профіль/піки/кумулятив), теплокарта, експорт CSV/TXT."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Погодинні профілі вузлів, групування, контрактні ліміти (добовий обсяг та погодинний пік), алерти, графіки (профіль/піки/кумулятив), теплокарта, експорт CSV/TXT.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -40,14 +38,14 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
 .tag.bad{border-color:#5a1f1f;background:#2a1212}
 .footer{margin-top:20px;color:#94a3b8;font-size:.9rem}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para19.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 19"><meta property="og:description" content="Працюємо з погодинними профілями вузлів (лічильники/ТП). Агрегуємо по групах (Feeder/Район) і контролюємо контрактні ліміти: Vday (добовий обсяг, тис. м³)"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para19.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 19","description":"Працюємо з погодинними профілями вузлів (лічильники/ТП). Агрегуємо по групах (Feeder/Район) і контролюємо контрактні ліміти: Vday (добовий обсяг, тис. м³)","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para19.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">📈⛽</span>
       <div>
-        <b>Пара 19 — Комерційний облік</b><br/>
+        <b>Пара 19 — Комерційний облік</b><br>
         <span class="badge">Профілі (год) → агрегація → піки → ліміти (Vday/Pmax) → алерти → графіки → експорт</span>
       </div>
     </div>
@@ -91,8 +89,8 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
         <label>Показати групу
           <select id="selGroup" class="input"></select>
         </label>
-        <label>Лінія Pmax (вкл) <input id="shPmax" type="checkbox" checked></label>
-        <label>Лінія середнього <input id="shAvg" type="checkbox" checked></label>
+        <label>Лінія Pmax (вкл) <input id="shPmax" type="checkbox" checked=""></label>
+        <label>Лінія середнього <input id="shAvg" type="checkbox" checked=""></label>
         <button class="btn" id="mark">📍 Зняти точку</button>
         <button class="btn secondary" id="clear">🧹 Очистити графік</button>
       </div>
@@ -403,5 +401,6 @@ $('#saveTxt').addEventListener('click',()=>{
 /* ===== Ініт ===== */
 refreshGroups(); redrawAll();
 </script>
-</body>
-</html>
+
+
+</body></html>

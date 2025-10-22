@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 25 (механіки) — ШІ#5: Планувальник ТО (LLM-агент, Gantt, CSV/ICS, чек 58 мм)</title>
-<meta name="description" content="Черга робіт ТО: ризик, безпека, дедлайн, запчастини, механіки. Пріоритезація, розклад по днях, Gantt-діаграма, експорт CSV/ICS, чек 58 мм, журнал, промпт для LLM."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Черга робіт ТО: ризик, безпека, дедлайн, запчастини, механіки. Пріоритезація, розклад по днях, Gantt-діаграма, експорт CSV/ICS, чек 58 мм, журнал, промпт для LLM.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -40,14 +38,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 canvas{display:block;max-width:100%}
 .ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/mech_II_kyrs/mechanic_para25.html"><meta property="og:type" content="article"><meta property="og:title" content="Механізація — Пара 25"><meta property="og:description" content="Мета: навчитися формувати **розклад ТО/ремонту** з урахуванням ризику, безпеки, дедлайнів, запчастин, штату та вартості простою. Інструмент оцінює **пріори"><meta property="og:url" content="https://edlab.pp.ua/mech_II_kyrs/mechanic_para25.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Механізація — Пара 25","description":"Мета: навчитися формувати **розклад ТО/ремонту** з урахуванням ризику, безпеки, дедлайнів, запчастин, штату та вартості простою. Інструмент оцінює **пріори","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/mech_II_kyrs/mechanic_para25.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🗂️</span>
       <div>
-        <b>Пара 25 — Планувальник ТО (ШІ-агент, Gantt, CSV/ICS)</b><br/>
+        <b>Пара 25 — Планувальник ТО (ШІ-агент, Gantt, CSV/ICS)</b><br>
         <span class="badge">черга робіт → пріоритет → ресурси → розклад → Gantt → експорт → чек 58 мм</span>
       </div>
     </div>
@@ -71,16 +69,16 @@ canvas{display:block;max-width:100%}
         <tbody id="jobsBody"></tbody>
       </table>
       <div class="row" style="margin-top:6px">
-        <input class="input" id="jMach" placeholder="Трактор МТЗ-82"/>
-        <input class="input" id="jTask" placeholder="Заміна підшипника на промвалі"/>
-        <input class="input" id="jDur" type="number" min="1" step="1" value="6"/>
-        <input class="input" id="jTech" type="number" min="1" step="1" value="2"/>
-        <input class="input" id="jDue" type="date"/>
-        <input class="input" id="jRisk" type="number" min="0" max="1" step="0.05" value="0.6"/>
-        <input class="input" id="jImp" type="number" min="1" max="5" step="1" value="4"/>
+        <input class="input" id="jMach" placeholder="Трактор МТЗ-82">
+        <input class="input" id="jTask" placeholder="Заміна підшипника на промвалі">
+        <input class="input" id="jDur" type="number" min="1" step="1" value="6">
+        <input class="input" id="jTech" type="number" min="1" step="1" value="2">
+        <input class="input" id="jDue" type="date">
+        <input class="input" id="jRisk" type="number" min="0" max="1" step="0.05" value="0.6">
+        <input class="input" id="jImp" type="number" min="1" max="5" step="1" value="4">
         <select class="input" id="jSafe"><option value="ok">ok</option><option value="warn">warn</option><option value="critical">critical</option></select>
-        <input class="input" id="jDown" type="number" min="0" step="10" value="400"/>
-        <input class="input" id="jParts" placeholder="6204:2, A42:1"/>
+        <input class="input" id="jDown" type="number" min="0" step="10" value="400">
+        <input class="input" id="jParts" placeholder="6204:2, A42:1">
         <button class="btn good" id="addJob">➕ Додати</button>
         <button class="btn secondary" id="demoJobs">📌 Демодані</button>
       </div>
@@ -89,13 +87,13 @@ canvas{display:block;max-width:100%}
     <div class="card">
       <h2>👷 Ресурси та політика планування</h2>
       <div class="row">
-        <label style="flex:1">Механіків у зміні<input class="input" id="capTech" type="number" min="1" value="4"/></label>
-        <label style="flex:1">Годин у зміні<input class="input" id="capHours" type="number" min="1" value="8"/></label>
-        <label style="flex:1">Початкова дата плану<input class="input" id="startDate" type="date"/></label>
+        <label style="flex:1">Механіків у зміні<input class="input" id="capTech" type="number" min="1" value="4"></label>
+        <label style="flex:1">Годин у зміні<input class="input" id="capHours" type="number" min="1" value="8"></label>
+        <label style="flex:1">Початкова дата плану<input class="input" id="startDate" type="date"></label>
       </div>
       <div class="row">
         <label style="flex:1">Запаси (через кому)<textarea id="stock" class="input" placeholder="6204:10, A42:3, HLP-46:20л, M10:50"></textarea></label>
-        <label style="flex:1">Вага критеріїв<input class="input" id="weights" value='{"risk":0.35,"impact":0.2,"safety":0.2,"urgency":0.15,"downtime":0.1}'/></label>
+        <label style="flex:1">Вага критеріїв<input class="input" id="weights" value="{&quot;risk&quot;:0.35,&quot;impact&quot;:0.2,&quot;safety&quot;:0.2,&quot;urgency&quot;:0.15,&quot;downtime&quot;:0.1}"></label>
       </div>
       <div class="row">
         <button class="btn" id="plan">🧠 Спланувати (пріоритет→розклад)</button>
@@ -148,7 +146,7 @@ canvas{display:block;max-width:100%}
         <button class="btn" id="makeReceipt">🖨️ 58 мм чек</button>
       </div>
       <pre class="code" id="alog" style="max-height:180px;overflow:auto">// Поки без записів</pre>
-      <div class="receipt" id="rc" hidden></div>
+      <div class="receipt" id="rc" hidden=""></div>
     </div>
   </div>
 
@@ -164,25 +162,25 @@ canvas{display:block;max-width:100%}
   <div class="card">
     <h2>🔌 Схема потоку (SVG)</h2>
     <svg viewBox="0 0 980 260" role="img" aria-label="Черга → Пріоритезація → Розклад → Gantt → Експорт">
-      <rect x="40" y="60" width="180" height="100" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <rect x="40" y="60" width="180" height="100" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
       <text x="130" y="92" fill="#e5e7eb" font-size="14" text-anchor="middle">Черга робіт</text>
       <text x="130" y="112" fill="#93c5fd" font-size="12" text-anchor="middle">ризик/запчастини</text>
 
-      <rect x="250" y="50" width="200" height="120" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <rect x="250" y="50" width="200" height="120" rx="12" fill="#14532d" stroke="#22c55e"></rect>
       <text x="350" y="90" fill="#dcfce7" font-size="14" text-anchor="middle">Пріоритезація</text>
       <text x="350" y="108" fill="#a7f3d0" font-size="12" text-anchor="middle">risk·impact·safety·urgency·downtime</text>
 
-      <rect x="480" y="50" width="200" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+      <rect x="480" y="50" width="200" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
       <text x="580" y="90" fill="#e5e7eb" font-size="14" text-anchor="middle">Розклад</text>
       <text x="580" y="108" fill="#93c5fd" font-size="12" text-anchor="middle">люди·години·склад</text>
 
-      <rect x="700" y="50" width="240" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+      <rect x="700" y="50" width="240" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"></rect>
       <text x="820" y="90" fill="#e5e7eb" font-size="14" text-anchor="middle">Gantt + Експорт</text>
       <text x="820" y="108" fill="#93c5fd" font-size="12" text-anchor="middle">CSV / ICS / чек 58 мм</text>
 
-      <line x1="220" y1="110" x2="250" y2="110" stroke="#93c5fd" stroke-width="3"/>
-      <line x1="450" y1="110" x2="480" y2="110" stroke="#22c55e" stroke-width="3"/>
-      <line x1="680" y1="110" x2="700" y2="110" stroke="#64748b" stroke-width="3"/>
+      <line x1="220" y1="110" x2="250" y2="110" stroke="#93c5fd" stroke-width="3"></line>
+      <line x1="450" y1="110" x2="480" y2="110" stroke="#22c55e" stroke-width="3"></line>
+      <line x1="680" y1="110" x2="700" y2="110" stroke="#64748b" stroke-width="3"></line>
     </svg>
   </div>
 
@@ -538,5 +536,6 @@ $('#plan').addEventListener('click', ()=>{
   const now=new Date(); $('#startDate').value = ymd(now);
 })();
 </script>
-</body>
-</html>
+
+
+</body></html>

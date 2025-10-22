@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 16 (технологи) — Пастеризація: теплограма → пастеризаційні одиниці (PU) → CCP → чек 58 мм/QR/CSV</title>
-<meta name="description" content="Емулятор пастеризації молока/соку/яєчної маси: нагрів–витримка–охолодження. Обчислення PU = ∫10^((T−Tref)/z)dt, контроль CCP, графік, журнал тривог, чек 58 мм, QR, експорт CSV/TXT."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Емулятор пастеризації молока/соку/яєчної маси: нагрів–витримка–охолодження. Обчислення PU = ∫10^((T−Tref)/z)dt, контроль CCP, графік, журнал тривог, чек 58 мм, QR, експорт CSV/TXT.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -40,14 +38,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
 .ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/tech_II_kyrs/tech_para16.html"><meta property="og:type" content="article"><meta property="og:title" content="Технології тваринництва — Пара 16"><meta property="og:description" content="Мета: змоделювати пастеризацію молока/соку/яєчної маси, обчислити пастеризаційні одиниці (PU) за параметрами Tref та z, контролювати CCP-пороги, будувати г"><meta property="og:url" content="https://edlab.pp.ua/tech_II_kyrs/tech_para16.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Технології тваринництва — Пара 16","description":"Мета: змоделювати пастеризацію молока/соку/яєчної маси, обчислити пастеризаційні одиниці (PU) за параметрами Tref та z, контролювати CCP-пороги, будувати г","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/tech_II_kyrs/tech_para16.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🥛</span>
       <div>
-        <b>Пара 16 — Пастеризація (емулятор + PU + CCP)</b><br/>
+        <b>Пара 16 — Пастеризація (емулятор + PU + CCP)</b><br>
         <span class="badge">нагрів → витримка → охолодження • ∫10^((T−Tref)/z)dt • графік • журнал • чек/QR/CSV</span>
       </div>
     </div>
@@ -62,25 +60,25 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h2>🔧 Налаштування процесу</h2>
       <div class="row">
         <select id="product" class="input" style="max-width:220px">
-          <option value="milk" selected>Молоко HTST (≈72°C/15 с)</option>
+          <option value="milk" selected="">Молоко HTST (≈72°C/15 с)</option>
           <option value="batch">Молоко batch (≈63°C/30 хв)</option>
           <option value="egg">Яєчна маса (≈60°C/3,5 хв)</option>
           <option value="juice">Сік (налаштовується)</option>
         </select>
-        <label>Об’єм, л<input id="vol" class="input" type="number" min="10" step="10" value="500"/></label>
-        <label>Темп. старту °C<input id="t0" class="input" type="number" step="1" value="6"/></label>
+        <label>Об’єм, л<input id="vol" class="input" type="number" min="10" step="10" value="500"></label>
+        <label>Темп. старту °C<input id="t0" class="input" type="number" step="1" value="6"></label>
       </div>
       <div class="row">
-        <label>Tref °C<input id="tref" class="input" type="number" step="0.1" value="60"/></label>
-        <label>z °C<input id="z" class="input" type="number" step="0.1" value="7"/></label>
-        <label>Ціль PU<input id="puTarget" class="input" type="number" step="1" value="15"/></label>
-        <label>Δt симуляції, с<input id="dt" class="input" type="number" min="1" step="1" value="1"/></label>
+        <label>Tref °C<input id="tref" class="input" type="number" step="0.1" value="60"></label>
+        <label>z °C<input id="z" class="input" type="number" step="0.1" value="7"></label>
+        <label>Ціль PU<input id="puTarget" class="input" type="number" step="1" value="15"></label>
+        <label>Δt симуляції, с<input id="dt" class="input" type="number" min="1" step="1" value="1"></label>
       </div>
       <div class="row">
-        <label>Потужність нагріву %<input id="heat" class="input" type="range" min="0" max="100" value="75"/></label>
-        <label>Охолодження %<input id="cool" class="input" type="range" min="0" max="100" value="60"/></label>
-        <label>Утримувати ≥Thold °C<input id="thold" class="input" type="number" step="0.5" value="72"/></label>
-        <label>Тривалість hold, с<input id="holdSec" class="input" type="number" step="1" value="15"/></label>
+        <label>Потужність нагріву %<input id="heat" class="input" type="range" min="0" max="100" value="75"></label>
+        <label>Охолодження %<input id="cool" class="input" type="range" min="0" max="100" value="60"></label>
+        <label>Утримувати ≥Thold °C<input id="thold" class="input" type="number" step="0.5" value="72"></label>
+        <label>Тривалість hold, с<input id="holdSec" class="input" type="number" step="1" value="15"></label>
       </div>
       <div class="row">
         <button class="btn good" id="start">▶️ Старт симуляції</button>
@@ -98,13 +96,13 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:10px">💾 Експорт/друк</h3>
       <div class="row">
-        <input id="lot" class="input" placeholder="Лот/партія (напр. 2025-10-18-01)"/>
+        <input id="lot" class="input" placeholder="Лот/партія (напр. 2025-10-18-01)">
         <button class="btn" id="saveCsv">📄 CSV</button>
         <button class="btn" id="saveTxt">💾 TXT-звіт</button>
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR</button>
       </div>
-      <div class="receipt" id="rc" hidden></div>
+      <div class="receipt" id="rc" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
       <small class="muted">QR генерується через відкритий сервіс <span class="mono">api.qrserver.com</span>. Якщо офлайн — буде текстовий фолбек.</small>
     </div>
@@ -113,25 +111,25 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>🔌 Схема процесу (SVG)</h2>
       <svg viewBox="0 0 820 280" role="img" aria-label="Бак пастеризації: нагрів–витримка–охолодження">
-        <rect x="40" y="40" width="240" height="160" rx="14" fill="#0e2a47" stroke="#3b82f6"/>
+        <rect x="40" y="40" width="240" height="160" rx="14" fill="#0e2a47" stroke="#3b82f6"></rect>
         <text x="160" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Бак з сорочкою</text>
         <text x="160" y="90" fill="#93c5fd" font-size="12" text-anchor="middle">датчик T, перемішування</text>
 
-        <rect x="320" y="40" width="200" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <rect x="320" y="40" width="200" height="80" rx="12" fill="#14532d" stroke="#22c55e"></rect>
         <text x="420" y="72" fill="#dcfce7" font-size="14" text-anchor="middle">Нагрівач</text>
         <text x="420" y="90" fill="#a7f3d0" font-size="12" text-anchor="middle">пара/ТЕН</text>
 
-        <rect x="320" y="120" width="200" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <rect x="320" y="120" width="200" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
         <text x="420" y="152" fill="#e5e7eb" font-size="14" text-anchor="middle">Охолоджувач</text>
         <text x="420" y="170" fill="#93c5fd" font-size="12" text-anchor="middle">вода/розсіл</text>
 
-        <rect x="560" y="40" width="220" height="160" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+        <rect x="560" y="40" width="220" height="160" rx="12" fill="#0b1a2f" stroke="#64748b"></rect>
         <text x="670" y="72" fill="#e5e7eb" font-size="14" text-anchor="middle">CCP-контролер</text>
         <text x="670" y="90" fill="#93c5fd" font-size="12" text-anchor="middle">PU, Tref, z, hold</text>
 
-        <line x1="280" y1="120" x2="320" y2="80"  stroke="#93c5fd" stroke-width="3"/>
-        <line x1="280" y1="120" x2="320" y2="160" stroke="#64748b" stroke-width="3"/>
-        <line x1="520" y1="120" x2="560" y2="120" stroke="#22c55e" stroke-width="3"/>
+        <line x1="280" y1="120" x2="320" y2="80" stroke="#93c5fd" stroke-width="3"></line>
+        <line x1="280" y1="120" x2="320" y2="160" stroke="#64748b" stroke-width="3"></line>
+        <line x1="520" y1="120" x2="560" y2="120" stroke="#22c55e" stroke-width="3"></line>
 
         <text x="410" y="230" fill="#fbbf24" font-size="12" text-anchor="middle">Протокол: CSV/TXT • Чек 58 мм • QR</text>
       </svg>
@@ -369,5 +367,6 @@ $('#qrGen').addEventListener('click', ()=>{
   img.src=url;
 });
 </script>
-</body>
-</html>
+
+
+</body></html>

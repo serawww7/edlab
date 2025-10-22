@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 14 (газовики) — Планове ТО котла: чек-лист, манометрія, графік навантаження, фото/аудіо, підпис, 58 мм, CSV/TXT, QR</title>
-<meta name="description" content="Практика планового техобслуговування котла: чек-лист із таймерами, манометрія (Pgas_in/Pgas_out, Pwater), KPI-пороги, динамічний графік навантаження (Load%, T°), камера, аудіо, підпис, чек 58 мм, CSV/TXT, QR, журнал подій."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Практика планового техобслуговування котла: чек-лист із таймерами, манометрія (Pgas_in/Pgas_out, Pwater), KPI-пороги, динамічний графік навантаження (Load%, T°), камера, аудіо, підпис, чек 58 мм, CSV/TXT, QR, журнал подій.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -52,14 +50,14 @@ canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px
 hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 audio{width:100%}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para14.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 14"><meta property="og:description" content="Виконуємо річне планове ТО побутового/малопотужного котла: від вимкнення газу та огляду до чистки пальника й теплообмінника, вимірів Pgas,in/Pgas,out, Pwat"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para14.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 14","description":"Виконуємо річне планове ТО побутового/малопотужного котла: від вимкнення газу та огляду до чистки пальника й теплообмінника, вимірів Pgas,in/Pgas,out, Pwat","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para14.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🛠️🔥</span>
       <div>
-        <b>Пара 14 — Планове техобслуговування котла</b><br/>
+        <b>Пара 14 — Планове техобслуговування котла</b><br>
         <span class="badge">Чек-лист ТО → манометрія → KPI → графік навантаження → камера/аудіо → підпис → 58 мм → CSV/TXT → QR</span>
       </div>
     </div>
@@ -73,15 +71,15 @@ audio{width:100%}
       вимірів <b>P<sub>gas,in</sub>/P<sub>gas,out</sub></b>, <b>P<sub>water</sub></b>, перевірок КПІ та фіксації <b>навантаження/температури</b> у часі. 
       Робимо <b>фото</b>, додаємо <b>аудіо-коментар</b>, беремо <b>підпис</b>, друкуємо <b>чек 58 мм</b>, експортуємо <b>CSV/TXT</b>, генеруємо <b>QR</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котел"/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котел"></label>
       <label style="flex:1">Тип котла
         <select id="boilType" class="input">
-          <option selected>Атмосферний</option><option>Турбований (закр. камера)</option><option>Конденсаційний</option><option>Інший</option>
+          <option selected="">Атмосферний</option><option>Турбований (закр. камера)</option><option>Конденсаційний</option><option>Інший</option>
         </select>
       </label>
-      <label style="flex:1">Модель<input id="model" class="input" placeholder="Напр. AOGV 11, Baxi Luna, Vaillant..."/></label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">Модель<input id="model" class="input" placeholder="Напр. AOGV 11, Baxi Luna, Vaillant..."></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"></label>
     </div>
     <div class="row">
       <button class="btn good" id="mkCase">🧰 Створити кейс</button>
@@ -98,25 +96,25 @@ audio{width:100%}
       <h2 style="margin-top:10px">🧪 Манометрія та KPI</h2>
       <div class="block">
         <div class="row">
-          <label style="flex:1">P<sub>gas,in</sub>, мбар<input id="pgin" type="range" class="input" min="5" max="40" step="0.1" value="20.0"/></label>
+          <label style="flex:1">P<sub>gas,in</sub>, мбар<input id="pgin" type="range" class="input" min="5" max="40" step="0.1" value="20.0"></label>
           <span class="badge">Поточний P<sub>gas,in</sub>: <b id="pginNum">20.0</b></span>
           <button class="btn" id="markPgin">📍 Точка P<sub>gas,in</sub></button>
         </div>
         <div class="row">
-          <label style="flex:1">P<sub>gas,out</sub>, мбар<input id="pgout" type="range" class="input" min="5" max="40" step="0.1" value="12.0"/></label>
+          <label style="flex:1">P<sub>gas,out</sub>, мбар<input id="pgout" type="range" class="input" min="5" max="40" step="0.1" value="12.0"></label>
           <span class="badge">Поточний P<sub>gas,out</sub>: <b id="pgoutNum">12.0</b></span>
           <button class="btn" id="markPgout">📍 Точка P<sub>gas,out</sub></button>
         </div>
         <div class="row">
-          <label style="flex:1">P<sub>water</sub>, бар<input id="pwater" type="range" class="input" min="0.0" max="3.0" step="0.05" value="1.2"/></label>
+          <label style="flex:1">P<sub>water</sub>, бар<input id="pwater" type="range" class="input" min="0.0" max="3.0" step="0.05" value="1.2"></label>
           <span class="badge">Поточний P<sub>water</sub>: <b id="pwaterNum">1.2</b></span>
           <button class="btn" id="markPwater">📍 Точка P<sub>water</sub></button>
           <button class="btn secondary" id="clearPress">🧹 Очистити точки</button>
         </div>
         <div class="row">
-          <label>Мін. P<sub>gas,in</sub>, мбар<input id="pginMin" class="input" type="number" step="0.1" value="18.0"/></label>
-          <label>Ціль P<sub>gas,out</sub>, мбар<input id="pgoutTgt" class="input" type="number" step="0.1" value="12.0"/></label>
-          <label>P<sub>water</sub> робочий, бар<input id="pwaterOk" class="input" type="number" step="0.05" value="1.0"/></label>
+          <label>Мін. P<sub>gas,in</sub>, мбар<input id="pginMin" class="input" type="number" step="0.1" value="18.0"></label>
+          <label>Ціль P<sub>gas,out</sub>, мбар<input id="pgoutTgt" class="input" type="number" step="0.1" value="12.0"></label>
+          <label>P<sub>water</sub> робочий, бар<input id="pwaterOk" class="input" type="number" step="0.05" value="1.0"></label>
           <button class="btn secondary" id="applyKPI">⚙️ Застосувати KPI</button>
         </div>
         <div class="kpi" style="margin-top:6px">
@@ -129,12 +127,12 @@ audio{width:100%}
       <h2 style="margin-top:10px">📈 Динамічний графік (Load % / T° подачі)</h2>
       <div class="block">
         <div class="row">
-          <label style="flex:1">Навантаження, %<input id="load" type="range" class="input" min="0" max="100" step="1" value="45"/></label>
+          <label style="flex:1">Навантаження, %<input id="load" type="range" class="input" min="0" max="100" step="1" value="45"></label>
           <span class="badge">Поточне навантаження: <b id="loadNum">45</b>%</span>
           <button class="btn" id="markLoad">📍 Точка Load</button>
         </div>
         <div class="row">
-          <label style="flex:1">T° подачі, °C<input id="tflow" type="range" class="input" min="20" max="90" step="0.5" value="55.0"/></label>
+          <label style="flex:1">T° подачі, °C<input id="tflow" type="range" class="input" min="20" max="90" step="0.5" value="55.0"></label>
           <span class="badge">Поточна T° подачі: <b id="tflowNum">55.0</b> °C</span>
           <button class="btn" id="markT">📍 Точка T°</button>
           <button class="btn secondary" id="clearSeries">🧹 Очистити графік</button>
@@ -147,12 +145,12 @@ audio{width:100%}
 
       <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
       <div class="row">
-        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <video id="vid" class="photo" autoplay="" playsinline="" muted=""></video>
         <div>
           <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
           <button class="btn" data-kind="plate">📷 Табличка котла</button>
           <button class="btn" data-kind="burner">📷 Пальник/теплообмінник</button>
-          <button class="btn" data-kind="gauge">📷 Манометр/датчик</button><br/>
+          <button class="btn" data-kind="gauge">📷 Манометр/датчик</button><br>
           <small class="muted">Фото зберігаються у «Галереї доказів».</small>
         </div>
       </div>
@@ -166,7 +164,7 @@ audio{width:100%}
           <button class="btn" id="audSave">💾 Зберегти</button>
           <span class="badge" id="audStat">Немає запису</span>
         </div>
-        <audio id="audPlay" controls></audio>
+        <audio id="audPlay" controls=""></audio>
       </div>
 
       <h2 style="margin-top:10px">✍️ Підпис абонента</h2>
@@ -214,7 +212,7 @@ audio{width:100%}
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (Case)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
 
       <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
@@ -543,5 +541,6 @@ init(); updateMetrics(); computeKPI(); drawChart();
 // Вбудоване відображення (Moodle/iFrame)
 (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
 </script>
-</body>
-</html>
+
+
+</body></html>
