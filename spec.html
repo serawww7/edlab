@@ -72,27 +72,26 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
           </div>
         </div>
         <div class="tester">
+          <!-- ВАЖЛИВО: прев’ю без sandbox, з такими ж allow/allowfullscreen/referrerpolicy як у Moodle -->
           <iframe id="previewFrame" src="about:blank"
-                  sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-downloads"
-                  referrerpolicy="no-referrer"></iframe>
+                  allow="clipboard-write *; fullscreen *; geolocation *; autoplay *"
+                  allowfullscreen="allowfullscreen"
+                  referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
       </div>
-      <p class="muted" id="previewNote" style="display:none;margin-top:6px">Порада: натисни «Згенерувати iFrame» — код справа вже з потрібним URL.</p>
+      <p class="muted" id="previewNote" style="display:none;margin-top:6px">Порада: натисни «Згенерувати iFrame» — код справа вже з потрібними атрибутами під Moodle.</p>
     </div>
 
     <div class="card" id="generator">
       <h2>🔧 Генератор коду для Moodle (iFrame)</h2>
+
       <label for="url">URL сторінки</label>
       <input id="url" type="text" value=""/>
 
       <div class="inline">
         <div>
-          <label for="height">Висота фрейма (px)</label>
-          <input id="height" type="number" value="1600"/>
-        </div>
-        <div>
-          <label for="sandbox">Sandbox токени</label>
-          <input id="sandbox" type="text" value="allow-same-origin allow-scripts allow-forms allow-modals allow-downloads"/>
+          <label for="height">Висота фрейма (px або vh)</label>
+          <input id="height" type="text" value="80vh"/>
         </div>
       </div>
 
@@ -103,7 +102,10 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
         <button class="btn" type="button" id="btnGen">🔁 Оновити код</button>
         <button class="btn" type="button" id="btnCopy">📋 Скопіювати</button>
       </div>
-      <p class="muted" style="margin-top:6px">Режими вставки: <b>Page</b> або <b>URL (Display: Embed)</b>. Якщо кнопки «німі» — перевір фільтри ресурсу або зменш набір sandbox.</p>
+      <p class="muted" style="margin-top:6px">
+        Режими вставки: <b>Page</b> або <b>URL (Display: Embed або Open in new window)</b>.<br/>
+        Якщо вбудований режим щось блокує — у Moodle краще обрати «У новому вікні».
+      </p>
     </div>
   </div>
 </div>
@@ -133,16 +135,16 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
 <script>
 // ===== Кольори для секцій + поточний ключ
 const THEME_COLORS = {
-coach:   {accent:'#a855f7', ring:'#7c3aed'},
-electric:{accent:'#22d3ee', ring:'#0891b2'},
-agro:    {accent:'#22c55e', ring:'#15803d'},
-mech:    {accent:'#f59e0b', ring:'#b45309'},
-tech:    {accent:'#ef4444', ring:'#b91c1c'},
-gas:     {accent:'#6b7280', ring:'#374151'}
+  coach:{accent:'#a855f7', ring:'#7c3aed'},
+  electric:{accent:'#22d3ee', ring:'#0891b2'},
+  agro:{accent:'#22c55e', ring:'#15803d'},
+  mech:{accent:'#f59e0b', ring:'#b45309'},
+  tech:{accent:'#ef4444', ring:'#b91c1c'},
+  gas:{accent:'#6b7280', ring:'#374151'}
 };
-let CURRENT_SPEC = ''; // виставимо в init()
+let CURRENT_SPEC = '';
 
-// === SVG-іконка (абстракція з орбітою)
+// === SVG-іконка
 function iconSvgForCurrent(){
   const c = THEME_COLORS[CURRENT_SPEC] || {accent:'#60a5fa', ring:'#1d4ed8'};
   return `
@@ -165,12 +167,12 @@ function iconSvgForCurrent(){
 const byId = (id)=>document.getElementById(id);
 const SECTION_KEYS = ['coach','electric','agro','mech','gas','tech'];
 const SECTION_META = {
-  coach:   { title:"🧠 Психологічні тренінги (coach)", desc:"Коучингові практики, рефлексія, soft skills, робота в групах." },
-  electric:{ title:"⚡ Електроенергетика",             desc:"Вимірювання, маркування, ППР, калькулятори перерізів, журнали ОП." },
-  agro:    { title:"🌾 Агрономія",                     desc:"Польові журнали, планування, моніторинги, QR/NFC." },
-  mech:    { title:"🚜 Агроінженерія (механіки)",      desc:"ТО/ППР, облік пального, заявки, діагностика, безпека." },
-  gas:     { title:"🔥 Будівництво та цивільна інженерія (газовики)",      desc:"Цифровий інструментарій газовика" },
-  tech:    { title:"🐄 Технологи",                     desc:"HACCP/FSMS, SPC, простежуваність, аудит, CAPA." }
+  coach:{ title:"🧠 Психологічні тренінги (coach)", desc:"Коучингові практики, рефлексія, soft skills, робота в групах." },
+  electric:{ title:"⚡ Електроенергетика", desc:"Вимірювання, маркування, ППР, калькулятори перерізів, журнали ОП." },
+  agro:{ title:"🌾 Агрономія", desc:"Польові журнали, планування, моніторинги, QR/NFC." },
+  mech:{ title:"🚜 Агроінженерія (механіки)", desc:"ТО/ППР, облік пального, заявки, діагностика, безпека." },
+  gas:{ title:"🔥 Будівництво та цивільна інженерія (газовики)", desc:"Цифровий інструментарій газовика" },
+  tech:{ title:"🐄 Технологи", desc:"HACCP/FSMS, SPC, простежуваність, аудит, CAPA." }
 };
 const SECTION_TO_DIR = {
   coach:'coach',
@@ -207,7 +209,7 @@ function lessonCard(item){
     </div>`;
 }
 
-// ——— Витяг <title> і description з HTML (з кешем)
+// ——— Витяг <title> і description з HTML
 function extractTitleDescFromHTML(html){
   try{
     const doc = new DOMParser().parseFromString(html,'text/html');
@@ -249,19 +251,14 @@ async function tryFetchJson(url){
 async function loadManifestFor(key){
   const dir = SECTION_TO_DIR[key];
   if(!dir) return null;
-
-  // 1) глобальний маніфест
   const global = await tryFetchJson(absoluteUrl('/assets/manifest.json'));
   if(global && Array.isArray(global[dir])) return { src:'/assets/manifest.json#'+dir, data: global[dir] };
-
-  // 2) локальний маніфест секції
   const local = await tryFetchJson(absoluteUrl('/'+dir+'/manifest.json'));
   if(Array.isArray(local)) return { src: '/'+dir+'/manifest.json', data: local };
-
   return null;
 }
 
-// === Побудова секції (з автозаголовками)
+// === Побудова секції
 async function buildSection(key){
   const meta = SECTION_META[key];
   byId('specTitle').textContent = meta.title;
@@ -279,10 +276,7 @@ async function buildSection(key){
     return;
   }
 
-  // Нормалізуємо записи: або рядок, або {url,title,desc}
   const rawList = man.data.map(x => (typeof x==='string' ? {url:x} : x));
-
-  // Спершу грубо рендеримо humanized, а потім додаємо справжні title/desc асинхронно
   const initial = rawList.map(x => ({
     url: x.url,
     title: (x.title && x.title.trim()) || humanizeFromPath(x.url),
@@ -290,13 +284,11 @@ async function buildSection(key){
   }));
   byId('lessons').innerHTML = initial.map(lessonCard).join('');
 
-  // iFrame генератор одразу на перший
   const firstAbs = initial[0]?.url ? absoluteUrl(initial[0].url) : '';
   byId('url').value = firstAbs; gen();
 
-  // Дотягуємо заголовки з HTML (тільки для тих, де title не задано явно)
   const promises = initial.map(async (it, idx) => {
-    if (rawList[idx].title) return it; // явний title залишаємо
+    if (rawList[idx].title) return it;
     const meta = await fetchTitleDesc(it.url);
     const betterTitle = (meta.title || '').trim();
     const betterDesc  = (meta.desc  || '').trim();
@@ -314,7 +306,7 @@ async function buildSection(key){
   await Promise.allSettled(promises);
 }
 
-// === Рендер «вибору розділу», якщо spec не заданий
+// === Вибір розділу, якщо не заданий
 function renderSelector(){
   byId('specTitle').textContent = 'Вибери розділ';
   byId('specDesc').textContent  = 'Оберіть напрям із переліку нижче.';
@@ -346,18 +338,16 @@ function closePreview(){
 }
 function gen(){
   const url = byId('url').value.trim();
-  const h   = parseInt(byId('height').value,10) || 1600;
-  const sb  = byId('sandbox').value.trim();
+  const h   = (byId('height').value || '80vh').trim();
+
+  // ГЕНЕРУЄМО САМЕ ТАК, ЯК ПОТРІБНО ДЛЯ MOODLE
   const html =
-`<div style="max-width:980px;margin:0 auto;position:relative;z-index:1;">
-  <iframe
+`<p><iframe style="width: 100%; height: ${h}; border: 0;"
     src="${url}"
-    style="width:100%;height:${h}px;border:0;display:block;pointer-events:auto;background:#fff;"
-    loading="eager"
-    referrerpolicy="no-referrer"
-    sandbox="${sb}">
-  </iframe>
-</div>`;
+    allow="clipboard-write *; fullscreen *; geolocation *; autoplay *"
+    allowfullscreen="allowfullscreen"
+    referrerpolicy="no-referrer-when-downgrade"></iframe></p>`;
+
   byId('code').value = html;
 }
 function copyCode(){
@@ -397,9 +387,7 @@ document.addEventListener('click', (e)=>{
 
   if(!key){ renderSelector(); return; }
 
-  // ВАЖЛИВО: виставляємо поточну секцію для кольорів іконки
   CURRENT_SPEC = key;
-
   await buildSection(key);
 })();
 </script>
