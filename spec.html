@@ -39,6 +39,37 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
   .lesson .thumb .spin{animation:spin 6s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 }
+
+/* Липкий генератор справа */
+@media(min-width:981px){
+  #generator{ position: sticky; top: 12px; }
+}
+
+/* Toast */
+#toast{
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  display: grid;
+  gap: 8px;
+  z-index: 9999;
+}
+.toast-item{
+  background: rgba(17,24,39,0.95);
+  color: #e5e7eb;
+  border: 1px solid #334155;
+  padding: 10px 12px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+.toast-item.show{
+  opacity: 1;
+  transform: translateY(0);
+}
 </style>
 </head>
 <body>
@@ -84,6 +115,14 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
 
     <div class="card" id="generator">
       <h2>🔧 Генератор коду для Moodle (iFrame)</h2>
+
+      <!-- Перемикач показу прев’ю після генерації -->
+      <div class="row" style="align-items:center; gap:10px; margin-bottom:8px">
+        <label class="muted" for="showPreview" style="display:flex; align-items:center; gap:8px; cursor:pointer">
+          <input id="showPreview" type="checkbox" />
+          <span>Показувати прев’ю після генерації</span>
+        </label>
+      </div>
 
       <label for="url">URL сторінки</label>
       <input id="url" type="text" value=""/>
@@ -131,6 +170,9 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
   </div>
   <div class="footer-bottom"><span>Зроблено з турботою про зручність викладача і студента</span></div>
 </footer>
+
+<!-- Toast контейнер -->
+<div id="toast" aria-live="polite" aria-atomic="true"></div>
 
 <script>
 // ===== Кольори для секцій + поточний ключ
@@ -336,6 +378,22 @@ function closePreview(){
   byId('previewBox').style.display = 'none';
   byId('previewNote').style.display = 'none';
 }
+
+/* ===== Toast ===== */
+function showToast(message){
+  const host = byId('toast');
+  const div = document.createElement('div');
+  div.className = 'toast-item';
+  div.textContent = message;
+  host.appendChild(div);
+  // мале відтермінування, щоб спрацював transition
+  requestAnimationFrame(()=>div.classList.add('show'));
+  setTimeout(()=>{
+    div.classList.remove('show');
+    setTimeout(()=>div.remove(), 220);
+  }, 1800);
+}
+
 function gen(){
   const url = byId('url').value.trim();
   const h   = (byId('height').value || '80vh').trim();
@@ -349,24 +407,53 @@ function gen(){
     referrerpolicy="no-referrer-when-downgrade"></iframe></p>`;
 
   byId('code').value = html;
+
+  // автоскрол до генератора + виділити код + тост
+  document.getElementById('generator').scrollIntoView({behavior:'smooth', block:'start'});
+  const ta = byId('code');
+  ta.focus();
+  ta.select();
+  ta.setSelectionRange(0, ta.value.length);
+  showToast('✅ Код згенеровано');
 }
+
+function genAndMaybePreview(u){
+  const abs = absoluteUrl(u);
+  byId('url').value = abs;
+  gen();
+  const show = byId('showPreview')?.checked;
+  if(show){
+    openPreview(u);
+    showToast('👀 Відкрито прев’ю');
+  }else{
+    closePreview();
+  }
+}
+
 function copyCode(){
   const ta = byId('code');
   ta.select(); ta.setSelectionRange(0, ta.value.length);
   document.execCommand('copy');
-  const old = document.title; document.title='✅ HTML скопійовано';
-  setTimeout(()=>document.title=old,900);
+  showToast('✅ HTML скопійовано');
 }
 
 // === Події
 document.addEventListener('click', (e)=>{
   const p = e.target.closest('.js-preview');
-  if(p){ openPreview(p.dataset.url); return; }
+  if(p){ openPreview(p.dataset.url); showToast('👀 Відкрито прев’ю'); return; }
+
   const i = e.target.closest('.js-iframe');
-  if(i){ const u = i.dataset.url; const abs = absoluteUrl(u); byId('url').value = abs; gen(); openPreview(u); return; }
+  if(i){ genAndMaybePreview(i.dataset.url); return; }
+
   if(e.target.id==='closePrev'){ closePreview(); }
-  if(e.target.id==='toGen'){ document.getElementById('generator').scrollIntoView({behavior:'smooth',block:'start'}); }
-  if(e.target.id==='btnGen'){ gen(); }
+  if(e.target.id==='toGen'){
+    document.getElementById('generator').scrollIntoView({behavior:'smooth',block:'start'});
+    const ta = byId('code'); ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length);
+  }
+  if(e.target.id==='btnGen'){
+    const curr = byId('url').value.trim();
+    if(curr){ genAndMaybePreview(curr); } else { gen(); }
+  }
   if(e.target.id==='btnCopy'){ copyCode(); }
 });
 
