@@ -142,3 +142,26 @@ html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
 html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
 html.embedded .spec{background:#fff; color:#111; border:1px solid #e5e7eb}
 html.embedded .spec:hover{background:#f8fafc}
+
+
+/* === Фіксований правий сайдбар з генератором (тільки на десктопі) === */
+@media (min-width: 981px){
+  /* Щоб картки/колонки не «тягнулися» і верхня грань вирівнювалась */
+  .grid2{ align-items: start; }
+
+  /* Робимо генератор фіксованим праворуч і прокручуваним всередині */
+  #generator{
+    position: fixed;
+    top: 12px;
+    right: 16px;
+    width: min(38vw, 420px);
+    max-height: calc(100vh - 24px);
+    overflow: auto;
+    z-index: 50;
+  }
+
+  /* Зміщуємо ліву колонку, щоб її не перекривав сайдбар */
+  #listCard{
+    margin-right: calc(min(38vw, 420px) + 24px);
+  }
+}
