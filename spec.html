@@ -456,13 +456,16 @@ document.addEventListener('click', (e)=>{
   if(e.target.id==='btnCopy'){ copyCode(); }
 });
 
-document.addEventListener('change', (e)=>{
-  if(e.target && e.target.id==='pinToggle'){
-    applyPinState(e.target.checked);
-  }
+function applyPinState(checked){
+  const isDesktop = window.matchMedia('(min-width: 981px)').matches;
+  // Закріплюємо ТІЛЬКИ на десктопі, на мобільному завжди вимкнено
+  document.body.classList.toggle('pin-generator', !!checked && isDesktop);
+}
+window.addEventListener('resize', ()=>{
+  // якщо звузили до мобільного — закріплення автоматично вимикаємо
+  const pin = document.getElementById('pinToggle');
+  applyPinState(pin ? pin.checked : false);
 });
-
-window.addEventListener('resize', ()=>{ syncPinOnResize(); });
 
 // === Ініціалізація
 (async function init(){
