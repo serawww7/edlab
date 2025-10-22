@@ -92,7 +92,17 @@
     .no-print{ display:none !important }
   }
 </style>
-
+<!-- Moodle iFrame Click Guard: повертаємо кліки елементам керування
+     (проблема з накладними оверлеями/шаром теми у вбудованому режимі) -->
+<style>
+  .wrap{ position:relative; z-index: 9999; }          /* підняти наш контент над можливим оверлеєм */
+  .btn, button, input, select, textarea, a{
+    pointer-events:auto !important;
+    position:relative; z-index: 10000;               /* підняти саме інтерактив */
+ }
+  /* Якщо тема підсовує фоновий overlay з position:fixed — приберемо його з потоку кліків */
+  .print-overlay, .print__overlay, .moodle-overlay{ pointer-events:none !important; }
+</style>
 <style>
 /* PRINT PATCH v1 CSS (auto) */
 .ticket{ font-weight:700; letter-spacing:0.1px }
@@ -476,6 +486,26 @@
   ['W','V','Ov','FE','fuel_ha','fuel_h','price','rate_lab','rate_mach','t_prep','t_delay'].forEach(id=>{
     document.getElementById(id).addEventListener('change', recalc);
   });
+      /* Interaction Guard JS: на випадок якщо тема/iframe зняла кліки або заблокувала елементи */
+  (function unlockInteraction(){
+    function enable(){
+      document.querySelectorAll('button, .btn, input, select, textarea, a').forEach(el=>{
+        try{
+          el.disabled = false;
+          el.style.pointerEvents = 'auto';
+        }catch(_){}
+      });
+      // прибрати типові оверлеї, що перекривають кліки у деяких темах
+      document.querySelectorAll(
+        '[data-print-overlay], .print-overlay, .print__overlay, .overlay, [aria-hidden="true"][style*="position: fixed"]'
+      ).forEach(el=>{
+        const st=getComputedStyle(el);
+        if(st.position==='fixed' || st.position==='absolute'){ el.style.pointerEvents='none'; }
+      });
+    }
+    enable(); setTimeout(enable,200); setTimeout(enable,600); setTimeout(enable,1200);
+    window.addEventListener('focus', enable, {passive:true});
+  })();
 </script>
 
 <script>
