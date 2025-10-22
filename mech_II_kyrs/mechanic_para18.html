@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 18 (механіки) — Акустична діагностика гідросистем (WebAudio: осцилограма+FFT, класи, журнал)</title>
-<meta name="description" content="Без Arduino: мікрофон гарнітури або WAV → осцилограма, FFT, ознаки (смугові енергії, центроїд, плоскість, тональність, ZCR, SNR) → класифікація (кавітація/перепуск/аерація/норма) → журнал, чек 58 мм, CSV/TXT/PNG, ICS."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Без Arduino: мікрофон гарнітури або WAV → осцилограма, FFT, ознаки (смугові енергії, центроїд, плоскість, тональність, ZCR, SNR) → класифікація (кавітація/перепуск/аерація/норма) → журнал, чек 58 мм, CSV/TXT/PNG, ICS.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -38,14 +36,14 @@ canvas{display:block;width:100%;height:220px}
 .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
 kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/mech_II_kyrs/mechanic_para18.html"><meta property="og:type" content="article"><meta property="og:title" content="Механізація — Пара 18"><meta property="og:description" content="Мета: за допомогою мікрофона гарнітури або аудіозапису проаналізувати звук гідросистеми та розпізнати кавітацію насоса, роботу перепускного/запобіжного кла"><meta property="og:url" content="https://edlab.pp.ua/mech_II_kyrs/mechanic_para18.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Механізація — Пара 18","description":"Мета: за допомогою мікрофона гарнітури або аудіозапису проаналізувати звук гідросистеми та розпізнати кавітацію насоса, роботу перепускного/запобіжного кла","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/mech_II_kyrs/mechanic_para18.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🛠️</span>
       <div>
-        <b>Пара 18 — Акустична діагностика гідросистем (без Arduino)</b><br/>
+        <b>Пара 18 — Акустична діагностика гідросистем (без Arduino)</b><br>
         <span class="badge">мікрофон/гарнітура → осцилограма + FFT → ознаки → класи (кавітація/перепуск/аерація/норма) → журнал → експорт</span>
       </div>
     </div>
@@ -62,7 +60,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div style="flex:1">
         <label for="src">Джерело</label>
         <select id="src" class="input">
-          <option value="mic" selected>Мікрофон (гарнітура/ноутбук)</option>
+          <option value="mic" selected="">Мікрофон (гарнітура/ноутбук)</option>
           <option value="file">Аудіофайл (WAV/MP3)</option>
           <option value="emu">Емулятор (синтетика)</option>
         </select>
@@ -74,7 +72,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       </div>
     </div>
     <div id="fileBox" class="row" style="display:none;margin-top:6px">
-      <input id="fileInp" class="input" type="file" accept="audio/*"/>
+      <input id="fileInp" class="input" type="file" accept="audio/*">
       <button class="btn" id="playFile">▶️ Відтворити файл</button>
     </div>
     <div id="emuBox" class="note" style="display:none;margin-top:6px">
@@ -82,14 +80,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div class="row">
         <div style="flex:1">
           <select id="emuType" class="input">
-            <option value="normal" selected>Нормальний режим насоса</option>
+            <option value="normal" selected="">Нормальний режим насоса</option>
             <option value="cav">Кавітація (широкосмуговий «шурхіт» 3–10 кГц)</option>
             <option value="relief">Перепуск/запобіжний (тон 400–1200 Гц)</option>
             <option value="aero">Аерація (бульбашки, низькочастотний «бульк» 100–400 Гц + шум)</option>
           </select>
         </div>
         <div style="flex:1">
-          <label>Рівень <input id="emuLvl" class="input" type="range" min="0" max="1" step="0.01" value="0.7"/></label>
+          <label>Рівень <input id="emuLvl" class="input" type="range" min="0" max="1" step="0.01" value="0.7"></label>
         </div>
       </div>
     </div>
@@ -115,7 +113,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       </div>
       <div style="flex:1">
         <label for="k">k для k-NN (допоміжно)</label>
-        <input id="k" class="input" type="number" min="1" step="1" value="3"/>
+        <input id="k" class="input" type="number" min="1" step="1" value="3">
       </div>
       <div style="flex:2">
         <span id="pred" class="badge">Pred: —</span>
@@ -142,7 +140,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <button class="btn good" id="classify">✅ Класифікувати зараз</button>
       <button class="btn secondary" id="mark">📌 Додати мітку (навчити k-NN)</button>
       <select id="label" class="input" style="max-width:240px">
-        <option value="normal" selected>normal</option>
+        <option value="normal" selected="">normal</option>
         <option value="cav">cav</option>
         <option value="relief">relief</option>
         <option value="aero">aero</option>
@@ -161,23 +159,23 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <button class="btn" id="expICS">🗓️ ICS (вікна ризику)</button>
       <button class="btn secondary" id="receipt">🖨️ 58-мм чек</button>
     </div>
-    <div id="rc" class="receipt" hidden></div>
+    <div id="rc" class="receipt" hidden=""></div>
   </div>
 
   <div class="card">
     <h2>🔌 Схема розміщення мікрофона (SVG)</h2>
     <svg viewBox="0 0 980 320" role="img" aria-label="Мікрофон на гідролінії/біля насоса">
-      <rect x="40" y="40" width="280" height="160" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <rect x="40" y="40" width="280" height="160" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
       <text x="180" y="70" fill="#e5e7eb" font-size="16" text-anchor="middle">Гідробак + насос</text>
       <text x="180" y="90" fill="#93c5fd" font-size="12" text-anchor="middle">всмоктування ↔ нагнітання</text>
 
-      <rect x="360" y="60" width="560" height="40" rx="8" fill="#1f2937" stroke="#9ca3af"/>
+      <rect x="360" y="60" width="560" height="40" rx="8" fill="#1f2937" stroke="#9ca3af"></rect>
       <text x="640" y="85" fill="#e5e7eb" font-size="14" text-anchor="middle">Напірна лінія</text>
 
-      <rect x="360" y="140" width="560" height="40" rx="8" fill="#1f2937" stroke="#9ca3af"/>
+      <rect x="360" y="140" width="560" height="40" rx="8" fill="#1f2937" stroke="#9ca3af"></rect>
       <text x="640" y="165" fill="#e5e7eb" font-size="14" text-anchor="middle">Зворотна лінія (краще чути кавітацію)</text>
 
-      <circle cx="420" cy="160" r="16" fill="#14532d" stroke="#22c55e"/>
+      <circle cx="420" cy="160" r="16" fill="#14532d" stroke="#22c55e"></circle>
       <text x="420" y="165" fill="#dcfce7" font-size="12" text-anchor="middle">🎤</text>
       <text x="420" y="185" fill="#a7f3d0" font-size="12" text-anchor="middle">мікрофон 10–20 мм</text>
 
@@ -491,5 +489,6 @@ $('#receipt').addEventListener('click', ()=>{
 // ===== Ініціалізація =====
 if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
 </script>
-</body>
-</html>
+
+
+</body></html>

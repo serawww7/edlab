@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 17 (газовики) — Диспетчеризація аварій: мапа, черги, маршрути бригад, ETA, SLA-графік, експорт</title>
-<meta name="description" content="Інтерактивна диспетчеризація: клік на мапі → інцидент (P1/P2/P3), черга, авто-призначення найближчої бригади, маршрут/ETA, імітація руху й усунення, графік SLA, метрики, журнал, експорт CSV/TXT."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Інтерактивна диспетчеризація: клік на мапі → інцидент (P1/P2/P3), черга, авто-призначення найближчої бригади, маршрут/ETA, імітація руху й усунення, графік SLA, метрики, журнал, експорт CSV/TXT.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -39,14 +37,14 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
 .tag.bad{border-color:#5a1f1f;background:#2a1212}
 .footer{margin-top:20px;color:#94a3b8;font-size:.9rem}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para17.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 17"><meta property="og:description" content="Клікай на мапі, щоб створити інцидент. Обирай пріоритет (P1/P2/P3) і тип (запах газу, витік, відсутність газу, вибухонебезпечні роботи поруч). Система трим"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para17.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 17","description":"Клікай на мапі, щоб створити інцидент. Обирай пріоритет (P1/P2/P3) і тип (запах газу, витік, відсутність газу, вибухонебезпечні роботи поруч). Система трим","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para17.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🚨🗺️</span>
       <div>
-        <b>Пара 17 — Диспетчеризація аварій</b><br/>
+        <b>Пара 17 — Диспетчеризація аварій</b><br>
         <span class="badge">Мапа → інциденти → черга/пріоритет → призначення бригади → маршрут/ETA → графік SLA → експорт</span>
       </div>
     </div>
@@ -82,7 +80,7 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
         <label>Пріоритет
           <select id="prio" class="input">
             <option value="P1">P1 (критичний)</option>
-            <option value="P2" selected>P2 (високий)</option>
+            <option value="P2" selected="">P2 (високий)</option>
             <option value="P3">P3 (звичайний)</option>
           </select>
         </label>
@@ -94,7 +92,7 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
             <option>Роботи поруч (ризик)</option>
           </select>
         </label>
-        <label style="flex:1">Нотатка<input id="inote" class="input" placeholder="Деталі інциденту"/></label>
+        <label style="flex:1">Нотатка<input id="inote" class="input" placeholder="Деталі інциденту"></label>
         <button class="btn" id="assign">🤖 Перепризначити вручну (опц.)</button>
       </div>
 
@@ -417,5 +415,6 @@ $('#saveTxt').addEventListener('click', saveTXT);
 /* ===== Ініт ===== */
 drawMap(); drawChart(); refreshTables();
 </script>
-</body>
-</html>
+
+
+</body></html>

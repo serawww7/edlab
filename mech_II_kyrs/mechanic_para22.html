@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 22 (механіки) — ШІ#2: Візуальний інспектор ременя/шлангів (CV у браузері)</title>
-<meta name="description" content="Вебкамера/фото → аналіз зображення: тріщини (edge density), масляні плями (спекуляр/низька насиченість), перевірка вирівнювання по контрольній лінії, чек-лист, промпти, журнал, експорт PNG/CSV/TXT, чек 58 мм."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Вебкамера/фото → аналіз зображення: тріщини (edge density), масляні плями (спекуляр/низька насиченість), перевірка вирівнювання по контрольній лінії, чек-лист, промпти, журнал, експорт PNG/CSV/TXT, чек 58 мм.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -40,14 +38,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 .grid{display:grid;gap:14px;grid-template-columns:1.25fr 1fr}
 @media(max-width:1080px){.grid{grid-template-columns:1fr}}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/mech_II_kyrs/mechanic_para22.html"><meta property="og:type" content="article"><meta property="og:title" content="Механізація — Пара 22"><meta property="og:description" content="Мета: навчитися застосовувати прості алгоритми комп’ютерного зору для оцінки стану ременів, шлангів та околиць вузлів. Ми аналізуємо кадр на тріщини (щільн"><meta property="og:url" content="https://edlab.pp.ua/mech_II_kyrs/mechanic_para22.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Механізація — Пара 22","description":"Мета: навчитися застосовувати прості алгоритми комп’ютерного зору для оцінки стану ременів, шлангів та околиць вузлів. Ми аналізуємо кадр на тріщини (щільн","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/mech_II_kyrs/mechanic_para22.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🪛</span>
       <div>
-        <b>Пара 22 — Візуальний інспектор ременя/шлангів (ШІ у браузері)</b><br/>
+        <b>Пара 22 — Візуальний інспектор ременя/шлангів (ШІ у браузері)</b><br>
         <span class="badge">камера/фото → тріщини/масло/вирівнювання → чек-лист → промпти → журнал → експорт</span>
       </div>
     </div>
@@ -62,14 +60,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h2>🎥 Джерело зображення</h2>
       <div class="row">
         <select id="src" class="input" style="max-width:220px">
-          <option value="cam" selected>Вебкамера</option>
+          <option value="cam" selected="">Вебкамера</option>
           <option value="img">Фото (завантажити)</option>
         </select>
         <select id="camSel" class="input" style="max-width:260px"></select>
         <select id="res" class="input" style="max-width:160px">
-          <option>640x480</option><option selected>1280x720</option><option>1920x1080</option>
+          <option>640x480</option><option selected="">1280x720</option><option>1920x1080</option>
         </select>
-        <input id="file" class="input" type="file" accept="image/*" style="display:none"/>
+        <input id="file" class="input" type="file" accept="image/*" style="display:none">
         <button class="btn good" id="start">▶️ Старт</button>
         <button class="btn secondary" id="shot">📸 Знімок</button>
         <button class="btn secondary" id="stop">⏹️ Стоп</button>
@@ -77,10 +75,10 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       </div>
 
       <div class="row" style="margin-top:6px">
-        <label>Порог edge<input id="thrE" class="input" type="range" min="8" max="80" step="1" value="24"/></label>
-        <label>Порог «масло» (V%)<input id="thrV" class="input" type="range" min="30" max="95" step="1" value="70"/></label>
-        <label>Порог насиченості (S%)<input id="thrS" class="input" type="range" min="5" max="60" step="1" value="18"/></label>
-        <label>Товщина лінії вирівн., px<input id="aline" class="input" type="number" min="1" max="8" value="3"/></label>
+        <label>Порог edge<input id="thrE" class="input" type="range" min="8" max="80" step="1" value="24"></label>
+        <label>Порог «масло» (V%)<input id="thrV" class="input" type="range" min="30" max="95" step="1" value="70"></label>
+        <label>Порог насиченості (S%)<input id="thrS" class="input" type="range" min="5" max="60" step="1" value="18"></label>
+        <label>Товщина лінії вирівн., px<input id="aline" class="input" type="number" min="1" max="8" value="3"></label>
       </div>
 
       <div class="canvasWrap" style="margin-top:8px">
@@ -110,11 +108,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>✅ Чек-лист дій</h2>
       <div id="checklist" class="note small">
-        <label><input type="checkbox"/> Очистити зону вузла від пилу/масла, зробити повторний кадр.</label><br/>
-        <label><input type="checkbox"/> Перевірити натяг ременя та паралельність шківів (Пара 19).</label><br/>
-        <label><input type="checkbox"/> Оглянути шланги на мікротріщини, «мокрі місця», підтік на з’єднаннях.</label><br/>
-        <label><input type="checkbox"/> Протерти посадки підшипників, перевірити вібрацію/шум (Пара 20).</label><br/>
-        <label><input type="checkbox"/> Усунути підтік (хомут/фітинг/шланг), промити вузол, повторний контроль.</label>
+        <label><input type="checkbox"> Очистити зону вузла від пилу/масла, зробити повторний кадр.</label><br>
+        <label><input type="checkbox"> Перевірити натяг ременя та паралельність шківів (Пара 19).</label><br>
+        <label><input type="checkbox"> Оглянути шланги на мікротріщини, «мокрі місця», підтік на з’єднаннях.</label><br>
+        <label><input type="checkbox"> Протерти посадки підшипників, перевірити вібрацію/шум (Пара 20).</label><br>
+        <label><input type="checkbox"> Усунути підтік (хомут/фітинг/шланг), промити вузол, повторний контроль.</label>
       </div>
 
       <h2 style="margin-top:10px">🧠 Промпт до LLM</h2>
@@ -129,7 +127,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div class="row">
         <button class="btn" id="mark">📌 Позначити подію</button>
         <select id="label" class="input" style="max-width:240px">
-          <option value="ok" selected>ok</option>
+          <option value="ok" selected="">ok</option>
           <option value="crack">тріщини</option>
           <option value="oil">масло</option>
           <option value="misalign">невирівняно</option>
@@ -142,7 +140,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <button class="btn" id="saveTasks">📝 TXT (завдання студента)</button>
         <button class="btn" id="receipt">🖨️ 58 мм чек</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
     </div>
   </div>
 
@@ -158,13 +156,13 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🔌 Схема розміщення (SVG)</h2>
     <svg viewBox="0 0 980 280" role="img" aria-label="Камера → ремінь/шланг; контрольна лінія">
-      <rect x="40" y="40" width="260" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <rect x="40" y="40" width="260" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
       <text x="170" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Ноутбук/ПК</text>
       <text x="170" y="98" fill="#93c5fd" font-size="12" text-anchor="middle">вебкамера 720p+</text>
-      <line x1="300" y1="90" x2="440" y2="90" stroke="#93c5fd" stroke-width="3"/>
-      <rect x="460" y="60" width="180" height="68" rx="10" fill="#14532d" stroke="#22c55e"/>
+      <line x1="300" y1="90" x2="440" y2="90" stroke="#93c5fd" stroke-width="3"></line>
+      <rect x="460" y="60" width="180" height="68" rx="10" fill="#14532d" stroke="#22c55e"></rect>
       <text x="550" y="92" fill="#dcfce7" font-size="12" text-anchor="middle">Ремінь/шланг</text>
-      <line x1="460" y1="140" x2="780" y2="140" stroke="#fbbf24" stroke-width="3"/>
+      <line x1="460" y1="140" x2="780" y2="140" stroke="#fbbf24" stroke-width="3"></line>
       <text x="620" y="160" fill="#fde68a" font-size="12" text-anchor="middle">Контрольна лінія (вирівнювання)</text>
       <text x="540" y="220" fill="#fbbf24" font-size="12">⚠️ Безпека: LOTO, не лізти до рухомих частин під час аналізу.</text>
     </svg>
@@ -499,5 +497,6 @@ loop();
 // ===== LMS-friendly =====
 if (window.self !== window.top) document.documentElement.classList.add('embedded');
 </script>
-</body>
-</html>
+
+
+</body></html>

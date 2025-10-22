@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 11 (газовики) — Ревізія газових лічильників: серійний №/фото, контрольний об’єм, похибка, графік, 58 мм, CSV/TXT, QR</title>
-<meta name="description" content="Практика ревізії лічильників: фото серійного № та показань, емульований витратомір, інтеграція об’єму, похибка за контрольним об’ємом і показаннями, живий графік, NFC/ID, підпис, чек 58 мм, CSV/TXT, QR."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Практика ревізії лічильників: фото серійного № та показань, емульований витратомір, інтеграція об’єму, похибка за контрольним об’ємом і показаннями, живий графік, NFC/ID, підпис, чек 58 мм, CSV/TXT, QR.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -48,14 +46,14 @@ canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px
 .tag.bad{border-color:#5a1f1f;background:#2a1212}
 hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para11.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 11"><meta property="og:description" content="Перевіряємо побутовий лічильник (G1.6/G2.5 тощо). Фіксуємо серійний номер і показання (старт/фініш) з фото. Проводимо тест за контрольним об’ємом (Vref): п"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para11.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 11","description":"Перевіряємо побутовий лічильник (G1.6/G2.5 тощо). Фіксуємо серійний номер і показання (старт/фініш) з фото. Проводимо тест за контрольним об’ємом (Vref): п","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para11.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧮🔧</span>
       <div>
-        <b>Пара 11 — Ревізія газових лічильників</b><br/>
+        <b>Пара 11 — Ревізія газових лічильників</b><br>
         <span class="badge">Серійний №/фото → контрольний об’єм → інтеграція V → похибка → графік → NFC/ID → підпис → чек 58 мм → CSV/TXT → QR</span>
       </div>
     </div>
@@ -69,15 +67,15 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       Проводимо тест за <b>контрольним об’ємом</b> (<span class="mono">Vref</span>): подаємо стабільну витрату, таймер інтегрує <b>об’єм</b> та обчислює <b>похибку</b>. 
       Далі порівнюємо з <b>допуском</b> і формуємо <b>чек 58 мм</b>, <b>CSV/TXT</b>, <b>QR</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., кв. ..."/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., кв. ..."></label>
       <label style="flex:1">Тип лічильника
         <select id="meterType" class="input">
-          <option>G1.6</option><option selected>G2.5</option><option>G4</option><option>Інший</option>
+          <option>G1.6</option><option selected="">G2.5</option><option>G4</option><option>Інший</option>
         </select>
       </label>
-      <label style="flex:1">Серійний №<input id="serial" class="input" placeholder="Напр. 21-1234567"/></label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">Серійний №<input id="serial" class="input" placeholder="Напр. 21-1234567"></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"></label>
     </div>
     <div class="row">
       <button class="btn good" id="mkCase">🧰 Створити кейс</button>
@@ -95,16 +93,16 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <div class="block">
         <div class="row">
           <label style="flex:1">Витрата, м³/год
-            <input id="flow" type="range" class="input" min="0" max="6" step="0.1" value="1.2"/>
+            <input id="flow" type="range" class="input" min="0" max="6" step="0.1" value="1.2">
           </label>
           <span class="badge">Поточна: <b id="flowNum">1.2</b> м³/год</span>
           <button class="btn" id="markFlow">📍 Точка Q</button>
         </div>
         <div class="row">
-          <label>Контрольний об’єм Vref, м³<input id="vref" type="number" class="input" step="0.001" value="0.010"/></label>
-          <label>Допуск, % (±)<input id="tol" type="number" class="input" step="0.1" value="2.0"/></label>
-          <label>Показання старт, м³<input id="idxStart" type="number" class="input" step="0.001" value="1234.000"/></label>
-          <label>Показання фініш, м³<input id="idxEnd" type="number" class="input" step="0.001" value="1234.010"/></label>
+          <label>Контрольний об’єм Vref, м³<input id="vref" type="number" class="input" step="0.001" value="0.010"></label>
+          <label>Допуск, % (±)<input id="tol" type="number" class="input" step="0.1" value="2.0"></label>
+          <label>Показання старт, м³<input id="idxStart" type="number" class="input" step="0.001" value="1234.000"></label>
+          <label>Показання фініш, м³<input id="idxEnd" type="number" class="input" step="0.001" value="1234.010"></label>
           <button class="btn secondary" id="applyCfg">⚙️ Застосувати</button>
         </div>
         <div class="row">
@@ -129,13 +127,13 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 
       <h2 style="margin-top:10px">🎥 Фото (4 шт.)</h2>
       <div class="row">
-        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <video id="vid" class="photo" autoplay="" playsinline="" muted=""></video>
         <div>
           <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
           <button class="btn" data-kind="plate">📷 Табличка/серійний</button>
           <button class="btn" data-kind="idxStart">📷 Показання старт</button>
           <button class="btn" data-kind="idxEnd">📷 Показання фініш</button>
-          <button class="btn" data-kind="setup">📷 Схема підключення</button><br/>
+          <button class="btn" data-kind="setup">📷 Схема підключення</button><br>
           <small class="muted">Фото зберігаються у «Галереї доказів».</small>
         </div>
       </div>
@@ -155,7 +153,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <div class="block">
         <div class="row">
           <button class="btn" id="nfcBtn">📶 NFC</button>
-          <input id="asset" class="input" placeholder="ID лічильника (якщо NFC недоступний)"/>
+          <input id="asset" class="input" placeholder="ID лічильника (якщо NFC недоступний)">
           <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
           <span class="badge" id="nfcs">Статус NFC: очікується</span>
         </div>
@@ -198,7 +196,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
 
       <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
@@ -554,5 +552,6 @@ initDefaults(); updateMetrics(); computeAll(); drawChart();
 // Вбудоване відображення (Moodle/iFrame)
 (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
 </script>
-</body>
-</html>
+
+
+</body></html>

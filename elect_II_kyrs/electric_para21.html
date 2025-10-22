@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 21 (Електрика) — Arduino: монітор енергоспоживання (SCT-013, кВт·год, сигналізація)</title>
-<meta name="description" content="Вимірюємо струм SCT-013, обчислюємо S/P, кВт·год, індикатори перевантаження (LED/бузер), калібрування, живий графік, журнал і експорт. Генератор прошивки для одного або двох сенсорів (I-only або I+U)."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Вимірюємо струм SCT-013, обчислюємо S/P, кВт·год, індикатори перевантаження (LED/бузер), калібрування, живий графік, журнал і експорт. Генератор прошивки для одного або двох сенсорів (I-only або I+U).">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -38,14 +36,14 @@ svg{max-width:100%;height:auto;display:block}
 .footer{margin-top:20px;color:var(--muted);font-size:.9rem}
 kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para21.html"><meta property="og:type" content="article"><meta property="og:title" content="Електроенергетика — Пара 21"><meta property="og:description" content="Мета: безпечним способом зняти струм із трансформатора струму SCT-013, оцінити S (повна потужність), за наявності сенсора напруги — P (активна) та PF, нако"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para21.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Електроенергетика — Пара 21","description":"Мета: безпечним способом зняти струм із трансформатора струму SCT-013, оцінити S (повна потужність), за наявності сенсора напруги — P (активна) та PF, нако","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para21.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🔌</span>
       <div>
-        <b>Пара 21 — Arduino: монітор енергоспоживання</b><br/>
+        <b>Пара 21 — Arduino: монітор енергоспоживання</b><br>
         <span class="badge">SCT-013 → I<sub>rms</sub> → S/P → кВт·год → пороги → графік → експорт</span>
       </div>
     </div>
@@ -64,17 +62,17 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <div style="flex:1">
           <label for="mode">Режим</label>
           <select id="mode" class="input">
-            <option value="I_ONLY" selected>Лише струм (S≈U·I)</option>
+            <option value="I_ONLY" selected="">Лише струм (S≈U·I)</option>
             <option value="I_U">Струм + напруга (реальна P, PF)</option>
           </select>
         </div>
         <div style="flex:1">
           <label for="mains">Мережа, В (RMS)</label>
-          <input id="mains" class="input" type="number" step="1" value="230"/>
+          <input id="mains" class="input" type="number" step="1" value="230">
         </div>
         <div style="flex:1">
           <label for="freq">Частота, Гц</label>
-          <input id="freq" class="input" type="number" step="0.1" value="50.0"/>
+          <input id="freq" class="input" type="number" step="0.1" value="50.0">
         </div>
       </div>
 
@@ -85,26 +83,26 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         </div>
         <div style="flex:1">
           <label for="apinU">A1 — AC-адаптер (напруга)</label>
-          <select id="apinU" class="input"><option>A1</option><option selected>A2</option><option>A3</option></select>
+          <select id="apinU" class="input"><option>A1</option><option selected="">A2</option><option>A3</option></select>
         </div>
         <div style="flex:1">
           <label for="nSamples">Вікно вибірки (мс)</label>
-          <input id="nSamples" class="input" type="number" step="5" value="500"/>
+          <input id="nSamples" class="input" type="number" step="5" value="500">
         </div>
       </div>
 
       <div class="row">
         <div style="flex:1">
           <label for="calI">Калібрування I (A/ADC)</label>
-          <input id="calI" class="input" type="number" step="0.0001" value="0.0500"/>
+          <input id="calI" class="input" type="number" step="0.0001" value="0.0500">
         </div>
         <div style="flex:1">
           <label for="calU">Калібрування U (В/ADC)</label>
-          <input id="calU" class="input" type="number" step="0.001" value="1.100"/>
+          <input id="calU" class="input" type="number" step="0.001" value="1.100">
         </div>
         <div style="flex:1">
           <label for="phase">Фазовий зсув (рад)</label>
-          <input id="phase" class="input" type="number" step="0.01" value="0.10"/>
+          <input id="phase" class="input" type="number" step="0.01" value="0.10">
         </div>
       </div>
 
@@ -112,25 +110,25 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div class="row">
         <div style="flex:1">
           <label for="pMax">Поріг перевантаження, Вт</label>
-          <input id="pMax" class="input" type="number" step="10" value="3000"/>
+          <input id="pMax" class="input" type="number" step="10" value="3000">
         </div>
         <div style="flex:1">
           <label for="ledPin">LED пін</label>
-          <select id="ledPin" class="input"><option>3</option><option selected>5</option><option>6</option><option>9</option><option>10</option><option>11</option></select>
+          <select id="ledPin" class="input"><option>3</option><option selected="">5</option><option>6</option><option>9</option><option>10</option><option>11</option></select>
         </div>
         <div style="flex:1">
           <label for="buzPin">Buzzer пін</label>
-          <select id="buzPin" class="input"><option>4</option><option selected>8</option><option>7</option><option>12</option><option>13</option></select>
+          <select id="buzPin" class="input"><option>4</option><option selected="">8</option><option>7</option><option>12</option><option>13</option></select>
         </div>
       </div>
 
       <h3 style="margin-top:12px">🧪 Емулятор навантаження</h3>
       <div class="row">
-        <input id="emu" type="checkbox"/><label for="emu">Увімкнути емуль</label>
+        <input id="emu" type="checkbox"><label for="emu">Увімкнути емуль</label>
       </div>
       <div class="row">
-        <label style="flex:1">Струм, A<sub>rms</sub> <input id="emuI" class="input" type="range" min="0" max="25" step="0.1" value="4" disabled/></label>
-        <label style="flex:1">PF (cos φ) <input id="emuPF" class="input" type="range" min="0" max="1" step="0.01" value="0.90" disabled/></label>
+        <label style="flex:1">Струм, A<sub>rms</sub> <input id="emuI" class="input" type="range" min="0" max="25" step="0.1" value="4" disabled=""></label>
+        <label style="flex:1">PF (cos φ) <input id="emuPF" class="input" type="range" min="0" max="1" step="0.01" value="0.90" disabled=""></label>
       </div>
 
       <h3 style="margin-top:12px">📈 Живий графік</h3>
@@ -151,7 +149,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:12px">💾 Протокол/експорт</h3>
       <div class="row">
-        <input id="fio" class="input" placeholder="ПІБ студента"/>
+        <input id="fio" class="input" placeholder="ПІБ студента">
         <button class="btn" id="saveTxt">💾 TXT</button>
         <button class="btn" id="saveCsv">📄 CSV</button>
       </div>
@@ -163,32 +161,32 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h2>🔌 Схема підключення (SVG)</h2>
       <svg viewBox="0 0 760 420" role="img" aria-label="Arduino + SCT-013 + AC-адаптер">
         <!-- Arduino -->
-        <rect x="40" y="40" width="220" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <rect x="40" y="40" width="220" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
         <text x="150" y="66" fill="#e5e7eb" font-size="16" text-anchor="middle">Arduino UNO/Nano</text>
         <text x="60" y="96" fill="#93c5fd" font-size="12">A0 — I</text>
         <text x="60" y="116" fill="#93c5fd" font-size="12">A1/A2 — U (опц.)</text>
         <text x="60" y="136" fill="#93c5fd" font-size="12">5V/3.3V — bias</text>
 
         <!-- SCT -->
-        <rect x="320" y="40" width="200" height="100" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <rect x="320" y="40" width="200" height="100" rx="12" fill="#14532d" stroke="#22c55e"></rect>
         <text x="420" y="70" fill="#dcfce7" font-size="16" text-anchor="middle">SCT-013 (CT)</text>
         <text x="420" y="90" fill="#a7f3d0" font-size="12" text-anchor="middle">I → A0 через шунт + bias</text>
 
         <!-- Bias divider -->
-        <rect x="320" y="160" width="200" height="90" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <rect x="320" y="160" width="200" height="90" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
         <text x="420" y="190" fill="#e5e7eb" font-size="14" text-anchor="middle">Дільник 2×100кΩ</text>
         <text x="420" y="210" fill="#9ca3af" font-size="12" text-anchor="middle">центр ~Vcc/2 → A0/A2</text>
 
         <!-- AC adapter -->
-        <rect x="320" y="270" width="200" height="100" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+        <rect x="320" y="270" width="200" height="100" rx="12" fill="#7c2d12" stroke="#fb923c"></rect>
         <text x="420" y="300" fill="#fed7aa" font-size="16" text-anchor="middle">AC-адаптер 9V (опц.)</text>
         <text x="420" y="320" fill="#fed7aa" font-size="12" text-anchor="middle">через дільник до A1/A2</text>
 
         <!-- Connections -->
-        <line x1="260" y1="100" x2="320" y2="80" stroke="#93c5fd" stroke-width="3"/><text x="280" y="90" fill="#93c5fd" font-size="12">A0 ← CT</text>
-        <line x1="260" y1="120" x2="320" y2="300" stroke="#93c5fd" stroke-width="3"/><text x="280" y="210" fill="#93c5fd" font-size="12">A1/A2 ← AC</text>
+        <line x1="260" y1="100" x2="320" y2="80" stroke="#93c5fd" stroke-width="3"></line><text x="280" y="90" fill="#93c5fd" font-size="12">A0 ← CT</text>
+        <line x1="260" y1="120" x2="320" y2="300" stroke="#93c5fd" stroke-width="3"></line><text x="280" y="210" fill="#93c5fd" font-size="12">A1/A2 ← AC</text>
 
-        <line x1="260" y1="140" x2="320" y2="200" stroke="#64748b" stroke-width="3"/><text x="280" y="170" fill="#94a3b8" font-size="12">Bias: Vcc/2</text>
+        <line x1="260" y1="140" x2="320" y2="200" stroke="#64748b" stroke-width="3"></line><text x="280" y="170" fill="#94a3b8" font-size="12">Bias: Vcc/2</text>
       </svg>
 
       <div class="note small" style="margin-top:10px">
@@ -465,5 +463,6 @@ $('#saveCsv').addEventListener('click', ()=>{
 drawChart();
 if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS/Moodle-friendly
 </script>
-</body>
-</html>
+
+
+</body></html>

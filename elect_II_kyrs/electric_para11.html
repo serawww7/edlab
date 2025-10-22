@@ -3,14 +3,11 @@
      Чек-листи ОП (охорона праці), журнал інструктажів (первинний/повторний/цільовий/позаплановий),
      наряд-допуск (LOTO-пункти), етикетки-допуски 58 мм, A4-звіти, імпорт/експорт CSV, NFC/QR.
      Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 11 — Електробезпека: інструктажі, наряд-допуск, LOTO, 58 мм, A4</title>
-<meta name="color-scheme" content="light dark" />
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -94,7 +91,7 @@
 .ticket small{ font-weight:700 }
 </style>
 
-</head>
+<meta name="description" content="Відпрацювати оформлення інструктажів з ОП, створення наряду-допуску з чек-листами LOTO, генерацію етикеток-допусків 58 мм та A4-звітів, а також експортуват"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para11.html"><meta property="og:type" content="article"><meta property="og:title" content="⚡ Електробезпека: інструктажі · наряд-допуск · LOTO · 🧾 етикетки 58 мм · A4-звіти"><meta property="og:description" content="Відпрацювати оформлення інструктажів з ОП, створення наряду-допуску з чек-листами LOTO, генерацію етикеток-допусків 58 мм та A4-звітів, а також експортуват"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para11.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"⚡ Електробезпека: інструктажі · наряд-допуск · LOTO · 🧾 етикетки 58 мм · A4-звіти","description":"Відпрацювати оформлення інструктажів з ОП, створення наряду-допуску з чек-листами LOTO, генерацію етикеток-допусків 58 мм та A4-звітів, а також експортуват","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para11.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Електрики · Пара 11 · аудиторно</span>
@@ -106,7 +103,7 @@
       <div class="row">
         <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
         <button class="btn" onclick="exportAll()">📤 Експорт CSV (3 файли)</button>
-        <input id="fileInstr" type="file" accept=".csv,text/csv" class="btn"/>
+        <input id="fileInstr" type="file" accept=".csv,text/csv" class="btn">
         <button class="btn" onclick="importInstr()">⬆️ Імпорт CSV (інструктажі)</button>
       </div>
       <p class="small">CSV (інструктажі): <span class="mono">date,type,student,group,topic,result,notes</span></p>
@@ -119,7 +116,7 @@
           <h3>Додати запис</h3>
           <div class="row"><label class="small" style="min-width:140px">Дата</label><input id="iDate" type="date"></div>
           <div class="row"><label class="small" style="min-width:140px">Тип</label>
-            <select id="iType"><option>Первинний</option><option selected>Повторний</option><option>Цільовий</option><option>Позаплановий</option></select>
+            <select id="iType"><option>Первинний</option><option selected="">Повторний</option><option>Цільовий</option><option>Позаплановий</option></select>
           </div>
           <div class="row"><label class="small" style="min-width:140px">Студент</label><input id="iStudent" placeholder="Прізвище І.П."></div>
           <div class="row"><label class="small" style="min-width:140px">Група</label><input id="iGroup" placeholder="Е-21"></div>
@@ -135,7 +132,7 @@
           <h3>Фільтр/службове</h3>
           <div class="row">
             <select id="iFilter">
-              <option selected>Всі</option><option>Лише PASS</option><option>Лише FAIL</option><option>Первинний</option><option>Повторний</option><option>Цільовий</option><option>Позаплановий</option>
+              <option selected="">Всі</option><option>Лише PASS</option><option>Лише FAIL</option><option>Первинний</option><option>Повторний</option><option>Цільовий</option><option>Позаплановий</option>
             </select>
             <button class="btn" onclick="renderInstr()">🔎 Фільтр</button>
           </div>
@@ -180,11 +177,11 @@
         </div>
         <div>
           <h3>LOTO / Безпечна підготовка</h3>
-          <div class="row"><label class="small" style="min-width:160px">Вимкнення джерела</label><select id="wIso"><option selected>Виконано</option><option>Н/З</option></select></div>
-          <div class="row"><label class="small" style="min-width:160px">Замок (Lock)</label><select id="wLock"><option selected>Встановлено</option><option>Н/З</option></select></div>
-          <div class="row"><label class="small" style="min-width:160px">Бирка (Tag)</label><select id="wTag"><option selected>Встановлено</option><option>Н/З</option></select></div>
-          <div class="row"><label class="small" style="min-width:160px">Перевірка відсутності напруги</label><select id="wTest"><option selected>Виконано</option><option>Н/З</option></select></div>
-          <div class="row"><label class="small" style="min-width:160px">ЗІЗ (PPE) перевірено</label><select id="wPPE"><option selected>Так</option><option>Ні</option></select></div>
+          <div class="row"><label class="small" style="min-width:160px">Вимкнення джерела</label><select id="wIso"><option selected="">Виконано</option><option>Н/З</option></select></div>
+          <div class="row"><label class="small" style="min-width:160px">Замок (Lock)</label><select id="wLock"><option selected="">Встановлено</option><option>Н/З</option></select></div>
+          <div class="row"><label class="small" style="min-width:160px">Бирка (Tag)</label><select id="wTag"><option selected="">Встановлено</option><option>Н/З</option></select></div>
+          <div class="row"><label class="small" style="min-width:160px">Перевірка відсутності напруги</label><select id="wTest"><option selected="">Виконано</option><option>Н/З</option></select></div>
+          <div class="row"><label class="small" style="min-width:160px">ЗІЗ (PPE) перевірено</label><select id="wPPE"><option selected="">Так</option><option>Ні</option></select></div>
           <div class="row"><button class="btn" onclick="buildA4Permit()">📄 A4 наряд-допуск</button></div>
           <p class="small">Після відновлення — <b>зняти lock/tag</b>, записати час завершення робіт.</p>
         </div>
@@ -545,5 +542,6 @@ function openTicketOnly(){
 }
 </script>
 
-</body>
-</html>
+
+
+</body></html>

@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 23 (газовики) — AI-архів актів: PDF/JPEG → реквізити → пошук → дублікати → дашборд → експорт</title>
-<meta name="description" content="AI-архів: завантаж PDF/JPEG актів, автоматичний витяг реквізитів (№, дата, адреса, абонент, телефон, пріоритет, відповідальний), пошук/фільтри, дублікати, дашборд, експорт CSV/TXT, QR."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="AI-архів: завантаж PDF/JPEG актів, автоматичний витяг реквізитів (№, дата, адреса, абонент, телефон, пріоритет, відповідальний), пошук/фільтри, дублікати, дашборд, експорт CSV/TXT, QR.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -43,14 +41,14 @@ canvas.pie{display:block;width:100%;height:220px;background:#0b1220;border:1px s
 .kpi .card{margin-top:0}
 @media(max-width:900px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para23.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 23"><meta property="og:description" content="Завантаж PDF або зображення актів — система витягне текст, розпарсить № акта, дату/час, адресу, абонента, телефон, пріоритет (P1/P2/P3), відповідального, п"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para23.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 23","description":"Завантаж PDF або зображення актів — система витягне текст, розпарсить № акта, дату/час, адресу, абонента, телефон, пріоритет (P1/P2/P3), відповідального, п","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para23.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🗂️🤖</span>
       <div>
-        <b>Пара 23 — AI-архів актів</b><br/>
+        <b>Пара 23 — AI-архів актів</b><br>
         <span class="badge">PDF/JPEG → текст → реквізити → фільтри/пошук → дублікати → дашборд → експорт</span>
       </div>
     </div>
@@ -63,7 +61,7 @@ canvas.pie{display:block;width:100%;height:220px;background:#0b1220;border:1px s
     <p>Завантаж <b>PDF</b> або <b>зображення</b> актів — система витягне текст, розпарсить <b>№ акта, дату/час, адресу, абонента, телефон, пріоритет (P1/P2/P3), відповідального</b>, 
     позначить <b>дублікати</b>, надасть <b>пошук</b> і <b>фільтри</b>, побудує <b>дашборд</b>, збереже у <b>CSV/TXT</b> і згенерує <b>QR</b> на папку з оригіналами.</p>
     <div class="row">
-      <input id="files" type="file" accept=".pdf,image/*" multiple class="input" style="max-width:420px"/>
+      <input id="files" type="file" accept=".pdf,image/*" multiple="" class="input" style="max-width:420px">
       <button class="btn" id="run">▶️ Обробити</button>
       <button class="btn secondary" id="clear">🧹 Очистити</button>
       <span class="badge">Файлів: <b id="nFiles">0</b></span>
@@ -467,5 +465,6 @@ function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<'
 renderDash();
 
 </script>
-</body>
-</html>
+
+
+</body></html>

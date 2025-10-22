@@ -13,12 +13,9 @@
      • ЗІЗ-чеклист і службова записка (текст) + CSV.
 
      Готово для GitHub Pages / iFrame у Moodle.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 15 — Scouting: ЕПШ → рішення → бакова суміш → вікно погоди → ЗІЗ, CSV</title>
 <meta name="color-scheme" content="light dark">
 <style>
@@ -79,7 +76,7 @@
     .no-print{ display:none !important }
   }
 </style>
-</head>
+<meta name="description" content="За пару студенти проведуть польове обстеження, розрахують щільність/ураження, порівняють із ЕПШ, ухвалять рішення (обробляти/спостерігати) та розрахують ба"><link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para15.html"><meta property="og:type" content="article"><meta property="og:title" content="🔎 Scouting: ЕПШ → рішення → бакова суміш → вікно погоди → ЗІЗ"><meta property="og:description" content="За пару студенти проведуть польове обстеження, розрахують щільність/ураження, порівняють із ЕПШ, ухвалять рішення (обробляти/спостерігати) та розрахують ба"><meta property="og:url" content="https://edlab.pp.ua/agro_II_kyrs/agro_para15.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🔎 Scouting: ЕПШ → рішення → бакова суміш → вікно погоди → ЗІЗ","description":"За пару студенти проведуть польове обстеження, розрахують щільність/ураження, порівняють із ЕПШ, ухвалять рішення (обробляти/спостерігати) та розрахують ба","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/agro_II_kyrs/agro_para15.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Пара 15 · аудиторно · агрономи</span>
@@ -105,7 +102,7 @@
             <div style="flex:1">
               <label>Тип</label>
               <select id="objType">
-                <option value="pest" selected>Шкідник</option>
+                <option value="pest" selected="">Шкідник</option>
                 <option value="disease">Хвороба</option>
               </select>
             </div>
@@ -117,7 +114,7 @@
           <div class="row" style="margin-top:6px">
             <div style="flex:1"><label>Одиниця обліку</label>
               <select id="unit">
-                <option value="perPlant" selected>екз./рослину</option>
+                <option value="perPlant" selected="">екз./рослину</option>
                 <option value="perM2">екз./м²</option>
                 <option value="percent">% ураження</option>
               </select>
@@ -239,19 +236,19 @@
         <div class="box">
           <h3>ЗІЗ (перед стартом)</h3>
           <div class="row">
-            <label><input type="checkbox" class="ppe" checked> Комбінезон/куртка хімстійка</label>
+            <label><input type="checkbox" class="ppe" checked=""> Комбінезон/куртка хімстійка</label>
           </div>
           <div class="row">
-            <label><input type="checkbox" class="ppe" checked> Рукавички нітрилові</label>
+            <label><input type="checkbox" class="ppe" checked=""> Рукавички нітрилові</label>
           </div>
           <div class="row">
-            <label><input type="checkbox" class="ppe" checked> Респіратор з фільтром</label>
+            <label><input type="checkbox" class="ppe" checked=""> Респіратор з фільтром</label>
           </div>
           <div class="row">
-            <label><input type="checkbox" class="ppe" checked> Захисні окуляри/щиток</label>
+            <label><input type="checkbox" class="ppe" checked=""> Захисні окуляри/щиток</label>
           </div>
           <div class="row">
-            <label><input type="checkbox" class="ppe" checked> Мийка/вода/нейтралізатор поруч</label>
+            <label><input type="checkbox" class="ppe" checked=""> Мийка/вода/нейтралізатор поруч</label>
           </div>
           <p>Статус: <b><span id="ppeStatus">—</span></b></p>
         </div>
@@ -508,5 +505,6 @@
     if(e.target.classList.contains('ppe')) ppeCheck();
   });
 </script>
-</body>
-</html>
+
+
+</body></html>
