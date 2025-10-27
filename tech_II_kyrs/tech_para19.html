@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 19 (технологи) — Санітарія/SSOP: календар, ATP/змиви, тренди, чек/CSV/QR</title>
-<meta name="description" content="План мийки/дезінфекції (SSOP), журнал ATP (RLU), змиви (CFU/см²), алергени; живі графіки трендів, попередження, чек 58 мм, експорт CSV/TXT, QR на папку з доказами."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="План мийки/дезінфекції (SSOP), журнал ATP (RLU), змиви (CFU/см²), алергени; живі графіки трендів, попередження, чек 58 мм, експорт CSV/TXT, QR на папку з доказами.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -48,14 +46,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 .pill.weekly{border-color:#fbbf24}
 .pill.over{border-color:#f87171;color:#f87171}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/tech_II_kyrs/tech_para19.html"><meta property="og:type" content="article"><meta property="og:title" content="Технології тваринництва — Пара 19"><meta property="og:description" content="Мета: спланувати мийку/дезінфекцію за SSOP, вести журнал чистоти з вимірюваннями ATP (RLU), змивів (CFU/см²) і алергенних тестів, відслідковувати тренди, в"><meta property="og:url" content="https://edlab.pp.ua/tech_II_kyrs/tech_para19.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Технології тваринництва — Пара 19","description":"Мета: спланувати мийку/дезінфекцію за SSOP, вести журнал чистоти з вимірюваннями ATP (RLU), змивів (CFU/см²) і алергенних тестів, відслідковувати тренди, в","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/tech_II_kyrs/tech_para19.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧼</span>
       <div>
-        <b>Пара 19 — Санітарія/SSOP: календар, ATP/змиви, тренди</b><br/>
+        <b>Пара 19 — Санітарія/SSOP: календар, ATP/змиви, тренди</b><br>
         <span class="badge">план мийки/дезінфекції → журнал ATP/CFU/алергени → живі графіки → чек/CSV/QR</span>
       </div>
     </div>
@@ -70,16 +68,16 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h2>🗓️ План-календар SSOP</h2>
       <div class="row">
         <select id="area" class="input" style="max-width:220px">
-          <option value="milk" selected>Цех пастеризації</option>
+          <option value="milk" selected="">Цех пастеризації</option>
           <option value="cut">Коптильне/нарізка</option>
           <option value="pack">Пакування (MAP)</option>
           <option value="brine">Розсільне відділення</option>
           <option value="egg">Яєчний відділ</option>
         </select>
-        <label>Зміни/добу<input id="shifts" class="input" type="number" min="1" max="4" value="2"/></label>
-        <label>ATP поріг (RLU)<input id="rluThr" class="input" type="number" min="10" step="10" value="150"/></label>
-        <label>CFU поріг (напр., 10/см²)<input id="cfuThr" class="input" type="number" min="1" step="1" value="10"/></label>
-        <label>Алерген (порог., ppm)<input id="algThr" class="input" type="number" min="1" step="1" value="2"/></label>
+        <label>Зміни/добу<input id="shifts" class="input" type="number" min="1" max="4" value="2"></label>
+        <label>ATP поріг (RLU)<input id="rluThr" class="input" type="number" min="10" step="10" value="150"></label>
+        <label>CFU поріг (напр., 10/см²)<input id="cfuThr" class="input" type="number" min="1" step="1" value="10"></label>
+        <label>Алерген (порог., ppm)<input id="algThr" class="input" type="number" min="1" step="1" value="2"></label>
         <button class="btn good" id="mkPlan">⚙️ Згенерувати план</button>
       </div>
 
@@ -91,13 +89,13 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <select id="station" class="input" style="max-width:220px">
           <option>Ніж/стіл</option><option>Транспортер</option><option>Фасувальник</option><option>Пастеризатор</option><option>Шприц/шприц-насадка</option>
         </select>
-        <label>ATP, RLU<input id="rlu" class="input" type="number" step="1" value="120"/></label>
-        <label>Змив, CFU/см²<input id="cfu" class="input" type="number" step="1" value="6"/></label>
-        <label>Алерген, ppm<input id="alg" class="input" type="number" step="1" value="0"/></label>
+        <label>ATP, RLU<input id="rlu" class="input" type="number" step="1" value="120"></label>
+        <label>Змив, CFU/см²<input id="cfu" class="input" type="number" step="1" value="6"></label>
+        <label>Алерген, ppm<input id="alg" class="input" type="number" step="1" value="0"></label>
       </div>
       <div class="row">
-        <input id="operator" class="input" placeholder="Оператор/зміна (ПІБ)"/>
-        <input id="lot" class="input" placeholder="Лот/партія (необов.)"/>
+        <input id="operator" class="input" placeholder="Оператор/зміна (ПІБ)">
+        <input id="lot" class="input" placeholder="Лот/партія (необов.)">
         <button class="btn" id="addRec">➕ Додати запис</button>
         <button class="btn secondary" id="clearRec">🧹 Очистити журнал</button>
         <span id="kpi" class="badge">PASS: — % | Всього: 0</span>
@@ -115,7 +113,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (папка з актами/фото)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
       <small class="muted">QR генерується через <span class="mono">api.qrserver.com</span>; офлайн-фолбек — текст.</small>
     </div>
@@ -138,25 +136,25 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h2 style="margin-top:10px">🔌 Схема процесу (SVG)</h2>
       <svg viewBox="0 0 820 280" role="img" aria-label="Мийка/Дез → Інспекція ATP/Змиви → Журнал → Аналіз → Дії">
-        <rect x="40" y="40" width="160" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <rect x="40" y="40" width="160" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
         <text x="120" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Мийка / Дез</text>
         <text x="120" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">SSOP</text>
 
-        <rect x="220" y="40" width="170" height="120" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <rect x="220" y="40" width="170" height="120" rx="12" fill="#14532d" stroke="#22c55e"></rect>
         <text x="305" y="80" fill="#dcfce7" font-size="14" text-anchor="middle">ATP / Змиви</text>
         <text x="305" y="100" fill="#a7f3d0" font-size="12" text-anchor="middle">RLU / CFU / алергени</text>
 
-        <rect x="410" y="40" width="160" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <rect x="410" y="40" width="160" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
         <text x="490" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Журнал</text>
         <text x="490" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">CSV/TXT/чек</text>
 
-        <rect x="590" y="40" width="170" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+        <rect x="590" y="40" width="170" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"></rect>
         <text x="675" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Аналіз/Дії</text>
         <text x="675" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">тренди/аларми</text>
 
-        <line x1="200" y1="100" x2="220" y2="100" stroke="#93c5fd" stroke-width="3"/>
-        <line x1="390" y1="100" x2="410" y2="100" stroke="#22c55e" stroke-width="3"/>
-        <line x1="570" y1="100" x2="590" y2="100" stroke="#64748b" stroke-width="3"/>
+        <line x1="200" y1="100" x2="220" y2="100" stroke="#93c5fd" stroke-width="3"></line>
+        <line x1="390" y1="100" x2="410" y2="100" stroke="#22c55e" stroke-width="3"></line>
+        <line x1="570" y1="100" x2="590" y2="100" stroke="#64748b" stroke-width="3"></line>
       </svg>
 
       <h2 style="margin-top:10px">🎯 Завдання для студентів</h2>
@@ -408,5 +406,6 @@ $('#print58').addEventListener('click', print58);
 // ===== Ініціалізація =====
 genPlan(); drawCharts(); updateKPIs(); renderCal();
 </script>
-</body>
-</html>
+
+
+</body></html>

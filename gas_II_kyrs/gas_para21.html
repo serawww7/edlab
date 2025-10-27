@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 21 (газовики) — AI-помічник бригади: NLP заявки → P1/P2/P3 → кроки дій → акт, підпис, чек, експорт</title>
-<meta name="description" content="Встав текст заявки або надиктуй: локальний AI витягає сутності, визначає пріоритет (P1/P2/P3), пропонує алгоритм дій і автозаповнює акт. Експорт CSV/TXT, чек 58 мм, QR на докази."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Встав текст заявки або надиктуй: локальний AI витягає сутності, визначає пріоритет (P1/P2/P3), пропонує алгоритм дій і автозаповнює акт. Експорт CSV/TXT, чек 58 мм, QR на докази.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -41,14 +39,14 @@ canvas.chart{display:block;width:100%;height:220px;background:#0b1220;border:1px
 .sig{border:1px solid var(--line);border-radius:12px;background:#0b1220}
 .footer{margin-top:20px;color:#94a3b8;font-size:.9rem}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para21.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 21"><meta property="og:description" content="Встав текст заявки (або кілька), натисни Аналізувати — локальний AI витягне сутності (АДРЕСА, ПІБ, ТЕЛ, ЛІЧИЛЬНИК, ОЗНАКИ, ТИСК, ЧАС), оцінить ризик, пріор"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para21.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 21","description":"Встав текст заявки (або кілька), натисни Аналізувати — локальний AI витягне сутності (АДРЕСА, ПІБ, ТЕЛ, ЛІЧИЛЬНИК, ОЗНАКИ, ТИСК, ЧАС), оцінить ризик, пріор","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para21.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🤖🧯</span>
       <div>
-        <b>Пара 21 — AI-помічник бригади</b><br/>
+        <b>Пара 21 — AI-помічник бригади</b><br>
         <span class="badge">Заявка → NLP сутності → пріоритет → рекомендації → акт/підпис → чек/CSV/TXT/QR</span>
       </div>
     </div>
@@ -119,7 +117,7 @@ canvas.chart{display:block;width:100%;height:220px;background:#0b1220;border:1px
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div style="margin-top:8px"><canvas id="qr" width="220" height="220" style="background:#0b1220;border:1px solid var(--line);border-radius:12px"></canvas></div>
 
       <h3 style="margin-top:10px">🛎️ Журнал</h3>
@@ -375,5 +373,6 @@ $('#qrGen').addEventListener('click',()=>{
 function initRisk(){ gr.clearRect(0,0,cRisk.width,cRisk.height); gr.strokeStyle='#223049'; gr.strokeRect(0.5,0.5,cRisk.width-1,cRisk.height-1); }
 initRisk();
 </script>
-</body>
-</html>
+
+
+</body></html>

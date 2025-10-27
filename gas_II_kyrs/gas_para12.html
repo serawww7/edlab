@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 12 (газовики) — Налаштування запірної арматури й регуляторів: карта положень, тренажер “обертів”, графік тиску P_in/P_out, фото, підпис, 58 мм, CSV/TXT, QR</title>
-<meta name="description" content="Практика: карта положень кранів з міжзамками, тренажер обертів регулятора (кроки/оберти/відсоток відкриття), живий графік тиску до/після, KPI (сетпойнт/друп/стабільність), фото, NFC/ID, підпис, чек 58 мм, CSV/TXT, QR."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Практика: карта положень кранів з міжзамками, тренажер обертів регулятора (кроки/оберти/відсоток відкриття), живий графік тиску до/після, KPI (сетпойнт/друп/стабільність), фото, NFC/ID, підпис, чек 58 мм, CSV/TXT, QR.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -55,14 +53,14 @@ canvas.scheme{display:block;width:100%;height:220px;background:#0b1220;border:1p
 .dial .hand{position:absolute;left:50%;top:50%;width:2px;height:50px;background:#e6eef9;transform-origin:bottom center;transform:translate(-50%,-100%) rotate(0deg);border-radius:2px}
 hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para12.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 12"><meta property="og:description" content="Відпрацьовуємо безпечний пуск і налаштування регулятора тиску. Є карта положень кранів із міжзамками безпеки, тренажер обертів (кроки/оберти, % відкриття),"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para12.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 12","description":"Відпрацьовуємо безпечний пуск і налаштування регулятора тиску. Є карта положень кранів із міжзамками безпеки, тренажер обертів (кроки/оберти, % відкриття),","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para12.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧰⚙️</span>
       <div>
-        <b>Пара 12 — Налаштування запірної арматури й регуляторів</b><br/>
+        <b>Пара 12 — Налаштування запірної арматури й регуляторів</b><br>
         <span class="badge">Карта положень → тренажер обертів → графік P_in/P_out → KPI → фото → NFC/ID → підпис → чек 58 мм → CSV/TXT → QR</span>
       </div>
     </div>
@@ -75,16 +73,16 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
     <p>Відпрацьовуємо безпечний пуск і налаштування регулятора тиску. Є <b>карта положень кранів</b> із міжзамками безпеки, <b>тренажер обертів</b> (кроки/оберти, % відкриття), 
       <b>живий графік тиску</b> (до/після регулятора), автоматичні <b>KPI</b>: сетпойнт, відхилення, <i>droop</i>, стабільність. Додаємо <b>фото</b>, <b>NFC/ID</b>, <b>підпис</b>, друкуємо <b>чек 58 мм</b>, експортуємо <b>CSV/TXT</b>, генеруємо <b>QR</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котельня/квартира"/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котельня/квартира"></label>
       <label style="flex:1">Регулятор
         <select id="regType" class="input">
-          <option selected>RG/2M</option><option>Fisher</option><option>Elster</option><option>Інший</option>
+          <option selected="">RG/2M</option><option>Fisher</option><option>Elster</option><option>Інший</option>
         </select>
       </label>
-      <label style="flex:1">DN<input id="dn" class="input" type="number" step="1" value="25"/></label>
-      <label style="flex:1">Сетпойнт P_out, мбар<input id="sp" class="input" type="number" step="0.1" value="20.0"/></label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">DN<input id="dn" class="input" type="number" step="1" value="25"></label>
+      <label style="flex:1">Сетпойнт P_out, мбар<input id="sp" class="input" type="number" step="0.1" value="20.0"></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"></label>
     </div>
     <div class="row">
       <button class="btn good" id="mkCase">🧰 Створити кейс</button>
@@ -98,7 +96,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2>🗺️ Карта положень запірної арматури (міжзамки)</h2>
       <div class="block">
         <div id="valves" class="row"></div>
-        <small class="muted">Правило безпеки: спершу <b>ввідний</b> закритий, продувка, потім контроль витоків, тоді по черзі &mdash; до регулятора, після регулятора, прилад.</small>
+        <small class="muted">Правило безпеки: спершу <b>ввідний</b> закритий, продувка, потім контроль витоків, тоді по черзі — до регулятора, після регулятора, прилад.</small>
       </div>
 
       <h2 style="margin-top:10px">🧭 Тренажер “обертів” регулятора</h2>
@@ -113,8 +111,8 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
               <button class="btn" id="turnPlus10">⟳ +10°</button>
             </div>
             <div class="row">
-              <label>Крок, °<input id="stepDeg" class="input" type="number" step="0.1" value="6.0"/></label>
-              <label>Макс. хід, обертів<input id="maxRev" class="input" type="number" step="0.1" value="10.0"/></label>
+              <label>Крок, °<input id="stepDeg" class="input" type="number" step="0.1" value="6.0"></label>
+              <label>Макс. хід, обертів<input id="maxRev" class="input" type="number" step="0.1" value="10.0"></label>
               <button class="btn secondary" id="resetDial">🧹 Скинути</button>
             </div>
             <div class="kpi" style="margin-top:6px">
@@ -129,19 +127,19 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2 style="margin-top:10px">🛰️ Емулятори тиску та записи</h2>
       <div class="block">
         <div class="row">
-          <label style="flex:1">P_in, мбар<input id="pin" type="range" class="input" min="0" max="100" step="0.5" value="30.0"/></label>
+          <label style="flex:1">P_in, мбар<input id="pin" type="range" class="input" min="0" max="100" step="0.5" value="30.0"></label>
           <span class="badge">Поточний P_in: <b id="pinNum">30.0</b></span>
           <button class="btn" id="markPin">📍 Точка P_in</button>
         </div>
         <div class="row">
-          <label style="flex:1">P_out, мбар<input id="pout" type="range" class="input" min="0" max="60" step="0.1" value="18.5"/></label>
+          <label style="flex:1">P_out, мбар<input id="pout" type="range" class="input" min="0" max="60" step="0.1" value="18.5"></label>
           <span class="badge">Поточний P_out: <b id="poutNum">18.5</b></span>
           <button class="btn" id="markPout">📍 Точка P_out</button>
           <button class="btn secondary" id="clearSeries">🧹 Очистити графік</button>
         </div>
         <div class="row">
-          <label>Поріг стабільності, мбар<input id="stab" type="number" class="input" step="0.1" value="0.5"/></label>
-          <label>Довжина вікна стабільн., с<input id="win" type="number" class="input" step="1" value="15"/></label>
+          <label>Поріг стабільності, мбар<input id="stab" type="number" class="input" step="0.1" value="0.5"></label>
+          <label>Довжина вікна стабільн., с<input id="win" type="number" class="input" step="1" value="15"></label>
           <button class="btn secondary" id="applyKPI">⚙️ Застосувати KPI</button>
         </div>
         <div class="kpi" style="margin-top:6px">
@@ -160,12 +158,12 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 
       <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
       <div class="row">
-        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <video id="vid" class="photo" autoplay="" playsinline="" muted=""></video>
         <div>
           <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
           <button class="btn" data-kind="overview">📷 Загальний вигляд</button>
           <button class="btn" data-kind="nameplate">📷 Табличка регулятора</button>
-          <button class="btn" data-kind="gauge">📷 Манометр</button><br/>
+          <button class="btn" data-kind="gauge">📷 Манометр</button><br>
           <small class="muted">Фото зберігаються у «Галереї доказів».</small>
         </div>
       </div>
@@ -185,7 +183,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <div class="block">
         <div class="row">
           <button class="btn" id="nfcBtn">📶 NFC</button>
-          <input id="asset" class="input" placeholder="ID регулятора/вузла (якщо NFC недоступний)"/>
+          <input id="asset" class="input" placeholder="ID регулятора/вузла (якщо NFC недоступний)">
           <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
           <span class="badge" id="nfcs">Статус NFC: очікується</span>
         </div>
@@ -229,7 +227,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
 
       <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
@@ -636,5 +634,6 @@ initDefaults(); updateMetrics(); computeKPI(); drawChart(); drawScheme();
 // Вбудоване відображення (Moodle/iFrame)
 (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
 </script>
-</body>
-</html>
+
+
+</body></html>

@@ -3,14 +3,11 @@
      Оцінка петлі «фаза–нуль/PE», розрахунок Ik (1Ф/3Ф), перевірка умови ADS (Zs ≤ U0/Ia),
      перевірка миттєвого розчіплювача MCB (B/C/D), Icu/Ics, наклейки 58 мм, A4-звіт, CSV.
      Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 15 — КЗ, петля Zs, ADS, миттєвий розчіплювач, Icu/Ics</title>
-<meta name="color-scheme" content="light dark" />
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -78,7 +75,7 @@
     .ticket{ box-shadow:none; width:auto; padding:0 }
   }
 </style>
-</head>
+<meta name="description" content="Оцінити опір петлі Zs, розрахувати Ik на кінці лінії (1Ф/3Ф), перевірити умову ADS (Zs ≤ U0/Ia), перевірити миттєвий розчіплювач для MCB кривих B/C/D та Ic"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para15.html"><meta property="og:type" content="article"><meta property="og:title" content="⚡ Коротке замикання (Ik) → петля Zs → ADS (Zs ≤ U0/Ia) → миттєвий розчіплювач B/C/D → Icu/Ics"><meta property="og:description" content="Оцінити опір петлі Zs, розрахувати Ik на кінці лінії (1Ф/3Ф), перевірити умову ADS (Zs ≤ U0/Ia), перевірити миттєвий розчіплювач для MCB кривих B/C/D та Ic"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para15.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"⚡ Коротке замикання (Ik) → петля Zs → ADS (Zs ≤ U0/Ia) → миттєвий розчіплювач B/C/D → Icu/Ics","description":"Оцінити опір петлі Zs, розрахувати Ik на кінці лінії (1Ф/3Ф), перевірити умову ADS (Zs ≤ U0/Ia), перевірити миттєвий розчіплювач для MCB кривих B/C/D та Ic","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para15.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Електрики · Пара 15 · аудиторно</span>
@@ -91,7 +88,7 @@
       <div class="row">
         <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
         <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <input id="file" type="file" accept=".csv,text/csv" class="btn">
         <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
       </div>
       <p class="small">CSV: <span class="mono">id,name,phases,curve,In_A,Icu_kA,U0,ULL,source_Zs,material,S_mm2,length_m,pe_same,ambientC,notes,url</span></p>
@@ -104,24 +101,24 @@
           <h3>Загальне</h3>
           <div class="row"><label class="small" style="min-width:150px">ID</label><input id="id" value="SC-01"></div>
           <div class="row"><label class="small" style="min-width:150px">Назва</label><input id="name" value="Розетки аудиторії"></div>
-          <div class="row"><label class="small" style="min-width:150px">Фази</label><select id="phases"><option selected>1Ф</option><option>3Ф</option></select></div>
+          <div class="row"><label class="small" style="min-width:150px">Фази</label><select id="phases"><option selected="">1Ф</option><option>3Ф</option></select></div>
           <div class="row"><label class="small" style="min-width:150px">U0 (LN), В</label><input id="U0" type="number" value="230"></div>
           <div class="row"><label class="small" style="min-width:150px">ULL (LL), В</label><input id="ULL" type="number" value="400"></div>
         </div>
         <div>
           <h3>Автомат</h3>
-          <div class="row"><label class="small" style="min-width:150px">Крива</label><select id="curve"><option>B</option><option selected>C</option><option>D</option></select></div>
+          <div class="row"><label class="small" style="min-width:150px">Крива</label><select id="curve"><option>B</option><option selected="">C</option><option>D</option></select></div>
           <div class="row"><label class="small" style="min-width:150px">In, А</label>
-            <select id="InA"><option>6</option><option>10</option><option selected>16</option><option>20</option><option>25</option><option>32</option><option>40</option><option>50</option><option>63</option></select></div>
-          <div class="row"><label class="small" style="min-width:150px">Icu (kA)</label><select id="Icu"><option>4.5</option><option selected>6</option><option>10</option></select></div>
+            <select id="InA"><option>6</option><option>10</option><option selected="">16</option><option>20</option><option>25</option><option>32</option><option>40</option><option>50</option><option>63</option></select></div>
+          <div class="row"><label class="small" style="min-width:150px">Icu (kA)</label><select id="Icu"><option>4.5</option><option selected="">6</option><option>10</option></select></div>
         </div>
         <div>
           <h3>Петля / траса</h3>
           <div class="row"><label class="small" style="min-width:150px">Джерело Zs, Ω</label><input id="Zs_src" type="number" step="0.001" value="0.20"></div>
-          <div class="row"><label class="small" style="min-width:150px">Матеріал</label><select id="mat"><option selected>Cu</option><option>Al</option></select></div>
-          <div class="row"><label class="small" style="min-width:150px">S (фаза), мм²</label><select id="S"><option>1.5</option><option selected>2.5</option><option>4</option><option>6</option><option>10</option></select></div>
+          <div class="row"><label class="small" style="min-width:150px">Матеріал</label><select id="mat"><option selected="">Cu</option><option>Al</option></select></div>
+          <div class="row"><label class="small" style="min-width:150px">S (фаза), мм²</label><select id="S"><option>1.5</option><option selected="">2.5</option><option>4</option><option>6</option><option>10</option></select></div>
           <div class="row"><label class="small" style="min-width:150px">Довжина L, м</label><input id="L" type="number" value="25"></div>
-          <div class="row"><label class="small" style="min-width:150px">PE=S фази?</label><select id="peSame"><option selected>Так</option><option>Ні</option></select></div>
+          <div class="row"><label class="small" style="min-width:150px">PE=S фази?</label><select id="peSame"><option selected="">Так</option><option>Ні</option></select></div>
         </div>
       </div>
       <div class="row" style="margin-top:8px">
@@ -448,5 +445,6 @@
   // Авто-демо при старті
   seedDemo();
 </script>
-</body>
-</html>
+
+
+</body></html>

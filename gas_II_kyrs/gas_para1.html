@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 1 (газовики) — Ввідна: цифровий інструментарій газовика</title>
-<meta name="description" content="Ввідне заняття: створення міні-наряду, фото до/після, голосова нотатка, емульований датчик тиску, NFC-ідентифікація об’єкта, QR, чек 58 мм, експорт CSV/TXT."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Ввідне заняття: створення міні-наряду, фото до/після, голосова нотатка, емульований датчик тиску, NFC-ідентифікація об’єкта, QR, чек 58 мм, експорт CSV/TXT.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -43,14 +41,14 @@ canvas.chart{display:block;width:100%;height:220px;background:#0b1220;border:1px
 .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted);margin-right:6px;margin-top:6px}
 kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para1.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 1"><meta property="og:description" content="Ти в ролі слюсаря/майстра дільниці. Сьогодні відпрацюємо «цифрову рутину»: створити міні-наряд, зафіксувати об’єкт (через NFC або код), зробити фото до/піс"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para1.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 1","description":"Ти в ролі слюсаря/майстра дільниці. Сьогодні відпрацюємо «цифрову рутину»: створити міні-наряд, зафіксувати об’єкт (через NFC або код), зробити фото до/піс","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para1.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🛠️</span>
       <div>
-        <b>Пара 1 — Ввідна: цифровий інструментарій газовика</b><br/>
+        <b>Пара 1 — Ввідна: цифровий інструментарій газовика</b><br>
         <span class="badge">Міні-наряд → NFC/код об’єкта → фото до/після → голосова нотатка → датчик тиску → чек 58 мм → CSV/QR</span>
       </div>
     </div>
@@ -72,7 +70,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>🧾 Міні-наряд</h2>
       <div class="row">
-        <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. Шевченка, 10, кв. 12"/></label>
+        <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. Шевченка, 10, кв. 12"></label>
         <label style="flex:1">Тип робіт
           <select id="job" class="input">
             <option value="Огляд лічильника">Огляд лічильника</option>
@@ -82,7 +80,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
             <option value="Пуск газу після сервісу">Пуск газу після сервісу</option>
           </select>
         </label>
-        <label style="flex:1">Контакт абонента<input id="phone" class="input" placeholder="+380680094244"/></label>
+        <label style="flex:1">Контакт абонента<input id="phone" class="input" placeholder="+380680094244"></label>
       </div>
       <div class="row">
         <button class="btn good" id="mkOrder">🧰 Створити наряд</button>
@@ -92,18 +90,18 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h2 style="margin-top:10px">📍 Ідентифікація об’єкта (NFC/код)</h2>
       <div class="row">
         <button class="btn" id="nfcBtn">📶 Сканувати NFC</button>
-        <input id="asset" class="input" placeholder="Введи код/ID об’єкта, якщо NFC недоступний"/>
+        <input id="asset" class="input" placeholder="Введи код/ID об’єкта, якщо NFC недоступний">
         <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
         <span class="badge" id="nfcs">Статус: очікується</span>
       </div>
 
       <h2 style="margin-top:10px">📸 Фото до/після</h2>
       <div class="row">
-        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <video id="vid" class="photo" autoplay="" playsinline="" muted=""></video>
         <div>
           <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
           <button class="btn" id="shotBefore">📷 Фото «до»</button>
-          <button class="btn" id="shotAfter">📷 Фото «після»</button><br/>
+          <button class="btn" id="shotAfter">📷 Фото «після»</button><br>
           <small class="muted">Камера працює локально в браузері; фото збережуться у «Галереї доказів».</small>
         </div>
       </div>
@@ -112,14 +110,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h2 style="margin-top:10px">🎙️ Голосова нотатка</h2>
       <div class="row">
         <button class="btn" id="recStart">⏺️ Запис</button>
-        <button class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
+        <button class="btn secondary" id="recStop" disabled="">⏹️ Стоп</button>
         <span class="badge" id="rstat">Немає запису</span>
       </div>
-      <audio id="player" controls style="margin-top:8px;max-width:100%"></audio>
+      <audio id="player" controls="" style="margin-top:8px;max-width:100%"></audio>
 
       <h2 style="margin-top:10px">🧪 «Датчик тиску» (емулятор)</h2>
       <div class="row">
-        <input type="range" id="pVal" min="0" max="6" step="0.1" value="2.5" style="width:260px"/>
+        <input type="range" id="pVal" min="0" max="6" step="0.1" value="2.5" style="width:260px">
         <span class="badge">Тиск: <b id="pNum">2.5</b> кПа</span>
         <button class="btn" id="pMark">📍 Позначити точку</button>
         <button class="btn secondary" id="pClear">🧹 Очистити графік</button>
@@ -133,7 +131,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (посилання/ID)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
       <small class="muted">QR генерується через <span class="mono">api.qrserver.com</span>; якщо офлайн — з’явиться текст.</small>
     </div>
@@ -416,5 +414,6 @@ drawChart();
 // Вбудоване відображення
 (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
 </script>
-</body>
-</html>
+
+
+</body></html>

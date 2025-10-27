@@ -1,12 +1,9 @@
 <!-- electric_para2.html
      Пара 2 (Електрики, аудиторно): Журнал ППР · чек-листи · PASS/FAIL · експорт CSV · друк 58 мм · NFC/QR-текст
      Повністю автономний файл для GitHub Pages та вбудовування в Moodle через <iframe>.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 2 — Журнал ППР, чек-листи, друк 58 мм, NFC/QR</title>
 <meta name="color-scheme" content="light dark">
 <style>
@@ -82,7 +79,7 @@
 .ticket small{ font-weight:700 }
 </style>
 
-</head>
+<meta name="description" content="Створити цифровий журнал ППР електрооб’єктів, проводити перевірку за чек-листом, фіксувати статус PASS/FAIL, друкувати «Мітку обслуговування 58 мм» і генер"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para2.html"><meta property="og:type" content="article"><meta property="og:title" content="🛠️ Журнал ППР · ✅/❌ чек-листи · 🧾 друк 58 мм · 🔗 NFC/QR"><meta property="og:description" content="Створити цифровий журнал ППР електрооб’єктів, проводити перевірку за чек-листом, фіксувати статус PASS/FAIL, друкувати «Мітку обслуговування 58 мм» і генер"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para2.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🛠️ Журнал ППР · ✅/❌ чек-листи · 🧾 друк 58 мм · 🔗 NFC/QR","description":"Створити цифровий журнал ППР електрооб’єктів, проводити перевірку за чек-листом, фіксувати статус PASS/FAIL, друкувати «Мітку обслуговування 58 мм» і генер","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para2.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Електрики · Пара 2 · аудиторно</span>
@@ -103,24 +100,24 @@
       <h2>➕ Додати об’єкт до журналу</h2>
       <div class="field">
         <label for="objName">Об’єкт</label>
-        <input id="objName" type="text" value="ЩО-1 / Автомат B16" />
+        <input id="objName" type="text" value="ЩО-1 / Автомат B16">
       </div>
       <div class="field">
         <label for="objPlace">Місце</label>
-        <input id="objPlace" type="text" value="Майстерня" />
+        <input id="objPlace" type="text" value="Майстерня">
       </div>
       <div class="field">
         <label for="period">Періодичність</label>
         <select id="period">
           <option value="1">1 міс</option>
-          <option value="3" selected>3 міс</option>
+          <option value="3" selected="">3 міс</option>
           <option value="6">6 міс</option>
           <option value="12">12 міс</option>
         </select>
       </div>
       <div class="field">
         <label for="resp">Відповідальний</label>
-        <input id="resp" type="text" value="ПІБ / група" />
+        <input id="resp" type="text" value="ПІБ / група">
       </div>
       <div class="row">
         <button class="btn" type="button" onclick="addObject()">➕ Додати в таблицю</button>
@@ -158,11 +155,11 @@
           <h3>1) Обери рядок журналу й виконай чек-лист</h3>
           <div id="selectedInfo" class="small">Обрано: —</div>
           <div id="checklist" style="margin-top:8px">
-            <label><input type="checkbox" class="cl" data-name="Вимкнення живлення" /> Вимкнення живлення (LOTO)</label><br/>
-            <label><input type="checkbox" class="cl" data-name="Візуальний огляд" /> Візуальний огляд (корпус, клеми, позначення)</label><br/>
-            <label><input type="checkbox" class="cl" data-name="Затягування контактів" /> Затягування контактів (за потреби)</label><br/>
-            <label><input type="checkbox" class="cl" data-name="Перевірка захисту" /> Перевірка номіналу захисту (автомат/ПЗВ)</label><br/>
-            <label><input type="checkbox" class="cl" data-name="Тест індикації" /> Тест індикації/маркування</label><br/>
+            <label><input type="checkbox" class="cl" data-name="Вимкнення живлення"> Вимкнення живлення (LOTO)</label><br>
+            <label><input type="checkbox" class="cl" data-name="Візуальний огляд"> Візуальний огляд (корпус, клеми, позначення)</label><br>
+            <label><input type="checkbox" class="cl" data-name="Затягування контактів"> Затягування контактів (за потреби)</label><br>
+            <label><input type="checkbox" class="cl" data-name="Перевірка захисту"> Перевірка номіналу захисту (автомат/ПЗВ)</label><br>
+            <label><input type="checkbox" class="cl" data-name="Тест індикації"> Тест індикації/маркування</label><br>
           </div>
           <div class="row" style="margin-top:8px">
             <button class="btn" type="button" onclick="markPass()">✅ PASS</button>
@@ -171,7 +168,7 @@
           <p class="small">Під час FAIL додай примітку в полі нижче перед друком.</p>
           <div class="field" style="margin-top:8px">
             <label for="note">Примітка</label>
-            <input id="note" type="text" placeholder="Напр.: Заміна автомата до 20.10.2025" />
+            <input id="note" type="text" placeholder="Напр.: Заміна автомата до 20.10.2025">
           </div>
         </div>
 
@@ -210,7 +207,7 @@
       <p class="small">Рекомендуємо формат URL, що веде на цю сторінку з якорем об’єкта.</p>
       <div class="field">
         <label for="nfcText">Текст для запису на NFC / QR</label>
-        <input id="nfcText" type="text" value="https://serawww7.github.io/edlab/electric_para2.html#asset=ELC-001" />
+        <input id="nfcText" type="text" value="https://serawww7.github.io/edlab/electric_para2.html#asset=ELC-001">
       </div>
       <div class="row">
         <button class="btn" type="button" onclick="genNFC()">🔁 Згенерувати з обраного рядка</button>
@@ -521,5 +518,6 @@ function openTicketOnly(){
 }
 </script>
 
-</body>
-</html>
+
+
+</body></html>

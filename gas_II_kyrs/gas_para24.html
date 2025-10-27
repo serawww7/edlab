@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 24 (газовики) — AI-диспетчер: розподіл викликів, ETA, черги, симулятор затримок</title>
-<meta name="description" content="Інтерактивний диспетчер: мапа-граф, P1/P2/P3 виклики, автопризначення на бригади з урахуванням ETA/черги, симулятор руху, SLA, експорт CSV/TXT."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Інтерактивний диспетчер: мапа-граф, P1/P2/P3 виклики, автопризначення на бригади з урахуванням ETA/черги, симулятор руху, SLA, експорт CSV/TXT.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -39,14 +37,14 @@ pre.log{max-height:220px;overflow:auto;background:#0c182a;border-radius:12px;pad
 .footer{margin-top:20px;color:#94a3b8;font-size:.9rem}
 kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para24.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 24"><meta property="og:description" content="Місто змодельоване як граф вузлів/доріг. Додавай виклики (адресні вузли), запускай Автопризначення: алгоритм мінімізує очікування з урахуванням пріоритету"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para24.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 24","description":"Місто змодельоване як граф вузлів/доріг. Додавай виклики (адресні вузли), запускай Автопризначення: алгоритм мінімізує очікування з урахуванням пріоритету","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para24.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🗺️🚐</span>
       <div>
-        <b>Пара 24 — AI-диспетчер</b><br/>
+        <b>Пара 24 — AI-диспетчер</b><br>
         <span class="badge">P1/P2/P3 → автопризначення → ETA/черги → симуляція руху → SLA → експорт</span>
       </div>
     </div>
@@ -63,7 +61,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <label>Пріоритет
         <select id="prio" class="input">
           <option value="P1">P1 (аварія)</option>
-          <option value="P2" selected>P2 (терміново)</option>
+          <option value="P2" selected="">P2 (терміново)</option>
           <option value="P3">P3 (планово)</option>
         </select>
       </label>
@@ -473,5 +471,6 @@ function init(){
 }
 init();
 </script>
-</body>
-</html>
+
+
+</body></html>

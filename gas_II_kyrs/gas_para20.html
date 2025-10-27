@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 20 (газовики) — Сценарне планування: зима vs міжсезоння, еластичність, тариф, оптимізація лімітів</title>
-<meta name="description" content="Інтерактив: зимовий/міжсезонний профіль, еластичність попиту, тарифні сценарії, оптимізація Vday/Pmax за вартістю і штрафами, графіки, теплокарта, експорт."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Інтерактив: зимовий/міжсезонний профіль, еластичність попиту, тарифні сценарії, оптимізація Vday/Pmax за вартістю і штрафами, графіки, теплокарта, експорт.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -39,14 +37,14 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
 .tag.bad{border-color:#5a1f1f;background:#2a1212}
 .footer{margin-top:20px;color:#94a3b8;font-size:.9rem}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para20.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 20"><meta property="og:description" content="Моделюємо добовий профіль споживання (24 год) для двох сезонів: зима та міжсезоння. Враховуємо цінову еластичність попиту ε (наскільки попит змінюється від"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para20.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 20","description":"Моделюємо добовий профіль споживання (24 год) для двох сезонів: зима та міжсезоння. Враховуємо цінову еластичність попиту ε (наскільки попит змінюється від","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para20.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧮❄️🌤️</span>
       <div>
-        <b>Пара 20 — Сценарне планування</b><br/>
+        <b>Пара 20 — Сценарне планування</b><br>
         <span class="badge">Зима↔︎Міжсезоння → ε (еластичність) → тариф → оптимізація Vday/Pmax → графіки → експорт</span>
       </div>
     </div>
@@ -60,14 +58,14 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
     <div class="row">
       <label>Сезон
         <select id="season" class="input">
-          <option value="winter" selected>Зима</option>
+          <option value="winter" selected="">Зима</option>
           <option value="shoulder">Міжсезоння</option>
         </select>
       </label>
       <label>Базовий тариф, грн/м³ <input id="tariffBase" class="input" type="number" step="0.01" value="10.00"></label>
       <label>Сценарій тарифу
         <select id="tariffMode" class="input">
-          <option value="flat" selected>Плоский (без змін)</option>
+          <option value="flat" selected="">Плоский (без змін)</option>
           <option value="raise10">Підвищення +10%</option>
           <option value="timeOfUse">Time-of-Use (день/ніч)</option>
         </select>
@@ -95,9 +93,9 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
     <div class="card">
       <h2>📈 Графік 1 — Профіль навантаження (м³/год)</h2>
       <div class="row">
-        <label>Показати базовий <input id="shBase" type="checkbox" checked></label>
-        <label>Показати скоригований <input id="shAdj" type="checkbox" checked></label>
-        <label>Лінія Pmax <input id="shPmax" type="checkbox" checked></label>
+        <label>Показати базовий <input id="shBase" type="checkbox" checked=""></label>
+        <label>Показати скоригований <input id="shAdj" type="checkbox" checked=""></label>
+        <label>Лінія Pmax <input id="shPmax" type="checkbox" checked=""></label>
         <button class="btn" id="mark">📍 Зняти точку</button>
         <button class="btn secondary" id="clear">🧹 Очистити графік</button>
       </div>
@@ -446,5 +444,6 @@ $('#saveTxt').addEventListener('click',()=>{
 /* ===== Ініт ===== */
 drawHeat(); recalc();
 </script>
-</body>
-</html>
+
+
+</body></html>

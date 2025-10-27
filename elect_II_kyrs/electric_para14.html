@@ -3,14 +3,11 @@
      Вибір перерізу кабелю за струмом навантаження з урахуванням коефіцієнтів корекції,
      перевірка падіння напруги (ΔU), підбір автомата (MCB), наклейки 58 мм, A4-звіт, CSV.
      Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 14 — Кабелі: переріз, коеф. корекції, ΔU, автомат, 58 мм</title>
-<meta name="color-scheme" content="light dark" />
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -77,7 +74,7 @@
     .ticket{ box-shadow:none; width:auto; padding:0 }
   }
 </style>
-</head>
+<meta name="description" content="Для кожної лінії визначити робочий струм, обрати переріз кабелю з урахуванням коефіцієнтів корекції (температура, спосіб прокладки, групування), перевірити"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para14.html"><meta property="og:type" content="article"><meta property="og:title" content="🧵 Кабелі: переріз за струмом → коеф. корекції → ΔU → підбір MCB → 🧾 58 мм"><meta property="og:description" content="Для кожної лінії визначити робочий струм, обрати переріз кабелю з урахуванням коефіцієнтів корекції (температура, спосіб прокладки, групування), перевірити"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para14.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🧵 Кабелі: переріз за струмом → коеф. корекції → ΔU → підбір MCB → 🧾 58 мм","description":"Для кожної лінії визначити робочий струм, обрати переріз кабелю з урахуванням коефіцієнтів корекції (температура, спосіб прокладки, групування), перевірити","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para14.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Електрики · Пара 14 · аудиторно</span>
@@ -90,7 +87,7 @@
       <div class="row">
         <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
         <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <input id="file" type="file" accept=".csv,text/csv" class="btn">
         <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
       </div>
       <p class="small">CSV: <span class="mono">id,name,phases,kW,PF,eta,material,install,tempC,groupCount,length_m,drop_limit_pct,curve,stdA,url,notes</span></p>
@@ -103,16 +100,16 @@
           <h3>Навантаження</h3>
           <div class="row"><label class="small" style="min-width:150px">ID</label><input id="id" value="CL-01"></div>
           <div class="row"><label class="small" style="min-width:150px">Назва</label><input id="name" value="Живлення лабораторії"></div>
-          <div class="row"><label class="small" style="min-width:150px">Фази</label><select id="phases"><option selected>1Ф</option><option>3Ф</option></select></div>
+          <div class="row"><label class="small" style="min-width:150px">Фази</label><select id="phases"><option selected="">1Ф</option><option>3Ф</option></select></div>
           <div class="row"><label class="small" style="min-width:150px">Потужність, кВт</label><input id="kW" type="number" step="0.1" value="3.5"></div>
           <div class="row"><label class="small" style="min-width:150px">PF (cosφ)</label><input id="pf" type="number" step="0.01" value="0.95"></div>
           <div class="row"><label class="small" style="min-width:150px">η</label><input id="eta" type="number" step="0.01" value="0.98"></div>
         </div>
         <div>
           <h3>Кабель / умови</h3>
-          <div class="row"><label class="small" style="min-width:150px">Матеріал</label><select id="material"><option selected>Cu</option><option>Al</option></select></div>
+          <div class="row"><label class="small" style="min-width:150px">Матеріал</label><select id="material"><option selected="">Cu</option><option>Al</option></select></div>
           <div class="row"><label class="small" style="min-width:150px">Прокладка</label>
-            <select id="install"><option selected>Повітря/лоток</option><option>Труба/канал</option><option>Земля</option></select></div>
+            <select id="install"><option selected="">Повітря/лоток</option><option>Труба/канал</option><option>Земля</option></select></div>
           <div class="row"><label class="small" style="min-width:150px">Температура, °C</label><input id="tempC" type="number" value="30"></div>
           <div class="row"><label class="small" style="min-width:150px">К-ть паралельних/згруп.</label><input id="groupCount" type="number" value="1"></div>
           <div class="row"><label class="small" style="min-width:150px">Довжина L, м</label><input id="L" type="number" value="35"></div>
@@ -120,9 +117,9 @@
         </div>
         <div>
           <h3>Захист / службове</h3>
-          <div class="row"><label class="small" style="min-width:150px">Крива MCB</label><select id="curve"><option>B</option><option selected>C</option><option>D</option></select></div>
+          <div class="row"><label class="small" style="min-width:150px">Крива MCB</label><select id="curve"><option>B</option><option selected="">C</option><option>D</option></select></div>
           <div class="row"><label class="small" style="min-width:150px">Ряд, А</label>
-            <select id="stdA"><option>6</option><option>10</option><option selected>16</option><option>20</option><option>25</option><option>32</option><option>40</option><option>50</option><option>63</option></select></div>
+            <select id="stdA"><option>6</option><option>10</option><option selected="">16</option><option>20</option><option>25</option><option>32</option><option>40</option><option>50</option><option>63</option></select></div>
           <div class="row"><label class="small" style="min-width:150px">URL (NFC/QR)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
           <div class="row"><label class="small" style="min-width:150px">Нотатка</label><input id="notes" placeholder="Примітка"></div>
         </div>
@@ -491,5 +488,6 @@
   // Авто-демо при старті
   seedDemo();
 </script>
-</body>
-</html>
+
+
+</body></html>

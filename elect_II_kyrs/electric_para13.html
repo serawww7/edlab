@@ -3,14 +3,11 @@
      Відомість щита: кола/фази/навантаження/автомати/ПЗВ (RCD), баланс фаз, прості перевірки селективності,
      наклейки 58 мм на лінії, A4-звіт, імпорт/експорт CSV.
      Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 13 — Електрощит: панельний журнал, баланс фаз, RCD, наклейки</title>
-<meta name="color-scheme" content="light dark" />
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -82,7 +79,7 @@
     .ticket{ box-shadow:none; width:auto; padding:0 }
   }
 </style>
-</head>
+<meta name="description" content="Скласти відомість щита: створити кола з параметрами навантаження, фазами, автоматами та ПЗВ; перевірити баланс фаз, просту селективність по номіналах; зген"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para13.html"><meta property="og:type" content="article"><meta property="og:title" content="🛠️ Електрощит: панельний журнал → баланс фаз → RCD/RCBO → 🧾 наклейки 58 мм → A4"><meta property="og:description" content="Скласти відомість щита: створити кола з параметрами навантаження, фазами, автоматами та ПЗВ; перевірити баланс фаз, просту селективність по номіналах; зген"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para13.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🛠️ Електрощит: панельний журнал → баланс фаз → RCD/RCBO → 🧾 наклейки 58 мм → A4","description":"Скласти відомість щита: створити кола з параметрами навантаження, фазами, автоматами та ПЗВ; перевірити баланс фаз, просту селективність по номіналах; зген","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para13.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Електрики · Пара 13 · аудиторно</span>
@@ -94,7 +91,7 @@
       <div class="row">
         <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
         <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <input id="file" type="file" accept=".csv,text/csv" class="btn">
         <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
       </div>
       <p class="small">CSV: <span class="mono">id,name,type,phase,phases,kw,U,PF,eta,curve,mcbA,rcdType,rcd_mA,rcdA,rcdGroup,wire_mm2,length_m,url,notes,duty_pct,diversity_pct</span></p>
@@ -106,9 +103,9 @@
         <div>
           <div class="row"><label class="small" style="min-width:150px">Назва щита</label><input id="panelName" value="ЩО-1 · Майстерня"></div>
           <div class="row"><label class="small" style="min-width:150px">Головний автомат, А</label>
-            <select id="mainMCB"><option>25</option><option selected>40</option><option>50</option><option>63</option></select></div>
+            <select id="mainMCB"><option>25</option><option selected="">40</option><option>50</option><option>63</option></select></div>
           <div class="row"><label class="small" style="min-width:150px">Крива головного</label>
-            <select id="mainCurve"><option selected>C</option><option>B</option><option>D</option></select></div>
+            <select id="mainCurve"><option selected="">C</option><option>B</option><option>D</option></select></div>
         </div>
         <div>
           <div class="row"><label class="small" style="min-width:150px">U фаз-фаза, В</label><input id="Ull" type="number" value="400"></div>
@@ -139,24 +136,24 @@
         <div>
           <h3>Фази / Захист</h3>
           <div class="row"><label class="small" style="min-width:140px">Фази</label>
-            <select id="phases"><option selected>1Ф</option><option>3Ф</option></select></div>
+            <select id="phases"><option selected="">1Ф</option><option>3Ф</option></select></div>
           <div class="row" id="phaseRow"><label class="small" style="min-width:140px">Фаза (1Ф)</label>
             <select id="phase"><option>A</option><option>B</option><option>C</option></select></div>
           <div class="row"><label class="small" style="min-width:140px">MCB крива</label>
-            <select id="curve"><option>B</option><option selected>C</option><option>D</option></select></div>
+            <select id="curve"><option>B</option><option selected="">C</option><option>D</option></select></div>
           <div class="row"><label class="small" style="min-width:140px">MCB, А</label>
-            <select id="mcbA"><option>6</option><option>10</option><option selected>16</option><option>20</option><option>25</option><option>32</option></select></div>
+            <select id="mcbA"><option>6</option><option>10</option><option selected="">16</option><option>20</option><option>25</option><option>32</option></select></div>
         </div>
         <div>
           <h3>RCD / Лінія</h3>
           <div class="row"><label class="small" style="min-width:140px">RCD тип</label>
-            <select id="rcdType"><option>—</option><option selected>AC</option><option>A</option><option>F</option></select></div>
+            <select id="rcdType"><option>—</option><option selected="">AC</option><option>A</option><option>F</option></select></div>
           <div class="row"><label class="small" style="min-width:140px">RCD IΔn, мА</label>
-            <select id="rcd_mA"><option>—</option><option>30</option><option selected>100</option><option>300</option></select></div>
+            <select id="rcd_mA"><option>—</option><option>30</option><option selected="">100</option><option>300</option></select></div>
           <div class="row"><label class="small" style="min-width:140px">RCD, А</label>
-            <select id="rcdA"><option>—</option><option>25</option><option selected>40</option><option>63</option></select></div>
+            <select id="rcdA"><option>—</option><option>25</option><option selected="">40</option><option>63</option></select></div>
           <div class="row"><label class="small" style="min-width:140px">Група RCD</label><input id="rcdGroup" value="RCD-1"></div>
-          <div class="row"><label class="small" style="min-width:140px">Провід, мм²</label><select id="wire"><option>1.5</option><option selected>2.5</option><option>4</option><option>6</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px">Провід, мм²</label><select id="wire"><option>1.5</option><option selected="">2.5</option><option>4</option><option>6</option></select></div>
           <div class="row"><label class="small" style="min-width:140px">Довжина, м</label><input id="len" type="number" value="25"></div>
         </div>
       </div>
@@ -550,5 +547,6 @@
   // Авто-демо при старті
   seedDemo();
 </script>
-</body>
-</html>
+
+
+</body></html>

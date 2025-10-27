@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 24 (механіки) — ШІ#4: Класифікація фото дефектів (ISO-чек-лист, heatmap, навчання)</title>
-<meta name="description" content="Фото/камера → ROI → класифікація дефектів: витік/масло, корозія, тріщина, знос/піттінг, перекіс, послаблене кріплення. Heatmap-пояснення, навчання на своїх прикладах, ISO-чек-лист, експорт CSV/TXT/58мм."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Фото/камера → ROI → класифікація дефектів: витік/масло, корозія, тріщина, знос/піттінг, перекіс, послаблене кріплення. Heatmap-пояснення, навчання на своїх прикладах, ISO-чек-лист, експорт CSV/TXT/58мм.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -40,14 +38,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 @media(max-width:1120px){.grid{grid-template-columns:1fr}}
 .ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/mech_II_kyrs/mechanic_para24.html"><meta property="og:type" content="article"><meta property="og:title" content="Механізація — Пара 24"><meta property="og:description" content="Мета: навчити студентів **правильно бачити дефекти** на фото вузлів і застосовувати **спрощені ознаки CV** для класифікації та пояснень. Класи: oil (витік/"><meta property="og:url" content="https://edlab.pp.ua/mech_II_kyrs/mechanic_para24.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Механізація — Пара 24","description":"Мета: навчити студентів **правильно бачити дефекти** на фото вузлів і застосовувати **спрощені ознаки CV** для класифікації та пояснень. Класи: oil (витік/","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/mech_II_kyrs/mechanic_para24.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧠</span>
       <div>
-        <b>Пара 24 — Класифікація фото дефектів (ШІ у браузері)</b><br/>
+        <b>Пара 24 — Класифікація фото дефектів (ШІ у браузері)</b><br>
         <span class="badge">ROI → класи → heatmap → ISO-чек-лист → навчання → експорт</span>
       </div>
     </div>
@@ -62,14 +60,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h2>🎥 Джерело зображення</h2>
       <div class="row">
         <select id="src" class="input" style="max-width:220px">
-          <option value="cam" selected>Вебкамера</option>
+          <option value="cam" selected="">Вебкамера</option>
           <option value="img">Фото (завантажити)</option>
         </select>
         <select id="camSel" class="input" style="max-width:260px"></select>
         <select id="res" class="input" style="max-width:160px">
-          <option>640x480</option><option selected>1280x720</option><option>1920x1080</option>
+          <option>640x480</option><option selected="">1280x720</option><option>1920x1080</option>
         </select>
-        <input id="file" class="input" type="file" accept="image/*" style="display:none"/>
+        <input id="file" class="input" type="file" accept="image/*" style="display:none">
         <button class="btn good" id="start">▶️ Старт</button>
         <button class="btn secondary" id="shot">📸 Знімок</button>
         <button class="btn secondary" id="stop">⏹️ Стоп</button>
@@ -77,10 +75,10 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       </div>
 
       <div class="row" style="margin-top:6px">
-        <label>Heatmap<span class="mono"> α</span><input id="alpha" class="input" type="range" min="0" max="1" step="0.05" value="0.6"/></label>
-        <label>Edge thr<input id="thrE" class="input" type="range" min="8" max="80" step="1" value="26"/></label>
-        <label>Shiny V%<input id="thrV" class="input" type="range" min="40" max="95" step="1" value="75"/></label>
-        <label>Low-Sat S%<input id="thrS" class="input" type="range" min="5" max="60" step="1" value="18"/></label>
+        <label>Heatmap<span class="mono"> α</span><input id="alpha" class="input" type="range" min="0" max="1" step="0.05" value="0.6"></label>
+        <label>Edge thr<input id="thrE" class="input" type="range" min="8" max="80" step="1" value="26"></label>
+        <label>Shiny V%<input id="thrV" class="input" type="range" min="40" max="95" step="1" value="75"></label>
+        <label>Low-Sat S%<input id="thrS" class="input" type="range" min="5" max="60" step="1" value="18"></label>
       </div>
 
       <div class="canvasWrap" style="margin-top:8px">
@@ -128,13 +126,13 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h2 style="margin-top:10px">📋 ISO-чек-лист огляду вузла</h2>
       <div id="checklist" class="note small">
-        <label><input type="checkbox"/> Очистити вузол (безпека: LOTO, ЗІЗ), повторити фото.</label><br/>
-        <label><input type="checkbox"/> Перевірити витоки/масло навколо прокладок/швів (ISO 4406 контамін.).</label><br/>
-        <label><input type="checkbox"/> Оцінити корозію (ступінь покриття, лусочки/іржа, підфарбувати/заміна).</label><br/>
-        <label><input type="checkbox"/> Перевірити тріщини/сколи (збільшення, барвник-проникник, NDT за потреби).</label><br/>
-        <label><input type="checkbox"/> Знос/піттінг на зубах/роликах (шорсткість, підвищений люфт).</label><br/>
-        <label><input type="checkbox"/> Перекіс/невирівняння (кут &lt; 2° від контрольної лінії).</label><br/>
-        <label><input type="checkbox"/> Кріплення: момент затягування за мануалом, маркер-фарба.</label>
+        <label><input type="checkbox"> Очистити вузол (безпека: LOTO, ЗІЗ), повторити фото.</label><br>
+        <label><input type="checkbox"> Перевірити витоки/масло навколо прокладок/швів (ISO 4406 контамін.).</label><br>
+        <label><input type="checkbox"> Оцінити корозію (ступінь покриття, лусочки/іржа, підфарбувати/заміна).</label><br>
+        <label><input type="checkbox"> Перевірити тріщини/сколи (збільшення, барвник-проникник, NDT за потреби).</label><br>
+        <label><input type="checkbox"> Знос/піттінг на зубах/роликах (шорсткість, підвищений люфт).</label><br>
+        <label><input type="checkbox"> Перекіс/невирівняння (кут &lt; 2° від контрольної лінії).</label><br>
+        <label><input type="checkbox"> Кріплення: момент затягування за мануалом, маркер-фарба.</label>
       </div>
 
       <h2 style="margin-top:10px">📜 Журнал та експорт</h2>
@@ -151,7 +149,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <button class="btn" id="saveTasks">📝 TXT (завдання студента)</button>
         <button class="btn" id="receipt">🖨️ 58 мм чек</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
     </div>
   </div>
 
@@ -168,25 +166,25 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🔌 Схема (SVG)</h2>
     <svg viewBox="0 0 980 260" role="img" aria-label="Фото → ROI → ознаки → k-NN → клас/heatmap">
-      <rect x="40" y="60" width="220" height="100" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <rect x="40" y="60" width="220" height="100" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
       <text x="150" y="92" fill="#e5e7eb" font-size="14" text-anchor="middle">Фото/камера</text>
       <text x="150" y="112" fill="#93c5fd" font-size="12" text-anchor="middle">ROI + контрольна лінія</text>
 
-      <rect x="290" y="50" width="220" height="120" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <rect x="290" y="50" width="220" height="120" rx="12" fill="#14532d" stroke="#22c55e"></rect>
       <text x="400" y="90" fill="#dcfce7" font-size="14" text-anchor="middle">Ознаки</text>
       <text x="400" y="108" fill="#a7f3d0" font-size="12" text-anchor="middle">edge, oil, rust, low-sat, angle</text>
 
-      <rect x="540" y="50" width="220" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+      <rect x="540" y="50" width="220" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
       <text x="650" y="90" fill="#e5e7eb" font-size="14" text-anchor="middle">k-NN класифікатор</text>
       <text x="650" y="108" fill="#93c5fd" font-size="12" text-anchor="middle">навчання на своїх прикладах</text>
 
-      <rect x="790" y="50" width="150" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+      <rect x="790" y="50" width="150" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"></rect>
       <text x="865" y="90" fill="#e5e7eb" font-size="14" text-anchor="middle">Клас + Heatmap</text>
       <text x="865" y="108" fill="#93c5fd" font-size="12" text-anchor="middle">експорт CSV/PNG</text>
 
-      <line x1="260" y1="110" x2="290" y2="110" stroke="#93c5fd" stroke-width="3"/>
-      <line x1="510" y1="110" x2="540" y2="110" stroke="#22c55e" stroke-width="3"/>
-      <line x1="760" y1="110" x2="790" y2="110" stroke="#64748b" stroke-width="3"/>
+      <line x1="260" y1="110" x2="290" y2="110" stroke="#93c5fd" stroke-width="3"></line>
+      <line x1="510" y1="110" x2="540" y2="110" stroke="#22c55e" stroke-width="3"></line>
+      <line x1="760" y1="110" x2="790" y2="110" stroke="#64748b" stroke-width="3"></line>
     </svg>
   </div>
 
@@ -530,5 +528,6 @@ tick();
 // LMS-friendly
 if (window.self !== window.top) document.documentElement.classList.add('embedded');
 </script>
-</body>
-</html>
+
+
+</body></html>

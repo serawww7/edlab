@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 25 (технологи) — ШІ для аудиту санітарії: NLP SSOP/журнали → невідповідності → CAPA → графіки → чек/CSV/QR</title>
-<meta name="description" content="Фінальна: вставляй тексти SSOP/журналів, AI витягає сутності, класифікує невідповідності (Minor/Major/Critical), генерує CAPA, веде журнал, будує графіки, чек 58 мм, експорт CSV/QR."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Фінальна: вставляй тексти SSOP/журналів, AI витягає сутності, класифікує невідповідності (Minor/Major/Critical), генерує CAPA, веде журнал, будує графіки, чек 58 мм, експорт CSV/QR.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -41,14 +39,14 @@ canvas{display:block;width:100%;height:280px;background:#0b1220;border:1px solid
 kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
 .footer{margin-top:20px;color:var(--muted);font-size:.9rem}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/tech_II_kyrs/tech_para25.html"><meta property="og:type" content="article"><meta property="og:title" content="Технології тваринництва — Пара 25"><meta property="og:description" content="Ти — технолог зміни на молокопереробному цеху. У тебе є SSOP (санітарні операційні процедури) і добові журнали прибирання/дезінфекції. Завдання: забрати з"><meta property="og:url" content="https://edlab.pp.ua/tech_II_kyrs/tech_para25.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Технології тваринництва — Пара 25","description":"Ти — технолог зміни на молокопереробному цеху. У тебе є SSOP (санітарні операційні процедури) і добові журнали прибирання/дезінфекції. Завдання: забрати з","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/tech_II_kyrs/tech_para25.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧼</span>
       <div>
-        <b>Пара 25 — ШІ для аудиту санітарії (фінал)</b><br/>
+        <b>Пара 25 — ШІ для аудиту санітарії (фінал)</b><br>
         <span class="badge">SSOP/журнали → витяг сутностей → ризик → CAPA → графіки → чек/CSV/QR</span>
       </div>
     </div>
@@ -66,15 +64,15 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     </p>
     <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
       <div class="note">
-        <b>📌 Дані</b><br/>Беремо сирі тексти SSOP/журналів: наприклад, «Зона фасування, мийка лінії С, 
+        <b>📌 Дані</b><br>Беремо сирі тексти SSOP/журналів: наприклад, «Зона фасування, мийка лінії С, 
         лужний 2.0 %, 55 °C, контакт 12 хв, валідація ОК». Вставляємо нижче.
       </div>
       <div class="note">
-        <b>🔎 NLP</b><br/>Браузер витягає сутності: <span class="mono">ZONE, TOOL, CHEM, CONC, TEMP, TIME, ALLERGEN, BIO, DATE, PERSON</span>, 
+        <b>🔎 NLP</b><br>Браузер витягає сутності: <span class="mono">ZONE, TOOL, CHEM, CONC, TEMP, TIME, ALLERGEN, BIO, DATE, PERSON</span>, 
         перевіряє ліміти і шукає тригери ризику.
       </div>
       <div class="note">
-        <b>🧠 Класифікація</b><br/>Правила + скоринг: <i>Minor</i> (косметичне), <i>Major</i> (можливий вплив на якість), 
+        <b>🧠 Класифікація</b><br>Правила + скоринг: <i>Minor</i> (косметичне), <i>Major</i> (можливий вплив на якість), 
         <i>Critical</i> (ризик безпеки харчів: алергени/патогени/стекло/метал/герметичність/аномально низькі параметри).
       </div>
     </div>
@@ -136,7 +134,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h3 style="margin-top:10px">🧠 CAPA-план (авто/ручний)</h3>
       <div class="row">
         <button class="btn" id="genCapa">🤖 AI-CAPA з невідповідностей</button>
-        <input id="lot" class="input" placeholder="Лот/лінія (напр. SSOP_йогурт_2025-10-18_B)"/>
+        <input id="lot" class="input" placeholder="Лот/лінія (напр. SSOP_йогурт_2025-10-18_B)">
       </div>
       <textarea id="capa" placeholder="1) Утримання/containment: ...
 2) Корінна причина (5 чому): ...
@@ -154,7 +152,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
       <small class="muted">QR генерується через <span class="mono">api.qrserver.com</span>; офлайн буде текст.</small>
     </div>
@@ -179,25 +177,25 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h2 style="margin-top:10px">🔌 Схема процесу (SVG)</h2>
       <svg viewBox="0 0 820 260" role="img" aria-label="SSOP → NLP → Ризик → CAPA → Звіт">
-        <rect x="40" y="40" width="160" height="110" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <rect x="40" y="40" width="160" height="110" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
         <text x="120" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">SSOP / Журнали</text>
         <text x="120" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">вільний текст</text>
 
-        <rect x="220" y="40" width="170" height="110" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <rect x="220" y="40" width="170" height="110" rx="12" fill="#14532d" stroke="#22c55e"></rect>
         <text x="305" y="80" fill="#dcfce7" font-size="14" text-anchor="middle">NLP витяг</text>
         <text x="305" y="100" fill="#a7f3d0" font-size="12" text-anchor="middle">ZONE/CHEM/TIME/…</text>
 
-        <rect x="410" y="40" width="150" height="110" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <rect x="410" y="40" width="150" height="110" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
         <text x="485" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Оцінка ризику</text>
         <text x="485" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">Minor/Major/Critical</text>
 
-        <rect x="580" y="40" width="180" height="110" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+        <rect x="580" y="40" width="180" height="110" rx="12" fill="#0b1a2f" stroke="#64748b"></rect>
         <text x="670" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">CAPA-план</text>
         <text x="670" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">утримання/5Why/дії</text>
 
-        <line x1="200" y1="95" x2="220" y2="95" stroke="#93c5fd" stroke-width="3"/>
-        <line x1="390" y1="95" x2="410" y2="95" stroke="#22c55e" stroke-width="3"/>
-        <line x1="560" y1="95" x2="580" y2="95" stroke="#64748b" stroke-width="3"/>
+        <line x1="200" y1="95" x2="220" y2="95" stroke="#93c5fd" stroke-width="3"></line>
+        <line x1="390" y1="95" x2="410" y2="95" stroke="#22c55e" stroke-width="3"></line>
+        <line x1="560" y1="95" x2="580" y2="95" stroke="#64748b" stroke-width="3"></line>
       </svg>
 
       <h2 style="margin-top:10px">🎯 Завдання для студентів</h2>
@@ -505,5 +503,6 @@ updCount();
 // Вбудоване відображення (Moodle/iFrame)
 (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
 </script>
-</body>
-</html>
+
+
+</body></html>

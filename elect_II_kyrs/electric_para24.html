@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 24 (Електрика) — ШІ: прогноз піків (Gradient Boosting JS) + балансування</title>
-<meta name="description" content="Імпорт історії навантаження, фічі часу/лагів/погоди, градієнтний бустинг у JS (decision stumps), 48h прогноз, поради балансування, алерти та експорт (ICS/CSV/TXT)."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Імпорт історії навантаження, фічі часу/лагів/погоди, градієнтний бустинг у JS (decision stumps), 48h прогноз, поради балансування, алерти та експорт (ICS/CSV/TXT).">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -37,14 +35,14 @@ canvas{display:block;width:100%;height:280px}
 .ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
 .receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para24.html"><meta property="og:type" content="article"><meta property="og:title" content="Електроенергетика — Пара 24"><meta property="og:description" content="Мета: навчити простий градієнтний бустинг на історії timestamp,kW[,Temp], оцінити якість та важливість фіч, спрогнозувати 48 год наперед, позначити пікові"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para24.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Електроенергетика — Пара 24","description":"Мета: навчити простий градієнтний бустинг на історії timestamp,kW[,Temp], оцінити якість та важливість фіч, спрогнозувати 48 год наперед, позначити пікові","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para24.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">📈</span>
       <div>
-        <b>Пара 24 — ШІ: прогноз піків навантаження</b><br/>
+        <b>Пара 24 — ШІ: прогноз піків навантаження</b><br>
         <span class="badge">CSV → фічі → Gradient Boosting (JS) → 48h forecast → поради → ICS/CSV/TXT</span>
       </div>
     </div>
@@ -78,29 +76,29 @@ canvas{display:block;width:100%;height:280px}
       <div style="flex:1">
         <label>Лаги/фічі</label>
         <div class="row">
-          <label><input type="checkbox" id="fHour" checked/> Hour</label>
-          <label><input type="checkbox" id="fDow" checked/> DayOfWeek</label>
-          <label><input type="checkbox" id="fLag1" checked/> Lag 1h</label>
-          <label><input type="checkbox" id="fLag24" checked/> Lag 24h</label>
-          <label><input type="checkbox" id="fMA24" checked/> MA 24h</label>
-          <label><input type="checkbox" id="fTemp" /> Temp</label>
+          <label><input type="checkbox" id="fHour" checked=""> Hour</label>
+          <label><input type="checkbox" id="fDow" checked=""> DayOfWeek</label>
+          <label><input type="checkbox" id="fLag1" checked=""> Lag 1h</label>
+          <label><input type="checkbox" id="fLag24" checked=""> Lag 24h</label>
+          <label><input type="checkbox" id="fMA24" checked=""> MA 24h</label>
+          <label><input type="checkbox" id="fTemp"> Temp</label>
         </div>
       </div>
       <div style="flex:1">
         <label for="trees">К-сть дерев</label>
-        <input id="trees" class="input" type="number" min="10" step="10" value="120"/>
+        <input id="trees" class="input" type="number" min="10" step="10" value="120">
       </div>
       <div style="flex:1">
         <label for="depth">Глибина</label>
-        <select id="depth" class="input"><option value="1" selected>1 (stumps)</option><option value="2">2</option></select>
+        <select id="depth" class="input"><option value="1" selected="">1 (stumps)</option><option value="2">2</option></select>
       </div>
       <div style="flex:1">
         <label for="lr">Learning rate</label>
-        <input id="lr" class="input" type="number" min="0.01" step="0.01" value="0.10"/>
+        <input id="lr" class="input" type="number" min="0.01" step="0.01" value="0.10">
       </div>
       <div style="flex:1">
         <label for="split">Train/Test, % (train)</label>
-        <input id="split" class="input" type="number" min="60" max="90" step="1" value="80"/>
+        <input id="split" class="input" type="number" min="60" max="90" step="1" value="80">
       </div>
     </div>
     <div class="row" style="margin-top:6px">
@@ -120,7 +118,7 @@ canvas{display:block;width:100%;height:280px}
     <h2>📈 Графік</h2>
     <div class="canvasWrap"><canvas id="chart" width="1050" height="280"></canvas></div>
     <div class="row" style="margin-top:6px">
-      <label style="flex:1">Поріг піку, кВт <input id="thr" class="input" type="number" step="1" value="300"/></label>
+      <label style="flex:1">Поріг піку, кВт <input id="thr" class="input" type="number" step="1" value="300"></label>
       <button class="btn" id="findPeaks">🚨 Знайти піки</button>
       <span id="badgePk" class="badge">Піків: —</span>
     </div>
@@ -136,7 +134,7 @@ canvas{display:block;width:100%;height:280px}
       <button class="btn" id="expTXT">💾 TXT (підсумок/поради)</button>
       <button class="btn secondary" id="receipt">🖨️ 58-мм чек на день</button>
     </div>
-    <div id="rc" class="receipt" hidden></div>
+    <div id="rc" class="receipt" hidden=""></div>
   </div>
 
   <div class="card">
@@ -152,28 +150,28 @@ canvas{display:block;width:100%;height:280px}
   <div class="card">
     <h2>🔁 Схема процесу (SVG)</h2>
     <svg viewBox="0 0 1000 360" role="img" aria-label="Дані → Фічі → GBRT → Прогноз → Піки → Поради → Експорт">
-      <rect x="30" y="40" width="180" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <rect x="30" y="40" width="180" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
       <text x="120" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Історія CSV</text>
       <text x="120" y="90" fill="#93c5fd" font-size="12" text-anchor="middle">timestamp,kW[,Temp]</text>
 
-      <rect x="240" y="40" width="200" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <rect x="240" y="40" width="200" height="80" rx="12" fill="#14532d" stroke="#22c55e"></rect>
       <text x="340" y="70" fill="#dcfce7" font-size="14" text-anchor="middle">Фічі/лаги</text>
       <text x="340" y="90" fill="#a7f3d0" font-size="12" text-anchor="middle">hour,dow,lag1,lag24,MA24,temp</text>
 
-      <rect x="460" y="40" width="200" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+      <rect x="460" y="40" width="200" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"></rect>
       <text x="560" y="70" fill="#fed7aa" font-size="14" text-anchor="middle">GBRT (JS)</text>
       <text x="560" y="90" fill="#fed7aa" font-size="12" text-anchor="middle">stumps d=1..2</text>
 
-      <rect x="680" y="40" width="140" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+      <rect x="680" y="40" width="140" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
       <text x="750" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Прогноз</text>
 
-      <rect x="840" y="40" width="130" height="80" rx="12" fill="#111827" stroke="#4b5563"/>
+      <rect x="840" y="40" width="130" height="80" rx="12" fill="#111827" stroke="#4b5563"></rect>
       <text x="905" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Піки/Поради</text>
 
-      <line x1="210" y1="80" x2="240" y2="80" stroke="#93c5fd" stroke-width="3"/>
-      <line x1="440" y1="80" x2="460" y2="80" stroke="#93c5fd" stroke-width="3"/>
-      <line x1="660" y1="80" x2="680" y2="80" stroke="#93c5fd" stroke-width="3"/>
-      <line x1="820" y1="80" x2="840" y2="80" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="210" y1="80" x2="240" y2="80" stroke="#93c5fd" stroke-width="3"></line>
+      <line x1="440" y1="80" x2="460" y2="80" stroke="#93c5fd" stroke-width="3"></line>
+      <line x1="660" y1="80" x2="680" y2="80" stroke="#93c5fd" stroke-width="3"></line>
+      <line x1="820" y1="80" x2="840" y2="80" stroke="#93c5fd" stroke-width="3"></line>
     </svg>
   </div>
 
@@ -616,5 +614,6 @@ function draw(){
 if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
 draw();
 </script>
-</body>
-</html>
+
+
+</body></html>

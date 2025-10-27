@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 18 — Arduino: мікроклімат (DHT11/DHT22) + GDD, графік, експорт</title>
-<meta name="description" content="Читаємо DHT11/DHT22: T/вологість, згладжуємо, будуємо онлайн-графік, рахуємо Growing Degree Days (GDD) з базою/стелею, експортуємо CSV/TXT. Генератор прошивки під обраний сенсор."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Читаємо DHT11/DHT22: T/вологість, згладжуємо, будуємо онлайн-графік, рахуємо Growing Degree Days (GDD) з базою/стелею, експортуємо CSV/TXT. Генератор прошивки під обраний сенсор.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -37,14 +35,14 @@ canvas{display:block;width:100%;height:260px}
 .footer{margin-top:20px;color:var(--muted);font-size:.9rem}
 .badgeGDD{display:inline-block;border:1px solid #334155;border-radius:999px;padding:2px 8px}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para18.html"><meta property="og:type" content="article"><meta property="og:title" content="Агрономія — Пара 18"><meta property="og:description" content="Мета: під’єднати DHT11/DHT22, вимірювати T/вологість, будувати онлайн-графік, рахувати Growing Degree Days (GDD) із базою (Tbase) і стелею (Tupper), експор"><meta property="og:url" content="https://edlab.pp.ua/agro_II_kyrs/agro_para18.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Агрономія — Пара 18","description":"Мета: під’єднати DHT11/DHT22, вимірювати T/вологість, будувати онлайн-графік, рахувати Growing Degree Days (GDD) із базою (Tbase) і стелею (Tupper), експор","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/agro_II_kyrs/agro_para18.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🌡️</span>
       <div>
-        <b>Пара 18 — Arduino: мікроклімат (DHT11/DHT22)</b><br/>
+        <b>Пара 18 — Arduino: мікроклімат (DHT11/DHT22)</b><br>
         <span class="badge">Температура/вологість → згладжування → GDD → графік → експорт</span>
       </div>
     </div>
@@ -62,13 +60,13 @@ canvas{display:block;width:100%;height:260px}
           <label for="sensor">Тип сенсора</label>
           <select id="sensor" class="input">
             <option value="DHT11">DHT11</option>
-            <option value="DHT22" selected>DHT22 / AM2302</option>
+            <option value="DHT22" selected="">DHT22 / AM2302</option>
           </select>
         </div>
         <div style="flex:1">
           <label for="dpin">Цифровий пін (DHT DATA)</label>
           <select id="dpin" class="input">
-            <option value="2">D2</option><option value="3">D3</option><option value="4" selected>D4</option>
+            <option value="2">D2</option><option value="3">D3</option><option value="4" selected="">D4</option>
             <option value="5">D5</option><option value="6">D6</option><option value="7">D7</option>
           </select>
         </div>
@@ -77,11 +75,11 @@ canvas{display:block;width:100%;height:260px}
       <div class="row">
         <div style="flex:1">
           <label for="period">Період вимірювання, мс</label>
-          <input id="period" class="input" type="number" min="1000" max="60000" step="500" value="2000"/>
+          <input id="period" class="input" type="number" min="1000" max="60000" step="500" value="2000">
         </div>
         <div style="flex:1">
           <label for="alpha">EMA згладжування α (0..1)</label>
-          <input id="alpha" class="input" type="number" step="0.05" min="0" max="1" value="0.2"/>
+          <input id="alpha" class="input" type="number" step="0.05" min="0" max="1" value="0.2">
         </div>
       </div>
 
@@ -89,15 +87,15 @@ canvas{display:block;width:100%;height:260px}
       <div class="row">
         <div style="flex:1">
           <label for="tbase">T<sub>base</sub> (°C)</label>
-          <input id="tbase" class="input" type="number" step="0.5" value="10"/>
+          <input id="tbase" class="input" type="number" step="0.5" value="10">
         </div>
         <div style="flex:1">
           <label for="tupper">T<sub>upper</sub> (°C, «стеля»)</label>
-          <input id="tupper" class="input" type="number" step="0.5" value="30"/>
+          <input id="tupper" class="input" type="number" step="0.5" value="30">
         </div>
         <div style="flex:1">
           <label for="targetGDD">Ціль GDD (напр. фаза)</label>
-          <input id="targetGDD" class="input" type="number" step="1" value="150"/>
+          <input id="targetGDD" class="input" type="number" step="1" value="150">
         </div>
       </div>
       <div class="row" style="gap:14px">
@@ -107,12 +105,12 @@ canvas{display:block;width:100%;height:260px}
 
       <h3 style="margin-top:12px">🧪 Емулятор (без Arduino)</h3>
       <div class="row">
-        <input id="emu" type="checkbox"/>
+        <input id="emu" type="checkbox">
         <label for="emu">Увімкнути емулятор</label>
       </div>
       <div class="row" style="width:100%">
-        <label style="flex:1">Температура, °C <input id="emuT" class="input" type="range" min="-5" max="45" step="0.5" value="22" disabled/></label>
-        <label style="flex:1">Вологість, % <input id="emuH" class="input" type="range" min="15" max="95" step="1" value="55" disabled/></label>
+        <label style="flex:1">Температура, °C <input id="emuT" class="input" type="range" min="-5" max="45" step="0.5" value="22" disabled=""></label>
+        <label style="flex:1">Вологість, % <input id="emuH" class="input" type="range" min="15" max="95" step="1" value="55" disabled=""></label>
       </div>
 
       <h3 style="margin-top:12px">📈 Живий графік</h3>
@@ -133,7 +131,7 @@ canvas{display:block;width:100%;height:260px}
 
       <h3 style="margin-top:12px">💾 Протокол для звіту</h3>
       <div class="row">
-        <input id="fio" class="input" placeholder="ПІБ студента"/>
+        <input id="fio" class="input" placeholder="ПІБ студента">
         <button class="btn" id="saveTxt">💾 TXT</button>
         <button class="btn" id="saveCsv">📄 CSV</button>
       </div>
@@ -144,26 +142,26 @@ canvas{display:block;width:100%;height:260px}
       <h2>🔌 Схема підключення (SVG)</h2>
       <svg viewBox="0 0 760 360" role="img" aria-label="Arduino + DHT">
         <!-- Arduino -->
-        <rect x="40" y="40" width="220" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <rect x="40" y="40" width="220" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
         <text x="150" y="65" fill="#e5e7eb" font-size="16" text-anchor="middle">Arduino UNO/Nano</text>
         <text x="55" y="95" fill="#93c5fd" font-size="12">5V</text>
         <text x="55" y="115" fill="#93c5fd" font-size="12">GND</text>
         <text x="55" y="135" fill="#93c5fd" font-size="12">D4</text>
 
         <!-- DHT -->
-        <rect x="320" y="40" width="200" height="100" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <rect x="320" y="40" width="200" height="100" rx="12" fill="#14532d" stroke="#22c55e"></rect>
         <text x="420" y="70" fill="#dcfce7" font-size="16" text-anchor="middle">DHT11/DHT22</text>
         <text x="420" y="90" fill="#a7f3d0" font-size="12" text-anchor="middle">VCC — DATA — GND</text>
 
         <!-- Підтяжка -->
-        <line x1="420" y1="100" x2="420" y2="130" stroke="#fbbf24" stroke-width="2"/>
-        <rect x="410" y="130" width="20" height="10" fill="#fbbf24"/>
+        <line x1="420" y1="100" x2="420" y2="130" stroke="#fbbf24" stroke-width="2"></line>
+        <rect x="410" y="130" width="20" height="10" fill="#fbbf24"></rect>
         <text x="460" y="138" fill="#fde68a" font-size="12">~10k Ω pull-up</text>
 
         <!-- З’єднання -->
-        <line x1="260" y1="90"  x2="320" y2="60"  stroke="#93c5fd" stroke-width="3"/><text x="280" y="80"  fill="#93c5fd" font-size="12">5V → VCC</text>
-        <line x1="260" y1="110" x2="320" y2="100" stroke="#64748b" stroke-width="3"/><text x="280" y="110" fill="#94a3b8" font-size="12">GND → GND</text>
-        <line x1="260" y1="130" x2="320" y2="80"  stroke="#22c55e" stroke-width="3"/><text x="280" y="95"  fill="#86efac" font-size="12">D4 → DATA</text>
+        <line x1="260" y1="90" x2="320" y2="60" stroke="#93c5fd" stroke-width="3"></line><text x="280" y="80" fill="#93c5fd" font-size="12">5V → VCC</text>
+        <line x1="260" y1="110" x2="320" y2="100" stroke="#64748b" stroke-width="3"></line><text x="280" y="110" fill="#94a3b8" font-size="12">GND → GND</text>
+        <line x1="260" y1="130" x2="320" y2="80" stroke="#22c55e" stroke-width="3"></line><text x="280" y="95" fill="#86efac" font-size="12">D4 → DATA</text>
       </svg>
 
       <div class="note" style="margin-top:10px">
@@ -181,7 +179,7 @@ canvas{display:block;width:100%;height:260px}
     </div>
   </div>
 
-  <hr class="sep"/>
+  <hr class="sep">
 
   <div class="card">
     <h2>📋 Підсумок для звіту</h2>
@@ -384,5 +382,6 @@ $('#saveCsv').addEventListener('click', ()=>{
 draw();
 if (window.self !== window.top) document.documentElement.classList.add('embedded'); // Moodle-friendly
 </script>
-</body>
-</html>
+
+
+</body></html>

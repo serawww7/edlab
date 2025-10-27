@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 20 (механіки) — Акустичний стетоскоп підшипників редуктора (WebAudio)</title>
-<meta name="description" content="Мікрофон гарнітури або WAV → осцилограма, envelope, спектр/спектр огинаючої, кепструм → діагноз підшипника/редуктора → чек-лист дій → журнал → експорт PNG/CSV/TXT."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Мікрофон гарнітури або WAV → осцилограма, envelope, спектр/спектр огинаючої, кепструм → діагноз підшипника/редуктора → чек-лист дій → журнал → експорт PNG/CSV/TXT.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -38,14 +36,14 @@ canvas{display:block;width:100%;height:220px}
 kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
 .receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/mech_II_kyrs/mechanic_para20.html"><meta property="og:type" content="article"><meta property="og:title" content="Механізація — Пара 20"><meta property="og:description" content="Мета: за допомогою звичайного мікрофона гарнітури прослухати корпус редуктора, отримати огинаючу ударів, спектр і кепструм, розпізнати типові проблеми (1X"><meta property="og:url" content="https://edlab.pp.ua/mech_II_kyrs/mechanic_para20.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Механізація — Пара 20","description":"Мета: за допомогою звичайного мікрофона гарнітури прослухати корпус редуктора, отримати огинаючу ударів, спектр і кепструм, розпізнати типові проблеми (1X","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/mech_II_kyrs/mechanic_para20.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🎧</span>
       <div>
-        <b>Пара 20 — Акустичний стетоскоп підшипників редуктора</b><br/>
+        <b>Пара 20 — Акустичний стетоскоп підшипників редуктора</b><br>
         <span class="badge">мікрофон → envelope → спектр/кепструм → діагноз → чек-лист → журнал → експорт</span>
       </div>
     </div>
@@ -60,7 +58,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div style="flex:1">
         <label>Режим</label>
         <select id="src" class="input">
-          <option value="mic" selected>Мікрофон (гарнітура/ноутбук)</option>
+          <option value="mic" selected="">Мікрофон (гарнітура/ноутбук)</option>
           <option value="file">Аудіофайл (WAV/MP3)</option>
           <option value="emu">Емулятор (синтетика підшипника)</option>
         </select>
@@ -72,7 +70,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       </div>
     </div>
     <div id="fileBox" class="row" style="display:none;margin-top:6px">
-      <input id="fileInp" class="input" type="file" accept="audio/*"/>
+      <input id="fileInp" class="input" type="file" accept="audio/*">
       <button class="btn" id="playFile">▶️ Відтворити файл</button>
     </div>
     <div id="emuBox" class="note" style="display:none;margin-top:6px">
@@ -80,16 +78,16 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div class="row">
         <div style="flex:1">
           <select id="emuType" class="input">
-            <option value="normal" selected>Норма (тихий підшипник)</option>
-            <option value="outer">Підшипник — доріжка <i>outer race</i></option>
-            <option value="inner">Підшипник — доріжка <i>inner race</i></option>
+            <option value="normal" selected="">Норма (тихий підшипник)</option>
+            <option value="outer">Підшипник — доріжка outer race</option>
+            <option value="inner">Підшипник — доріжка inner race</option>
             <option value="ball">Підшипник — тіла кочення</option>
             <option value="gear">Зачеплення шестерень (GMF)</option>
             <option value="loose">Looseness (послаблення)</option>
           </select>
         </div>
         <div style="flex:1">
-          <label>Рівень <input id="emuLvl" class="input" type="range" min="0" max="1" step="0.01" value="0.7"/></label>
+          <label>Рівень <input id="emuLvl" class="input" type="range" min="0" max="1" step="0.01" value="0.7"></label>
         </div>
       </div>
     </div>
@@ -100,19 +98,19 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="row">
       <div style="flex:1">
         <label>RPM валу (або оцінка)</label>
-        <input id="rpm" class="input" type="number" min="60" step="1" value="900"/>
+        <input id="rpm" class="input" type="number" min="60" step="1" value="900">
       </div>
       <div style="flex:1">
         <label>Зубців на шестерні (якщо редуктор)</label>
-        <input id="teeth" class="input" type="number" min="5" step="1" value="30"/>
+        <input id="teeth" class="input" type="number" min="5" step="1" value="30">
       </div>
       <div style="flex:1">
         <label>Смуга огинаючої, кГц (НЧ фільтр)</label>
-        <input id="envLP" class="input" type="number" min="0.2" step="0.1" value="2.0"/>
+        <input id="envLP" class="input" type="number" min="0.2" step="0.1" value="2.0">
       </div>
       <div style="flex:1">
         <label>FFT розмір</label>
-        <select id="fft" class="input"><option>2048</option><option selected>4096</option><option>8192</option></select>
+        <select id="fft" class="input"><option>2048</option><option selected="">4096</option><option>8192</option></select>
       </div>
     </div>
     <small class="muted">Порада: «стетоскоп» працює краще на частинах корпусу, де звук «дзвенить». Притисни мікрофон через гумову прокладку або ізоленту.</small>
@@ -173,7 +171,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="row">
       <button class="btn" id="mark">📌 Позначити подію</button>
       <select id="label" class="input" style="max-width:260px">
-        <option value="ok" selected>ok</option>
+        <option value="ok" selected="">ok</option>
         <option value="unbalance">unbalance</option>
         <option value="misalignment">misalignment</option>
         <option value="looseness">looseness</option>
@@ -188,21 +186,21 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <button class="btn" id="expPNG">🖼️ PNG (все разом)</button>
       <button class="btn secondary" id="receipt">🖨️ 58 мм чек</button>
     </div>
-    <div id="rc" class="receipt" hidden></div>
+    <div id="rc" class="receipt" hidden=""></div>
   </div>
 
   <div class="card">
     <h2>🔌 Схема розміщення (SVG)</h2>
     <svg viewBox="0 0 980 300" role="img" aria-label="Мікрофон → корпус редуктора">
-      <rect x="60" y="60" width="300" height="160" rx="16" fill="#0e2a47" stroke="#3b82f6"/>
+      <rect x="60" y="60" width="300" height="160" rx="16" fill="#0e2a47" stroke="#3b82f6"></rect>
       <text x="210" y="90" fill="#e5e7eb" font-size="15" text-anchor="middle">Редуктор</text>
       <text x="210" y="110" fill="#93c5fd" font-size="12" text-anchor="middle">вхідний вал ліворуч, вихід праворуч</text>
 
-      <circle cx="130" cy="140" r="20" fill="#1f2937" stroke="#9ca3af"/>
-      <circle cx="350" cy="140" r="28" fill="#1f2937" stroke="#9ca3af"/>
-      <rect x="500" y="110" width="160" height="60" rx="10" fill="#14532d" stroke="#22c55e"/>
+      <circle cx="130" cy="140" r="20" fill="#1f2937" stroke="#9ca3af"></circle>
+      <circle cx="350" cy="140" r="28" fill="#1f2937" stroke="#9ca3af"></circle>
+      <rect x="500" y="110" width="160" height="60" rx="10" fill="#14532d" stroke="#22c55e"></rect>
       <text x="580" y="145" fill="#dcfce7" font-size="14" text-anchor="middle">🎤 Мікрофон</text>
-      <line x1="360" y1="140" x2="500" y2="140" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="360" y1="140" x2="500" y2="140" stroke="#93c5fd" stroke-width="3"></line>
       <text x="640" y="210" fill="#fbbf24" font-size="12" text-anchor="middle">Притиснути до корпуса через гуму/ізолентою</text>
     </svg>
     <div class="note small" style="margin-top:8px">
@@ -652,5 +650,6 @@ $('#fft').addEventListener('change', ()=>{ if(actx){ alert('Змініть FFT �
 // ===== Ініціалізація =====
 if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
 </script>
-</body>
-</html>
+
+
+</body></html>

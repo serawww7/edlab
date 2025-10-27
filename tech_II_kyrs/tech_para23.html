@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 23 (технологи) — ШІ для термопроцесів: F/PU, оптимізація профілю, графіки, журнал, чек/CSV/QR</title>
-<meta name="description" content="Симулятор термообробки: профіль температури, інтегрування F/PU (летальний ефект), оптимізація під ціль без переварювання, живі графіки, журнал, експорт, чек/QR."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Симулятор термообробки: профіль температури, інтегрування F/PU (летальний ефект), оптимізація під ціль без переварювання, живі графіки, журнал, експорт, чек/QR.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -41,14 +39,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted);margin-right:6px;margin-top:6px}
 .small{font-size:.9rem}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/tech_II_kyrs/tech_para23.html"><meta property="og:type" content="article"><meta property="og:title" content="Технології тваринництва — Пара 23"><meta property="og:description" content="Навчити моделювати термообробку молока/м’яса/сиру у браузері: будувати профіль T(t), інтегрувати летальний ефект (F/PU) за параметрами Tref, z, та оптимізу"><meta property="og:url" content="https://edlab.pp.ua/tech_II_kyrs/tech_para23.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Технології тваринництва — Пара 23","description":"Навчити моделювати термообробку молока/м’яса/сиру у браузері: будувати профіль T(t), інтегрувати летальний ефект (F/PU) за параметрами Tref, z, та оптимізу","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/tech_II_kyrs/tech_para23.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🔥</span>
       <div>
-        <b>Пара 23 — ШІ для термопроцесів</b><br/>
+        <b>Пара 23 — ШІ для термопроцесів</b><br>
         <span class="badge">профіль температури → F/PU → оптимізація під ціль → графіки → журнал → чек/CSV/QR</span>
       </div>
     </div>
@@ -63,9 +61,9 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       та <b>оптимізувати</b> час/температуру для досягнення цілі без «переварювання» (штраф за якість).
     </p>
     <div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
-      <div class="note"><b>📐 Модель</b><br/>Летальна швидкість: <span class="mono">L(T)=10^{(T−Tref)/z}</span>, інтеграл F = ∫L·dt.</div>
-      <div class="note"><b>🎛️ Профіль</b><br/>Лінійний розгін → ізотермічна витримка → лінійне охолодження.</div>
-      <div class="note"><b>🧠 Оптимізація</b><br/>Пошук параметрів профілю під <span class="mono">Target F</span> з мінімумом штрафу за якість/перегрів.</div>
+      <div class="note"><b>📐 Модель</b><br>Летальна швидкість: <span class="mono">L(T)=10^{(T−Tref)/z}</span>, інтеграл F = ∫L·dt.</div>
+      <div class="note"><b>🎛️ Профіль</b><br>Лінійний розгін → ізотермічна витримка → лінійне охолодження.</div>
+      <div class="note"><b>🧠 Оптимізація</b><br>Пошук параметрів профілю під <span class="mono">Target F</span> з мінімумом штрафу за якість/перегрів.</div>
     </div>
   </div>
 
@@ -76,35 +74,35 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div class="row">
         <label>Продукт / референт
           <select id="prod" class="input">
-            <option value="milk" selected>Молоко HTST (Tref=72.0°C, z=7.0, ціль PU=1.0)</option>
+            <option value="milk" selected="">Молоко HTST (Tref=72.0°C, z=7.0, ціль PU=1.0)</option>
             <option value="curd">Сирна маса (Tref=63.0°C, z=7.0, ціль PU=0.5)</option>
             <option value="sausage">Варена ковбаса (Tref=70.0°C, z=6.0, ціль F=3.0)</option>
             <option value="custom">Кастом</option>
           </select>
         </label>
-        <label>Tref, °C<input id="tref" class="input" type="number" step="0.1" value="72.0"/></label>
-        <label>z, °C<input id="z" class="input" type="number" step="0.1" value="7.0"/></label>
-        <label>Ціль F/PU<input id="ftarget" class="input" type="number" step="0.01" value="1.00"/></label>
+        <label>Tref, °C<input id="tref" class="input" type="number" step="0.1" value="72.0"></label>
+        <label>z, °C<input id="z" class="input" type="number" step="0.1" value="7.0"></label>
+        <label>Ціль F/PU<input id="ftarget" class="input" type="number" step="0.01" value="1.00"></label>
       </div>
 
       <h3 style="margin-top:8px">📈 Профіль T(t): розгін → витримка → охолодження</h3>
       <div class="row">
-        <label>T старт, °C<input id="t0" class="input" type="number" step="0.1" value="4.0"/></label>
-        <label>T витримки, °C<input id="thold" class="input" type="number" step="0.1" value="74.0"/></label>
-        <label>Витримка, сек<input id="hold" class="input" type="number" step="1" value="20"/></label>
+        <label>T старт, °C<input id="t0" class="input" type="number" step="0.1" value="4.0"></label>
+        <label>T витримки, °C<input id="thold" class="input" type="number" step="0.1" value="74.0"></label>
+        <label>Витримка, сек<input id="hold" class="input" type="number" step="1" value="20"></label>
       </div>
       <div class="row">
-        <label>Час розгону, сек<input id="t_up" class="input" type="number" step="1" value="25"/></label>
-        <label>Час охол., сек<input id="t_dn" class="input" type="number" step="1" value="40"/></label>
-        <label>Крок симуляції, сек<input id="dt" class="input" type="number" step="0.1" value="0.5"/></label>
+        <label>Час розгону, сек<input id="t_up" class="input" type="number" step="1" value="25"></label>
+        <label>Час охол., сек<input id="t_dn" class="input" type="number" step="1" value="40"></label>
+        <label>Крок симуляції, сек<input id="dt" class="input" type="number" step="0.1" value="0.5"></label>
         <button class="btn" id="simulate">▶️ Симулювати</button>
       </div>
 
       <h3 style="margin-top:8px">🧠 Авто-підбір (AI)</h3>
       <div class="row">
-        <label>Max T, °C<input id="tmax" class="input" type="number" step="0.1" value="78.0"/></label>
-        <label>Max час, сек<input id="tmaxsec" class="input" type="number" step="1" value="240"/></label>
-        <label>Штраф якості, °C<sup>2</sup>·сек<input id="qpen" class="input" type="number" step="0.1" value="0.08"/></label>
+        <label>Max T, °C<input id="tmax" class="input" type="number" step="0.1" value="78.0"></label>
+        <label>Max час, сек<input id="tmaxsec" class="input" type="number" step="1" value="240"></label>
+        <label>Штраф якості, °C<sup>2</sup>·сек<input id="qpen" class="input" type="number" step="0.1" value="0.08"></label>
         <button class="btn good" id="opt">🚀 Підібрати під ціль</button>
       </div>
       <small class="muted">Штраф ∝ ∑(max(0, T−T<sub>qual</sub>))²·dt, де T<sub>qual</sub>=Tref (наближено). Мета — F ≥ Target при мінімальному штрафі/часі.</small>
@@ -119,13 +117,13 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:10px">💾 Експорт / друк</h3>
       <div class="row">
-        <input id="lot" class="input" placeholder="Лот/процес (напр. HTST_2025-10-18_змінаB)"/>
+        <input id="lot" class="input" placeholder="Лот/процес (напр. HTST_2025-10-18_змінаB)">
         <button class="btn" id="saveCsv">📄 CSV (профіль)</button>
         <button class="btn" id="saveTxt">💾 TXT (звіт)</button>
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
       <small class="muted">QR генерується через <span class="mono">api.qrserver.com</span>; офлайн — виведеться текст.</small>
     </div>
@@ -147,25 +145,25 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h2 style="margin-top:10px">🔌 Схема процесу (SVG)</h2>
       <svg viewBox="0 0 820 280" role="img" aria-label="Профіль T(t) → Інтегратор F → Рішення">
-        <rect x="40" y="40" width="170" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <rect x="40" y="40" width="170" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
         <text x="125" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Профіль T(t)</text>
         <text x="125" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">розгін/витримка/охол.</text>
 
-        <rect x="230" y="40" width="190" height="120" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <rect x="230" y="40" width="190" height="120" rx="12" fill="#14532d" stroke="#22c55e"></rect>
         <text x="325" y="80" fill="#dcfce7" font-size="14" text-anchor="middle">Інтегратор F/PU</text>
         <text x="325" y="100" fill="#a7f3d0" font-size="12" text-anchor="middle">L(T)=10^{(T−Tref)/z}</text>
 
-        <rect x="440" y="40" width="150" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <rect x="440" y="40" width="150" height="120" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
         <text x="515" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Оцінка якості</text>
         <text x="515" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">штраф за перегрів</text>
 
-        <rect x="610" y="40" width="170" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+        <rect x="610" y="40" width="170" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"></rect>
         <text x="695" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Звіт</text>
         <text x="695" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">чек/CSV/QR</text>
 
-        <line x1="210" y1="100" x2="230" y2="100" stroke="#93c5fd" stroke-width="3"/>
-        <line x1="420" y1="100" x2="440" y2="100" stroke="#22c55e" stroke-width="3"/>
-        <line x1="590" y1="100" x2="610" y2="100" stroke="#64748b" stroke-width="3"/>
+        <line x1="210" y1="100" x2="230" y2="100" stroke="#93c5fd" stroke-width="3"></line>
+        <line x1="420" y1="100" x2="440" y2="100" stroke="#22c55e" stroke-width="3"></line>
+        <line x1="590" y1="100" x2="610" y2="100" stroke="#64748b" stroke-width="3"></line>
       </svg>
 
       <h2 style="margin-top:10px">🎯 Завдання для студентів</h2>
@@ -464,5 +462,6 @@ $('#qrGen').addEventListener('click', ()=>{
   simulate();
 })();
 </script>
-</body>
-</html>
+
+
+</body></html>

@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 21 (механіки) — ШІ Copilot ТО: аналіз симптомів, класи, чек-лист, промпти, ICS</title>
-<meta name="description" content="ШІ для механіків #1: текст/голос → zero-shot класифікація поломок → чек-лист дій → генератор промптів для LLM → планувальник ICS → чек 58 мм, експорт CSV/TXT."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="ШІ для механіків #1: текст/голос → zero-shot класифікація поломок → чек-лист дій → генератор промптів для LLM → планувальник ICS → чек 58 мм, експорт CSV/TXT.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -38,14 +36,14 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
 kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
 .footer{margin-top:20px;color:var(--muted);font-size:.9rem}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/mech_II_kyrs/mechanic_para21.html"><meta property="og:type" content="article"><meta property="og:title" content="Механізація — Пара 21"><meta property="og:description" content="Мета: навчитися використовувати ШІ як «співмеханіка». Вводиш симптоми текстом або голосом — отримуєш клас поломки, чек-лист дій, готові промпти для LLM, пл"><meta property="og:url" content="https://edlab.pp.ua/mech_II_kyrs/mechanic_para21.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Механізація — Пара 21","description":"Мета: навчитися використовувати ШІ як «співмеханіка». Вводиш симптоми текстом або голосом — отримуєш клас поломки, чек-лист дій, готові промпти для LLM, пл","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/mech_II_kyrs/mechanic_para21.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🤖</span>
       <div>
-        <b>Пара 21 — ШІ Copilot ТО (для механіків)</b><br/>
+        <b>Пара 21 — ШІ Copilot ТО (для механіків)</b><br>
         <span class="badge">текст/голос → класифікація → чек-лист → промпти → планувальник → експорт</span>
       </div>
     </div>
@@ -61,17 +59,17 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div class="row">
         <div style="flex:1">
           <label>Машина</label>
-          <input id="machine" class="input" placeholder="Трактор / Комбайн / Навісне..."/>
+          <input id="machine" class="input" placeholder="Трактор / Комбайн / Навісне...">
         </div>
         <div style="flex:1">
           <label>Наробіток, м/г</label>
-          <input id="hours" class="input" type="number" min="0" step="1" value="3500"/>
+          <input id="hours" class="input" type="number" min="0" step="1" value="3500">
         </div>
         <div style="flex:1">
           <label>Критичність</label>
           <select id="crit" class="input">
             <option value="low">низька</option>
-            <option value="medium" selected>середня</option>
+            <option value="medium" selected="">середня</option>
             <option value="high">висока</option>
           </select>
         </div>
@@ -112,7 +110,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
           <option value="cooling">охолодження</option>
           <option value="fuel">паливо</option>
         </select>
-        <input id="shot" class="input" placeholder="Короткий приклад симптому для цього класу"/>
+        <input id="shot" class="input" placeholder="Короткий приклад симптому для цього класу">
         <button class="btn" id="addShot">➕ Додати</button>
         <button class="btn secondary" id="exportShots">💾 Експорт прикладів</button>
       </div>
@@ -133,31 +131,31 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <button class="btn" id="saveIcs">🗓️ ICS (план робіт)</button>
         <button class="btn secondary" id="receipt">🖨️ 58 мм чек</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
     </div>
   </div>
 
   <div class="card">
     <h2>🔌 Схема роботи Copilot (SVG)</h2>
     <svg viewBox="0 0 980 260" role="img" aria-label="Потік: симптоми → класи → дії → промпт → план">
-      <rect x="40" y="60" width="200" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <rect x="40" y="60" width="200" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
       <text x="140" y="92" fill="#e5e7eb" font-size="14" text-anchor="middle">Симптоми</text>
       <text x="140" y="112" fill="#93c5fd" font-size="12" text-anchor="middle">текст/голос</text>
 
-      <rect x="270" y="50" width="210" height="100" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <rect x="270" y="50" width="210" height="100" rx="12" fill="#14532d" stroke="#22c55e"></rect>
       <text x="375" y="90" fill="#dcfce7" font-size="14" text-anchor="middle">Zero-shot класифікатор</text>
 
-      <rect x="510" y="50" width="210" height="100" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+      <rect x="510" y="50" width="210" height="100" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
       <text x="615" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Чек-лист дій</text>
       <text x="615" y="96" fill="#93c5fd" font-size="12" text-anchor="middle">ПЕЕ, інструмент</text>
 
-      <rect x="750" y="50" width="190" height="100" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+      <rect x="750" y="50" width="190" height="100" rx="12" fill="#0b1a2f" stroke="#64748b"></rect>
       <text x="845" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Промпт → LLM</text>
       <text x="845" y="96" fill="#93c5fd" font-size="12" text-anchor="middle">звіт/інструкція</text>
 
-      <line x1="240" y1="100" x2="270" y2="100" stroke="#93c5fd" stroke-width="3"/>
-      <line x1="480" y1="100" x2="510" y2="100" stroke="#22c55e" stroke-width="3"/>
-      <line x1="720" y1="100" x2="750" y2="100" stroke="#64748b" stroke-width="3"/>
+      <line x1="240" y1="100" x2="270" y2="100" stroke="#93c5fd" stroke-width="3"></line>
+      <line x1="480" y1="100" x2="510" y2="100" stroke="#22c55e" stroke-width="3"></line>
+      <line x1="720" y1="100" x2="750" y2="100" stroke="#64748b" stroke-width="3"></line>
 
       <text x="140" y="180" fill="#fbbf24" font-size="12" text-anchor="middle">ICS план робіт, чек 58 мм, CSV</text>
     </svg>
@@ -541,5 +539,6 @@ $('#receipt').addEventListener('click', makeReceipt);
 // ===== Ініціалізація =====
 if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
 </script>
-</body>
-</html>
+
+
+</body></html>
