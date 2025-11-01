@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 10 (газовики) — Перевірка герметичності: тече-шук (ppm), падіння тиску, графік, матриця ризику, фото, підпис, чек 58 мм, CSV/TXT, QR</title>
-<meta name="description" content="Практика перевірки герметичності: емульований тече-шук (ppm), тест падіння тиску, живий графік (ppm/тиск), матриця ризику (ймовірність×наслідки), фото, NFC/ID, підпис, чек 58 мм, CSV/TXT, QR."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Практика перевірки герметичності: емульований тече-шук (ppm), тест падіння тиску, живий графік (ppm/тиск), матриця ризику (ймовірність×наслідки), фото, NFC/ID, підпис, чек 58 мм, CSV/TXT, QR.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -49,14 +47,14 @@ canvas.heat{display:block;width:100%;height:220px;background:#0b1220;border:1px 
 .tag.bad{border-color:#5a1f1f;background:#2a1212}
 hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para10.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 10"><meta property="og:description" content="Виконуємо перевірку герметичності: сканування тече-шуком (ppm) та тест падіння тиску на відсіченій ділянці. На графіку — часові ряди ppm і тиску. За піком"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para10.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 10","description":"Виконуємо перевірку герметичності: сканування тече-шуком (ppm) та тест падіння тиску на відсіченій ділянці. На графіку — часові ряди ppm і тиску. За піком","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para10.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧪🛠️</span>
       <div>
-        <b>Пара 10 — Перевірка герметичності газопроводів</b><br/>
+        <b>Пара 10 — Перевірка герметичності газопроводів</b><br>
         <span class="badge">Тече-шук (ppm) → падіння тиску → живий графік → матриця ризику → фото → NFC/ID → підпис → чек 58 мм → CSV/TXT → QR</span>
       </div>
     </div>
@@ -69,10 +67,10 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
     <p>Виконуємо перевірку герметичності: <b>сканування тече-шуком</b> (ppm) та <b>тест падіння тиску</b> на відсіченій ділянці. На графіку — часові ряди <b>ppm</b> і <b>тиску</b>. 
       За піком ppm та падінням тиску розраховується <b>матриця ризику</b> (Ймовірність × Наслідки). Додаємо <b>фото</b>, <b>NFC/ID</b>, <b>підпис</b>, друкуємо <b>чек 58 мм</b> і експортуємо <b>CSV/TXT</b>, генеруємо <b>QR</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., кв. ..."/></label>
-      <label style="flex:1">Ділянка/вузол<input id="section" class="input" placeholder="Стояк №3, ввод, шафа ГРП, кухня…"/></label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., кв. ..."></label>
+      <label style="flex:1">Ділянка/вузол<input id="section" class="input" placeholder="Стояк №3, ввод, шафа ГРП, кухня…"></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"></label>
     </div>
     <div class="row">
       <button class="btn good" id="mkCase">🧰 Створити кейс</button>
@@ -90,25 +88,25 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <div class="block">
         <div class="row">
           <label style="flex:1">Тече-шук, ppm
-            <input id="ppm" type="range" class="input" min="0" max="10000" step="50" value="150"/>
+            <input id="ppm" type="range" class="input" min="0" max="10000" step="50" value="150">
           </label>
           <span class="badge">Поточне: <b id="ppmNum">150</b> ppm</span>
           <button class="btn" id="markPPM">📍 Додати точку</button>
         </div>
         <div class="row">
           <label style="flex:1">Тиск, мбар
-            <input id="press" type="range" class="input" min="0" max="100" step="0.5" value="30.0"/>
+            <input id="press" type="range" class="input" min="0" max="100" step="0.5" value="30.0">
           </label>
           <span class="badge">Поточне: <b id="pNum">30.0</b> мбар</span>
           <button class="btn" id="markP">📍 Додати точку</button>
           <button class="btn secondary" id="clearSeries">🧹 Очистити графік</button>
         </div>
         <div class="row">
-          <label>Warn ppm<input id="ppmWarn" type="number" class="input" step="10" value="500"/></label>
-          <label>Alarm ppm<input id="ppmAlarm" type="number" class="input" step="10" value="2000"/></label>
-          <label>Старт тиску, мбар<input id="pStart" type="number" class="input" step="0.1" value="30.0"/></label>
-          <label>Тривалість тесту, хв<input id="tMin" type="number" class="input" step="1" value="10"/></label>
-          <label>Допустиме падіння, мбар<input id="pDropMax" type="number" class="input" step="0.1" value="1.0"/></label>
+          <label>Warn ppm<input id="ppmWarn" type="number" class="input" step="10" value="500"></label>
+          <label>Alarm ppm<input id="ppmAlarm" type="number" class="input" step="10" value="2000"></label>
+          <label>Старт тиску, мбар<input id="pStart" type="number" class="input" step="0.1" value="30.0"></label>
+          <label>Тривалість тесту, хв<input id="tMin" type="number" class="input" step="1" value="10"></label>
+          <label>Допустиме падіння, мбар<input id="pDropMax" type="number" class="input" step="0.1" value="1.0"></label>
           <button class="btn secondary" id="applyTh">⚙️ Застосувати пороги</button>
         </div>
         <div class="kpi" style="margin-top:6px">
@@ -126,12 +124,12 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 
       <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
       <div class="row">
-        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <video id="vid" class="photo" autoplay="" playsinline="" muted=""></video>
         <div>
           <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
           <button class="btn" data-kind="before">📷 До</button>
           <button class="btn" data-kind="joint">📷 З’єднання/муфта</button>
-          <button class="btn" data-kind="soap">📷 Мильна піна</button><br/>
+          <button class="btn" data-kind="soap">📷 Мильна піна</button><br>
           <small class="muted">Фото зберігаються у «Галереї доказів».</small>
         </div>
       </div>
@@ -151,7 +149,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <div class="block">
         <div class="row">
           <button class="btn" id="nfcBtn">📶 NFC</button>
-          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)"/>
+          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)">
           <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
           <span class="badge" id="nfcs">Статус NFC: очікується</span>
         </div>
@@ -194,7 +192,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
 
       <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
@@ -556,5 +554,6 @@ $('#qrGen').addEventListener('click',()=>{
 updateMetrics(); drawChart(); computeRisk();
 (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
 </script>
-</body>
-</html>
+
+
+</body></html>

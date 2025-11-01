@@ -3,14 +3,11 @@
      Мета: змоделювати добовий профіль навантаження (15-хв інтервали), підрахувати кВт·год,
      пікову потужність, вартість за одно/двозонним тарифом; зробити "енергопаспорти" (58 мм),
      A4-звіт, CSV імпорт/експорт. Працює офлайн, під Moodle (iframe).
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 16 — Енергооблік: добовий профіль, кВт·год, тарифи, 58 мм</title>
-<meta name="color-scheme" content="light dark" />
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -82,7 +79,7 @@
   .spark{height:64px; width:100%; background:linear-gradient(180deg,#0b1220,#0b1220 60%,#0e1a2c); border:1px solid #223049; border-radius:8px; position:relative; overflow:hidden}
   .spark canvas{position:absolute; inset:0}
 </style>
-</head>
+<meta name="description" content="Створити добовий профіль навантаження (96 інтервалів по 15 хв), порахувати кВт·год, пікову потужність, вартість за одно/двозонним тарифом; згенерувати накл"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para16.html"><meta property="og:type" content="article"><meta property="og:title" content="📈 Енергооблік: добовий профіль (15 хв) → кВт·год → пікова потужність → тарифи → 🧾 58 мм"><meta property="og:description" content="Створити добовий профіль навантаження (96 інтервалів по 15 хв), порахувати кВт·год, пікову потужність, вартість за одно/двозонним тарифом; згенерувати накл"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para16.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"📈 Енергооблік: добовий профіль (15 хв) → кВт·год → пікова потужність → тарифи → 🧾 58 мм","description":"Створити добовий профіль навантаження (96 інтервалів по 15 хв), порахувати кВт·год, пікову потужність, вартість за одно/двозонним тарифом; згенерувати накл","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para16.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Електрики · Пара 16 · аудиторно</span>
@@ -94,7 +91,7 @@
       <div class="row">
         <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
         <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <input id="file" type="file" accept=".csv,text/csv" class="btn">
         <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
       </div>
       <p class="small">CSV: <span class="mono">id,name,phase,p_w,qty,mode,start,end,hours,duty_pct,url,notes</span> (mode: BLOCK або HOURS; BLOCK = інтервал [start,end] у форматі HH:MM, HOURS = години/добу рівномірно).</p>
@@ -106,7 +103,7 @@
         <div>
           <h3>Тариф</h3>
           <div class="row"><label class="small" style="min-width:140px">Тип</label>
-            <select id="tariffType"><option selected>Однозонний</option><option>Двозонний (ніч/день)</option></select></div>
+            <select id="tariffType"><option selected="">Однозонний</option><option>Двозонний (ніч/день)</option></select></div>
           <div class="row"><label class="small" style="min-width:140px">Ціна день, грн/кВт·год</label><input id="priceDay" type="number" step="0.01" value="3.00"></div>
           <div class="row"><label class="small" style="min-width:140px">Ціна ніч, грн/кВт·год</label><input id="priceNight" type="number" step="0.01" value="1.80"></div>
           <div class="row"><label class="small" style="min-width:140px">Нічний період</label>
@@ -135,13 +132,13 @@
           <h3>Паспорт</h3>
           <div class="row"><label class="small" style="min-width:140px">ID</label><input id="id" value="E-01"></div>
           <div class="row"><label class="small" style="min-width:140px">Назва</label><input id="name" value="Освітлення ауд.101"></div>
-          <div class="row"><label class="small" style="min-width:140px">Фаза</label><select id="phase"><option>A</option><option selected>B</option><option>C</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px">Фаза</label><select id="phase"><option>A</option><option selected="">B</option><option>C</option></select></div>
           <div class="row"><label class="small" style="min-width:140px">Потужність, Вт</label><input id="p_w" type="number" step="10" value="600"></div>
           <div class="row"><label class="small" style="min-width:140px">К-ть</label><input id="qty" type="number" value="1"></div>
         </div>
         <div>
           <h3>Графік</h3>
-          <div class="row"><label class="small" style="min-width:140px">Режим</label><select id="mode"><option selected>BLOCK</option><option>HOURS</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px">Режим</label><select id="mode"><option selected="">BLOCK</option><option>HOURS</option></select></div>
           <div class="row"><label class="small" style="min-width:140px">Початок</label><input id="start" value="08:00"></div>
           <div class="row"><label class="small" style="min-width:140px">Кінець</label><input id="end" value="18:00"></div>
           <div class="row"><label class="small" style="min-width:140px">Годин/добу (HOURS)</label><input id="hours" type="number" step="0.25" value="4"></div>
@@ -435,3 +432,4 @@
           <thead><tr><th>Показник</th><th>Значення</th></tr></thead>
           <tbody>
             <tr><td>Сумарні кВт·год/добу</td><td><b>${totals.kWh.toFixed(2)}</b></td></tr>
+</script></body></html>

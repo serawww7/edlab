@@ -2,12 +2,9 @@
      Тема: ЕКОНОМІЧНИЙ ПОРОГ ШКОДОЧИННОСТІ (EIL) і ПОРОГ ДІЇ (ET) — мобільне обстеження, розрахунки, рішення
      Фокус: телефони/ПК, локально; таблиця відбору проб, калькулятор EIL/ET, рекомендація «діяти/спостерігати», CSV.
      Контраст: темні клітинки мають світлий текст (як просив викладач).
-     Готово для GitHub Pages / iFrame у Moodle. -->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+     Готово для GitHub Pages / iFrame у Moodle. --><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 8 — Економічний поріг шкодочинності (EIL) і поріг дії (ET)</title>
 <meta name="color-scheme" content="light dark">
 <style>
@@ -70,7 +67,7 @@
   html.embedded .box{background:#f8fafc; color:#111}
   html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
 </style>
-</head>
+<meta name="description" content="За пару студенти виконують польовий відбір проб (імітаційно в аудиторії), розраховують EIL (Economic Injury Level) і ET (Economic Threshold), порівнюють із"><link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para8.html"><meta property="og:type" content="article"><meta property="og:title" content="🪲 Економічний поріг шкодочинності (EIL) та поріг дії (ET): від відбору проб до рішення"><meta property="og:description" content="За пару студенти виконують польовий відбір проб (імітаційно в аудиторії), розраховують EIL (Economic Injury Level) і ET (Economic Threshold), порівнюють із"><meta property="og:url" content="https://edlab.pp.ua/agro_II_kyrs/agro_para8.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🪲 Економічний поріг шкодочинності (EIL) та поріг дії (ET): від відбору проб до рішення","description":"За пару студенти виконують польовий відбір проб (імітаційно в аудиторії), розраховують EIL (Economic Injury Level) і ET (Economic Threshold), порівнюють із","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/agro_II_kyrs/agro_para8.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Пара 8 · аудиторно · агрономи</span>
@@ -95,18 +92,18 @@
       <div class="grid g3">
         <div class="box">
           <h3>Культура та ціна</h3>
-          <div><label>Культура</label><input id="crop" type="text" value="Пшениця озима" /></div>
+          <div><label>Культура</label><input id="crop" type="text" value="Пшениця озима"></div>
           <div class="row" style="margin-top:6px">
-            <div style="flex:1"><label>Очікуваний врожай, т/га</label><input id="yield" type="number" step="0.1" value="5.5" /></div>
-            <div style="flex:1"><label>Ціна, грн/т</label><input id="price" type="number" step="1" value="7000" /></div>
+            <div style="flex:1"><label>Очікуваний врожай, т/га</label><input id="yield" type="number" step="0.1" value="5.5"></div>
+            <div style="flex:1"><label>Ціна, грн/т</label><input id="price" type="number" step="1" value="7000"></div>
           </div>
         </div>
 
         <div class="box">
           <h3>Біологія шкодочинності</h3>
           <div class="row">
-            <div style="flex:1"><label>I — ушкодж., од./росл.</label><input id="I" type="number" step="0.001" value="0.02" /></div>
-            <div style="flex:1"><label>D — втрати, т/га/1од.</label><input id="D" type="number" step="0.01" value="0.2" /></div>
+            <div style="flex:1"><label>I — ушкодж., од./росл.</label><input id="I" type="number" step="0.001" value="0.02"></div>
+            <div style="flex:1"><label>D — втрати, т/га/1од.</label><input id="D" type="number" step="0.01" value="0.2"></div>
           </div>
           <p class="small">Напр., «0.02» означає, що одна особина/рослину викликає 2% інтенсивності ушкодження у формулі.</p>
         </div>
@@ -114,8 +111,8 @@
         <div class="box">
           <h3>Захист</h3>
           <div class="row">
-            <div style="flex:1"><label>C — вартість, грн/га</label><input id="C" type="number" step="1" value="1200" /></div>
-            <div style="flex:1"><label>K — ефективність (0..1)</label><input id="K" type="number" step="0.05" value="0.8" /></div>
+            <div style="flex:1"><label>C — вартість, грн/га</label><input id="C" type="number" step="1" value="1200"></div>
+            <div style="flex:1"><label>K — ефективність (0..1)</label><input id="K" type="number" step="0.05" value="0.8"></div>
           </div>
           <div class="row" style="margin-top:6px">
             <button class="btn" type="button" onclick="recalcEIL()">🔁 Перерахувати EIL/ET</button>
@@ -342,5 +339,6 @@
   addRow(); addRow(); addRow(); // кілька рядків для старту
   recalcStats();
 </script>
-</body>
-</html>
+
+
+</body></html>

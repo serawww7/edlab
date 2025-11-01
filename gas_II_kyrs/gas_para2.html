@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 2 (газовики) — Маршрут бригади: зупинки, NFC, фото/аудіо, таймлайн, чек 58 мм, CSV/QR</title>
-<meta name="description" content="Маршрутний лист бригади: додай зупинки, ідентифікуй об’єкти NFC/кодом, роби фото до/після і голосові нотатки, фіксуй тривалість, будуй графік таймлайн, друкуй чек 58 мм, експортуй CSV/QR."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Маршрутний лист бригади: додай зупинки, ідентифікуй об’єкти NFC/кодом, роби фото до/після і голосові нотатки, фіксуй тривалість, будуй графік таймлайн, друкуй чек 58 мм, експортуй CSV/QR.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -44,14 +42,14 @@ canvas.chart{display:block;width:100%;height:220px;background:#0b1220;border:1px
 .kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
 hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para2.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 2"><meta property="og:description" content="Створюємо маршрутний лист на день: додаємо зупинки (адреси/типи робіт), ідентифікуємо кожен об’єкт через NFC або код, робимо фото «до/після» і голосові нот"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para2.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 2","description":"Створюємо маршрутний лист на день: додаємо зупинки (адреси/типи робіт), ідентифікуємо кожен об’єкт через NFC або код, робимо фото «до/після» і голосові нот","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para2.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧭</span>
       <div>
-        <b>Пара 2 — Маршрут бригади</b><br/>
+        <b>Пара 2 — Маршрут бригади</b><br>
         <span class="badge">Зупинки → NFC/код → фото до/після → аудіо → тривалість → таймлайн → чек 58 мм → CSV/QR</span>
       </div>
     </div>
@@ -63,9 +61,9 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
     <h2>📚 Сценарій заняття</h2>
     <p>Створюємо <b>маршрутний лист</b> на день: додаємо <b>зупинки</b> (адреси/типи робіт), ідентифікуємо кожен об’єкт через <b>NFC</b> або код, робимо <b>фото «до/після»</b> і <b>голосові нотатки</b>, фіксуємо <b>тривалість</b> робіт і отримуємо <b>таймлайн</b>. Наприкінці — <b>чек 58 мм</b>, <b>CSV/TXT</b>, <b>QR</b>.</p>
     <div class="row">
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
-      <label style="flex:1">Бригада (ПІБ)<input id="crew" class="input" placeholder="Славінський В., Кошута В."/></label>
-      <label style="flex:1">Диспетчер<input id="disp" class="input" placeholder="Баланчук О."/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"></label>
+      <label style="flex:1">Бригада (ПІБ)<input id="crew" class="input" placeholder="Славінський В., Кошута В."></label>
+      <label style="flex:1">Диспетчер<input id="disp" class="input" placeholder="Баланчук О."></label>
     </div>
     <div class="row">
       <button class="btn good" id="mkRoute">🧰 Створити маршрут</button>
@@ -87,15 +85,15 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2>🛑 Зупинки маршруту</h2>
       <div id="stops"></div>
 
-      <hr class="sep"/>
+      <hr class="sep">
 
       <h2>🎥 Камера та фото «до/після» (для активної зупинки)</h2>
       <div class="row">
-        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <video id="vid" class="photo" autoplay="" playsinline="" muted=""></video>
         <div>
           <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
           <button class="btn" id="shotBefore">📷 Фото «до»</button>
-          <button class="btn" id="shotAfter">📷 Фото «після»</button><br/>
+          <button class="btn" id="shotAfter">📷 Фото «після»</button><br>
           <small class="muted">Фото прив’язуються до <b>активної</b> зупинки.</small>
         </div>
       </div>
@@ -104,10 +102,10 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2 style="margin-top:10px">🎙️ Голосова нотатка (для активної зупинки)</h2>
       <div class="row">
         <button class="btn" id="recStart">⏺️ Запис</button>
-        <button class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
+        <button class="btn secondary" id="recStop" disabled="">⏹️ Стоп</button>
         <span class="badge" id="rstat">Немає запису</span>
       </div>
-      <audio id="player" controls style="margin-top:8px;max-width:100%"></audio>
+      <audio id="player" controls="" style="margin-top:8px;max-width:100%"></audio>
     </div>
 
     <!-- Права колонка: Таймлайн/Оцінка/Експорт -->
@@ -141,7 +139,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (Route ID/посилання)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
 
       <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
@@ -522,5 +520,6 @@ setInterval(syncStopCounters, 1500);
   addStop({});
 })();
 </script>
-</body>
-</html>
+
+
+</body></html>

@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 25 (газовики) — AI-планувальник профілактики: історія → правила → тижневі маршрути → ефект</title>
-<meta name="description" content="Завантаж історію аварій, навчи прості правила ризику, сформуй тижневий план профілактики з маршрутами для бригад, подивись дашборд ефекту, експорт CSV/TXT, чек 58 мм, QR."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Завантаж історію аварій, навчи прості правила ризику, сформуй тижневий план профілактики з маршрутами для бригад, подивись дашборд ефекту, експорт CSV/TXT, чек 58 мм, QR.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -43,14 +41,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 .progress{height:14px;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:#0b1220}
 .progress>span{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#38bdf8);width:0%}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para25.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 25"><meta property="og:description" content="Завантаж CSV історії або натисни 🧪 Приклади. AI обчислить ваги ознак, сформує правила ризику для секторів, побудує теплову карту, а потім згенерує план ти"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para25.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 25","description":"Завантаж CSV історії або натисни 🧪 Приклади. AI обчислить ваги ознак, сформує правила ризику для секторів, побудує теплову карту, а потім згенерує план ти","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para25.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧠🗺️</span>
       <div>
-        <b>Пара 25 — AI-планувальник профілактики</b><br/>
+        <b>Пара 25 — AI-планувальник профілактики</b><br>
         <span class="badge">Історія → правила ризику → тижневі маршрути → ефект → експорт/QR</span>
       </div>
     </div>
@@ -62,7 +60,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <h2>📚 Контекст</h2>
     <p>Завантаж <b>CSV історії</b> або натисни <b>🧪 Приклади</b>. AI обчислить <b>ваги ознак</b>, сформує <b>правила ризику</b> для секторів, побудує <b>теплову карту</b>, а потім згенерує <b>план тижня</b> з маршрутами для N бригад та оцінить <b>очікуване зниження ризику</b>.</p>
     <div class="row">
-      <input id="file" type="file" accept=".csv" class="input" style="max-width:380px"/>
+      <input id="file" type="file" accept=".csv" class="input" style="max-width:380px">
       <button class="btn" id="ex">🧪 Приклади (200 інцидентів)</button>
       <button class="btn good" id="train">🧠 Навчити правила</button>
       <button class="btn" id="plan">🗓️ Спланувати тиждень</button>
@@ -115,7 +113,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <button class="btn" id="print58">🖨️ Чек 58 мм (бригада)</button>
         <button class="btn secondary" id="qrGen">🔗 QR (папка з планом)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div style="margin-top:8px"><canvas id="qr" width="220" height="220" style="background:#0b1220;border:1px solid var(--line);border-radius:12px"></canvas></div>
 
       <h3 style="margin-top:10px">🛎️ Журнал</h3>
@@ -490,5 +488,6 @@ $('#reset').addEventListener('click', ()=>{
 /* ====== Початкова отрисовка ====== */
 drawMap();
 </script>
-</body>
-</html>
+
+
+</body></html>

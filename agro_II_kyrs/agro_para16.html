@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 16 — Arduino: сенсор вологості ґрунту (калібрування, %RHsoil, лог)</title>
-<meta name="description" content="Калібруємо ємнісний датчик вологості ґрунту: ADC→% вологості, усереднення, експоненційне згладжування, графік, експорт CSV/TXT. Генератор персонального .ino і схема підключення."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Калібруємо ємнісний датчик вологості ґрунту: ADC→% вологості, усереднення, експоненційне згладжування, графік, експорт CSV/TXT. Генератор персонального .ino і схема підключення.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -41,14 +39,14 @@ label>span.hint{color:var(--muted);font-size:.9rem}
 .switch{display:flex;align-items:center;gap:8px}
 .switch input{width:42px}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para16.html"><meta property="og:type" content="article"><meta property="og:title" content="Агрономія — Пара 16"><meta property="og:description" content="Мета: зняти калібрувальні точки «сухо/мокро», перетворити ADC у % вологості, застосувати усереднення та експоненційне згладжування, вести лог у форматі CSV"><meta property="og:url" content="https://edlab.pp.ua/agro_II_kyrs/agro_para16.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Агрономія — Пара 16","description":"Мета: зняти калібрувальні точки «сухо/мокро», перетворити ADC у % вологості, застосувати усереднення та експоненційне згладжування, вести лог у форматі CSV","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/agro_II_kyrs/agro_para16.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🌱</span>
       <div>
-        <b>Пара 16 — Arduino: сенсор вологості ґрунту</b><br/>
+        <b>Пара 16 — Arduino: сенсор вологості ґрунту</b><br>
         <span class="badge">Агрономія · калібрування → % вологості → згладжування → лог</span>
       </div>
     </div>
@@ -72,42 +70,42 @@ label>span.hint{color:var(--muted);font-size:.9rem}
       <div class="row">
         <div style="flex:1">
           <label for="dry">ADC «сухо» <span class="hint">(напр. 3000 або 800 для 10-біт)</span></label>
-          <input id="dry" class="input" type="number" min="10" max="4095" value="3000"/>
+          <input id="dry" class="input" type="number" min="10" max="4095" value="3000">
         </div>
         <div style="flex:1">
           <label for="wet">ADC «мокро» <span class="hint">(напр. 800 або 500)</span></label>
-          <input id="wet" class="input" type="number" min="10" max="4095" value="800"/>
+          <input id="wet" class="input" type="number" min="10" max="4095" value="800">
         </div>
       </div>
       <div class="row">
         <div style="flex:1">
           <label for="avg">Усереднення, зразків</label>
-          <input id="avg" class="input" type="number" min="1" max="50" value="10"/>
+          <input id="avg" class="input" type="number" min="1" max="50" value="10">
         </div>
         <div style="flex:1">
           <label for="alpha">Експоненційне згладжування α (0..1)</label>
-          <input id="alpha" class="input" type="number" step="0.05" min="0" max="1" value="0.3"/>
+          <input id="alpha" class="input" type="number" step="0.05" min="0" max="1" value="0.3">
         </div>
       </div>
       <div class="row">
         <div style="flex:1">
           <label for="ain">Аналоговий пін сенсора</label>
           <select id="ain" class="input">
-            <option value="A0" selected>A0</option><option value="A1">A1</option><option value="A2">A2</option><option value="A3">A3</option>
+            <option value="A0" selected="">A0</option><option value="A1">A1</option><option value="A2">A2</option><option value="A3">A3</option>
           </select>
         </div>
         <div style="flex:1">
           <label for="period">Період вимірювання, мс</label>
-          <input id="period" class="input" type="number" min="100" max="5000" step="100" value="1000"/>
+          <input id="period" class="input" type="number" min="100" max="5000" step="100" value="1000">
         </div>
       </div>
 
       <div class="row" style="margin-top:8px">
         <div class="switch">
-          <input id="emu" type="checkbox"/>
+          <input id="emu" type="checkbox">
           <label for="emu">Емулятор без Arduino (повзунок нижче)</label>
         </div>
-        <input id="emuSlider" class="input" type="range" min="400" max="3400" value="2100" disabled/>
+        <input id="emuSlider" class="input" type="range" min="400" max="3400" value="2100" disabled="">
       </div>
 
       <div class="row" style="margin-top:8px">
@@ -131,7 +129,7 @@ label>span.hint{color:var(--muted);font-size:.9rem}
 
       <h3 style="margin-top:12px">💾 Збереження протоколу калібрування</h3>
       <div class="row">
-        <input id="fio" class="input" placeholder="ПІБ студента"/>
+        <input id="fio" class="input" placeholder="ПІБ студента">
         <button class="btn" id="saveTxt">💾 TXT</button>
         <button class="btn" id="saveCsv">📄 CSV</button>
       </div>
@@ -142,21 +140,21 @@ label>span.hint{color:var(--muted);font-size:.9rem}
       <h2>🔌 Схема підключення (SVG)</h2>
       <svg viewBox="0 0 760 360" role="img" aria-label="Схема Arduino + Soil sensor">
         <!-- Плата -->
-        <rect x="40" y="40" width="220" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <rect x="40" y="40" width="220" height="120" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
         <text x="150" y="65" fill="#e5e7eb" font-size="16" text-anchor="middle">Arduino UNO/Nano</text>
         <text x="55" y="95" fill="#93c5fd" font-size="12">5V</text>
         <text x="55" y="115" fill="#93c5fd" font-size="12">GND</text>
         <text x="55" y="135" fill="#93c5fd" font-size="12">A0</text>
 
         <!-- Сенсор -->
-        <rect x="320" y="40" width="200" height="100" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <rect x="320" y="40" width="200" height="100" rx="12" fill="#14532d" stroke="#22c55e"></rect>
         <text x="420" y="70" fill="#dcfce7" font-size="16" text-anchor="middle">Ємнісний сенсор</text>
         <text x="420" y="90" fill="#a7f3d0" font-size="12" text-anchor="middle">VCC — OUT — GND</text>
 
         <!-- З’єднання -->
-        <line x1="260" y1="90"  x2="320" y2="60"  stroke="#93c5fd" stroke-width="3"/><text x="280" y="80"  fill="#93c5fd" font-size="12">5V → VCC</text>
-        <line x1="260" y1="110" x2="320" y2="100" stroke="#64748b" stroke-width="3"/><text x="280" y="110" fill="#94a3b8" font-size="12">GND → GND</text>
-        <line x1="260" y1="130" x2="320" y2="80"  stroke="#22c55e" stroke-width="3"/><text x="280" y="95"  fill="#86efac" font-size="12">A0 ← OUT</text>
+        <line x1="260" y1="90" x2="320" y2="60" stroke="#93c5fd" stroke-width="3"></line><text x="280" y="80" fill="#93c5fd" font-size="12">5V → VCC</text>
+        <line x1="260" y1="110" x2="320" y2="100" stroke="#64748b" stroke-width="3"></line><text x="280" y="110" fill="#94a3b8" font-size="12">GND → GND</text>
+        <line x1="260" y1="130" x2="320" y2="80" stroke="#22c55e" stroke-width="3"></line><text x="280" y="95" fill="#86efac" font-size="12">A0 ← OUT</text>
       </svg>
 
       <div class="note" style="margin-top:10px">
@@ -174,7 +172,7 @@ label>span.hint{color:var(--muted);font-size:.9rem}
     </div>
   </div>
 
-  <hr class="sep"/>
+  <hr class="sep">
 
   <div class="card">
     <h2>📋 Підсумок для звіту</h2>
@@ -394,5 +392,6 @@ drawChart();
 // Moodle-friendly клас
 if (window.self !== window.top) document.documentElement.classList.add('embedded');
 </script>
-</body>
-</html>
+
+
+</body></html>

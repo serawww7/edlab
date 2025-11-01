@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 4 (газовики) — Огляд витоків: сенсор CH₄ (емулятор), пороги, графік, SOAP-тест, фото/аудіо, чек 58 мм, CSV/QR</title>
-<meta name="description" content="Практика огляду витоків: емульований датчик метану (ppm) з порогами, живий графік, SOAP-тест, фото/аудіо, NFC/ID, журнал, чек 58 мм, експорт CSV/TXT, QR."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Практика огляду витоків: емульований датчик метану (ppm) з порогами, живий графік, SOAP-тест, фото/аудіо, NFC/ID, журнал, чек 58 мм, експорт CSV/TXT, QR.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -46,14 +44,14 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 .tag.warn{border-color:#4a3b13;background:#2b2310}
 .tag.bad{border-color:#5a1f1f;background:#2a1212}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para4.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 4"><meta property="og:description" content="Інспектуємо можливий витік біля з’єднань/кранів/шлангів. Ідентифікуємо об’єкт, вимірюємо концентрацію метану (ppm) за допомогою емулятора (слайдер → легко"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para4.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 4","description":"Інспектуємо можливий витік біля з’єднань/кранів/шлангів. Ідентифікуємо об’єкт, вимірюємо концентрацію метану (ppm) за допомогою емулятора (слайдер → легко","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para4.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🫧</span>
       <div>
-        <b>Пара 4 — Огляд витоків газу</b><br/>
+        <b>Пара 4 — Огляд витоків газу</b><br>
         <span class="badge">Сенсор CH₄ (емулятор) → пороги → графік → SOAP-тест → фото/аудіо → чек 58 мм → CSV/TXT → QR</span>
       </div>
     </div>
@@ -67,10 +65,10 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       за допомогою емулятора (слайдер → легко замінити на значення з <b>Arduino/MQ-4</b>), фіксуємо <b>графік</b> і час вище порогів, 
       робимо <b>SOAP-тест</b> (бульбашки/немає), додаємо <b>фото</b> і <b>аудіо-коментар</b>, формуємо <b>чек 58 мм</b>, <b>CSV/TXT</b>, <b>QR</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., під’їзд/квартира"/></label>
-      <label style="flex:1">Зона/вузол<input id="zone" class="input" placeholder="Кран перед плитою / різьбове з’єднання"/></label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., під’їзд/квартира"></label>
+      <label style="flex:1">Зона/вузол<input id="zone" class="input" placeholder="Кран перед плитою / різьбове з’єднання"></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"></label>
     </div>
     <div class="row">
       <button class="btn good" id="mkCase">🧰 Створити кейс</button>
@@ -83,28 +81,28 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
     <div class="card">
       <h2>🛰️ Сенсор CH₄ (емулятор)</h2>
       <div class="row">
-        <input type="range" id="ppm" class="input" min="0" max="1000" step="5" value="25" style="flex:1"/>
+        <input type="range" id="ppm" class="input" min="0" max="1000" step="5" value="25" style="flex:1">
         <span class="badge">Поточне: <b id="ppmNum">25</b> ppm</span>
         <button class="btn" id="ppmMark">📍 Додати точку</button>
         <button class="btn secondary" id="ppmClear">🧹 Очистити графік</button>
       </div>
       <div class="row">
-        <label>Info (ppm)<input id="thInfo" type="number" class="input" min="0" step="5" value="50"/></label>
-        <label>Warning (ppm)<input id="thWarn" type="number" class="input" min="0" step="5" value="200"/></label>
-        <label>Alarm (ppm)<input id="thAlarm" type="number" class="input" min="0" step="5" value="500"/></label>
+        <label>Info (ppm)<input id="thInfo" type="number" class="input" min="0" step="5" value="50"></label>
+        <label>Warning (ppm)<input id="thWarn" type="number" class="input" min="0" step="5" value="200"></label>
+        <label>Alarm (ppm)<input id="thAlarm" type="number" class="input" min="0" step="5" value="500"></label>
         <button class="btn secondary" id="applyTh">⚙️ Застосувати пороги</button>
       </div>
       <div class="kpi" style="margin-top:6px">
-        <span class="tag ok">⏱️ Час >Info: <b id="tInfo">0</b> с</span>
-        <span class="tag warn">⏱️ Час >Warn: <b id="tWarn">0</b> с</span>
-        <span class="tag bad">⏱️ Час >Alarm: <b id="tAlarm">0</b> с</span>
+        <span class="tag ok">⏱️ Час &gt;Info: <b id="tInfo">0</b> с</span>
+        <span class="tag warn">⏱️ Час &gt;Warn: <b id="tWarn">0</b> с</span>
+        <span class="tag bad">⏱️ Час &gt;Alarm: <b id="tAlarm">0</b> с</span>
       </div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="chart" class="chart" width="520" height="220"></canvas></div>
 
       <h2 style="margin-top:10px">🫧 SOAP-тест (піна)</h2>
       <div class="row">
         <select id="soap" class="input" style="max-width:260px">
-          <option value="none" selected>— Обери результат —</option>
+          <option value="none" selected="">— Обери результат —</option>
           <option value="bubbles">Видимі бульбашки</option>
           <option value="no-bubbles">Бульбашок немає</option>
         </select>
@@ -114,11 +112,11 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 
       <h2 style="margin-top:10px">🎥 Фото (2 шт.)</h2>
       <div class="row">
-        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <video id="vid" class="photo" autoplay="" playsinline="" muted=""></video>
         <div>
           <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
           <button class="btn" data-kind="area">📷 Місце перевірки</button>
-          <button class="btn" data-kind="manometer">📷 Прилад/манометр</button><br/>
+          <button class="btn" data-kind="manometer">📷 Прилад/манометр</button><br>
           <small class="muted">Фото зберігаються в «Галереї доказів».</small>
         </div>
       </div>
@@ -127,16 +125,16 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2 style="margin-top:10px">🎙️ Аудіо-коментар</h2>
       <div class="row">
         <button class="btn" id="recStart">⏺️ Запис</button>
-        <button class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
+        <button class="btn secondary" id="recStop" disabled="">⏹️ Стоп</button>
         <span class="badge" id="rstat">Немає запису</span>
       </div>
-      <audio id="player" controls style="margin-top:8px;max-width:100%"></audio>
+      <audio id="player" controls="" style="margin-top:8px;max-width:100%"></audio>
 
       <h2 style="margin-top:10px">📶 NFC / ID об’єкта</h2>
       <div class="block">
         <div class="row">
           <button class="btn" id="nfcBtn">📶 NFC</button>
-          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)"/>
+          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)">
           <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
           <span class="badge" id="nfcs">Статус NFC: очікується</span>
         </div>
@@ -176,7 +174,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
 
       <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
@@ -470,5 +468,6 @@ $('#qrGen').addEventListener('click',()=>{
 // ===== Вбудоване відображення
 (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
 </script>
-</body>
-</html>
+
+
+</body></html>

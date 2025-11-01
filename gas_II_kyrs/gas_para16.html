@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 16 (газовики) — Гідравлічні режими мережі: інтерактивна схема, попит/регулятор/витоки, графік, тривоги, експорт</title>
-<meta name="description" content="Інтерактивна анімаційна схема ГРМ: вузли/ділянки, регулятор тиску, насос, витоки, засувки, попит, графік P/Q, тривоги, журнал, експорт CSV/TXT."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Інтерактивна анімаційна схема ГРМ: вузли/ділянки, регулятор тиску, насос, витоки, засувки, попит, графік P/Q, тривоги, журнал, експорт CSV/TXT.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -46,14 +44,14 @@ canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px
 pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;padding:10px}
 .footer{margin-top:20px;color:#94a3b8;font-size:.9rem}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para16.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 16"><meta property="og:description" content="На схемі нижче — зразкова **локальна мережа низького тиску**: магістраль, відгалуження до трьох районів N1–N3, ГРП зі стабілізацією тиску, насос-підкачка ("><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para16.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 16","description":"На схемі нижче — зразкова **локальна мережа низького тиску**: магістраль, відгалуження до трьох районів N1–N3, ГРП зі стабілізацією тиску, насос-підкачка (","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para16.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🗺️🌬️</span>
       <div>
-        <b>Пара 16 — Гідравлічні режими мережі</b><br/>
+        <b>Пара 16 — Гідравлічні режими мережі</b><br>
         <span class="badge">Схема ГРМ → попит/засувки/витоки → регулятор тиску → графік → тривоги → журнал → експорт</span>
       </div>
     </div>
@@ -102,25 +100,25 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
       <h2>🗺️ Анімаційна схема мережі</h2>
       <svg id="net" viewBox="0 0 900 500" role="img" aria-label="Газова мережа">
         <!-- Магістраль -->
-        <line id="e_main" class="edge" x1="80" y1="250" x2="820" y2="250"/>
+        <line id="e_main" class="edge" x1="80" y1="250" x2="820" y2="250"></line>
         <!-- Вузли -->
-        <circle id="n_src" class="node" cx="80" cy="250" r="16"/>
-        <rect id="n_grp" class="grp" x="150" y="220" width="60" height="60" rx="8"/>
-        <rect id="n_pump" class="pump" x="240" y="220" width="60" height="60" rx="8"/>
-        <circle id="n_t1" class="node" cx="380" cy="250" r="14"/>
-        <circle id="n_split" class="node" cx="540" cy="250" r="12"/>
+        <circle id="n_src" class="node" cx="80" cy="250" r="16"></circle>
+        <rect id="n_grp" class="grp" x="150" y="220" width="60" height="60" rx="8"></rect>
+        <rect id="n_pump" class="pump" x="240" y="220" width="60" height="60" rx="8"></rect>
+        <circle id="n_t1" class="node" cx="380" cy="250" r="14"></circle>
+        <circle id="n_split" class="node" cx="540" cy="250" r="12"></circle>
         <!-- Відгалуження -->
-        <line id="e_n1" class="edge" x1="540" y1="250" x2="540" y2="120"/>
-        <line id="e_n2" class="edge" x1="620" y1="250" x2="620" y2="120"/>
-        <line id="e_n3" class="edge" x1="700" y1="250" x2="700" y2="120"/>
+        <line id="e_n1" class="edge" x1="540" y1="250" x2="540" y2="120"></line>
+        <line id="e_n2" class="edge" x1="620" y1="250" x2="620" y2="120"></line>
+        <line id="e_n3" class="edge" x1="700" y1="250" x2="700" y2="120"></line>
         <!-- Ноди споживачів -->
-        <circle id="n1" class="node" cx="540" cy="100" r="12"/>
-        <circle id="n2" class="node" cx="620" cy="100" r="12"/>
-        <circle id="n3" class="node" cx="700" cy="100" r="12"/>
+        <circle id="n1" class="node" cx="540" cy="100" r="12"></circle>
+        <circle id="n2" class="node" cx="620" cy="100" r="12"></circle>
+        <circle id="n3" class="node" cx="700" cy="100" r="12"></circle>
         <!-- Засувки -->
-        <rect id="v1_icon" class="valve" x="536" y="170" width="8" height="24" rx="2"/>
-        <rect id="v2_icon" class="valve" x="616" y="170" width="8" height="24" rx="2"/>
-        <rect id="v3_icon" class="valve" x="696" y="170" width="8" height="24" rx="2"/>
+        <rect id="v1_icon" class="valve" x="536" y="170" width="8" height="24" rx="2"></rect>
+        <rect id="v2_icon" class="valve" x="616" y="170" width="8" height="24" rx="2"></rect>
+        <rect id="v3_icon" class="valve" x="696" y="170" width="8" height="24" rx="2"></rect>
         <!-- Підписи -->
         <text x="70" y="235" fill="#94a3b8" font-size="12">SRC</text>
         <text x="154" y="214" fill="#22c55e" font-size="12">ГРП</text>
@@ -400,5 +398,6 @@ $('#saveTxt').addEventListener('click',()=>{
 drawChart(); updateSVG({P:[2,2,2], v:[100,100,100], sp:2, pump:60});
 log('Готово. Запускай симуляцію або знімай точки вручну.');
 </script>
-</body>
-</html>
+
+
+</body></html>
