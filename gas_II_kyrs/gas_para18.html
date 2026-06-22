@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 18 (газовики) — Баланс/втрати: добові надходження/відбори, аномалії, what-if, графіки, експорт</title>
-<meta name="description" content="Інтерактивний баланс газу: добові надходження/відбори, корекції T/P, похибки лічильників, технічні втрати, виявлення аномалій (Z-score), графіки, what-if моделювання потенційних втрат, санкі, експорт CSV/TXT."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Інтерактивний баланс газу: добові надходження/відбори, корекції T/P, похибки лічильників, технічні втрати, виявлення аномалій (Z-score), графіки, what-if моделювання потенційних втрат, санкі, експорт CSV/TXT.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -39,14 +37,14 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
 .tag.bad{border-color:#5a1f1f;background:#2a1212}
 .footer{margin-top:20px;color:#94a3b8;font-size:.9rem}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para18.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 18"><meta property="og:description" content="Встав або згенеруй добові значення Надходження (In) та Відбору (Out), задай корекції температура/тиск та похибки лічильників. Система оцінить технічні втра"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para18.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 18","description":"Встав або згенеруй добові значення Надходження (In) та Відбору (Out), задай корекції температура/тиск та похибки лічильників. Система оцінить технічні втра","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para18.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">⚖️🔥</span>
       <div>
-        <b>Пара 18 — Баланс/втрати газу</b><br/>
+        <b>Пара 18 — Баланс/втрати газу</b><br>
         <span class="badge">Добові дані → корекції → технічні втрати → аномалії → графіки → what-if → експорт</span>
       </div>
     </div>
@@ -110,10 +108,10 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
       <h2 style="margin-top:10px">🔀 Санкі (потоки за період)</h2>
       <svg id="sk" viewBox="0 0 520 220" role="img" aria-label="Sankey: In → Consumption/Technical/Potential">
         <!-- Прямокутники -->
-        <rect id="rIn"  x="20"  y="40" width="40" height="140" rx="6" fill="#14532d" stroke="#22c55e"/>
-        <rect id="rCons" x="420" y="30" width="40" height="110" rx="6" fill="#0b1a2f" stroke="#93c5fd"/>
-        <rect id="rTech" x="420" y="150" width="40" height="40"  rx="6" fill="#1f2937" stroke="#fbbf24"/>
-        <rect id="rPot"  x="420" y="195" width="40" height="0"   rx="6" fill="#2a1212" stroke="#f87171"/>
+        <rect id="rIn" x="20" y="40" width="40" height="140" rx="6" fill="#14532d" stroke="#22c55e"></rect>
+        <rect id="rCons" x="420" y="30" width="40" height="110" rx="6" fill="#0b1a2f" stroke="#93c5fd"></rect>
+        <rect id="rTech" x="420" y="150" width="40" height="40" rx="6" fill="#1f2937" stroke="#fbbf24"></rect>
+        <rect id="rPot" x="420" y="195" width="40" height="0" rx="6" fill="#2a1212" stroke="#f87171"></rect>
         <!-- Підписи -->
         <text x="20" y="28" fill="#e5e7eb" font-size="12">Надходження</text>
         <text x="410" y="20" fill="#e5e7eb" font-size="12">Споживання / Втрати</text>
@@ -388,5 +386,6 @@ function initFrames(){
 }
 initFrames();
 </script>
-</body>
-</html>
+
+
+</body></html>

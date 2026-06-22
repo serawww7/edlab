@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 15 (газовики) — Акт перевірки автоматики безпеки: датчики/термостати/тяга/іонізація, графіки, фото/аудіо, підпис, 58 мм, CSV/TXT, QR</title>
-<meta name="description" content="Інтерактивна перевірка автоматики безпеки: тести датчиків (витоку, тяги, перегріву, іонізації, тиску води), таймери і KPI для часу спрацювання, графіки, камера, аудіо, підпис, чек 58 мм, CSV/TXT, QR, журнал подій."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Інтерактивна перевірка автоматики безпеки: тести датчиків (витоку, тяги, перегріву, іонізації, тиску води), таймери і KPI для часу спрацювання, графіки, камера, аудіо, підпис, чек 58 мм, CSV/TXT, QR, журнал подій.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -52,14 +50,14 @@ canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px
 audio{width:100%}
 hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para15.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 15"><meta property="og:description" content="Виконуємо послідовну перевірку автоматики безпеки побутового котла/ВБД: газ-детектор (витік), датчик тяги, термостат перегріву, іонізаційний контроль полум"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para15.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 15","description":"Виконуємо послідовну перевірку автоматики безпеки побутового котла/ВБД: газ-детектор (витік), датчик тяги, термостат перегріву, іонізаційний контроль полум","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para15.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🛡️🔥</span>
       <div>
-        <b>Пара 15 — Акт перевірки автоматики безпеки</b><br/>
+        <b>Пара 15 — Акт перевірки автоматики безпеки</b><br>
         <span class="badge">Датчики → таймери → KPI → графіки → камера/аудіо → підпис → 58 мм → CSV/TXT → QR</span>
       </div>
     </div>
@@ -72,15 +70,15 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
     <p>Виконуємо <b>послідовну перевірку</b> автоматики безпеки побутового котла/ВБД: газ-детектор (витік), датчик тяги, термостат перегріву, іонізаційний контроль полум’я, 
       пресостат/датчик низького тиску води, відключення газ-клапана. Для кожного тесту фіксуємо <b>час спрацювання</b> і порівнюємо з <b>KPI</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котельня"/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котельня"></label>
       <label style="flex:1">Обладнання
         <select id="equip" class="input">
-          <option selected>Котел атмосферний</option><option>Котел турбований</option><option>ВБД (водонагрівач)</option><option>Інше</option>
+          <option selected="">Котел атмосферний</option><option>Котел турбований</option><option>ВБД (водонагрівач)</option><option>Інше</option>
         </select>
       </label>
-      <label style="flex:1">Модель/серійний<input id="model" class="input" placeholder="Напр. AOGV 11, S/N 12345..."/></label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">Модель/серійний<input id="model" class="input" placeholder="Напр. AOGV 11, S/N 12345..."></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"></label>
     </div>
     <div class="row">
       <button class="btn good" id="mkCase">🧰 Створити кейс</button>
@@ -94,8 +92,8 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2>🧪 Тести автоматики (таймери, KPI)</h2>
       <div class="block">
         <div class="row">
-          <label>Макс. час спрацювання (KPI), сек<input id="kpiTime" class="input" type="number" step="0.1" value="5.0"/></label>
-          <label>Макс. CO для приміщення, ppm<input id="kpiCO" class="input" type="number" step="1" value="50"/></label>
+          <label>Макс. час спрацювання (KPI), сек<input id="kpiTime" class="input" type="number" step="0.1" value="5.0"></label>
+          <label>Макс. CO для приміщення, ppm<input id="kpiCO" class="input" type="number" step="1" value="50"></label>
           <button class="btn secondary" id="applyKPI">⚙️ Застосувати KPI</button>
         </div>
         <div class="kpi" style="margin-top:6px">
@@ -115,12 +113,12 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 
       <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
       <div class="row">
-        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <video id="vid" class="photo" autoplay="" playsinline="" muted=""></video>
         <div>
           <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
           <button class="btn" data-kind="sensor">📷 Датчик (тяги/газу)</button>
           <button class="btn" data-kind="wiring">📷 Підключення/клеми</button>
-          <button class="btn" data-kind="valve">📷 Газ-клапан</button><br/>
+          <button class="btn" data-kind="valve">📷 Газ-клапан</button><br>
           <small class="muted">Фото зберігаються у «Галереї доказів».</small>
         </div>
       </div>
@@ -134,7 +132,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
           <button class="btn" id="audSave">💾 Зберегти</button>
           <span class="badge" id="audStat">Немає запису</span>
         </div>
-        <audio id="audPlay" controls></audio>
+        <audio id="audPlay" controls=""></audio>
       </div>
 
       <h2 style="margin-top:10px">✍️ Підпис абонента</h2>
@@ -181,7 +179,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (Case)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
 
       <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
@@ -546,5 +544,6 @@ init(); updateMetrics(); drawBars(); drawTimeline();
 // Вбудоване відображення (Moodle/iFrame)
 (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
 </script>
-</body>
-</html>
+
+
+</body></html>

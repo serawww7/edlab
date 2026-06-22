@@ -1,12 +1,9 @@
 <!-- ПАРА 5 (аудиторно) для агрономів
      Тема: ТЕХКАРТА ОБПРИСКУВАННЯ — норми, баки, пофорсунковий витрат, чек-завдання 58 мм
      Фокус: робота в коледжі, максимум телефону/ПК + термопринтер 58 мм (опційно).
-     Усе локально, без зовнішніх бібліотек. Готово для GitHub Pages / iFrame у Moodle. -->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+     Усе локально, без зовнішніх бібліотек. Готово для GitHub Pages / iFrame у Moodle. --><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 5 — Техкарта обприскування: норми, баки, пофорсунково, чек 58 мм</title>
 <meta name="color-scheme" content="light dark">
 <style>
@@ -92,7 +89,7 @@
 .ticket small{ font-weight:700 }
 </style>
 
-</head>
+<meta name="description" content="За пару студент формує повний розрахунок обприскування для конкретного поля: загальна суміш, кількість баків, пофорсунковий витрат (L/хв) за шириною/кроком"><link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para5.html"><meta property="og:type" content="article"><meta property="og:title" content="🚜 Техкарта обприскування: норми, баки, пофорсунковий витрат + чек 58 мм"><meta property="og:description" content="За пару студент формує повний розрахунок обприскування для конкретного поля: загальна суміш, кількість баків, пофорсунковий витрат (L/хв) за шириною/кроком"><meta property="og:url" content="https://edlab.pp.ua/agro_II_kyrs/agro_para5.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🚜 Техкарта обприскування: норми, баки, пофорсунковий витрат + чек 58 мм","description":"За пару студент формує повний розрахунок обприскування для конкретного поля: загальна суміш, кількість баків, пофорсунковий витрат (L/хв) за шириною/кроком","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/agro_II_kyrs/agro_para5.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Пара 5 · аудиторно · агрономи</span>
@@ -105,9 +102,9 @@
         <b>пофорсунковий витрат (L/хв)</b> за шириною/кроком, розкладка по баках, і друкує <b>чек-завдання 58 мм</b> для механізатора.
       </p>
       <div class="grid g3">
-        <div class="kpi"><span>📐</span><div><b>Формули</b><br/><span class="mono">q_форс = (Нв * V * S) / 600</span></div></div>
-        <div class="kpi"><span>🧪</span><div><b>Суміш</b><br/>вода + продукт(и), кількість баків</div></div>
-        <div class="kpi"><span>🖨️</span><div><b>Чек 58 мм</b><br/>«Завдання на зміну»</div></div>
+        <div class="kpi"><span>📐</span><div><b>Формули</b><br><span class="mono">q_форс = (Нв * V * S) / 600</span></div></div>
+        <div class="kpi"><span>🧪</span><div><b>Суміш</b><br>вода + продукт(и), кількість баків</div></div>
+        <div class="kpi"><span>🖨️</span><div><b>Чек 58 мм</b><br>«Завдання на зміну»</div></div>
       </div>
       <p class="small">Де: Нв — норма виливу (л/га), V — швидкість (км/год), S — міжфорсункова відстань (м), 600 — коеф. перерахунку.</p>
     </div>
@@ -118,18 +115,18 @@
       <div class="grid g2">
         <div class="box">
           <h3>Поле та препарат</h3>
-          <div class="field"><label for="fieldCode">Код поля</label><input id="fieldCode" type="text" value="F-01" /></div>
-          <div class="field"><label for="area">Площа, га</label><input id="area" type="number" step="0.01" value="25" /></div>
-          <div class="field"><label for="product">Продукт (назва)</label><input id="product" type="text" value="Гербіцид Х" /></div>
-          <div class="field"><label for="dose">Доза продукту, л/га</label><input id="dose" type="number" step="0.01" value="0.8" /></div>
-          <div class="field"><label for="waterRate">Норма виливу (вода), л/га</label><input id="waterRate" type="number" step="0.1" value="200" /></div>
+          <div class="field"><label for="fieldCode">Код поля</label><input id="fieldCode" type="text" value="F-01"></div>
+          <div class="field"><label for="area">Площа, га</label><input id="area" type="number" step="0.01" value="25"></div>
+          <div class="field"><label for="product">Продукт (назва)</label><input id="product" type="text" value="Гербіцид Х"></div>
+          <div class="field"><label for="dose">Доза продукту, л/га</label><input id="dose" type="number" step="0.01" value="0.8"></div>
+          <div class="field"><label for="waterRate">Норма виливу (вода), л/га</label><input id="waterRate" type="number" step="0.1" value="200"></div>
         </div>
         <div class="box">
           <h3>Обприскувач</h3>
-          <div class="field"><label for="boomWidth">Ширина штанги, м</label><input id="boomWidth" type="number" step="0.1" value="18" /></div>
-          <div class="field"><label for="spacing">Крок форсунок (S), м</label><input id="spacing" type="number" step="0.01" value="0.5" /></div>
-          <div class="field"><label for="speed">Робоча швидкість (V), км/год</label><input id="speed" type="number" step="0.1" value="7.0" /></div>
-          <div class="field"><label for="tank">Обʼєм бака, л</label><input id="tank" type="number" step="1" value="3000" /></div>
+          <div class="field"><label for="boomWidth">Ширина штанги, м</label><input id="boomWidth" type="number" step="0.1" value="18"></div>
+          <div class="field"><label for="spacing">Крок форсунок (S), м</label><input id="spacing" type="number" step="0.01" value="0.5"></div>
+          <div class="field"><label for="speed">Робоча швидкість (V), км/год</label><input id="speed" type="number" step="0.1" value="7.0"></div>
+          <div class="field"><label for="tank">Обʼєм бака, л</label><input id="tank" type="number" step="1" value="3000"></div>
         </div>
       </div>
       <div class="row" style="margin-top:8px">
@@ -496,5 +493,6 @@ function openTicketOnly(){
 }
 </script>
 
-</body>
-</html>
+
+
+</body></html>

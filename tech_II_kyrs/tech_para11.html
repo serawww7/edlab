@@ -8,12 +8,9 @@
 
      Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
      УВАГА: навчальна модель. Реальні вимоги етикетування і термінів — за чинним законодавством та СОП підприємства.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 11 (технологи) — Пакування/Маркування: MAP, EAN-13, термін, холодовий ланцюг, квиток/NFC/CSV</title>
 <meta name="color-scheme" content="light dark">
 <style>
@@ -73,7 +70,7 @@
 .ticket small{ font-weight:700 }
 </style>
 
-</head>
+<meta name="description" content="За заняття студенти: (1) підберуть режим пакування (MAP/вакуум), (2) сформують етикетку з EAN-13, датою/лотом та обов’язковими полями, (3) зберуть холодови"><link rel="canonical" href="https://edlab.pp.ua/tech_II_kyrs/tech_para11.html"><meta property="og:type" content="article"><meta property="og:title" content="📦 Пакування/Маркування: MAP/вакуум, етикетка EAN-13, термін, холодовий ланцюг, квиток/NFC/CSV"><meta property="og:description" content="За заняття студенти: (1) підберуть режим пакування (MAP/вакуум), (2) сформують етикетку з EAN-13, датою/лотом та обов’язковими полями, (3) зберуть холодови"><meta property="og:url" content="https://edlab.pp.ua/tech_II_kyrs/tech_para11.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"📦 Пакування/Маркування: MAP/вакуум, етикетка EAN-13, термін, холодовий ланцюг, квиток/NFC/CSV","description":"За заняття студенти: (1) підберуть режим пакування (MAP/вакуум), (2) сформують етикетку з EAN-13, датою/лотом та обов’язковими полями, (3) зберуть холодови","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/tech_II_kyrs/tech_para11.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <span class="badge">Пара 11 · аудиторно · технологи переробки</span>
@@ -109,7 +106,7 @@
         <div class="row">
           <div style="flex:1"><label>Тип</label>
             <select id="pkType">
-              <option selected>Вакуум</option>
+              <option selected="">Вакуум</option>
               <option>MAP</option>
             </select>
           </div>
@@ -294,13 +291,13 @@
       </div>
 
       <div class="box">
-        <h3>Квиток 58 мм — “PACK & LABEL”</h3>
+        <h3>Квиток 58 мм — “PACK &amp; LABEL”</h3>
         <div class="row">
           <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
           <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
-          <h4>PACK & LABEL</h4>
+          <h4>PACK &amp; LABEL</h4>
           <p><b>Виріб:</b> <span id="tProd">—</span></p>
           <p><b>ЛОТ:</b> <span id="tLot">—</span> · <b>EAN-13:</b> <span id="tEAN">—</span></p>
           <div class="line"></div>
@@ -670,5 +667,6 @@ function openTicketOnly(){
 }
 </script>
 
-</body>
-</html>
+
+
+</body></html>

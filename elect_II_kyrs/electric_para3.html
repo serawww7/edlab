@@ -1,12 +1,9 @@
 <!-- electric_para3.html
      Пара 3 (Електрики, аудиторно): Формування Акту ППР (A4/PDF) і Дефектного листа з CSV журналу ППР
      Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 3 — Акт ППР (A4/PDF) + Дефектний лист із CSV</title>
 <meta name="color-scheme" content="light dark">
 <style>
@@ -72,7 +69,7 @@
     .doc{ page-break-after:always }
   }
 </style>
-</head>
+<meta name="description" content="Імпортувати CSV журналу ППР, перевірити дані й згенерувати друковані документи: Акт ППР та Дефектний лист."><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para3.html"><meta property="og:type" content="article"><meta property="og:title" content="📄 Акт ППР (A4/PDF) + 🧾 Дефектний лист із CSV журналу"><meta property="og:description" content="Імпортувати CSV журналу ППР, перевірити дані й згенерувати друковані документи: Акт ППР та Дефектний лист."><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para3.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"📄 Акт ППР (A4/PDF) + 🧾 Дефектний лист із CSV журналу","description":"Імпортувати CSV журналу ППР, перевірити дані й згенерувати друковані документи: Акт ППР та Дефектний лист.","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para3.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Електрики · Пара 3 · аудиторно</span>
@@ -82,7 +79,7 @@
       <h2>🎯 Мета</h2>
       <p>Імпортувати CSV журналу ППР, перевірити дані й згенерувати друковані документи: <b>Акт ППР</b> та <b>Дефектний лист</b>.</p>
       <div class="row">
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <input id="file" type="file" accept=".csv,text/csv" class="btn">
         <button class="btn" type="button" onclick="pasteSample()">⬇️ Вставити навчальний CSV</button>
         <button class="btn" type="button" onclick="parseCSV()">🔎 Розібрати CSV</button>
       </div>
@@ -96,15 +93,15 @@
         <div>
           <div class="row">
             <label class="small">Номер акта</label>
-            <input id="actnum" type="text" value="ППР-001" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb"/>
+            <input id="actnum" type="text" value="ППР-001" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb">
             <label class="small">Підрозділ/об’єкт</label>
-            <input id="dept" type="text" value="Електромайстерня / Коледж" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb"/>
+            <input id="dept" type="text" value="Електромайстерня / Коледж" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb">
           </div>
           <div class="row" style="margin-top:8px">
             <label class="small">Комісія, голова</label>
-            <input id="head" type="text" value="Викладач ПІБ" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb"/>
+            <input id="head" type="text" value="Викладач ПІБ" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb">
             <label class="small">Члени комісії</label>
-            <input id="members" type="text" value="Студент1; Студент2" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb"/>
+            <input id="members" type="text" value="Студент1; Студент2" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb">
           </div>
           <div class="row" style="margin-top:8px">
             <button class="btn" type="button" onclick="buildDocs()">🧩 Згенерувати Акт і Дефектний лист</button>
@@ -284,5 +281,6 @@ ELC-003,"ПЗВ 30мА, лінія 3","Лабораторія",6,"Студент
   // Автозапуск з демо, щоб було що друкувати при першому відкритті
   pasteSample();
 </script>
-</body>
-</html>
+
+
+</body></html>

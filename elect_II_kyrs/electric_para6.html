@@ -2,14 +2,11 @@
      Пара 6 (Електрики, аудиторно): СЕЛЕКТИВНІСТЬ ЗАХИСТІВ
      Тема: MCB (B/C/D) та ПЗВ (RCD) — підбір, перевірка селективності, тестові сценарії, друк 58 мм, експорт CSV.
      Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 6 — Селективність MCB/ПЗВ, тест, друк 58 мм</title>
-<meta name="color-scheme" content="light dark"/>
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -79,7 +76,7 @@
 .ticket small{ font-weight:700 }
 </style>
 
-</head>
+<meta name="description" content="Навчитися підбирати селективні пари «ввідний → відхідний» для автоматичних вимикачів (B/C/D) та ПЗВ, оцінювати селективність у тепловій і миттєвій зонах, а"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para6.html"><meta property="og:type" content="article"><meta property="og:title" content="🛡️ Селективність захистів: MCB (B/C/D) та ПЗВ (RCD) · тестові сценарії · 🧾 друк 58 мм"><meta property="og:description" content="Навчитися підбирати селективні пари «ввідний → відхідний» для автоматичних вимикачів (B/C/D) та ПЗВ, оцінювати селективність у тепловій і миттєвій зонах, а"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para6.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🛡️ Селективність захистів: MCB (B/C/D) та ПЗВ (RCD) · тестові сценарії · 🧾 друк 58 мм","description":"Навчитися підбирати селективні пари «ввідний → відхідний» для автоматичних вимикачів (B/C/D) та ПЗВ, оцінювати селективність у тепловій і миттєвій зонах, а","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para6.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Електрики · Пара 6 · аудиторно</span>
@@ -98,18 +95,18 @@
           <h3>🔼 Ввідний захист (UPSTREAM)</h3>
           <div class="field"><label for="upType">Тип</label>
             <select id="upType">
-              <option value="MCB" selected>MCB (автомат)</option>
+              <option value="MCB" selected="">MCB (автомат)</option>
               <option value="RCD">ПЗВ (RCD)</option>
             </select></div>
           <div id="upMCB">
-            <div class="field"><label for="upIn">In, А</label><input id="upIn" type="number" value="40"/></div>
+            <div class="field"><label for="upIn">In, А</label><input id="upIn" type="number" value="40"></div>
             <div class="field"><label for="upCurve">Крива</label>
-              <select id="upCurve"><option>B</option><option selected>C</option><option>D</option></select></div>
+              <select id="upCurve"><option>B</option><option selected="">C</option><option>D</option></select></div>
           </div>
           <div id="upRCD" style="display:none">
-            <div class="field"><label for="upIdn">IΔn, мА</label><input id="upIdn" type="number" value="100"/></div>
+            <div class="field"><label for="upIdn">IΔn, мА</label><input id="upIdn" type="number" value="100"></div>
             <div class="field"><label for="upDelay">Затримка</label>
-              <select id="upDelay"><option value="0">миттєва</option><option value="S" selected>тип S (затримка)</option></select></div>
+              <select id="upDelay"><option value="0">миттєва</option><option value="S" selected="">тип S (затримка)</option></select></div>
           </div>
         </div>
 
@@ -117,25 +114,25 @@
           <h3>🔽 Відхідний захист (DOWNSTREAM)</h3>
           <div class="field"><label for="dnType">Тип</label>
             <select id="dnType">
-              <option value="MCB" selected>MCB (автомат)</option>
+              <option value="MCB" selected="">MCB (автомат)</option>
               <option value="RCD">ПЗВ (RCD)</option>
             </select></div>
           <div id="dnMCB">
-            <div class="field"><label for="dnIn">In, А</label><input id="dnIn" type="number" value="16"/></div>
+            <div class="field"><label for="dnIn">In, А</label><input id="dnIn" type="number" value="16"></div>
             <div class="field"><label for="dnCurve">Крива</label>
-              <select id="dnCurve"><option selected>B</option><option>C</option><option>D</option></select></div>
+              <select id="dnCurve"><option selected="">B</option><option>C</option><option>D</option></select></div>
           </div>
           <div id="dnRCD" style="display:none">
-            <div class="field"><label for="dnIdn">IΔn, мА</label><input id="dnIdn" type="number" value="30"/></div>
+            <div class="field"><label for="dnIdn">IΔn, мА</label><input id="dnIdn" type="number" value="30"></div>
             <div class="field"><label for="dnDelay">Затримка</label>
-              <select id="dnDelay"><option value="0" selected>миттєва</option><option value="S">тип S (затримка)</option></select></div>
+              <select id="dnDelay"><option value="0" selected="">миттєва</option><option value="S">тип S (затримка)</option></select></div>
           </div>
         </div>
       </div>
 
       <div class="grid g2" style="margin-top:8px">
-        <div class="field"><label for="Ik">Очікуваний струм к.з. у точці DN, A</label><input id="Ik" type="number" value="2000"/></div>
-        <div class="field"><label for="resp">Відповідальний</label><input id="resp" type="text" value="Студент ПІБ / група"/></div>
+        <div class="field"><label for="Ik">Очікуваний струм к.з. у точці DN, A</label><input id="Ik" type="number" value="2000"></div>
+        <div class="field"><label for="resp">Відповідальний</label><input id="resp" type="text" value="Студент ПІБ / група"></div>
       </div>
 
       <div class="row" style="margin-top:6px">
@@ -500,5 +497,6 @@ function openTicketOnly(){
 }
 </script>
 
-</body>
-</html>
+
+
+</body></html>

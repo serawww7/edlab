@@ -1,11 +1,8 @@
 <!-- ПАРА 6 (аудиторно) для агрономів
      Тема: НОРМА ВИСІВУ ТА КАЛІБРУВАННЯ СІВАЛКИ — TKW, схожість, цільова густота, рядкова норма, «ваговий тест» на колесо
-     Фокус: робота в коледжі, максимум телефону/ПК. Без зовнішніх бібліотек. Готово для GitHub Pages / iFrame у Moodle. -->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+     Фокус: робота в коледжі, максимум телефону/ПК. Без зовнішніх бібліотек. Готово для GitHub Pages / iFrame у Moodle. --><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 6 — Норма висіву та калібрування сівалки</title>
 <meta name="color-scheme" content="light dark">
 <style>
@@ -60,7 +57,7 @@
     .no-print{ display:none !important }
   }
 </style>
-</head>
+<meta name="description" content="За пару студент розраховує норму висіву (кг/га) із урахуванням маси 1000 насінин (TKW), схожості та польової приживлюваності, отримує рядкову норму (насіни"><link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para6.html"><meta property="og:type" content="article"><meta property="og:title" content="🌾 Норма висіву та калібрування сівалки: від TKW і схожості до «вагового тесту»"><meta property="og:description" content="За пару студент розраховує норму висіву (кг/га) із урахуванням маси 1000 насінин (TKW), схожості та польової приживлюваності, отримує рядкову норму (насіни"><meta property="og:url" content="https://edlab.pp.ua/agro_II_kyrs/agro_para6.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🌾 Норма висіву та калібрування сівалки: від TKW і схожості до «вагового тесту»","description":"За пару студент розраховує норму висіву (кг/га) із урахуванням маси 1000 насінин (TKW), схожості та польової приживлюваності, отримує рядкову норму (насіни","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/agro_II_kyrs/agro_para6.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Пара 6 · аудиторно · агрономи</span>
@@ -82,20 +79,20 @@
       <div class="grid g2">
         <div class="box">
           <h3>Насіння і ціль</h3>
-          <div class="field"><label for="crop">Культура</label><input id="crop" type="text" value="Пшениця озима" /></div>
-          <div class="field"><label for="tkw">TKW — маса 1000 насінин, г</label><input id="tkw" type="number" step="0.1" value="42" /></div>
-          <div class="field"><label for="germ">Схожість, %</label><input id="germ" type="number" step="1" value="95" /></div>
-          <div class="field"><label for="field">Польова приживлюваність, %</label><input id="field" type="number" step="1" value="90" /></div>
-          <div class="field"><label for="target">Цільова густота, рослин/м²</label><input id="target" type="number" step="1" value="450" /></div>
+          <div class="field"><label for="crop">Культура</label><input id="crop" type="text" value="Пшениця озима"></div>
+          <div class="field"><label for="tkw">TKW — маса 1000 насінин, г</label><input id="tkw" type="number" step="0.1" value="42"></div>
+          <div class="field"><label for="germ">Схожість, %</label><input id="germ" type="number" step="1" value="95"></div>
+          <div class="field"><label for="field">Польова приживлюваність, %</label><input id="field" type="number" step="1" value="90"></div>
+          <div class="field"><label for="target">Цільова густота, рослин/м²</label><input id="target" type="number" step="1" value="450"></div>
           <div class="row"><button class="btn" type="button" onclick="calcSeed()">🔁 Розрахувати</button></div>
         </div>
 
         <div class="box">
           <h3>Сівалка і геометрія</h3>
-          <div class="field"><label for="rowcm">Крок рядка, см</label><input id="rowcm" type="number" step="0.1" value="12.5" /></div>
-          <div class="field"><label for="width">Ширина захвату, м</label><input id="width" type="number" step="0.1" value="3.0" /></div>
-          <div class="field"><label for="rows">Кількість рядків (якщо відомо)</label><input id="rows" type="number" step="1" value="24" /></div>
-          <div class="field"><label for="wheelD">Діаметр колеса, см</label><input id="wheelD" type="number" step="0.1" value="90" /></div>
+          <div class="field"><label for="rowcm">Крок рядка, см</label><input id="rowcm" type="number" step="0.1" value="12.5"></div>
+          <div class="field"><label for="width">Ширина захвату, м</label><input id="width" type="number" step="0.1" value="3.0"></div>
+          <div class="field"><label for="rows">Кількість рядків (якщо відомо)</label><input id="rows" type="number" step="1" value="24"></div>
+          <div class="field"><label for="wheelD">Діаметр колеса, см</label><input id="wheelD" type="number" step="0.1" value="90"></div>
           <div class="row"><button class="btn" type="button" onclick="calcWheel()">🛞 Обчислити «ваговий тест»</button></div>
           <p class="small">Якщо рядки × крок не співпадають з шириною — переважно вірити <b>фактичній ширині</b> (вимір рулеткою).</p>
         </div>
@@ -151,19 +148,19 @@
           <tbody id="calBody">
             <tr>
               <td>1</td>
-              <td><input type="number" value="10" /></td>
+              <td><input type="number" value="10"></td>
               <td class="mono exp">—</td>
-              <td><input type="number" step="0.1" value="0.0" /></td>
+              <td><input type="number" step="0.1" value="0.0"></td>
               <td class="mono dev">—</td>
-              <td><input type="text" value="Зірочка +1 крок / заслінка +" /></td>
+              <td><input type="text" value="Зірочка +1 крок / заслінка +"></td>
             </tr>
             <tr>
               <td>2</td>
-              <td><input type="number" value="10" /></td>
+              <td><input type="number" value="10"></td>
               <td class="mono exp">—</td>
-              <td><input type="number" step="0.1" value="0.0" /></td>
+              <td><input type="number" step="0.1" value="0.0"></td>
               <td class="mono dev">—</td>
-              <td><input type="text" value="Тонка доводка" /></td>
+              <td><input type="text" value="Тонка доводка"></td>
             </tr>
           </tbody>
         </table>
@@ -347,5 +344,6 @@
   calcWheel();
   recalcCal();
 </script>
-</body>
-</html>
+
+
+</body></html>

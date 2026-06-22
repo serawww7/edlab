@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 22 (Електрика) — ШІ: класифікація станів мережі + аномалії (k-NN)</title>
-<meta name="description" content="Імпорт CSV із метриками (Vrms, Irms, PF, THD, Temp), навчання k-NN, детектор аномалій (реконструкційна похибка), матриця помилок, емулятор, журнал тривог, експорт моделі JSON, генератор скетча Arduino."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Імпорт CSV із метриками (Vrms, Irms, PF, THD, Temp), навчання k-NN, детектор аномалій (реконструкційна похибка), матриця помилок, емулятор, журнал тривог, експорт моделі JSON, генератор скетча Arduino.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -38,14 +36,14 @@ svg{max-width:100%;height:auto;display:block}
 .note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
 kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para22.html"><meta property="og:type" content="article"><meta property="og:title" content="Електроенергетика — Пара 22"><meta property="og:description" content="Мета: навчити модель розпізнавати стани мережі (нормальний, перевантаження, перекіс фаз/низький PF, високий THD, перегрів) за ознаками Vrms, Irms, PF, THD,"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para22.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Електроенергетика — Пара 22","description":"Мета: навчити модель розпізнавати стани мережі (нормальний, перевантаження, перекіс фаз/низький PF, високий THD, перегрів) за ознаками Vrms, Irms, PF, THD,","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para22.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧠</span>
       <div>
-        <b>Пара 22 — ШІ: класифікація станів мережі + аномалії</b><br/>
+        <b>Пара 22 — ШІ: класифікація станів мережі + аномалії</b><br>
         <span class="badge">CSV → тренування k-NN → матриця помилок → живий монітор → тривоги → експорт моделі → промпт LLM</span>
       </div>
     </div>
@@ -73,15 +71,15 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="row">
       <div style="flex:1">
         <label for="k">k для k-NN</label>
-        <input id="k" class="input" type="number" min="1" step="1" value="5"/>
+        <input id="k" class="input" type="number" min="1" step="1" value="5">
       </div>
       <div style="flex:1">
         <label for="split">Train/Test, % (train)</label>
-        <input id="split" class="input" type="number" min="50" max="90" step="1" value="70"/>
+        <input id="split" class="input" type="number" min="50" max="90" step="1" value="70">
       </div>
       <div style="flex:1">
         <label for="anomThr">Поріг аномалії (recon err)</label>
-        <input id="anomThr" class="input" type="number" min="0" step="0.01" value="0.25"/>
+        <input id="anomThr" class="input" type="number" min="0" step="0.01" value="0.25">
       </div>
     </div>
     <div class="row" style="margin-top:6px">
@@ -107,11 +105,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>⚡ Емулятор і живий монітор</h2>
     <div class="row">
-      <label style="flex:1">Vrms, В <input id="ev" class="input" type="range" min="180" max="260" step="1" value="230"/></label>
-      <label style="flex:1">Irms, А <input id="ei" class="input" type="range" min="0" max="30" step="0.1" value="3.0"/></label>
-      <label style="flex:1">PF (cos φ) <input id="epf" class="input" type="range" min="0" max="1" step="0.01" value="0.95"/></label>
-      <label style="flex:1">THD, % <input id="ethd" class="input" type="range" min="0" max="40" step="0.5" value="4.0"/></label>
-      <label style="flex:1">Temp, °C <input id="et" class="input" type="range" min="15" max="90" step="0.5" value="32.0"/></label>
+      <label style="flex:1">Vrms, В <input id="ev" class="input" type="range" min="180" max="260" step="1" value="230"></label>
+      <label style="flex:1">Irms, А <input id="ei" class="input" type="range" min="0" max="30" step="0.1" value="3.0"></label>
+      <label style="flex:1">PF (cos φ) <input id="epf" class="input" type="range" min="0" max="1" step="0.01" value="0.95"></label>
+      <label style="flex:1">THD, % <input id="ethd" class="input" type="range" min="0" max="40" step="0.5" value="4.0"></label>
+      <label style="flex:1">Temp, °C <input id="et" class="input" type="range" min="15" max="90" step="0.5" value="32.0"></label>
     </div>
     <div class="row" style="margin-top:6px">
       <button class="btn" id="tick">➕ Додати точку</button>
@@ -147,25 +145,25 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🔁 Схема процесу (SVG)</h2>
     <svg viewBox="0 0 900 380" role="img" aria-label="Пайплайн ШІ для електромережі">
-      <rect x="30" y="40" width="210" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <rect x="30" y="40" width="210" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
       <text x="135" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Arduino → CSV</text>
       <text x="135" y="88" fill="#93c5fd" font-size="12" text-anchor="middle">Vrms, Irms, PF, THD, Temp</text>
 
-      <rect x="270" y="40" width="210" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <rect x="270" y="40" width="210" height="80" rx="12" fill="#14532d" stroke="#22c55e"></rect>
       <text x="375" y="70" fill="#dcfce7" font-size="14" text-anchor="middle">k-NN навчання</text>
       <text x="375" y="88" fill="#a7f3d0" font-size="12" text-anchor="middle">нормалізація</text>
 
-      <rect x="510" y="40" width="170" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+      <rect x="510" y="40" width="170" height="80" rx="12" fill="#7c2d12" stroke="#fb923c"></rect>
       <text x="595" y="70" fill="#fed7aa" font-size="14" text-anchor="middle">Аномалії</text>
       <text x="595" y="88" fill="#fed7aa" font-size="12" text-anchor="middle">recon error</text>
 
-      <rect x="710" y="40" width="160" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+      <rect x="710" y="40" width="160" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
       <text x="790" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Журнал</text>
       <text x="790" y="88" fill="#9ca3af" font-size="12" text-anchor="middle">тривоги/експорт</text>
 
-      <line x1="240" y1="80" x2="270" y2="80" stroke="#93c5fd" stroke-width="3"/>
-      <line x1="480" y1="80" x2="510" y2="80" stroke="#93c5fd" stroke-width="3"/>
-      <line x1="680" y1="80" x2="710" y2="80" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="240" y1="80" x2="270" y2="80" stroke="#93c5fd" stroke-width="3"></line>
+      <line x1="480" y1="80" x2="510" y2="80" stroke="#93c5fd" stroke-width="3"></line>
+      <line x1="680" y1="80" x2="710" y2="80" stroke="#93c5fd" stroke-width="3"></line>
     </svg>
   </div>
 
@@ -523,5 +521,6 @@ $('#savePrompt').addEventListener('click', ()=>{ const txt=$('#prompt').textCont
 drawChart();
 if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
 </script>
-</body>
-</html>
+
+
+</body></html>

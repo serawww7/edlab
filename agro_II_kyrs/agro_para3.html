@@ -2,12 +2,9 @@
      Тема: Польові треки зі смартфона — GPX → аналіз → план/факт у таблиці
      Фокус: максимум телефону. Є локальний аналізатор GPX (без інтернету), підрахунок довжини, часу, швидкості, генерація рядка для Sheets.
      Готово для GitHub Pages або вставки в Moodle через iFrame. Без сторонніх бібліотек.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 3 — Польові треки: GPX → аналіз → план/факт</title>
 <meta name="color-scheme" content="light dark">
 <style>
@@ -69,7 +66,7 @@
     .no-print{ display:none !important }
   }
 </style>
-</head>
+<meta name="description" content="Навчити студента записувати трек GPX зі смартфона, локально обробляти файл (довжина, час, швидкість), та переносити підсумок у таблицю Tracks з полем План/"><link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para3.html"><meta property="og:type" content="article"><meta property="og:title" content="🗺️ Польові треки: запис GPX на смартфоні → аналіз → план/факт"><meta property="og:description" content="Навчити студента записувати трек GPX зі смартфона, локально обробляти файл (довжина, час, швидкість), та переносити підсумок у таблицю Tracks з полем План/"><meta property="og:url" content="https://edlab.pp.ua/agro_II_kyrs/agro_para3.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🗺️ Польові треки: запис GPX на смартфоні → аналіз → план/факт","description":"Навчити студента записувати трек GPX зі смартфона, локально обробляти файл (довжина, час, швидкість), та переносити підсумок у таблицю Tracks з полем План/","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/agro_II_kyrs/agro_para3.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Пара 3 · ЛПЗ · агрономи</span>
@@ -82,9 +79,9 @@
         та переносити підсумок у таблицю <b>Tracks</b> з полем <i>План/Факт</i>.
       </p>
       <div class="grid g3">
-        <div class="kpi"><span>📍</span><div><b>GPX</b><br/><span class="mono">&lt;trkpt lat lon time&gt;</span></div></div>
-        <div class="kpi"><span>⏱️</span><div><b>Час і відстань</b><br/>Haversine + ISO time</div></div>
-        <div class="kpi"><span>📊</span><div><b>План/Факт</b><br/>довжина, швидкість, відхилення</div></div>
+        <div class="kpi"><span>📍</span><div><b>GPX</b><br><span class="mono">&lt;trkpt lat lon time&gt;</span></div></div>
+        <div class="kpi"><span>⏱️</span><div><b>Час і відстань</b><br>Haversine + ISO time</div></div>
+        <div class="kpi"><span>📊</span><div><b>План/Факт</b><br>довжина, швидкість, відхилення</div></div>
       </div>
     </div>
 
@@ -102,7 +99,7 @@
       <h2>🧪 Локальний аналізатор GPX (працює офлайн у браузері)</h2>
       <div class="field">
         <label for="gpxFile">Завантаж GPX-файл</label>
-        <input id="gpxFile" type="file" accept=".gpx,.xml" />
+        <input id="gpxFile" type="file" accept=".gpx,.xml">
       </div>
       <div class="row">
         <button class="btn" type="button" onclick="parseGPX()">📥 Обробити GPX</button>
@@ -131,12 +128,12 @@
       <div class="grid g3">
         <div class="box">
           <h3>Вхідні (з треку або вручну)</h3>
-          <div class="field"><label for="date">Дата</label><input id="date" type="date" /></div>
-          <div class="field"><label for="fieldCode">Код поля</label><input id="fieldCode" type="text" value="F-01" /></div>
-          <div class="field"><label for="crop">Культура</label><input id="crop" type="text" value="Пшениця оз." /></div>
-          <div class="field"><label for="op">Операція</label><input id="op" type="text" value="Огляд" /></div>
-          <div class="field"><label for="lenM">Довжина, м (факт)</label><input id="lenM" type="number" step="1" value="0" /></div>
-          <div class="field"><label for="timeMin">Час, хв (факт)</label><input id="timeMin" type="number" step="1" value="0" /></div>
+          <div class="field"><label for="date">Дата</label><input id="date" type="date"></div>
+          <div class="field"><label for="fieldCode">Код поля</label><input id="fieldCode" type="text" value="F-01"></div>
+          <div class="field"><label for="crop">Культура</label><input id="crop" type="text" value="Пшениця оз."></div>
+          <div class="field"><label for="op">Операція</label><input id="op" type="text" value="Огляд"></div>
+          <div class="field"><label for="lenM">Довжина, м (факт)</label><input id="lenM" type="number" step="1" value="0"></div>
+          <div class="field"><label for="timeMin">Час, хв (факт)</label><input id="timeMin" type="number" step="1" value="0"></div>
           <div class="row">
             <button class="btn" type="button" onclick="takeFromGPX()">⬅️ Взяти з GPX-підсумку</button>
           </div>
@@ -144,8 +141,8 @@
 
         <div class="box">
           <h3>План</h3>
-          <div class="field"><label for="planM">Планова довжина, м</label><input id="planM" type="number" step="1" value="1200" /></div>
-          <div class="field"><label for="comment">Коментар</label><input id="comment" type="text" value="Маршрут по межі поля" /></div>
+          <div class="field"><label for="planM">Планова довжина, м</label><input id="planM" type="number" step="1" value="1200"></div>
+          <div class="field"><label for="comment">Коментар</label><input id="comment" type="text" value="Маршрут по межі поля"></div>
           <div class="box success" id="calcBox" style="margin-top:8px">
             <div><b>Середня швидкість:</b> <span id="calcSpeed">0.0</span> км/год</div>
             <div><b>Відхилення від плану:</b> <span id="calcDev">0</span> м</div>
@@ -390,5 +387,6 @@
     setTimeout(()=>document.title = old, 900);
   }
 </script>
-</body>
-</html>
+
+
+</body></html>
