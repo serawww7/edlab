@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 25 (Електрика) — ШІ: аудіодіагностика трансформатора (FFT, ознаки, класифікація)</title>
-<meta name="description" content="WebAudio мікрофон/емулятор → спектр (FFT) → f0/гармоніки/тональність/центроїд/плоскість/ZCR → класифікація (правила + kNN) → журнал/чек-лист → експорт PNG/CSV/TXT/JSON. Включає Arduino Goertzel-логер."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="WebAudio мікрофон/емулятор → спектр (FFT) → f0/гармоніки/тональність/центроїд/плоскість/ZCR → класифікація (правила + kNN) → журнал/чек-лист → експорт PNG/CSV/TXT/JSON. Включає Arduino Goertzel-логер.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -37,14 +35,14 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
 .footer{margin-top:20px;color:var(--muted);font-size:.9rem}
 .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para25.html"><meta property="og:type" content="article"><meta property="og:title" content="Електроенергетика — Пара 25"><meta property="og:description" content="Ще з 1930-х техніки слухали трансформатори стетоскопом. Сьогодні WebAudio + FFT дає ті ж «вуха», але з цифрами: тональність, гармоніки і спектральна «шерша"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para25.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Електроенергетика — Пара 25","description":"Ще з 1930-х техніки слухали трансформатори стетоскопом. Сьогодні WebAudio + FFT дає ті ж «вуха», але з цифрами: тональність, гармоніки і спектральна «шерша","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para25.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🔊</span>
       <div>
-        <b>Пара 25 — ШІ: аудіодіагностика трансформатора</b><br/>
+        <b>Пара 25 — ШІ: аудіодіагностика трансформатора</b><br>
         <span class="badge">мікрофон/WebAudio → FFT → ознаки → класифікація → журнал → експорт</span>
       </div>
     </div>
@@ -59,7 +57,7 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
         <div style="flex:1">
           <label for="src">Джерело</label>
           <select id="src" class="input">
-            <option value="mic" selected>Мікрофон (браузер)</option>
+            <option value="mic" selected="">Мікрофон (браузер)</option>
             <option value="emu">Емулятор (синтетичні звуки)</option>
           </select>
         </div>
@@ -76,7 +74,7 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
           <div style="flex:1">
             <label for="emuType">Тип</label>
             <select id="emuType" class="input">
-              <option value="normal" selected>Нормальний гул (50/60 Гц + гармоніки)</option>
+              <option value="normal" selected="">Нормальний гул (50/60 Гц + гармоніки)</option>
               <option value="loose">Розхитане ядро (120–300 Гц «брязкіт»)</option>
               <option value="bearing">Підшипник вентилятора (тон 1–4 кГц)</option>
               <option value="pd">Часткові розряди (широкосмугові імпульси 3–20 кГц)</option>
@@ -84,7 +82,7 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
             </select>
           </div>
           <div style="flex:1">
-            <label>Рівень <input id="emuLvl" class="input" type="range" min="0" max="1" step="0.01" value="0.6"/></label>
+            <label>Рівень <input id="emuLvl" class="input" type="range" min="0" max="1" step="0.01" value="0.6"></label>
           </div>
         </div>
       </div>
@@ -111,7 +109,7 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
         </div>
         <div style="flex:1">
           <label for="k">k для k-NN (допоміжний)</label>
-          <input id="k" class="input" type="number" min="1" step="1" value="3"/>
+          <input id="k" class="input" type="number" min="1" step="1" value="3">
         </div>
       </div>
 
@@ -132,7 +130,7 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
       <h3 style="margin-top:10px">⚖️ Параметри правил</h3>
       <div class="row small">
         <div style="flex:1">
-          <label>f₀ ~ 50/60±3 Гц; H2>-15 дБ (норма)</label>
+          <label>f₀ ~ 50/60±3 Гц; H2&gt;-15 дБ (норма)</label>
         </div>
         <div style="flex:1">
           <label>«Брязкіт»: f₀ в 120–300 Гц, тональність &lt;0.25, плоскість &gt;0.4</label>
@@ -185,13 +183,13 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
   <div class="card">
     <h2>🔌 Схема розміщення мікрофона (SVG)</h2>
     <svg viewBox="0 0 900 300" role="img" aria-label="Мікрофон біля трансформатора">
-      <rect x="40" y="60" width="240" height="160" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <rect x="40" y="60" width="240" height="160" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
       <text x="160" y="90" fill="#e5e7eb" font-size="16" text-anchor="middle">Силовий трансформатор</text>
       <text x="160" y="110" fill="#93c5fd" font-size="12" text-anchor="middle">дверцята ЗР.1</text>
-      <circle cx="360" cy="150" r="18" fill="#14532d" stroke="#22c55e"/>
+      <circle cx="360" cy="150" r="18" fill="#14532d" stroke="#22c55e"></circle>
       <text x="360" y="155" fill="#dcfce7" font-size="12" text-anchor="middle">🎤</text>
       <text x="360" y="177" fill="#a7f3d0" font-size="12" text-anchor="middle">мікрофон 20–40 см</text>
-      <line x1="280" y1="140" x2="342" y2="150" stroke="#93c5fd" stroke-width="3"/>
+      <line x1="280" y1="140" x2="342" y2="150" stroke="#93c5fd" stroke-width="3"></line>
       <text x="140" y="240" fill="#fbbf24" font-size="12">⚠️ Не відкривай шафу під напругою; тримайся за розміткою безпеки</text>
     </svg>
     <div class="note small" style="margin-top:10px">
@@ -607,5 +605,6 @@ $('#savePrompt').addEventListener('click', ()=>{ const txt=$('#prompt').textCont
 // ===== ІНІЦІАЛІЗАЦІЯ =====
 if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
 </script>
-</body>
-</html>
+
+
+</body></html>

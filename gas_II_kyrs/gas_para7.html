@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 7 (газовики) — Огляд димовентканалів: чек-лист, тяга/CO, графік, фото, чек 58 мм, CSV/TXT, QR</title>
-<meta name="description" content="Практика огляду димових і вентиляційних каналів: чек-лист з таймерами, емульовані виміри тяги (Па) і CO (ppm) з порогами, живий графік, фото, NFC/ID, аудіо, чек 58 мм, експорт CSV/TXT, QR."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Практика огляду димових і вентиляційних каналів: чек-лист з таймерами, емульовані виміри тяги (Па) і CO (ppm) з порогами, живий графік, фото, NFC/ID, аудіо, чек 58 мм, експорт CSV/TXT, QR.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -46,14 +44,14 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 .tag.warn{border-color:#4a3b13;background:#2b2310}
 .tag.bad{border-color:#5a1f1f;background:#2a1212}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para7.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 7"><meta property="og:description" content="Оглядаємо димовий/вентканал: прохідність/засмічення, наявність тяги (Па), рівень CO у приміщенні під час роботи приладу, дефекти (сажa, конденсат, підсмокт"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para7.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 7","description":"Оглядаємо димовий/вентканал: прохідність/засмічення, наявність тяги (Па), рівень CO у приміщенні під час роботи приладу, дефекти (сажa, конденсат, підсмокт","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para7.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🌫️</span>
       <div>
-        <b>Пара 7 — Огляд димовентканалів</b><br/>
+        <b>Пара 7 — Огляд димовентканалів</b><br>
         <span class="badge">Чек-лист → тяга/CO → графік → фото → NFC/ID → чек 58 мм → CSV/TXT → QR</span>
       </div>
     </div>
@@ -67,14 +65,14 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       дефекти (сажa, конденсат, підсмоктування). Записуємо чек-лист з таймерами, ведемо <b>живий графік</b> (тяга/CO), робимо <b>фото</b> і <b>аудіо</b>, 
       прив’язуємо <b>NFC/ID</b>, формуємо <b>чек 58 мм</b>, <b>CSV/TXT</b>, <b>QR</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., кв. ..."/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., кв. ..."></label>
       <label style="flex:1">Тип приладу
         <select id="appliance" class="input">
-          <option>Колонка</option><option selected>Котел</option><option>Плита</option><option>Інше</option>
+          <option>Колонка</option><option selected="">Котел</option><option>Плита</option><option>Інше</option>
         </select>
       </label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"></label>
     </div>
     <div class="row">
       <button class="btn good" id="mkCase">🧰 Створити кейс</button>
@@ -91,28 +89,28 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2 style="margin-top:10px">🛰️ Виміри (емулятор): Тяга (Па) і CO (ppm)</h2>
       <div class="row">
         <label style="flex:1">Тяга, Па
-          <input type="range" id="draft" class="input" min="-10" max="40" step="1" value="8"/>
+          <input type="range" id="draft" class="input" min="-10" max="40" step="1" value="8">
         </label>
         <span class="badge">Поточне: <b id="draftNum">8</b> Па</span>
         <button class="btn" id="markDraft">📍 Додати точку</button>
       </div>
       <div class="row">
         <label style="flex:1">CO, ppm
-          <input type="range" id="co" class="input" min="0" max="400" step="5" value="15"/>
+          <input type="range" id="co" class="input" min="0" max="400" step="5" value="15">
         </label>
         <span class="badge">Поточне: <b id="coNum">15</b> ppm</span>
         <button class="btn" id="markCO">📍 Додати точку</button>
       </div>
       <div class="row">
-        <label>Мін. тяга OK (Па)<input id="thDraft" type="number" class="input" step="1" value="5"/></label>
-        <label>CO Warn (ppm)<input id="thCOWarn" type="number" class="input" step="5" value="50"/></label>
-        <label>CO Alarm (ppm)<input id="thCOAlarm" type="number" class="input" step="5" value="200"/></label>
+        <label>Мін. тяга OK (Па)<input id="thDraft" type="number" class="input" step="1" value="5"></label>
+        <label>CO Warn (ppm)<input id="thCOWarn" type="number" class="input" step="5" value="50"></label>
+        <label>CO Alarm (ppm)<input id="thCOAlarm" type="number" class="input" step="5" value="200"></label>
         <button class="btn secondary" id="applyTh">⚙️ Застосувати пороги</button>
       </div>
       <div class="kpi" style="margin-top:6px">
-        <span class="tag ok">⏱️ Час тяги <b>&ge;</b> OK: <b id="tDraftOk">0</b> с</span>
-        <span class="tag warn">⏱️ Час CO > Warn: <b id="tCOWarn">0</b> с</span>
-        <span class="tag bad">⏱️ Час CO > Alarm: <b id="tCOAlarm">0</b> с</span>
+        <span class="tag ok">⏱️ Час тяги <b>≥</b> OK: <b id="tDraftOk">0</b> с</span>
+        <span class="tag warn">⏱️ Час CO &gt; Warn: <b id="tCOWarn">0</b> с</span>
+        <span class="tag bad">⏱️ Час CO &gt; Alarm: <b id="tCOAlarm">0</b> с</span>
       </div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="chart" class="chart" width="520" height="240"></canvas></div>
       <div class="row">
@@ -121,12 +119,12 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 
       <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
       <div class="row">
-        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <video id="vid" class="photo" autoplay="" playsinline="" muted=""></video>
         <div>
           <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
           <button class="btn" data-kind="inlet">📷 Вхід у канал (решітка/патрубок)</button>
           <button class="btn" data-kind="outlet">📷 Вихід на даху/шахті</button>
-          <button class="btn" data-kind="defect">📷 Дефект/сажa/конденсат</button><br/>
+          <button class="btn" data-kind="defect">📷 Дефект/сажa/конденсат</button><br>
           <small class="muted">Фото зберігаються у «Галереї доказів».</small>
         </div>
       </div>
@@ -135,16 +133,16 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2 style="margin-top:10px">🎙️ Аудіо-нотатка</h2>
       <div class="row">
         <button class="btn" id="recStart">⏺️ Запис</button>
-        <button class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
+        <button class="btn secondary" id="recStop" disabled="">⏹️ Стоп</button>
         <span class="badge" id="rstat">Немає запису</span>
       </div>
-      <audio id="player" controls style="margin-top:8px;max-width:100%"></audio>
+      <audio id="player" controls="" style="margin-top:8px;max-width:100%"></audio>
 
       <h2 style="margin-top:10px">📶 NFC / ID об’єкта</h2>
       <div class="block">
         <div class="row">
           <button class="btn" id="nfcBtn">📶 NFC</button>
-          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)"/>
+          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)">
           <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
           <span class="badge" id="nfcs">Статус NFC: очікується</span>
         </div>
@@ -185,7 +183,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
 
       <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
@@ -557,5 +555,6 @@ function renderGallery(){/* уже визначено вище */}
 updateMetrics();
 (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
 </script>
-</body>
-</html>
+
+
+</body></html>

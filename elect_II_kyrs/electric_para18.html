@@ -3,14 +3,11 @@
      Мета: скласти реєстр кіл щитка, порахувати струми по фазах (A/B/C), оцінити дисбаланс і струм N,
      запропонувати перестановки для балансування, надрукувати наклейки 58 мм та A4-«план-щиток»,
      експорт/імпорт CSV. Працює офлайн, під GitHub Pages і Moodle (iframe).
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 18 — Балансування фаз і план-щиток</title>
-<meta name="color-scheme" content="light dark"/>
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -72,7 +69,7 @@
   .banner{display:flex; gap:8px; flex-wrap:wrap}
   .banner .b{padding:8px 10px; border:1px solid #223049; border-radius:10px; background:#0d1a2e}
 </style>
-</head>
+<meta name="description" content="Заповнити реєстр кіл щитка (1Ф/3Ф), обчислити струми по фазах, оцінити % дисбалансу та IN (нейтраль), отримати пропозиції перестановок для балансування, сф"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para18.html"><meta property="og:type" content="article"><meta property="og:title" content="⚖️ Балансування фаз: A/B/C → %дисбалансу → IN → пропозиції перестановок → 🧾 58 мм → 📄 план-щиток"><meta property="og:description" content="Заповнити реєстр кіл щитка (1Ф/3Ф), обчислити струми по фазах, оцінити % дисбалансу та IN (нейтраль), отримати пропозиції перестановок для балансування, сф"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para18.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"⚖️ Балансування фаз: A/B/C → %дисбалансу → IN → пропозиції перестановок → 🧾 58 мм → 📄 план-щиток","description":"Заповнити реєстр кіл щитка (1Ф/3Ф), обчислити струми по фазах, оцінити % дисбалансу та IN (нейтраль), отримати пропозиції перестановок для балансування, сф","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para18.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <span class="badge">Електрики · Пара 18 · аудиторно</span>
@@ -86,7 +83,7 @@
       <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
       <button class="btn" onclick="recalc()">🧮 Перерахувати</button>
       <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-      <input id="file" class="btn" type="file" accept=".csv,text/csv"/>
+      <input id="file" class="btn" type="file" accept=".csv,text/csv">
       <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
     </div>
     <p class="small">CSV: <span class="mono">way,id,name,phase,poles,mode,p_or_I,value,PF,eta,duty_pct,diversity_pct,curve,In_A,location,notes,url,nonlinear</span> (mode=p або i; value=кВт або А; poles=1P/3P; phase=A/B/C/3F; nonlinear=Так/Ні).</p>
@@ -104,9 +101,9 @@
       </div>
       <div>
         <h3>Електрика</h3>
-        <div class="row"><label class="small" style="min-width:140px">Фаза</label><select id="phase"><option selected>A</option><option>B</option><option>C</option><option>3F</option></select></div>
-        <div class="row"><label class="small" style="min-width:140px">Полюсів</label><select id="poles"><option selected>1P</option><option>3P</option></select></div>
-        <div class="row"><label class="small" style="min-width:140px">Режим навантаження</label><select id="mode"><option selected>p (кВт)</option><option>i (А)</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">Фаза</label><select id="phase"><option selected="">A</option><option>B</option><option>C</option><option>3F</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">Полюсів</label><select id="poles"><option selected="">1P</option><option>3P</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">Режим навантаження</label><select id="mode"><option selected="">p (кВт)</option><option>i (А)</option></select></div>
         <div class="row"><label class="small" style="min-width:140px">Значення</label><input id="value" type="number" step="0.1" value="0.6"></div>
         <div class="row"><label class="small" style="min-width:140px">PF</label><input id="pf" type="number" step="0.01" value="0.95"></div>
         <div class="row"><label class="small" style="min-width:140px">η</label><input id="eta" type="number" step="0.01" value="0.98"></div>
@@ -115,8 +112,8 @@
         <h3>Захист/режим</h3>
         <div class="row"><label class="small" style="min-width:140px">Duty, %</label><input id="duty" type="number" value="80"></div>
         <div class="row"><label class="small" style="min-width:140px">Диверсиф., %</label><input id="divers" type="number" value="100"></div>
-        <div class="row"><label class="small" style="min-width:140px">Крива</label><select id="curve"><option>B</option><option selected>C</option><option>D</option></select></div>
-        <div class="row"><label class="small" style="min-width:140px">Номінал MCB, А</label><select id="InA"><option>6</option><option selected>10</option><option>16</option><option>20</option><option>25</option><option>32</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">Крива</label><select id="curve"><option>B</option><option selected="">C</option><option>D</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">Номінал MCB, А</label><select id="InA"><option>6</option><option selected="">10</option><option>16</option><option>20</option><option>25</option><option>32</option></select></div>
         <div class="row"><label class="small" style="min-width:140px">Нелінійне?</label><select id="nonlin"><option>Ні</option><option>Так</option></select></div>
         <div class="row"><label class="small" style="min-width:140px">URL</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
       </div>
@@ -491,5 +488,6 @@
   // Автодемо
   seedDemo();
 </script>
-</body>
-</html>
+
+
+</body></html>

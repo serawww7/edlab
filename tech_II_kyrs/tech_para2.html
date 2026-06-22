@@ -7,12 +7,9 @@
      Готово для GitHub Pages та вбудовування в Moodle (iframe).
 
      Примітка контрасту: темні клітинки таблиць мають світлий текст (.dark).
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 2 (технологи) — HACCP: пастеризація, охолодження, дезінфекція (CCP), чек 58 мм, NFC, CSV</title>
 <meta name="color-scheme" content="light dark">
 <style>
@@ -65,7 +62,7 @@
   /* Нічого агресивного: тільки основні елементи керування */
   button, .btn, input, select, textarea, a { pointer-events:auto !important; }
 </style>
-</head>
+<meta name="description" content="За заняття студенти: (1) відслідкують пастеризацію за часом і температурою, (2) перевірять правильність охолодження готової продукції/сировини, (3) розраху"><link rel="canonical" href="https://edlab.pp.ua/tech_II_kyrs/tech_para2.html"><meta property="og:type" content="article"><meta property="og:title" content="🛡️ HACCP (CCP): пастеризація, охолодження, дезінфекція — трекер T–t, звіт, чек 58 мм, NFC"><meta property="og:description" content="За заняття студенти: (1) відслідкують пастеризацію за часом і температурою, (2) перевірять правильність охолодження готової продукції/сировини, (3) розраху"><meta property="og:url" content="https://edlab.pp.ua/tech_II_kyrs/tech_para2.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🛡️ HACCP (CCP): пастеризація, охолодження, дезінфекція — трекер T–t, звіт, чек 58 мм, NFC","description":"За заняття студенти: (1) відслідкують пастеризацію за часом і температурою, (2) перевірять правильність охолодження готової продукції/сировини, (3) розраху","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/tech_II_kyrs/tech_para2.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <span class="badge">Пара 2 · аудиторно · технологи переробки</span>
@@ -93,7 +90,7 @@
           <div style="flex:1">
             <label>Критична точка</label>
             <select id="ccp">
-              <option value="pasteur" selected>Пастеризація (HTST)</option>
+              <option value="pasteur" selected="">Пастеризація (HTST)</option>
               <option value="cooling">Охолодження готової продукції</option>
               <option value="sanit">Дезінфекція/мийні розчини</option>
             </select>
@@ -105,7 +102,7 @@
         <div class="row" style="margin-top:6px">
           <div style="flex:1"><label>Оператор</label><input id="operator" type="text" value="Студент групи ТПТ"></div>
           <div style="flex:1"><label>Зміна</label>
-            <select id="shift"><option>A</option><option selected>B</option><option>C</option></select>
+            <select id="shift"><option>A</option><option selected="">B</option><option>C</option></select>
           </div>
         </div>
       </div>
@@ -135,7 +132,7 @@
         <div class="row">
           <div style="flex:1"><label>Тип</label>
             <select id="s_type">
-              <option value="NaOCl" selected>Гіпохлорит натрію (NaOCl)</option>
+              <option value="NaOCl" selected="">Гіпохлорит натрію (NaOCl)</option>
               <option value="PAA">Пероцтова кислота (PAA)</option>
               <option value="QUAT">ЧАС (четвертинні амонієві)</option>
             </select>
@@ -638,5 +635,6 @@ function printTicketNewTab(){
 }
 </script>
 
-</body>
-</html>
+
+
+</body></html>

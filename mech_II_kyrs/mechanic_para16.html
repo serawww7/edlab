@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 16 (механіки) — Arduino: тахометр ВВП/шківів → RPM, ковзання ременя %, алерти, експорт</title>
-<meta name="description" content="Оптичний/Холла тахометр: RPM одного або двох валів, ковзання ременя %, живий графік, алерти, чек 58 мм, CSV/TXT, генератор прошивки (.ino)."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Оптичний/Холла тахометр: RPM одного або двох валів, ковзання ременя %, живий графік, алерти, чек 58 мм, CSV/TXT, генератор прошивки (.ino).">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -38,14 +36,14 @@ canvas{display:block;width:100%;height:260px}
 .receipt{background:#0b1220;border:1px dashed #334155;border-radius:12px;padding:10px;font-family:ui-monospace,monospace}
 kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/mech_II_kyrs/mechanic_para16.html"><meta property="og:type" content="article"><meta property="og:title" content="Механізація — Пара 16"><meta property="og:description" content="Мета: зібрати тахометр для валу ВВП або шківів на оптичному датчику (TCRT5000) чи датчику Холла (A3144+магніт), вимірювати RPM одного/двох валів, обчислюва"><meta property="og:url" content="https://edlab.pp.ua/mech_II_kyrs/mechanic_para16.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Механізація — Пара 16","description":"Мета: зібрати тахометр для валу ВВП або шківів на оптичному датчику (TCRT5000) чи датчику Холла (A3144+магніт), вимірювати RPM одного/двох валів, обчислюва","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/mech_II_kyrs/mechanic_para16.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">⚙️</span>
       <div>
-        <b>Пара 16 — Arduino: тахометр ВВП/шківів</b><br/>
+        <b>Пара 16 — Arduino: тахометр ВВП/шківів</b><br>
         <span class="badge">Оптопара/Холл → RPM1/RPM2 → ковзання ременя (%) → графік → алерти → експорт</span>
       </div>
     </div>
@@ -59,57 +57,57 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="row">
       <div style="flex:1">
         <label>Сенсор 1 (привід)</label>
-        <select id="s1" class="input"><option>Оптичний (білий маркер)</option><option selected>Холла (магніт)</option></select>
+        <select id="s1" class="input"><option>Оптичний (білий маркер)</option><option selected="">Холла (магніт)</option></select>
       </div>
       <div style="flex:1">
         <label>Сенсор 2 (ведений)</label>
-        <select id="s2" class="input"><option>Немає</option><option selected>Оптичний (білий маркер)</option><option>Холла (магніт)</option></select>
+        <select id="s2" class="input"><option>Немає</option><option selected="">Оптичний (білий маркер)</option><option>Холла (магніт)</option></select>
       </div>
       <div style="flex:1">
         <label>Піни переривань (UNO):</label>
-        <select id="pin1" class="input"><option value="2" selected>D2</option><option value="3">D3</option></select>
+        <select id="pin1" class="input"><option value="2" selected="">D2</option><option value="3">D3</option></select>
       </div>
       <div style="flex:1">
         <label>Другий пін:</label>
-        <select id="pin2" class="input"><option value="-1" selected>—</option><option value="3">D3</option><option value="2">D2</option></select>
+        <select id="pin2" class="input"><option value="-1" selected="">—</option><option value="3">D3</option><option value="2">D2</option></select>
       </div>
     </div>
 
     <div class="row">
       <div style="flex:1">
         <label>Імпульсів/оберт (вал 1)</label>
-        <input id="ppr1" class="input" type="number" min="1" step="1" value="1"/>
+        <input id="ppr1" class="input" type="number" min="1" step="1" value="1">
       </div>
       <div style="flex:1">
         <label>Імпульсів/оберт (вал 2)</label>
-        <input id="ppr2" class="input" type="number" min="1" step="1" value="1"/>
+        <input id="ppr2" class="input" type="number" min="1" step="1" value="1">
       </div>
       <div style="flex:1">
         <label>Діаметр шківа привідного, мм (D1)</label>
-        <input id="d1" class="input" type="number" min="10" step="1" value="150"/>
+        <input id="d1" class="input" type="number" min="10" step="1" value="150">
       </div>
       <div style="flex:1">
         <label>Діаметр шківа веденого, мм (D2)</label>
-        <input id="d2" class="input" type="number" min="10" step="1" value="300"/>
+        <input id="d2" class="input" type="number" min="10" step="1" value="300">
       </div>
     </div>
 
     <div class="row">
       <div style="flex:1">
         <label>Вікно усереднення, мс</label>
-        <input id="win" class="input" type="number" min="100" step="100" value="500"/>
+        <input id="win" class="input" type="number" min="100" step="100" value="500">
       </div>
       <div style="flex:1">
         <label>Дебаунс, мкс</label>
-        <input id="deb" class="input" type="number" min="0" step="50" value="200"/>
+        <input id="deb" class="input" type="number" min="0" step="50" value="200">
       </div>
       <div style="flex:1">
         <label>Поріг тривоги (SLIP %)</label>
-        <input id="thr" class="input" type="number" step="0.5" value="3.0"/>
+        <input id="thr" class="input" type="number" step="0.5" value="3.0">
       </div>
       <div style="flex:1">
         <label>Мітка роботи</label>
-        <input id="job" class="input" placeholder="ТО приводу жатки / ВВП 540 об/хв"/>
+        <input id="job" class="input" placeholder="ТО приводу жатки / ВВП 540 об/хв">
       </div>
     </div>
   </div>
@@ -117,9 +115,9 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🧪 Емулятор (без «заліза»)</h2>
     <div class="row">
-      <label><input id="emu" type="checkbox"/> Увімкнути емулятор</label>
-      <label style="flex:1">RPM вал 1 <input id="rpm1s" class="input" type="range" min="100" max="2500" step="10" value="540" disabled/></label>
-      <label style="flex:1">RPM вал 2 <input id="rpm2s" class="input" type="range" min="50" max="2000" step="10" value="270" disabled/></label>
+      <label><input id="emu" type="checkbox"> Увімкнути емулятор</label>
+      <label style="flex:1">RPM вал 1 <input id="rpm1s" class="input" type="range" min="100" max="2500" step="10" value="540" disabled=""></label>
+      <label style="flex:1">RPM вал 2 <input id="rpm2s" class="input" type="range" min="50" max="2000" step="10" value="270" disabled=""></label>
       <button class="btn" id="tick">➕ Додати точку</button>
       <button class="btn secondary" id="clear">🧹 Очистити</button>
       <span id="stat" class="badge">Статус: —</span>
@@ -148,41 +146,41 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>💾 Протокол і експорт</h2>
     <div class="row">
-      <input id="fio" class="input" placeholder="ПІБ механіка"/>
+      <input id="fio" class="input" placeholder="ПІБ механіка">
       <button class="btn" id="saveTxt">💾 TXT</button>
       <button class="btn" id="saveCsv">📄 CSV</button>
       <button class="btn" id="receipt">🖨️ 58 мм чек</button>
     </div>
-    <div id="rc" class="receipt" hidden></div>
+    <div id="rc" class="receipt" hidden=""></div>
   </div>
 
   <div class="card">
     <h2>🔌 Схема підключення (SVG)</h2>
     <svg viewBox="0 0 900 320" role="img" aria-label="Arduino + A3144/TCRT5000">
       <!-- Arduino -->
-      <rect x="40" y="40" width="220" height="140" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+      <rect x="40" y="40" width="220" height="140" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
       <text x="150" y="65" fill="#e5e7eb" font-size="16" text-anchor="middle">Arduino UNO/Nano</text>
       <text x="55" y="95" fill="#93c5fd" font-size="12">5V</text>
       <text x="55" y="115" fill="#93c5fd" font-size="12">GND</text>
       <text x="55" y="135" fill="#93c5fd" font-size="12">D2 (INT0)</text>
       <text x="55" y="155" fill="#93c5fd" font-size="12">D3 (INT1)</text>
       <!-- Hall A3144 -->
-      <rect x="320" y="40" width="200" height="90" rx="12" fill="#14532d" stroke="#22c55e"/>
+      <rect x="320" y="40" width="200" height="90" rx="12" fill="#14532d" stroke="#22c55e"></rect>
       <text x="420" y="65" fill="#dcfce7" font-size="15" text-anchor="middle">A3144 (Холла)</text>
       <text x="420" y="85" fill="#a7f3d0" font-size="12" text-anchor="middle">VCC — OUT — GND (потрібен pull-up)</text>
       <!-- Opto -->
-      <rect x="320" y="150" width="200" height="90" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+      <rect x="320" y="150" width="200" height="90" rx="12" fill="#7c2d12" stroke="#fb923c"></rect>
       <text x="420" y="175" fill="#fed7aa" font-size="15" text-anchor="middle">TCRT5000 (оптичний)</text>
       <text x="420" y="195" fill="#fed7aa" font-size="12" text-anchor="middle">VCC — OUT — GND</text>
       <!-- Resistor -->
-      <line x1="260" y1="130" x2="320" y2="70" stroke="#fbbf24" stroke-width="2"/>
-      <rect x="300" y="60" width="20" height="10" fill="#fbbf24"/>
+      <line x1="260" y1="130" x2="320" y2="70" stroke="#fbbf24" stroke-width="2"></line>
+      <rect x="300" y="60" width="20" height="10" fill="#fbbf24"></rect>
       <text x="340" y="68" fill="#fde68a" font-size="12">10k Ω pull-up</text>
       <!-- Wires -->
-      <line x1="260" y1="90"  x2="320" y2="60"  stroke="#93c5fd" stroke-width="3"/><text x="280" y="80" fill="#93c5fd" font-size="12">5V → VCC</text>
-      <line x1="260" y1="110" x2="320" y2="100" stroke="#64748b" stroke-width="3"/><text x="280" y="110" fill="#94a3b8" font-size="12">GND → GND</text>
-      <line x1="260" y1="130" x2="320" y2="80"  stroke="#22c55e" stroke-width="3"/><text x="280" y="95" fill="#86efac" font-size="12">D2 → OUT (сенсор 1)</text>
-      <line x1="260" y1="150" x2="320" y2="190" stroke="#38bdf8" stroke-width="3"/><text x="280" y="160" fill="#93c5fd" font-size="12">D3 → OUT (сенсор 2)</text>
+      <line x1="260" y1="90" x2="320" y2="60" stroke="#93c5fd" stroke-width="3"></line><text x="280" y="80" fill="#93c5fd" font-size="12">5V → VCC</text>
+      <line x1="260" y1="110" x2="320" y2="100" stroke="#64748b" stroke-width="3"></line><text x="280" y="110" fill="#94a3b8" font-size="12">GND → GND</text>
+      <line x1="260" y1="130" x2="320" y2="80" stroke="#22c55e" stroke-width="3"></line><text x="280" y="95" fill="#86efac" font-size="12">D2 → OUT (сенсор 1)</text>
+      <line x1="260" y1="150" x2="320" y2="190" stroke="#38bdf8" stroke-width="3"></line><text x="280" y="160" fill="#93c5fd" font-size="12">D3 → OUT (сенсор 2)</text>
       <text x="120" y="210" fill="#fbbf24" font-size="12">⚠️ Маркер: біла/срібна смужка або магніт — 1 імп./оберт</text>
     </svg>
     <div class="note small" style="margin-top:8px">
@@ -385,5 +383,6 @@ $('#receipt').addEventListener('click', ()=>{
 draw();
 if (window.self !== window.top) document.documentElement.classList.add('embedded'); // LMS-friendly
 </script>
-</body>
-</html>
+
+
+</body></html>

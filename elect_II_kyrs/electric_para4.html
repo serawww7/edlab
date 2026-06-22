@@ -1,14 +1,11 @@
 <!-- electric_para4.html
      Пара 4 (Електрики, аудиторно): Розрахунок лінії — струм, переріз кабелю, автомат, падіння напруги + друк 58 мм і експорт CSV/TXT
      Повністю автономний файл для GitHub Pages і вбудовування в Moodle через <iframe>.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 4 — Розрахунок лінії: переріз, автомат, ΔU, друк 58 мм</title>
-<meta name="color-scheme" content="light dark" />
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -79,7 +76,7 @@
 .ticket small{ font-weight:700 }
 </style>
 
-</head>
+<meta name="description" content="Навчитися швидко розраховувати параметри лінії: робочий струм, переріз провідника (Cu/Al), номінал автомата, падіння напруги, а також сформувати «паспорт л"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para4.html"><meta property="og:type" content="article"><meta property="og:title" content="🔌 Розрахунок лінії: струм, переріз, автомат, падіння напруги + 🧾 друк 58 мм"><meta property="og:description" content="Навчитися швидко розраховувати параметри лінії: робочий струм, переріз провідника (Cu/Al), номінал автомата, падіння напруги, а також сформувати «паспорт л"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para4.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🔌 Розрахунок лінії: струм, переріз, автомат, падіння напруги + 🧾 друк 58 мм","description":"Навчитися швидко розраховувати параметри лінії: робочий струм, переріз провідника (Cu/Al), номінал автомата, падіння напруги, а також сформувати «паспорт л","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para4.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Електрики · Пара 4 · аудиторно</span>
@@ -102,58 +99,58 @@
         <div class="block">
           <div class="field">
             <label for="lineName">Назва лінії</label>
-            <input id="lineName" type="text" value="Лінія Розетки/Майстерня" />
+            <input id="lineName" type="text" value="Лінія Розетки/Майстерня">
           </div>
           <div class="field">
             <label for="phase">Схема</label>
             <select id="phase">
               <option value="1">1-фазна (Uл)</option>
-              <option value="3" selected>3-фазна (Uл = 400 В)</option>
+              <option value="3" selected="">3-фазна (Uл = 400 В)</option>
             </select>
           </div>
           <div class="field">
             <label for="U">Напруга U, В</label>
-            <input id="U" type="number" value="400" />
+            <input id="U" type="number" value="400">
           </div>
           <div class="field">
             <label for="P">Потужність P, кВт</label>
-            <input id="P" type="number" step="0.1" value="6.0" />
+            <input id="P" type="number" step="0.1" value="6.0">
           </div>
           <div class="field">
             <label for="cosfi">cos φ</label>
-            <input id="cosfi" type="number" step="0.01" value="0.95" />
+            <input id="cosfi" type="number" step="0.01" value="0.95">
           </div>
           <div class="field">
             <label for="eta">ККД η</label>
-            <input id="eta" type="number" step="0.01" value="0.98" />
+            <input id="eta" type="number" step="0.01" value="0.98">
           </div>
         </div>
         <div class="block">
           <div class="field">
             <label for="L">Довжина траси L, м</label>
-            <input id="L" type="number" value="35" />
+            <input id="L" type="number" value="35">
           </div>
           <div class="field">
             <label for="mat">Матеріал</label>
             <select id="mat">
-              <option value="Cu" selected>Мідь (Cu)</option>
+              <option value="Cu" selected="">Мідь (Cu)</option>
               <option value="Al">Алюміній (Al)</option>
             </select>
           </div>
           <div class="field">
             <label for="dropMax">Допустима ΔU, %</label>
-            <input id="dropMax" type="number" step="0.1" value="5" />
+            <input id="dropMax" type="number" step="0.1" value="5">
           </div>
           <div class="field">
             <label for="install">Спосіб прокладання</label>
             <select id="install">
-              <option value="air" selected>В повітрі/кабель-канал</option>
+              <option value="air" selected="">В повітрі/кабель-канал</option>
               <option value="pipe">В трубі/штробі</option>
             </select>
           </div>
           <div class="field">
             <label for="resp">Відповідальний</label>
-            <input id="resp" type="text" value="Студент ПІБ / група" />
+            <input id="resp" type="text" value="Студент ПІБ / група">
           </div>
         </div>
       </div>
@@ -498,5 +495,6 @@ function openTicketOnly(){
 }
 </script>
 
-</body>
-</html>
+
+
+</body></html>

@@ -3,14 +3,11 @@
      Мета: створити реєстр обладнання, випустити NFC/QR-паспорти, план ТО з автопідрахунком "Наступне ТО",
      друк квитків 58 мм (термопринтер), експорт/імпорт CSV, генерація подій .ics.
      Працює офлайн, під GitHub Pages і вбудовується у Moodle (iframe).
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Електрики · Пара 17 — NFC-паспорти обладнання, журнал ТО, 58 мм, A4, ICS</title>
-<meta name="color-scheme" content="light dark"/>
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
@@ -74,7 +71,7 @@
     .ticket{ box-shadow:none; width:auto; padding:0 }
   }
 </style>
-</head>
+<meta name="description" content="Сформувати реєстр обладнання (ID, місце, живлення, серійний №, вартість, інтервал ТО), згенерувати NFC/QR-паспорт, обчислити Наступне ТО, друкувати етикетк"><link rel="canonical" href="https://edlab.pp.ua/elect_II_kyrs/electric_para17.html"><meta property="og:type" content="article"><meta property="og:title" content="🏷️ NFC-паспорт обладнання → журнал ТО → 🧾 наклейки 58 мм → 📄 A4 → 📅 .ics"><meta property="og:description" content="Сформувати реєстр обладнання (ID, місце, живлення, серійний №, вартість, інтервал ТО), згенерувати NFC/QR-паспорт, обчислити Наступне ТО, друкувати етикетк"><meta property="og:url" content="https://edlab.pp.ua/elect_II_kyrs/electric_para17.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🏷️ NFC-паспорт обладнання → журнал ТО → 🧾 наклейки 58 мм → 📄 A4 → 📅 .ics","description":"Сформувати реєстр обладнання (ID, місце, живлення, серійний №, вартість, інтервал ТО), згенерувати NFC/QR-паспорт, обчислити Наступне ТО, друкувати етикетк","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/elect_II_kyrs/electric_para17.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <span class="badge">Електрики · Пара 17 · аудиторно</span>
@@ -87,7 +84,7 @@
     <div class="row">
       <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
       <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-      <input id="file" class="btn" type="file" accept=".csv,text/csv"/>
+      <input id="file" class="btn" type="file" accept=".csv,text/csv">
       <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
       <button class="btn" onclick="downloadICS()">📅 Експорт .ics (всі ТО)</button>
     </div>
@@ -106,7 +103,7 @@
       </div>
       <div>
         <h3>Електрика</h3>
-        <div class="row"><label class="small" style="min-width:140px">Фаза</label><select id="phase"><option>A</option><option>B</option><option>C</option><option selected>3Ф</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px">Фаза</label><select id="phase"><option>A</option><option>B</option><option>C</option><option selected="">3Ф</option></select></div>
         <div class="row"><label class="small" style="min-width:140px">U, В</label><input id="voltage" type="number" value="400"></div>
         <div class="row"><label class="small" style="min-width:140px">P, Вт</label><input id="power" type="number" value="1500"></div>
         <div class="row"><label class="small" style="min-width:140px">Серійний №</label><input id="serial" value="SN-2309-001"></div>
@@ -148,12 +145,12 @@
     <div class="grid g2">
       <div>
         <h3>Зміст NDEF TEXT</h3>
-        <textarea id="ndefText" readonly></textarea>
+        <textarea id="ndefText" readonly=""></textarea>
         <p class="small">Скопіюй у NFC-записувач як TEXT (або URI з поля праворуч).</p>
       </div>
       <div>
         <h3>URI для NDEF/QR</h3>
-        <textarea id="ndefURI" readonly></textarea>
+        <textarea id="ndefURI" readonly=""></textarea>
         <p class="small">Цей URI відкриватиме паспорт/інструкцію. Його ж виводимо на наклейку 58 мм.</p>
       </div>
     </div>
@@ -503,5 +500,6 @@
   // Авто-демо
   seedDemo();
 </script>
-</body>
-</html>
+
+
+</body></html>

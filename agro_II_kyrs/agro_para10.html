@@ -6,12 +6,9 @@
      Контраст: темні комірки мають світлий текст.
 
      Примітка: модель навчальна (спрощена). Для виробничих рішень — інженерні карти поливів та локальні норми.
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 10 — Зрошення: водний баланс, ET₀·Kc, TAW/RAW, план поливів</title>
 <meta name="color-scheme" content="light dark">
 <style>
@@ -72,7 +69,7 @@
     .no-print{ display:none !important }
   }
 </style>
-</head>
+<meta name="description" content="За пару студенти налаштовують модель кореневої зони, вносять ET₀ та опади на 10 днів із будь-якого погодного застосунку, обирають Kc (коеф. культури) та от"><link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para10.html"><meta property="og:type" content="article"><meta property="og:title" content="💧 Зрошення та водний баланс: ET₀·Kc → ETc, TAW/RAW → скільки і коли поливати"><meta property="og:description" content="За пару студенти налаштовують модель кореневої зони, вносять ET₀ та опади на 10 днів із будь-якого погодного застосунку, обирають Kc (коеф. культури) та от"><meta property="og:url" content="https://edlab.pp.ua/agro_II_kyrs/agro_para10.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"💧 Зрошення та водний баланс: ET₀·Kc → ETc, TAW/RAW → скільки і коли поливати","description":"За пару студенти налаштовують модель кореневої зони, вносять ET₀ та опади на 10 днів із будь-якого погодного застосунку, обирають Kc (коеф. культури) та от","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/agro_II_kyrs/agro_para10.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Пара 10 · аудиторно · агрономи</span>
@@ -146,7 +143,7 @@
           <select id="kcStage" onchange="setStageKc()">
             <option value="0.35">Початкова (Kc≈0.35)</option>
             <option value="0.85">Ріст (Kc≈0.85)</option>
-            <option value="1.15" selected>Середина сезону (Kc≈1.15)</option>
+            <option value="1.15" selected="">Середина сезону (Kc≈1.15)</option>
             <option value="0.8">Кінець сезону (Kc≈0.80)</option>
           </select>
           <p style="margin-top:8px"><label>Або вручну Kc</label><input id="Kc" type="number" step="0.01" value="1.15"></p>
@@ -413,5 +410,6 @@
     buildRows(); computeTAW_RAW(); recalc();
   })();
 </script>
-</body>
-</html>
+
+
+</body></html>

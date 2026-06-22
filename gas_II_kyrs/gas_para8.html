@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 8 (газовики) — Пуск/зупинка після сервісу: чек-лист, манометр, графік, фото, підпис, чек 58 мм, CSV/TXT, QR</title>
-<meta name="description" content="Практика пуску/зупинки після сервісу: покроковий чек-лист із таймерами, емульований манометр (мбар) з порогами OK/Warn/Alarm, живий графік, фото, NFC/ID, підпис абонента, чек 58 мм, експорт CSV/TXT, QR."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Практика пуску/зупинки після сервісу: покроковий чек-лист із таймерами, емульований манометр (мбар) з порогами OK/Warn/Alarm, живий графік, фото, NFC/ID, підпис абонента, чек 58 мм, експорт CSV/TXT, QR.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -47,14 +45,14 @@ canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px
 .tag.warn{border-color:#4a3b13;background:#2b2310}
 .tag.bad{border-color:#5a1f1f;background:#2a1212}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para8.html"><meta property="og:type" content="article"><meta property="og:title" content="Газовики — Пара 8"><meta property="og:description" content="Інженер виконує пуск або зупинку газового приладу після сервісу: продування, контроль тиску на вході (мбар), запалювання/погасання, стабілізація, тест на г"><meta property="og:url" content="https://edlab.pp.ua/gas_II_kyrs/gas_para8.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Газовики — Пара 8","description":"Інженер виконує пуск або зупинку газового приладу після сервісу: продування, контроль тиску на вході (мбар), запалювання/погасання, стабілізація, тест на г","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/gas_II_kyrs/gas_para8.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">▶️⏹️</span>
       <div>
-        <b>Пара 8 — Пуск/зупинка обладнання після сервісу</b><br/>
+        <b>Пара 8 — Пуск/зупинка обладнання після сервісу</b><br>
         <span class="badge">Чек-лист → манометр (мбар) → графік → фото → NFC/ID → підпис → чек 58 мм → CSV/TXT → QR</span>
       </div>
     </div>
@@ -67,21 +65,21 @@ canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px
     <p>Інженер виконує <b>пуск</b> або <b>зупинку</b> газового приладу після сервісу: продування, контроль тиску на вході (мбар), запалювання/погасання, стабілізація, тест на герметичність. 
       Студент відмічає кроки з таймерами, фіксує <b>тиск</b> (емулятор манометра) на <b>живому графіку</b>, додає <b>фото</b>, <b>NFC/ID</b>, підпис абонента, формує <b>чек</b> і <b>експорт</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., кв. ..."/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., кв. ..."></label>
       <label style="flex:1">Прилад
         <select id="appliance" class="input">
-          <option selected>Котел</option><option>Колонка</option><option>Плита</option><option>Інше</option>
+          <option selected="">Котел</option><option>Колонка</option><option>Плита</option><option>Інше</option>
         </select>
       </label>
       <label style="flex:1">Режим
         <select id="mode" class="input">
-          <option value="start" selected>Пуск після сервісу</option>
+          <option value="start" selected="">Пуск після сервісу</option>
           <option value="stop">Зупинка (вивід з експлуатації)</option>
           <option value="restart">Повторний пуск</option>
         </select>
       </label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date"></label>
     </div>
     <div class="row">
       <button class="btn good" id="mkCase">🧰 Створити кейс</button>
@@ -98,17 +96,17 @@ canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px
       <h2 style="margin-top:10px">🧪 Манометр (емулятор)</h2>
       <div class="row">
         <label style="flex:1">Тиск, мбар
-          <input type="range" id="press" class="input" min="-5" max="60" step="0.5" value="18"/>
+          <input type="range" id="press" class="input" min="-5" max="60" step="0.5" value="18">
         </label>
         <span class="badge">Поточне: <b id="pNum">18.0</b> мбар</span>
         <button class="btn" id="markP">📍 Додати точку</button>
         <button class="btn secondary" id="clearP">🧹 Очистити графік</button>
       </div>
       <div class="row">
-        <label>OK мін. (мбар)<input id="pMin" type="number" class="input" step="0.1" value="13.0"/></label>
-        <label>Warn межа (мбар)<input id="pWarn" type="number" class="input" step="0.1" value="10.0"/></label>
-        <label>Alarm межа (мбар)<input id="pAlarm" type="number" class="input" step="0.1" value="8.0"/></label>
-        <label>Δ стабілізації (мбар)<input id="pDelta" type="number" class="input" step="0.1" value="1.0"/></label>
+        <label>OK мін. (мбар)<input id="pMin" type="number" class="input" step="0.1" value="13.0"></label>
+        <label>Warn межа (мбар)<input id="pWarn" type="number" class="input" step="0.1" value="10.0"></label>
+        <label>Alarm межа (мбар)<input id="pAlarm" type="number" class="input" step="0.1" value="8.0"></label>
+        <label>Δ стабілізації (мбар)<input id="pDelta" type="number" class="input" step="0.1" value="1.0"></label>
         <button class="btn secondary" id="applyTh">⚙️ Пороги</button>
       </div>
       <div class="kpi" style="margin-top:6px">
@@ -121,12 +119,12 @@ canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px
 
       <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
       <div class="row">
-        <video id="vid" class="photo" autoplay playsinline muted></video>
+        <video id="vid" class="photo" autoplay="" playsinline="" muted=""></video>
         <div>
           <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
           <button class="btn" data-kind="before">📷 До</button>
           <button class="btn" data-kind="manometer">📷 Манометр</button>
-          <button class="btn" data-kind="flame">📷 Полум’я/камера</button><br/>
+          <button class="btn" data-kind="flame">📷 Полум’я/камера</button><br>
           <small class="muted">Фото зберігаються у «Галереї доказів».</small>
         </div>
       </div>
@@ -146,7 +144,7 @@ canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px
       <div class="block">
         <div class="row">
           <button class="btn" id="nfcBtn">📶 NFC</button>
-          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)"/>
+          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)">
           <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
           <span class="badge" id="nfcs">Статус NFC: очікується</span>
         </div>
@@ -188,7 +186,7 @@ canvas.chart{display:block;width:100%;height:240px;background:#0b1220;border:1px
         <button class="btn" id="print58">🖨️ Чек 58 мм</button>
         <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
       </div>
-      <div id="rc" class="receipt" hidden></div>
+      <div id="rc" class="receipt" hidden=""></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
 
       <h2 style="margin-top:10px">🛎️ Журнал подій</h2>
@@ -540,5 +538,6 @@ $('#qrGen').addEventListener('click',()=>{
 updateMetrics();
 (function(){ if (window.self !== window.top) document.documentElement.classList.add('embedded'); })();
 </script>
-</body>
-</html>
+
+
+</body></html>

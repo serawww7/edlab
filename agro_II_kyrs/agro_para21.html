@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 21 — ШІ-помічник агронома: scouting-промпти + валідація + журнал</title>
-<meta name="description" content="Генератор структурованих промптів для агроскаутингу: культура, фаза, симптоми, погода, ЕПШ/ПД, ресурси. Прев’ю, копіювання, експорт CSV/TXT, чек-лист оцінювання відповіді ШІ, журнал рішень. SVG-схема робочого циклу."/>
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="Генератор структурованих промптів для агроскаутингу: культура, фаза, симптоми, погода, ЕПШ/ПД, ресурси. Прев’ю, копіювання, експорт CSV/TXT, чек-лист оцінювання відповіді ШІ, журнал рішень. SVG-схема робочого циклу.">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -34,14 +32,14 @@ svg{max-width:100%;height:auto;display:block}
 .log{max-height:160px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;background:#0b1220;font-family:ui-monospace,monospace;font-size:13px;white-space:pre-wrap}
 .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
 </style>
-</head>
+<link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para21.html"><meta property="og:type" content="article"><meta property="og:title" content="Агрономія — Пара 21"><meta property="og:description" content="Мета: навчитися формулювати структуровані промпти під конкретні агрозавдання (scouting), перевіряти якість відповідей ШІ за чек-листом і фіксувати рішення"><meta property="og:url" content="https://edlab.pp.ua/agro_II_kyrs/agro_para21.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Агрономія — Пара 21","description":"Мета: навчитися формулювати структуровані промпти під конкретні агрозавдання (scouting), перевіряти якість відповідей ШІ за чек-листом і фіксувати рішення","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/agro_II_kyrs/agro_para21.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🤖</span>
       <div>
-        <b>Пара 21 — ШІ-помічник агронома</b><br/>
+        <b>Пара 21 — ШІ-помічник агронома</b><br>
         <span class="badge">Scouting-промпти → відповідь ШІ → валідація → рішення → журнал</span>
       </div>
     </div>
@@ -70,18 +68,18 @@ svg{max-width:100%;height:auto;display:block}
         </div>
         <div style="flex:1">
           <label for="bbch">Фаза (BBCH)</label>
-          <input id="bbch" class="input" placeholder="напр. BBCH 37 — прапорцевий листок розгорнутий"/>
+          <input id="bbch" class="input" placeholder="напр. BBCH 37 — прапорцевий листок розгорнутий">
         </div>
       </div>
 
       <div class="row">
         <div style="flex:1">
           <label for="field">Поле/локація</label>
-          <input id="field" class="input" placeholder="Поле №3, Тальне, Черкаська обл."/>
+          <input id="field" class="input" placeholder="Поле №3, Тальне, Черкаська обл.">
         </div>
         <div style="flex:1">
           <label for="area">Площа, га</label>
-          <input id="area" class="input" type="number" step="0.1" value="25"/>
+          <input id="area" class="input" type="number" step="0.1" value="25">
         </div>
       </div>
 
@@ -92,7 +90,7 @@ svg{max-width:100%;height:auto;display:block}
         </div>
         <div style="flex:1">
           <label for="pests">Підозри (шкідник/хвороба)</label>
-          <input id="pests" class="input" placeholder="септоріоз, борошниста роса; або шведська муха"/>
+          <input id="pests" class="input" placeholder="септоріоз, борошниста роса; або шведська муха">
           <small class="muted">Якщо нема підозр — залиш порожнім, нехай ШІ шукає диференціально.</small>
         </div>
       </div>
@@ -111,11 +109,11 @@ svg{max-width:100%;height:auto;display:block}
       <div class="row">
         <div style="flex:1">
           <label for="eil">ЕПШ/ПД (якщо відомі)</label>
-          <input id="eil" class="input" placeholder="вкажи локальні пороги або напиши: «запитати в ШІ з посиланнями»"/>
+          <input id="eil" class="input" placeholder="вкажи локальні пороги або напиши: «запитати в ШІ з посиланнями»">
         </div>
         <div style="flex:1">
           <label for="constraints">Обмеження/ресурси</label>
-          <input id="constraints" class="input" placeholder="лише наземний обприскувач, робоче вікно 2 дні, бюджет 8000 грн/га"/>
+          <input id="constraints" class="input" placeholder="лише наземний обприскувач, робоче вікно 2 дні, бюджет 8000 грн/га">
         </div>
       </div>
 
@@ -151,19 +149,19 @@ svg{max-width:100%;height:auto;display:block}
 
       <h3 style="margin-top:12px">🧪 Чек-лист оцінювання відповіді ШІ</h3>
       <div class="small">
-        <label><input type="checkbox" class="crit" value="sources"/> Є посилання на джерела/етикетки засобів</label><br/>
-        <label><input type="checkbox" class="crit" value="local"/> Ураховано локальні умови (погода, ґрунт, BBCH)</label><br/>
-        <label><input type="checkbox" class="crit" value="thresholds"/> Зіставлено з ЕПШ/ПД і вказано розрахунок</label><br/>
-        <label><input type="checkbox" class="crit" value="ops"/> Є операційні обмеження (вікно погоди, техніка, бюджет)</label><br/>
-        <label><input type="checkbox" class="crit" value="safety"/> Є техніка безпеки та ЗІЗ</label><br/>
-        <label><input type="checkbox" class="crit" value="alt"/> Є альтернативи: хімія/агротехніка/біо та «нічого не робити» з ризиками</label><br/>
-        <label><input type="checkbox" class="crit" value="format"/> Формат відповіді збігається з обраним</label>
+        <label><input type="checkbox" class="crit" value="sources"> Є посилання на джерела/етикетки засобів</label><br>
+        <label><input type="checkbox" class="crit" value="local"> Ураховано локальні умови (погода, ґрунт, BBCH)</label><br>
+        <label><input type="checkbox" class="crit" value="thresholds"> Зіставлено з ЕПШ/ПД і вказано розрахунок</label><br>
+        <label><input type="checkbox" class="crit" value="ops"> Є операційні обмеження (вікно погоди, техніка, бюджет)</label><br>
+        <label><input type="checkbox" class="crit" value="safety"> Є техніка безпеки та ЗІЗ</label><br>
+        <label><input type="checkbox" class="crit" value="alt"> Є альтернативи: хімія/агротехніка/біо та «нічого не робити» з ризиками</label><br>
+        <label><input type="checkbox" class="crit" value="format"> Формат відповіді збігається з обраним</label>
       </div>
 
       <h3 style="margin-top:12px">💾 Журнал рішення</h3>
       <div class="row">
-        <input id="fio" class="input" placeholder="ПІБ студента"/>
-        <input id="decision" class="input" placeholder="Прийняте рішення (коротко)"/>
+        <input id="fio" class="input" placeholder="ПІБ студента">
+        <input id="decision" class="input" placeholder="Прийняте рішення (коротко)">
         <button class="btn" id="addLog">➕ Додати в журнал</button>
         <button class="btn secondary" id="exportCsv">📄 Експорт CSV</button>
       </div>
@@ -174,36 +172,36 @@ svg{max-width:100%;height:auto;display:block}
     <div class="card">
       <h2>🔌 Схема процесу (SVG)</h2>
       <svg viewBox="0 0 760 420" role="img" aria-label="Цикл роботи з ШІ у полі">
-        <rect x="40" y="40" width="160" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"/>
+        <rect x="40" y="40" width="160" height="80" rx="12" fill="#0e2a47" stroke="#3b82f6"></rect>
         <text x="120" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Польові</text>
         <text x="120" y="88" fill="#e5e7eb" font-size="14" text-anchor="middle">спостереження</text>
 
-        <rect x="260" y="40" width="160" height="80" rx="12" fill="#14532d" stroke="#22c55e"/>
+        <rect x="260" y="40" width="160" height="80" rx="12" fill="#14532d" stroke="#22c55e"></rect>
         <text x="340" y="70" fill="#dcfce7" font-size="14" text-anchor="middle">Структурований</text>
         <text x="340" y="88" fill="#dcfce7" font-size="14" text-anchor="middle">промпт</text>
 
-        <rect x="480" y="40" width="240" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"/>
+        <rect x="480" y="40" width="240" height="80" rx="12" fill="#1f2937" stroke="#9ca3af"></rect>
         <text x="600" y="70" fill="#e5e7eb" font-size="14" text-anchor="middle">Відповідь ШІ</text>
         <text x="600" y="88" fill="#94a3b8" font-size="12" text-anchor="middle">план/JSON/інструкція</text>
 
-        <rect x="40" y="180" width="240" height="90" rx="12" fill="#0b3f5a" stroke="#22d3ee"/>
+        <rect x="40" y="180" width="240" height="90" rx="12" fill="#0b3f5a" stroke="#22d3ee"></rect>
         <text x="160" y="210" fill="#a5f3fc" font-size="14" text-anchor="middle">Чек-лист валідації</text>
         <text x="160" y="230" fill="#a5f3fc" font-size="12" text-anchor="middle">джерела, ЕПШ, безпека</text>
 
-        <rect x="320" y="180" width="180" height="90" rx="12" fill="#7c2d12" stroke="#fb923c"/>
+        <rect x="320" y="180" width="180" height="90" rx="12" fill="#7c2d12" stroke="#fb923c"></rect>
         <text x="410" y="212" fill="#fed7aa" font-size="14" text-anchor="middle">Рішення</text>
         <text x="410" y="232" fill="#fed7aa" font-size="12" text-anchor="middle">дія/відкласти/змінити</text>
 
-        <rect x="540" y="180" width="180" height="90" rx="12" fill="#111827" stroke="#4b5563"/>
+        <rect x="540" y="180" width="180" height="90" rx="12" fill="#111827" stroke="#4b5563"></rect>
         <text x="630" y="210" fill="#e5e7eb" font-size="14" text-anchor="middle">Журнал</text>
         <text x="630" y="230" fill="#9ca3af" font-size="12" text-anchor="middle">прозорість і навчання</text>
 
         <!-- arrows -->
-        <line x1="200" y1="80" x2="260" y2="80" stroke="#93c5fd" stroke-width="3"/>
-        <line x1="420" y1="80" x2="480" y2="80" stroke="#93c5fd" stroke-width="3"/>
-        <line x1="160" y1="220" x2="320" y2="220" stroke="#22d3ee" stroke-width="3"/>
-        <line x1="500" y1="220" x2="540" y2="220" stroke="#fdba74" stroke-width="3"/>
-        <line x1="630" y1="270" x2="120" y2="120" stroke="#64748b" stroke-width="2" stroke-dasharray="6 6"/>
+        <line x1="200" y1="80" x2="260" y2="80" stroke="#93c5fd" stroke-width="3"></line>
+        <line x1="420" y1="80" x2="480" y2="80" stroke="#93c5fd" stroke-width="3"></line>
+        <line x1="160" y1="220" x2="320" y2="220" stroke="#22d3ee" stroke-width="3"></line>
+        <line x1="500" y1="220" x2="540" y2="220" stroke="#fdba74" stroke-width="3"></line>
+        <line x1="630" y1="270" x2="120" y2="120" stroke="#64748b" stroke-width="2" stroke-dasharray="6 6"></line>
         <text x="385" y="310" fill="#94a3b8" font-size="12" text-anchor="middle">Зворотній зв’язок покращує промпти</text>
       </svg>
 
@@ -376,5 +374,6 @@ $('#exportCsv').addEventListener('click', ()=>{
 
 // Авто-прев’ю при першому відкритті порожнє — не заважаємо. Кінець.
 </script>
-</body>
-</html>
+
+
+</body></html>

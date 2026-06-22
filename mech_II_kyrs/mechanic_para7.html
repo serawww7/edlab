@@ -4,12 +4,9 @@
            рекомендації тиску в шинах, журнал вимірів (GPS/хронометр), чек 58 мм, NFC, CSV
      Фокус: телефони/ПК; без бібліотек; працює на GitHub Pages і в Moodle (iframe).
      Примітка щодо контрасту: темні клітинки таблиць мають світлий текст (.dark).
--->
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+--><!DOCTYPE html><html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Пара 7 (механіки) — Тяга, буксування, баласт, тиск у шинах, чек 58 мм, NFC, CSV</title>
 <meta name="color-scheme" content="light dark">
 <style>
@@ -87,7 +84,7 @@
 .ticket small{ font-weight:700 }
 </style>
 
-</head>
+<meta name="description" content="За пару студенти розрахують потрібну тягу і потужність на дишлі, оцінять обмеження за зчепленням, підберуть баласт і розподіл по осях, визначать цільовий б"><link rel="canonical" href="https://edlab.pp.ua/mech_II_kyrs/mechanic_para7.html"><meta property="og:type" content="article"><meta property="og:title" content="🚜 Тяга, буксування, баласт і тиск у шинах — розрахунки, журнал вимірів, чек 58 мм, NFC"><meta property="og:description" content="За пару студенти розрахують потрібну тягу і потужність на дишлі, оцінять обмеження за зчепленням, підберуть баласт і розподіл по осях, визначать цільовий б"><meta property="og:url" content="https://edlab.pp.ua/mech_II_kyrs/mechanic_para7.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"🚜 Тяга, буксування, баласт і тиск у шинах — розрахунки, журнал вимірів, чек 58 мм, NFC","description":"За пару студенти розрахують потрібну тягу і потужність на дишлі, оцінять обмеження за зчепленням, підберуть баласт і розподіл по осях, визначать цільовий б","inLanguage":"uk","educationalLevel":"college","url":"https://edlab.pp.ua/mech_II_kyrs/mechanic_para7.html","provider":{"@type":"Organization","name":"EDLab"}}</script></head>
 <body>
   <div class="wrap">
     <span class="badge">Пара 7 · аудиторно · механіки</span>
@@ -116,7 +113,7 @@
           </div>
           <div class="row" style="margin-top:6px">
             <div style="flex:1"><label>Привід</label>
-              <select id="drive"><option value="mfwd" selected>MFWD (4×4 підключ.)</option><option value="2wd">2WD (задній)</option><option value="4wd">Пост. 4×4</option></select>
+              <select id="drive"><option value="mfwd" selected="">MFWD (4×4 підключ.)</option><option value="2wd">2WD (задній)</option><option value="4wd">Пост. 4×4</option></select>
             </div>
             <div style="flex:1"><label>Діаметр шини (еф.), м</label><input id="tireDia" type="number" step="0.01" value="1.5"></div>
           </div>
@@ -255,13 +252,13 @@
         </div>
 
         <div class="box">
-          <h3>Квиток “Баласт & Тиск шин”</h3>
+          <h3>Квиток “Баласт &amp; Тиск шин”</h3>
           <div class="row">
             <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
             <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
           </div>
           <div class="ticket" id="ticket" style="margin-top:8px">
-            <h4>БАЛАСТ & ТИСК ШИН</h4>
+            <h4>БАЛАСТ &amp; ТИСК ШИН</h4>
             <p id="tDate"><small>Дата: —</small></p>
             <div class="line"></div>
             <p><b>Fпотр:</b> <span id="tF">—</span> кН · <b>Pᵈ:</b> <span id="tPd">—</span> кВт</p>
@@ -628,5 +625,6 @@ function openTicketOnly(){
 }
 </script>
 
-</body>
-</html>
+
+
+</body></html>
