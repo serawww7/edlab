@@ -254,7 +254,7 @@ function drawMap(){
   gm.strokeStyle='#334155'; gm.lineWidth=2;
   EDGES.forEach(([u,v,d])=>{
     const a=NODES[u], b=NODES[v]; gm.beginPath(); gm.moveTo(a.x,a.y); gm.lineTo(b.x,b.y); gm.stroke();
-    const mx=(a.x+b.x)/2, my=(a.y+b.y)/2; gm.fillStyle='#64748b'; gm.font='10px ui-monospace'; gm.fillText(d.toFixed(1)+'км', mx-12, my-4);
+    const mx=(a.x+b.x)/2, my=(a.y+b.y)/2; gm.fillStyle='#94a3b8'; gm.font='10px ui-monospace'; gm.fillText(d.toFixed(1)+'км', mx-12, my-4);
   });
   // вузли
   Object.entries(NODES).forEach(([k,p])=>{

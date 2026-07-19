@@ -185,7 +185,7 @@ function drawMap(){
   for(let j=0;j<=ROWS;j++){ g.beginPath(); g.moveTo(0,j*CELLH); g.lineTo(W,j*CELLH); g.stroke(); }
   // депо (умовні)
   [['DEP1',4,20],['DEP2',20,4],['DEP3',36,18]].forEach(([t,x,y])=>{
-    g.fillStyle='#64748b'; g.fillRect(x*CELLW-10,y*CELLH-10,20,20);
+    g.fillStyle='#94a3b8'; g.fillRect(x*CELLW-10,y*CELLH-10,20,20);
     g.fillStyle='#e5e7eb'; g.font='10px ui-monospace'; g.fillText(t, x*CELLW-14, y*CELLH-12);
   });
   // інциденти

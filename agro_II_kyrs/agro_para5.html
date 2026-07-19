@@ -22,7 +22,7 @@ body{
 .wrap{max-width:1080px; margin:0 auto; padding:24px 16px 64px}
 .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
 h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
-     background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+       color:#93c5fd;}
 h2{font-size:22px; margin:28px 0 12px}
 p{margin:10px 0}
 .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
@@ -57,7 +57,7 @@ p{margin:10px 0}
     width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px;
     box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace;
   }
-.ticket h4{margin:0 0 6px; font-size:13px; text-align:center}
+.ticket h3{margin:0 0 6px; font-size:13px; text-align:center}
 .ticket p{margin:2px 0; font-size:12px}
 .ticket .center{text-align:center}
 .ticket small{font-size:10px}
@@ -180,7 +180,7 @@ html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
         </div>
         <div>
           <div id="ticket" class="ticket" aria-live="polite">
-            <h4>ЗАВДАННЯ — ОБПРИСКУВАННЯ</h4>
+            <h3>ЗАВДАННЯ — ОБПРИСКУВАННЯ</h3>
             <p class="center"><small id="t-date">Дата: —</small></p>
             <div class="line"></div>
             <p><b>Поле:</b> <span id="t-field">—</span> · <b>Площа:</b> <span id="t-area">—</span> га</p>
@@ -418,7 +418,7 @@ function printTicketNewTab(){
       font-family:"Courier New", Courier, monospace; font-weight:700; letter-spacing:0.1px;
       border:none; box-shadow:none; border-radius:0
     }
-    .ticket h4{ margin:0 0 6px; font-size:13px; text-align:center; font-weight:700 }
+    .ticket h3{ margin:0 0 6px; font-size:13px; text-align:center; font-weight:700 }
     .ticket p{ margin:2px 0; font-size:12px; font-weight:700 }
     .ticket b,.ticket strong,.ticket span{ font-weight:700 }
     .line{ border-top:1px dashed #111; margin:6px 0 }
@@ -461,7 +461,7 @@ function openTicketOnly(){
       font-family:"Courier New", Courier, monospace; font-weight:700; letter-spacing:0.1px;
       border:none; box-shadow:none; border-radius:0
     }
-    .ticket h4{ margin:0 0 6px; font-size:13px; text-align:center; font-weight:700 }
+    .ticket h3{ margin:0 0 6px; font-size:13px; text-align:center; font-weight:700 }
     .ticket p{ margin:2px 0; font-size:12px; font-weight:700 }
     .line{ border-top:1px dashed #111; margin:6px 0 }
     small{ font-size:10px; font-weight:700 }

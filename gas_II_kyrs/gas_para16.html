@@ -278,8 +278,8 @@ function updateSVG(st){
   const vids=['#v1_icon','#v2_icon','#v3_icon'];
   st.v.forEach((v,i)=>{ const el=$(vids[i]); el.setAttribute('transform', `rotate(${(100-v)*0.7}, ${parseFloat(el.getAttribute('x'))+4}, ${parseFloat(el.getAttribute('y'))+12})`); el.setAttribute('stroke', v>0? '#a3a3a3':'#f87171'); });
   // ГРП/насос — «світяться» за активністю
-  $('#n_grp').setAttribute('stroke', st.sp>0? '#22c55e':'#64748b');
-  $('#n_pump').setAttribute('stroke', st.pump>0? '#38bdf8':'#64748b');
+  $('#n_grp').setAttribute('stroke', st.sp>0? '#22c55e':'#94a3b8');
+  $('#n_pump').setAttribute('stroke', st.pump>0? '#38bdf8':'#94a3b8');
 }
 
 /* ===== Графік ===== */

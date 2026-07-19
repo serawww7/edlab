@@ -139,13 +139,13 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <text x="500" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Етикетка</text>
         <text x="500" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">quiet zone</text>
 
-        <rect x="590" y="40" width="170" height="120" rx="12" fill="#0b1a2f" stroke="#64748b"/>
+        <rect x="590" y="40" width="170" height="120" rx="12" fill="#0b1a2f" stroke="#94a3b8"/>
         <text x="675" y="80" fill="#e5e7eb" font-size="14" text-anchor="middle">Сканер/Журнал</text>
         <text x="675" y="100" fill="#93c5fd" font-size="12" text-anchor="middle">графіки/CSV</text>
 
         <line x1="220" y1="100" x2="250" y2="100" stroke="#93c5fd" stroke-width="3"/>
         <line x1="410" y1="100" x2="430" y2="100" stroke="#22c55e" stroke-width="3"/>
-        <line x1="570" y1="100" x2="590" y2="100" stroke="#64748b" stroke-width="3"/>
+        <line x1="570" y1="100" x2="590" y2="100" stroke="#94a3b8" stroke-width="3"/>
       </svg>
 
       <h2 style="margin-top:10px">🎯 Завдання для студентів</h2>
@@ -353,7 +353,7 @@ function drawCharts(){
   ctx.beginPath(); ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2;
   pctSeries.forEach((v,k)=>{ const x=left+k*gx; const y=yP(v.p); k?ctx.lineTo(x,y):ctx.moveTo(x,y);}); ctx.stroke();
   // 100/80/60 лінії
-  ctx.strokeStyle='#64748b'; [100,80,60].forEach(val=>{ ctx.beginPath(); ctx.setLineDash([4,4]); ctx.moveTo(left,yP(val)); ctx.lineTo(right,yP(val)); ctx.stroke(); ctx.setLineDash([]); });
+  ctx.strokeStyle='#94a3b8'; [100,80,60].forEach(val=>{ ctx.beginPath(); ctx.setLineDash([4,4]); ctx.moveTo(left,yP(val)); ctx.lineTo(right,yP(val)); ctx.stroke(); ctx.setLineDash([]); });
 
   // Час до скану (низ)
   ctx.fillStyle='#94a3b8'; ctx.fillText('Час до скану, мс', 8, mid+16);

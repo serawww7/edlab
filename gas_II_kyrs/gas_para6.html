@@ -364,7 +364,7 @@ function drawProgress(){
   // список
   let y=top+52;
   STEPS.forEach((s,i)=>{
-    const t = `${i+1}. ${s.name}`; pg.fillStyle = s.ok ? '#22c55e' : (s.dur>0?'#94a3b8':'#6b7280');
+    const t = `${i+1}. ${s.name}`; pg.fillStyle = s.ok ? '#22c55e' : (s.dur>0?'#94a3b8':'#94a3b8');
     pg.fillText((s.ok?'✔ ':'• ')+t, left+8, y);
     y+=18;
   });
