@@ -12,60 +12,52 @@
 <title>Пара 3 — Польові треки: GPX → аналіз → план/факт</title>
 <meta name="color-scheme" content="light dark">
 <style>
-  :root{
+:root{
     --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
     --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --good:#10b981; --line:#1f2937;
   }
-  *{box-sizing:border-box}
-  body{
+body{
     margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
     color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
   }
-  .wrap{max-width:980px; margin:0 auto; padding:24px 16px 64px}
-  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
-  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+.wrap{max-width:980px; margin:0 auto; padding:24px 16px 64px}
+.badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
      background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
-  h2{font-size:22px; margin:28px 0 12px}
-  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
-  p{margin:10px 0}
-  ul,ol{margin:8px 0 12px 22px}
-  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
-  .grid{display:grid; gap:12px}
-  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
-  @media (max-width:900px){.g3{grid-template-columns:1fr}}
-  .kpi{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px dashed #263042; border-radius:12px}
-  .kpi b{font-size:14px}
-  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
-  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px; border:1px solid #223049}
-  .table th,.table td{padding:10px 12px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
-  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left}
-  .table tbody tr:nth-child(even){background:#0b1324}
-  .step{display:flex; gap:12px; align-items:flex-start; padding:10px 12px; border:1px solid #1f2937; border-radius:12px; background:#0b1324; margin:8px 0}
-  .step .n{min-width:30px; height:30px; border-radius:8px; background:#0e1a2e; display:grid; place-items:center; color:#a5b4fc; font-weight:700}
-  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
-  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
-  .btn:hover{background:#0f1f39}
-  .muted{color:#93a3b5}
-  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:#ef4444}
-  .row{display:flex; gap:10px; flex-wrap:wrap}
-  .field{display:flex; gap:8px; margin:6px 0; align-items:center}
-  .field label{min-width:160px; color:#cbd5e1}
-  .field input, .field select{
+h2{font-size:22px; margin:28px 0 12px}
+p{margin:10px 0}
+ul,ol{margin:8px 0 12px 22px}
+.card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.grid{display:grid; gap:12px}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:900px){.g3{grid-template-columns:1fr}}
+.kpi{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px dashed #263042; border-radius:12px}
+.kpi b{font-size:14px}
+.mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+.table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px; border:1px solid #223049}
+.table th,.table td{padding:10px 12px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+.table thead th{background:#0c1629; color:#a5b4fc; text-align:left}
+.table tbody tr:nth-child(even){background:#0b1324}
+.step{display:flex; gap:12px; align-items:flex-start; padding:10px 12px; border:1px solid #1f2937; border-radius:12px; background:#0b1324; margin:8px 0}
+.step .n{min-width:30px; height:30px; border-radius:8px; background:#0e1a2e; display:grid; place-items:center; color:#a5b4fc; font-weight:700}
+.pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+.btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+.btn:hover{background:#0f1f39}
+.muted{color:#93a3b5}
+.ok{color:var(--good)}
+.warn{color:var(--warn)}
+.bad{color:#ef4444}
+.field{display:flex; gap:8px; margin:6px 0; align-items:center}
+.field label{min-width:160px; color:#cbd5e1}
+.field input, .field select{
     flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb
   }
-  .out{background:#0b1324; border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
-  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:#0b1324}
-  .small{font-size:12px; color:#9fb0c8}
-  .success{border-color:#1f5135; background:#0f2a1c}
-  .danger{border-color:#5b2020; background:#2a0f0f}
-
-  /* Вбудовано (iframe) → стриманий вигляд */
-  html.embedded body{background:#fff; color:#111}
-  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
-  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
-  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
-
-  @media print{
+.out{background:#0b1324; border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+.box{border:1px solid #223049; border-radius:12px; padding:12px; background:#0b1324}
+.success{border-color:#1f5135; background:#0f2a1c}
+.danger{border-color:#5b2020; background:#2a0f0f}
+html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+@media print{
     @page{ margin:12mm }
     .no-print{ display:none !important }
   }

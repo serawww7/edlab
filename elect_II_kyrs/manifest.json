@@ -1,27 +1,127 @@
 [
-    "/elect_II_kyrs/electric_para1.html",
-    "/elect_II_kyrs/electric_para2.html",
-    "/elect_II_kyrs/electric_para3.html",
-    "/elect_II_kyrs/electric_para4.html",
-    "/elect_II_kyrs/electric_para5.html",
-    "/elect_II_kyrs/electric_para6.html",
-    "/elect_II_kyrs/electric_para7.html",
-    "/elect_II_kyrs/electric_para8.html",
-    "/elect_II_kyrs/electric_para9.html",
-    "/elect_II_kyrs/electric_para10.html",
-    "/elect_II_kyrs/electric_para11.html",
-    "/elect_II_kyrs/electric_para12.html",
-    "/elect_II_kyrs/electric_para13.html",
-    "/elect_II_kyrs/electric_para14.html",
-    "/elect_II_kyrs/electric_para15.html",
-    "/elect_II_kyrs/electric_para16.html",
-    "/elect_II_kyrs/electric_para17.html",
-    "/elect_II_kyrs/electric_para18.html",
-    "/elect_II_kyrs/electric_para19.html",
-    "/elect_II_kyrs/electric_para20.html",
-    "/elect_II_kyrs/electric_para21.html",
-    "/elect_II_kyrs/electric_para22.html",
-    "/elect_II_kyrs/electric_para23.html",
-    "/elect_II_kyrs/electric_para24.html",
-    "/elect_II_kyrs/electric_para25.html"
+  {
+    "url": "/elect_II_kyrs/electric_para1.html",
+    "title": "Електрики · Пара 1 — Наряд, Етикетка кола, Протокол інструменту",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para2.html",
+    "title": "Електрики · Пара 2 — Журнал ППР, чек-листи, друк 58 мм, NFC/QR",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para3.html",
+    "title": "Електрики · Пара 3 — Акт ППР (A4/PDF) + Дефектний лист із CSV",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para4.html",
+    "title": "Електрики · Пара 4 — Розрахунок лінії: переріз, автомат, ΔU, друк 58 мм",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para5.html",
+    "title": "Електрики · Пара 5 — План/Факт вимірювань, журнал, друк 58 мм",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para6.html",
+    "title": "Електрики · Пара 6 — Селективність MCB/ПЗВ, тест, друк 58 мм",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para7.html",
+    "title": "Електрики · Пара 7 — Маркування щита: адреси, навантаження, наклейки 58 мм",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para8.html",
+    "title": "Електрики · Пара 8 — Облік інструменту, калібрування, QR/NFC, друк 58 мм",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para9.html",
+    "title": "Електрики · Пара 9 — Вузол заземлення: протокол, PASS/FAIL, друк 58 мм",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para10.html",
+    "title": "Електрики · Пара 10 — Освітлення: люкс-метод, групи, автомати, ΔU, друк 58 мм",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para11.html",
+    "title": "Електрики · Пара 11 — Електробезпека: інструктажі, наряд-допуск, LOTO, 58 мм, A4",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para12.html",
+    "title": "Електрики · Пара 12 — Пускові струми двигунів: In, Iпуск, захисти, ΔU, 58 мм",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para13.html",
+    "title": "Електрики · Пара 13 — Електрощит: панельний журнал, баланс фаз, RCD, наклейки",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para14.html",
+    "title": "Електрики · Пара 14 — Кабелі: переріз, коеф. корекції, ΔU, автомат, 58 мм",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para15.html",
+    "title": "Електрики · Пара 15 — КЗ, петля Zs, ADS, миттєвий розчіплювач, Icu/Ics",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para16.html",
+    "title": "Електрики · Пара 16 — Енергооблік: добовий профіль, кВт·год, тарифи, 58 мм",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para17.html",
+    "title": "Електрики · Пара 17 — NFC-паспорти обладнання, журнал ТО, 58 мм, A4, ICS",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para18.html",
+    "title": "Електрики · Пара 18 — Балансування фаз і план-щиток",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para19.html",
+    "title": "Електрики · Пара 19 — LOTO та Дозвіл на роботи (PTW)",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para20.html",
+    "title": "Електрики · Пара 20 — Фінальний мікропроєкт і захист",
+    "desc": ""
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para21.html",
+    "title": "Пара 21 (Електрика) — Arduino: монітор енергоспоживання (SCT-013, кВт·год, сигналізація)",
+    "desc": "Вимірюємо струм SCT-013, обчислюємо S/P, кВт·год, індикатори перевантаження (LED/бузер), калібрування, живий графік, журнал і експорт. Генератор прошивки для одного або двох сенсорів (I-only або I+U)."
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para22.html",
+    "title": "Пара 22 (Електрика) — ШІ: класифікація станів мережі + аномалії (k-NN)",
+    "desc": "Імпорт CSV із метриками (Vrms, Irms, PF, THD, Temp), навчання k-NN, детектор аномалій (реконструкційна похибка), матриця помилок, емулятор, журнал тривог, експорт моделі JSON, генератор скетча Arduino."
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para23.html",
+    "title": "Пара 23 (Електрика) — ШІ-помічник техобслуговування: SOP → чек-листи, квіз, RAG",
+    "desc": "Парсимо SOP/інструкції, формуємо чек-листи (58 мм), генеруємо квіз і перевіряємо відповіді, локальний RAG-пошук по базі SOP, експорт CSV/TXT/ICS."
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para24.html",
+    "title": "Пара 24 (Електрика) — ШІ: прогноз піків (Gradient Boosting JS) + балансування",
+    "desc": "Імпорт історії навантаження, фічі часу/лагів/погоди, градієнтний бустинг у JS (decision stumps), 48h прогноз, поради балансування, алерти та експорт (ICS/CSV/TXT)."
+  },
+  {
+    "url": "/elect_II_kyrs/electric_para25.html",
+    "title": "Пара 25 (Електрика) — ШІ: аудіодіагностика трансформатора (FFT, ознаки, класифікація)",
+    "desc": "WebAudio мікрофон/емулятор → спектр (FFT) → f0/гармоніки/тональність/центроїд/плоскість/ZCR → класифікація (правила + kNN) → журнал/чек-лист → експорт PNG/CSV/TXT/JSON. Включає Arduino Goertzel-логер."
+  }
 ]

@@ -12,64 +12,49 @@
 <title>Пара 8 — Економічний поріг шкодочинності (EIL) і поріг дії (ET)</title>
 <meta name="color-scheme" content="light dark">
 <style>
-  :root{
+:root{
     --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
     --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
     --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
   }
-  *{box-sizing:border-box}
-  body{
+body{
     margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
     color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
   }
-  .wrap{max-width:1080px; margin:0 auto; padding:24px 16px 64px}
-  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
-  h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
+.wrap{max-width:1080px; margin:0 auto; padding:24px 16px 64px}
+.badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
      background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
-  h2{font-size:22px; margin:28px 0 12px}
-  h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
-  p{margin:10px 0}
-  .muted{color:#93a3b5}
-  .small{font-size:12px; color:#9fb0c8}
-
-  .card{
+h2{font-size:22px; margin:28px 0 12px}
+p{margin:10px 0}
+.muted{color:#93a3b5}
+.card{
     background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0;
     box-shadow:0 6px 24px rgba(0,0,0,.25)
   }
-  .grid{display:grid; gap:12px}
-  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
-  @media (max-width:980px){.g2,.g3{grid-template-columns:1fr}}
-
-  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
-  .btn:hover{background:#0f1f39}
-  .pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
-  .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
-
-  .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
-  .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
-
-  .table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
-  .table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
-  .table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
-  .table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)}
-  .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
-  .table td .tag{display:inline-block; padding:3px 8px; border-radius:999px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; font-size:12px}
-
-  input[type="text"], input[type="number"], input[type="date"], select, textarea{
+.grid{display:grid; gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:980px){.g2,.g3{grid-template-columns:1fr}}
+.btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+.btn:hover{background:#0f1f39}
+.pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
+.mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+.box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
+.ok{color:var(--good)}
+.warn{color:var(--warn)}
+.bad{color:var(--bad)}
+.table{width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; border:1px solid #223049}
+.table th,.table td{padding:8px 10px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
+.table tbody tr:nth-child(even){background:var(--darkcell); color:var(--darkink2)}
+.table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
+.table td .tag{display:inline-block; padding:3px 8px; border-radius:999px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; font-size:12px}
+input[type="text"], input[type="number"], input[type="date"], select, textarea{
     width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
   }
-
-  .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
-  .row{display:flex; gap:10px; flex-wrap:wrap}
-
-  /* Вбудовано (iframe) → світлий вигляд */
-  html.embedded body{background:#fff; color:#111}
-  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
-  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
-  html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
-  html.embedded .box{background:#f8fafc; color:#111}
-  html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+.out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
+html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
+html.embedded .box{background:#f8fafc; color:#111}
 </style>
 </head>
 <body>

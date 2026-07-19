@@ -13,69 +13,57 @@
 <title>Електрики · Пара 13 — Електрощит: панельний журнал, баланс фаз, RCD, наклейки</title>
 <meta name="color-scheme" content="light dark" />
 <style>
-  :root{
+:root{
     --bg:#0b1220; --bg2:#111827; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
     --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa;
   }
-  *{box-sizing:border-box}
-  body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
+body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg)); color:var(--text);
        font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
-  .wrap{max-width:1120px; margin:0 auto; padding:24px 16px 96px}
-  .badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9aa5b1}
-  h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
-  h2{font-size:22px; margin:22px 0 12px}
-  h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
-  p{margin:8px 0}
-  .card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
-  .row{display:flex; gap:10px; flex-wrap:wrap}
-  .grid{display:grid; gap:12px}
-  .g2{grid-template-columns:1fr 1fr}
-  .g3{grid-template-columns:repeat(3,1fr)}
-  @media (max-width:1050px){.g3{grid-template-columns:1fr}; .g2{grid-template-columns:1fr}}
-  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
-  .btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
-  .btn:hover{background:#0f1f39}
-  .small{font-size:12px; color:#93a3b5}
-  .chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; font-size:12px; margin-right:6px; background:#0d1a2e}
-  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)} .muted{color:#9aa5b1}
-  input,select,textarea{padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb; width:100%}
-  textarea{min-height:88px}
-
-  /* Таблиці */
-  table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
-  thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
-  tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
-  tbody tr:nth-child(even){background:#0b1324}
-
-  /* Квитанції 58 мм */
-  .tickets{display:flex; gap:12px; flex-wrap:wrap}
-  .ticket{
+.wrap{max-width:1120px; margin:0 auto; padding:24px 16px 96px}
+.badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9aa5b1}
+h1{font-size:32px; margin:6px 0 12px; line-height:1.15; background:linear-gradient(90deg,#60a5fa,#22c55e); -webkit-background-clip:text; -webkit-text-fill-color:transparent}
+h2{font-size:22px; margin:22px 0 12px}
+h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
+.card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.grid{display:grid; gap:12px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:1050px){.g3{grid-template-columns:1fr}; .g2{grid-template-columns:1fr}}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+.btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
+.btn:hover{background:#0f1f39}
+.small{font-size:12px; color:#93a3b5}
+.chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; font-size:12px; margin-right:6px; background:#0d1a2e}
+.ok{color:var(--ok)}
+.warn{color:var(--warn)}
+.bad{color:var(--bad)}
+.muted{color:#9aa5b1}
+input,select,textarea{padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb; width:100%}
+textarea{min-height:88px}
+table{width:100%; border-collapse:separate; border-spacing:0; border:1px solid #223049; border-radius:12px; overflow:hidden}
+thead th{background:#0c1629; color:#a5b4fc; text-align:left; padding:10px 12px; font-size:14px}
+tbody td{padding:8px 10px; border-top:1px solid #1f2937; font-size:14px; vertical-align:top}
+tbody tr:nth-child(even){background:#0b1324}
+.tickets{display:flex; gap:12px; flex-wrap:wrap}
+.ticket{
     width:58mm; background:#fff; color:#000; padding:5mm 4mm; border-radius:6px;
     box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace
   }
-  .ticket h4{margin:0 0 4px; font-size:13px; text-align:center}
-  .ticket p{margin:1px 0; font-size:12px}
-  .ticket .line{border-top:1px dashed #111; margin:5px 0}
-  .ticket small{font-size:10px}
-  .ticket .qr{font-size:10px; word-break:break-all}
-
-  /* A4 */
-  #printArea{background:#fff; color:#000; border-radius:12px; border:1px solid #e5e7eb; padding:16px}
-  .doc{page-break-after:always; padding:12mm; color:#000; font-family:Georgia,"Times New Roman",serif}
-  .doc h2{color:#000; font-size:20px; margin:0 0 6px}
-  .doc h3{color:#000; font-size:16px; margin:6px 0}
-  .doc p{color:#000; margin:4px 0}
-  .doc table{width:100%; border-collapse:collapse; border:1px solid #111}
-  .doc th,.doc td{border:1px solid #111; padding:6px 8px; font-size:12px; vertical-align:top}
-  .doc .sign{margin-top:10mm; display:flex; gap:10mm; flex-wrap:wrap}
-  .doc .sign div{flex:1 1 220px}
-
-  /* Вбудований режим (iframe/Moodle) */
-  html.embedded body{background:#fff; color:#111}
-  html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
-  html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
-
-  @media print{
+.ticket h4{margin:0 0 4px; font-size:13px; text-align:center}
+.ticket p{margin:1px 0; font-size:12px}
+.ticket .line{border-top:1px dashed #111; margin:5px 0}
+.ticket small{font-size:10px}
+.ticket .qr{font-size:10px; word-break:break-all}
+#printArea{background:#fff; color:#000; border-radius:12px; border:1px solid #e5e7eb; padding:16px}
+.doc{page-break-after:always; padding:12mm; color:#000; font-family:Georgia,"Times New Roman",serif}
+.doc h2{color:#000; font-size:20px; margin:0 0 6px}
+.doc h3{color:#000; font-size:16px; margin:6px 0}
+.doc p{color:#000; margin:4px 0}
+.doc table{width:100%; border-collapse:collapse; border:1px solid #111}
+.doc th,.doc td{border:1px solid #111; padding:6px 8px; font-size:12px; vertical-align:top}
+.doc .sign{margin-top:10mm; display:flex; gap:10mm; flex-wrap:wrap}
+.doc .sign div{flex:1 1 220px}
+@media print{
     @page{ size:A4; margin:12mm }
     body{ background:#fff; color:#000 }
     .no-print, .card:not(.printable){ display:none !important }

@@ -1,27 +1,127 @@
 [
-    "/agro_II_kyrs/agro_para1.html",
-    "/agro_II_kyrs/agro_para2.html",
-    "/agro_II_kyrs/agro_para3.html",
-    "/agro_II_kyrs/agro_para4.html",
-    "/agro_II_kyrs/agro_para5.html",
-    "/agro_II_kyrs/agro_para6.html",
-    "/agro_II_kyrs/agro_para7.html",
-    "/agro_II_kyrs/agro_para8.html",
-    "/agro_II_kyrs/agro_para9.html",
-    "/agro_II_kyrs/agro_para10.html",
-    "/agro_II_kyrs/agro_para11.html",
-    "/agro_II_kyrs/agro_para12.html",
-    "/agro_II_kyrs/agro_para13.html",
-    "/agro_II_kyrs/agro_para14.html",
-    "/agro_II_kyrs/agro_para15.html",
-    "/agro_II_kyrs/agro_para16.html",
-    "/agro_II_kyrs/agro_para17.html",
-    "/agro_II_kyrs/agro_para18.html",
-    "/agro_II_kyrs/agro_para19.html",
-    "/agro_II_kyrs/agro_para20.html",
-    "/agro_II_kyrs/agro_para21.html",
-    "/agro_II_kyrs/agro_para22.html",
-    "/agro_II_kyrs/agro_para23.html",
-    "/agro_II_kyrs/agro_para24.html",
-    "/agro_II_kyrs/agro_para25.html"
+  {
+    "url": "/agro_II_kyrs/agro_para1.html",
+    "title": "Пара 1 — Вступ + Термодрук 58 мм",
+    "desc": ""
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para2.html",
+    "title": "Пара 2 — Паспорт поля: QR/NFC → мобільна форма → дашборд",
+    "desc": ""
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para3.html",
+    "title": "Пара 3 — Польові треки: GPX → аналіз → план/факт",
+    "desc": ""
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para4.html",
+    "title": "Пара 4 — Погода: GDD, опади, вікна для робіт",
+    "desc": ""
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para5.html",
+    "title": "Пара 5 — Техкарта обприскування: норми, баки, пофорсунково, чек 58 мм",
+    "desc": ""
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para6.html",
+    "title": "Пара 6 — Норма висіву та калібрування сівалки",
+    "desc": ""
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para7.html",
+    "title": "Пара 7 — Ґрунтові зразки: pH · EC · NPK → рекомендації",
+    "desc": ""
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para8.html",
+    "title": "Пара 8 — Економічний поріг шкодочинності (EIL) і поріг дії (ET)",
+    "desc": ""
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para9.html",
+    "title": "Пара 9 — Змішування NPK: ціль → суміш → вартість → завантаження",
+    "desc": ""
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para10.html",
+    "title": "Пара 10 — Зрошення: водний баланс, ET₀·Kc, TAW/RAW, план поливів",
+    "desc": ""
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para11.html",
+    "title": "Пара 11 — Вологість зерна: усушка, сушіння, сумішування, вартість",
+    "desc": ""
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para12.html",
+    "title": "Пара 12 — GPS-картування поля: межа, площа, буфер, ґрід, експорт",
+    "desc": ""
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para13.html",
+    "title": "Пара 13 — Планування польової операції: площа, ресурси, час, завантаження",
+    "desc": ""
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para14.html",
+    "title": "Пара 14 — Норма висіву: кг/га, насіння/м, крок, кг/хв, мішки",
+    "desc": ""
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para15.html",
+    "title": "Пара 15 — Scouting: ЕПШ → рішення → бакова суміш → вікно погоди → ЗІЗ, CSV",
+    "desc": ""
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para16.html",
+    "title": "Пара 16 — Arduino: сенсор вологості ґрунту (калібрування, %RHsoil, лог)",
+    "desc": "Калібруємо ємнісний датчик вологості ґрунту: ADC→% вологості, усереднення, експоненційне згладжування, графік, експорт CSV/TXT. Генератор персонального .ino і схема підключення."
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para17.html",
+    "title": "Пара 17 — Arduino: насос для поливу (реле, поріг, гістерезис, мін. час, ручний режим)",
+    "desc": "Реле насоса для поливу на Arduino: поріг вологості, гістерезис, мінімальний час увімкнення/вимкнення, ручний режим, лог у CSV. Схема + генератор .ino."
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para18.html",
+    "title": "Пара 18 — Arduino: мікроклімат (DHT11/DHT22) + GDD, графік, експорт",
+    "desc": "Читаємо DHT11/DHT22: T/вологість, згладжуємо, будуємо онлайн-графік, рахуємо Growing Degree Days (GDD) з базою/стелею, експортуємо CSV/TXT. Генератор прошивки під обраний сенсор."
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para19.html",
+    "title": "Пара 19 — Arduino: CO₂ у теплиці (MH-Z19B UART) + вентиляція",
+    "desc": "Знімаємо CO₂ із MH-Z19B по UART (без бібліотек), згладжуємо, застосовуємо гістерезис, керуємо реле вентиляції/фрамуги за порогами, будуємо графік, експортуємо CSV/TXT. Є емуль CO₂ і генератор прошивки під твої піни та параметри."
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para20.html",
+    "title": "Пара 20 — CO₂-збагачення + безпека персоналу (сирена, RGB-індикатор, журнал тривог)",
+    "desc": "MH-Z19B (UART): керуємо збагаченням CO₂ (клапан/генератор) і вентиляцією з гістерезисом та мінімальним часом увімкнення. Безпека: сирена/буззер, RGB-індикатор зон (зелена/жовта/червона), журнал тривог. Емулятор CO₂, графік, експорт CSV/TXT, генератор прошивки."
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para21.html",
+    "title": "Пара 21 — ШІ-помічник агронома: scouting-промпти + валідація + журнал",
+    "desc": "Генератор структурованих промптів для агроскаутингу: культура, фаза, симптоми, погода, ЕПШ/ПД, ресурси. Прев’ю, копіювання, експорт CSV/TXT, чек-лист оцінювання відповіді ШІ, журнал рішень. SVG-схема робочого циклу."
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para22.html",
+    "title": "Пара 22 — ШІ-прогноз ризиків хвороб: погода → інфекційні вікна → «що якщо» → промпт",
+    "desc": "Завантажуємо/емуємо погодинні T/RH/опади, рахуємо leaf wetness, Smith Period (картопля фітофтороз), індекс септоріозу (пшениця), ризик борошнистої роси. Живий графік, what-if симулятор, генератор промпта для LLM, експорт CSV/TXT."
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para23.html",
+    "title": "Пара 23 — ШІ-чекер етикеток і сумісності бакових сумішей",
+    "desc": "Етикетки ЗЗР → конструктор бакової суміші → автоматичні перевірки (FRAC/HRAC, pH, порядок змішування, заборони), матриця ризиків, журнал, промпт до LLM, кейс-квіз і місії з прогресом."
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para24.html",
+    "title": "Пара 24 — Діагностика за фото + доказовість (LLM-шаблони + чекер джерел)",
+    "desc": "Завантаження фото симптомів, анотації на знімку, генератор промпта до LLM для диференційної діагностики з джерелами, чекер відповіді ШІ, журнал рішень, експорт і збереження розміченого знімка."
+  },
+  {
+    "url": "/agro_II_kyrs/agro_para25.html",
+    "title": "Пара 25 — ШІ-планувальник робіт: нотатки → календар (SOP/REI/PHI/погода) + конфлікт-чекинґ",
+    "desc": "Імпорт польових нотаток і погоди → автоплан робіт із урахуванням REI/PHI та погодних вікон → перевірка конфліктів ресурсів → Gantt, експорт ICS/CSV/TXT, 58-мм чек, промпт до LLM."
+  }
 ]

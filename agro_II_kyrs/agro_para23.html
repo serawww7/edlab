@@ -12,7 +12,6 @@
   --bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;
   --brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171;
 }
-*{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--text);
   font-family:system-ui,-apple-system,"Segoe UI",Inter,Roboto,Arial,sans-serif}
 .wrap{max-width:1060px;margin:0 auto;padding:16px}
@@ -33,7 +32,9 @@ small.mono,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier
 .tbl{width:100%;border-collapse:collapse;font-size:.95rem}
 .tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
 .tbl th{background:#0b1a2f}
-.risk-ok{color:var(--ok)}.risk-warn{color:var(--warn)}.risk-bad{color:var(--bad)}
+.risk-ok{color:var(--ok)}
+.risk-warn{color:var(--warn)}
+.risk-bad{color:var(--bad)}
 .log{max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;background:#0b1220;
   font-family:ui-monospace,monospace;font-size:13px;white-space:pre-wrap}
 pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
