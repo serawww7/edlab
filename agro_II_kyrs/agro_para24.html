@@ -3,12 +3,13 @@
 <head>
 <link rel="stylesheet" href="/assets/edlab-core.css">
 <meta charset="utf-8"/>
+<script>(function(){try{var t=localStorage.getItem('edlab-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 24 — Діагностика за фото + доказовість (LLM-шаблони + чекер джерел)</title>
 <meta name="description" content="Завантаження фото симптомів, анотації на знімку, генератор промпта до LLM для диференційної діагностики з джерелами, чекер відповіді ШІ, журнал рішень, експорт і збереження розміченого знімка."/>
 <meta name="color-scheme" content="light dark"/>
 <style>
-:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#b0bcc9;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Inter,Roboto,Arial,sans-serif}
 .wrap{max-width:1040px;margin:0 auto;padding:16px}
 header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -22,22 +23,22 @@ h1{margin:.2em 0 .3em 0}
 .btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
 .btn.secondary{background:transparent}
 .btn.good{border-color:#204b2a;background:#12341b}
-.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
 small.mono,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace}
 .grid{display:grid;gap:14px;grid-template-columns:1.35fr 1fr}
 @media(max-width:1040px){.grid{grid-template-columns:1fr}}
 hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0}
 .note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
 svg{max-width:100%;height:auto;display:block}
-pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+pre.code{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
 kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6px}
-.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220;display:grid;grid-template-columns:1fr}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg);display:grid;grid-template-columns:1fr}
 canvas{display:block;width:100%;height:auto;image-rendering:auto}
 .badge{display:inline-block;border:1px solid #334155;border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
 .tbl{width:100%;border-collapse:collapse;font-size:.95rem}
 .tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
 .tbl th{background:#0b1a2f}
-.log{max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;background:#0b1220;font-family:ui-monospace,monospace;font-size:13px;white-space:pre-wrap}
+.log{max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--bg);font-family:ui-monospace,monospace;font-size:13px;white-space:pre-wrap}
 .footer{margin-top:20px;color:var(--muted);font-size:.9rem}
 .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
 .ok{color:var(--ok)}

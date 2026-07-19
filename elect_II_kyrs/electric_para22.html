@@ -3,12 +3,13 @@
 <head>
 <link rel="stylesheet" href="/assets/edlab-core.css">
 <meta charset="utf-8"/>
+<script>(function(){try{var t=localStorage.getItem('edlab-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 22 (Електрика) — ШІ: класифікація станів мережі + аномалії (k-NN)</title>
 <meta name="description" content="Імпорт CSV із метриками (Vrms, Irms, PF, THD, Temp), навчання k-NN, детектор аномалій (реконструкційна похибка), матриця помилок, емулятор, журнал тривог, експорт моделі JSON, генератор скетча Arduino."/>
 <meta name="color-scheme" content="light dark"/>
 <style>
-:root{--bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
+:root{--bg:#0b1220;--panel:#0f172a;--muted:#b0bcc9;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Inter,Roboto,Arial,sans-serif}
 .wrap{max-width:1100px;margin:0 auto;padding:16px}
 header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -19,17 +20,17 @@ h1{margin:.2em 0 .3em 0}
 .muted{color:var(--muted)}
 .card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
 .btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
 .btn.secondary{background:transparent}
 .btn.good{border-color:#204b2a;background:#12341b}
 .badge{display:inline-block;border:1px solid #334155;border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
-pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+pre.code{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
 .small{font-size:.9rem}
 .tbl{width:100%;border-collapse:collapse;font-size:.95rem}
 .tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
 .tbl th{background:#0b1a2f}
-.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1220}
+.canvasWrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
 canvas{display:block;width:100%;height:260px}
 .ok{color:var(--ok)}
 .warn{color:var(--warn)}

@@ -3,13 +3,14 @@
 <head>
 <link rel="stylesheet" href="/assets/edlab-core.css">
 <meta charset="utf-8"/>
+<script>(function(){try{var t=localStorage.getItem('edlab-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 23 — ШІ-чекер етикеток і сумісності бакових сумішей</title>
 <meta name="description" content="Етикетки ЗЗР → конструктор бакової суміші → автоматичні перевірки (FRAC/HRAC, pH, порядок змішування, заборони), матриця ризиків, журнал, промпт до LLM, кейс-квіз і місії з прогресом."/>
 <meta name="color-scheme" content="light dark"/>
 <style>
 :root{
-  --bg:#0b1220;--panel:#0f172a;--muted:#94a3b8;--text:#e6eef9;--line:#223049;
+  --bg:#0b1220;--panel:#0f172a;--muted:#b0bcc9;--text:#e6eef9;--line:#223049;
   --brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171;
 }
 html,body{margin:0;background:var(--bg);color:var(--text);
@@ -26,7 +27,7 @@ h1{margin:.2em 0 .3em 0}
 .btn{border:1px solid var(--line);background:#0f1f39;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
 .btn.secondary{background:transparent}
 .btn.good{border-color:#204b2a;background:#12341b}
-.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
 small.mono,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace}
 .badge{display:inline-block;border:1px solid #334155;border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px}
 .tbl{width:100%;border-collapse:collapse;font-size:.95rem}
@@ -35,22 +36,22 @@ small.mono,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier
 .risk-ok{color:var(--ok)}
 .risk-warn{color:var(--warn)}
 .risk-bad{color:var(--bad)}
-.log{max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;background:#0b1220;
+.log{max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--bg);
   font-family:ui-monospace,monospace;font-size:13px;white-space:pre-wrap}
-pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
+pre.code{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap}
 hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0}
 .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted);margin-right:6px;margin-top:6px}
 .footer{margin-top:20px;color:var(--muted);font-size:.9rem}
 .note{border:1px dashed var(--line);border-radius:12px;padding:10px;background:#0c182a}
 .progress{height:10px;border-radius:999px;background:#0b1324;overflow:hidden;border:1px solid #223049}
 .progress > div{height:100%;background:linear-gradient(90deg,#60a5fa,#22c55e)}
-.badgeNum{display:inline-grid;place-items:center;min-width:34px;height:26px;border-radius:8px;background:#0e1a2e;color:#a5b4fc;font-weight:700}
+.badgeNum{display:inline-grid;place-items:center;min-width:34px;height:26px;border-radius:8px;background:#0e1a2e;color:var(--chip-fg,#c7d2fe);font-weight:700}
 .kpi{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px dashed var(--line);border-radius:12px}
 .kpi b{font-size:14px}
 .score{font-weight:700}
 svg{max-width:100%;height:auto;display:block}
 @media (max-width:700px){ header a.btn{width:100%} }
-.help{font-size:.9rem;color:#a5b4fc}
+.help{font-size:.9rem;color:var(--chip-fg,#c7d2fe)}
 .disabled{opacity:.6;pointer-events:none}
 </style>
 </head>

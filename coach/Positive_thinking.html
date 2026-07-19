@@ -3,12 +3,13 @@
 <head>
 <link rel="stylesheet" href="/assets/edlab-core.css">
   <meta charset="utf-8">
+<script>(function(){try{var t=localStorage.getItem('edlab-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
   <title>Позитивне і негативне мислення — самооцінка та самовдосконалення (інтерактив, 80 хв)</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Повний інтерактивний конспект тренінгу: тест «дерево з чоловічками», мозковий штурм, якості, пиріг щастя, австралійський дощ, притча, магічне коло бажань, рефлексія ДРІД. Експорт у .txt та друк.">
   <style>
 :root{
-      --bg:#0b1220; --card:#0f172a; --muted:#93a4bf; --fg:#e6eefc; --accent:#60a5fa;
+      --bg:#0b1220; --card:#0f172a; --muted:#b0bcc9; --fg:#e6eefc; --accent:#60a5fa;
       --ok:#34d399; --warn:#fbbf24; --danger:#f87171; --border:#1f2a44; --ink:#0a1020;
     }
 html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
@@ -33,7 +34,7 @@ h3{margin:12px 0 8px 0;font-size:18px}
 .pill{display:inline-block;padding:4px 10px;border:1px solid var(--border);border-radius:999px;font-size:12px;color:var(--muted);margin-right:6px}
 .timer{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
 .timer .dot{width:8px;height:8px;border-radius:50%;background:var(--warn)}
-.kbd{font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:#dbeafe}
+.kbd{font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--btn-fg,#e2e8f0)}
 textarea,input[type="text"]{width:100%;background:#0b1528;color:#e6eefc;border:1px solid var(--border);border-radius:10px;padding:10px 12px}
 textarea{min-height:68px;resize:vertical}
 .row{display:grid;gap:10px}
@@ -447,7 +448,7 @@ canvas{background:#0a1020;border:1px solid var(--border);border-radius:10px;widt
   <text x="100" y="118" text-anchor="middle" font-family="system-ui" font-size="10" fill="#0b1220">${to}</text>
   <text x="100" y="137" text-anchor="middle" font-family="system-ui" font-size="9" fill="#0b1220">${msg}</text>
 </svg>
-<div style="margin-top:6px;font-size:13px;color:#93a4bf">Надрукуй і подаруй сусіду по колу</div>
+<div style="margin-top:6px;font-size:13px;color:var(--muted)">Надрукуй і подаруй сусіду по колу</div>
 </div>`;
   }
   $('#printStar').addEventListener('click', ()=>{

@@ -9,43 +9,44 @@
 <head>
 <link rel="stylesheet" href="/assets/edlab-core.css">
 <meta charset="utf-8"/>
+<script>(function(){try{var t=localStorage.getItem('edlab-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Електрики · Пара 20 — Фінальний мікропроєкт і захист</title>
 <meta name="description" content="🏁 Фінальний мікропроєкт: «Електробезпека та енергоефективність майстерні» — імпорт CSV → KPI → оцінка → 🧾 58 мм → 📄 A4">
 <meta name="color-scheme" content="light dark"/>
 <style>
 :root{
-    --bg:#0b1220; --bg2:#101826; --card:#0f172a; --text:#e2e8f0; --muted:#9aa5b1; --line:#1f2937;
+    --bg:#0b1220; --bg2:#101826; --card:#0f172a; --text:#e2e8f0; --muted:#b0bcc9; --line:#1f2937;
     --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --info:#60a5fa; --brand:#22c55e;
   }
 body{margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 35%,var(--bg)); color:var(--text);
        font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55}
 .wrap{max-width:1120px; margin:0 auto; padding:24px 16px 96px}
-.badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:#9aa5b1}
+.badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:var(--bg); border-radius:999px; font-size:12px; color:var(--muted)}
 h1{font-size:32px; margin:6px 0 12px; line-height:1.15; 
       color:#93c5fd;}
 h2{font-size:22px; margin:22px 0 12px}
-h3{font-size:18px; margin:12px 0 8px; color:#cbd5e1}
-.card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+h3{font-size:18px; margin:12px 0 8px; color:var(--muted)}
+.card{background:linear-gradient(180deg,var(--card),var(--bg)); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
 .grid{display:grid; gap:12px}
 .g2{grid-template-columns:1fr 1fr}
 .g3{grid-template-columns:repeat(3,1fr)}
 @media (max-width:1050px){.g3{grid-template-columns:1fr}; .g2{grid-template-columns:1fr}}
-.btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
-.btn:hover{background:#0f1f39}
-.small{font-size:12px; color:#93a3b5}
-input,select,textarea{padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e5e7eb; width:100%}
+.btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--surface-line); background:var(--surface); color:var(--btn-fg,#e2e8f0); text-decoration:none; cursor:pointer}
+.btn:hover{background:var(--surface-hover)}
+.small{font-size:12px; color:var(--muted)}
+input,select,textarea{padding:8px 10px; border-radius:10px; border:1px solid #223049; background:var(--surface); color:var(--text); width:100%}
 textarea{min-height:72px}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
-.chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; background:#0d1a2e; font-size:12px; color:#9aa5b1}
+.chip{display:inline-block; padding:2px 8px; border:1px solid #223049; border-radius:999px; background:var(--surface); font-size:12px; color:var(--muted)}
 .ok{color:var(--ok)}
 .warn{color:var(--warn)}
 .bad{color:var(--bad)}
 .score{display:flex; gap:10px; flex-wrap:wrap}
-.score .s{padding:10px 12px; border:1px solid #223049; border-radius:10px; background:#0d1a2e}
+.score .s{padding:10px 12px; border:1px solid #223049; border-radius:10px; background:var(--surface)}
 .kpi{display:grid; gap:8px; grid-template-columns:repeat(2,1fr)}
 @media (max-width:800px){.kpi{grid-template-columns:1fr}}
-.bar{height:12px; background:#0d1a2e; border:1px solid #223049; border-radius:999px; overflow:hidden}
+.bar{height:12px; background:var(--surface); border:1px solid #223049; border-radius:999px; overflow:hidden}
 .bar > div{height:100%; background:linear-gradient(90deg,#60a5fa,#22c55e)}
 .tickets{display:flex; gap:12px; flex-wrap:wrap}
 .ticket{width:58mm; background:#fff; color:#000; padding:5mm 4mm; border-radius:6px; box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace}

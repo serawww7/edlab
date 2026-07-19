@@ -14,36 +14,37 @@
 <head>
 <link rel="stylesheet" href="/assets/edlab-core.css">
 <meta charset="utf-8" />
+<script>(function(){try{var t=localStorage.getItem('edlab-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Пара 13 — Планування польової операції: площа, ресурси, час, завантаження</title>
 <meta name="description" content="🚜 Планування операції: площа за проходами → насіння/добрива/ЗЗР → ПММ → час → завантаження">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
-    --bg:#0b1220; --card:#0f172a; --muted:#94a3b8; --text:#e2e8f0;
+    --bg:#0b1220; --card:#0f172a; --muted:#b0bcc9; --text:#e2e8f0;
     --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --bad:#ef4444; --good:#10b981; --line:#1f2937;
     --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
   }
 body{
-    margin:0; background:linear-gradient(180deg,#0b1220,#111827 30%,#0b1220);
+    margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg));
     color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
   }
 .wrap{max-width:1100px; margin:0 auto; padding:24px 16px 64px}
-.badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:#0b1220; border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
+.badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:var(--bg); border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
 h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
        color:#93c5fd;}
 h2{font-size:22px; margin:28px 0 12px}
 p{margin:10px 0}
-.muted{color:#93a3b5}
-.pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:#a5b4fc; background:#0d1a2e; margin-right:6px}
-.card{background:linear-gradient(180deg,#0f172a,#0b1220); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.muted{color:var(--muted)}
+.pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:var(--chip-fg,#c7d2fe); background:var(--surface); margin-right:6px}
+.card{background:linear-gradient(180deg,var(--card),var(--bg)); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
 .box{border:1px solid #223049; border-radius:12px; padding:12px; background:var(--darkcell); color:var(--darkink)}
 .ok{color:var(--good)}
 .warn{color:var(--warn)}
 .bad{color:var(--bad)}
 .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
-.btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#dbeafe; text-decoration:none; cursor:pointer}
-.btn:hover{background:#0f1f39}
+.btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--surface-line); background:var(--surface); color:var(--btn-fg,#e2e8f0); text-decoration:none; cursor:pointer}
+.btn:hover{background:var(--surface-hover)}
 .grid{display:grid; gap:12px}
 .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -54,7 +55,7 @@ p{margin:10px 0}
 .table td.dark, .table th.dark{background:var(--darkcell) !important; color:var(--darkink2) !important}
 .out{background:var(--darkcell); color:var(--darkink2); border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
 input[type="text"], input[type="number"]{
-    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:#0d1a2e; color:#e6eef9
+    width:100%; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:var(--surface); color:#e6eef9
   }
 html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
 html.embedded .box{background:#f8fafc; color:#111}

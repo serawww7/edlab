@@ -9,8 +9,10 @@
 html[data-theme="dark"]{
   /* Базова палітра (темна — за замовчуванням) */
   --bg:#0b1220; --bg2:#111827; --card:#0f172a; --soft:#0b1324;
-  --text:#e5e7eb; --muted:#9aa5b1; --line:#1f2937;
+  --text:#e5e7eb; --muted:#b0bcc9; --line:#1f2937;
   --accent:#22c55e; --accent2:#60a5fa; --link:#9ec5ff;
+  /* Інтерактивні підписи (кнопки / чіпи) — AA на темних поверхнях */
+  --btn-fg:#e2e8f0; --chip-fg:#c7d2fe;
 
   /* Семантичні статуси */
   --good:#10b981; --warn:#f59e0b; --bad:#ef4444;
@@ -42,6 +44,7 @@ html[data-theme="light"]{
   --accent:#16a34a; --accent2:#1d4ed8; --link:#1d4ed8;
   --good:#059669; --warn:#b45309; --bad:#dc2626;
   --surface:#ffffff; --surface-hover:#eef3f9; --surface-line:#c9d4e3;
+  --btn-fg:#0f172a; --chip-fg:#3730a3;
   --footer-bg:#e8eef6; --footer-line:#c9d4e3;
   --header-bg:rgba(255,255,255,.92);
   --shadow-card:0 6px 24px rgba(15,23,42,.08);
@@ -147,21 +150,20 @@ p{margin:8px 0}
 }
 .tag{
   display:inline-block; padding:4px 10px; border:1px solid var(--line);
-  border-radius:var(--r-pill); font-size:12px; color:#a5b4fc; background:var(--surface); margin-right:6px;
+  border-radius:var(--r-pill); font-size:12px; color:var(--chip-fg); background:var(--surface); margin-right:6px;
 }
-html[data-theme="light"] .tag{ color:#3730a3; }
 .emoji{font-size:26px; line-height:1}
 
 /* ------------------------------ Buttons --------------------------------- */
 .btn{
   display:inline-flex; align-items:center; gap:8px; padding:10px 14px;
   border-radius:var(--r-sm); border:1px solid var(--surface-line);
-  background:var(--surface); color:#dbeafe; text-decoration:none; cursor:pointer;
+  background:var(--surface); color:var(--btn-fg); text-decoration:none; cursor:pointer;
   font-size:14px; line-height:1.2; transition:background .15s ease, border-color .15s ease;
 }
 .btn:hover{background:var(--surface-hover); text-decoration:none}
 .btn.secondary{background:var(--soft)}
-.btn.ghost{background:transparent; border-color:#334155; color:#cbd5e1}
+.btn.ghost{background:transparent; border-color:var(--surface-line); color:var(--text)}
 .btn.ghost:hover{background:var(--surface-hover)}
 .btn.primary{background:linear-gradient(180deg,#16a34a,#15803d); border-color:#15803d; color:#eafff2}
 .btn.primary:hover{filter:brightness(1.06)}
@@ -175,7 +177,7 @@ html[data-theme="light"] .tag{ color:#3730a3; }
 .card h2{margin-top:0}
 
 /* ------------------------------ Forms ----------------------------------- */
-label{display:block; font-size:13px; color:#cbd5e1; margin:8px 0 4px}
+label{display:block; font-size:13px; color:var(--muted); margin:8px 0 4px}
 input[type="text"],input[type="number"],input[type="date"],input[type="email"],input[type="url"],input[type="search"],select,textarea{
   width:100%; padding:10px 12px; border-radius:var(--r-sm);
   border:1px solid var(--surface-line); background:var(--surface); color:var(--text);
@@ -191,7 +193,7 @@ img,video{max-width:100%; height:auto}
 .table-wrap{overflow-x:auto; border-radius:var(--r-md); border:1px solid var(--surface-line)}
 .table{width:100%; border-collapse:separate; border-spacing:0}
 .table th,.table td{padding:8px 10px; border-bottom:1px solid var(--line); font-size:14px; vertical-align:top}
-.table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+.table thead th{background:var(--soft); color:var(--chip-fg); text-align:left; position:sticky; top:0}
 .table tbody tr:nth-child(even){background:var(--soft)}
 
 /* ------------------------------ Notes / toast --------------------------- */
@@ -305,10 +307,77 @@ img,video{max-width:100%; height:auto}
 
 /* Світла тема: кольори shell-блоків */
 html[data-theme="light"] .site-header__nav a{color:var(--text)}
-html[data-theme="light"] .btn{color:var(--text)}
 html[data-theme="light"] .tile{color:var(--text)}
 html[data-theme="light"] .badge{background:var(--soft); color:var(--muted)}
 html[data-theme="light"] label{color:#334155}
+
+/* ==========================================================================
+   Заняття: AA-контраст .btn / .step / muted (перебиває типові inline-правила)
+   Специфічність html body … вища за одиночний .btn у <style> сторінки.
+   ========================================================================== */
+html body .btn{
+  background:var(--surface); color:var(--btn-fg); border-color:var(--surface-line);
+}
+html body .btn:hover{background:var(--surface-hover)}
+html body .btn.primary{background:linear-gradient(180deg,#16a34a,#15803d); border-color:#15803d; color:#eafff2}
+html body .step{
+  background:var(--soft); border-color:var(--line); color:var(--text);
+}
+html body .step .n{
+  background:var(--surface); color:var(--chip-fg);
+}
+html body .pill{
+  background:var(--surface); border-color:var(--surface-line); color:var(--chip-fg);
+}
+html body .badge{color:var(--muted)}
+html body .muted,html body .small,html body .hint,html body .subtitle{color:var(--muted)}
+html body .footer,html body .logo .badge{color:var(--muted)}
+html body .field label,html body label{color:var(--muted)}
+html body .table thead th{background:var(--soft); color:var(--chip-fg)}
+html body b,html body strong{color:inherit}
+
+/* Світла тема: підміняємо захардкоджені темні фони занять */
+html[data-theme="light"] body{
+  background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg));
+  color:var(--text);
+}
+html[data-theme="light"] body .card,
+html[data-theme="light"] body .panel,
+html[data-theme="light"] body .box{
+  background:linear-gradient(180deg,var(--card),var(--soft));
+  border-color:var(--line);
+  color:var(--text);
+  box-shadow:var(--shadow-card);
+}
+html[data-theme="light"] body h1{color:#1d4ed8; background:none; -webkit-text-fill-color:unset}
+html[data-theme="light"] body h2,html[data-theme="light"] body h3{color:var(--text)}
+html[data-theme="light"] body .kpi{border-color:var(--line); color:var(--text)}
+html[data-theme="light"] body .table th,
+html[data-theme="light"] body .table td{border-color:var(--line); color:var(--text)}
+html[data-theme="light"] body .field input,
+html[data-theme="light"] body .field select,
+html[data-theme="light"] body input,
+html[data-theme="light"] body select,
+html[data-theme="light"] body textarea{
+  background:var(--surface); color:var(--text); border-color:var(--surface-line);
+}
+html[data-theme="light"] body .kbd,
+html[data-theme="light"] body .chip,
+html[data-theme="light"] body .tag,
+html[data-theme="light"] body .table td .tag{
+  background:var(--soft); color:var(--chip-fg); border-color:var(--line);
+}
+html[data-theme="light"] body .badge{
+  background:var(--soft); color:var(--muted); border-color:var(--line);
+}
+html[data-theme="light"] body .table,
+html[data-theme="light"] body .table th,
+html[data-theme="light"] body .table td{
+  border-color:var(--line);
+}
+html[data-theme="light"] body .table thead th{
+  background:var(--soft); color:var(--chip-fg);
+}
 
 /* ==========================================================================
    Специфічні блоки головної / spec
@@ -396,11 +465,21 @@ html[data-theme="light"] label{color:#334155}
    Вбудовано в Moodle (iframe) → світлий, спрощений вигляд
    ========================================================================== */
 html.embedded body{background:#fff; color:#111}
-html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none; color:#111}
 html.embedded h1{background:none; color:#111; -webkit-text-fill-color:unset}
 html.embedded .spec{background:#fff; color:#111; border:1px solid #e5e7eb}
 html.embedded .spec:hover{background:#f8fafc}
 html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+html.embedded body .btn{background:#111827; color:#fff; border-color:#111827}
+html.embedded body .step{background:#f8fafc; border-color:#e5e7eb; color:#111}
+html.embedded body .step .n{background:#eef2ff; color:#3730a3}
+html.embedded body .pill{background:#f1f5f9; border-color:#e2e8f0; color:#334155}
+html.embedded body .badge,
+html.embedded body .muted,
+html.embedded body .small,
+html.embedded body .hint,
+html.embedded body .footer{color:#475569}
+html.embedded body .field label,html.embedded body label{color:#334155}
 html.embedded .site-header,
 html.embedded .site-footer,
 html.embedded .edlab-attribution,
