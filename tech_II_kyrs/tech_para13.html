@@ -397,8 +397,8 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="number" step="1" value="${s.sg}"></td>
-      <td class="dark"><input type="number" step="0.1" value="${s.val}"></td>
+      <td><input type="number" step="1" value="${s.sg}" aria-label="Підгрупа"></td>
+      <td class="dark"><input type="number" step="0.1" value="${s.val}" aria-label="Значення"></td>
       <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(body); buildCSV_Raw(); recalc();">✖</button></td>
     `;
     body.appendChild(tr); reindex(body); buildCSV_Raw();
@@ -554,12 +554,12 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr=document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.desc}"></td>
-      <td class="dark"><input type="text" value="${s.root}"></td>
-      <td class="dark"><input type="text" value="${s.corr}"></td>
-      <td class="dark"><input type="text" value="${s.prev}"></td>
-      <td><input type="text" value="${s.resp}"></td>
-      <td><input type="date" value="${s.due}"></td>
+      <td><input type="text" value="${s.desc}" aria-label="Опис"></td>
+      <td class="dark"><input type="text" value="${s.root}" aria-label="Root cause"></td>
+      <td class="dark"><input type="text" value="${s.corr}" aria-label="Corrective"></td>
+      <td class="dark"><input type="text" value="${s.prev}" aria-label="Preventive"></td>
+      <td><input type="text" value="${s.resp}" aria-label="Відповідальний"></td>
+      <td><input type="date" value="${s.due}" aria-label="Термін"></td>
       <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyNCR); buildCSV_NCR();">✖</button></td>
     `;
     bodyNCR.appendChild(tr); reindex(bodyNCR); buildCSV_NCR();
@@ -595,7 +595,7 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td class="idx">1</td>
-      <td><input type="text" value="${byId('charName').value}"></td>
+      <td><input type="text" value="${byId('charName').value}" aria-label="Підгрупа"></td>
       <td class="dark">${mX?`[${mX[1]}; ${mX[2]}]`:'—'}</td>
       <td class="dark">${mR?`[${mR[1]}; ${mR[2]}]`:'—'}</td>
       <td>${cap||'—'}</td>

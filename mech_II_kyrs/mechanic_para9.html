@@ -368,15 +368,15 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.name}"></td>
-      <td><input type="number" step="1" value="${s.intH}"></td>
-      <td><input type="number" step="1" value="${s.intD}"></td>
-      <td><input type="number" step="1" value="${s.lastH}"></td>
-      <td><input type="date" value="${s.lastD}"></td>
+      <td><input type="text" value="${s.name}" aria-label="Пункт ТО"></td>
+      <td><input type="number" step="1" value="${s.intH}" aria-label="Інтервал, м/г"></td>
+      <td><input type="number" step="1" value="${s.intD}" aria-label="Інтервал, днів"></td>
+      <td><input type="number" step="1" value="${s.lastH}" aria-label="Останні м/г"></td>
+      <td><input type="date" value="${s.lastD}" aria-label="Остання дата"></td>
       <td class="dark toH">—</td>
       <td class="dark toD">—</td>
       <td class="dark flag">—</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyEl.appendChild(tr);
     reindex();
@@ -494,7 +494,7 @@ html.embedded .box{background:#f8fafc;color:#111}
     if(!s){ alert('Введи назву задачі'); return; }
     const div = document.createElement('div');
     div.className='row';
-    div.innerHTML = `<label style="flex:1"><input type="checkbox" class="chk" checked> ${s}</label>`;
+    div.innerHTML = `<label style="flex:1"><input type="checkbox" class="chk" checked aria-label="Прапорець"> ${s}</label>`;
     byId('customTask').value='';
     // додамо перед кнопками — у першій колонці (стандартний перелік)
     // знайдемо першу колонку і додамо в її кінець

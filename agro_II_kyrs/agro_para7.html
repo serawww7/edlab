@@ -300,26 +300,26 @@ html.embedded .box{background:#f8fafc; color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${sample.field}"/></td>
-      <td><input type="text" value="${sample.code}"/></td>
-      <td><input type="date" value="${sample.date}"/></td>
+      <td><input type="text" value="${sample.field}"/ aria-label="Поле (код)"></td>
+      <td><input type="text" value="${sample.code}"/ aria-label="Зразок"></td>
+      <td><input type="date" value="${sample.date}"/ aria-label="Дата"></td>
       <td>
-        <select>
+        <select aria-label="Текстура">
           <option${/піщ/i.test(sample.texture)?' selected':''}>піщаний</option>
           <option${/супіс/i.test(sample.texture)?' selected':''}>супіщаний</option>
           <option${/суглин/i.test(sample.texture)?' selected':''}>суглинок</option>
           <option${/глина/i.test(sample.texture)?' selected':''}>глина</option>
         </select>
       </td>
-      <td><input type="number" step="0.1" value="${sample.pH}"/></td>
-      <td><input type="number" step="0.01" value="${sample.EC}"/></td>
-      <td><input type="number" step="1" value="${sample.N}"/></td>
-      <td><input type="number" step="1" value="${sample.P}"/></td>
-      <td><input type="number" step="1" value="${sample.K}"/></td>
+      <td><input type="number" step="0.1" value="${sample.pH}"/ aria-label="pH"></td>
+      <td><input type="number" step="0.01" value="${sample.EC}"/ aria-label="EC, dS/m"></td>
+      <td><input type="number" step="1" value="${sample.N}"/ aria-label="N (ppm)"></td>
+      <td><input type="number" step="1" value="${sample.P}"/ aria-label="P₂O₅ (ppm)"></td>
+      <td><input type="number" step="1" value="${sample.K}"/ aria-label="K₂O (ppm)"></td>
       <td class="dark lvl">—</td>
       <td class="dark rnpk">—</td>
       <td class="dark lime">—</td>
-      <td><input type="text" value="${sample.note}"/></td>
+      <td><input type="text" value="${sample.note}"/ aria-label="Коментар"></td>
     `;
     bodyEl.appendChild(tr);
     reindex();

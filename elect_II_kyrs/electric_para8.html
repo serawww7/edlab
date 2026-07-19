@@ -328,7 +328,7 @@ tbody tr:nth-child(even){background:#0b1324}
     const key = td.getAttribute('data-k');
     const idx = td.parentElement.rowIndex-1;
     const r = rows[idx];
-    const inp = document.createElement('input');
+    const inp=document.createElement('input'); inp.setAttribute('aria-label', (typeof key!=='undefined'&&key)?String(key): (typeof k!=='undefined'&&k)?String(k):'Редагування комірки');
     inp.value = r[key] || '';
     inp.style.width='100%'; inp.style.padding='6px 8px';
     inp.addEventListener('blur', ()=>{

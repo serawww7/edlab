@@ -463,15 +463,15 @@ html.embedded .box{background:#f8fafc; color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.field}"></td>
-      <td><input type="number" step="10" value="${s.rpm}"></td>
-      <td><input type="number" step="0.1" value="${s.ratio}"></td>
-      <td><input type="number" step="0.001" value="${s.R}"></td>
+      <td><input type="text" value="${s.field}" aria-label="Поле/ділянка"></td>
+      <td><input type="number" step="10" value="${s.rpm}" aria-label="Обертів двиг., rpm"></td>
+      <td><input type="number" step="0.1" value="${s.ratio}" aria-label="Передача (коеф.)"></td>
+      <td><input type="number" step="0.001" value="${s.R}" aria-label="Радіус кочення, м"></td>
       <td class="vth">—</td>
-      <td><input type="number" step="0.1" value="${s.vfact}"></td>
+      <td><input type="number" step="0.1" value="${s.vfact}" aria-label="V факт., км/год"></td>
       <td class="dark slip">—</td>
       <td class="dark flag">—</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyEl.appendChild(tr);
     reindex();

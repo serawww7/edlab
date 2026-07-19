@@ -369,14 +369,14 @@ tr{background:#0b1528;border-radius:12px}
         const wrap=document.createElement('div'); wrap.className='step';
         wrap.innerHTML=`
           <div class="row">
-            <div><small>Учасник</small><input type="text" data-k="name" data-i="${i}" value="${row.name}"></div>
+            <div><small>Учасник</small><input type="text" data-k="name" data-i="${i}" value="${row.name}" aria-label="Назва"></div>
             <div><small>Роль/ресурс</small>
-              <select data-k="role" data-i="${i}">
+              <select data-k="role" data-i="${i}" aria-label="Текст">
                 ${ROLES.map(r=>`<option ${row.role===r?'selected':''}>${r}</option>`).join('')}
               </select>
             </div>
-            <div><small>Сильна сторона (1–2 слова)</small><input type="text" data-k="strength" data-i="${i}" value="${row.strength||''}"></div>
-            <div><small>Коментар</small><input type="text" data-k="note" data-i="${i}" value="${row.note||''}"></div>
+            <div><small>Сильна сторона (1–2 слова)</small><input type="text" data-k="strength" data-i="${i}" value="${row.strength||''}" aria-label="Текст"></div>
+            <div><small>Коментар</small><input type="text" data-k="note" data-i="${i}" value="${row.note||''}" aria-label="Текст"></div>
           </div>`;
         root.appendChild(wrap);
       });
@@ -402,10 +402,10 @@ tr{background:#0b1528;border-radius:12px}
         const el=document.createElement('div'); el.className='step';
         el.innerHTML=`
           <div class="row">
-            <div><small>Крок</small><input type="text" data-k="title" data-i="${i}" value="${s.title}"></div>
-            <div><small>Відповідальний</small><input type="text" data-k="owner" data-i="${i}" value="${s.owner}"></div>
-            <div><small>Ресурс</small><input type="text" data-k="resource" data-i="${i}" value="${s.resource}"></div>
-            <div><small>Дедлайн</small><input type="text" data-k="deadline" data-i="${i}" value="${s.deadline}" placeholder="напр., 15.11"></div>
+            <div><small>Крок</small><input type="text" data-k="title" data-i="${i}" value="${s.title}" aria-label="title"></div>
+            <div><small>Відповідальний</small><input type="text" data-k="owner" data-i="${i}" value="${s.owner}" aria-label="owner"></div>
+            <div><small>Ресурс</small><input type="text" data-k="resource" data-i="${i}" value="${s.resource}" aria-label="resource"></div>
+            <div><small>Дедлайн</small><input type="text" data-k="deadline" data-i="${i}" value="${s.deadline}" placeholder="напр., 15.11" aria-label="deadline"></div>
           </div>
           <div class="btn-row">
             <button type="button" class="btn" data-up="${i}">⬆️</button>

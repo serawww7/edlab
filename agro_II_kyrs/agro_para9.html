@@ -301,12 +301,12 @@ html.embedded .box{background:#f8fafc; color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${f.name}"></td>
-      <td><input type="number" step="0.1" value="${f.N}"></td>
-      <td><input type="number" step="0.1" value="${f.P}"></td>
-      <td><input type="number" step="0.1" value="${f.K}"></td>
-      <td><input type="number" step="1" value="${f.price}"></td>
-      <td style="text-align:center"><input type="checkbox" ${f.use?'checked':''}></td>
+      <td><input type="text" value="${f.name}" aria-label="Назва"></td>
+      <td><input type="number" step="0.1" value="${f.N}" aria-label="%N"></td>
+      <td><input type="number" step="0.1" value="${f.P}" aria-label="%P₂O₅"></td>
+      <td><input type="number" step="0.1" value="${f.K}" aria-label="%K₂O"></td>
+      <td><input type="number" step="1" value="${f.price}" aria-label="Ціна, грн/т"></td>
+      <td style="text-align:center"><input type="checkbox" ${f.use?'checked':''} aria-label="Використати?"></td>
     `;
     fertBody.appendChild(tr);
     reindexF();

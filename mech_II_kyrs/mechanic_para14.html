@@ -552,13 +552,13 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.node}"></td>
+      <td><input type="text" value="${s.node}" aria-label="Режим/вузол"></td>
       <td>${s.md}</td>
       <td class="dark">${s.bsfc}</td>
       <td class="dark">${s.q}</td>
       <td class="dark">${s.af}</td>
       <td>${s.th}</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyEl.appendChild(tr); reindex(); buildCSVlog();
   }

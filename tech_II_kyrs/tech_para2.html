@@ -407,9 +407,9 @@ button, .btn, input, select, textarea, a { pointer-events:auto !important; }
     const note = sample?.note || '';
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${ts}" placeholder="HH:MM:SS"></td>
-      <td class="dark"><input type="number" step="0.1" value="${t}"></td>
-      <td><input type="text" value="${note}"></td>
+      <td><input type="text" value="${ts}" placeholder="HH:MM:SS" aria-label="Час (HH:MM:SS)"></td>
+      <td class="dark"><input type="number" step="0.1" value="${t}" aria-label="T, °C"></td>
+      <td><input type="text" value="${note}" aria-label="Примітка"></td>
       <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyPoints); buildCSVpoints();">✖</button></td>
     `;
     bodyPoints.appendChild(tr); reindex(bodyPoints); buildCSVpoints();
@@ -585,7 +585,7 @@ button, .btn, input, select, textarea, a { pointer-events:auto !important; }
       <td class="dark">${s.limits}</td>
       <td class="dark">${s.metrics}</td>
       <td class="dark">${s.status}</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Дії/Примітка"></td>
     `;
     bodyLog.appendChild(tr); reindex(bodyLog); buildCSVlog();
   }

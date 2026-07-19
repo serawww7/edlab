@@ -262,9 +262,9 @@ function refreshStopsUI(){
     d.innerHTML = `
       <h3>Зупинка #${i+1} <span class="badge mono">${s.id}</span></h3>
       <div class="minirow">
-        <label style="flex:2">Адреса<input class="input in-addr" value="${s.addr||''}" placeholder="м. Тальне, вул. Шевченка, 10"/></label>
+        <label style="flex:2">Адреса<input class="input in-addr" value="${s.addr||''}" placeholder="м. Тальне, вул. Шевченка, 10"/ aria-label="Текст"></label>
         <label style="flex:1">Тип робіт
-          <select class="input in-job">
+          <select class="input in-job" aria-label="Текст">
             <option ${s.job==='Огляд лічильника'?'selected':''}>Огляд лічильника</option>
             <option ${s.job==='Усунення витоку'?'selected':''}>Усунення витоку</option>
             <option ${s.job==='Заміна крана/шланга'?'selected':''}>Заміна крана/шланга</option>
@@ -272,17 +272,17 @@ function refreshStopsUI(){
             <option ${s.job==='Пуск газу'?'selected':''}>Пуск газу</option>
           </select>
         </label>
-        <label style="flex:1">Контакт<input class="input in-contact" value="${s.contact||''}" placeholder="+380..."/></label>
+        <label style="flex:1">Контакт<input class="input in-contact" value="${s.contact||''}" placeholder="+380..."/ aria-label="Текст"></label>
       </div>
       <div class="minirow" style="margin-top:6px">
         <button type="button" class="btn btn-nfc">📶 NFC</button>
-        <input class="input in-asset" placeholder="ID об’єкта (якщо NFC недоступний)" value="${s.asset||''}"/>
+        <input class="input in-asset" placeholder="ID об’єкта (якщо NFC недоступний)" value="${s.asset||''}"/ aria-label="Текст">
         <button type="button" class="btn secondary btn-asset">💾 Застосувати</button>
         <span class="badge">Фото: <b class="phc">${s.beforeImg?1:0} / ${s.afterImg?1:0}</b></span>
         <span class="badge">Аудіо: <b class="audc">${s.audioUrl?'є':'немає'}</b></span>
       </div>
       <div class="minirow" style="margin-top:6px">
-        <label>Тривалість, хв<input type="number" min="0" step="1" class="input in-dur" value="${Number.isFinite(s.durMin)?s.durMin:0}"/></label>
+        <label>Тривалість, хв<input type="number" min="0" step="1" class="input in-dur" value="${Number.isFinite(s.durMin)?s.durMin:0}"/ aria-label="Число"></label>
       </div>
       <div class="gallery gal-stop">${s.beforeImg?`<img class="photo" src="${s.beforeImg}" alt="до"/>`:''}${s.afterImg?`<img class="photo" src="${s.afterImg}" alt="після"/>`:''}</div>
     `;

@@ -512,9 +512,9 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${byId('nodeName').value}"></td>
-      <td><input type="number" step="1" value="${byId('rpm').value}"></td>
-      <td><input type="number" step="0.01" value="${byId('f1exp').value}"></td>
+      <td><input type="text" value="${byId('nodeName').value}" aria-label="Вузол"></td>
+      <td><input type="number" step="1" value="${byId('rpm').value}" aria-label="rpm"></td>
+      <td><input type="number" step="0.01" value="${byId('f1exp').value}" aria-label="1X очік., Гц"></td>
       <td class="rms">`+byId('rms').textContent+`</td>
       <td class="peak">`+byId('peak').textContent+`</td>
       <td class="dark h1">`+byId('a1').textContent+`</td>
@@ -522,7 +522,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark h3">`+byId('a3').textContent+`</td>
       <td class="dark d1">`+byId('f1diff').textContent+`</td>
       <td class="dark dg">`+byId('diag').textContent+`</td>
-      <td><input type="text" value=""></td>
+      <td><input type="text" value="" aria-label="Критерій"></td>
     `;
     bodyEl.appendChild(tr);
     reindex();
@@ -554,9 +554,9 @@ html.embedded .box{background:#f8fafc;color:#111}
       const tr=document.createElement('tr');
       tr.innerHTML=`
         <td class="idx">1</td>
-        <td><input type="text" value="${n}"></td>
-        <td><input type="number" step="1" value="${r}"></td>
-        <td><input type="number" step="0.01" value="${f1}"></td>
+        <td><input type="text" value="${n}" aria-label="Вузол"></td>
+        <td><input type="number" step="1" value="${r}" aria-label="rpm"></td>
+        <td><input type="number" step="0.01" value="${f1}" aria-label="1X очік., Гц"></td>
         <td class="rms">${rms}</td>
         <td class="peak">${pk}</td>
         <td class="dark h1">${h1}</td>
@@ -564,7 +564,7 @@ html.embedded .box{background:#f8fafc;color:#111}
         <td class="dark h3">${h3}</td>
         <td class="dark d1">${d1}</td>
         <td class="dark dg">${dg}</td>
-        <td><input type="text" value="${note}"></td>
+        <td><input type="text" value="${note}" aria-label="Примітка"></td>
       `;
       bodyEl.appendChild(tr);
     };

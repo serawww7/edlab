@@ -266,17 +266,17 @@ html.embedded .box{background:#f8fafc; color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.id}"></td>
-      <td><input type="text" value="${s.model}"></td>
-      <td><input type="number" step="1" value="${s.h}"></td>
-      <td><input type="date" value="${s.lastDate}"></td>
-      <td><input type="number" step="1" value="${s.lastH}"></td>
-      <td><input type="number" step="1" value="${s.intH}"></td>
-      <td><input type="number" step="1" value="${s.intD}"></td>
+      <td><input type="text" value="${s.id}" aria-label="Машина ID"></td>
+      <td><input type="text" value="${s.model}" aria-label="Модель"></td>
+      <td><input type="number" step="1" value="${s.h}" aria-label="Мотогод., h"></td>
+      <td><input type="date" value="${s.lastDate}" aria-label="ТО останнє: дата"></td>
+      <td><input type="number" step="1" value="${s.lastH}" aria-label="ТО останнє: h"></td>
+      <td><input type="number" step="1" value="${s.intH}" aria-label="Інтервал ТО: h"></td>
+      <td><input type="number" step="1" value="${s.intD}" aria-label="Інтервал ТО: днів"></td>
       <td class="dark dueH">—</td>
       <td class="dark dueD">—</td>
       <td class="dark status">—</td>
-      <td><input type="text" value="${s.note}"></td>`;
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>`;
     bodyM.appendChild(tr);
     reindex(bodyM);
   }
@@ -298,14 +298,14 @@ html.embedded .box{background:#f8fafc; color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="date" value="${s.date}"></td>
-      <td><input type="text" value="${s.id}"></td>
-      <td><input type="text" value="${s.job}"></td>
-      <td><input type="number" step="0.1" value="${s.hours}"></td>
-      <td><input type="number" step="1" value="${s.parts}"></td>
+      <td><input type="date" value="${s.date}" aria-label="Дата"></td>
+      <td><input type="text" value="${s.id}" aria-label="Машина ID"></td>
+      <td><input type="text" value="${s.job}" aria-label="Тип робіт"></td>
+      <td><input type="number" step="0.1" value="${s.hours}" aria-label="Люд.-год"></td>
+      <td><input type="number" step="1" value="${s.parts}" aria-label="Матеріали, грн"></td>
       <td class="dark workCost">—</td>
       <td class="dark total">—</td>
-      <td><input type="text" value="${s.note}"></td>`;
+      <td><input type="text" value="${s.note}" aria-label="Нотатка"></td>`;
     bodyJ.appendChild(tr); reindex(bodyJ);
   }
   function demoJobs(){

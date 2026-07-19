@@ -313,17 +313,17 @@ html.embedded .box{background:#f8fafc; color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.field}"></td>
-      <td><input type="number" step="1" value="${s.L}"></td>
-      <td><input type="number" step="1" value="${s.passes}"></td>
-      <td><input type="number" step="0.01" value="${s.W}"></td>
-      <td><input type="number" step="1" value="${s.Ov}"></td>
-      <td><input type="number" step="0.1" value="${s.V}"></td>
-      <td><input type="number" step="0.1" value="${s.FuelH}"></td>
+      <td><input type="text" value="${s.field}" aria-label="Поле"></td>
+      <td><input type="number" step="1" value="${s.L}" aria-label="Довжина гону L, м"></td>
+      <td><input type="number" step="1" value="${s.passes}" aria-label="К-ть проходів"></td>
+      <td><input type="number" step="0.01" value="${s.W}" aria-label="Ширина W (м, опц.)"></td>
+      <td><input type="number" step="1" value="${s.Ov}" aria-label="Перекр., % (опц.)"></td>
+      <td><input type="number" step="0.1" value="${s.V}" aria-label="Швидк., км/год"></td>
+      <td><input type="number" step="0.1" value="${s.FuelH}" aria-label="ПММ, л/год (опц.)"></td>
       <td class="dark area">—</td>
       <td class="dark time">—</td>
       <td class="dark fuel">—</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyEl.appendChild(tr);
     reindex();

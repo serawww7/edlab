@@ -399,10 +399,10 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td class="idx">1</td>
-      <td><input type="text" value="${s.lot}"></td>
-      <td class="dark"><input type="text" value="${s.supp}"></td>
-      <td class="dark"><input type="date" value="${s.date}"></td>
-      <td class="dark"><input type="number" step="0.1" value="${s.kg}"></td>
+      <td><input type="text" value="${s.lot}" aria-label="Лот RAW"></td>
+      <td class="dark"><input type="text" value="${s.supp}" aria-label="Постачальник"></td>
+      <td class="dark"><input type="date" value="${s.date}" aria-label="Дата прийм."></td>
+      <td class="dark"><input type="number" step="0.1" value="${s.kg}" aria-label="К-ть, кг"></td>
       <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyRAW); buildCSV_RAW();">✖</button></td>
     `;
     bodyRAW.appendChild(tr); reindex(bodyRAW); buildCSV_RAW();
@@ -433,10 +433,10 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td class="idx">1</td>
-      <td><input type="text" value="${s.id}"></td>
-      <td class="dark"><input type="date" value="${s.date}"></td>
-      <td class="dark"><input type="text" value="${s.comp}" placeholder="S-25041-AC:60%;B-25039-Z1:40%"></td>
-      <td><input type="number" step="0.1" value="${s.outKg}"></td>
+      <td><input type="text" value="${s.id}" aria-label="Лот RAW"></td>
+      <td class="dark"><input type="date" value="${s.date}" aria-label="Постачальник"></td>
+      <td class="dark"><input type="text" value="${s.comp}" placeholder="S-25041-AC:60%;B-25039-Z1:40%" aria-label="Дата прийм."></td>
+      <td><input type="number" step="0.1" value="${s.outKg}" aria-label="К-ть, кг"></td>
       <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyWIP); buildCSV_WIP();">✖</button></td>
     `;
     bodyWIP.appendChild(tr); reindex(bodyWIP); buildCSV_WIP();
@@ -466,10 +466,10 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr=document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.lot}"></td>
-      <td class="dark"><input type="date" value="${s.date}"></td>
-      <td class="dark"><input type="text" value="${s.comp}" placeholder="WIP-101:60%;WIP-102:40%"></td>
-      <td><input type="number" step="0.1" value="${s.kg}"></td>
+      <td><input type="text" value="${s.lot}" aria-label="Лот RAW"></td>
+      <td class="dark"><input type="date" value="${s.date}" aria-label="Постачальник"></td>
+      <td class="dark"><input type="text" value="${s.comp}" placeholder="WIP-101:60%;WIP-102:40%" aria-label="Дата прийм."></td>
+      <td><input type="number" step="0.1" value="${s.kg}" aria-label="К-ть, кг"></td>
       <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyFG); buildCSV_FG();">✖</button></td>
     `;
     bodyFG.appendChild(tr); reindex(bodyFG); buildCSV_FG();
@@ -626,7 +626,7 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td class="idx">1</td>
-      <td><input type="text" value="${reason}"></td>
+      <td><input type="text" value="${reason}" aria-label="Лот RAW"></td>
       <td class="dark">${fgs}</td>
       <td class="dark">${kg}</td>
       <td>${act}</td>

@@ -362,17 +362,17 @@ html.embedded .box{background:#f8fafc; color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="datetime-local" value="${s.date}"></td>
-      <td><input type="text" value="${s.field}"></td>
-      <td><input type="text" value="${s.crop}"></td>
-      <td><input type="number" step="0.01" value="${s.weight}"></td>
-      <td><input type="number" step="0.1" value="${s.W0}"></td>
+      <td><input type="datetime-local" value="${s.date}" aria-label="Дата/час"></td>
+      <td><input type="text" value="${s.field}" aria-label="Поле"></td>
+      <td><input type="text" value="${s.crop}" aria-label="Культура"></td>
+      <td><input type="number" step="0.01" value="${s.weight}" aria-label="Вага, т"></td>
+      <td><input type="number" step="0.1" value="${s.W0}" aria-label="W₀, %"></td>
       <td class="dark md">—</td>
       <td class="dark loss">—</td>
       <td class="dark en">—</td>
       <td class="dark cost">—</td>
       <td class="dark dec">—</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Нотатка"></td>
     `;
     bodyEl.appendChild(tr);
     reindex();

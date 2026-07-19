@@ -15,6 +15,7 @@
     "wcag-labels": "node scripts/fix-wcag-labels.js",
     "wcag-meta": "node scripts/ensure-meta-desc.js",
     "wcag-contrast": "node scripts/fix-lesson-contrast.js",
+    "wcag-dynamic-a11y": "node scripts/fix-a11y-dynamic-inputs.js && node scripts/fix-a11y-selects.js",
     "build": "npm run apply-core && npm run fix-meta && npm run dedup-css && npm run build-manifest && npm run generate-sitemap && npm run wcag-meta"
   },
   "dependencies": {

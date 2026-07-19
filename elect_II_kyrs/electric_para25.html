@@ -588,7 +588,7 @@ $('#saveModel').addEventListener('click', ()=>{
   download('electric_para25_model_'+stamp()+'.json', JSON.stringify(m,null,2), 'application/json');
 });
 $('#loadModel').addEventListener('click', ()=>{
-  const inp=document.createElement('input'); inp.type='file'; inp.accept='application/json';
+  const inp=document.createElement('input'); inp.setAttribute('aria-label', (typeof key!=='undefined'&&key)?String(key): (typeof k!=='undefined'&&k)?String(k):'Редагування комірки'); inp.type='file'; inp.accept='application/json';
   inp.onchange=e=>{
     const f=e.target.files[0]; if(!f) return;
     const r=new FileReader(); r.onload=()=>{

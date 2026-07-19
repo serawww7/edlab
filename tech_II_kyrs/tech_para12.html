@@ -414,11 +414,11 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.prod}"></td>
-      <td class="dark"><input type="text" value="${s.lot}"></td>
-      <td class="dark"><input type="date" value="${s.exp}"></td>
-      <td class="dark"><input type="number" step="1" value="${s.cases}"></td>
-      <td><input type="text" value="${s.addr}"></td>
+      <td><input type="text" value="${s.prod}" aria-label="Продукт"></td>
+      <td class="dark"><input type="text" value="${s.lot}" aria-label="ЛОТ"></td>
+      <td class="dark"><input type="date" value="${s.exp}" aria-label="EXP"></td>
+      <td class="dark"><input type="number" step="1" value="${s.cases}" aria-label="К-ть, ящ."></td>
+      <td><input type="text" value="${s.addr}" aria-label="Адреса"></td>
       <td>${s.st}</td>
       <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyInbound); buildCSV_Stock();">✖</button></td>
     `;
@@ -479,9 +479,9 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.client}"></td>
-      <td class="dark"><input type="text" value="${s.prod}"></td>
-      <td class="dark"><input type="number" step="1" value="${s.need}"></td>
+      <td><input type="text" value="${s.client}" aria-label="Клієнт"></td>
+      <td class="dark"><input type="text" value="${s.prod}" aria-label="Продукт"></td>
+      <td class="dark"><input type="number" step="1" value="${s.need}" aria-label="Потрібно, ящ."></td>
       <td class="pick">—</td>
       <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyOrder); buildCSV_Order();">✖</button></td>
     `;
@@ -632,7 +632,7 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${byId('tripNo').value}"></td>
+      <td><input type="text" value="${byId('tripNo').value}" aria-label="Продукт"></td>
       <td class="dark">${client}</td>
       <td class="dark">${pals}</td>
       <td>${cases}</td>

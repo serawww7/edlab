@@ -403,7 +403,7 @@ function renderTable(){
     tr.querySelectorAll('[data-k]').forEach(td=>{
       td.addEventListener('dblclick',()=>{
         const k=td.dataset.k, old=td.textContent.trim();
-        const inp=document.createElement('input'); inp.className='input'; inp.value=old==='—'?'':old;
+        const inp=document.createElement('input'); inp.setAttribute('aria-label', (typeof key!=='undefined'&&key)?String(key): (typeof k!=='undefined'&&k)?String(k):'Редагування комірки'); inp.className='input'; inp.value=old==='—'?'':old;
         td.innerHTML=''; td.appendChild(inp); inp.focus();
         inp.addEventListener('blur',()=>{ const v=inp.value.trim(); td.innerHTML=escapeHtml(v||'—'); r[k]=v; renderDash(); });
         inp.addEventListener('keydown',e=>{ if(e.key==='Enter') inp.blur(); });

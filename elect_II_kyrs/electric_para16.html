@@ -408,7 +408,7 @@ tbody tr:nth-child(even){background:#0b1324}
     const td=e.target.closest('.editable'); if(!td) return;
     const id=td.getAttribute('data-id'); const key=td.getAttribute('data-k');
     const idx=loads.findIndex(x=>x.id===id); const L=loads[idx];
-    const input=document.createElement('input'); input.value=(key==='start' || key==='end' || key==='mode')? (L[key] || '') : (L[key] || '');
+    const input=document.createElement('input'); input.setAttribute('aria-label', (typeof key!=='undefined'&&key)?String(key): (typeof k!=='undefined'&&k)?String(k):'Редагування комірки'); input.value=(key==='start' || key==='end' || key==='mode')? (L[key] || '') : (L[key] || '');
     input.style.width='100%'; input.style.padding='6px 8px';
     input.addEventListener('blur', ()=>{ let v=input.value.trim(); if(['p_w','qty','hours','duty'].includes(key)) v=parseFloat(v.replace(',','.'))||0; L[key]=v; recalcAll(); });
     td.innerHTML=''; td.appendChild(input); input.focus(); input.select();

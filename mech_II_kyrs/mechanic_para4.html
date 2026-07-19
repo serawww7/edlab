@@ -359,26 +359,26 @@ html.embedded .box{background:#f8fafc; color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.node}"></td>
+      <td><input type="text" value="${s.node}" aria-label="Вузол"></td>
       <td>
-        <select>
+        <select aria-label="Тип">
           <option value="direct" ${s.type==='direct'?'selected':''}>direct</option>
           <option value="belt" ${s.type==='belt'?'selected':''}>belt</option>
           <option value="chain" ${s.type==='chain'?'selected':''}>chain</option>
         </select>
       </td>
-      <td><input type="number" step="1" value="${s.drv}"></td>
-      <td><input type="number" step="1" value="${s.drn}"></td>
-      <td><input type="number" step="1" value="${s.drum}"></td>
-      <td><input type="number" step="1" value="${s.rpmT}"></td>
-      <td><input type="number" step="0.01" value="${s.msT}"></td>
+      <td><input type="number" step="1" value="${s.drv}" aria-label="Ведучий (D мм / зуби)"></td>
+      <td><input type="number" step="1" value="${s.drn}" aria-label="Ведений (D мм / зуби)"></td>
+      <td><input type="number" step="1" value="${s.drum}" aria-label="Барабан D, мм"></td>
+      <td><input type="number" step="1" value="${s.rpmT}" aria-label="Ціль rpm"></td>
+      <td><input type="number" step="0.01" value="${s.msT}" aria-label="Ціль м/с"></td>
       <td class="dark i">—</td>
       <td class="dark rpm">—</td>
       <td class="dark ms">—</td>
       <td class="dark dev">—</td>
       <td class="dark need">—</td>
       <td class="dark rec">—</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyEl.appendChild(tr);
     reindex();

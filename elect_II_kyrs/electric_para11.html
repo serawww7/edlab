@@ -341,7 +341,7 @@ tbody tr:nth-child(even){background:#0b1324}
     const td = e.target.closest('.editable'); if(!td) return;
     const id = td.getAttribute('data-id'); const key = td.getAttribute('data-k');
     const idx = instr.findIndex(x=>x.id===id); const r=instr[idx];
-    const input = document.createElement('input'); input.value = r[key] || ''; input.style.width='100%'; input.style.padding='6px 8px';
+    const input=document.createElement('input'); input.setAttribute('aria-label', (typeof key!=='undefined'&&key)?String(key): (typeof k!=='undefined'&&k)?String(k):'Редагування комірки'); input.value = r[key] || ''; input.style.width='100%'; input.style.padding='6px 8px';
     input.addEventListener('blur', ()=>{ r[key] = input.value.trim(); renderInstr(); rebuildSelect(); });
     td.innerHTML=''; td.appendChild(input); input.focus(); input.select();
   });

@@ -425,11 +425,11 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td class="idx">1</td>
-      <td><input type="text" value="${s.name}"></td>
-      <td class="dark"><input type="text" value="${s.lot}"></td>
-      <td class="dark"><input type="text" value="${s.supp}"></td>
-      <td class="dark"><input type="date" value="${s.exp}"></td>
-      <td><input type="number" step="0.1" value="${s.left}"></td>
+      <td><input type="text" value="${s.name}" aria-label="Назва"></td>
+      <td class="dark"><input type="text" value="${s.lot}" aria-label="ЛОТ RM"></td>
+      <td class="dark"><input type="text" value="${s.supp}" aria-label="Постачальник"></td>
+      <td class="dark"><input type="date" value="${s.exp}" aria-label="EXP"></td>
+      <td><input type="number" step="0.1" value="${s.left}" aria-label="Залишок, кг"></td>
       <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyRM); buildCSV_RM(); refreshSelectors();">✖</button></td>
     `;
     bodyRM.appendChild(tr); reindex(bodyRM); buildCSV_RM(); refreshSelectors();
@@ -572,7 +572,7 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td class="idx">1</td>
-      <td><input type="text" value="${client}"></td>
+      <td><input type="text" value="${client}" aria-label="Клієнт"></td>
       <td class="dark">${fg}</td>
       <td class="dark">${d}</td>
       <td>${rnd(kg,2)}</td>

@@ -461,7 +461,7 @@ function analyze(){
   const feats = (KB[pred.y]?.keywords||[]).filter(w=>text.toLowerCase().includes(w)).slice(0,6);
 
   // 6) Чек-лист
-  const checklist = (KB[pred.y]?.actions||['Збери додаткові дані']).map((a,i)=>`<label style="display:block;margin:.2em 0"><input type="checkbox" data-i="${i}"/> ${a}</label>`).join('');
+  const checklist = (KB[pred.y]?.actions||['Збери додаткові дані']).map((a,i)=>`<label style="display:block;margin:.2em 0"><input type="checkbox" data-i="${i}"/ aria-label="Прапорець"> ${a}</label>`).join('');
   $('#checklist').innerHTML = checklist;
 
   // 7) ПЕЕ/Інструмент

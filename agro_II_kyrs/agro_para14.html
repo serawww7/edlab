@@ -303,13 +303,13 @@ html.embedded .box{background:#f8fafc; color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.field}"></td>
-      <td><input type="text" value="${s.crop}"></td>
-      <td><input type="number" step="0.01" value="${s.area}"></td>
-      <td><input type="number" step="1" value="${s.P}"></td>
-      <td><input type="number" step="0.1" value="${s.TKW}"></td>
-      <td><input type="number" step="0.1" value="${s.G}"></td>
-      <td><input type="number" step="0.1" value="${s.Ef}"></td>
+      <td><input type="text" value="${s.field}" aria-label="Поле"></td>
+      <td><input type="text" value="${s.crop}" aria-label="Культура/Сорт"></td>
+      <td><input type="number" step="0.01" value="${s.area}" aria-label="Площа, га"></td>
+      <td><input type="number" step="1" value="${s.P}" aria-label="Ціль рослин, шт/м²"></td>
+      <td><input type="number" step="0.1" value="${s.TKW}" aria-label="TKW (г/1000)"></td>
+      <td><input type="number" step="0.1" value="${s.G}" aria-label="Схожість, %"></td>
+      <td><input type="number" step="0.1" value="${s.Ef}" aria-label="Польова схожість, %"></td>
       <td class="dark N">—</td>
       <td class="dark KgHa">—</td>
       <td class="dark perM">—</td>
@@ -317,7 +317,7 @@ html.embedded .box{background:#f8fafc; color:#111}
       <td class="dark KgField">—</td>
       <td class="dark Bags">—</td>
       <td class="dark Flow">—</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyEl.appendChild(tr);
     reindex();

@@ -369,9 +369,9 @@ html.embedded .box{background:#f8fafc; color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.field}"></td>
-      <td><input type="number" step="0.01" value="${s.area}"></td>
-      <td><input type="text" value="${s.task}"></td>
+      <td><input type="text" value="${s.field}" aria-label="Поле / завдання"></td>
+      <td><input type="number" step="0.01" value="${s.area}" aria-label="Площа, га"></td>
+      <td><input type="text" value="${s.task}" aria-label="Опис робіт"></td>
       <td class="dark tfc">—</td>
       <td class="dark efc">—</td>
       <td class="dark tField">—</td>
@@ -379,7 +379,7 @@ html.embedded .box{background:#f8fafc; color:#111}
       <td class="dark fuel">—</td>
       <td class="dark cHa">—</td>
       <td class="dark cost">—</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyEl.appendChild(tr);
     reindex();

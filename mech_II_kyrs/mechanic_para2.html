@@ -324,26 +324,26 @@ html.embedded .box{background:#f8fafc; color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="date" value="${s.date}"></td>
-      <td><input type="text" value="${s.id}"></td>
+      <td><input type="date" value="${s.date}" aria-label="Дата"></td>
+      <td><input type="text" value="${s.id}" aria-label="Машина ID"></td>
       <td>
-        <select>
+        <select aria-label="Режим">
           <option value="field" ${s.mode==='field'?'selected':''}>поле</option>
           <option value="transport" ${s.mode==='transport'?'selected':''}>транспорт</option>
           <option value="idle" ${s.mode==='idle'?'selected':''}>холостий/маневри</option>
         </select>
       </td>
-      <td><input type="number" step="0.1" value="${s.liters}"></td>
-      <td><input type="number" step="0.1" value="${s.h1}"></td>
-      <td><input type="number" step="0.1" value="${s.h2}"></td>
-      <td><input type="number" step="0.1" value="${s.km}"></td>
-      <td><input type="number" step="0.1" value="${s.ha}"></td>
+      <td><input type="number" step="0.1" value="${s.liters}" aria-label="Літри, л"></td>
+      <td><input type="number" step="0.1" value="${s.h1}" aria-label="Мотогод. до"></td>
+      <td><input type="number" step="0.1" value="${s.h2}" aria-label="Мотогод. після"></td>
+      <td><input type="number" step="0.1" value="${s.km}" aria-label="Кілометри, км (за період)"></td>
+      <td><input type="number" step="0.1" value="${s.ha}" aria-label="Площа, га (за період)"></td>
       <td class="dark lh">—</td>
       <td class="dark l100">—</td>
       <td class="dark lha">—</td>
       <td class="dark dev">—</td>
       <td class="dark flag">—</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyEl.appendChild(tr);
     reindex();

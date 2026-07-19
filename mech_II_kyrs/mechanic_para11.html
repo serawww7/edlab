@@ -493,19 +493,19 @@ html.embedded .box{background:#f8fafc;color:#111}
     const I = s.U>0 ? s.P/s.U : 0;
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.name}"></td>
-      <td><input type="number" step="0.1" value="${s.U}"></td>
-      <td><input type="number" step="1" value="${s.P}"></td>
+      <td><input type="text" value="${s.name}" aria-label="Споживач"></td>
+      <td><input type="number" step="0.1" value="${s.U}" aria-label="U, В"></td>
+      <td><input type="number" step="1" value="${s.P}" aria-label="P, Вт"></td>
       <td class="dark I">${rnd(I,2)}</td>
       <td class="dark">
-        <select>
+        <select aria-label="Група">
           <option ${s.group==='постійно'?'selected':''}>постійно</option>
           <option ${s.group==='періодично'?'selected':''}>періодично</option>
           <option ${s.group==='світло'?'selected':''}>світло</option>
         </select>
       </td>
       <td class="dark flag">—</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyEl.appendChild(tr); reindex(); calcLoads();
     // слухачі на зміни U/P/group
@@ -594,7 +594,7 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${name}"></td>
+      <td><input type="text" value="${name}" aria-label="Ланцюг"></td>
       <td class="Us">${U}</td>
       <td class="I">${rnd(ld.I,2)}</td>
       <td class="S">${rnd(ld.S,2)}</td>
@@ -602,7 +602,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark dUp">${rnd(ld.dUp,1)}</td>
       <td class="dark F">${byId('fuse').value}</td>
       <td class="dark flag">${byId('lineFlag').textContent}</td>
-      <td><input type="text" value=""></td>
+      <td><input type="text" value="" aria-label="Примітка"></td>
     `;
     bodyLogEl.appendChild(tr);
     reindexLog(); buildCSVlog();
@@ -617,7 +617,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td class="idx">1</td>
-        <td><input type="text" value="${name}"></td>
+        <td><input type="text" value="${name}" aria-label="Ланцюг"></td>
         <td class="Us">${U}</td>
         <td class="I">${I}</td>
         <td class="S">${S}</td>
@@ -625,7 +625,7 @@ html.embedded .box{background:#f8fafc;color:#111}
         <td class="dark dUp">${dUp}</td>
         <td class="dark F">${F}</td>
         <td class="dark flag">${flag}</td>
-        <td><input type="text" value="${note}"></td>
+        <td><input type="text" value="${note}" aria-label="Примітка"></td>
       `;
       bodyLogEl.appendChild(tr);
     };

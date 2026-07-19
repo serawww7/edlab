@@ -633,16 +633,16 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.node}"></td>
-      <td><input type="number" step="0.1" value="${rnd(s.Q,1)}"></td>
-      <td><input type="number" step="1" value="${rnd(s.P,0)}"></td>
+      <td><input type="text" value="${s.node}" aria-label="Узел"></td>
+      <td><input type="number" step="0.1" value="${rnd(s.Q,1)}" aria-label="Q, л/хв"></td>
+      <td><input type="number" step="1" value="${rnd(s.P,0)}" aria-label="p, бар"></td>
       <td class="dark pkW">${rnd(s.PkW,2)}</td>
       <td class="dark dp">${rnd(s.dP,0)}</td>
       <td class="dark loss">${rnd(s.Ploss,2)}</td>
       <td class="force">${rnd(s.Fext,1)}/${rnd(s.Fret,1)}</td>
       <td class="vhose">${rnd(s.vhose,2)}</td>
       <td class="iso">${s.iso}</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyEl.appendChild(tr); reindex(); buildCSVlog();
   }

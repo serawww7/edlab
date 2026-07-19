@@ -361,9 +361,9 @@ function renderChecklist(){
     const tr=document.createElement('tr');
     tr.innerHTML=`<td>${r.i}</td>
       <td>${r.text}</td>
-      <td><input type="checkbox" ${r.done?'checked':''} data-ix="${ix}" class="chk"/></td>
+      <td><input type="checkbox" ${r.done?'checked':''} data-ix="${ix}" class="chk"/ aria-label="Готово"></td>
       <td class="mono">${r.ts||'—'}</td>
-      <td><input class="input cmt" data-ix="${ix}" placeholder="Коментар" value="${r.comment.replace(/"/g,'&quot;')}"/></td>`;
+      <td><input class="input cmt" data-ix="${ix}" placeholder="Коментар" value="${r.comment.replace(/"/g,'&quot;')}"/ aria-label="Коментар"></td>`;
     tb.appendChild(tr);
   });
   $$('.chk').forEach(ch=>ch.addEventListener('change', e=>{
@@ -531,7 +531,7 @@ function renderQuiz(list){
     tr.innerHTML=`<td>${i+1}</td>
       <td><b>${q.q}</b><br/><span class="muted small">Контекст: ${q.ctx}</span></td>
       <td>
-        <select class="input" id="${selId}">
+        <select class="input" id="${selId}" aria-label="Вибір значення">
           ${q.opts.map(o=>`<option>${o}</option>`).join('')}
         </select>
       </td>

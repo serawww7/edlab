@@ -557,7 +557,7 @@ $('#addShot').addEventListener('click', ()=>{
 });
 $('#exportShots').addEventListener('click', ()=> download('mechanic_para24_shots_'+stamp()+'.json', JSON.stringify(SHOTS,null,2)));
 $('#importShots').addEventListener('click', ()=>{
-  const inp=document.createElement('input'); inp.type='file'; inp.accept='application/json';
+  const inp=document.createElement('input'); inp.setAttribute('aria-label', (typeof key!=='undefined'&&key)?String(key): (typeof k!=='undefined'&&k)?String(k):'Редагування комірки'); inp.type='file'; inp.accept='application/json';
   inp.onchange=async e=>{ const f=e.target.files[0]; if(!f) return; const js=JSON.parse(await f.text()); if(Array.isArray(js)){ js.forEach(x=>{ if(x.y && x.feat) SHOTS.push(x); }); renderShots(); log('Імпортовано '+js.length+' прикл.'); } };
   inp.click();
 });

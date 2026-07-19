@@ -377,15 +377,15 @@ html.embedded .box{background:#f8fafc; color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="date" value="${s.date}"></td>
-      <td><input type="text" value="${s.crop}"></td>
-      <td><input type="text" value="${s.method}"></td>
-      <td><input type="number" step="0.1" value="${s.a}"></td>
-      <td><input type="number" step="1" value="${s.plants}"></td>
-      <td><input type="number" step="1" value="${s.cases}"></td>
+      <td><input type="date" value="${s.date}" aria-label="Дата"></td>
+      <td><input type="text" value="${s.crop}" aria-label="Культура/фаза"></td>
+      <td><input type="text" value="${s.method}" aria-label="Методика"></td>
+      <td><input type="number" step="0.1" value="${s.a}" aria-label="Площа огляду, м²"></td>
+      <td><input type="number" step="1" value="${s.plants}" aria-label="К-ть рослин"></td>
+      <td><input type="number" step="1" value="${s.cases}" aria-label="Випадків (екз./ураж.)"></td>
       <td class="dark fact">—</td>
       <td class="dark comp">—</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Нотатка"></td>
     `;
     bodyEl.appendChild(tr);
     reindex();

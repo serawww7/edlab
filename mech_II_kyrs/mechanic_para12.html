@@ -499,7 +499,7 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.name}"></td>
+      <td><input type="text" value="${s.name}" aria-label="Вузол"></td>
       <td>${s.dp}</td>
       <td>${s.grade}</td>
       <td class="dark">${s.K}</td>
@@ -507,7 +507,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark">${s.T}</td>
       <td class="dark">${s.Tset}</td>
       <td>${s.steps}</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyEl.appendChild(tr);
     reindex(); buildCSVlog();

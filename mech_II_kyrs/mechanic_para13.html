@@ -538,13 +538,13 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.node}"></td>
+      <td><input type="text" value="${s.node}" aria-label="Вузол"></td>
       <td>${s.io}</td>
       <td class="dark">${s.n}</td>
       <td class="dark">${s.v}</td>
       <td class="dark">${s.pto}</td>
       <td>${s.belt}; chain≈${rnd(c.Lmm,0)}мм</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyEl.appendChild(tr); reindex(); buildCSVlog();
   }

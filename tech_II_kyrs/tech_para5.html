@@ -469,14 +469,14 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.item}"></td>
+      <td><input type="text" value="${s.item}" aria-label="Товар"></td>
       <td class="dark">${s.lot}</td>
       <td class="dark">${s.exp}</td>
       <td class="dark">${s.temp}</td>
       <td>${s.zone}</td>
       <td>${s.bin}</td>
       <td>${s.status}</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyLog.appendChild(tr); reindex(); buildCSVlog();
   }

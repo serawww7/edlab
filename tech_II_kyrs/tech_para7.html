@@ -470,8 +470,8 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="time" value="${s.time}"></td>
-      <td class="dark"><input type="number" step="0.1" value="${s.g}"></td>
+      <td><input type="time" value="${s.time}" aria-label="Час"></td>
+      <td class="dark"><input type="number" step="0.1" value="${s.g}" aria-label="Показ, г"></td>
       <td class="wok">—</td>
       <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyW); buildWCSV();">✖</button></td>
     `;
@@ -564,7 +564,7 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td class="idx">1</td>
-      <td><input type="text" value="${s.prod}"></td>
+      <td><input type="text" value="${s.prod}" aria-label="Виріб"></td>
       <td class="dark">${s.lot}</td>
       <td class="dark">${s.ean}</td>
       <td>${s.mdS}</td>

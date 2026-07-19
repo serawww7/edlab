@@ -504,14 +504,14 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.node}"></td>
+      <td><input type="text" value="${s.node}" aria-label="Вузол"></td>
       <td class="dark">${s.F}</td>
       <td class="dark">${s.v}</td>
       <td class="dark">${s.t}</td>
       <td>${s.pump}</td>
       <td>${s.hose}</td>
       <td>${s.relief}</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyEl.appendChild(tr); reindex(); buildCSVlog();
   }

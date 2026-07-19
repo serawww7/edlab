@@ -391,11 +391,11 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.name}"></td>
-      <td class="dark"><input type="number" step="1" value="${s.kg}"></td>
-      <td class="dark"><input type="number" step="1" value="${s.dia}"></td>
-      <td class="dark"><input type="time" value="${s.start}"></td>
-      <td><input type="text" value="${s.lot}"></td>
+      <td><input type="text" value="${s.name}" aria-label="Виріб"></td>
+      <td class="dark"><input type="number" step="1" value="${s.kg}" aria-label="Навантаження, кг"></td>
+      <td class="dark"><input type="number" step="1" value="${s.dia}" aria-label="Ø батона, мм"></td>
+      <td class="dark"><input type="time" value="${s.start}" aria-label="Заплан. старт"></td>
+      <td><input type="text" value="${s.lot}" aria-label="ЛОТ"></td>
       <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyB); buildSchedule();">✖</button></td>
     `;
     bodyB.appendChild(tr); reindex(bodyB); buildBatchesCSV();
@@ -533,8 +533,8 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td class="idx">1</td>
-      <td><input type="time" value="${s.hms}"></td>
-      <td class="dark"><input type="number" step="0.1" value="${s.temp}"></td>
+      <td><input type="time" value="${s.hms}" aria-label="Час (HH:MM)"></td>
+      <td class="dark"><input type="number" step="0.1" value="${s.temp}" aria-label="Tядра, °C"></td>
       <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyCore); buildCoreCSV();">✖</button></td>
     `;
     bodyCore.appendChild(tr); reindex(bodyCore); buildCoreCSV();
@@ -627,13 +627,13 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr=document.createElement('tr');
     tr.innerHTML=`
       <td class="idx">1</td>
-      <td><input type="text" value="${s.prod}"></td>
+      <td><input type="text" value="${s.prod}" aria-label="Виріб"></td>
       <td class="dark">${s.lot}</td>
       <td class="dark">${s.start}</td>
       <td class="dark">${s.end}</td>
       <td>${s.dur}</td>
       <td>${s.kwh}</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyL.appendChild(tr); reindex(bodyL); buildLogCSV();
   }

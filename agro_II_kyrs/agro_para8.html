@@ -311,13 +311,13 @@ html.embedded .box{background:#f8fafc; color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="date" value="${s.date}"/></td>
-      <td><input type="text" value="${s.field}"/></td>
-      <td><input type="text" value="${s.crop}"/></td>
-      <td><input type="number" step="1" value="${s.plants}"/></td>
-      <td><input type="number" step="1" value="${s.pests}"/></td>
+      <td><input type="date" value="${s.date}"/ aria-label="Дата"></td>
+      <td><input type="text" value="${s.field}"/ aria-label="Поле (код)"></td>
+      <td><input type="text" value="${s.crop}"/ aria-label="Культура"></td>
+      <td><input type="number" step="1" value="${s.plants}"/ aria-label="Рослин у підрахунку"></td>
+      <td><input type="number" step="1" value="${s.pests}"/ aria-label="Шкідників, шт"></td>
       <td class="dark dens">—</td>
-      <td><input type="text" value="${s.note}"/></td>
+      <td><input type="text" value="${s.note}"/ aria-label="Примітка"></td>
     `;
     bodyEl.appendChild(tr);
     reindex();

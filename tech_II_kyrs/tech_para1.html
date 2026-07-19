@@ -442,13 +442,13 @@ html.embedded .box{background:#f8fafc;color:#111}
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="idx">1</td>
-      <td><input type="text" value="${s.prod}"></td>
+      <td><input type="text" value="${s.prod}" aria-label="Продукт"></td>
       <td>${s.pack}</td>
       <td class="dark">${s.lot}</td>
       <td class="dark">${s.prodDT}</td>
       <td class="dark">${s.exp}</td>
       <td>${s.cond}</td>
-      <td><input type="text" value="${s.note}"></td>
+      <td><input type="text" value="${s.note}" aria-label="Примітка"></td>
     `;
     bodyEl.appendChild(tr); reindex(); buildCSVlog();
   }

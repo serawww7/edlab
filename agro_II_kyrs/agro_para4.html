@@ -287,11 +287,11 @@ html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>День ${i+1}</td>
-        <td><input type="date" value="${fmtDate(d)}" /></td>
-        <td><input type="number" step="0.1" value="6" /></td>
-        <td><input type="number" step="0.1" value="16" /></td>
-        <td><input type="number" step="0.1" value="0.0" /></td>
-        <td><input type="number" step="0.1" value="3.0" /></td>
+        <td><input type="date" value="${fmtDate(d)}" / aria-label="Дата"></td>
+        <td><input type="number" step="0.1" value="6" / aria-label="Tmin"></td>
+        <td><input type="number" step="0.1" value="16" / aria-label="Tmax"></td>
+        <td><input type="number" step="0.1" value="0.0" / aria-label="Опади, мм"></td>
+        <td><input type="number" step="0.1" value="3.0" / aria-label="Вітер, м/с"></td>
         <td class="gdd mono">0.0</td>
         <td class="okflag">—</td>
       `;
