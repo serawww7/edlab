@@ -94,13 +94,24 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
 /* Блок Accessibility Statement */
 .a11y-statement{
-  margin-top:28px; padding:18px 20px;
+  display:flex; gap:14px; align-items:flex-start;
+  margin-top:28px; padding:16px 18px;
   border:1px solid var(--surface-line); border-radius:var(--r-lg);
-  background:linear-gradient(180deg,var(--card),var(--soft));
-  border-left:4px solid var(--accent2);
+  background:var(--soft);
 }
-.a11y-statement h2{margin:0 0 8px; font-size:1.15rem}
-.a11y-statement p{margin:0; color:var(--muted); font-size:15px; max-width:70ch}
+.a11y-statement__icon{
+  flex:0 0 auto; display:grid; place-items:center;
+  width:36px; height:36px; border-radius:10px;
+  color:var(--muted); background:var(--card);
+  border:1px solid var(--surface-line);
+}
+.a11y-statement__body{min-width:0; flex:1}
+.a11y-statement h2{margin:0 0 6px; font-size:1.05rem; font-weight:600}
+.a11y-statement p{margin:0; color:var(--muted); font-size:14px; line-height:1.55; max-width:72ch}
+@media (max-width:520px){
+  .a11y-statement{padding:14px 14px}
+  .a11y-statement__icon{width:32px; height:32px}
+}
 
 /* ------------------------------ Layout ---------------------------------- */
 .wrap{max-width:var(--container); margin:0 auto; padding:28px 16px 40px}

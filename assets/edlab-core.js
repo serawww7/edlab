@@ -18,7 +18,7 @@
     brandEmoji: "🎓",
     brandName: "EDLab",
     brandBadge: "цифрові пари для ОПП коледжу",
-    facebook: "https://www.facebook.com/coach.Sergiy",
+    facebook: "https://www.facebook.com/sergiy.polishchuk.ua",
     infoSite: "https://www.serawww.pp.ua",
     nav: [
       { href: "/index.html", label: "Головна" },
