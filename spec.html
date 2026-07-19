@@ -5,88 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>EDLab — сторінка розділу</title>
 <meta name="color-scheme" content="light dark"/>
-<link rel="preload" href="assets/edlab.css" as="style">
-<link rel="stylesheet" href="assets/edlab.css"/>
-<style>
-.header-mini{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.grid2{display:grid;gap:16px;grid-template-columns:2fr 1fr;align-items:start}
-@media(max-width:980px){.grid2{grid-template-columns:1fr}}
-.lesson-list .lesson{position:relative;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
-.lesson-list .btn{position:relative;z-index:2}
-.tester-toolbar{display:flex;justify-content:space-between;gap:8px;align-items:center;background:#0d1a2e;color:#e6eef9;border:1px solid #223049;border-bottom:0;border-radius:12px 12px 0 0;padding:8px 12px}
-.tester{border:1px solid #223049;border-radius:0 0 12px 12px;overflow:hidden;background:#0b1220}
-.tester iframe{width:100%;height:900px;border:0;background:#fff;display:block}
-.btn.ghost{background:transparent;border-color:#334155;color:#cbd5e1}
-.btn.ghost:hover{background:#0f1f39}
-small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace}
-.note{background:#0c182a;color:#cde1ff;border:1px dashed #274364;padding:10px 12px;border-radius:12px;margin-top:8px}
-.note.error{background:#230b0b;color:#ffd4d4;border-color:#8a2b2b}
-.selector{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:12px}
-.selector a{display:block;padding:16px;border:1px solid #223049;border-radius:12px;background:#0b1220;text-decoration:none}
-.selector a:hover{background:#0f1f39}
-
-/* === Анімована абстракція (іконка) === */
-.lesson .thumb{
-  width:44px;height:44px;
-  display:grid;place-items:center;
-  border-radius:12px;
-  background:linear-gradient(135deg,#0b1220,#0f1f39);
-  border:1px solid #223049;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.02), 0 4px 14px rgba(0,0,0,.25);
-}
-.lesson .thumb svg{width:24px;height:24px;display:block}
-@media (prefers-reduced-motion:no-preference){
-  .lesson .thumb .spin{animation:spin 6s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-}
-
-/* ЛИШЕ “липкий” генератор на десктопі (без фіксації та без зміни ширини лівої колонки) */
-@media(min-width:981px){
-  #generator{
-    position: sticky;
-    top: 12px;
-    align-self: start;
-    height: max-content;
-  }
-}
-
-/* Toast */
-#toast{
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  display: grid;
-  gap: 8px;
-  z-index: 9999;
-}
-.toast-item{
-  background: rgba(17,24,39,0.95);
-  color: #e5e7eb;
-  border: 1px solid #334155;
-  padding: 10px 12px;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.35);
-  font-size: 14px;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity .2s ease, transform .2s ease;
-}
-.toast-item.show{
-  opacity: 1;
-  transform: translateY(0);
-}
-</style>
+<link rel="preload" href="/assets/edlab-core.css" as="style">
+<link rel="stylesheet" href="/assets/edlab-core.css"/>
 </head>
 <body>
 <div class="wrap">
-  <header class="header-mini">
-    <div class="logo">
-      <span class="emoji">🎓</span><b>EDLab</b>
-      <span class="badge">цифрові пари для ОПП коледжу</span>
-    </div>
-    <a class="btn" href="index.html">⬅ На головну</a>
-  </header>
-
   <h1 id="specTitle">Розділ</h1>
   <p class="muted" id="specDesc">—</p>
 
@@ -108,7 +31,6 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
           </div>
         </div>
         <div class="tester">
-          <!-- Прев’ю без sandbox, з робочими allow/allowfullscreen/referrerpolicy -->
           <iframe id="previewFrame" src="about:blank"
                   allow="clipboard-write *; fullscreen *; geolocation *; autoplay *"
                   allowfullscreen="allowfullscreen"
@@ -121,7 +43,6 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
     <div class="card" id="generator">
       <h2>🔧 Генератор коду для Moodle (iFrame)</h2>
 
-      <!-- ЛИШЕ перемикач прев’ю (режим “закріпити” повністю прибрано) -->
       <div class="row" style="align-items:center; gap:10px; margin-bottom:8px">
         <label class="muted" for="showPreview" style="display:flex; align-items:center; gap:8px; cursor:pointer">
           <input id="showPreview" type="checkbox" />
@@ -144,7 +65,7 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
 
       <div class="row" style="margin-top:8px">
         <button class="btn" type="button" id="btnGen">🔁 Оновити код</button>
-        <button class="btn" type="button" id="btnCopy">📋 Скопіювати</button>
+        <button class="btn primary" type="button" id="btnCopy">📋 Скопіювати</button>
       </div>
       <p class="muted" style="margin-top:6px">
         Режими вставки: <b>Page</b> або <b>URL (Display: Embed або Open in new window)</b>.<br/>
@@ -154,31 +75,7 @@ small.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier N
   </div>
 </div>
 
-<footer class="site-footer">
-  <div class="footer-inner">
-    <div class="col brand">
-      <div class="brand-line"><span class="emoji">🌾</span><strong>EDLab</strong></div>
-      <p>Інтерактивні лабораторні з інформатики та коуч-тренінги.</p>
-    </div>
-    <div class="col legal">
-      <h3>Правова інформація</h3>
-      <p>© 2025 <b>Сергій ПОЛІЩУК</b>. Матеріали захищені авторським правом.</p>
-    </div>
-    <div class="col links">
-      <h3>Офіційні ресурси</h3>
-      <ul>
-        <li><a href="https://edlab.pp.ua/legal.html" target="_blank" rel="noopener">Правова інформація</a></li>
-        <li><a href="https://www.serawww.pp.ua" target="_blank" rel="noopener">Сторінка інформатика</a></li>
-        <li><a href="https://www.facebook.com/coach.Sergiy" target="_blank" rel="noopener">facebook.com</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-bottom"><span>Зроблено з турботою про зручність викладача і студента</span></div>
-</footer>
-
-<!-- Toast контейнер -->
-<div id="toast" aria-live="polite" aria-atomic="true"></div>
-
+<script src="/assets/edlab-core.js" data-chrome="full" defer></script>
 <script>
 // ===== Кольори для секцій + поточний ключ
 const THEME_COLORS = {
@@ -212,6 +109,7 @@ function iconSvgForCurrent(){
 
 // ===== Утиліти
 const byId = (id)=>document.getElementById(id);
+const showToast = (m)=> (window.EDLab ? EDLab.toast(m) : alert(m));
 const SECTION_KEYS = ['coach','electric','agro','mech','gas','tech'];
 const SECTION_META = {
   coach:{ title:"🧠 Психологічні тренінги (coach)", desc:"Коучингові практики, рефлексія, soft skills, робота в групах." },
@@ -331,11 +229,9 @@ async function buildSection(key){
   }));
   byId('lessons').innerHTML = initial.map(lessonCard).join('');
 
-  // ПІДСТАВЛЯЄМО URL у генератор, але НЕ СКРОЛИМО І НЕ ГЕНЕРУЄМО АВТОМАТИЧНО
   const firstAbs = initial[0]?.url ? absoluteUrl(initial[0].url) : '';
   byId('url').value = firstAbs;
 
-  // Асинхронно покращуємо заголовки/описи (без скролів)
   const promises = initial.map(async (it, idx) => {
     if (rawList[idx].title) return it;
     const meta = await fetchTitleDesc(it.url);
@@ -347,7 +243,7 @@ async function buildSection(key){
       if (card){
         if (betterTitle) card.querySelector('.meta b').textContent = betterTitle;
         const p = card.querySelector('.meta p.muted');
-        if (betterDesc) p.textContent = betterDesc;
+        if (betterDesc && p) p.textContent = betterDesc;
       }
     }
     return it;
@@ -378,23 +274,11 @@ function openPreview(u){
   byId('previewFrame').src = abs;
   byId('previewBox').style.display = '';
   byId('previewNote').style.display = '';
-  // БІЛЬШЕ НЕ СКРОЛИМО ДО НИЗУ!
 }
 function closePreview(){
   byId('previewFrame').src = 'about:blank';
   byId('previewBox').style.display = 'none';
   byId('previewNote').style.display = 'none';
-}
-
-/* ===== Toast ===== */
-function showToast(message){
-  const host = byId('toast');
-  const div = document.createElement('div');
-  div.className = 'toast-item';
-  div.textContent = message;
-  host.appendChild(div);
-  requestAnimationFrame(()=>div.classList.add('show'));
-  setTimeout(()=>{ div.classList.remove('show'); setTimeout(()=>div.remove(), 220); }, 1800);
 }
 
 /* ===== Генерація коду ===== */
@@ -409,13 +293,10 @@ function genInteractive(){
   const url = byId('url').value.trim();
   const h   = (byId('height').value || '80vh').trim();
   byId('code').value = buildIframeHTML(url, h);
-
-  // Виділяємо код ДЛЯ ЗРУЧНОСТІ, але БЕЗ СКРОЛУ
   const ta = byId('code');
   ta.focus();
   ta.select();
   ta.setSelectionRange(0, ta.value.length);
-
   showToast('✅ Код згенеровано');
 }
 function genFromLesson(u){
@@ -428,8 +309,9 @@ function genFromLesson(u){
 function copyCode(){
   const ta = byId('code');
   ta.select(); ta.setSelectionRange(0, ta.value.length);
-  document.execCommand('copy');
-  showToast('✅ HTML скопійовано');
+  const done = ()=> showToast('✅ HTML скопійовано');
+  if(window.EDLab){ EDLab.copy(ta.value).then(done).catch(()=>showToast('⚠️ Не вдалося скопіювати')); }
+  else { try{ document.execCommand('copy'); done(); }catch(_){ showToast('⚠️ Не вдалося скопіювати'); } }
 }
 
 // === Події
@@ -442,7 +324,6 @@ document.addEventListener('click', (e)=>{
 
   if(e.target.id==='closePrev'){ closePreview(); }
   if(e.target.id==='toGen'){
-    // Раніше скролили — тепер просто фокус на код без скролу
     const ta = byId('code'); ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length);
   }
   if(e.target.id==='btnGen'){ genInteractive(); }
@@ -451,8 +332,6 @@ document.addEventListener('click', (e)=>{
 
 // === Ініціалізація
 (async function init(){
-  if (window.self !== window.top) document.documentElement.classList.add('embedded');
-
   const key = (()=>{
     const sp = new URLSearchParams(location.search).get('spec');
     if (sp && SECTION_KEYS.includes(sp.toLowerCase())) return sp.toLowerCase();

@@ -12,7 +12,10 @@ const files = glob.sync('**/*.html', {
   nodir: true,
   ignore: [
     'node_modules/**',
-    '.github/**'
+    '.github/**',
+    'tools/**',            // службові інструменти розробки
+    'print-ticket.html',   // технічна сторінка друку
+    '**/*old*.html'        // застарілі копії сторінок
   ]
 });
 

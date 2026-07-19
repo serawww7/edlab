@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="uk">
 <head>
+<link rel="stylesheet" href="/assets/edlab-core.css">
   <meta charset="utf-8">
   <title>Профілактика навчального стресу — онлайн-тренінг (інтерактив)</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -345,3 +346,5 @@
         Object.entries(d).forEach(([k,v])=>{ const el=$('#'+k); if(el) el.value=v; });
         if(d.chips){ restoreChips(d.chips); } else { seedChips(); }
       }cat
+
+<script src="/assets/edlab-core.js" data-chrome="minimal" defer></script>

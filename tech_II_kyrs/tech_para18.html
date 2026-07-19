@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+<link rel="stylesheet" href="/assets/edlab-core.css">
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 18 (технологи) — EAN-13: генератор/верифікатор + тест друку + журнал сканувань (графіки) + чек/CSV</title>
@@ -448,7 +449,8 @@ $('#printPage').addEventListener('click', ()=>{
   x.strokeRect(40,300,700,160); x.fillText('Поле для EAN-13 (врахуй quiet zone ≥4 мм)', 40,295);
   x.fillText('Підпис/Лот: ___________________________', 40, 500);
   window.print();
-  <\/script></body></html>`;
+  <\/script><script src="/assets/edlab-core.js" data-chrome="minimal" defer></script>
+</body></html>`;
   w.document.write(html); w.document.close();
 });
 

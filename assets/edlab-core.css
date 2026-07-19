@@ -1,0 +1,290 @@
+/* ==========================================================================
+   EDLab core — єдине джерело стилів для всього сайту.
+   Без фреймворків. Темна тема за замовчуванням, світлий вигляд у iframe (.embedded).
+   Токени навмисно сумісні зі старими іменами, щоб сторінки-заняття могли
+   поступово переходити на core без візуальних стрибків.
+   ========================================================================== */
+
+:root{
+  /* Базова палітра */
+  --bg:#0b1220; --bg2:#111827; --card:#0f172a; --soft:#0b1324;
+  --text:#e5e7eb; --muted:#9aa5b1; --line:#1f2937;
+  --accent:#22c55e; --accent2:#60a5fa;
+
+  /* Семантичні статуси */
+  --good:#10b981; --warn:#f59e0b; --bad:#ef4444;
+
+  /* Поверхні для інтерактивних контролів */
+  --surface:#0d1a2e; --surface-hover:#0f1f39; --surface-line:#223049;
+
+  /* Футер */
+  --footer-bg:#0c1222; --footer-line:#1e293b;
+
+  /* Радіуси / тіні / відступи — єдина шкала */
+  --r-sm:8px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+  --shadow-card:0 6px 24px rgba(0,0,0,.25);
+  --shadow-pop:0 10px 30px rgba(0,0,0,.35);
+  --container:1100px;
+
+  /* Синоніми токенів, що трапляються в старих inline-стилях занять */
+  --fg:var(--text); --border:var(--line); --danger:var(--bad); --ok:var(--good);
+  --accent-2:var(--accent2); --ink:#0a1020;
+}
+
+*{box-sizing:border-box}
+
+html,body{margin:0}
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,
+    "Apple Color Emoji","Segoe UI Emoji",sans-serif;
+  line-height:1.55; color:var(--text);
+  background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg));
+  min-height:100%;
+}
+
+a{color:#9ec5ff;text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ------------------------------ Layout ---------------------------------- */
+.wrap{max-width:var(--container); margin:0 auto; padding:28px 16px 40px}
+.grid{display:grid; gap:16px}
+.g2{grid-template-columns:1.2fr .8fr}
+.row{display:flex; gap:10px; flex-wrap:wrap}
+@media (max-width:1000px){ .g2{grid-template-columns:1fr} }
+
+h1{
+  font-size:clamp(26px,5vw,36px); margin:8px 0 10px; line-height:1.15;
+  background:linear-gradient(90deg,var(--accent2),var(--accent));
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+h2{font-size:clamp(20px,3vw,22px); margin:6px 0 8px}
+h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
+p{margin:8px 0}
+.muted{color:var(--muted); font-size:14px}
+.small{font-size:12px; color:#9fb0c8}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+
+/* ------------------------------ Badges ---------------------------------- */
+.badge{
+  display:inline-block; padding:6px 10px; border:1px solid var(--line);
+  border-radius:var(--r-pill); font-size:12px; color:var(--muted); background:var(--soft);
+}
+.badge2{
+  display:inline-block; margin-top:8px; padding:2px 8px; border-radius:var(--r-pill);
+  border:1px solid #334155; color:#cbd5e1;
+}
+.tag{
+  display:inline-block; padding:4px 10px; border:1px solid var(--line);
+  border-radius:var(--r-pill); font-size:12px; color:#a5b4fc; background:var(--surface); margin-right:6px;
+}
+.emoji{font-size:26px; line-height:1}
+
+/* ------------------------------ Buttons --------------------------------- */
+.btn{
+  display:inline-flex; align-items:center; gap:8px; padding:10px 14px;
+  border-radius:var(--r-sm); border:1px solid var(--surface-line);
+  background:var(--surface); color:#dbeafe; text-decoration:none; cursor:pointer;
+  font-size:14px; line-height:1.2; transition:background .15s ease, border-color .15s ease;
+}
+.btn:hover{background:var(--surface-hover); text-decoration:none}
+.btn:focus-visible{outline:2px solid var(--accent2); outline-offset:2px}
+.btn.secondary{background:var(--soft)}
+.btn.ghost{background:transparent; border-color:#334155; color:#cbd5e1}
+.btn.ghost:hover{background:var(--surface-hover)}
+.btn.primary{background:linear-gradient(180deg,#16a34a,#15803d); border-color:#15803d; color:#eafff2}
+.btn.primary:hover{filter:brightness(1.06)}
+
+/* ------------------------------ Cards ----------------------------------- */
+.card{
+  background:linear-gradient(180deg,var(--card),var(--bg));
+  border:1px solid var(--line); border-radius:var(--r-lg); padding:16px;
+  box-shadow:var(--shadow-card);
+}
+.card h2{margin-top:0}
+
+/* ------------------------------ Forms ----------------------------------- */
+label{display:block; font-size:13px; color:#cbd5e1; margin:8px 0 4px}
+input[type="text"],input[type="number"],input[type="date"],select,textarea{
+  width:100%; padding:10px 12px; border-radius:var(--r-sm);
+  border:1px solid var(--surface-line); background:var(--surface); color:var(--text);
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace;
+}
+textarea{min-height:140px; resize:vertical}
+.inline{display:grid; grid-template-columns:1fr 180px; gap:10px}
+@media (max-width:720px){ .inline{grid-template-columns:1fr} }
+
+/* ------------------------------ Tables ---------------------------------- */
+.table-wrap{overflow-x:auto; border-radius:var(--r-md); border:1px solid var(--surface-line)}
+.table{width:100%; border-collapse:separate; border-spacing:0}
+.table th,.table td{padding:8px 10px; border-bottom:1px solid var(--line); font-size:14px; vertical-align:top}
+.table thead th{background:#0c1629; color:#a5b4fc; text-align:left; position:sticky; top:0}
+.table tbody tr:nth-child(even){background:var(--soft)}
+
+/* ------------------------------ Notes / toast --------------------------- */
+.note{background:#0c182a; color:#cde1ff; border:1px dashed #274364; padding:10px 12px; border-radius:var(--r-md); margin-top:8px}
+.note.error,.note.warn{background:#230b0b; color:#ffd4d4; border-color:#8a2b2b}
+.note.ok{background:var(--surface-hover); color:#cde1ff; border-color:var(--surface-line)}
+
+#edlab-toast{position:fixed; right:16px; bottom:16px; display:grid; gap:8px; z-index:9999}
+.toast-item{
+  background:rgba(17,24,39,.96); color:var(--text); border:1px solid #334155;
+  padding:10px 12px; border-radius:var(--r-md); box-shadow:var(--shadow-pop);
+  font-size:14px; opacity:0; transform:translateY(10px);
+  transition:opacity .2s ease, transform .2s ease;
+}
+.toast-item.show{opacity:1; transform:translateY(0)}
+
+/* ==========================================================================
+   Site Header (рендериться edlab-core.js)
+   ========================================================================== */
+.site-header{
+  position:sticky; top:0; z-index:50;
+  background:linear-gradient(180deg,rgba(13,27,42,.92),rgba(11,18,32,.92));
+  backdrop-filter:saturate(140%) blur(8px);
+  border-bottom:1px solid var(--footer-line);
+}
+.site-header__inner{
+  max-width:var(--container); margin:0 auto; padding:12px 16px;
+  display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+}
+.site-header__brand{display:inline-flex; align-items:center; gap:10px; color:var(--text)}
+.site-header__brand:hover{text-decoration:none; opacity:.92}
+.site-header__brand b{font-size:20px; letter-spacing:.3px}
+.site-header__nav{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+.site-header__nav a{
+  padding:8px 12px; border-radius:var(--r-sm); color:#dbeafe; font-size:14px;
+  border:1px solid transparent;
+}
+.site-header__nav a:hover{background:var(--surface-hover); text-decoration:none}
+.site-header__nav a[aria-current="page"]{border-color:var(--surface-line); background:var(--surface)}
+@media (max-width:640px){
+  .site-header__brand .badge{display:none}
+  .site-header__nav a{padding:6px 10px}
+}
+
+/* ==========================================================================
+   Site Footer (рендериться edlab-core.js)
+   ========================================================================== */
+.site-footer{
+  background:linear-gradient(180deg,var(--footer-bg),#0a0f1d);
+  border-top:1px solid var(--footer-line); color:#c7d2fe; margin-top:32px;
+}
+.footer-inner{
+  max-width:var(--container); margin:0 auto; padding:22px 16px;
+  display:grid; gap:16px;
+  grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,0.8fr);
+}
+.footer-inner .col{padding:6px 8px; min-width:0}
+.footer-inner .brand .brand-line{display:flex; align-items:center; gap:10px; font-size:18px; margin-bottom:6px}
+.footer-inner h3{margin:4px 0 6px; font-size:16px; color:#e2e8f0}
+.site-footer p{margin:6px 0}
+.site-footer a{color:#9ec5ff; overflow-wrap:anywhere; word-break:break-word}
+.site-footer li,.site-footer p{overflow-wrap:anywhere; word-break:break-word}
+.footer-inner ul{margin:6px 0; padding:0; list-style:none}
+.footer-inner li{margin:4px 0}
+.footer-bottom{border-top:1px solid var(--footer-line); text-align:center; padding:10px 16px; font-size:12px; color:#9fb0c8}
+@media (max-width:900px){ .footer-inner{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:560px){ .footer-inner{grid-template-columns:1fr; padding:18px 12px} }
+
+/* Мінімальна атрибуція для сторінок-занять (styles-only режим) */
+.edlab-attribution{
+  max-width:var(--container); margin:24px auto 0; padding:14px 16px;
+  border-top:1px solid var(--line); text-align:center; font-size:12px; color:var(--muted);
+}
+.edlab-attribution a{color:#9ec5ff}
+
+/* ==========================================================================
+   Специфічні блоки головної / spec
+   ========================================================================== */
+.specs{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 18px}
+.spec{
+  display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:var(--r-md);
+  border:1px solid var(--line); background:var(--surface); color:#dbeafe; font-size:14px;
+}
+.spec:hover{background:var(--surface-hover); text-decoration:none}
+.spec .dot{width:9px; height:9px; border-radius:50%}
+
+.tile-grid{display:grid; gap:16px; grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:980px){ .tile-grid{grid-template-columns:1fr} }
+.tile{
+  display:block; padding:18px; border:1px solid var(--surface-line); border-radius:var(--r-lg);
+  background:linear-gradient(180deg,var(--card),var(--soft)); color:#e6eef9;
+  transition:background .15s ease, transform .15s ease;
+}
+.tile:hover{background:var(--surface-hover); text-decoration:none; transform:translateY(-2px)}
+.tile h3{margin:0 0 8px}
+.tile p{margin:0; color:#93a3b5}
+
+.seo-text{
+  max-width:var(--container); margin:40px auto 0; padding:24px;
+  border:1px solid var(--surface-line); border-radius:var(--r-lg);
+  background:linear-gradient(180deg,var(--card),var(--soft)); color:#e6eef9;
+}
+.seo-text h2{margin-top:0; color:#fff}
+.seo-text p,.seo-text li{color:#93a3b5}
+.seo-text ul{padding-left:20px}
+
+/* Список занять у spec */
+.grid2{display:grid; gap:16px; grid-template-columns:2fr 1fr; align-items:start}
+@media (max-width:980px){ .grid2{grid-template-columns:1fr} }
+.lesson-list .lesson{position:relative; display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:start}
+.lesson .thumb{
+  width:44px; height:44px; display:grid; place-items:center; border-radius:var(--r-md);
+  background:linear-gradient(135deg,var(--bg),var(--surface-hover));
+  border:1px solid var(--surface-line);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.02), 0 4px 14px rgba(0,0,0,.25);
+}
+.lesson .thumb svg{width:24px; height:24px; display:block}
+.lesson .meta b{display:block; font-size:18px}
+.lesson .meta small{color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){
+  .lesson .thumb .spin{animation:edlab-spin 6s linear infinite}
+  @keyframes edlab-spin{to{transform:rotate(360deg)}}
+}
+.selector{display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); margin-top:12px}
+.selector a{display:block; padding:16px; border:1px solid var(--surface-line); border-radius:var(--r-md); background:var(--bg)}
+.selector a:hover{background:var(--surface-hover); text-decoration:none}
+
+.tester-toolbar{
+  display:flex; justify-content:space-between; gap:8px; align-items:center;
+  background:var(--surface); color:#e6eef9; border:1px solid var(--surface-line);
+  border-bottom:0; border-radius:var(--r-md) var(--r-md) 0 0; padding:8px 12px;
+}
+.tester{border:1px solid var(--surface-line); border-radius:0 0 var(--r-md) var(--r-md); overflow:hidden; background:#fff}
+.tester iframe{width:100%; height:900px; border:0; background:#fff; display:block}
+
+@media (min-width:981px){
+  #generator{position:sticky; top:72px; align-self:start; height:max-content}
+}
+
+/* ==========================================================================
+   Ticket 58 мм (екран) + правила друку — єдине джерело
+   ========================================================================== */
+.ticket{
+  width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px;
+  box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace;
+  font-weight:700; letter-spacing:.1px;
+}
+.ticket h4{margin:0 0 6px; font-size:13px; text-align:center; font-weight:700}
+.ticket p{margin:2px 0; font-size:12px; font-weight:700}
+.ticket .line{border-top:1px dashed #111; margin:6px 0}
+.ticket small{font-size:10px; font-weight:700}
+
+@media print{
+  @page{margin:4mm}
+  .no-print,.site-header,.site-footer,.edlab-attribution{display:none !important}
+}
+
+/* ==========================================================================
+   Вбудовано в Moodle (iframe) → світлий, спрощений вигляд
+   ========================================================================== */
+html.embedded body{background:#fff; color:#111}
+html.embedded .card{background:#fff; border:1px solid #e5e7eb; box-shadow:none}
+html.embedded h1{-webkit-text-fill-color:initial; background:none; color:#111}
+html.embedded .spec{background:#fff; color:#111; border:1px solid #e5e7eb}
+html.embedded .spec:hover{background:#f8fafc}
+html.embedded .table tbody tr:nth-child(even){background:#f3f4f6; color:#111}
+/* У вбудованому режимі site-хедер/футер не потрібні */
+html.embedded .site-header,
+html.embedded .site-footer,
+html.embedded .edlab-attribution{display:none !important}

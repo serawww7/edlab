@@ -10,6 +10,7 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+<link rel="stylesheet" href="/assets/edlab-core.css">
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 9 (технологи) — Traceability & Recall: генеалогія партій, симуляція, квиток/QR/NFC/CSV</title>
@@ -644,7 +645,8 @@ function printTicketNewTab(){
       catch(e){ if(window.opener) window.opener.postMessage({type:'ticketPrint',status:'error'},'*'); }
     });
   <\/script>
-  </body></html>`;
+  <script src="/assets/edlab-core.js" data-chrome="minimal" defer></script>
+</body></html>`;
 
   var w = window.open('', '_blank');
   if(!w){ openTicketOnly(); return; }  // попап заблоковано — фолбек

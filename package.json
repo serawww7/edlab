@@ -6,7 +6,8 @@
   "scripts": {
     "fix-meta": "node scripts/fix-meta.js",
     "generate-sitemap": "node scripts/generate-sitemap.js",
-    "build": "npm run fix-meta && npm run generate-sitemap"
+    "apply-core": "node scripts/apply-core.js",
+    "build": "npm run apply-core && npm run fix-meta && npm run generate-sitemap"
   },
   "dependencies": {
     "cheerio": "1.0.0-rc.12",

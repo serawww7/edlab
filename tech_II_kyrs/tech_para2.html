@@ -11,6 +11,7 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+<link rel="stylesheet" href="/assets/edlab-core.css">
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 2 (технологи) — HACCP: пастеризація, охолодження, дезінфекція (CCP), чек 58 мм, NFC, CSV</title>
@@ -628,6 +629,7 @@ function printTicketNewTab(){
   window.addEventListener('load',()=>{ try{ window.focus(); window.print(); }catch(e){} });
   window.addEventListener('afterprint',()=>{ try{ if(window.opener) window.opener.postMessage({type:'ticketPrintDone'},'*'); }catch(_){}})
 <\/script>
+<script src="/assets/edlab-core.js" data-chrome="minimal" defer></script>
 </body></html>`;
 
   var blob = new Blob([html], {type:'text/html'});

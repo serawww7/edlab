@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+<link rel="stylesheet" href="/assets/edlab-core.css">
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 19 (механіки) — Візуальний тахометр і стробоскоп (вебкамера → RPM, биття, журнал)</title>
@@ -493,5 +494,6 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
 // Якщо камери немає — дати можливість потренуватись на емуляторі:
 setTimeout(()=>{ if(!stream) emulate(); }, 1000);
 </script>
+<script src="/assets/edlab-core.js" data-chrome="minimal" defer></script>
 </body>
 </html>

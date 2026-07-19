@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+<link rel="stylesheet" href="/assets/edlab-core.css">
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 16 (газовики) — Гідравлічні режими мережі: інтерактивна схема, попит/регулятор/витоки, графік, тривоги, експорт</title>
@@ -400,5 +401,6 @@ $('#saveTxt').addEventListener('click',()=>{
 drawChart(); updateSVG({P:[2,2,2], v:[100,100,100], sp:2, pump:60});
 log('Готово. Запускай симуляцію або знімай точки вручну.');
 </script>
+<script src="/assets/edlab-core.js" data-chrome="minimal" defer></script>
 </body>
 </html>
