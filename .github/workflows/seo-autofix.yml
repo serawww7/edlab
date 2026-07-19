@@ -35,6 +35,7 @@ jobs:
             Автоматичне оновлення:
             - <title>, <meta name="description">, canonical, OG, JSON-LD
             - lang="uk"
-            - sitemap.xml, robots.txt (якщо не було)
+            - sitemap.xml (loc + lastmod, без priority/changefreq)
+            - robots.txt (за потреби)
           branch: "seo/autofix"
           delete-branch: true
