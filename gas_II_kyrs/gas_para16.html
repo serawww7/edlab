@@ -48,7 +48,7 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🗺️🌬️</span>
@@ -65,31 +65,31 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
     <p>На схемі нижче — зразкова **локальна мережа низького тиску**: магістраль, відгалуження до трьох районів <b>N1–N3</b>, <b>ГРП</b> зі стабілізацією тиску, <b>насос-підкачка</b> (умовний), три <b>засувки</b> та два потенційні <b>витоки</b>.
     Задача: керуй <b>попитом</b>, <b>відкриттям засувок</b>, <b>швидкістю насоса</b>, <b>уставкою регулятора</b>, вмикай <b>витоки/аварії</b> — спостерігай за **теплокартою тиску** та **графіком P/Q**. Лови <b>тривоги KPI</b> і збережи результат.</p>
     <div class="row">
-      <label style="flex:1">Попит базовий, м³/год<input id="dBase" class="input" type="range" min="50" max="600" step="10" value="200"><small>Впливає на всі три райони</small></label>
-      <label style="flex:1">Навантаження N1, %<input id="d1" class="input" type="range" min="50" max="150" step="1" value="100"></label>
-      <label style="flex:1">Навантаження N2, %<input id="d2" class="input" type="range" min="50" max="150" step="1" value="100"></label>
-      <label style="flex:1">Навантаження N3, %<input id="d3" class="input" type="range" min="50" max="150" step="1" value="100"></label>
+      <label style="flex:1">Попит базовий, м³/год<input id="dBase" class="input" type="range" min="50" max="600" step="10" value="200" aria-label="d Base"><small>Впливає на всі три райони</small></label>
+      <label style="flex:1">Навантаження N1, %<input id="d1" class="input" type="range" min="50" max="150" step="1" value="100" aria-label="d1"></label>
+      <label style="flex:1">Навантаження N2, %<input id="d2" class="input" type="range" min="50" max="150" step="1" value="100" aria-label="d2"></label>
+      <label style="flex:1">Навантаження N3, %<input id="d3" class="input" type="range" min="50" max="150" step="1" value="100" aria-label="d3"></label>
     </div>
     <div class="row">
-      <label style="flex:1">Засувка V1 (до N1), % відкриття<input id="v1" class="input" type="range" min="0" max="100" step="1" value="100"></label>
-      <label style="flex:1">Засувка V2 (до N2), % відкриття<input id="v2" class="input" type="range" min="0" max="100" step="1" value="100"></label>
-      <label style="flex:1">Засувка V3 (до N3), % відкриття<input id="v3" class="input" type="range" min="0" max="100" step="1" value="100"></label>
+      <label style="flex:1">Засувка V1 (до N1), % відкриття<input id="v1" class="input" type="range" min="0" max="100" step="1" value="100" aria-label="v1"></label>
+      <label style="flex:1">Засувка V2 (до N2), % відкриття<input id="v2" class="input" type="range" min="0" max="100" step="1" value="100" aria-label="v2"></label>
+      <label style="flex:1">Засувка V3 (до N3), % відкриття<input id="v3" class="input" type="range" min="0" max="100" step="1" value="100" aria-label="v3"></label>
     </div>
     <div class="row">
-      <label style="flex:1">Насос (частота), %<input id="pump" class="input" type="range" min="0" max="120" step="1" value="60"><small>Підвищує тиск у магістралі</small></label>
-      <label style="flex:1">Регулятор: уставка Pout, кПа<input id="sp" class="input" type="number" step="0.5" value="2.0"></label>
-      <label style="flex:1">Регулятор: коеф. Kp<input id="kp" class="input" type="number" step="0.1" value="1.2"></label>
+      <label style="flex:1">Насос (частота), %<input id="pump" class="input" type="range" min="0" max="120" step="1" value="60" aria-label="pump"><small>Підвищує тиск у магістралі</small></label>
+      <label style="flex:1">Регулятор: уставка Pout, кПа<input id="sp" class="input" type="number" step="0.5" value="2.0" aria-label="sp"></label>
+      <label style="flex:1">Регулятор: коеф. Kp<input id="kp" class="input" type="number" step="0.1" value="1.2" aria-label="kp"></label>
     </div>
     <div class="row">
-      <label><input id="leak1" type="checkbox"> Витік L1 біля N2 (~фт)</label>
-      <label><input id="leak2" type="checkbox"> Витік L2 на гілці N3</label>
-      <label><input id="valvTrip" type="checkbox"> Аварія: V2 заклинило (→0%)</label>
-      <label><input id="surge" type="checkbox"> Стрибок попиту (+40% на 20 с)</label>
+      <label><input id="leak1" type="checkbox" aria-label="leak1"> Витік L1 біля N2 (~фт)</label>
+      <label><input id="leak2" type="checkbox" aria-label="leak2"> Витік L2 на гілці N3</label>
+      <label><input id="valvTrip" type="checkbox" aria-label="valvTrip"> Аварія: V2 заклинило (→0%)</label>
+      <label><input id="surge" type="checkbox" aria-label="surge"> Стрибок попиту (+40% на 20 с)</label>
     </div>
     <div class="row">
-      <button class="btn good" id="run">▶️ Старт</button>
-      <button class="btn secondary" id="stop">⏹️ Стоп</button>
-      <button class="btn" id="reset">🔄 Скинути</button>
+      <button type="button" class="btn good" id="run">▶️ Старт</button>
+      <button type="button" class="btn secondary" id="stop">⏹️ Стоп</button>
+      <button type="button" class="btn" id="reset">🔄 Скинути</button>
       <span class="badge">t = <b id="tSim">0</b> c</span>
       <span class="badge">Q магістралі: <b id="qMain">—</b> м³/год</span>
       <span class="badge">Pmin мережі: <b id="pMin">—</b> кПа</span>
@@ -133,8 +133,8 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
 
       <h2 style="margin-top:10px">📈 Графік: P вузлів (кПа) та Q магістралі (м³/год)</h2>
       <div class="row">
-        <button class="btn" id="mark">📍 Зняти точку</button>
-        <button class="btn secondary" id="clear">🧹 Очистити графік</button>
+        <button type="button" class="btn" id="mark">📍 Зняти точку</button>
+        <button type="button" class="btn secondary" id="clear">🧹 Очистити графік</button>
       </div>
       <canvas id="chart" class="chart" width="560" height="240"></canvas>
     </div>
@@ -161,8 +161,8 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
 
       <h2 style="margin-top:10px">💾 Експорт</h2>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV (серія P/Q)</button>
-        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (серія P/Q)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (підсумок)</button>
       </div>
     </div>
   </div>

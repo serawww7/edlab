@@ -41,7 +41,7 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🔊</span>
@@ -66,8 +66,8 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
           </select>
         </div>
         <div class="row" style="gap:8px">
-          <button class="btn good" id="start">▶️ Старт</button>
-          <button class="btn secondary" id="stop">⏸️ Стоп</button>
+          <button type="button" class="btn good" id="start">▶️ Старт</button>
+          <button type="button" class="btn secondary" id="stop">⏸️ Стоп</button>
           <span id="stat" class="badge">Статус: idle</span>
         </div>
       </div>
@@ -86,7 +86,7 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
             </select>
           </div>
           <div style="flex:1">
-            <label>Рівень <input id="emuLvl" class="input" type="range" min="0" max="1" step="0.01" value="0.6"/></label>
+            <label>Рівень <input id="emuLvl" class="input" type="range" min="0" max="1" step="0.01" value="0.6" aria-label="emu Lvl"/></label>
           </div>
         </div>
       </div>
@@ -98,8 +98,8 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
       <canvas id="spec" width="900" height="240"></canvas>
 
       <div class="row" style="margin-top:8px">
-        <button class="btn" id="savePng">🖼️ Зберегти спектр (PNG)</button>
-        <button class="btn secondary" id="clearPlot">🧹 Очистити графік</button>
+        <button type="button" class="btn" id="savePng">🖼️ Зберегти спектр (PNG)</button>
+        <button type="button" class="btn secondary" id="clearPlot">🧹 Очистити графік</button>
       </div>
     </div>
 
@@ -148,7 +148,7 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
       </div>
 
       <div class="row" style="margin-top:8px">
-        <button class="btn" id="classify">✅ Класифікувати зараз</button>
+        <button type="button" class="btn" id="classify">✅ Класифікувати зараз</button>
         <span id="pred" class="badge">Pred: —</span>
       </div>
 
@@ -156,10 +156,10 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
       <pre id="alog" class="code" style="max-height:180px;overflow:auto">// Поки без інцидентів</pre>
 
       <div class="row" style="margin-top:6px">
-        <button class="btn" id="saveCsv">📄 Експорт CSV (ознаки)</button>
-        <button class="btn" id="saveTxt">💾 Звіт TXT</button>
-        <button class="btn" id="saveModel">⬇️ model.json</button>
-        <button class="btn secondary" id="loadModel">📥 Імпорт model.json</button>
+        <button type="button" class="btn" id="saveCsv">📄 Експорт CSV (ознаки)</button>
+        <button type="button" class="btn" id="saveTxt">💾 Звіт TXT</button>
+        <button type="button" class="btn" id="saveModel">⬇️ model.json</button>
+        <button type="button" class="btn secondary" id="loadModel">📥 Імпорт model.json</button>
       </div>
     </div>
   </div>
@@ -167,9 +167,9 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
   <div class="card">
     <h2>🧩 Arduino-скетч (Goertzel: 100/120/200/240/1k/3k Гц)</h2>
     <div class="row">
-      <button class="btn good" id="gen">⚙️ Згенерувати .ino</button>
-      <button class="btn secondary" id="copy">📋 Копіювати</button>
-      <button class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
+      <button type="button" class="btn good" id="gen">⚙️ Згенерувати .ino</button>
+      <button type="button" class="btn secondary" id="copy">📋 Копіювати</button>
+      <button type="button" class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
     </div>
     <pre class="code" id="code">// Натисни «Згенерувати .ino»</pre>
   </div>
@@ -177,9 +177,9 @@ pre.code{background:#0b1220;border:1px solid var(--line);border-radius:12px;padd
   <div class="card">
     <h2>🤖 Промпт до LLM для пояснень</h2>
     <div class="row">
-      <button class="btn" id="genPrompt">📝 Згенерувати</button>
-      <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
-      <button class="btn secondary" id="savePrompt">⬇️ TXT</button>
+      <button type="button" class="btn" id="genPrompt">📝 Згенерувати</button>
+      <button type="button" class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+      <button type="button" class="btn secondary" id="savePrompt">⬇️ TXT</button>
     </div>
     <pre class="code" id="prompt">// Спочатку запусти аналіз</pre>
   </div>

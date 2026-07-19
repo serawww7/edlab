@@ -45,7 +45,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧠🗺️</span>
@@ -62,21 +62,21 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <h2>📚 Контекст</h2>
     <p>Завантаж <b>CSV історії</b> або натисни <b>🧪 Приклади</b>. AI обчислить <b>ваги ознак</b>, сформує <b>правила ризику</b> для секторів, побудує <b>теплову карту</b>, а потім згенерує <b>план тижня</b> з маршрутами для N бригад та оцінить <b>очікуване зниження ризику</b>.</p>
     <div class="row">
-      <input id="file" type="file" accept=".csv" class="input" style="max-width:380px"/>
-      <button class="btn" id="ex">🧪 Приклади (200 інцидентів)</button>
-      <button class="btn good" id="train">🧠 Навчити правила</button>
-      <button class="btn" id="plan">🗓️ Спланувати тиждень</button>
-      <button class="btn secondary" id="reset">🔄 Скинути</button>
+      <input id="file" type="file" accept=".csv" class="input" style="max-width:380px" aria-label="file"/>
+      <button type="button" class="btn" id="ex">🧪 Приклади (200 інцидентів)</button>
+      <button type="button" class="btn good" id="train">🧠 Навчити правила</button>
+      <button type="button" class="btn" id="plan">🗓️ Спланувати тиждень</button>
+      <button type="button" class="btn secondary" id="reset">🔄 Скинути</button>
       <span class="badge">Записів: <b id="nRec">0</b></span>
       <span class="badge">Сектори: <b id="nSect">0</b></span>
       <span class="badge">Очікуваний ефект: <b id="eff">—</b></span>
     </div>
     <div class="row">
-      <label>Кількість бригад <input id="nCrews" class="input" type="number" step="1" value="3"></label>
-      <label>Ліміт завдань/день на бригаду <input id="limDay" class="input" type="number" step="1" value="6"></label>
-      <label>Горизонт планування (днів) <input id="hDays" class="input" type="number" step="1" value="7"></label>
-      <label>Зниження ризику на візит, % <input id="dropPct" class="input" type="number" step="1" value="35"></label>
-      <label>Макс. довжина рейсу (км) <input id="maxKm" class="input" type="number" step="1" value="40"></label>
+      <label>Кількість бригад <input id="nCrews" class="input" type="number" step="1" value="3" aria-label="n Crews"></label>
+      <label>Ліміт завдань/день на бригаду <input id="limDay" class="input" type="number" step="1" value="6" aria-label="lim Day"></label>
+      <label>Горизонт планування (днів) <input id="hDays" class="input" type="number" step="1" value="7" aria-label="h Days"></label>
+      <label>Зниження ризику на візит, % <input id="dropPct" class="input" type="number" step="1" value="35" aria-label="drop Pct"></label>
+      <label>Макс. довжина рейсу (км) <input id="maxKm" class="input" type="number" step="1" value="40" aria-label="max Km"></label>
     </div>
   </div>
 
@@ -110,10 +110,10 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h3 style="margin-top:10px">📈 Очікуваний ефект (анім.)</h3>
       <div class="progress"><span id="bar" style="width:0%"></span></div>
       <div class="row" style="margin-top:8px">
-        <button class="btn" id="saveCsv">📄 CSV (план)</button>
-        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм (бригада)</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (папка з планом)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (план)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм (бригада)</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (папка з планом)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div style="margin-top:8px"><canvas id="qr" width="220" height="220" style="background:#0b1220;border:1px solid var(--line);border-radius:12px"></canvas></div>

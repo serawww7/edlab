@@ -11,6 +11,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Електрики · Пара 9 — Вузол заземлення: протокол, PASS/FAIL, друк 58 мм</title>
+<meta name="description" content="🟩 Вузол заземлення: огляд, вимірювання, A4-протокол + 🧾 мітка 58 мм">
 <meta name="color-scheme" content="light dark" />
 <style>
 :root{
@@ -72,7 +73,7 @@ tbody tr:nth-child(even){background:#0b1324}
 
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Електрики · Пара 9 · аудиторно</span>
     <h1>🟩 Вузол заземлення: огляд, вимірювання, A4-протокол + 🧾 мітка 58 мм</h1>
 
@@ -87,17 +88,17 @@ tbody tr:nth-child(even){background:#0b1324}
       <div class="grid g2">
         <div>
           <div class="row">
-            <label class="small" style="min-width:140px">Об’єкт/адреса</label>
+            <label class="small" style="min-width:140px" for="site">Об’єкт/адреса</label>
             <input id="site" class="btn" value="Коледж · Майстерня" />
           </div>
           <div class="row" style="margin-top:8px">
-            <label class="small" style="min-width:140px">Система</label>
+            <label class="small" style="min-width:140px" for="system">Система</label>
             <select id="system" class="btn"><option>TN</option><option selected>TT</option></select>
-            <label class="small" style="min-width:80px">Темп. °C</label>
+            <label class="small" style="min-width:80px" for="temp">Темп. °C</label>
             <input id="temp" class="btn" type="number" value="20" />
           </div>
           <div class="row" style="margin-top:8px">
-            <label class="small" style="min-width:140px">Відповідальний</label>
+            <label class="small" style="min-width:140px" for="resp">Відповідальний</label>
             <input id="resp" class="btn" value="Студент ПІБ / група" />
           </div>
         </div>
@@ -109,7 +110,7 @@ tbody tr:nth-child(even){background:#0b1324}
           </div>
           <div class="row" style="margin-top:8px">
             <button class="btn" type="button" onclick="exportCSV()">📤 Експорт CSV</button>
-            <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+            <input id="file" type="file" accept=".csv,text/csv" class="btn"  aria-label="file"/>
             <button class="btn" type="button" onclick="importCSV()">⬆️ Імпорт CSV</button>
           </div>
         </div>
@@ -121,27 +122,27 @@ tbody tr:nth-child(even){background:#0b1324}
       <div class="grid g3">
         <div>
           <h3>Додати точку</h3>
-          <div class="row"><label class="small" style="min-width:120px">Тип</label>
+          <div class="row"><label class="small" style="min-width:120px" for="ptType">Тип</label>
             <select id="ptType" class="btn">
               <option selected>Rзаз (електрод/контур)</option>
               <option>RPE (неперервність PE)</option>
             </select>
           </div>
-          <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px">Назва точки</label>
+          <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px" for="ptName">Назва точки</label>
             <input id="ptName" class="btn" value="Контур 1 · болт контрольний"/>
           </div>
-          <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px">R вимір., Ω</label>
+          <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px" for="ptR">R вимір., Ω</label>
             <input id="ptR" class="btn" type="number" step="0.01" value="3.2"/>
           </div>
-          <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px">Ліміт, Ω</label>
+          <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px" for="ptLimit">Ліміт, Ω</label>
             <input id="ptLimit" class="btn" type="number" step="0.01" value="4"/>
           </div>
-          <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px">Примітка</label>
+          <div class="row" style="margin-top:6px"><label class="small" style="min-width:120px" for="ptNote">Примітка</label>
             <input id="ptNote" class="btn" placeholder="схема 62% / 3-кiлки / довжина..." />
           </div>
           <div class="row" style="margin-top:8px">
-            <button class="btn" onclick="addPoint()">➕ Додати</button>
-            <button class="btn" onclick="seedPoints()">🔄 2 приклади</button>
+            <button type="button" class="btn" onclick="addPoint()">➕ Додати</button>
+            <button type="button" class="btn" onclick="seedPoints()">🔄 2 приклади</button>
           </div>
         </div>
 
@@ -149,22 +150,22 @@ tbody tr:nth-child(even){background:#0b1324}
           <div>
             <h3>Фільтр</h3>
             <div class="row">
-              <select id="flt" class="btn">
+              <select id="flt" class="btn" aria-label="flt">
                 <option selected>Всі</option>
                 <option>Лише Rзаз</option>
                 <option>Лише RPE</option>
                 <option>Лише FAIL</option>
                 <option>Лише PASS</option>
               </select>
-              <button class="btn" onclick="render()">🔎 Застосувати</button>
+              <button type="button" class="btn" onclick="render()">🔎 Застосувати</button>
             </div>
             <p class="small">PASS, якщо <span class="mono">Rвимір ≤ Ліміт</span>.</p>
           </div>
           <div>
             <h3>Сервіс</h3>
             <div class="row">
-              <button class="btn" onclick="clearAll()">🧹 Очистити</button>
-              <button class="btn" onclick="buildLabel()">🧾 Мітка 58 мм</button>
+              <button type="button" class="btn" onclick="clearAll()">🧹 Очистити</button>
+              <button type="button" class="btn" onclick="buildLabel()">🧾 Мітка 58 мм</button>
             </div>
             <p class="small">Мітка будується для виділеного рядка або першого у списку.</p>
           </div>
@@ -173,7 +174,7 @@ tbody tr:nth-child(even){background:#0b1324}
         <div>
           <h3>Вибір для мітки</h3>
           <div class="row">
-            <select id="labelSel" class="btn"></select>
+            <select id="labelSel" class="btn" aria-label="label Sel"></select>
           </div>
           <p class="small">Вибери точку зі списку — дані підставляться в мітку 58 мм.</p>
         </div>
@@ -196,9 +197,9 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="card printable">
       <h2>🧾 Мітка 58 мм «ЗАЗЕМЛЕННЯ · ПЕРЕВІРЕНО»</h2>
       <div class="row">
-        <button class="btn" onclick="buildLabel()">🧩 Зібрати</button>
-        <button class="btn" onclick="printTicketNewTab()">🖨️ Друк 58 мм</button>
-        <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+        <button type="button" class="btn" onclick="buildLabel()">🧩 Зібрати</button>
+        <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк 58 мм</button>
+        <button type="button" class="btn" onclick="downloadTXT()">📥 TXT</button>
       </div>
       <div class="tickets" id="tickets">
         <div id="ticket" class="ticket" aria-live="polite">
@@ -289,7 +290,7 @@ tbody tr:nth-child(even){background:#0b1324}
         <td class="editable" data-k="limit" data-id="${p.id}">${escapeHTML(p.limit)}</td>
         <td>${badge}</td>
         <td class="editable" data-k="note" data-id="${p.id}">${escapeHTML(p.note||'')}</td>
-        <td class="mono"><button class="btn" data-act="label" data-id="${p.id}">Мітка</button> <button class="btn" data-act="del" data-id="${p.id}">✖</button></td>`;
+        <td class="mono"><button type="button" class="btn" data-act="label" data-id="${p.id}">Мітка</button> <button type="button" class="btn" data-act="del" data-id="${p.id}">✖</button></td>`;
       tbody.appendChild(tr);
     });
   }

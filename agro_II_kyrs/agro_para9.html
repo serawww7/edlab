@@ -19,6 +19,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Пара 9 — Змішування NPK: ціль → суміш → вартість → завантаження</title>
+<meta name="description" content="🧮 Змішування добрив NPK: ціль → суміш → вартість → завантаження">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -68,7 +69,7 @@ html.embedded .box{background:#f8fafc; color:#111}
 </style>
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Пара 9 · аудиторно · агрономи</span>
     <h1>🧮 Змішування добрив NPK: ціль → суміш → вартість → завантаження</h1>
 
@@ -88,34 +89,34 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>Ціль (кг діючої речовини / га)</h3>
           <div class="row">
-            <div style="flex:1"><label>N</label><input id="tN" type="number" step="1" value="90"></div>
-            <div style="flex:1"><label>P₂O₅</label><input id="tP" type="number" step="1" value="60"></div>
-            <div style="flex:1"><label>K₂O</label><input id="tK" type="number" step="1" value="60"></div>
+            <div style="flex:1"><label for="tN">N</label><input id="tN" type="number" step="1" value="90"></div>
+            <div style="flex:1"><label for="tP">P₂O₅</label><input id="tP" type="number" step="1" value="60"></div>
+            <div style="flex:1"><label for="tK">K₂O</label><input id="tK" type="number" step="1" value="60"></div>
           </div>
           <div class="row" style="margin-top:6px">
-            <div style="flex:1"><label>Допустиме відхилення, %</label><input id="tol" type="number" step="1" value="7"></div>
-            <div style="flex:1"><label>Макс суміш, кг/га</label><input id="maxRate" type="number" step="1" value="500"></div>
+            <div style="flex:1"><label for="tol">Допустиме відхилення, %</label><input id="tol" type="number" step="1" value="7"></div>
+            <div style="flex:1"><label for="maxRate">Макс суміш, кг/га</label><input id="maxRate" type="number" step="1" value="500"></div>
           </div>
         </div>
 
         <div class="box">
           <h3>Поле та логістика</h3>
           <div class="row">
-            <div style="flex:1"><label>Код поля</label><input id="fieldCode" type="text" value="F-01"></div>
-            <div style="flex:1"><label>Площа, га</label><input id="area" type="number" step="0.01" value="25"></div>
+            <div style="flex:1"><label for="fieldCode">Код поля</label><input id="fieldCode" type="text" value="F-01"></div>
+            <div style="flex:1"><label for="area">Площа, га</label><input id="area" type="number" step="0.01" value="25"></div>
           </div>
           <div class="row" style="margin-top:6px">
-            <div style="flex:1"><label>Місткість бункера/розкидача, кг</label><input id="hopper" type="number" step="10" value="3000"></div>
-            <div style="flex:1"><label>Крок x₃ (кг/га) для пошуку</label><input id="step3" type="number" step="1" value="5"></div>
+            <div style="flex:1"><label for="hopper">Місткість бункера/розкидача, кг</label><input id="hopper" type="number" step="10" value="3000"></div>
+            <div style="flex:1"><label for="step3">Крок x₃ (кг/га) для пошуку</label><input id="step3" type="number" step="1" value="5"></div>
           </div>
         </div>
 
         <div class="box">
           <h3>Керування</h3>
           <div class="row">
-            <button class="btn" onclick="solve()">🔁 Підібрати суміш</button>
-            <button class="btn" onclick="addFert()">➕ Додати продукт</button>
-            <button class="btn" onclick="preset()">🧪 Приклад</button>
+            <button type="button" class="btn" onclick="solve()">🔁 Підібрати суміш</button>
+            <button type="button" class="btn" onclick="addFert()">➕ Додати продукт</button>
+            <button type="button" class="btn" onclick="preset()">🧪 Приклад</button>
           </div>
           <p class="small">Порада: для старту скористайся «Приклад» (сечовина + DAP + MOP).</p>
         </div>
@@ -170,14 +171,14 @@ html.embedded .box{background:#f8fafc; color:#111}
           <h3>📄 CSV — рецепт (кг/га, ціна)</h3>
           <div id="csv1" class="out">—</div>
           <div class="row" style="margin-top:6px">
-            <button class="btn" onclick="copyEl('csv1')">📋 Копіювати</button>
+            <button type="button" class="btn" onclick="copyEl('csv1')">📋 Копіювати</button>
           </div>
         </div>
         <div class="box">
           <h3>📄 CSV — тоннаж на поле</h3>
           <div id="csv2" class="out">—</div>
           <div class="row" style="margin-top:6px">
-            <button class="btn" onclick="copyEl('csv2')">📋 Копіювати</button>
+            <button type="button" class="btn" onclick="copyEl('csv2')">📋 Копіювати</button>
           </div>
         </div>
       </div>

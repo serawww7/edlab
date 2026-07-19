@@ -10,6 +10,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Пара 2 — Паспорт поля: QR/NFC → мобільна форма → дашборд</title>
+<meta name="description" content="🌱 Паспорт поля: QR/NFC → мобільна форма → таблиця/дашборд">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -75,7 +76,7 @@ html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
 </style>
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Пара 2 · ЛПЗ · агрономи</span>
     <h1>🌱 Паспорт поля: QR/NFC → мобільна форма → таблиця/дашборд</h1>
 
@@ -99,9 +100,9 @@ html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
 
     <div class="card">
       <h2>🎮 Місії пари (інтерактив)</h2>
-      <div class="step"><div class="n">1</div><div><label><input type="checkbox" class="mission" data-id="m1"> Зібрати URL форми з автозаповненням для свого коду поля</label><div class="hint">Підготує основу для QR/NFC.</div></div></div>
-      <div class="step"><div class="n">2</div><div><label><input type="checkbox" class="mission" data-id="m2"> Додати 3+ записи у симуляторі (різні поля/стани)</label><div class="hint">Тренує структуру відповіді.</div></div></div>
-      <div class="step"><div class="n">3</div><div><label><input type="checkbox" class="mission" data-id="m3"> Побудувати дашборд і сформулювати висновок</label><div class="hint">1–2 речення: «де проблема» і «що робимо завтра».</div></div></div>
+      <div class="step"><div class="n">1</div><div><label><input type="checkbox" class="mission" data-id="m1" aria-label="m1"> Зібрати URL форми з автозаповненням для свого коду поля</label><div class="hint">Підготує основу для QR/NFC.</div></div></div>
+      <div class="step"><div class="n">2</div><div><label><input type="checkbox" class="mission" data-id="m2" aria-label="m2"> Додати 3+ записи у симуляторі (різні поля/стани)</label><div class="hint">Тренує структуру відповіді.</div></div></div>
+      <div class="step"><div class="n">3</div><div><label><input type="checkbox" class="mission" data-id="m3" aria-label="m3"> Побудувати дашборд і сформулювати висновок</label><div class="hint">1–2 речення: «де проблема» і «що робимо завтра».</div></div></div>
       <div class="progress" style="margin-top:10px"><div id="progressBar" style="width:0%"></div></div>
     </div>
 
@@ -170,8 +171,8 @@ html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
       <p class="muted">Це тренажер <b>без серверів</b>: дані зберігаються у твоєму браузері (localStorage). Додай 3+ записи.</p>
       <div class="grid g3">
         <div class="step"><div class="n">A</div><div>
-          <div class="field"><label>Код поля</label><input id="f_code" type="text"></div>
-          <div class="field"><label>Стан</label>
+          <div class="field"><label for="f_code">Код поля</label><input id="f_code" type="text"></div>
+          <div class="field"><label for="f_state">Стан</label>
             <select id="f_state">
               <option>норма</option>
               <option>бур’ян</option>
@@ -181,8 +182,8 @@ html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
               <option>інше</option>
             </select>
           </div>
-          <div class="field"><label>Коментар</label><input id="f_comment" type="text"></div>
-          <div class="field"><label>Фото URL</label><input id="f_photo" type="text"></div>
+          <div class="field"><label for="f_comment">Коментар</label><input id="f_comment" type="text"></div>
+          <div class="field"><label for="f_photo">Фото URL</label><input id="f_photo" type="text"></div>
           <div class="flex">
             <button class="btn" type="button" onclick="addRecord()">➕ Додати запис</button>
             <button class="btn" type="button" onclick="clearRecords()">🗑️ Очистити</button>
@@ -214,9 +215,9 @@ html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
       <h2>🗺️ Міні-мапа поля (5×5)</h2>
       <p class="muted">Клацай по клітинках і змінюй стан ділянки — дашборд вище автоматично оновиться.</p>
       <div class="flex" style="align-items:center">
-        <label>Код поля для мапи</label>
+        <label for="mapCode">Код поля для мапи</label>
         <input id="mapCode" type="text" style="max-width:160px">
-        <select id="mapState" style="max-width:220px">
+        <select id="mapState" style="max-width:220px" aria-label="map State">
           <option value="норма">норма</option>
           <option value="бур’ян">бур’ян</option>
           <option value="шкідник">шкідник</option>
@@ -238,8 +239,8 @@ html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
         <div>
           <div id="caseText" class="soft">Натисни «Згенерувати кейс»</div>
           <div class="flex" style="margin-top:8px">
-            <button class="btn" onclick="newCase()">🎯 Згенерувати кейс</button>
-            <select id="caseAction">
+            <button type="button" class="btn" onclick="newCase()">🎯 Згенерувати кейс</button>
+            <select id="caseAction" aria-label="case Action">
               <option value="">— Обери дію —</option>
               <option value="огляд_сьогодні">Терміновий огляд сьогодні</option>
               <option value="локальна_обробка">Локальна обробка</option>
@@ -247,7 +248,7 @@ html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
               <option value="моніторинг_48г">Спостереження 48 год</option>
               <option value="без_дії">Без дій</option>
             </select>
-            <button class="btn" onclick="checkCase()">✅ Перевірити</button>
+            <button type="button" class="btn" onclick="checkCase()">✅ Перевірити</button>
           </div>
           <div id="caseFeedback" class="hint" style="margin-top:6px"></div>
           <div class="kpi" style="margin-top:8px"><span class="badgeNum" id="streak">0</span><div>Серія вдалих рішень</div></div>
@@ -262,7 +263,7 @@ html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
         <li>Які поля потребують уваги <b>сьогодні</b> і чому?</li>
         <li>Що робимо <b>завтра зранку</b> (конкретна дія)?</li>
       </ul>
-      <div class="field"><label>Текст висновку</label><input id="conclusion" type="text" value=""></div>
+      <div class="field"><label for="conclusion">Текст висновку</label><input id="conclusion" type="text" value=""></div>
       <div class="flex no-print">
         <button class="btn" type="button" onclick="saveConclusion()">💾 Зберегти</button>
         <button class="btn" type="button" onclick="copyConclusion()">📋 Скопіювати</button>

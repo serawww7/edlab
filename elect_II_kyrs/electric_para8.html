@@ -10,6 +10,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Електрики · Пара 8 — Облік інструменту, калібрування, QR/NFC, друк 58 мм</title>
+<meta name="description" content="🧰 Облік інструменту · калібрування · видача/повернення · QR/NFC · 🧾 друк 58 мм">
 <meta name="color-scheme" content="light dark" />
 <style>
 :root{
@@ -59,7 +60,7 @@ tbody tr:nth-child(even){background:#0b1324}
 
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Електрики · Пара 8 · аудиторно</span>
     <h1>🧰 Облік інструменту · калібрування · видача/повернення · QR/NFC · 🧾 друк 58 мм</h1>
 
@@ -67,10 +68,10 @@ tbody tr:nth-child(even){background:#0b1324}
       <h2>🎯 Мета</h2>
       <p>Навчитися вести облік електровимірювального та допоміжного інструменту: картки інструменту, графік калібрувань, <b>видача/повернення</b>, стани <b>OK/REPAIR/OOS</b>, швидкі <b>QR/NFC</b>-рядки, друк етикеток 58 мм, імпорт/експорт CSV.</p>
       <div class="row">
-        <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
-        <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
-        <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+        <button type="button" class="btn" onclick="seedDemo()">🔄 Приклад</button>
+        <button type="button" class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+        <input id="file" type="file" accept=".csv,text/csv" class="btn"  aria-label="file"/>
+        <button type="button" class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
       </div>
       <p class="small">Поля CSV: <span class="mono">tool_id,name,category,serial,location,responsible,condition,last_cal,interval_m,next_cal,status,holder,notes,url</span></p>
     </div>
@@ -102,8 +103,8 @@ tbody tr:nth-child(even){background:#0b1324}
           <div class="field"><label for="turl">URL (NFC/QR)</label><input id="turl" placeholder="https://serawww7.github.io/edlab/..."></div>
           <div class="field"><label for="tnote">Нотатка</label><input id="tnote" placeholder="Комплект щупів у кейсі" /></div>
           <div class="row">
-            <button class="btn" onclick="calcNext()">🧩 Розрахувати наступну дату</button>
-            <button class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
+            <button type="button" class="btn" onclick="calcNext()">🧩 Розрахувати наступну дату</button>
+            <button type="button" class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
           </div>
         </div>
       </div>
@@ -116,9 +117,9 @@ tbody tr:nth-child(even){background:#0b1324}
         <div>
           <div class="field"><label for="holder">Кому видано</label><input id="holder" placeholder="Студент Прізвище / група" /></div>
           <div class="row">
-            <button class="btn" onclick="checkout()">📤 Видати</button>
-            <button class="btn" onclick="checkin()">📥 Повернення</button>
-            <button class="btn" onclick="markRepair()">🛠️ В ремонт</button>
+            <button type="button" class="btn" onclick="checkout()">📤 Видати</button>
+            <button type="button" class="btn" onclick="checkin()">📥 Повернення</button>
+            <button type="button" class="btn" onclick="markRepair()">🛠️ В ремонт</button>
           </div>
         </div>
         <div>
@@ -144,9 +145,9 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="card printable">
       <h2>🧾 Етикетка 58 мм (картка інструменту)</h2>
       <div class="row">
-        <button class="btn" onclick="buildTicket()">🧩 Зібрати</button>
-        <button class="btn" onclick="printTicketNewTab()">🖨️ Друк 58 мм</button>
-        <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+        <button type="button" class="btn" onclick="buildTicket()">🧩 Зібрати</button>
+        <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк 58 мм</button>
+        <button type="button" class="btn" onclick="downloadTXT()">📥 TXT</button>
       </div>
       <div class="tickets" id="tickets">
         <div id="ticket" class="ticket" aria-live="polite">
@@ -171,9 +172,9 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="card">
       <h2>📤 Експорт/списки</h2>
       <div class="row">
-        <button class="btn" onclick="exportCSV()">CSV реєстру</button>
-        <button class="btn" onclick="exportDue()">CSV «До калібрування»</button>
-        <button class="btn" onclick="exportMovements()">CSV руху</button>
+        <button type="button" class="btn" onclick="exportCSV()">CSV реєстру</button>
+        <button type="button" class="btn" onclick="exportDue()">CSV «До калібрування»</button>
+        <button type="button" class="btn" onclick="exportMovements()">CSV руху</button>
       </div>
       <p class="small">«До калібрування» включає <span class="chip warn">DUE</span> та <span class="chip bad">OVERDUE</span>.</p>
     </div>
@@ -234,8 +235,8 @@ tbody tr:nth-child(even){background:#0b1324}
         <td class="${st.css}"><b>${st.status}</b></td>
         <td class="editable" data-k="holder">${esc(r.holder||'')}</td>
         <td class="mono">
-          <button class="btn" data-act="label" data-id="${r.tool_id}">Етикетка</button>
-          <button class="btn" data-act="del" data-id="${r.tool_id}">✖</button>
+          <button type="button" class="btn" data-act="label" data-id="${r.tool_id}">Етикетка</button>
+          <button type="button" class="btn" data-act="del" data-id="${r.tool_id}">✖</button>
         </td>`;
       tbody.appendChild(tr);
     });

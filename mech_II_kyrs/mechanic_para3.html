@@ -27,6 +27,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Пара 3 (механіки) — Продуктивність, час, ПММ, собівартість/га, квиток 58 мм, NFC</title>
+<meta name="description" content="📈 Продуктивність агрегату: TFC/EFC → час → ПММ → собівартість/га → квиток 58 мм, NFC">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -91,7 +92,7 @@ html.embedded .box{background:#f8fafc; color:#111}
 
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Пара 3 · аудиторно · механіки</span>
     <h1>📈 Продуктивність агрегату: TFC/EFC → час → ПММ → собівартість/га → квиток 58 мм, NFC</h1>
 
@@ -111,16 +112,16 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>Агрегат</h3>
           <div class="row">
-            <div style="flex:1"><label>Машина ID</label><input id="machId" type="text" value="TR-001"></div>
-            <div style="flex:1"><label>Модель</label><input id="machModel" type="text" value="МТЗ-82 + ґрунтообробний 4 м"></div>
+            <div style="flex:1"><label for="machId">Машина ID</label><input id="machId" type="text" value="TR-001"></div>
+            <div style="flex:1"><label for="machModel">Модель</label><input id="machModel" type="text" value="МТЗ-82 + ґрунтообробний 4 м"></div>
           </div>
           <div class="row" style="margin-top:6px">
-            <div style="flex:1"><label>Ширина захвату W, м</label><input id="W" type="number" step="0.01" value="4.0"></div>
-            <div style="flex:1"><label>Швидкість V, км/год</label><input id="V" type="number" step="0.1" value="8.0"></div>
+            <div style="flex:1"><label for="W">Ширина захвату W, м</label><input id="W" type="number" step="0.01" value="4.0"></div>
+            <div style="flex:1"><label for="V">Швидкість V, км/год</label><input id="V" type="number" step="0.1" value="8.0"></div>
           </div>
           <div class="row" style="margin-top:6px">
-            <div style="flex:1"><label>Перекриття, %</label><input id="Ov" type="number" step="1" value="7"></div>
-            <div style="flex:1"><label>FE (0..1)</label><input id="FE" type="number" step="0.01" value="0.78"></div>
+            <div style="flex:1"><label for="Ov">Перекриття, %</label><input id="Ov" type="number" step="1" value="7"></div>
+            <div style="flex:1"><label for="FE">FE (0..1)</label><input id="FE" type="number" step="0.01" value="0.78"></div>
           </div>
           <p class="small">Ефективна ширина <span class="mono">Wᵉᶠᶠ = W × (1 − Ov%)</span>.</p>
         </div>
@@ -128,24 +129,24 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>Пальне</h3>
           <div class="row">
-            <div style="flex:1"><label>Витрата, л/га (якщо відома)</label><input id="fuel_ha" type="number" step="0.1" value="0"></div>
-            <div style="flex:1"><label>Витрата, л/год (альтерн.)</label><input id="fuel_h" type="number" step="0.1" value="7.5"></div>
+            <div style="flex:1"><label for="fuel_ha">Витрата, л/га (якщо відома)</label><input id="fuel_ha" type="number" step="0.1" value="0"></div>
+            <div style="flex:1"><label for="fuel_h">Витрата, л/год (альтерн.)</label><input id="fuel_h" type="number" step="0.1" value="7.5"></div>
           </div>
           <div class="row" style="margin-top:6px">
-            <div style="flex:1"><label>Ціна дизпального, грн/л</label><input id="price" type="number" step="0.01" value="63.50"></div>
-            <div style="flex:1"><label>Місткість бака/бункера, л/кг (опц.)</label><input id="tank" type="number" step="1" value="0"></div>
+            <div style="flex:1"><label for="price">Ціна дизпального, грн/л</label><input id="price" type="number" step="0.01" value="63.50"></div>
+            <div style="flex:1"><label for="tank">Місткість бака/бункера, л/кг (опц.)</label><input id="tank" type="number" step="1" value="0"></div>
           </div>
         </div>
 
         <div class="box">
           <h3>Економіка</h3>
           <div class="row">
-            <div style="flex:1"><label>Тариф праці, грн/год</label><input id="rate_lab" type="number" step="1" value="220"></div>
-            <div style="flex:1"><label>Ставка машини, грн/год</label><input id="rate_mach" type="number" step="1" value="450"></div>
+            <div style="flex:1"><label for="rate_lab">Тариф праці, грн/год</label><input id="rate_lab" type="number" step="1" value="220"></div>
+            <div style="flex:1"><label for="rate_mach">Ставка машини, грн/год</label><input id="rate_mach" type="number" step="1" value="450"></div>
           </div>
           <div class="row" style="margin-top:6px">
-            <div style="flex:1"><label>T підгот.-заверш., год</label><input id="t_prep" type="number" step="0.1" value="0.5"></div>
-            <div style="flex:1"><label>T простоїв (план), год</label><input id="t_delay" type="number" step="0.1" value="0.3"></div>
+            <div style="flex:1"><label for="t_prep">T підгот.-заверш., год</label><input id="t_prep" type="number" step="0.1" value="0.5"></div>
+            <div style="flex:1"><label for="t_delay">T простоїв (план), год</label><input id="t_delay" type="number" step="0.1" value="0.3"></div>
           </div>
         </div>
       </div>
@@ -155,10 +156,10 @@ html.embedded .box{background:#f8fafc; color:#111}
     <div class="card">
       <h2>🧱 Поля / роботи</h2>
       <div class="row">
-        <button class="btn" onclick="addRow()">➕ Додати поле</button>
-        <button class="btn" onclick="preset()">🧪 Приклад</button>
-        <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
-        <button class="btn" onclick="copyCSV()">📋 CSV</button>
+        <button type="button" class="btn" onclick="addRow()">➕ Додати поле</button>
+        <button type="button" class="btn" onclick="preset()">🧪 Приклад</button>
+        <button type="button" class="btn" onclick="recalc()">🔁 Перерахувати</button>
+        <button type="button" class="btn" onclick="copyCSV()">📋 CSV</button>
       </div>
       <div style="overflow:auto; margin-top:8px">
         <table class="table" id="tbl">
@@ -209,8 +210,8 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>Квиток 58 мм — “План зміни”</h3>
           <div class="row">
-            <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-            <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+            <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+            <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
           </div>
           <div class="ticket" id="ticket" style="margin-top:8px">
             <h4>ПЛАН ЗМІНИ</h4>
@@ -232,12 +233,12 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>NFC — текст завдання</h3>
           <div class="row">
-            <div style="flex:1"><label>Куратор/бригадир</label><input id="nfcBoss" type="text" value="Майстер діл. №1"></div>
-            <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+            <div style="flex:1"><label for="nfcBoss">Куратор/бригадир</label><input id="nfcBoss" type="text" value="Майстер діл. №1"></div>
+            <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
           </div>
           <div class="row" style="margin-top:6px">
-            <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-            <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+            <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+            <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
           </div>
           <div id="nfcOut" class="out">—</div>
         </div>

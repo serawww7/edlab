@@ -46,7 +46,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧾</span>
@@ -63,12 +63,12 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <h2>📚 Що робимо</h2>
     <p>Вносимо дані лічильника (<b>серійний номер</b>, <b>модель</b>, <b>місце</b>), прив’язуємо <b>ID об’єкта (NFC або код)</b>, робимо <b>2 фото</b> (серійник крупно + вузол підключення), відмічаємо <b>пломбу</b> (генеруємо №, обираємо статус, додаємо фото пломби), знімаємо <b>показник</b> (м³), лишаємо <b>аудіо-нотатку</b>, будуємо <b>шкалу завершеності</b> і формуємо <b>чек 58 мм</b>, <b>CSV/TXT</b>, <b>QR</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. Шевченка, 10, кв. 12"/></label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. Шевченка, 10, кв. 12" aria-label="м. Тальне, вул. Шевченка, 10, кв. 12"/></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П." aria-label="Прізвище І.П."/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date" aria-label="day"/></label>
     </div>
     <div class="row">
-      <button class="btn good" id="mkCase">🧰 Створити кейс</button>
+      <button type="button" class="btn good" id="mkCase">🧰 Створити кейс</button>
       <span class="badge" id="cid">Кейс: —</span>
     </div>
   </div>
@@ -78,20 +78,20 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>🆔 Дані лічильника</h2>
       <div class="row">
-        <label style="flex:1">Серійний №<input id="ser" class="input" placeholder="Напр.: G4-12345678"/></label>
+        <label style="flex:1">Серійний №<input id="ser" class="input" placeholder="Напр.: G4-12345678" aria-label="Напр.: G4-12345678"/></label>
         <label style="flex:1">Модель
-          <select id="model" class="input">
+          <select id="model" class="input" aria-label="model">
             <option>G1.6</option><option selected>G2.5</option><option>G4</option><option>G6</option>
           </select>
         </label>
-        <label style="flex:1">Місце встановлення<input id="place" class="input" placeholder="Кухня, шафа, щит..."/></label>
+        <label style="flex:1">Місце встановлення<input id="place" class="input" placeholder="Кухня, шафа, щит..." aria-label="Кухня, шафа, щит..."/></label>
       </div>
 
       <div class="block">
         <div class="row">
-          <button class="btn" id="nfcBtn">📶 NFC</button>
-          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)"/>
-          <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
+          <button type="button" class="btn" id="nfcBtn">📶 NFC</button>
+          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)" aria-label="ID об’єкта (якщо NFC недоступний)"/>
+          <button type="button" class="btn secondary" id="saveAsset">💾 Застосувати</button>
           <span class="badge" id="nfcs">Статус NFC: очікується</span>
         </div>
       </div>
@@ -100,10 +100,10 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div class="row">
         <video id="vid" class="photo" autoplay playsinline muted></video>
         <div>
-          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
-          <button class="btn" data-kind="ser">📷 Серійний № (крупно)</button>
-          <button class="btn" data-kind="node">📷 Вузол підключення</button>
-          <button class="btn" data-kind="seal">📷 Пломба</button><br/>
+          <button type="button" class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button type="button" class="btn" data-kind="ser">📷 Серійний № (крупно)</button>
+          <button type="button" class="btn" data-kind="node">📷 Вузол підключення</button>
+          <button type="button" class="btn" data-kind="seal">📷 Пломба</button><br/>
           <small class="muted">Фото зберігаються в «Галереї доказів».</small>
         </div>
       </div>
@@ -111,28 +111,28 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h2 style="margin-top:10px">🔒 Пломба</h2>
       <div class="row">
-        <label style="flex:1">№ пломби<input id="sealNo" class="input" placeholder="Автогенерація або свій номер"/></label>
+        <label style="flex:1">№ пломби<input id="sealNo" class="input" placeholder="Автогенерація або свій номер" aria-label="Автогенерація або свій номер"/></label>
         <label style="flex:1">Статус
-          <select id="sealState" class="input">
+          <select id="sealState" class="input" aria-label="seal State">
             <option value="sealed" selected>Пломбовано</option>
             <option value="unsealed">Розпломбовано</option>
             <option value="replaced">Заміна пломби</option>
           </select>
         </label>
-        <button class="btn" id="genSeal">🎲 Згенерувати №</button>
+        <button type="button" class="btn" id="genSeal">🎲 Згенерувати №</button>
       </div>
 
       <h2 style="margin-top:10px">🔢 Показник лічильника (м³)</h2>
       <div class="row">
-        <input type="number" id="reading" class="input" min="0" step="0.001" placeholder="Напр.: 01234.567"/>
-        <button class="btn" id="markRead">✅ Підтвердити показник</button>
+        <input type="number" id="reading" class="input" min="0" step="0.001" placeholder="Напр.: 01234.567" aria-label="Напр.: 01234.567"/>
+        <button type="button" class="btn" id="markRead">✅ Підтвердити показник</button>
         <span class="badge" id="rOk">—</span>
       </div>
 
       <h2 style="margin-top:10px">🎙️ Голосова нотатка</h2>
       <div class="row">
-        <button class="btn" id="recStart">⏺️ Запис</button>
-        <button class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
+        <button type="button" class="btn" id="recStart">⏺️ Запис</button>
+        <button type="button" class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
         <span class="badge" id="rstat">Немає запису</span>
       </div>
       <audio id="player" controls style="margin-top:8px;max-width:100%"></audio>
@@ -167,10 +167,10 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h2 style="margin-top:10px">💾 Експорт / друк</h2>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV</button>
-        <button class="btn" id="saveTxt">💾 TXT</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>

@@ -15,6 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 10 (технологи) — Санітарія та гігієна: SSOP/GMP, графік, тести, аудит, квиток/NFC/CSV</title>
+<meta name="description" content="🧼 Санітарія та гігієна: SSOP/GMP, графік, тести, аудит, квиток/NFC/CSV">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -62,7 +63,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 10 · аудиторно · технологи переробки</span>
   <h1>🧼 Санітарія та гігієна: SSOP/GMP, графік, тести, аудит, квиток/NFC/CSV</h1>
 
@@ -83,9 +84,9 @@ html.embedded .box{background:#f8fafc;color:#111}
       <span>Ризик: 1 — низький</span><span>2 — середній</span><span>3 — високий</span>
     </div>
     <div class="row" style="margin-top:6px">
-      <button class="btn" onclick="addZone()">➕ Додати зону</button>
-      <button class="btn" onclick="presetZones()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvZones')">📋 CSV (zones)</button>
+      <button type="button" class="btn" onclick="addZone()">➕ Додати зону</button>
+      <button type="button" class="btn" onclick="presetZones()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvZones')">📋 CSV (zones)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblZones">
@@ -110,9 +111,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>🧽 SSOP — План прибирання/дезінфекції</h2>
     <div class="row">
-      <button class="btn" onclick="addSSOP()">➕ Додати SSOP</button>
-      <button class="btn" onclick="presetSSOP()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvSSOP')">📋 CSV (ssop)</button>
+      <button type="button" class="btn" onclick="addSSOP()">➕ Додати SSOP</button>
+      <button type="button" class="btn" onclick="presetSSOP()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvSSOP')">📋 CSV (ssop)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblSSOP">
@@ -140,15 +141,15 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Параметри</h3>
         <div class="row">
-          <div style="flex:1"><label>Початок (HH:MM)</label><input id="winStart" type="time" value="18:00"></div>
-          <div style="flex:1"><label>Тривалість, хв</label><input id="winDur" type="number" step="5" value="60"></div>
+          <div style="flex:1"><label for="winStart">Початок (HH:MM)</label><input id="winStart" type="time" value="18:00"></div>
+          <div style="flex:1"><label for="winDur">Тривалість, хв</label><input id="winDur" type="number" step="5" value="60"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>К-ть вікон</label><input id="winCount" type="number" step="1" value="2"></div>
+          <div style="flex:1"><label for="winCount">К-ть вікон</label><input id="winCount" type="number" step="1" value="2"></div>
         </div>
         <div class="row" style="margin-top:8px">
-          <button class="btn" onclick="buildWindows()">🧮 Побудувати</button>
-          <button class="btn" onclick="copyCSV('csvWin')">📋 CSV (windows)</button>
+          <button type="button" class="btn" onclick="buildWindows()">🧮 Побудувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvWin')">📋 CSV (windows)</button>
         </div>
       </div>
       <div class="box">
@@ -167,10 +168,10 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>🧫 ATP/мікро-тести (симуляція)</h2>
     <div class="row">
-      <button class="btn" onclick="addTest()">➕ Додати тест</button>
-      <button class="btn" onclick="presetTests()">🧪 Приклад</button>
-      <button class="btn" onclick="evaluateTests()">✅ Порахувати</button>
-      <button class="btn" onclick="copyCSV('csvTests')">📋 CSV (tests)</button>
+      <button type="button" class="btn" onclick="addTest()">➕ Додати тест</button>
+      <button type="button" class="btn" onclick="presetTests()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="evaluateTests()">✅ Порахувати</button>
+      <button type="button" class="btn" onclick="copyCSV('csvTests')">📋 CSV (tests)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblTests">
@@ -196,10 +197,10 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📝 Аудит GMP — чек-лист</h2>
     <div class="row">
-      <button class="btn" onclick="addAudit()">➕ Додати пункт</button>
-      <button class="btn" onclick="presetAudit()">🧪 Приклад</button>
-      <button class="btn" onclick="scoreAudit()">✅ Оцінити</button>
-      <button class="btn" onclick="copyCSV('csvAudit')">📋 CSV (audit)</button>
+      <button type="button" class="btn" onclick="addAudit()">➕ Додати пункт</button>
+      <button type="button" class="btn" onclick="presetAudit()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="scoreAudit()">✅ Оцінити</button>
+      <button type="button" class="btn" onclick="copyCSV('csvAudit')">📋 CSV (audit)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblAudit">
@@ -224,8 +225,8 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал / Квиток 58 мм / NFC</h2>
     <div class="row">
-      <button class="btn" onclick="addLog()">➕ Додати у журнал</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+      <button type="button" class="btn" onclick="addLog()">➕ Додати у журнал</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblLog">
@@ -250,12 +251,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>NFC — “SSOP TASK CARD”</h3>
         <div class="row">
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
-          <div style="flex:1"><label>Виконавець</label><input id="nfcOper" type="text" value="Студент ТПТ"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="nfcOper">Виконавець</label><input id="nfcOper" type="text" value="Студент ТПТ"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -263,8 +264,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток 58 мм — “SSOP TASK”</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>SSOP TASK</h4>
@@ -344,7 +345,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark"><input type="number" min="1" max="3" step="1" value="${s.risk}"></td>
       <td><input type="text" value="${s.freq}"></td>
       <td><input type="text" value="${s.ccp}"></td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyZones); buildCSV_Zones();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyZones); buildCSV_Zones();">✖</button></td>
     `;
     bodyZones.appendChild(tr); reindex(bodyZones); buildCSV_Zones();
   }
@@ -380,7 +381,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark"><input type="number" step="1" value="${s.exp}"></td>
       <td class="dark"><input type="text" value="${s.ppe}"></td>
       <td><input type="text" value="${s.tool}"></td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodySSOP); buildCSV_SSOP();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodySSOP); buildCSV_SSOP();">✖</button></td>
     `;
     bodySSOP.appendChild(tr); reindex(bodySSOP); buildCSV_SSOP();
   }
@@ -465,7 +466,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark"><input type="number" step="0.1" value="${s.val}"></td>
       <td><input type="number" step="1" value="${s.thr}"></td>
       <td class="status">—</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyTests); buildCSV_Tests();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyTests); buildCSV_Tests();">✖</button></td>
     `;
     bodyTests.appendChild(tr); reindex(bodyTests); buildCSV_Tests();
   }
@@ -522,7 +523,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark"><input type="number" min="1" max="5" step="1" value="${s.w}"></td>
       <td class="dark"><input type="number" min="0" max="1" step="0.1" value="${s.s}"></td>
       <td class="pt">—</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyAudit); buildCSV_Audit();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyAudit); buildCSV_Audit();">✖</button></td>
     `;
     bodyAudit.appendChild(tr); reindex(bodyAudit); buildCSV_Audit();
   }
@@ -586,7 +587,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td>${passRate}%</td>
       <td>${auditScore}%</td>
       <td>${verdict}</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
     `;
     bodyLog.appendChild(tr); reindex(bodyLog); buildCSV_Log();
 

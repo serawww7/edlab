@@ -19,6 +19,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 8 (механіки) — Вібраційна діагностика: RMS g, 1X/2X/3X, журнал, чек 58 мм, NFC, CSV</title>
+<meta name="description" content="📳 Вібраційна діагностика: RMS g, 1X/2X/3X, журнал вимірів, чек 58 мм, NFC">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -64,7 +65,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 8 · аудиторно · механіки</span>
   <h1>📳 Вібраційна діагностика: RMS g, 1X/2X/3X, журнал вимірів, чек 58 мм, NFC</h1>
 
@@ -85,11 +86,11 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Паспортні/робочі</h3>
         <div class="row">
-          <div style="flex:1"><label>Назва вузла</label><input id="nodeName" type="text" value="Вал вентилятора охолодження"></div>
+          <div style="flex:1"><label for="nodeName">Назва вузла</label><input id="nodeName" type="text" value="Вал вентилятора охолодження"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Оберти, rpm</label><input id="rpm" type="number" step="1" value="1800"></div>
-          <div style="flex:1"><label>Очікувана 1X, Гц</label><input id="f1exp" type="number" step="0.01" value="30.0"></div>
+          <div style="flex:1"><label for="rpm">Оберти, rpm</label><input id="rpm" type="number" step="1" value="1800"></div>
+          <div style="flex:1"><label for="f1exp">Очікувана 1X, Гц</label><input id="f1exp" type="number" step="0.01" value="30.0"></div>
         </div>
         <p class="small">Підказка: 1X = rpm/60. Кнопка “⟳ Обчислити 1X” нижче.</p>
       </div>
@@ -97,30 +98,30 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Параметри виміру</h3>
         <div class="row">
-          <div style="flex:1"><label>Вікно, с</label><input id="winSec" type="number" step="0.5" value="6"></div>
-          <div style="flex:1"><label>Знормувати g (видалити DC)</label>
+          <div style="flex:1"><label for="winSec">Вікно, с</label><input id="winSec" type="number" step="0.5" value="6"></div>
+          <div style="flex:1"><label for="detrend">Знормувати g (видалити DC)</label>
             <select id="detrend"><option value="on" selected>так</option><option value="off">ні</option></select>
           </div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Режим Goertzel</label>
+          <div style="flex:1"><label for="gMode">Режим Goertzel</label>
             <select id="gMode"><option value="multi" selected>1X/2X/3X</option><option value="fine">тонкий ±5%</option></select>
           </div>
-          <div style="flex:1"><label>Поріг тривоги, g RMS</label><input id="thrRMS" type="number" step="0.01" value="0.4"></div>
+          <div style="flex:1"><label for="thrRMS">Поріг тривоги, g RMS</label><input id="thrRMS" type="number" step="0.01" value="0.4"></div>
         </div>
       </div>
 
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" id="permBtn">🔓 Дозвіл на сенсори</button>
-          <button class="btn" id="startBtn">▶️ Пуск</button>
-          <button class="btn" id="stopBtn" disabled>⏹️ Стоп</button>
+          <button type="button" class="btn" id="permBtn">🔓 Дозвіл на сенсори</button>
+          <button type="button" class="btn" id="startBtn">▶️ Пуск</button>
+          <button type="button" class="btn" id="stopBtn" disabled>⏹️ Стоп</button>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="calcF1()">⟳ Обчислити 1X</button>
-          <button class="btn" onclick="addLog()">🧩 В журнал</button>
-          <button class="btn" onclick="copyCSV('csvSys')">📋 CSV (сесія)</button>
+          <button type="button" class="btn" onclick="calcF1()">⟳ Обчислити 1X</button>
+          <button type="button" class="btn" onclick="addLog()">🧩 В журнал</button>
+          <button type="button" class="btn" onclick="copyCSV('csvSys')">📋 CSV (сесія)</button>
         </div>
         <div id="csvSys" class="out" style="margin-top:8px">—</div>
       </div>
@@ -150,8 +151,8 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал вимірів</h2>
     <div class="row">
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
-      <button class="btn" onclick="presetLog()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
+      <button type="button" class="btn" onclick="presetLog()">🧪 Приклад</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tbl">
@@ -184,12 +185,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>NFC — “VIBRO CHECK”</h3>
         <div class="row">
-          <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="nfcId">Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -197,8 +198,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток “VIBRO CHECK”</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>VIBRO CHECK</h4>

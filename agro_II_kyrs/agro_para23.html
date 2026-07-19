@@ -55,7 +55,7 @@ svg{max-width:100%;height:auto;display:block}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧯</span>
@@ -85,10 +85,10 @@ svg{max-width:100%;height:auto;display:block}
   <!-- МІСІЇ -->
   <div class="card">
     <h2>🎮 Місії пари</h2>
-    <label><input type="checkbox" class="mission" data-id="m1"> Імпортуй хоча б 4 етикетки (CSV або «Еталонні»)</label><br/>
-    <label><input type="checkbox" class="mission" data-id="m2"> Збери суміш із 2–4 препаратів і задай воду/бак/площу</label><br/>
-    <label><input type="checkbox" class="mission" data-id="m3"> Пройди перевірки, добийся <b>ризик-бал ≤ 2</b></label><br/>
-    <label><input type="checkbox" class="mission" data-id="m4"> Згенеруй промпт до LLM і випиши 2 пропозиції покращення</label>
+    <label><input type="checkbox" class="mission" data-id="m1" aria-label="m1"> Імпортуй хоча б 4 етикетки (CSV або «Еталонні»)</label><br/>
+    <label><input type="checkbox" class="mission" data-id="m2" aria-label="m2"> Збери суміш із 2–4 препаратів і задай воду/бак/площу</label><br/>
+    <label><input type="checkbox" class="mission" data-id="m3" aria-label="m3"> Пройди перевірки, добийся <b>ризик-бал ≤ 2</b></label><br/>
+    <label><input type="checkbox" class="mission" data-id="m4" aria-label="m4"> Згенеруй промпт до LLM і випиши 2 пропозиції покращення</label>
     <div class="progress" style="margin-top:10px"><div id="progressBar" style="width:0%"></div></div>
   </div>
 
@@ -96,11 +96,11 @@ svg{max-width:100%;height:auto;display:block}
   <div class="card">
     <h2>🗂️ Етикетки (CSV)</h2>
     <p class="small muted">Стовпці: <span class="mono">product,ai,group,form,dose_per_ha,unit,crops,targets,water_l_ha,rei_h,phi_d,ph_min,ph_max,incompat,notes</span></p>
-    <textarea id="csv" class="input" rows="7" placeholder="product,ai,group,form,dose_per_ha,unit,crops,targets,water_l_ha,rei_h,phi_d,ph_min,ph_max,incompat,notes"></textarea>
+    <textarea id="csv" class="input" rows="7" placeholder="product,ai,group,form,dose_per_ha,unit,crops,targets,water_l_ha,rei_h,phi_d,ph_min,ph_max,incompat,notes" aria-label="product,ai,group,form,dose_per_ha,unit,crops,targets,water_l_ha,rei_h,phi_d,ph_min,ph_max,incompat,notes"></textarea>
     <div class="row">
-      <button class="btn good" id="load">📥 Імпорт</button>
-      <button class="btn secondary" id="demo">🎲 Еталонні етикетки</button>
-      <button class="btn secondary" id="clearLabels">🧹 Очистити</button>
+      <button type="button" class="btn good" id="load">📥 Імпорт</button>
+      <button type="button" class="btn secondary" id="demo">🎲 Еталонні етикетки</button>
+      <button type="button" class="btn secondary" id="clearLabels">🧹 Очистити</button>
       <span id="badgeN" class="badge">Препаратів: 0</span>
     </div>
     <p class="help">Порада: натисни «Еталонні етикетки» — вони <b>автоматично</b> імпортуються і селект нижче заповниться.</p>
@@ -133,7 +133,7 @@ svg{max-width:100%;height:auto;display:block}
         <label for="unit">Одиниця</label>
         <select id="unit" class="input"><option>л/га</option><option>кг/га</option></select>
       </div>
-      <button class="btn disabled" id="add" disabled>➕ Додати</button>
+      <button type="button" class="btn disabled" id="add" disabled>➕ Додати</button>
     </div>
 
     <table class="tbl" id="mixTbl" style="margin-top:8px">
@@ -157,7 +157,7 @@ svg{max-width:100%;height:auto;display:block}
     </div>
 
     <div class="row" style="margin-top:10px">
-      <button class="btn good" id="check">🧪 Перевірити сумісність</button>
+      <button type="button" class="btn good" id="check">🧪 Перевірити сумісність</button>
       <span id="badgeRisk" class="badge">Статус: —</span>
       <span id="mixAdvice" class="muted"></span>
     </div>
@@ -174,8 +174,8 @@ svg{max-width:100%;height:auto;display:block}
       <tbody></tbody>
     </table>
     <div class="row" style="margin-top:8px">
-      <button class="btn" id="exportLog">📄 Експорт журналу</button>
-      <button class="btn secondary" id="resetLog">🧹 Очистити журнал</button>
+      <button type="button" class="btn" id="exportLog">📄 Експорт журналу</button>
+      <button type="button" class="btn secondary" id="resetLog">🧹 Очистити журнал</button>
     </div>
     <div id="log" class="log" aria-live="polite"></div>
   </div>
@@ -185,9 +185,9 @@ svg{max-width:100%;height:auto;display:block}
     <h2>🤖 Генератор промпта для LLM</h2>
     <p class="muted">Згенеруй інструкцію для моделі ШІ (ChatGPT, Claude тощо), щоб вона перевірила твою суміш і запропонувала покращення IPM.</p>
     <div class="row">
-      <button class="btn good" id="genPrompt">⚙️ Згенерувати</button>
-      <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
-      <button class="btn secondary" id="savePrompt">⬇️ TXT</button>
+      <button type="button" class="btn good" id="genPrompt">⚙️ Згенерувати</button>
+      <button type="button" class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+      <button type="button" class="btn secondary" id="savePrompt">⬇️ TXT</button>
     </div>
     <pre class="code" id="prompt">// Спочатку імпорт етикеток і «🧪 Перевірити сумісність»</pre>
   </div>
@@ -197,8 +197,8 @@ svg{max-width:100%;height:auto;display:block}
     <h2>🎲 Кейс-квіз: що робити з цим конфліктом?</h2>
     <p class="muted">Отримай випадковий конфлікт суміші та обери дію. Тримай серію вдалих рішень!</p>
     <div class="row">
-      <button class="btn" onclick="newCase()">🎯 Згенерувати конфлікт</button>
-      <select id="caseAction" class="input" style="max-width:340px">
+      <button type="button" class="btn" onclick="newCase()">🎯 Згенерувати конфлікт</button>
+      <select id="caseAction" class="input" style="max-width:340px" aria-label="case Action">
         <option value="">— Обери дію —</option>
         <option value="заміна_FRAC">Замінити препарат на іншу FRAC-групу</option>
         <option value="скоригувати_pH">Додати коректор pH/воду в інше джерело</option>
@@ -206,7 +206,7 @@ svg{max-width:100%;height:auto;display:block}
         <option value="вилучити_заборонену_пару">Вилучити несумісну пару</option>
         <option value="нічого_не_робити">Нічого не робити</option>
       </select>
-      <button class="btn" onclick="checkCase()">✅ Перевірити</button>
+      <button type="button" class="btn" onclick="checkCase()">✅ Перевірити</button>
     </div>
     <div id="caseText" class="note" style="margin-top:8px">Натисни «Згенерувати конфлікт»</div>
     <div class="row" style="margin-top:8px">
@@ -334,7 +334,7 @@ function renderMix(){
   MIXTBL.innerHTML='';
   mix.forEach((m,i)=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${i+1}</td><td>${m.product}</td><td>${m.group}</td><td>${m.form}</td><td>${m.dose} ${m.unit}/га</td><td><button class="btn secondary" data-i="${i}">✖</button></td>`;
+    tr.innerHTML=`<td>${i+1}</td><td>${m.product}</td><td>${m.group}</td><td>${m.form}</td><td>${m.dose} ${m.unit}/га</td><td><button type="button" class="btn secondary" data-i="${i}">✖</button></td>`;
     MIXTBL.appendChild(tr);
   });
   MIXTBL.querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>removeFromMix(parseInt(b.dataset.i)));

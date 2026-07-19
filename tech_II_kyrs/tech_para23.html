@@ -45,7 +45,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🔥</span>
@@ -77,37 +77,37 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h2>🧰 Параметри процесу</h2>
       <div class="row">
         <label>Продукт / референт
-          <select id="prod" class="input">
+          <select id="prod" class="input" aria-label="prod">
             <option value="milk" selected>Молоко HTST (Tref=72.0°C, z=7.0, ціль PU=1.0)</option>
             <option value="curd">Сирна маса (Tref=63.0°C, z=7.0, ціль PU=0.5)</option>
             <option value="sausage">Варена ковбаса (Tref=70.0°C, z=6.0, ціль F=3.0)</option>
             <option value="custom">Кастом</option>
           </select>
         </label>
-        <label>Tref, °C<input id="tref" class="input" type="number" step="0.1" value="72.0"/></label>
-        <label>z, °C<input id="z" class="input" type="number" step="0.1" value="7.0"/></label>
-        <label>Ціль F/PU<input id="ftarget" class="input" type="number" step="0.01" value="1.00"/></label>
+        <label>Tref, °C<input id="tref" class="input" type="number" step="0.1" value="72.0" aria-label="tref"/></label>
+        <label>z, °C<input id="z" class="input" type="number" step="0.1" value="7.0" aria-label="z"/></label>
+        <label>Ціль F/PU<input id="ftarget" class="input" type="number" step="0.01" value="1.00" aria-label="ftarget"/></label>
       </div>
 
       <h3 style="margin-top:8px">📈 Профіль T(t): розгін → витримка → охолодження</h3>
       <div class="row">
-        <label>T старт, °C<input id="t0" class="input" type="number" step="0.1" value="4.0"/></label>
-        <label>T витримки, °C<input id="thold" class="input" type="number" step="0.1" value="74.0"/></label>
-        <label>Витримка, сек<input id="hold" class="input" type="number" step="1" value="20"/></label>
+        <label>T старт, °C<input id="t0" class="input" type="number" step="0.1" value="4.0" aria-label="t0"/></label>
+        <label>T витримки, °C<input id="thold" class="input" type="number" step="0.1" value="74.0" aria-label="thold"/></label>
+        <label>Витримка, сек<input id="hold" class="input" type="number" step="1" value="20" aria-label="hold"/></label>
       </div>
       <div class="row">
-        <label>Час розгону, сек<input id="t_up" class="input" type="number" step="1" value="25"/></label>
-        <label>Час охол., сек<input id="t_dn" class="input" type="number" step="1" value="40"/></label>
-        <label>Крок симуляції, сек<input id="dt" class="input" type="number" step="0.1" value="0.5"/></label>
-        <button class="btn" id="simulate">▶️ Симулювати</button>
+        <label>Час розгону, сек<input id="t_up" class="input" type="number" step="1" value="25" aria-label="t up"/></label>
+        <label>Час охол., сек<input id="t_dn" class="input" type="number" step="1" value="40" aria-label="t dn"/></label>
+        <label>Крок симуляції, сек<input id="dt" class="input" type="number" step="0.1" value="0.5" aria-label="dt"/></label>
+        <button type="button" class="btn" id="simulate">▶️ Симулювати</button>
       </div>
 
       <h3 style="margin-top:8px">🧠 Авто-підбір (AI)</h3>
       <div class="row">
-        <label>Max T, °C<input id="tmax" class="input" type="number" step="0.1" value="78.0"/></label>
-        <label>Max час, сек<input id="tmaxsec" class="input" type="number" step="1" value="240"/></label>
-        <label>Штраф якості, °C<sup>2</sup>·сек<input id="qpen" class="input" type="number" step="0.1" value="0.08"/></label>
-        <button class="btn good" id="opt">🚀 Підібрати під ціль</button>
+        <label>Max T, °C<input id="tmax" class="input" type="number" step="0.1" value="78.0" aria-label="tmax"/></label>
+        <label>Max час, сек<input id="tmaxsec" class="input" type="number" step="1" value="240" aria-label="tmaxsec"/></label>
+        <label>Штраф якості, °C<sup>2</sup>·сек<input id="qpen" class="input" type="number" step="0.1" value="0.08" aria-label="qpen"/></label>
+        <button type="button" class="btn good" id="opt">🚀 Підібрати під ціль</button>
       </div>
       <small class="muted">Штраф ∝ ∑(max(0, T−T<sub>qual</sub>))²·dt, де T<sub>qual</sub>=Tref (наближено). Мета — F ≥ Target при мінімальному штрафі/часі.</small>
 
@@ -121,11 +121,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:10px">💾 Експорт / друк</h3>
       <div class="row">
-        <input id="lot" class="input" placeholder="Лот/процес (напр. HTST_2025-10-18_змінаB)"/>
-        <button class="btn" id="saveCsv">📄 CSV (профіль)</button>
-        <button class="btn" id="saveTxt">💾 TXT (звіт)</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
+        <input id="lot" class="input" placeholder="Лот/процес (напр. HTST_2025-10-18_змінаB)" aria-label="Лот/процес (напр. HTST_2025-10-18_змінаB)"/>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (профіль)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (звіт)</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>

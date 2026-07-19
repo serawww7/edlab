@@ -17,6 +17,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 15 (технологи) — Підсумковий проєкт: HACCP/FSMS, аудит, CAPA, портфоліо</title>
+<meta name="description" content="🏁 Підсумковий проєкт: міні-HACCP/FSMS, аудит, CAPA, портфоліо">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -65,7 +66,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 15 · аудиторно · технологи переробки</span>
   <h1>🏁 Підсумковий проєкт: міні-HACCP/FSMS, аудит, CAPA, портфоліо</h1>
 
@@ -86,31 +87,31 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Паспорт продукту</h3>
         <div class="row">
-          <div style="flex:1"><label>Назва продукту</label><input id="pName" type="text" value="Шинка варена «Домашня» 400 г"></div>
+          <div style="flex:1"><label for="pName">Назва продукту</label><input id="pName" type="text" value="Шинка варена «Домашня» 400 г"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Категорія</label><input id="pCat" type="text" value="Мʼясопродукти, охолоджені"></div>
-          <div style="flex:1"><label>Термін (ціль), діб</label><input id="pShelf" type="number" step="1" value="20"></div>
+          <div style="flex:1"><label for="pCat">Категорія</label><input id="pCat" type="text" value="Мʼясопродукти, охолоджені"></div>
+          <div style="flex:1"><label for="pShelf">Термін (ціль), діб</label><input id="pShelf" type="number" step="1" value="20"></div>
         </div>
       </div>
 
       <div class="box">
         <h3>Етапи процесу</h3>
         <p class="small muted">Вкажіть 5–10 етапів (через «;»). Напр.: <span class="mono">Приймання; Засіл; Тумблер; Термообробка; Охолодження; Пакування; Зберігання</span></p>
-        <textarea id="pSteps">Приймання; Засіл; Тумблер; Термообробка; Охолодження; Пакування; Зберігання</textarea>
+        <textarea id="pSteps" aria-label="p Steps">Приймання; Засіл; Тумблер; Термообробка; Охолодження; Пакування; Зберігання</textarea>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildSteps()">🔁 Оновити етапи</button>
-          <button class="btn" onclick="copyCSV('csvSteps')">📋 CSV (steps)</button>
+          <button type="button" class="btn" onclick="buildSteps()">🔁 Оновити етапи</button>
+          <button type="button" class="btn" onclick="copyCSV('csvSteps')">📋 CSV (steps)</button>
         </div>
         <div id="csvSteps" class="out" style="margin-top:8px">—</div>
       </div>
 
       <div class="box">
         <h3>Короткий опис</h3>
-        <textarea id="pDesc">Варена шинка з охолодженої свинини; вакуумне пакування; зберігання +0…+6°C.</textarea>
+        <textarea id="pDesc" aria-label="p Desc">Варена шинка з охолодженої свинини; вакуумне пакування; зберігання +0…+6°C.</textarea>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="summaryHead()">🧠 Згенерувати резюме</button>
-          <button class="btn" onclick="copyCSV('csvHead')">📋 CSV (header)</button>
+          <button type="button" class="btn" onclick="summaryHead()">🧠 Згенерувати резюме</button>
+          <button type="button" class="btn" onclick="copyCSV('csvHead')">📋 CSV (header)</button>
         </div>
         <div id="headOut" class="out" style="margin-top:8px">—</div>
         <div id="csvHead" class="out" style="margin-top:8px">—</div>
@@ -122,9 +123,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>⚠️ Небезпеки/ризики та рішення щодо CCP</h2>
     <div class="row">
-      <button class="btn" onclick="addHaz()">➕ Додати небезпеку</button>
-      <button class="btn" onclick="presetHaz()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvHaz')">📋 CSV (hazards)</button>
+      <button type="button" class="btn" onclick="addHaz()">➕ Додати небезпеку</button>
+      <button type="button" class="btn" onclick="presetHaz()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvHaz')">📋 CSV (hazards)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblHaz">
@@ -152,10 +153,10 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>🧮 Внутрішній аудит (чек-ліст)</h2>
     <div class="row">
-      <button class="btn" onclick="addAudit()">➕ Додати пункт</button>
-      <button class="btn" onclick="presetAudit()">🧪 Приклад чек-ліста</button>
-      <button class="btn" onclick="calcAudit()">✅ Порахувати бал</button>
-      <button class="btn" onclick="copyCSV('csvAudit')">📋 CSV (audit)</button>
+      <button type="button" class="btn" onclick="addAudit()">➕ Додати пункт</button>
+      <button type="button" class="btn" onclick="presetAudit()">🧪 Приклад чек-ліста</button>
+      <button type="button" class="btn" onclick="calcAudit()">✅ Порахувати бал</button>
+      <button type="button" class="btn" onclick="copyCSV('csvAudit')">📋 CSV (audit)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblAudit">
@@ -181,9 +182,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>🛠️ План CAPA</h2>
     <div class="row">
-      <button class="btn" onclick="addCAPA()">➕ Додати CAPA</button>
-      <button class="btn" onclick="presetCAPA()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvCAPA')">📋 CSV (capa)</button>
+      <button type="button" class="btn" onclick="addCAPA()">➕ Додати CAPA</button>
+      <button type="button" class="btn" onclick="presetCAPA()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvCAPA')">📋 CSV (capa)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblCAPA">
@@ -209,10 +210,10 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📦 Портфоліо / Журнал / Квиток 58 мм / QR / NFC</h2>
     <div class="row">
-      <button class="btn" onclick="addLog()">➕ Додати запис</button>
-      <button class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
-      <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати QR-payload</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+      <button type="button" class="btn" onclick="addLog()">➕ Додати запис</button>
+      <button type="button" class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
+      <button type="button" class="btn" onclick="copyEl('qrOut')">📋 Копіювати QR-payload</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblLog">
@@ -237,12 +238,12 @@ html.embedded .box{background:#f8fafc;color:#111}
         <h3>QR / NFC</h3>
         <div id="qrOut" class="out">—</div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>NFC: контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
-          <div style="flex:1"><label>NFC: автор</label><input id="nfcOper" type="text" value="Студент ТПТ"></div>
+          <div style="flex:1"><label for="nfcPhone">NFC: контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="nfcOper">NFC: автор</label><input id="nfcOper" type="text" value="Студент ТПТ"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">📲 Згенерувати NFC-payload</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">📲 Згенерувати NFC-payload</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -250,8 +251,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток 58 мм — “HACCP SUMMARY”</h3>
         <div class="row">
-          <button class="btn" onclick="scrollTicket()">🧾 Показати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="scrollTicket()">🧾 Показати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>HACCP SUMMARY</h4>
@@ -342,7 +343,7 @@ html.embedded .box{background:#f8fafc;color:#111}
         </select>
       </td>
       <td><input type="text" value="${s.lim}"></td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyHaz); buildCSV_Haz(); updateTicket();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyHaz); buildCSV_Haz(); updateTicket();">✖</button></td>
     `;
     bodyHaz.appendChild(tr); reindex(bodyHaz); buildCSV_Haz(); updateTicket();
   }
@@ -400,7 +401,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       </td>
       <td class="score">—</td>
       <td><input type="text" value="${s.note}"></td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyAudit); calcAudit();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyAudit); calcAudit();">✖</button></td>
     `;
     bodyAudit.appendChild(tr); reindex(bodyAudit);
   }
@@ -453,7 +454,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td><input type="text" value="${s.prev}"></td>
       <td><input type="text" value="${s.resp}"></td>
       <td><input type="date" value="${s.due}"></td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyCAPA); buildCSV_CAPA(); updateTicket();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyCAPA); buildCSV_CAPA(); updateTicket();">✖</button></td>
     `;
     bodyCAPA.appendChild(tr); reindex(bodyCAPA); buildCSV_CAPA(); updateTicket();
   }
@@ -493,7 +494,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark">${ccpCount}</td>
       <td>${auditPct}</td>
       <td>${capaCount}</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
     `;
     bodyLog.appendChild(tr); reindex(bodyLog); buildCSV_Log();
     updateTicket();

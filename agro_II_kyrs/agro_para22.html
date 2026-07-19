@@ -42,7 +42,7 @@ table.comp th,table.comp td{border:1px solid var(--line);padding:6px;text-align:
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧬</span>
@@ -73,9 +73,9 @@ table.comp th,table.comp td{border:1px solid var(--line);padding:6px;text-align:
         </div>
       </div>
       <div class="row">
-        <button class="btn good" id="parse">📥 Імпорт</button>
-        <button class="btn secondary" id="emu">🎲 Згенерувати еталон 4 доби</button>
-        <button class="btn secondary" id="clear">🧹 Очистити</button>
+        <button type="button" class="btn good" id="parse">📥 Імпорт</button>
+        <button type="button" class="btn secondary" id="emu">🎲 Згенерувати еталон 4 доби</button>
+        <button type="button" class="btn secondary" id="clear">🧹 Очистити</button>
         <span id="badgeN" class="badge">Записів: 0</span>
       </div>
 
@@ -98,7 +98,7 @@ table.comp th,table.comp td{border:1px solid var(--line);padding:6px;text-align:
         </div>
       </div>
       <div class="row">
-        <button class="btn" id="applyWhatIf">🧮 Перерахувати ризики</button>
+        <button type="button" class="btn" id="applyWhatIf">🧮 Перерахувати ризики</button>
         <span id="badgeWI" class="badge">What-if: 0/0/0</span>
       </div>
 
@@ -136,9 +136,9 @@ table.comp th,table.comp td{border:1px solid var(--line);padding:6px;text-align:
         </div>
       </div>
       <div class="row">
-        <button class="btn good" id="genPrompt">⚙️ Згенерувати промпт</button>
-        <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
-        <button class="btn secondary" id="savePrompt">⬇️ TXT</button>
+        <button type="button" class="btn good" id="genPrompt">⚙️ Згенерувати промпт</button>
+        <button type="button" class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+        <button type="button" class="btn secondary" id="savePrompt">⬇️ TXT</button>
       </div>
       <pre class="code" id="promptPreview">// Спочатку імпортуй погоду або натисни «🎲 Згенерувати еталон»</pre>
 
@@ -176,9 +176,9 @@ table.comp th,table.comp td{border:1px solid var(--line);padding:6px;text-align:
 
       <h3 style="margin-top:12px">💾 Підсумок/журнал</h3>
       <div class="row">
-        <input id="fio" class="input" placeholder="ПІБ студента"/>
-        <button class="btn" id="saveTxt">💾 TXT</button>
-        <button class="btn" id="saveCsv">📄 CSV</button>
+        <input id="fio" class="input" placeholder="ПІБ студента" aria-label="ПІБ студента"/>
+        <button type="button" class="btn" id="saveTxt">💾 TXT</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV</button>
       </div>
       <div id="log" class="log" aria-live="polite"></div>
 

@@ -52,6 +52,7 @@ html[data-theme="light"]{
 
 *{box-sizing:border-box}
 
+html{scroll-padding-top:72px}
 html,body{margin:0}
 body{
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,
@@ -63,6 +64,43 @@ body{
 
 a{color:var(--link);text-decoration:none}
 a:hover{text-decoration:underline}
+
+/* --- Accessibility: focus, skip-link, sr-only --- */
+:focus{outline:none}
+:focus-visible{
+  outline:2px solid var(--accent2);
+  outline-offset:2px;
+}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--accent2);
+  outline-offset:2px;
+}
+.sr-only{
+  position:absolute!important; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+.skip-link{
+  position:absolute; left:12px; top:12px; z-index:10000;
+  padding:10px 14px; border-radius:var(--r-sm);
+  background:var(--accent2); color:#fff; font-weight:600; text-decoration:none;
+  transform:translateY(-150%); transition:transform .15s ease;
+}
+.skip-link:focus,.skip-link:focus-visible{
+  transform:translateY(0); outline:2px solid #fff; outline-offset:2px; color:#fff;
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; scroll-behavior:auto!important}
+}
+
+/* Блок Accessibility Statement */
+.a11y-statement{
+  margin-top:28px; padding:18px 20px;
+  border:1px solid var(--surface-line); border-radius:var(--r-lg);
+  background:linear-gradient(180deg,var(--card),var(--soft));
+  border-left:4px solid var(--accent2);
+}
+.a11y-statement h2{margin:0 0 8px; font-size:1.15rem}
+.a11y-statement p{margin:0; color:var(--muted); font-size:15px; max-width:70ch}
 
 /* ------------------------------ Layout ---------------------------------- */
 .wrap{max-width:var(--container); margin:0 auto; padding:28px 16px 40px}
@@ -111,7 +149,6 @@ html[data-theme="light"] .tag{ color:#3730a3; }
   font-size:14px; line-height:1.2; transition:background .15s ease, border-color .15s ease;
 }
 .btn:hover{background:var(--surface-hover); text-decoration:none}
-.btn:focus-visible{outline:2px solid var(--accent2); outline-offset:2px}
 .btn.secondary{background:var(--soft)}
 .btn.ghost{background:transparent; border-color:#334155; color:#cbd5e1}
 .btn.ghost:hover{background:var(--surface-hover)}
@@ -128,16 +165,18 @@ html[data-theme="light"] .tag{ color:#3730a3; }
 
 /* ------------------------------ Forms ----------------------------------- */
 label{display:block; font-size:13px; color:#cbd5e1; margin:8px 0 4px}
-input[type="text"],input[type="number"],input[type="date"],select,textarea{
+input[type="text"],input[type="number"],input[type="date"],input[type="email"],input[type="url"],input[type="search"],select,textarea{
   width:100%; padding:10px 12px; border-radius:var(--r-sm);
   border:1px solid var(--surface-line); background:var(--surface); color:var(--text);
   font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace;
+  font-size:16px; /* ≥16px — без автозуму iOS, зручніше при 200% */
 }
 textarea{min-height:140px; resize:vertical}
 .inline{display:grid; grid-template-columns:1fr 180px; gap:10px}
 @media (max-width:720px){ .inline{grid-template-columns:1fr} }
 
 /* ------------------------------ Tables ---------------------------------- */
+img,video{max-width:100%; height:auto}
 .table-wrap{overflow-x:auto; border-radius:var(--r-md); border:1px solid var(--surface-line)}
 .table{width:100%; border-collapse:separate; border-spacing:0}
 .table th,.table td{padding:8px 10px; border-bottom:1px solid var(--line); font-size:14px; vertical-align:top}
@@ -200,7 +239,7 @@ textarea{min-height:140px; resize:vertical}
 }
 .footer-inner .col{padding:6px 8px; min-width:0}
 .footer-inner .brand .brand-line{display:flex; align-items:center; gap:10px; font-size:18px; margin-bottom:6px}
-.footer-inner h3{margin:4px 0 6px; font-size:16px; color:var(--text)}
+.footer-inner .footer-heading,.footer-inner h3{margin:4px 0 6px; font-size:16px; font-weight:700; color:var(--text)}
 .site-footer p{margin:6px 0}
 .site-footer a{color:var(--link); overflow-wrap:anywhere; word-break:break-word}
 .site-footer li,.site-footer p{overflow-wrap:anywhere; word-break:break-word}
@@ -339,7 +378,7 @@ html[data-theme="light"] label{color:#334155}
 
 @media print{
   @page{margin:4mm}
-  .no-print,.site-header,.site-footer,.edlab-attribution,.edlab-lesson-nav,.theme-toggle{display:none !important}
+  .no-print,.site-header,.site-footer,.edlab-attribution,.edlab-lesson-nav,.theme-toggle,.skip-link{display:none !important}
 }
 
 /* ==========================================================================
@@ -355,4 +394,5 @@ html.embedded .site-header,
 html.embedded .site-footer,
 html.embedded .edlab-attribution,
 html.embedded .edlab-lesson-nav,
-html.embedded .theme-toggle{display:none !important}
+html.embedded .theme-toggle,
+html.embedded .skip-link{display:none !important}

@@ -42,7 +42,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🎧</span>
@@ -60,7 +60,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <h2>🎙️ Джерело сигналу</h2>
     <div class="row">
       <div style="flex:1">
-        <label>Режим</label>
+        <label for="src">Режим</label>
         <select id="src" class="input">
           <option value="mic" selected>Мікрофон (гарнітура/ноутбук)</option>
           <option value="file">Аудіофайл (WAV/MP3)</option>
@@ -68,20 +68,20 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         </select>
       </div>
       <div class="row" style="gap:8px">
-        <button class="btn good" id="start">▶️ Старт</button>
-        <button class="btn secondary" id="stop">⏹️ Стоп</button>
+        <button type="button" class="btn good" id="start">▶️ Старт</button>
+        <button type="button" class="btn secondary" id="stop">⏹️ Стоп</button>
         <span id="stat" class="badge">Статус: idle</span>
       </div>
     </div>
     <div id="fileBox" class="row" style="display:none;margin-top:6px">
-      <input id="fileInp" class="input" type="file" accept="audio/*"/>
-      <button class="btn" id="playFile">▶️ Відтворити файл</button>
+      <input id="fileInp" class="input" type="file" accept="audio/*" aria-label="file Inp"/>
+      <button type="button" class="btn" id="playFile">▶️ Відтворити файл</button>
     </div>
     <div id="emuBox" class="note" style="display:none;margin-top:6px">
       <b>Емулятор:</b>
       <div class="row">
         <div style="flex:1">
-          <select id="emuType" class="input">
+          <select id="emuType" class="input" aria-label="emu Type">
             <option value="normal" selected>Норма (тихий підшипник)</option>
             <option value="outer">Підшипник — доріжка <i>outer race</i></option>
             <option value="inner">Підшипник — доріжка <i>inner race</i></option>
@@ -91,7 +91,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
           </select>
         </div>
         <div style="flex:1">
-          <label>Рівень <input id="emuLvl" class="input" type="range" min="0" max="1" step="0.01" value="0.7"/></label>
+          <label>Рівень <input id="emuLvl" class="input" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="emu Lvl"/></label>
         </div>
       </div>
     </div>
@@ -102,18 +102,18 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="row">
       <div style="flex:1">
         <label>RPM валу (або оцінка)</label>
-        <input id="rpm" class="input" type="number" min="60" step="1" value="900"/>
+        <input id="rpm" class="input" type="number" min="60" step="1" value="900" aria-label="rpm"/>
       </div>
       <div style="flex:1">
-        <label>Зубців на шестерні (якщо редуктор)</label>
+        <label for="teeth">Зубців на шестерні (якщо редуктор)</label>
         <input id="teeth" class="input" type="number" min="5" step="1" value="30"/>
       </div>
       <div style="flex:1">
-        <label>Смуга огинаючої, кГц (НЧ фільтр)</label>
+        <label for="envLP">Смуга огинаючої, кГц (НЧ фільтр)</label>
         <input id="envLP" class="input" type="number" min="0.2" step="0.1" value="2.0"/>
       </div>
       <div style="flex:1">
-        <label>FFT розмір</label>
+        <label for="fft">FFT розмір</label>
         <select id="fft" class="input"><option>2048</option><option selected>4096</option><option>8192</option></select>
       </div>
     </div>
@@ -126,8 +126,8 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="canvasWrap" style="margin-top:8px"><canvas id="env" width="1080" height="200"></canvas></div>
     <div class="row" style="margin-top:8px">
       <span id="last" class="badge">RMS=—, Kurt=—, Crest=—</span>
-      <button class="btn secondary" id="pngOsci">🖼️ PNG (осцилограми)</button>
-      <button class="btn secondary" id="clear">🧹 Очистити</button>
+      <button type="button" class="btn secondary" id="pngOsci">🖼️ PNG (осцилограми)</button>
+      <button type="button" class="btn secondary" id="clear">🧹 Очистити</button>
     </div>
   </div>
 
@@ -137,7 +137,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="canvasWrap" style="margin-top:8px"><canvas id="espec" width="1080" height="240"></canvas></div>
     <div class="row small" style="margin-top:8px">
       <span class="badge">Fs=авто; колір зелений — спектр, жовтий — огинаюча</span>
-      <button class="btn secondary" id="pngSpec">🖼️ PNG (спектри)</button>
+      <button type="button" class="btn secondary" id="pngSpec">🖼️ PNG (спектри)</button>
     </div>
   </div>
 
@@ -146,7 +146,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="canvasWrap"><canvas id="cep" width="1080" height="200"></canvas></div>
     <div class="row small" style="margin-top:8px">
       <span id="cepInfo" class="badge">Кепстральні піки: —</span>
-      <button class="btn secondary" id="pngCep">🖼️ PNG (кепструм)</button>
+      <button type="button" class="btn secondary" id="pngCep">🖼️ PNG (кепструм)</button>
     </div>
   </div>
 
@@ -173,8 +173,8 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>📜 Журнал і експорт</h2>
     <div class="row">
-      <button class="btn" id="mark">📌 Позначити подію</button>
-      <select id="label" class="input" style="max-width:260px">
+      <button type="button" class="btn" id="mark">📌 Позначити подію</button>
+      <select id="label" class="input" style="max-width:260px" aria-label="label">
         <option value="ok" selected>ok</option>
         <option value="unbalance">unbalance</option>
         <option value="misalignment">misalignment</option>
@@ -185,10 +185,10 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     </div>
     <pre id="alog" class="code" style="max-height:200px;overflow:auto">// Поки без записів</pre>
     <div class="row">
-      <button class="btn" id="expCSV">📄 CSV (ознаки/піки)</button>
-      <button class="btn" id="expTXT">💾 TXT (підсумок + чек-лист)</button>
-      <button class="btn" id="expPNG">🖼️ PNG (все разом)</button>
-      <button class="btn secondary" id="receipt">🖨️ 58 мм чек</button>
+      <button type="button" class="btn" id="expCSV">📄 CSV (ознаки/піки)</button>
+      <button type="button" class="btn" id="expTXT">💾 TXT (підсумок + чек-лист)</button>
+      <button type="button" class="btn" id="expPNG">🖼️ PNG (все разом)</button>
+      <button type="button" class="btn secondary" id="receipt">🖨️ 58 мм чек</button>
     </div>
     <div id="rc" class="receipt" hidden></div>
   </div>

@@ -9,6 +9,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Електрики · Пара 5 — План/Факт вимірювань, журнал, друк 58 мм</title>
+<meta name="description" content="📏 План/Факт вимірювань U,I · журнал · 🧾 «ПЕРЕВІРЕНО 58 мм»">
 <meta name="color-scheme" content="light dark" />
 <style>
 :root{
@@ -57,7 +58,7 @@ tbody tr:nth-child(even){background:#0b1324}
 
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Електрики · Пара 5 · аудиторно</span>
     <h1>📏 План/Факт вимірювань U,I · журнал · 🧾 «ПЕРЕВІРЕНО 58 мм»</h1>
 
@@ -65,7 +66,7 @@ tbody tr:nth-child(even){background:#0b1324}
       <h2>🎯 Мета</h2>
       <p>Звірити розрахунок лінії з реальними вимірюваннями: імпорт <span class="mono">line_calc.csv</span> з Пара 4, виміряти U та I в точках, розрахувати відхилення, присвоїти PASS/FAIL, надрукувати «ПЕРЕВІРЕНО» та експортувати журнал у CSV.</p>
       <div class="row">
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <input id="file" type="file" accept=".csv,text/csv" class="btn"  aria-label="file"/>
         <button class="btn" type="button" onclick="pasteSample()">⬇️ Навчальний CSV</button>
         <button class="btn" type="button" onclick="parseLine()">🔎 Імпорт плану</button>
       </div>
@@ -271,8 +272,8 @@ tbody tr:nth-child(even){background:#0b1324}
         <td class="mono">${p.dI}</td>
         <td>${badge}</td>
         <td class="mono">
-          <button class="btn" data-act="choose" data-id="${p.id}">Мітка</button>
-          <button class="btn" data-act="del" data-id="${p.id}">✖</button>
+          <button type="button" class="btn" data-act="choose" data-id="${p.id}">Мітка</button>
+          <button type="button" class="btn" data-act="del" data-id="${p.id}">✖</button>
         </td>`;
       tblBody.appendChild(tr);
     });

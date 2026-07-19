@@ -15,6 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 2 (технологи) — HACCP: пастеризація, охолодження, дезінфекція (CCP), чек 58 мм, NFC, CSV</title>
+<meta name="description" content="🛡️ HACCP (CCP): пастеризація, охолодження, дезінфекція — трекер T–t, звіт, чек 58 мм, NFC">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -64,7 +65,7 @@ button, .btn, input, select, textarea, a { pointer-events:auto !important; }
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 2 · аудиторно · технологи переробки</span>
   <h1>🛡️ HACCP (CCP): пастеризація, охолодження, дезінфекція — трекер T–t, звіт, чек 58 мм, NFC</h1>
 
@@ -88,7 +89,7 @@ button, .btn, input, select, textarea, a { pointer-events:auto !important; }
         <h3>Вибір КТК</h3>
         <div class="row">
           <div style="flex:1">
-            <label>Критична точка</label>
+            <label for="ccp">Критична точка</label>
             <select id="ccp">
               <option value="pasteur" selected>Пастеризація (HTST)</option>
               <option value="cooling">Охолодження готової продукції</option>
@@ -96,12 +97,12 @@ button, .btn, input, select, textarea, a { pointer-events:auto !important; }
             </select>
           </div>
           <div style="flex:1">
-            <label>ID лінії</label><input id="lineId" type="text" value="L1">
+            <label for="lineId">ID лінії</label><input id="lineId" type="text" value="L1">
           </div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Оператор</label><input id="operator" type="text" value="Студент групи ТПТ"></div>
-          <div style="flex:1"><label>Зміна</label>
+          <div style="flex:1"><label for="operator">Оператор</label><input id="operator" type="text" value="Студент групи ТПТ"></div>
+          <div style="flex:1"><label for="shift">Зміна</label>
             <select id="shift"><option>A</option><option selected>B</option><option>C</option></select>
           </div>
         </div>
@@ -110,38 +111,38 @@ button, .btn, input, select, textarea, a { pointer-events:auto !important; }
       <div class="box" id="boxPasteur">
         <h3>Параметри пастеризації</h3>
         <div class="row">
-          <div style="flex:1"><label>Крит. T, °C (не нижче)</label><input id="p_Tcrit" type="number" step="0.1" value="72"></div>
-          <div style="flex:1"><label>Час утрим., с (не менше)</label><input id="p_tHold" type="number" step="1" value="15"></div>
+          <div style="flex:1"><label for="p_Tcrit">Крит. T, °C (не нижче)</label><input id="p_Tcrit" type="number" step="0.1" value="72"></div>
+          <div style="flex:1"><label for="p_tHold">Час утрим., с (не менше)</label><input id="p_tHold" type="number" step="1" value="15"></div>
         </div>
       </div>
 
       <div class="box" id="boxCooling" style="display:none">
         <h3>Параметри охолодження</h3>
         <div class="row">
-          <div style="flex:1"><label>T початкова, °C</label><input id="c_Tstart" type="number" step="0.1" value="60"></div>
-          <div style="flex:1"><label>T кінцева, °C</label><input id="c_Tend" type="number" step="0.1" value="5"></div>
+          <div style="flex:1"><label for="c_Tstart">T початкова, °C</label><input id="c_Tstart" type="number" step="0.1" value="60"></div>
+          <div style="flex:1"><label for="c_Tend">T кінцева, °C</label><input id="c_Tend" type="number" step="0.1" value="5"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Вікно 60→21, год (≤)</label><input id="c_w1" type="number" step="0.1" value="2"></div>
-          <div style="flex:1"><label>Вікно 21→5, год (≤)</label><input id="c_w2" type="number" step="0.1" value="4"></div>
+          <div style="flex:1"><label for="c_w1">Вікно 60→21, год (≤)</label><input id="c_w1" type="number" step="0.1" value="2"></div>
+          <div style="flex:1"><label for="c_w2">Вікно 21→5, год (≤)</label><input id="c_w2" type="number" step="0.1" value="4"></div>
         </div>
       </div>
 
       <div class="box" id="boxSanit" style="display:none">
         <h3>Параметри дезрозчину</h3>
         <div class="row">
-          <div style="flex:1"><label>Тип</label>
+          <div style="flex:1"><label for="s_type">Тип</label>
             <select id="s_type">
               <option value="NaOCl" selected>Гіпохлорит натрію (NaOCl)</option>
               <option value="PAA">Пероцтова кислота (PAA)</option>
               <option value="QUAT">ЧАС (четвертинні амонієві)</option>
             </select>
           </div>
-          <div style="flex:1"><label>Концентрація препарату</label><input id="s_stock" type="number" step="0.01" value="5"> <small>% або г/100мл*</small></div>
+          <div style="flex:1"><label for="s_stock">Концентрація препарату</label><input id="s_stock" type="number" step="0.01" value="5"> <small>% або г/100мл*</small></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Мета, ppm (мг/л)</label><input id="s_target" type="number" step="1" value="100"></div>
-          <div style="flex:1"><label>Об'єм, л</label><input id="s_volume" type="number" step="0.1" value="10"></div>
+          <div style="flex:1"><label for="s_target">Мета, ppm (мг/л)</label><input id="s_target" type="number" step="1" value="100"></div>
+          <div style="flex:1"><label for="s_volume">Об'єм, л</label><input id="s_volume" type="number" step="0.1" value="10"></div>
         </div>
         <p class="small muted">*Для розрахунку приймаємо: 1% ≈ 10 000 ppm діючої речовини.</p>
       </div>
@@ -152,11 +153,11 @@ button, .btn, input, select, textarea, a { pointer-events:auto !important; }
   <div class="card">
     <h2>⏱️🔥 Точки “час–температура”</h2>
     <div class="row">
-      <button class="btn" onclick="addPoint()">➕ Додати точку</button>
-      <button class="btn" onclick="nowPoint()">🕒 Додати T зараз</button>
-      <button class="btn" onclick="presetPoints()">🧪 Приклад</button>
-      <button class="btn" onclick="clearPoints()">🧹 Очистити</button>
-      <button class="btn" onclick="copyCSV('csvPoints')">📋 CSV (points)</button>
+      <button type="button" class="btn" onclick="addPoint()">➕ Додати точку</button>
+      <button type="button" class="btn" onclick="nowPoint()">🕒 Додати T зараз</button>
+      <button type="button" class="btn" onclick="presetPoints()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="clearPoints()">🧹 Очистити</button>
+      <button type="button" class="btn" onclick="copyCSV('csvPoints')">📋 CSV (points)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblPoints">
@@ -182,8 +183,8 @@ button, .btn, input, select, textarea, a { pointer-events:auto !important; }
       <div class="box">
         <h3>Розрахунок</h3>
         <div class="row">
-          <button class="btn" onclick="evaluate()">🔁 Перерахувати</button>
-          <button class="btn" onclick="copyCSV('csvEval')">📋 CSV (eval)</button>
+          <button type="button" class="btn" onclick="evaluate()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvEval')">📋 CSV (eval)</button>
         </div>
         <div id="csvEval" class="out" style="margin-top:8px">—</div>
       </div>
@@ -195,10 +196,10 @@ button, .btn, input, select, textarea, a { pointer-events:auto !important; }
       </div>
       <div class="box">
         <h3>Відхилення / дії</h3>
-        <textarea id="actions" placeholder="Опис відхилення, ізоляція партії, повторна обробка/утилізація, інформування..."></textarea>
+        <textarea id="actions" placeholder="Опис відхилення, ізоляція партії, повторна обробка/утилізація, інформування..." aria-label="Опис відхилення, ізоляція партії, повторна обробка/утилізація, інформування..."></textarea>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildDeviation()">📝 Звіт про відхилення</button>
-          <button class="btn" onclick="copyEl('devOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildDeviation()">📝 Звіт про відхилення</button>
+          <button type="button" class="btn" onclick="copyEl('devOut')">📋 Копіювати</button>
         </div>
         <div id="devOut" class="out">—</div>
       </div>
@@ -209,9 +210,9 @@ button, .btn, input, select, textarea, a { pointer-events:auto !important; }
   <div class="card">
     <h2>📒 Журнал моніторингу</h2>
     <div class="row">
-      <button class="btn" onclick="addLog()">➕ Додати рядок</button>
-      <button class="btn" onclick="presetLog()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+      <button type="button" class="btn" onclick="addLog()">➕ Додати рядок</button>
+      <button type="button" class="btn" onclick="presetLog()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblLog">
@@ -238,20 +239,20 @@ button, .btn, input, select, textarea, a { pointer-events:auto !important; }
       <div class="box">
         <h3>NFC — “HACCP CCP CARD”</h3>
         <div class="row">
-          <div style="flex:1"><label>Контакт/техн.</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
-          <div style="flex:1"><label>Партія/лот</label><input id="lotId" type="text" value="LOT-CCP-0001"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт/техн.</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="lotId">Партія/лот</label><input id="lotId" type="text" value="LOT-CCP-0001"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
       <div class="box">
         <h3>Квиток для принтера 58 мм</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>HACCP — CCP TICKET</h4>
@@ -329,7 +330,7 @@ button, .btn, input, select, textarea, a { pointer-events:auto !important; }
       <td><input type="text" value="${ts}" placeholder="HH:MM:SS"></td>
       <td class="dark"><input type="number" step="0.1" value="${t}"></td>
       <td><input type="text" value="${note}"></td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyPoints); buildCSVpoints();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyPoints); buildCSVpoints();">✖</button></td>
     `;
     bodyPoints.appendChild(tr); reindex(bodyPoints); buildCSVpoints();
   }

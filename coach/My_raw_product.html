@@ -60,17 +60,17 @@ textarea{min-height:64px;resize:vertical}
     <h1 class="title">Вправа «Мій сирий продукт — мій готовий продукт» — для технологів</h1>
     <p class="subtitle">Редагована схема 🧪⚙️ • 10 хв на заповнення • автозбереження • експорт .txt/.png • друк</p>
     <div class="btn-row">
-      <button class="btn" id="exportTxt">⬇️ Експорт .txt</button>
-      <button class="btn" id="savePng">🖼️ Експорт схеми .png</button>
-      <button class="btn" id="printPage">🖨️ Друк</button>
-      <button class="btn" id="clearAll">🗑️ Очистити</button>
-      <span class="timer">Таймер: <span id="t1">00:00</span> <button class="btn" id="startTimer">▶ 10:00</button></span>
+      <button type="button" class="btn" id="exportTxt">⬇️ Експорт .txt</button>
+      <button type="button" class="btn" id="savePng">🖼️ Експорт схеми .png</button>
+      <button type="button" class="btn" id="printPage">🖨️ Друк</button>
+      <button type="button" class="btn" id="clearAll">🗑️ Очистити</button>
+      <span class="timer">Таймер: <span id="t1">00:00</span> <button type="button" class="btn" id="startTimer">▶ 10:00</button></span>
       <span class="hint">Дані зберігаються локально на цьому пристрої.</span>
     </div>
   </div>
 </header>
 
-<main class="wrap">
+<main id="main-content" class="wrap">
   <section class="card">
     <div class="grid cols-2">
       <div>
@@ -115,33 +115,33 @@ textarea{min-height:64px;resize:vertical}
 
     <div class="two">
       <div>
-        <label class="kbd">Сировина — що в мене вже є зараз (здібності, риси, знання)</label>
+        <label class="kbd" for="raw">Сировина — що в мене вже є зараз (здібності, риси, знання)</label>
         <textarea id="raw"></textarea>
 
-        <label class="kbd">Процес обробки — дії/умови/зусилля для перетворення</label>
+        <label class="kbd" for="process">Процес обробки — дії/умови/зусилля для перетворення</label>
         <textarea id="process"></textarea>
 
-        <label class="kbd">Додаткові інгредієнти — що додати для якості</label>
+        <label class="kbd" for="ingredients">Додаткові інгредієнти — що додати для якості</label>
         <textarea id="ingredients"></textarea>
 
-        <label class="kbd">Мій готовий продукт — ким/яким спеціалістом хочу вийти</label>
+        <label class="kbd" for="product">Мій готовий продукт — ким/яким спеціалістом хочу вийти</label>
         <textarea id="product"></textarea>
 
-        <label class="kbd">Термін придатності / маркування — мої цінності й стандарти</label>
+        <label class="kbd" for="labeling">Термін придатності / маркування — мої цінності й стандарти</label>
         <textarea id="labeling"></textarea>
       </div>
 
       <!-- Схема виробництва: SVG + скетч -->
       <div>
         <div class="toolbar" style="margin-bottom:8px">
-          <span class="chip">Перо <input type="range" id="penSize" min="1" max="10" value="3"><input type="color" id="penColor" value="#60a5fa"></span>
-          <span class="chip">Ластик <input type="range" id="eraserSize" min="5" max="30" value="14"></span>
-          <button class="btn" id="modePen">✏️ Перо</button>
-          <button class="btn" id="modeEraser">🧽 Ластик</button>
-          <button class="btn" id="clearSketch">♻️ Очистити штрих</button>
+          <span class="chip">Перо <input type="range" id="penSize" min="1" max="10" value="3" aria-label="pen Size"><input type="color" id="penColor" value="#60a5fa" aria-label="pen Color"></span>
+          <span class="chip">Ластик <input type="range" id="eraserSize" min="5" max="30" value="14" aria-label="eraser Size"></span>
+          <button type="button" class="btn" id="modePen">✏️ Перо</button>
+          <button type="button" class="btn" id="modeEraser">🧽 Ластик</button>
+          <button type="button" class="btn" id="clearSketch">♻️ Очистити штрих</button>
         </div>
 
-        <svg id="flowSvg" viewBox="0 0 760 420" style="width:100%;background:#081322;border:1px solid var(--border);border-radius:12px">
+        <svg id="flowSvg" viewBox="0 0 760 420" style="width:100%;background:#081322;border:1px solid var(--border);border-radius:12px" aria-hidden="true" focusable="false">
           <!-- стрічка конвеєра -->
           <rect x="40" y="260" width="680" height="16" fill="#2b3a55"/>
           <!-- блоки -->
@@ -206,9 +206,9 @@ textarea{min-height:64px;resize:vertical}
   <section class="card">
     <h2>3) Обмін (5–7 хв)</h2>
     <div class="btn-row">
-      <button class="btn" id="shareRaw">Озвучити сировину</button>
-      <button class="btn" id="shareIng">Назвати інгредієнт</button>
-      <button class="btn" id="shareProd">Описати продукт</button>
+      <button type="button" class="btn" id="shareRaw">Озвучити сировину</button>
+      <button type="button" class="btn" id="shareIng">Назвати інгредієнт</button>
+      <button type="button" class="btn" id="shareProd">Описати продукт</button>
       <span class="badge" id="shareOut">—</span>
     </div>
     <p class="hint">Клікни — отримаєш короткий текст для озвучення/чату (копіюється в буфер).</p>
@@ -219,21 +219,21 @@ textarea{min-height:64px;resize:vertical}
     <h2>4) Рефлексія (5 хв)</h2>
     <div class="two">
       <div>
-        <label class="kbd">Що зрозумів(ла) про себе через метафору «перетворення»?</label>
+        <label class="kbd" for="ref1">Що зрозумів(ла) про себе через метафору «перетворення»?</label>
         <textarea id="ref1"></textarea>
       </div>
       <div>
-        <label class="kbd">Що можемо «додавати» одне одному як група?</label>
+        <label class="kbd" for="ref2">Що можемо «додавати» одне одному як група?</label>
         <textarea id="ref2"></textarea>
       </div>
     </div>
     <div class="two" style="margin-top:10px">
       <div>
-        <label class="kbd">Мій перший крок (дієслово + коли + як довго)</label>
+        <label class="kbd" for="ref3">Мій перший крок (дієслово + коли + як довго)</label>
         <textarea id="ref3"></textarea>
       </div>
       <div>
-        <label class="kbd">Критичні стандарти якості, яких я дотримуюсь завжди</label>
+        <label class="kbd" for="ref4">Критичні стандарти якості, яких я дотримуюсь завжди</label>
         <textarea id="ref4"></textarea>
       </div>
     </div>

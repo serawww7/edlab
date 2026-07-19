@@ -41,7 +41,7 @@ canvas{display:block;width:100%;height:280px}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">📈</span>
@@ -65,11 +65,14 @@ canvas{display:block;width:100%;height:280px}
     <textarea id="csv" class="input" rows="7" placeholder="timestamp,kW,Temp
 2025-05-01T00:00,120,16
 2025-05-01T01:00,115,16
+..." aria-label="timestamp,kW,Temp
+2025-05-01T00:00,120,16
+2025-05-01T01:00,115,16
 ..."></textarea>
     <div class="row">
-      <button class="btn good" id="load">📥 Імпорт</button>
-      <button class="btn secondary" id="demo">🎲 Згенерувати 60 діб</button>
-      <button class="btn secondary" id="clear">🧹 Очистити</button>
+      <button type="button" class="btn good" id="load">📥 Імпорт</button>
+      <button type="button" class="btn secondary" id="demo">🎲 Згенерувати 60 діб</button>
+      <button type="button" class="btn secondary" id="clear">🧹 Очистити</button>
       <span id="badgeN" class="badge">Записів: 0</span>
     </div>
   </div>
@@ -80,12 +83,12 @@ canvas{display:block;width:100%;height:280px}
       <div style="flex:1">
         <label>Лаги/фічі</label>
         <div class="row">
-          <label><input type="checkbox" id="fHour" checked/> Hour</label>
-          <label><input type="checkbox" id="fDow" checked/> DayOfWeek</label>
-          <label><input type="checkbox" id="fLag1" checked/> Lag 1h</label>
-          <label><input type="checkbox" id="fLag24" checked/> Lag 24h</label>
-          <label><input type="checkbox" id="fMA24" checked/> MA 24h</label>
-          <label><input type="checkbox" id="fTemp" /> Temp</label>
+          <label><input type="checkbox" id="fHour" checked/ aria-label="fHour"> Hour</label>
+          <label><input type="checkbox" id="fDow" checked/ aria-label="fDow"> DayOfWeek</label>
+          <label><input type="checkbox" id="fLag1" checked/ aria-label="fLag1"> Lag 1h</label>
+          <label><input type="checkbox" id="fLag24" checked/ aria-label="fLag24"> Lag 24h</label>
+          <label><input type="checkbox" id="fMA24" checked/ aria-label="fMA24"> MA 24h</label>
+          <label><input type="checkbox" id="fTemp" / aria-label="fTemp"> Temp</label>
         </div>
       </div>
       <div style="flex:1">
@@ -106,8 +109,8 @@ canvas{display:block;width:100%;height:280px}
       </div>
     </div>
     <div class="row" style="margin-top:6px">
-      <button class="btn good" id="train">🏋️ Тренувати</button>
-      <button class="btn secondary" id="forecast">🔮 48h прогноз</button>
+      <button type="button" class="btn good" id="train">🏋️ Тренувати</button>
+      <button type="button" class="btn secondary" id="forecast">🔮 48h прогноз</button>
       <span id="badgeRes" class="badge">MAE: — | RMSE: — | MAPE: —</span>
     </div>
 
@@ -122,8 +125,8 @@ canvas{display:block;width:100%;height:280px}
     <h2>📈 Графік</h2>
     <div class="canvasWrap"><canvas id="chart" width="1050" height="280"></canvas></div>
     <div class="row" style="margin-top:6px">
-      <label style="flex:1">Поріг піку, кВт <input id="thr" class="input" type="number" step="1" value="300"/></label>
-      <button class="btn" id="findPeaks">🚨 Знайти піки</button>
+      <label style="flex:1">Поріг піку, кВт <input id="thr" class="input" type="number" step="1" value="300" aria-label="thr"/></label>
+      <button type="button" class="btn" id="findPeaks">🚨 Знайти піки</button>
       <span id="badgePk" class="badge">Піків: —</span>
     </div>
     <h3 style="margin-top:8px">📜 Поради балансування</h3>
@@ -133,10 +136,10 @@ canvas{display:block;width:100%;height:280px}
   <div class="card">
     <h2>🧾 Експорт</h2>
     <div class="row">
-      <button class="btn" id="expCSV">📄 Прогноз CSV</button>
-      <button class="btn" id="expICS">🗓️ Піки ICS</button>
-      <button class="btn" id="expTXT">💾 TXT (підсумок/поради)</button>
-      <button class="btn secondary" id="receipt">🖨️ 58-мм чек на день</button>
+      <button type="button" class="btn" id="expCSV">📄 Прогноз CSV</button>
+      <button type="button" class="btn" id="expICS">🗓️ Піки ICS</button>
+      <button type="button" class="btn" id="expTXT">💾 TXT (підсумок/поради)</button>
+      <button type="button" class="btn secondary" id="receipt">🖨️ 58-мм чек на день</button>
     </div>
     <div id="rc" class="receipt" hidden></div>
   </div>
@@ -144,9 +147,9 @@ canvas{display:block;width:100%;height:280px}
   <div class="card">
     <h2>🤖 Промпт до LLM (диспетчер навантаження)</h2>
     <div class="row">
-      <button class="btn" id="genPrompt">📝 Згенерувати промпт</button>
-      <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
-      <button class="btn secondary" id="savePrompt">⬇️ TXT</button>
+      <button type="button" class="btn" id="genPrompt">📝 Згенерувати промпт</button>
+      <button type="button" class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+      <button type="button" class="btn secondary" id="savePrompt">⬇️ TXT</button>
     </div>
     <pre class="code" id="prompt">// Спочатку натренуй модель і сформуй піки</pre>
   </div>

@@ -6,6 +6,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Пара 1 (механіки) — Цифровий журнал ТО, чек 58 мм, NFC, CSV</title>
+<meta name="description" content="🔧 Цифровий журнал ТО: техніка, наряд-замовлення, чек 58 мм, NFC, CSV">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -46,7 +47,7 @@ html.embedded .box{background:#f8fafc; color:#111}
 </style>
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Пара 1 · аудиторно · механіки</span>
     <h1>🔧 Цифровий журнал ТО: техніка, наряд-замовлення, чек 58 мм, NFC, CSV</h1>
 
@@ -59,10 +60,10 @@ html.embedded .box{background:#f8fafc; color:#111}
     <div class="card">
       <h2>🚜 Довідник машин</h2>
       <div class="row">
-        <button class="btn" onclick="addMachine()">➕ Додати машину</button>
-        <button class="btn" onclick="demoMachines()">🧪 Приклад</button>
-        <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
-        <button class="btn" onclick="copyCSV('csvM')">📋 CSV (машини)</button>
+        <button type="button" class="btn" onclick="addMachine()">➕ Додати машину</button>
+        <button type="button" class="btn" onclick="demoMachines()">🧪 Приклад</button>
+        <button type="button" class="btn" onclick="recalc()">🔁 Перерахувати</button>
+        <button type="button" class="btn" onclick="copyCSV('csvM')">📋 CSV (машини)</button>
       </div>
       <div style="overflow:auto; margin-top:8px">
         <table class="table" id="tblM">
@@ -83,10 +84,10 @@ html.embedded .box{background:#f8fafc; color:#111}
     <div class="card">
       <h2>🧱 Журнал робіт</h2>
       <div class="row">
-        <button class="btn" onclick="addJob()">➕ Додати запис</button>
-        <button class="btn" onclick="demoJobs()">🧪 Приклад</button>
-        <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
-        <button class="btn" onclick="copyCSV('csvJ')">📋 CSV (роботи)</button>
+        <button type="button" class="btn" onclick="addJob()">➕ Додати запис</button>
+        <button type="button" class="btn" onclick="demoJobs()">🧪 Приклад</button>
+        <button type="button" class="btn" onclick="recalc()">🔁 Перерахувати</button>
+        <button type="button" class="btn" onclick="copyCSV('csvJ')">📋 CSV (роботи)</button>
       </div>
       <div style="overflow:auto; margin-top:8px">
         <table class="table" id="tblJ">
@@ -108,8 +109,8 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>Налаштування</h3>
           <div class="row">
-            <div style="flex:1"><label>Тариф, грн/год</label><input id="rate" type="number" step="1" value="220"></div>
-            <div style="flex:1"><label>Дата «сьогодні»</label><input id="today" type="date"></div>
+            <div style="flex:1"><label for="rate">Тариф, грн/год</label><input id="rate" type="number" step="1" value="220"></div>
+            <div style="flex:1"><label for="today">Дата «сьогодні»</label><input id="today" type="date"></div>
           </div>
           <p class="small">Дата «сьогодні» впливає на дні до ТО.</p>
         </div>
@@ -117,12 +118,12 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>NFC — текст</h3>
           <div class="row">
-            <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
-            <div style="flex:1"><label>Сервіс-контакт</label><input id="nfcContact" type="text" value="+380XXXXXXXXX"></div>
+            <div style="flex:1"><label for="nfcId">Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
+            <div style="flex:1"><label for="nfcContact">Сервіс-контакт</label><input id="nfcContact" type="text" value="+380XXXXXXXXX"></div>
           </div>
           <div class="row" style="margin-top:6px">
-            <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-            <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+            <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+            <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
           </div>
           <div id="nfcOut" class="out">—</div>
         </div>
@@ -130,9 +131,9 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>Наряд-замовлення (чек 58 мм)</h3>
           <div class="row">
-            <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-            <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
-            <button id="openOnlyBtn" class="btn" style="display:none" title="Фолбек, якщо звичайний друк недоступний" onclick="openTicketOnly()">↗️ Відкрити тільки чек</button>
+            <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+            <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+            <button type="button" id="openOnlyBtn" class="btn" style="display:none" title="Фолбек, якщо звичайний друк недоступний" onclick="openTicketOnly()">↗️ Відкрити тільки чек</button>
           </div>
           <div class="ticket" id="ticket" style="margin-top:8px">
             <h4>НАРЯД-ЗАМОВЛЕННЯ</h4>

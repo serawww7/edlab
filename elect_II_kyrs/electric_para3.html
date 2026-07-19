@@ -9,6 +9,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Електрики · Пара 3 — Акт ППР (A4/PDF) + Дефектний лист із CSV</title>
+<meta name="description" content="📄 Акт ППР (A4/PDF) + 🧾 Дефектний лист із CSV журналу">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -63,7 +64,7 @@ tbody tr:nth-child(even){background:#0b1324}
 </style>
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Електрики · Пара 3 · аудиторно</span>
     <h1>📄 Акт ППР (A4/PDF) + 🧾 Дефектний лист із CSV журналу</h1>
 
@@ -71,12 +72,12 @@ tbody tr:nth-child(even){background:#0b1324}
       <h2>🎯 Мета</h2>
       <p>Імпортувати CSV журналу ППР, перевірити дані й згенерувати друковані документи: <b>Акт ППР</b> та <b>Дефектний лист</b>.</p>
       <div class="row">
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <input id="file" type="file" accept=".csv,text/csv" class="btn"  aria-label="file"/>
         <button class="btn" type="button" onclick="pasteSample()">⬇️ Вставити навчальний CSV</button>
         <button class="btn" type="button" onclick="parseCSV()">🔎 Розібрати CSV</button>
       </div>
       <p class="small">Очікувані поля CSV: <span class="mono">id,object,place,period_months,responsible,last_date,next_date,status</span></p>
-      <textarea id="csv" style="width:100%;min-height:120px;margin-top:8px; padding:10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb" placeholder="Встав сюди вміст journal_ppr.csv"></textarea>
+      <textarea id="csv" style="width:100%;min-height:120px;margin-top:8px; padding:10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb" placeholder="Встав сюди вміст journal_ppr.csv" aria-label="Встав сюди вміст journal_ppr.csv"></textarea>
     </div>
 
     <div class="card">
@@ -84,15 +85,15 @@ tbody tr:nth-child(even){background:#0b1324}
       <div class="grid g2">
         <div>
           <div class="row">
-            <label class="small">Номер акта</label>
+            <label class="small" for="actnum">Номер акта</label>
             <input id="actnum" type="text" value="ППР-001" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb"/>
-            <label class="small">Підрозділ/об’єкт</label>
+            <label class="small" for="dept">Підрозділ/об’єкт</label>
             <input id="dept" type="text" value="Електромайстерня / Коледж" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb"/>
           </div>
           <div class="row" style="margin-top:8px">
-            <label class="small">Комісія, голова</label>
+            <label class="small" for="head">Комісія, голова</label>
             <input id="head" type="text" value="Викладач ПІБ" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb"/>
-            <label class="small">Члени комісії</label>
+            <label class="small" for="members">Члени комісії</label>
             <input id="members" type="text" value="Студент1; Студент2" style="padding:8px 10px;border-radius:10px;border:1px solid #223049;background:#0d1a2e;color:#e5e7eb"/>
           </div>
           <div class="row" style="margin-top:8px">

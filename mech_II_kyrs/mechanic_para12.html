@@ -20,6 +20,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 12 (механіки) — Болти та момент затягування: K-фактор, подовжувач, шаблони, чек, NFC, CSV</title>
+<meta name="description" content="🔩 Болти та момент затягування: K-фактор, подовжувач, шаблони, чек, NFC, CSV">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -66,7 +67,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 12 · аудиторно · механіки</span>
   <h1>🔩 Болти та момент затягування: K-фактор, подовжувач, шаблони, чек, NFC, CSV</h1>
 
@@ -89,31 +90,31 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Болт / умови</h3>
         <div class="row">
-          <div style="flex:1"><label>Позначення (довільно)</label><input id="boltName" type="text" value="M12×1.75, фланець насоса"></div>
+          <div style="flex:1"><label for="boltName">Позначення (довільно)</label><input id="boltName" type="text" value="M12×1.75, фланець насоса"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>d, мм (номінал)</label><input id="d" type="number" step="0.1" value="12"></div>
-          <div style="flex:1"><label>Крок p, мм</label><input id="p" type="number" step="0.01" value="1.75"></div>
+          <div style="flex:1"><label for="d">d, мм (номінал)</label><input id="d" type="number" step="0.1" value="12"></div>
+          <div style="flex:1"><label for="p">Крок p, мм</label><input id="p" type="number" step="0.01" value="1.75"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Клас міцності</label>
+          <div style="flex:1"><label for="grade">Клас міцності</label>
             <select id="grade">
               <option value="8.8">8.8 (Sp≈640 МПа)</option>
               <option value="10.9" selected>10.9 (Sp≈830 МПа)</option>
               <option value="12.9">12.9 (Sp≈970 МПа)</option>
             </select>
           </div>
-          <div style="flex:1"><label>Частка φ від Sp</label><input id="phi" type="number" step="0.05" value="0.75"></div>
+          <div style="flex:1"><label for="phi">Частка φ від Sp</label><input id="phi" type="number" step="0.05" value="0.75"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Мастило (K-фактор)</label>
+          <div style="flex:1"><label for="kfact">Мастило (K-фактор)</label>
             <select id="kfact">
               <option value="0.20">сухо (K≈0.20)</option>
               <option value="0.16" selected>олива (K≈0.16)</option>
               <option value="0.12">молібден (K≈0.12)</option>
             </select>
           </div>
-          <div style="flex:1"><label>Кроки затягування</label>
+          <div style="flex:1"><label for="steps">Кроки затягування</label>
             <select id="steps">
               <option value="30,60,100" selected>30% → 60% → 100%</option>
               <option value="40,80,100">40% → 80% → 100%</option>
@@ -126,17 +127,17 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Ключ / подовжувач</h3>
         <div class="row">
-          <div style="flex:1"><label>Довжина ключа L, мм</label><input id="L" type="number" step="1" value="300"></div>
-          <div style="flex:1"><label>Подовжувач E, мм (в лінію)</label><input id="E" type="number" step="1" value="0"></div>
+          <div style="flex:1"><label for="L">Довжина ключа L, мм</label><input id="L" type="number" step="1" value="300"></div>
+          <div style="flex:1"><label for="E">Подовжувач E, мм (в лінію)</label><input id="E" type="number" step="1" value="0"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Орієнтація</label>
+          <div style="flex:1"><label for="angle">Орієнтація</label>
             <select id="angle">
               <option value="inline" selected>в лінію (зміна Tset)</option>
               <option value="90">прибл. 90° (без зміни)</option>
             </select>
           </div>
-          <div style="flex:1"><label>К-ть болтів, шт</label>
+          <div style="flex:1"><label for="nBolts">К-ть болтів, шт</label>
             <select id="nBolts">
               <option>4</option><option selected>6</option><option>5</option><option>8</option>
             </select>
@@ -152,9 +153,9 @@ html.embedded .box{background:#f8fafc;color:#111}
         <p>Установка ключа Tset: <b><span id="Tset">—</span></b> Н·м</p>
         <p>Кроки: <b><span id="Tsteps">—</span></b> Н·м</p>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="calc()">🔁 Перерахувати</button>
-          <button class="btn" onclick="preset()">🧪 Приклад</button>
-          <button class="btn" onclick="copyCSV('csvBolt')">📋 CSV</button>
+          <button type="button" class="btn" onclick="calc()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="preset()">🧪 Приклад</button>
+          <button type="button" class="btn" onclick="copyCSV('csvBolt')">📋 CSV</button>
         </div>
         <div id="csvBolt" class="out" style="margin-top:8px">—</div>
       </div>
@@ -168,16 +169,16 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Генератор шаблону</h3>
         <div class="row">
-          <div style="flex:1"><label>К-ть болтів</label>
+          <div style="flex:1"><label for="nBolts2">К-ть болтів</label>
             <select id="nBolts2">
               <option>4</option><option>5</option><option selected>6</option><option>8</option>
             </select>
           </div>
-          <div style="flex:1"><label>Діаметр кола, мм</label><input id="pcd" type="number" step="1" value="180"></div>
+          <div style="flex:1"><label for="pcd">Діаметр кола, мм</label><input id="pcd" type="number" step="1" value="180"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="drawPattern()">🎯 Побудувати</button>
-          <button class="btn" onclick="copyEl('seqText')">📋 Копіювати порядок</button>
+          <button type="button" class="btn" onclick="drawPattern()">🎯 Побудувати</button>
+          <button type="button" class="btn" onclick="copyEl('seqText')">📋 Копіювати порядок</button>
         </div>
         <div id="seqText" class="out" style="margin-top:8px">—</div>
       </div>
@@ -192,9 +193,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал затягувань</h2>
     <div class="row">
-      <button class="btn" onclick="addRow()">➕ Додати рядок</button>
-      <button class="btn" onclick="presetRows()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
+      <button type="button" class="btn" onclick="addRow()">➕ Додати рядок</button>
+      <button type="button" class="btn" onclick="presetRows()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tbl">
@@ -225,12 +226,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>NFC — “BOLT CARD”</h3>
         <div class="row">
-          <div style="flex:1"><label>Машина/вузол ID</label><input id="nfcId" type="text" value="TR-001/FLANGE-A"></div>
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="nfcId">Машина/вузол ID</label><input id="nfcId" type="text" value="TR-001/FLANGE-A"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -238,8 +239,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток “TORQUE CARD”</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>TORQUE CARD</h4>

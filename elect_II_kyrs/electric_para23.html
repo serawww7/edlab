@@ -42,7 +42,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧰</span>
@@ -70,11 +70,18 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 Кроки:
 1) Відкрити шафу; 2) Перевірити затяжку клем; 3) Очистити від пилу; 4) Замір опору ізоляції;
 Перевірка:
+1) Зняти LOTO; 2) Увімкнути QF1; 3) Записати покази у журнал;" aria-label="PPE: діелектричні рукавиці, каска, окуляри...
+Інструменти: мультиметр CAT III, індикатор напруги, ізоляційний покажчик...
+Підготовка:
+1) Відключити вводний автомат QF1; 2) Встановити LOTO; 3) Перевірити відсутність напруги;
+Кроки:
+1) Відкрити шафу; 2) Перевірити затяжку клем; 3) Очистити від пилу; 4) Замір опору ізоляції;
+Перевірка:
 1) Зняти LOTO; 2) Увімкнути QF1; 3) Записати покази у журнал;"></textarea>
     <div class="row" style="margin-top:6px">
-      <button class="btn good" id="parse">🧩 Розпарсити</button>
-      <button class="btn secondary" id="demo">🎲 Демонстраційний SOP</button>
-      <button class="btn secondary" id="clear">🧹 Очистити</button>
+      <button type="button" class="btn good" id="parse">🧩 Розпарсити</button>
+      <button type="button" class="btn secondary" id="demo">🎲 Демонстраційний SOP</button>
+      <button type="button" class="btn secondary" id="clear">🧹 Очистити</button>
       <span id="badge" class="badge">Статус: —</span>
     </div>
   </div>
@@ -82,24 +89,24 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>✅ Чек-лист виконання</h2>
     <div class="row">
-      <input id="jobTitle" class="input" placeholder="Назва роботи (напр. ТО щита ЩО-1)"/>
-      <input id="who" class="input" placeholder="Виконавець (ПІБ)"/>
-      <input id="super" class="input" placeholder="Контролер/допуск (ПІБ)"/>
-      <input id="start" class="input" type="datetime-local"/>
-      <input id="loc" class="input" placeholder="Місце/шафа/фідер"/>
+      <input id="jobTitle" class="input" placeholder="Назва роботи (напр. ТО щита ЩО-1)" aria-label="Назва роботи (напр. ТО щита ЩО-1)"/>
+      <input id="who" class="input" placeholder="Виконавець (ПІБ)" aria-label="Виконавець (ПІБ)"/>
+      <input id="super" class="input" placeholder="Контролер/допуск (ПІБ)" aria-label="Контролер/допуск (ПІБ)"/>
+      <input id="start" class="input" type="datetime-local" aria-label="start"/>
+      <input id="loc" class="input" placeholder="Місце/шафа/фідер" aria-label="Місце/шафа/фідер"/>
     </div>
     <table class="tbl" id="tbl">
       <thead><tr><th>#</th><th>Крок</th><th>Готово</th><th>Час</th><th>Коментар</th></tr></thead>
       <tbody></tbody>
     </table>
     <div class="row" style="margin-top:6px">
-      <button class="btn" id="stampAll">⏱️ Проставити час</button>
-      <button class="btn secondary" id="addStep">➕ Додати крок</button>
-      <button class="btn secondary" id="rmDone">🧽 Прибрати виконані</button>
-      <button class="btn" id="receipt">🖨️ 58 мм чек</button>
-      <button class="btn" id="exportCsv">📄 CSV</button>
-      <button class="btn" id="exportTxt">💾 TXT</button>
-      <button class="btn" id="exportIcs">🗓️ ICS</button>
+      <button type="button" class="btn" id="stampAll">⏱️ Проставити час</button>
+      <button type="button" class="btn secondary" id="addStep">➕ Додати крок</button>
+      <button type="button" class="btn secondary" id="rmDone">🧽 Прибрати виконані</button>
+      <button type="button" class="btn" id="receipt">🖨️ 58 мм чек</button>
+      <button type="button" class="btn" id="exportCsv">📄 CSV</button>
+      <button type="button" class="btn" id="exportTxt">💾 TXT</button>
+      <button type="button" class="btn" id="exportIcs">🗓️ ICS</button>
     </div>
     <div class="receipt" id="rc" hidden></div>
   </div>
@@ -107,8 +114,8 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🧠 Квіз по SOP + «чекер» вільної відповіді</h2>
     <div class="row">
-      <button class="btn good" id="genQuiz">📝 Згенерувати 6 питань</button>
-      <button class="btn secondary" id="clearQuiz">🧹 Очистити</button>
+      <button type="button" class="btn good" id="genQuiz">📝 Згенерувати 6 питань</button>
+      <button type="button" class="btn secondary" id="clearQuiz">🧹 Очистити</button>
       <span id="qBadge" class="badge">Питань: 0</span>
     </div>
     <table class="tbl" id="quizTbl">
@@ -116,9 +123,9 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <tbody></tbody>
     </table>
     <h3 style="margin-top:10px">✍️ Вільна відповідь на запуск/допуск</h3>
-    <textarea id="freeAns" class="input" rows="4" placeholder="Опиши усі кроки LOTO та перевірки відсутності напруги..."></textarea>
+    <textarea id="freeAns" class="input" rows="4" placeholder="Опиши усі кроки LOTO та перевірки відсутності напруги..." aria-label="Опиши усі кроки LOTO та перевірки відсутності напруги..."></textarea>
     <div class="row" style="margin-top:6px">
-      <button class="btn" id="checkFree">✅ Перевірити</button>
+      <button type="button" class="btn" id="checkFree">✅ Перевірити</button>
       <span id="freeScore" class="badge">Оцінка: —</span>
     </div>
   </div>
@@ -127,8 +134,8 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <h2>🔎 Локальний RAG-помічник (без інтернету)</h2>
     <p class="small muted">Задай питання, відповіді шукатимуться у тексті SOP (tf-idf/косинус). Відповідь міститиме посилання на релевантні фрагменти.</p>
     <div class="row">
-      <input id="q" class="input" placeholder="Що робити перед замірами опору ізоляції?"/>
-      <button class="btn" id="ask">❓ Запитати</button>
+      <input id="q" class="input" placeholder="Що робити перед замірами опору ізоляції?" aria-label="Що робити перед замірами опору ізоляції?"/>
+      <button type="button" class="btn" id="ask">❓ Запитати</button>
     </div>
     <pre class="code" id="ragOut">// Відповідь з’явиться тут</pre>
   </div>
@@ -448,7 +455,7 @@ function renderQuiz(list){
           ${q.opts.map(o=>`<option>${o}</option>`).join('')}
         </select>
       </td>
-      <td><button class="btn checkOne" data-i="${i}">Перевірити</button><span class="badge" id="res_${i}">—</span></td>`;
+      <td><button type="button" class="btn checkOne" data-i="${i}">Перевірити</button><span class="badge" id="res_${i}">—</span></td>`;
     tb.appendChild(tr);
   });
   $$('.checkOne').forEach(b=>b.addEventListener('click', e=>{

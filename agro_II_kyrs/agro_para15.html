@@ -21,6 +21,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Пара 15 — Scouting: ЕПШ → рішення → бакова суміш → вікно погоди → ЗІЗ, CSV</title>
+<meta name="description" content="🔎 Scouting: ЕПШ → рішення → бакова суміш → вікно погоди → ЗІЗ">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -69,7 +70,7 @@ html.embedded .box{background:#f8fafc; color:#111}
 </style>
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Пара 15 · аудиторно · агрономи</span>
     <h1>🔎 Scouting: ЕПШ → рішення → бакова суміш → вікно погоди → ЗІЗ</h1>
 
@@ -91,26 +92,26 @@ html.embedded .box{background:#f8fafc; color:#111}
           <h3>Обʼєкт</h3>
           <div class="row">
             <div style="flex:1">
-              <label>Тип</label>
+              <label for="objType">Тип</label>
               <select id="objType">
                 <option value="pest" selected>Шкідник</option>
                 <option value="disease">Хвороба</option>
               </select>
             </div>
             <div style="flex:1">
-              <label>Назва</label>
+              <label for="objName">Назва</label>
               <input id="objName" type="text" value="Попелиця">
             </div>
           </div>
           <div class="row" style="margin-top:6px">
-            <div style="flex:1"><label>Одиниця обліку</label>
+            <div style="flex:1"><label for="unit">Одиниця обліку</label>
               <select id="unit">
                 <option value="perPlant" selected>екз./рослину</option>
                 <option value="perM2">екз./м²</option>
                 <option value="percent">% ураження</option>
               </select>
             </div>
-            <div style="flex:1"><label>ЕПШ (поріг)</label>
+            <div style="flex:1"><label for="epsh">ЕПШ (поріг)</label>
               <input id="epsh" type="number" step="0.1" value="12">
             </div>
           </div>
@@ -120,24 +121,24 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>Препарат/суміш</h3>
           <div class="row">
-            <div style="flex:1"><label>Назва препарату</label><input id="prod" type="text" value="Інсектицид X 200 г/л"></div>
-            <div style="flex:1"><label>Норма, л/га</label><input id="dose" type="number" step="0.01" value="0.3"></div>
+            <div style="flex:1"><label for="prod">Назва препарату</label><input id="prod" type="text" value="Інсектицид X 200 г/л"></div>
+            <div style="flex:1"><label for="dose">Норма, л/га</label><input id="dose" type="number" step="0.01" value="0.3"></div>
           </div>
           <div class="row" style="margin-top:6px">
-            <div style="flex:1"><label>Вміст д.р., г/л</label><input id="ai" type="number" step="1" value="200"></div>
-            <div style="flex:1"><label>Робочий розчин, л/га</label><input id="sprN" type="number" step="1" value="200"></div>
+            <div style="flex:1"><label for="ai">Вміст д.р., г/л</label><input id="ai" type="number" step="1" value="200"></div>
+            <div style="flex:1"><label for="sprN">Робочий розчин, л/га</label><input id="sprN" type="number" step="1" value="200"></div>
           </div>
         </div>
 
         <div class="box">
           <h3>Опрыскувач</h3>
           <div class="row">
-            <div style="flex:1"><label>Ширина захвату, м</label><input id="W" type="number" step="0.1" value="18"></div>
-            <div style="flex:1"><label>Місткість бака, л</label><input id="tank" type="number" step="1" value="3000"></div>
+            <div style="flex:1"><label for="W">Ширина захвату, м</label><input id="W" type="number" step="0.1" value="18"></div>
+            <div style="flex:1"><label for="tank">Місткість бака, л</label><input id="tank" type="number" step="1" value="3000"></div>
           </div>
           <div class="row" style="margin-top:6px">
-            <div style="flex:1"><label>Площа поля, га</label><input id="area" type="number" step="0.01" value="25"></div>
-            <div style="flex:1"><label>Код поля</label><input id="field" type="text" value="F-01"></div>
+            <div style="flex:1"><label for="area">Площа поля, га</label><input id="area" type="number" step="0.01" value="25"></div>
+            <div style="flex:1"><label for="field">Код поля</label><input id="field" type="text" value="F-01"></div>
           </div>
         </div>
       </div>
@@ -147,10 +148,10 @@ html.embedded .box{background:#f8fafc; color:#111}
     <div class="card">
       <h2>🧱 Точки обстеження</h2>
       <div class="row">
-        <button class="btn" onclick="addRow()">➕ Додати точку</button>
-        <button class="btn" onclick="preset()">🧪 Приклад</button>
-        <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
-        <button class="btn" onclick="copyCSV()">📋 CSV</button>
+        <button type="button" class="btn" onclick="addRow()">➕ Додати точку</button>
+        <button type="button" class="btn" onclick="preset()">🧪 Приклад</button>
+        <button type="button" class="btn" onclick="recalc()">🔁 Перерахувати</button>
+        <button type="button" class="btn" onclick="copyCSV()">📋 CSV</button>
       </div>
       <div style="overflow:auto; margin-top:8px">
         <table class="table" id="tbl">
@@ -193,7 +194,7 @@ html.embedded .box{background:#f8fafc; color:#111}
           <p>Середня фактична щільність/ураження: <b><span id="avgShow">—</span></b></p>
           <p>ЕПШ: <b><span id="epshShow">—</span></b></p>
           <p>Рекомендація: <b><span id="dec" class="mono">—</span></b></p>
-          <textarea id="note" rows="3" placeholder="Коротке обґрунтування..."></textarea>
+          <textarea id="note" rows="3" placeholder="Коротке обґрунтування..." aria-label="Коротке обґрунтування..."></textarea>
         </div>
 
         <div class="box">
@@ -207,12 +208,12 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>«Вікно погоди» для внесення</h3>
           <div class="row">
-            <div style="flex:1"><label>Вітер, м/с</label><input id="wind" type="number" step="0.1" value="3.5"></div>
-            <div style="flex:1"><label>Вологість, %</label><input id="rh" type="number" step="1" value="65"></div>
+            <div style="flex:1"><label for="wind">Вітер, м/с</label><input id="wind" type="number" step="0.1" value="3.5"></div>
+            <div style="flex:1"><label for="rh">Вологість, %</label><input id="rh" type="number" step="1" value="65"></div>
           </div>
           <div class="row" style="margin-top:6px">
-            <div style="flex:1"><label>Температура, °C</label><input id="temp" type="number" step="0.1" value="18.0"></div>
-            <div style="flex:1"><label>Ризик дощу (0..1)</label><input id="rain" type="number" step="0.05" value="0.2"></div>
+            <div style="flex:1"><label for="temp">Температура, °C</label><input id="temp" type="number" step="0.1" value="18.0"></div>
+            <div style="flex:1"><label for="rain">Ризик дощу (0..1)</label><input id="rain" type="number" step="0.05" value="0.2"></div>
           </div>
           <p>Придатність: <b><span id="wxOk">—</span></b></p>
           <p class="small">Навчальні критерії: вітер ≤ 5 м/с; RH 40–85%; t 8–25°C; ризик дощу &lt; 0.4 (у найближчі 4–6 год).</p>
@@ -227,19 +228,19 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>ЗІЗ (перед стартом)</h3>
           <div class="row">
-            <label><input type="checkbox" class="ppe" checked> Комбінезон/куртка хімстійка</label>
+            <label><input type="checkbox" class="ppe" checked aria-label="ЗІЗ"> Комбінезон/куртка хімстійка</label>
           </div>
           <div class="row">
-            <label><input type="checkbox" class="ppe" checked> Рукавички нітрилові</label>
+            <label><input type="checkbox" class="ppe" checked aria-label="ЗІЗ"> Рукавички нітрилові</label>
           </div>
           <div class="row">
-            <label><input type="checkbox" class="ppe" checked> Респіратор з фільтром</label>
+            <label><input type="checkbox" class="ppe" checked aria-label="ЗІЗ"> Респіратор з фільтром</label>
           </div>
           <div class="row">
-            <label><input type="checkbox" class="ppe" checked> Захисні окуляри/щиток</label>
+            <label><input type="checkbox" class="ppe" checked aria-label="ЗІЗ"> Захисні окуляри/щиток</label>
           </div>
           <div class="row">
-            <label><input type="checkbox" class="ppe" checked> Мийка/вода/нейтралізатор поруч</label>
+            <label><input type="checkbox" class="ppe" checked aria-label="ЗІЗ"> Мийка/вода/нейтралізатор поруч</label>
           </div>
           <p>Статус: <b><span id="ppeStatus">—</span></b></p>
         </div>
@@ -247,8 +248,8 @@ html.embedded .box{background:#f8fafc; color:#111}
           <h3>Службова записка (зведення)</h3>
           <div id="memo" class="out">—</div>
           <div class="row" style="margin-top:6px">
-            <button class="btn" onclick="buildMemo()">📝 Зібрати</button>
-            <button class="btn" onclick="copyEl('memo')">📋 Копіювати</button>
+            <button type="button" class="btn" onclick="buildMemo()">📝 Зібрати</button>
+            <button type="button" class="btn" onclick="copyEl('memo')">📋 Копіювати</button>
           </div>
         </div>
       </div>

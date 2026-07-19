@@ -9,6 +9,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Електрики · Пара 2 — Журнал ППР, чек-листи, друк 58 мм, NFC/QR</title>
+<meta name="description" content="🛠️ Журнал ППР · ✅/❌ чек-листи · 🧾 друк 58 мм · 🔗 NFC/QR">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -61,7 +62,7 @@ tbody tr:nth-child(even){background:#0b1324}
 
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Електрики · Пара 2 · аудиторно</span>
     <h1>🛠️ Журнал ППР · ✅/❌ чек-листи · 🧾 друк 58 мм · 🔗 NFC/QR</h1>
 
@@ -135,11 +136,11 @@ tbody tr:nth-child(even){background:#0b1324}
           <h3>1) Обери рядок журналу й виконай чек-лист</h3>
           <div id="selectedInfo" class="small">Обрано: —</div>
           <div id="checklist" style="margin-top:8px">
-            <label><input type="checkbox" class="cl" data-name="Вимкнення живлення" /> Вимкнення живлення (LOTO)</label><br/>
-            <label><input type="checkbox" class="cl" data-name="Візуальний огляд" /> Візуальний огляд (корпус, клеми, позначення)</label><br/>
-            <label><input type="checkbox" class="cl" data-name="Затягування контактів" /> Затягування контактів (за потреби)</label><br/>
-            <label><input type="checkbox" class="cl" data-name="Перевірка захисту" /> Перевірка номіналу захисту (автомат/ПЗВ)</label><br/>
-            <label><input type="checkbox" class="cl" data-name="Тест індикації" /> Тест індикації/маркування</label><br/>
+            <label><input type="checkbox" class="cl" data-name="Вимкнення живлення" / aria-label="Вимкнення живлення"> Вимкнення живлення (LOTO)</label><br/>
+            <label><input type="checkbox" class="cl" data-name="Візуальний огляд" / aria-label="Візуальний огляд"> Візуальний огляд (корпус, клеми, позначення)</label><br/>
+            <label><input type="checkbox" class="cl" data-name="Затягування контактів" / aria-label="Затягування контактів"> Затягування контактів (за потреби)</label><br/>
+            <label><input type="checkbox" class="cl" data-name="Перевірка захисту" / aria-label="Перевірка захисту"> Перевірка номіналу захисту (автомат/ПЗВ)</label><br/>
+            <label><input type="checkbox" class="cl" data-name="Тест індикації" / aria-label="Тест індикації"> Тест індикації/маркування</label><br/>
           </div>
           <div class="row" style="margin-top:8px">
             <button class="btn" type="button" onclick="markPass()">✅ PASS</button>
@@ -233,9 +234,9 @@ tbody tr:nth-child(even){background:#0b1324}
         <td>${row.nextISO}</td>
         <td><span class="status ${statusClass}"><span class="dot"></span>${statusClass.toUpperCase()}</span></td>
         <td class="mono">
-          <button class="btn" data-act="select" data-id="${row.id}">Обрати</button>
-          <button class="btn" data-act="pass" data-id="${row.id}">PASS</button>
-          <button class="btn" data-act="fail" data-id="${row.id}">FAIL</button>
+          <button type="button" class="btn" data-act="select" data-id="${row.id}">Обрати</button>
+          <button type="button" class="btn" data-act="pass" data-id="${row.id}">PASS</button>
+          <button type="button" class="btn" data-act="fail" data-id="${row.id}">FAIL</button>
         </td>
       `;
       tbody.appendChild(tr);

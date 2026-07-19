@@ -15,6 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 3 (технологи) — Рецептури та посіл: розсол, нітрит, ppm, втрати, квиток 58 мм, NFC</title>
+<meta name="description" content="🧂 Рецептури та посіл: розсол, нітрит, ppm, втрати, квиток 58 мм, NFC">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -61,7 +62,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 3 · аудиторно · технологи переробки</span>
   <h1>🧂 Рецептури та посіл: розсол, нітрит, ppm, втрати, квиток 58 мм, NFC</h1>
 
@@ -84,12 +85,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Партія</h3>
         <div class="row">
-          <div style="flex:1"><label>Маса м'яса, кг</label><input id="meatKg" type="number" step="0.1" value="50"></div>
-          <div style="flex:1"><label>Вода/лід, кг</label><input id="waterKg" type="number" step="0.1" value="10"></div>
+          <div style="flex:1"><label for="meatKg">Маса м'яса, кг</label><input id="meatKg" type="number" step="0.1" value="50"></div>
+          <div style="flex:1"><label for="waterKg">Вода/лід, кг</label><input id="waterKg" type="number" step="0.1" value="10"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Сіль кухонна, % від маси фаршу</label><input id="saltPct" type="number" step="0.01" value="1.8"></div>
-          <div style="flex:1"><label>Нітритна сіль, % від маси фаршу</label><input id="nsPct" type="number" step="0.01" value="0.2"></div>
+          <div style="flex:1"><label for="saltPct">Сіль кухонна, % від маси фаршу</label><input id="saltPct" type="number" step="0.01" value="1.8"></div>
+          <div style="flex:1"><label for="nsPct">Нітритна сіль, % від маси фаршу</label><input id="nsPct" type="number" step="0.01" value="0.2"></div>
         </div>
         <p class="small muted">Фаршова маса = м'ясо + вода + всі добавки (наближено).</p>
       </div>
@@ -97,8 +98,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Розсол (для ін'єкції/масажу)</h3>
         <div class="row">
-          <div style="flex:1"><label>Цільова концентрація солі в розсолі, %</label><input id="brineSaltPct" type="number" step="0.1" value="8"></div>
-          <div style="flex:1"><label>Об'єм розсолу, л</label><input id="brineL" type="number" step="0.1" value="15"></div>
+          <div style="flex:1"><label for="brineSaltPct">Цільова концентрація солі в розсолі, %</label><input id="brineSaltPct" type="number" step="0.1" value="8"></div>
+          <div style="flex:1"><label for="brineL">Об'єм розсолу, л</label><input id="brineL" type="number" step="0.1" value="15"></div>
         </div>
         <p class="small muted">Підказка: 8–12% NaCl у розсолі — типово для масажу/ін'єкції залежно від продукту.</p>
       </div>
@@ -110,9 +111,9 @@ html.embedded .box{background:#f8fafc;color:#111}
         <p>Нітритна сіль (0.6% NaNO₂): <b><span id="nsG">—</span></b> г</p>
         <p>Розсол: <b><span id="brineSaltG">—</span></b> г солі на <span id="brineVolL">—</span> л</p>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="calcRecipe()">🔁 Перерахувати</button>
-          <button class="btn" onclick="presetRecipe()">🧪 Приклад</button>
-          <button class="btn" onclick="copyCSV('csvRecipe')">📋 CSV (recipe)</button>
+          <button type="button" class="btn" onclick="calcRecipe()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="presetRecipe()">🧪 Приклад</button>
+          <button type="button" class="btn" onclick="copyCSV('csvRecipe')">📋 CSV (recipe)</button>
         </div>
         <div id="csvRecipe" class="out" style="margin-top:8px">—</div>
       </div>
@@ -126,8 +127,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Параметри</h3>
         <div class="row">
-          <div style="flex:1"><label>Частка NaNO₂ у нітритній солі, %</label><input id="naNo2Pct" type="number" step="0.01" value="0.6"></div>
-          <div style="flex:1"><label>Втрати при варці/запіканні, %</label><input id="cookLossPct" type="number" step="0.1" value="8"></div>
+          <div style="flex:1"><label for="naNo2Pct">Частка NaNO₂ у нітритній солі, %</label><input id="naNo2Pct" type="number" step="0.01" value="0.6"></div>
+          <div style="flex:1"><label for="cookLossPct">Втрати при варці/запіканні, %</label><input id="cookLossPct" type="number" step="0.1" value="8"></div>
         </div>
         <p class="small muted">Допущення: рівномірний розподіл, втрати маси зменшують <i>масу</i> готового продукту, а не внесений NaNO₂.</p>
       </div>
@@ -143,8 +144,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="calcNitrite()">🔁 Перерахувати</button>
-          <button class="btn" onclick="copyCSV('csvNitrite')">📋 CSV (nitrite)</button>
+          <button type="button" class="btn" onclick="calcNitrite()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvNitrite')">📋 CSV (nitrite)</button>
         </div>
         <div id="csvNitrite" class="out" style="margin-top:8px">—</div>
       </div>
@@ -159,8 +160,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Вхідні</h3>
         <div class="row">
-          <div style="flex:1"><label>Білок, % у готовому</label><input id="protPct" type="number" step="0.1" value="16"></div>
-          <div style="flex:1"><label>Жир, % у готовому</label><input id="fatPct" type="number" step="0.1" value="18"></div>
+          <div style="flex:1"><label for="protPct">Білок, % у готовому</label><input id="protPct" type="number" step="0.1" value="16"></div>
+          <div style="flex:1"><label for="fatPct">Жир, % у готовому</label><input id="fatPct" type="number" step="0.1" value="18"></div>
         </div>
         <p class="small muted">Енергетичні коефіцієнти: білок ~4 ккал/г, жир ~9 ккал/г, вуглеводи (за наявності) ~4 ккал/г.</p>
       </div>
@@ -173,8 +174,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="calcNutrition()">🔁 Перерахувати</button>
-          <button class="btn" onclick="copyCSV('csvNutri')">📋 CSV (nutrition)</button>
+          <button type="button" class="btn" onclick="calcNutrition()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvNutri')">📋 CSV (nutrition)</button>
         </div>
         <div id="csvNutri" class="out" style="margin-top:8px">—</div>
       </div>
@@ -185,9 +186,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал рецептур</h2>
     <div class="row">
-      <button class="btn" onclick="addRow()">➕ Додати рядок</button>
-      <button class="btn" onclick="presetRows()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+      <button type="button" class="btn" onclick="addRow()">➕ Додати рядок</button>
+      <button type="button" class="btn" onclick="presetRows()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tbl">
@@ -217,16 +218,16 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>NFC — “CURE BATCH CARD”</h3>
         <div class="row">
-          <div style="flex:1"><label>Назва виробу</label><input id="prodName" type="text" value="Ковбаса варена"></div>
-          <div style="flex:1"><label>Лот</label><input id="lotId" type="text" value="LOT-REC-0003"></div>
+          <div style="flex:1"><label for="prodName">Назва виробу</label><input id="prodName" type="text" value="Ковбаса варена"></div>
+          <div style="flex:1"><label for="lotId">Лот</label><input id="lotId" type="text" value="LOT-REC-0003"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
-          <div style="flex:1"><label>Оператор</label><input id="operator" type="text" value="Студент ТПТ"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="operator">Оператор</label><input id="operator" type="text" value="Студент ТПТ"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -234,8 +235,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток для принтера 58 мм</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>RECIPE & CURE TICKET</h4>

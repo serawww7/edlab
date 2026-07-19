@@ -53,7 +53,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧪🛠️</span>
@@ -71,13 +71,13 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
     <p>Виконуємо перевірку герметичності: <b>сканування тече-шуком</b> (ppm) та <b>тест падіння тиску</b> на відсіченій ділянці. На графіку — часові ряди <b>ppm</b> і <b>тиску</b>. 
       За піком ppm та падінням тиску розраховується <b>матриця ризику</b> (Ймовірність × Наслідки). Додаємо <b>фото</b>, <b>NFC/ID</b>, <b>підпис</b>, друкуємо <b>чек 58 мм</b> і експортуємо <b>CSV/TXT</b>, генеруємо <b>QR</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., кв. ..."/></label>
-      <label style="flex:1">Ділянка/вузол<input id="section" class="input" placeholder="Стояк №3, ввод, шафа ГРП, кухня…"/></label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., кв. ..." aria-label="м. Тальне, вул. ..., кв. ..."/></label>
+      <label style="flex:1">Ділянка/вузол<input id="section" class="input" placeholder="Стояк №3, ввод, шафа ГРП, кухня…" aria-label="Стояк №3, ввод, шафа ГРП, кухня…"/></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П." aria-label="Прізвище І.П."/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date" aria-label="day"/></label>
     </div>
     <div class="row">
-      <button class="btn good" id="mkCase">🧰 Створити кейс</button>
+      <button type="button" class="btn good" id="mkCase">🧰 Створити кейс</button>
       <span class="badge" id="cid">Кейс: —</span>
     </div>
   </div>
@@ -92,26 +92,26 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <div class="block">
         <div class="row">
           <label style="flex:1">Тече-шук, ppm
-            <input id="ppm" type="range" class="input" min="0" max="10000" step="50" value="150"/>
+            <input id="ppm" type="range" class="input" min="0" max="10000" step="50" value="150" aria-label="ppm"/>
           </label>
           <span class="badge">Поточне: <b id="ppmNum">150</b> ppm</span>
-          <button class="btn" id="markPPM">📍 Додати точку</button>
+          <button type="button" class="btn" id="markPPM">📍 Додати точку</button>
         </div>
         <div class="row">
           <label style="flex:1">Тиск, мбар
-            <input id="press" type="range" class="input" min="0" max="100" step="0.5" value="30.0"/>
+            <input id="press" type="range" class="input" min="0" max="100" step="0.5" value="30.0" aria-label="press"/>
           </label>
           <span class="badge">Поточне: <b id="pNum">30.0</b> мбар</span>
-          <button class="btn" id="markP">📍 Додати точку</button>
-          <button class="btn secondary" id="clearSeries">🧹 Очистити графік</button>
+          <button type="button" class="btn" id="markP">📍 Додати точку</button>
+          <button type="button" class="btn secondary" id="clearSeries">🧹 Очистити графік</button>
         </div>
         <div class="row">
-          <label>Warn ppm<input id="ppmWarn" type="number" class="input" step="10" value="500"/></label>
-          <label>Alarm ppm<input id="ppmAlarm" type="number" class="input" step="10" value="2000"/></label>
-          <label>Старт тиску, мбар<input id="pStart" type="number" class="input" step="0.1" value="30.0"/></label>
-          <label>Тривалість тесту, хв<input id="tMin" type="number" class="input" step="1" value="10"/></label>
-          <label>Допустиме падіння, мбар<input id="pDropMax" type="number" class="input" step="0.1" value="1.0"/></label>
-          <button class="btn secondary" id="applyTh">⚙️ Застосувати пороги</button>
+          <label>Warn ppm<input id="ppmWarn" type="number" class="input" step="10" value="500" aria-label="ppm Warn"/></label>
+          <label>Alarm ppm<input id="ppmAlarm" type="number" class="input" step="10" value="2000" aria-label="ppm Alarm"/></label>
+          <label>Старт тиску, мбар<input id="pStart" type="number" class="input" step="0.1" value="30.0" aria-label="p Start"/></label>
+          <label>Тривалість тесту, хв<input id="tMin" type="number" class="input" step="1" value="10" aria-label="t Min"/></label>
+          <label>Допустиме падіння, мбар<input id="pDropMax" type="number" class="input" step="0.1" value="1.0" aria-label="p Drop Max"/></label>
+          <button type="button" class="btn secondary" id="applyTh">⚙️ Застосувати пороги</button>
         </div>
         <div class="kpi" style="margin-top:6px">
           <span class="tag ok">Пік ppm: <b id="kPpm">0</b></span>
@@ -130,10 +130,10 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <div class="row">
         <video id="vid" class="photo" autoplay playsinline muted></video>
         <div>
-          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
-          <button class="btn" data-kind="before">📷 До</button>
-          <button class="btn" data-kind="joint">📷 З’єднання/муфта</button>
-          <button class="btn" data-kind="soap">📷 Мильна піна</button><br/>
+          <button type="button" class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button type="button" class="btn" data-kind="before">📷 До</button>
+          <button type="button" class="btn" data-kind="joint">📷 З’єднання/муфта</button>
+          <button type="button" class="btn" data-kind="soap">📷 Мильна піна</button><br/>
           <small class="muted">Фото зберігаються у «Галереї доказів».</small>
         </div>
       </div>
@@ -143,8 +143,8 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <div class="sigWrap">
         <canvas id="sig" width="520" height="200"></canvas>
         <div class="row" style="margin-top:6px">
-          <button class="btn" id="sigClear">🧹 Очистити</button>
-          <button class="btn" id="sigSave">💾 Зберегти підпис</button>
+          <button type="button" class="btn" id="sigClear">🧹 Очистити</button>
+          <button type="button" class="btn" id="sigSave">💾 Зберегти підпис</button>
           <span class="badge" id="sigStat">Підпису немає</span>
         </div>
       </div>
@@ -152,9 +152,9 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2 style="margin-top:10px">📶 NFC / ID об’єкта</h2>
       <div class="block">
         <div class="row">
-          <button class="btn" id="nfcBtn">📶 NFC</button>
-          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)"/>
-          <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
+          <button type="button" class="btn" id="nfcBtn">📶 NFC</button>
+          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)" aria-label="ID об’єкта (якщо NFC недоступний)"/>
+          <button type="button" class="btn secondary" id="saveAsset">💾 Застосувати</button>
           <span class="badge" id="nfcs">Статус NFC: очікується</span>
         </div>
       </div>
@@ -191,10 +191,10 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 
       <h2 style="margin-top:10px">💾 Експорт / друк</h2>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV</button>
-        <button class="btn" id="saveTxt">💾 TXT</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
@@ -251,9 +251,9 @@ function renderSteps(){
     div.innerHTML=`
       <b>${i+1}. ${s.name}</b> <span class="badge mono">${s.k}</span>
       <div class="row" style="margin-top:6px">
-        <button class="btn btn-start">▶️ Start</button>
-        <button class="btn secondary btn-stop">⏹️ Stop</button>
-        <button class="btn good btn-done">✅ Done</button>
+        <button type="button" class="btn btn-start">▶️ Start</button>
+        <button type="button" class="btn secondary btn-stop">⏹️ Stop</button>
+        <button type="button" class="btn good btn-done">✅ Done</button>
         <span class="badge">Тривалість: <b class="dur">0</b> с</span>
       </div>`;
     box.appendChild(div);

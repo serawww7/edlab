@@ -47,7 +47,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🔒</span>
@@ -64,19 +64,19 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
     <h2>📚 Сценарій</h2>
     <p>Операції: <b>Пломбування</b> / <b>Розпломбування</b> / <b>Заміна пломби</b>. Створюємо кейс, ідентифікуємо об’єкт (<b>NFC або код</b>), генеруємо <b>№ пломби</b> (або вводимо), робимо <b>фото</b> (до/крупний план/після), отримуємо <b>підпис абонента</b>, формуємо <b>чек 58 мм</b>, <b>CSV/TXT</b> і <b>QR</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. Шевченка, 10, кв. 12"/></label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. Шевченка, 10, кв. 12" aria-label="м. Тальне, вул. Шевченка, 10, кв. 12"/></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П." aria-label="Прізвище І.П."/></label>
       <label style="flex:1">Операція
-        <select id="op" class="input">
+        <select id="op" class="input" aria-label="op">
           <option value="sealed" selected>Пломбування</option>
           <option value="unsealed">Розпломбування</option>
           <option value="replaced">Заміна пломби</option>
         </select>
       </label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date" aria-label="day"/></label>
     </div>
     <div class="row">
-      <button class="btn good" id="mkCase">🧰 Створити кейс</button>
+      <button type="button" class="btn good" id="mkCase">🧰 Створити кейс</button>
       <span class="badge" id="cid">Кейс: —</span>
     </div>
   </div>
@@ -86,19 +86,19 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
     <div class="card">
       <h2>🔑 Пломба</h2>
       <div class="row">
-        <label style="flex:1">№ поточної пломби (якщо є)<input id="sealOld" class="input" placeholder="Напр.: PL-OLD-1234"/></label>
-        <label style="flex:1">№ нової пломби<input id="sealNew" class="input" placeholder="Автогенеруємо або свій"/></label>
-        <button class="btn" id="genSeal">🎲 Згенерувати №</button>
+        <label style="flex:1">№ поточної пломби (якщо є)<input id="sealOld" class="input" placeholder="Напр.: PL-OLD-1234" aria-label="Напр.: PL-OLD-1234"/></label>
+        <label style="flex:1">№ нової пломби<input id="sealNew" class="input" placeholder="Автогенеруємо або свій" aria-label="Автогенеруємо або свій"/></label>
+        <button type="button" class="btn" id="genSeal">🎲 Згенерувати №</button>
       </div>
 
       <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
       <div class="row">
         <video id="vid" class="photo" autoplay playsinline muted></video>
         <div>
-          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
-          <button class="btn" data-kind="before">📷 До</button>
-          <button class="btn" data-kind="closeup">📷 Крупний план пломби</button>
-          <button class="btn" data-kind="after">📷 Після</button><br/>
+          <button type="button" class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button type="button" class="btn" data-kind="before">📷 До</button>
+          <button type="button" class="btn" data-kind="closeup">📷 Крупний план пломби</button>
+          <button type="button" class="btn" data-kind="after">📷 Після</button><br/>
           <small class="muted">Фото зберігаються у «Галереї доказів» та підуть у звіт.</small>
         </div>
       </div>
@@ -108,8 +108,8 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <div class="sigWrap">
         <canvas id="sig" width="520" height="200"></canvas>
         <div class="row" style="margin-top:6px">
-          <button class="btn" id="sigClear">🧹 Очистити</button>
-          <button class="btn" id="sigSave">💾 Зберегти підпис</button>
+          <button type="button" class="btn" id="sigClear">🧹 Очистити</button>
+          <button type="button" class="btn" id="sigSave">💾 Зберегти підпис</button>
           <span class="badge" id="sigStat">Підпису немає</span>
         </div>
       </div>
@@ -117,9 +117,9 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2 style="margin-top:10px">📶 NFC / ID об’єкта</h2>
       <div class="block">
         <div class="row">
-          <button class="btn" id="nfcBtn">📶 NFC</button>
-          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)"/>
-          <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
+          <button type="button" class="btn" id="nfcBtn">📶 NFC</button>
+          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)" aria-label="ID об’єкта (якщо NFC недоступний)"/>
+          <button type="button" class="btn secondary" id="saveAsset">💾 Застосувати</button>
           <span class="badge" id="nfcs">Статус NFC: очікується</span>
         </div>
       </div>
@@ -151,10 +151,10 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 
       <h2 style="margin-top:10px">💾 Експорт / друк</h2>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV</button>
-        <button class="btn" id="saveTxt">💾 TXT</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>

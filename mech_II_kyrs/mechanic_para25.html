@@ -44,7 +44,7 @@ canvas{display:block;max-width:100%}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🗂️</span>
@@ -73,35 +73,35 @@ canvas{display:block;max-width:100%}
         <tbody id="jobsBody"></tbody>
       </table>
       <div class="row" style="margin-top:6px">
-        <input class="input" id="jMach" placeholder="Трактор МТЗ-82"/>
-        <input class="input" id="jTask" placeholder="Заміна підшипника на промвалі"/>
-        <input class="input" id="jDur" type="number" min="1" step="1" value="6"/>
-        <input class="input" id="jTech" type="number" min="1" step="1" value="2"/>
-        <input class="input" id="jDue" type="date"/>
-        <input class="input" id="jRisk" type="number" min="0" max="1" step="0.05" value="0.6"/>
-        <input class="input" id="jImp" type="number" min="1" max="5" step="1" value="4"/>
-        <select class="input" id="jSafe"><option value="ok">ok</option><option value="warn">warn</option><option value="critical">critical</option></select>
-        <input class="input" id="jDown" type="number" min="0" step="10" value="400"/>
-        <input class="input" id="jParts" placeholder="6204:2, A42:1"/>
-        <button class="btn good" id="addJob">➕ Додати</button>
-        <button class="btn secondary" id="demoJobs">📌 Демодані</button>
+        <input class="input" id="jMach" placeholder="Трактор МТЗ-82" aria-label="Трактор МТЗ-82"/>
+        <input class="input" id="jTask" placeholder="Заміна підшипника на промвалі" aria-label="Заміна підшипника на промвалі"/>
+        <input class="input" id="jDur" type="number" min="1" step="1" value="6" aria-label="j Dur"/>
+        <input class="input" id="jTech" type="number" min="1" step="1" value="2" aria-label="j Tech"/>
+        <input class="input" id="jDue" type="date" aria-label="j Due"/>
+        <input class="input" id="jRisk" type="number" min="0" max="1" step="0.05" value="0.6" aria-label="j Risk"/>
+        <input class="input" id="jImp" type="number" min="1" max="5" step="1" value="4" aria-label="j Imp"/>
+        <select class="input" id="jSafe" aria-label="j Safe"><option value="ok">ok</option><option value="warn">warn</option><option value="critical">critical</option></select>
+        <input class="input" id="jDown" type="number" min="0" step="10" value="400" aria-label="j Down"/>
+        <input class="input" id="jParts" placeholder="6204:2, A42:1" aria-label="6204:2, A42:1"/>
+        <button type="button" class="btn good" id="addJob">➕ Додати</button>
+        <button type="button" class="btn secondary" id="demoJobs">📌 Демодані</button>
       </div>
     </div>
 
     <div class="card">
       <h2>👷 Ресурси та політика планування</h2>
       <div class="row">
-        <label style="flex:1">Механіків у зміні<input class="input" id="capTech" type="number" min="1" value="4"/></label>
-        <label style="flex:1">Годин у зміні<input class="input" id="capHours" type="number" min="1" value="8"/></label>
-        <label style="flex:1">Початкова дата плану<input class="input" id="startDate" type="date"/></label>
+        <label style="flex:1">Механіків у зміні<input class="input" id="capTech" type="number" min="1" value="4" aria-label="cap Tech"/></label>
+        <label style="flex:1">Годин у зміні<input class="input" id="capHours" type="number" min="1" value="8" aria-label="cap Hours"/></label>
+        <label style="flex:1">Початкова дата плану<input class="input" id="startDate" type="date" aria-label="start Date"/></label>
       </div>
       <div class="row">
-        <label style="flex:1">Запаси (через кому)<textarea id="stock" class="input" placeholder="6204:10, A42:3, HLP-46:20л, M10:50"></textarea></label>
-        <label style="flex:1">Вага критеріїв<input class="input" id="weights" value='{"risk":0.35,"impact":0.2,"safety":0.2,"urgency":0.15,"downtime":0.1}'/></label>
+        <label style="flex:1">Запаси (через кому)<textarea id="stock" class="input" placeholder="6204:10, A42:3, HLP-46:20л, M10:50" aria-label="6204:10, A42:3, HLP-46:20л, M10:50"></textarea></label>
+        <label style="flex:1">Вага критеріїв<input class="input" id="weights" value='{"risk":0.35,"impact":0.2,"safety":0.2,"urgency":0.15,"downtime":0.1}' aria-label="weights"/></label>
       </div>
       <div class="row">
-        <button class="btn" id="plan">🧠 Спланувати (пріоритет→розклад)</button>
-        <button class="btn secondary" id="clearAll">🧹 Очистити все</button>
+        <button type="button" class="btn" id="plan">🧠 Спланувати (пріоритет→розклад)</button>
+        <button type="button" class="btn secondary" id="clearAll">🧹 Очистити все</button>
         <span id="stat" class="badge">Статус: очікування</span>
       </div>
     </div>
@@ -135,9 +135,9 @@ canvas{display:block;max-width:100%}
     <div class="card">
       <h2>🧠 Промпт до LLM-агента (опційно)</h2>
       <div class="row">
-        <button class="btn" id="mkPromptUA">🇺🇦 Згенерувати (укр)</button>
-        <button class="btn" id="mkPromptEN">🇬🇧 Generate (eng)</button>
-        <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+        <button type="button" class="btn" id="mkPromptUA">🇺🇦 Згенерувати (укр)</button>
+        <button type="button" class="btn" id="mkPromptEN">🇬🇧 Generate (eng)</button>
+        <button type="button" class="btn secondary" id="copyPrompt">📋 Копіювати</button>
       </div>
       <pre class="code" id="promptBox">// Спочатку побудуй розклад</pre>
     </div>
@@ -145,9 +145,9 @@ canvas{display:block;max-width:100%}
     <div class="card">
       <h2>📜 Журнал і експорт</h2>
       <div class="row">
-        <button class="btn" id="expCSV">📄 CSV (розклад)</button>
-        <button class="btn" id="expICS">📆 ICS (календар)</button>
-        <button class="btn" id="makeReceipt">🖨️ 58 мм чек</button>
+        <button type="button" class="btn" id="expCSV">📄 CSV (розклад)</button>
+        <button type="button" class="btn" id="expICS">📆 ICS (календар)</button>
+        <button type="button" class="btn" id="makeReceipt">🖨️ 58 мм чек</button>
       </div>
       <pre class="code" id="alog" style="max-height:180px;overflow:auto">// Поки без записів</pre>
       <div class="receipt" id="rc" hidden></div>
@@ -235,7 +235,7 @@ function renderJobs(){
       <td>${j.due?ymd(j.due):'—'}</td><td>${j.risk.toFixed(2)}</td><td>${j.imp}</td>
       <td>${j.safe}</td><td>${j.down}</td>
       <td>${Object.entries(j.parts).map(([k,v])=>`${k}:${v}`).join(', ')||'—'}</td>
-      <td><button class="btn secondary" data-del="${j.id}">🗑️</button></td>`;
+      <td><button type="button" class="btn secondary" data-del="${j.id}">🗑️</button></td>`;
     body.appendChild(tr);
   });
   body.querySelectorAll('button[data-del]').forEach(b=>{

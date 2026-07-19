@@ -43,7 +43,7 @@ canvas.chart{display:block;width:100%;height:220px;background:#0b1220;border:1px
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🤖🧯</span>
@@ -59,20 +59,21 @@ canvas.chart{display:block;width:100%;height:220px;background:#0b1220;border:1px
     <h2>📚 Контекст</h2>
     <p>Встав текст заявки (або кілька), натисни <b>Аналізувати</b> — локальний AI витягне сутності (<span class="mono">АДРЕСА, ПІБ, ТЕЛ, ЛІЧИЛЬНИК, ОЗНАКИ, ТИСК, ЧАС</span>), оцінить ризик, пріоритезує <b>P1/P2/P3</b>, згенерує <b>рекомендації</b> і заповнить <b>акт виїзду</b>. Далі — підпис абонента, чек 58 мм, CSV/TXT, QR на докази.</p>
     <div class="row">
-      <button class="btn" id="ex">🧪 Приклади (3 заявки)</button>
-      <button class="btn secondary" id="clr">🧹 Очистити</button>
-      <button class="btn good" id="an">🔎 Аналізувати</button>
+      <button type="button" class="btn" id="ex">🧪 Приклади (3 заявки)</button>
+      <button type="button" class="btn secondary" id="clr">🧹 Очистити</button>
+      <button type="button" class="btn good" id="an">🔎 Аналізувати</button>
       <span class="badge">Заявок: <b id="cnt">0</b></span>
     </div>
     <textarea id="txt" placeholder="Приклад формату (вільний текст, одна заявка в рядку або через порожній рядок):
 Київ, вул. Симиренка 12, кв. 47. Тел 0671234567, абонент: Іваненко Олена. Різкий запах газу у під’їзді, чутно свист біля стояка, тиск 0.7. Час: 08:35. Лічильник G4 № 00123456.
-"></textarea>
+" aria-label="Приклад формату (вільний текст, одна заявка в рядку або через порожній рядок):
+Київ, вул. Симиренка 12, кв. 47. Тел 0671234567, абонент: Іваненко Олена. Різкий запах газу у під’їзді, чутно свист біля стояка, тиск 0.7. Час: 08:35. Лічильник G4 № 00123456."></textarea>
 
     <div class="row">
-      <label>Вага «Запах/Свист/Полум’я», бал <input id="wDanger" class="input" type="number" step="1" value="50"></label>
-      <label>Вага «Тиск/без газу», бал <input id="wPress" class="input" type="number" step="1" value="30"></label>
-      <label>Пороги: P1 / P2 <input id="thr" class="input" type="text" value="70/40"><small class="muted">балів (інакше P3)</small></label>
-      <label>Виконавець (бригада) <input id="crew" class="input" value="Аварійна-1"></label>
+      <label>Вага «Запах/Свист/Полум’я», бал <input id="wDanger" class="input" type="number" step="1" value="50" aria-label="w Danger"></label>
+      <label>Вага «Тиск/без газу», бал <input id="wPress" class="input" type="number" step="1" value="30" aria-label="w Press"></label>
+      <label>Пороги: P1 / P2 <input id="thr" class="input" type="text" value="70/40" aria-label="thr"><small class="muted">балів (інакше P3)</small></label>
+      <label>Виконавець (бригада) <input id="crew" class="input" value="Аварійна-1" aria-label="crew"></label>
     </div>
   </div>
 
@@ -98,26 +99,26 @@ canvas.chart{display:block;width:100%;height:220px;background:#0b1220;border:1px
     <div class="card">
       <h2>📝 Акт виїзду (авто-заповнення)</h2>
       <div class="row">
-        <label style="flex:1">Адреса<input id="actAddr" class="input"></label>
-        <label style="flex:1">Абонент<input id="actName" class="input"></label>
-        <label style="flex:1">Телефон<input id="actTel" class="input"></label>
+        <label style="flex:1">Адреса<input id="actAddr" class="input" aria-label="act Addr"></label>
+        <label style="flex:1">Абонент<input id="actName" class="input" aria-label="act Name"></label>
+        <label style="flex:1">Телефон<input id="actTel" class="input" aria-label="act Tel"></label>
       </div>
       <div class="row">
-        <label style="flex:1">Лічильник<input id="actMeter" class="input"></label>
-        <label style="flex:1">Пріоритет<input id="actPrio" class="input"></label>
-        <label style="flex:1">Виконавець<input id="actCrew" class="input"></label>
+        <label style="flex:1">Лічильник<input id="actMeter" class="input" aria-label="act Meter"></label>
+        <label style="flex:1">Пріоритет<input id="actPrio" class="input" aria-label="act Prio"></label>
+        <label style="flex:1">Виконавець<input id="actCrew" class="input" aria-label="act Crew"></label>
       </div>
-      <label>Опис ситуації<textarea id="actDesc"></textarea></label>
-      <label>Виконані дії<textarea id="actActions"></textarea></label>
+      <label>Опис ситуації<textarea id="actDesc" aria-label="act Desc"></textarea></label>
+      <label>Виконані дії<textarea id="actActions" aria-label="act Actions"></textarea></label>
 
       <h3 style="margin-top:10px">✍️ Підпис абонента</h3>
       <canvas id="sig" class="sig" width="500" height="160"></canvas>
       <div class="row">
-        <button class="btn secondary" id="sigClr">🧽 Очистити підпис</button>
-        <button class="btn" id="saveTxt">💾 TXT (акт)</button>
-        <button class="btn" id="saveCsv">📄 CSV (сутності)</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
+        <button type="button" class="btn secondary" id="sigClr">🧽 Очистити підпис</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (акт)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (сутності)</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div style="margin-top:8px"><canvas id="qr" width="220" height="220" style="background:#0b1220;border:1px solid var(--line);border-radius:12px"></canvas></div>

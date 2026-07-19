@@ -18,6 +18,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Пара 2 (механіки) — Контроль ПММ: витрати, норми, чек 58 мм, NFC, CSV</title>
+<meta name="description" content="⛽ Контроль ПММ: заправки → фактична витрата → порівняння з нормами → чек 58 мм, NFC">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -67,7 +68,7 @@ html.embedded .box{background:#f8fafc; color:#111}
 </style>
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Пара 2 · аудиторно · механіки</span>
     <h1>⛽ Контроль ПММ: заправки → фактична витрата → порівняння з нормами → чек 58 мм, NFC</h1>
 
@@ -88,12 +89,12 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>Норми (базові)</h3>
           <div class="row">
-            <div style="flex:1"><label>Поле, л/га</label><input id="norm_ha" type="number" step="0.1" value="10.0"></div>
-            <div style="flex:1"><label>Транспорт, л/100 км</label><input id="norm_km" type="number" step="0.1" value="28.0"></div>
+            <div style="flex:1"><label for="norm_ha">Поле, л/га</label><input id="norm_ha" type="number" step="0.1" value="10.0"></div>
+            <div style="flex:1"><label for="norm_km">Транспорт, л/100 км</label><input id="norm_km" type="number" step="0.1" value="28.0"></div>
           </div>
           <div class="row" style="margin-top:6px">
-            <div style="flex:1"><label>Холостий/маневри, л/год</label><input id="norm_h" type="number" step="0.1" value="2.2"></div>
-            <div style="flex:1"><label>Польові роботи, л/год</label><input id="norm_h_field" type="number" step="0.1" value="7.5"></div>
+            <div style="flex:1"><label for="norm_h">Холостий/маневри, л/год</label><input id="norm_h" type="number" step="0.1" value="2.2"></div>
+            <div style="flex:1"><label for="norm_h_field">Польові роботи, л/год</label><input id="norm_h_field" type="number" step="0.1" value="7.5"></div>
           </div>
           <p class="small">Норми можна змінювати під марку/модель і умови.</p>
         </div>
@@ -101,8 +102,8 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>Економіка</h3>
           <div class="row">
-            <div style="flex:1"><label>Ціна дизпального, грн/л</label><input id="price" type="number" step="0.01" value="63.50"></div>
-            <div style="flex:1"><label>Густина, кг/л (опц.)</label><input id="density" type="number" step="0.001" value="0.835"></div>
+            <div style="flex:1"><label for="price">Ціна дизпального, грн/л</label><input id="price" type="number" step="0.01" value="63.50"></div>
+            <div style="flex:1"><label for="density">Густина, кг/л (опц.)</label><input id="density" type="number" step="0.001" value="0.835"></div>
           </div>
           <p class="small">Густина потрібна, якщо на складі облік у кг.</p>
         </div>
@@ -110,10 +111,10 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>Керування</h3>
           <div class="row">
-            <button class="btn" onclick="addRow()">➕ Додати заправку</button>
-            <button class="btn" onclick="preset()">🧪 Приклад</button>
-            <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
-            <button class="btn" onclick="copyCSV()">📋 CSV</button>
+            <button type="button" class="btn" onclick="addRow()">➕ Додати заправку</button>
+            <button type="button" class="btn" onclick="preset()">🧪 Приклад</button>
+            <button type="button" class="btn" onclick="recalc()">🔁 Перерахувати</button>
+            <button type="button" class="btn" onclick="copyCSV()">📋 CSV</button>
           </div>
         </div>
       </div>
@@ -171,12 +172,12 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>NFC — текст для пістолета/машини</h3>
           <div class="row">
-            <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
-            <div style="flex:1"><label>Власник/склад</label><input id="nfcOwner" type="text" value="ПММ-Склад №1"></div>
+            <div style="flex:1"><label for="nfcId">Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
+            <div style="flex:1"><label for="nfcOwner">Власник/склад</label><input id="nfcOwner" type="text" value="ПММ-Склад №1"></div>
           </div>
           <div class="row" style="margin-top:6px">
-            <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-            <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+            <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+            <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
           </div>
           <div id="nfcOut" class="out">—</div>
         </div>
@@ -184,8 +185,8 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>Квитанція (остання заправка)</h3>
           <div class="row">
-            <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-            <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+            <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+            <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
           </div>
           <div class="ticket" id="ticket" style="margin-top:8px">
             <h4>КВИТАНЦІЯ ЗАПРАВКИ</h4>

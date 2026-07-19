@@ -61,16 +61,16 @@ textarea{min-height:64px;resize:vertical}
     <h1 class="title">Самоусвідомлення за пірамідою Ділтса — інтерактив</h1>
     <p class="subtitle">Короткі відповіді (1–2 хв/блок) • збереження локально • експорт .txt • друк</p>
     <div class="btn-row">
-      <button class="btn" id="exportTxt">⬇️ Експорт .txt</button>
-      <button class="btn" id="copyAll">📋 Копіювати все</button>
-      <button class="btn" id="printPage">🖨️ Друк</button>
-      <button class="btn" id="clearAll">🗑️ Очистити</button>
+      <button type="button" class="btn" id="exportTxt">⬇️ Експорт .txt</button>
+      <button type="button" class="btn" id="copyAll">📋 Копіювати все</button>
+      <button type="button" class="btn" id="printPage">🖨️ Друк</button>
+      <button type="button" class="btn" id="clearAll">🗑️ Очистити</button>
       <span class="hint">Автозбереження: localStorage цього пристрою.</span>
     </div>
   </div>
 </header>
 
-<main class="wrap">
+<main id="main-content" class="wrap">
   <section class="card">
     <div class="grid cols-2">
       <div>
@@ -84,14 +84,14 @@ textarea{min-height:64px;resize:vertical}
       <div>
         <h2>План і таймінг</h2>
         <div class="agenda">
-          <div class="item"><strong>1. Привітання</strong> <span>4 хв · <span id="t1">00:00</span> <button class="btn" data-timer="t1" data-secs="240">▶</button></span></div>
-          <div class="item"><strong>2. Вступ</strong> <span>4 хв · <span id="t2">00:00</span> <button class="btn" data-timer="t2" data-secs="240">▶</button></span></div>
-          <div class="item"><strong>3. Середовище</strong> <span>7 хв · <span id="t3">00:00</span> <button class="btn" data-timer="t3" data-secs="420">▶</button></span></div>
-          <div class="item"><strong>4. Поведінка</strong> <span>6 хв · <span id="t4">00:00</span> <button class="btn" data-timer="t4" data-secs="360">▶</button></span></div>
-          <div class="item"><strong>5. Здібності/Стратегії</strong> <span>6 хв · <span id="t5">00:00</span> <button class="btn" data-timer="t5" data-secs="360">▶</button></span></div>
-          <div class="item"><strong>6. Переконання і цінності</strong> <span>7 хв · <span id="t6">00:00</span> <button class="btn" data-timer="t6" data-secs="420">▶</button></span></div>
-          <div class="item"><strong>7. Ідентичність</strong> <span>6 хв · <span id="t7">00:00</span> <button class="btn" data-timer="t7" data-secs="360">▶</button></span></div>
-          <div class="item"><strong>8. Місія + рефлексія</strong> <span>10 хв · <span id="t8">00:00</span> <button class="btn" data-timer="t8" data-secs="600">▶</button></span></div>
+          <div class="item"><strong>1. Привітання</strong> <span>4 хв · <span id="t1">00:00</span> <button type="button" class="btn" data-timer="t1" data-secs="240">▶</button></span></div>
+          <div class="item"><strong>2. Вступ</strong> <span>4 хв · <span id="t2">00:00</span> <button type="button" class="btn" data-timer="t2" data-secs="240">▶</button></span></div>
+          <div class="item"><strong>3. Середовище</strong> <span>7 хв · <span id="t3">00:00</span> <button type="button" class="btn" data-timer="t3" data-secs="420">▶</button></span></div>
+          <div class="item"><strong>4. Поведінка</strong> <span>6 хв · <span id="t4">00:00</span> <button type="button" class="btn" data-timer="t4" data-secs="360">▶</button></span></div>
+          <div class="item"><strong>5. Здібності/Стратегії</strong> <span>6 хв · <span id="t5">00:00</span> <button type="button" class="btn" data-timer="t5" data-secs="360">▶</button></span></div>
+          <div class="item"><strong>6. Переконання і цінності</strong> <span>7 хв · <span id="t6">00:00</span> <button type="button" class="btn" data-timer="t6" data-secs="420">▶</button></span></div>
+          <div class="item"><strong>7. Ідентичність</strong> <span>6 хв · <span id="t7">00:00</span> <button type="button" class="btn" data-timer="t7" data-secs="360">▶</button></span></div>
+          <div class="item"><strong>8. Місія + рефлексія</strong> <span>10 хв · <span id="t8">00:00</span> <button type="button" class="btn" data-timer="t8" data-secs="600">▶</button></span></div>
         </div>
       </div>
     </div>
@@ -103,11 +103,11 @@ textarea{min-height:64px;resize:vertical}
     <div class="script"><p class="mono">«Хелоу, команда! Працюємо коротко і по суті. На кожен блок — максимум дві хвилини».</p></div>
     <div class="two" style="margin-top:10px">
       <div>
-        <label class="kbd">Мій настрій одним словом</label>
+        <label class="kbd" for="mood">Мій настрій одним словом</label>
         <input id="mood" type="text">
       </div>
       <div>
-        <label class="kbd">Очікування від заняття</label>
+        <label class="kbd" for="goal">Очікування від заняття</label>
         <textarea id="goal"></textarea>
       </div>
     </div>
@@ -127,19 +127,19 @@ textarea{min-height:64px;resize:vertical}
     <p class="hint">До 2 хв на блок.</p>
     <div class="two">
       <div>
-        <label class="kbd">Коли я був дитиною, моя родина …</label>
+        <label class="kbd" for="env1">Коли я був дитиною, моя родина …</label>
         <textarea id="env1"></textarea>
-        <label class="kbd">Моя родина поводиться зі мною як з …</label>
+        <label class="kbd" for="env2">Моя родина поводиться зі мною як з …</label>
         <textarea id="env2"></textarea>
-        <label class="kbd">Люблю вчитися (працювати) з людьми, які …</label>
+        <label class="kbd" for="env3">Люблю вчитися (працювати) з людьми, які …</label>
         <textarea id="env3"></textarea>
       </div>
       <div>
-        <label class="kbd">Не люблю людей, які …</label>
+        <label class="kbd" for="env4">Не люблю людей, які …</label>
         <textarea id="env4"></textarea>
-        <label class="kbd">Коли мені не таланить, я …</label>
+        <label class="kbd" for="env5">Коли мені не таланить, я …</label>
         <textarea id="env5"></textarea>
-        <label class="kbd">Якщо всі проти мене, то …</label>
+        <label class="kbd" for="env6">Якщо всі проти мене, то …</label>
         <textarea id="env6"></textarea>
       </div>
     </div>
@@ -154,11 +154,11 @@ textarea{min-height:64px;resize:vertical}
     <div class="lvl"><span class="dot"></span><h2>4) Поведінка (що роблю)</h2></div>
     <div class="two">
       <div>
-        <label class="kbd">Саме гірше, що мені траплялося робити, це …</label>
+        <label class="kbd" for="beh1">Саме гірше, що мені траплялося робити, це …</label>
         <textarea id="beh1"></textarea>
       </div>
       <div>
-        <label class="kbd">Коли я був дитиною, то відчував … (і діяв так: …)</label>
+        <label class="kbd" for="beh2">Коли я був дитиною, то відчував … (і діяв так: …)</label>
         <textarea id="beh2"></textarea>
       </div>
     </div>
@@ -173,11 +173,11 @@ textarea{min-height:64px;resize:vertical}
     <div class="lvl"><span class="dot"></span><h2>5) Здібності / Стратегії (як)</h2></div>
     <div class="two">
       <div>
-        <label class="kbd">Щоб туди дійти, мені потрібно в першу чергу …</label>
+        <label class="kbd" for="cap1">Щоб туди дійти, мені потрібно в першу чергу …</label>
         <textarea id="cap1"></textarea>
       </div>
       <div>
-        <label class="kbd">Якщо хтось із колег/керівників помічає мене, то він/вона скаже, що я …</label>
+        <label class="kbd" for="cap2">Якщо хтось із колег/керівників помічає мене, то він/вона скаже, що я …</label>
         <textarea id="cap2"></textarea>
       </div>
     </div>
@@ -192,11 +192,11 @@ textarea{min-height:64px;resize:vertical}
     <div class="lvl"><span class="dot"></span><h2>6) Переконання і цінності (чому)</h2></div>
     <div class="two">
       <div>
-        <label class="kbd">Думаю, що мій батько … (навчив мене важливому: …)</label>
+        <label class="kbd" for="val1">Думаю, що мій батько … (навчив мене важливому: …)</label>
         <textarea id="val1"></textarea>
       </div>
       <div>
-        <label class="kbd">Я міг би бути дуже щасливим, якби …</label>
+        <label class="kbd" for="val2">Я міг би бути дуже щасливим, якби …</label>
         <textarea id="val2"></textarea>
       </div>
     </div>
@@ -209,7 +209,7 @@ textarea{min-height:64px;resize:vertical}
   <!-- 7 Ідентичність -->
   <section class="card" id="L5">
     <div class="lvl"><span class="dot"></span><h2>7) Ідентичність (хто я)</h2></div>
-    <label class="kbd">Через 5 років я бачу себе …</label>
+    <label class="kbd" for="idn1">Через 5 років я бачу себе …</label>
     <textarea id="idn1"></textarea>
     <div class="beacons">
       <div class="b-row"><input type="checkbox" id="b_idn1"> <label for="b_idn1">Позначити як «маячок»</label></div>
@@ -221,11 +221,11 @@ textarea{min-height:64px;resize:vertical}
     <div class="lvl"><span class="dot"></span><h2>8) Місія / Покликання (для чого)</h2></div>
     <div class="two">
       <div>
-        <label class="kbd">Якби я мав необмежений ресурс (час, кошти, знання), я б зробив …</label>
+        <label class="kbd" for="mis1">Якби я мав необмежений ресурс (час, кошти, знання), я б зробив …</label>
         <textarea id="mis1"></textarea>
       </div>
       <div>
-        <label class="kbd">Більше за все я хотів би в житті …</label>
+        <label class="kbd" for="mis2">Більше за все я хотів би в житті …</label>
         <textarea id="mis2"></textarea>
       </div>
     </div>
@@ -241,17 +241,17 @@ textarea{min-height:64px;resize:vertical}
     <h2>Міні-рефлексія і завершення</h2>
     <div class="two">
       <div>
-        <label class="kbd">Що здивувало у відповідях?</label>
+        <label class="kbd" for="ref1">Що здивувало у відповідях?</label>
         <textarea id="ref1"></textarea>
       </div>
       <div>
-        <label class="kbd">Головний «маячок» тижня + перший крок</label>
+        <label class="kbd" for="ref2">Головний «маячок» тижня + перший крок</label>
         <textarea id="ref2"></textarea>
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn" id="makeSummary">🧾 Згенерувати підсумок</button>
-      <button class="btn" id="exportSummary">⬇️ Експорт підсумку</button>
+      <button type="button" class="btn" id="makeSummary">🧾 Згенерувати підсумок</button>
+      <button type="button" class="btn" id="exportSummary">⬇️ Експорт підсумку</button>
     </div>
     <div id="summary" class="kbd" style="margin-top:10px;white-space:pre-wrap;display:none"></div>
   </section>

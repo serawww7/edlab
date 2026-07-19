@@ -10,6 +10,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Електрики · Пара 7 — Маркування щита: адреси, навантаження, наклейки 58 мм</title>
+<meta name="description" content="🏷️ Маркування щита: адреси, навантаження, пакет наклейок 58 мм + CSV/NFC">
 <meta name="color-scheme" content="light dark" />
 <style>
 :root{
@@ -60,7 +61,7 @@ tbody tr:nth-child(even){background:#0b1324}
 </style>
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Електрики · Пара 7 · аудиторно</span>
     <h1>🏷️ Маркування щита: адреси, навантаження, пакет наклейок 58 мм + CSV/NFC</h1>
 
@@ -70,7 +71,7 @@ tbody tr:nth-child(even){background:#0b1324}
       <div class="row">
         <button class="btn" type="button" onclick="seedDemo()">🔄 Приклад</button>
         <button class="btn" type="button" onclick="exportCSV()">📤 Експорт CSV</button>
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
+        <input id="file" type="file" accept=".csv,text/csv" class="btn"  aria-label="file"/>
         <button class="btn" type="button" onclick="importCSV()">⬆️ Імпорт CSV</button>
       </div>
       <p class="small">Поле CSV: <span class="mono">panel,circuit,addr,device,mcbrating_A,phase,wire,load,room,notes,url</span></p>
@@ -93,7 +94,7 @@ tbody tr:nth-child(even){background:#0b1324}
           <div class="field"><label for="room">Локація/пом.</label><input id="room" value="Майстерня"></div>
           <div class="field"><label for="notes">Нотатка</label><input id="notes" placeholder="ПЗВ 30мА або інше"></div>
           <div class="field"><label for="url">URL (NFC/QR)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
-          <div class="row"><button class="btn" onclick="addOne()">➕ Додати</button></div>
+          <div class="row"><button type="button" class="btn" onclick="addOne()">➕ Додати</button></div>
         </div>
 
         <div>
@@ -109,7 +110,7 @@ tbody tr:nth-child(even){background:#0b1324}
           <div class="field"><label for="wireB">Кабель</label><input id="wireB" value="Cu 3x2.5"></div>
           <div class="field"><label for="roomB">Локація</label><input id="roomB" value="Майстерня"></div>
           <div class="field"><label for="loadB">Шаблон навантаження</label><input id="loadB" value="Розетка #NUM"></div>
-          <div class="row"><button class="btn" onclick="bulkAdd()">⚙️ Згенерувати</button></div>
+          <div class="row"><button type="button" class="btn" onclick="bulkAdd()">⚙️ Згенерувати</button></div>
           <p class="small">В шаблоні <span class="mono">#NUM</span> заміниться на номер кола (з нулем: 01, 02…).</p>
         </div>
 
@@ -117,9 +118,9 @@ tbody tr:nth-child(even){background:#0b1324}
           <h3>Сервіс</h3>
           <p class="small">Адреса кола формується як <span class="mono">panel/XX</span>, де <span class="mono">XX</span> — двозначний номер.</p>
           <div class="row">
-            <button class="btn" onclick="clearAll()">🧹 Очистити</button>
-            <button class="btn" onclick="buildAllTickets()">🧾 Побудувати всі наклейки</button>
-            <button class="btn" onclick="printAll()">🖨️ Друк всіх</button>
+            <button type="button" class="btn" onclick="clearAll()">🧹 Очистити</button>
+            <button type="button" class="btn" onclick="buildAllTickets()">🧾 Побудувати всі наклейки</button>
+            <button type="button" class="btn" onclick="printAll()">🖨️ Друк всіх</button>
           </div>
           <p class="small">Після друку — зробіть фото частини стрічки та додайте у спільну папку.</p>
         </div>
@@ -142,9 +143,9 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="card printable">
       <h2>🧾 Прев’ю наклейок 58 мм (обрана/пакет)</h2>
       <div class="row">
-        <button class="btn" onclick="buildSelected()">🧩 Зібрати для виділеного</button>
-        <button class="btn" onclick="window.print()">🖨️ Друк (видиме)</button>
-        <button class="btn" onclick="downloadTXT()">📥 TXT (видиме)</button>
+        <button type="button" class="btn" onclick="buildSelected()">🧩 Зібрати для виділеного</button>
+        <button type="button" class="btn" onclick="window.print()">🖨️ Друк (видиме)</button>
+        <button type="button" class="btn" onclick="downloadTXT()">📥 TXT (видиме)</button>
       </div>
       <div class="tickets" id="tickets"></div>
       <p class="small">Щоб надрукувати всі наклейки відразу — натисніть «Побудувати всі наклейки», а потім «Друк (видиме)».</p>
@@ -179,7 +180,7 @@ tbody tr:nth-child(even){background:#0b1324}
         <td class="editable" data-k="load">${escapeHTML(r.load)}</td>
         <td class="editable" data-k="room">${escapeHTML(r.room)}</td>
         <td class="editable" data-k="url">${escapeHTML(r.url||'')}</td>
-        <td class="mono"><button class="btn" data-act="build" data-id="${r.id}">Наклейка</button> <button class="btn" data-act="del" data-id="${r.id}">✖</button></td>`;
+        <td class="mono"><button type="button" class="btn" data-act="build" data-id="${r.id}">Наклейка</button> <button type="button" class="btn" data-act="del" data-id="${r.id}">✖</button></td>`;
       tbody.appendChild(tr);
     });
   }

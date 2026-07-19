@@ -15,6 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 13 (технологи) — SPC X̄–R, Cp/Cpk, NCR & CAPA, квиток/QR/NFC/CSV</title>
+<meta name="description" content="📈 SPC X̄–R, Cp/Cpk, NCR & CAPA, квиток/QR/NFC/CSV">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -62,7 +63,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 13 · аудиторно · технологи переробки</span>
   <h1>📈 SPC X̄–R, Cp/Cpk, NCR & CAPA, квиток/QR/NFC/CSV</h1>
 
@@ -83,20 +84,20 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Показник</h3>
         <div class="row">
-          <div style="flex:1"><label>Назва</label><input id="charName" type="text" value="Маса нетто, г"></div>
+          <div style="flex:1"><label for="charName">Назва</label><input id="charName" type="text" value="Маса нетто, г"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>LSL</label><input id="lsl" type="number" step="0.1" value="390"></div>
-          <div style="flex:1"><label>TARGET</label><input id="tgt" type="number" step="0.1" value="400"></div>
-          <div style="flex:1"><label>USL</label><input id="usl" type="number" step="0.1" value="410"></div>
+          <div style="flex:1"><label for="lsl">LSL</label><input id="lsl" type="number" step="0.1" value="390"></div>
+          <div style="flex:1"><label for="tgt">TARGET</label><input id="tgt" type="number" step="0.1" value="400"></div>
+          <div style="flex:1"><label for="usl">USL</label><input id="usl" type="number" step="0.1" value="410"></div>
         </div>
       </div>
 
       <div class="box">
         <h3>Підгрупи</h3>
         <div class="row">
-          <div style="flex:1"><label>Розмір підгрупи (n, 2–10)</label><input id="n" type="number" step="1" value="5"></div>
-          <div style="flex:1"><label>Підгруп заплановано</label><input id="k" type="number" step="1" value="8"></div>
+          <div style="flex:1"><label for="n">Розмір підгрупи (n, 2–10)</label><input id="n" type="number" step="1" value="5"></div>
+          <div style="flex:1"><label for="k">Підгруп заплановано</label><input id="k" type="number" step="1" value="8"></div>
         </div>
         <p class="small muted">Карти: X̄ (середні) та R (розмах). Константи A2/D3/D4/d2 — за вибраним n.</p>
       </div>
@@ -104,9 +105,9 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="presetData()">🧪 Приклад даних</button>
-          <button class="btn" onclick="recalc()">✅ Перерахувати</button>
-          <button class="btn" onclick="copyCSV('csvData')">📋 CSV (raw)</button>
+          <button type="button" class="btn" onclick="presetData()">🧪 Приклад даних</button>
+          <button type="button" class="btn" onclick="recalc()">✅ Перерахувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvData')">📋 CSV (raw)</button>
         </div>
         <div id="csvData" class="out" style="margin-top:8px">—</div>
       </div>
@@ -117,9 +118,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>🧪 Вимірювання</h2>
     <div class="row">
-      <button class="btn" onclick="addRow()">➕ Додати вимір</button>
-      <button class="btn" onclick="autoSubgroup()">🔁 Заповнити підгрупи</button>
-      <button class="btn" onclick="copyCSV('csvSub')">📋 CSV (subgroups)</button>
+      <button type="button" class="btn" onclick="addRow()">➕ Додати вимір</button>
+      <button type="button" class="btn" onclick="autoSubgroup()">🔁 Заповнити підгрупи</button>
+      <button type="button" class="btn" onclick="copyCSV('csvSub')">📋 CSV (subgroups)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tbl">
@@ -145,7 +146,7 @@ html.embedded .box{background:#f8fafc;color:#111}
         <h3>Підсумки</h3>
         <div id="sumOut" class="out">—</div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="copyCSV('csvSPC')">📋 CSV (spc)</button>
+          <button type="button" class="btn" onclick="copyCSV('csvSPC')">📋 CSV (spc)</button>
         </div>
         <div id="csvSPC" class="out" style="margin-top:8px">—</div>
       </div>
@@ -170,9 +171,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>🚨 Невідповідності (NCR) та CAPA</h2>
     <div class="row">
-      <button class="btn" onclick="addNCR()">➕ Додати NCR</button>
-      <button class="btn" onclick="presetNCR()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvNCR')">📋 CSV (NCR)</button>
+      <button type="button" class="btn" onclick="addNCR()">➕ Додати NCR</button>
+      <button type="button" class="btn" onclick="presetNCR()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvNCR')">📋 CSV (NCR)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblNCR">
@@ -198,8 +199,8 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал SPC / Квиток 58 мм / QR / NFC</h2>
     <div class="row">
-      <button class="btn" onclick="addLog()">➕ Додати у журнал</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+      <button type="button" class="btn" onclick="addLog()">➕ Додати у журнал</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblLog">
@@ -223,19 +224,19 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>QR-payload</h3>
         <div class="row">
-          <button class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
-          <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
+          <button type="button" class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
         </div>
         <div id="qrOut" class="out">—</div>
 
         <h3 style="margin-top:12px">NFC — “SPC CARD”</h3>
         <div class="row">
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
-          <div style="flex:1"><label>Аналітик</label><input id="nfcOper" type="text" value="Студент ТПТ"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="nfcOper">Аналітик</label><input id="nfcOper" type="text" value="Студент ТПТ"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -243,8 +244,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток 58 мм — “SPC SUMMARY”</h3>
         <div class="row">
-          <button class="btn" onclick="scrollTicket()">🧾 Показати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="scrollTicket()">🧾 Показати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>SPC SUMMARY</h4>
@@ -318,7 +319,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="idx">1</td>
       <td><input type="number" step="1" value="${s.sg}"></td>
       <td class="dark"><input type="number" step="0.1" value="${s.val}"></td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(body); buildCSV_Raw(); recalc();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(body); buildCSV_Raw(); recalc();">✖</button></td>
     `;
     body.appendChild(tr); reindex(body); buildCSV_Raw();
   }
@@ -479,7 +480,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark"><input type="text" value="${s.prev}"></td>
       <td><input type="text" value="${s.resp}"></td>
       <td><input type="date" value="${s.due}"></td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyNCR); buildCSV_NCR();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyNCR); buildCSV_NCR();">✖</button></td>
     `;
     bodyNCR.appendChild(tr); reindex(bodyNCR); buildCSV_NCR();
   }
@@ -519,7 +520,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark">${mR?`[${mR[1]}; ${mR[2]}]`:'—'}</td>
       <td>${cap||'—'}</td>
       <td>${sigs.length>2? 'Є сигнали' : 'Немає'}</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
     `;
     bodyLog.appendChild(tr); reindex(bodyLog); buildCSV_Log();
   }

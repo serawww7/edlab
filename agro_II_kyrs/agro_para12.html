@@ -21,6 +21,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Пара 12 — GPS-картування поля: межа, площа, буфер, ґрід, експорт</title>
+<meta name="description" content="📍 GPS-картування поля: межа → площа/периметр → буфер → ґрід → GeoJSON/CSV">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -76,7 +77,7 @@ html.embedded .box{background:#f8fafc; color:#111}
 </style>
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Пара 12 · аудиторно · агрономи</span>
     <h1>📍 GPS-картування поля: межа → площа/периметр → буфер → ґрід → GeoJSON/CSV</h1>
 
@@ -97,14 +98,14 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>Поле</h3>
           <div class="row">
-            <div style="flex:1"><label>Код поля</label><input id="fieldCode" type="text" value="F-01"></div>
-            <div style="flex:1"><label>Назва</label><input id="fieldName" type="text" value="Навчальне поле"></div>
+            <div style="flex:1"><label for="fieldCode">Код поля</label><input id="fieldCode" type="text" value="F-01"></div>
+            <div style="flex:1"><label for="fieldName">Назва</label><input id="fieldName" type="text" value="Навчальне поле"></div>
           </div>
           <div class="row" style="margin-top:6px">
-            <button class="btn" onclick="startTrack()">▶️ Старт треку</button>
-            <button class="btn" onclick="stopTrack()">⏸️ Стоп</button>
-            <button class="btn" onclick="addCurrent()">➕ Точка (GPS)</button>
-            <button class="btn" onclick="addManual()">✍️ Точка (ручн.)</button>
+            <button type="button" class="btn" onclick="startTrack()">▶️ Старт треку</button>
+            <button type="button" class="btn" onclick="stopTrack()">⏸️ Стоп</button>
+            <button type="button" class="btn" onclick="addCurrent()">➕ Точка (GPS)</button>
+            <button type="button" class="btn" onclick="addManual()">✍️ Точка (ручн.)</button>
           </div>
           <p class="small">Працює на HTTPS; дозволь доступ до геолокації.</p>
         </div>
@@ -112,22 +113,22 @@ html.embedded .box{background:#f8fafc; color:#111}
         <div class="box">
           <h3>Буфер / Ґрід</h3>
           <div class="row">
-            <div style="flex:1"><label>Буфер, м (всередину −, назовні +)</label><input id="bufferM" type="number" step="1" value="0"></div>
-            <div style="flex:1"><label>Крок ґріда, м</label><input id="gridStep" type="number" step="1" value="100"></div>
+            <div style="flex:1"><label for="bufferM">Буфер, м (всередину −, назовні +)</label><input id="bufferM" type="number" step="1" value="0"></div>
+            <div style="flex:1"><label for="gridStep">Крок ґріда, м</label><input id="gridStep" type="number" step="1" value="100"></div>
           </div>
           <div class="row" style="margin-top:6px">
-            <button class="btn" onclick="makeBuffer()">🟢 Побудувати буфер</button>
-            <button class="btn" onclick="makeGrid()">🟠 Згенерувати ґрід</button>
+            <button type="button" class="btn" onclick="makeBuffer()">🟢 Побудувати буфер</button>
+            <button type="button" class="btn" onclick="makeGrid()">🟠 Згенерувати ґрід</button>
           </div>
         </div>
 
         <div class="box">
           <h3>Експорт / Демо</h3>
           <div class="row">
-            <button class="btn" onclick="exportGeoJSON()">⬇️ GeoJSON</button>
-            <button class="btn" onclick="copyCSV()">📋 CSV (ґрід)</button>
-            <button class="btn" onclick="demo()">🧪 Демо межа</button>
-            <button class="btn" onclick="resetAll()">♻️ Скинути</button>
+            <button type="button" class="btn" onclick="exportGeoJSON()">⬇️ GeoJSON</button>
+            <button type="button" class="btn" onclick="copyCSV()">📋 CSV (ґрід)</button>
+            <button type="button" class="btn" onclick="demo()">🧪 Демо межа</button>
+            <button type="button" class="btn" onclick="resetAll()">♻️ Скинути</button>
           </div>
           <div class="legend" style="margin-top:8px">
             <span class="dot c-border"></span><span class="small">межа</span>

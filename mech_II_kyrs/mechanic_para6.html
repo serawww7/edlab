@@ -18,6 +18,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 6 (механіки) — Електрика: АКБ, пуск/заряд, падіння U, спокійний струм, дроти/запобіжники, чек 58 мм, NFC</title>
+<meta name="description" content="🔋 Електрика: АКБ → пуск/заряд → падіння U → спокійний струм → дроти/запобіжники → чек 58 мм, NFC, CSV">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -63,7 +64,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 6 · аудиторно · механіки</span>
   <h1>🔋 Електрика: АКБ → пуск/заряд → падіння U → спокійний струм → дроти/запобіжники → чек 58 мм, NFC, CSV</h1>
 
@@ -85,16 +86,16 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Виміри</h3>
         <div class="row">
-          <div style="flex:1"><label>U спокою, В</label><input id="uRest" type="number" step="0.01" value="12.55"></div>
-          <div style="flex:1"><label>U під час пуску (мін), В</label><input id="uCrank" type="number" step="0.01" value="9.9"></div>
+          <div style="flex:1"><label for="uRest">U спокою, В</label><input id="uRest" type="number" step="0.01" value="12.55"></div>
+          <div style="flex:1"><label for="uCrank">U під час пуску (мін), В</label><input id="uCrank" type="number" step="0.01" value="9.9"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>U заряджання, В</label><input id="uCharge" type="number" step="0.01" value="14.2"></div>
-          <div style="flex:1"><label>I генератора, А (оцінка)</label><input id="iAlt" type="number" step="1" value="45"></div>
+          <div style="flex:1"><label for="uCharge">U заряджання, В</label><input id="uCharge" type="number" step="0.01" value="14.2"></div>
+          <div style="flex:1"><label for="iAlt">I генератора, А (оцінка)</label><input id="iAlt" type="number" step="1" value="45"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Ємність АКБ, А·год</label><input id="capAh" type="number" step="1" value="90"></div>
-          <div style="flex:1"><label>Система</label>
+          <div style="flex:1"><label for="capAh">Ємність АКБ, А·год</label><input id="capAh" type="number" step="1" value="90"></div>
+          <div style="flex:1"><label for="sysV">Система</label>
             <select id="sysV"><option value="12" selected>12 В</option><option value="24">24 В</option></select>
           </div>
         </div>
@@ -109,9 +110,9 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="calcAll()">🔁 Перерахувати</button>
-          <button class="btn" onclick="preset()">🧪 Приклад</button>
-          <button class="btn" onclick="copyCSV('csv1')">📋 CSV (тест)</button>
+          <button type="button" class="btn" onclick="calcAll()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="preset()">🧪 Приклад</button>
+          <button type="button" class="btn" onclick="copyCSV('csv1')">📋 CSV (тест)</button>
         </div>
         <div id="csv1" class="out" style="margin-top:8px">—</div>
       </div>
@@ -125,12 +126,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Вихідні</h3>
         <div class="row">
-          <div style="flex:1"><label>Струм I, А</label><input id="vdI" type="number" step="0.1" value="120"></div>
-          <div style="flex:1"><label>Довжина туди-назад, м</label><input id="vdL" type="number" step="0.1" value="3.2"></div>
+          <div style="flex:1"><label for="vdI">Струм I, А</label><input id="vdI" type="number" step="0.1" value="120"></div>
+          <div style="flex:1"><label for="vdL">Довжина туди-назад, м</label><input id="vdL" type="number" step="0.1" value="3.2"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Перетин S, мм²</label><input id="vdS" type="number" step="0.1" value="25"></div>
-          <div style="flex:1"><label>Допустиме падіння, % U</label><input id="vdPct" type="number" step="0.1" value="3"></div>
+          <div style="flex:1"><label for="vdS">Перетин S, мм²</label><input id="vdS" type="number" step="0.1" value="25"></div>
+          <div style="flex:1"><label for="vdPct">Допустиме падіння, % U</label><input id="vdPct" type="number" step="0.1" value="3"></div>
         </div>
       </div>
       <div class="box">
@@ -141,7 +142,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Підбір перетину</h3>
         <p>Список S (мм²):</p>
-        <input id="vdList" type="text" value="10,16,25,35,50,70">
+        <input id="vdList" type="text" value="10,16,25,35,50,70" aria-label="vd List">
         <p>Рекомендовано S: <b><span id="vdRec">—</span></b> мм²</p>
       </div>
     </div>
@@ -154,8 +155,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Дані</h3>
         <div class="row">
-          <div style="flex:1"><label>Iспок, мА</label><input id="iqmA" type="number" step="1" value="35"></div>
-          <div style="flex:1"><label>Час, год/добу</label><input id="iqH" type="number" step="0.5" value="24"></div>
+          <div style="flex:1"><label for="iqmA">Iспок, мА</label><input id="iqmA" type="number" step="1" value="35"></div>
+          <div style="flex:1"><label for="iqH">Час, год/добу</label><input id="iqH" type="number" step="0.5" value="24"></div>
         </div>
       </div>
       <div class="box">
@@ -174,12 +175,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Вихідні</h3>
         <div class="row">
-          <div style="flex:1"><label>Робочий струм, А</label><input id="fwI" type="number" step="0.1" value="22"></div>
-          <div style="flex:1"><label>Довжина (двобічно), м</label><input id="fwL" type="number" step="0.1" value="4"></div>
+          <div style="flex:1"><label for="fwI">Робочий струм, А</label><input id="fwI" type="number" step="0.1" value="22"></div>
+          <div style="flex:1"><label for="fwL">Довжина (двобічно), м</label><input id="fwL" type="number" step="0.1" value="4"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Доп. падіння, %</label><input id="fwPct" type="number" step="0.1" value="3"></div>
-          <div style="flex:1"><label>Темп. серед., °C</label><input id="fwT" type="number" step="1" value="25"></div>
+          <div style="flex:1"><label for="fwPct">Доп. падіння, %</label><input id="fwPct" type="number" step="0.1" value="3"></div>
+          <div style="flex:1"><label for="fwT">Темп. серед., °C</label><input id="fwT" type="number" step="1" value="25"></div>
         </div>
       </div>
       <div class="box">
@@ -191,8 +192,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="calcAll()">🔁 Перерахувати</button>
-          <button class="btn" onclick="copyCSV('csv2')">📋 CSV (провід/захист)</button>
+          <button type="button" class="btn" onclick="calcAll()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csv2')">📋 CSV (провід/захист)</button>
         </div>
         <div id="csv2" class="out" style="margin-top:8px">—</div>
       </div>
@@ -206,12 +207,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>NFC — “Electrical test”</h3>
         <div class="row">
-          <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="nfcId">Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -219,8 +220,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток “Електротест”</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>ЕЛЕКТРОТЕСТ</h4>
@@ -250,7 +251,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <li>Згенеруй <b>NFC</b> і <b>квиток 58 мм</b>; скопіюй <b>CSV</b> у Sheets (<span class="mono">Electrics</span>).</li>
     </ol>
     <div class="row">
-      <button class="btn" onclick="copyCSV('csvAll')">📋 CSV (узагальнення)</button>
+      <button type="button" class="btn" onclick="copyCSV('csvAll')">📋 CSV (узагальнення)</button>
     </div>
     <div id="csvAll" class="out" style="margin-top:8px">—</div>
   </div>

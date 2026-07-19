@@ -43,7 +43,7 @@ canvas{display:block;width:100%;height:260px}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">📅</span>
@@ -68,11 +68,14 @@ canvas{display:block;width:100%;height:260px}
       <textarea id="csvTasks" class="input" rows="6" placeholder="task,type,field,area_ha,product,REI_h,PHI_d,speed_ha_h,preferred_start,preferred_end
 Фунгіцид 1,обприскування,Поле 3,25,тебуконазол,24,35,12,2025-05-20T08:00,2025-05-22T20:00
 Підживлення КАС,підживлення,Поле 3,25,,0,0,15,2025-05-20T08:00,2025-05-23T20:00
+Скаутинг,скаутинг,Поле 3,25,,0,0,20,2025-05-19T08:00,2025-05-26T20:00" aria-label="task,type,field,area_ha,product,REI_h,PHI_d,speed_ha_h,preferred_start,preferred_end
+Фунгіцид 1,обприскування,Поле 3,25,тебуконазол,24,35,12,2025-05-20T08:00,2025-05-22T20:00
+Підживлення КАС,підживлення,Поле 3,25,,0,0,15,2025-05-20T08:00,2025-05-23T20:00
 Скаутинг,скаутинг,Поле 3,25,,0,0,20,2025-05-19T08:00,2025-05-26T20:00"></textarea>
       <div class="row">
-        <button class="btn good" id="loadTasks">📥 Імпорт</button>
-        <button class="btn secondary" id="demoTasks">🎲 Демонстраційні</button>
-        <button class="btn secondary" id="clearTasks">🧹 Очистити</button>
+        <button type="button" class="btn good" id="loadTasks">📥 Імпорт</button>
+        <button type="button" class="btn secondary" id="demoTasks">🎲 Демонстраційні</button>
+        <button type="button" class="btn secondary" id="clearTasks">🧹 Очистити</button>
         <span id="badgeTasks" class="badge">Завдань: 0</span>
       </div>
 
@@ -81,11 +84,14 @@ canvas{display:block;width:100%;height:260px}
       <textarea id="csvWx" class="input" rows="6" placeholder="timestamp,wind_ms,rain_mm,RH,T
 2025-05-20T06:00,2.1,0,92,12.4
 2025-05-20T07:00,2.5,0,90,13.1
+..." aria-label="timestamp,wind_ms,rain_mm,RH,T
+2025-05-20T06:00,2.1,0,92,12.4
+2025-05-20T07:00,2.5,0,90,13.1
 ..."></textarea>
       <div class="row">
-        <button class="btn" id="loadWx">📥 Імпорт</button>
-        <button class="btn secondary" id="demoWx">🎲 Згенерувати 5 діб</button>
-        <button class="btn secondary" id="clearWx">🧹 Очистити</button>
+        <button type="button" class="btn" id="loadWx">📥 Імпорт</button>
+        <button type="button" class="btn secondary" id="demoWx">🎲 Згенерувати 5 діб</button>
+        <button type="button" class="btn secondary" id="clearWx">🧹 Очистити</button>
         <span id="badgeWx" class="badge">Записів погоди: 0</span>
       </div>
 
@@ -138,9 +144,9 @@ canvas{display:block;width:100%;height:260px}
       </div>
 
       <div class="row" style="margin-top:8px">
-        <button class="btn good" id="plan">🧮 Автоплан</button>
-        <button class="btn secondary" id="check">🔎 Перевірки</button>
-        <button class="btn secondary" id="clearPlan">🧹 Очистити план</button>
+        <button type="button" class="btn good" id="plan">🧮 Автоплан</button>
+        <button type="button" class="btn secondary" id="check">🔎 Перевірки</button>
+        <button type="button" class="btn secondary" id="clearPlan">🧹 Очистити план</button>
         <span id="badgePlan" class="badge">План: —</span>
       </div>
 
@@ -163,18 +169,18 @@ canvas{display:block;width:100%;height:260px}
       </table>
 
       <div class="row" style="margin-top:8px">
-        <button class="btn" id="exportICS">🗓️ Експорт ICS</button>
-        <button class="btn" id="exportCSV">📄 Експорт CSV</button>
-        <button class="btn" id="exportTXT">💾 Підсумок TXT</button>
-        <button class="btn secondary" id="dayReceipt">🖨️ 58-мм чек (за день)</button>
+        <button type="button" class="btn" id="exportICS">🗓️ Експорт ICS</button>
+        <button type="button" class="btn" id="exportCSV">📄 Експорт CSV</button>
+        <button type="button" class="btn" id="exportTXT">💾 Підсумок TXT</button>
+        <button type="button" class="btn secondary" id="dayReceipt">🖨️ 58-мм чек (за день)</button>
       </div>
       <div class="receipt" id="receipt" hidden></div>
 
       <h2 style="margin-top:12px">🤖 Промпт для LLM (оптимізація)</h2>
       <div class="row">
-        <button class="btn" id="genPrompt">⚙️ Згенерувати</button>
-        <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
-        <button class="btn secondary" id="savePrompt">⬇️ TXT</button>
+        <button type="button" class="btn" id="genPrompt">⚙️ Згенерувати</button>
+        <button type="button" class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+        <button type="button" class="btn secondary" id="savePrompt">⬇️ TXT</button>
       </div>
       <pre class="code" id="prompt">// Спочатку імпортуй нотатки/погоду й натисни «🧮 Автоплан»</pre>
 

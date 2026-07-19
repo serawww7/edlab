@@ -11,6 +11,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Електрики · Пара 12 — Пускові струми двигунів: In, Iпуск, захисти, ΔU, 58 мм</title>
+<meta name="description" content="🛞 Пускові струми двигунів: In → Iпуск → захисти (MCB/MPCB, ТР) → ΔU → 🧾 58 мм">
 <meta name="color-scheme" content="light dark" />
 <style>
 :root{
@@ -72,7 +73,7 @@ tbody tr:nth-child(even){background:#0b1324}
 </style>
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Електрики · Пара 12 · аудиторно</span>
     <h1>🛞 Пускові струми двигунів: In → Iпуск → захисти (MCB/MPCB, ТР) → ΔU → 🧾 58 мм</h1>
 
@@ -81,10 +82,10 @@ tbody tr:nth-child(even){background:#0b1324}
       <p>Оцінити номінальний струм <b>In</b>, пусковий струм <b>Iпуск</b> для різних методів пуску (DOL/зірка-трикутник/софт-стартер), підібрати <b>захисти</b> (MCB/MPCB + теплове реле), перевірити падіння напруги <b>ΔU</b> під час пуску і роботи та сформувати мітки 58 мм і A4-звіт.</p>
       <p class="small">Формули: <span class="mono">In = P / (√3·U<sub>L-L</sub>·η·PF)</span>, <span class="mono">Iпуск = k·In</span>, де <span class="mono">k</span> залежить від методу (DOL: 6–8; Y/Δ: 2–3; софт-стартер: 1.8–2.5). <span class="mono">ΔU% ≈ I·2·L·ρ / (S·U)·100</span> (навчальна оцінка; Cu ρ=0.0175 Ω·мм²/м).</p>
       <div class="row">
-        <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
-        <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
-        <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+        <button type="button" class="btn" onclick="seedDemo()">🔄 Приклад</button>
+        <button type="button" class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+        <input id="file" type="file" accept=".csv,text/csv" class="btn"  aria-label="file"/>
+        <button type="button" class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
       </div>
       <p class="small">CSV поля: <span class="mono">id,name,kW,U_LL,PF,eta,method,cable_mm2,length_m,starter,curve,stdA,run_drop_limit,start_drop_limit,notes,url</span></p>
     </div>
@@ -94,45 +95,45 @@ tbody tr:nth-child(even){background:#0b1324}
       <div class="grid g3">
         <div>
           <h3>Двигун</h3>
-          <div class="row"><label class="small" style="min-width:150px">ID</label><input id="mId" value="M-001"></div>
-          <div class="row"><label class="small" style="min-width:150px">Назва</label><input id="mName" value="Насос 3 кВт"></div>
-          <div class="row"><label class="small" style="min-width:150px">Потужність, кВт</label><input id="kW" type="number" step="0.1" value="3.0"></div>
-          <div class="row"><label class="small" style="min-width:150px">U<sub>L-L</sub>, В</label><input id="U" type="number" value="400"></div>
-          <div class="row"><label class="small" style="min-width:150px">PF (cosφ)</label><input id="pf" type="number" step="0.01" value="0.85"></div>
-          <div class="row"><label class="small" style="min-width:150px">η (коеф. корисної дії)</label><input id="eta" type="number" step="0.01" value="0.88"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="mId">ID</label><input id="mId" value="M-001"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="mName">Назва</label><input id="mName" value="Насос 3 кВт"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="kW">Потужність, кВт</label><input id="kW" type="number" step="0.1" value="3.0"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="U">U<sub>L-L</sub>, В</label><input id="U" type="number" value="400"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="pf">PF (cosφ)</label><input id="pf" type="number" step="0.01" value="0.85"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="eta">η (коеф. корисної дії)</label><input id="eta" type="number" step="0.01" value="0.88"></div>
         </div>
         <div>
           <h3>Метод пуску</h3>
-          <div class="row"><label class="small" style="min-width:150px">Метод</label>
+          <div class="row"><label class="small" style="min-width:150px" for="method">Метод</label>
             <select id="method">
               <option value="DOL" selected>DOL (прямий пуск)</option>
               <option value="YΔ">Зірка-трикутник (Y/Δ)</option>
               <option value="SOFT">Софт-стартер</option>
             </select>
           </div>
-          <div class="row"><label class="small" style="min-width:150px">k (множник Iпуск)</label><input id="k" type="number" step="0.1" value="7.0"></div>
-          <div class="row"><label class="small" style="min-width:150px">Стартер/Пускач</label><input id="starter" value="Контактор + ТР"></div>
-          <div class="row"><label class="small" style="min-width:150px">Крива MCB</label>
+          <div class="row"><label class="small" style="min-width:150px" for="k">k (множник Iпуск)</label><input id="k" type="number" step="0.1" value="7.0"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="starter">Стартер/Пускач</label><input id="starter" value="Контактор + ТР"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="curve">Крива MCB</label>
             <select id="curve"><option>B</option><option selected>C</option><option>D</option></select>
           </div>
-          <div class="row"><label class="small" style="min-width:150px">Ряд In (А)</label>
+          <div class="row"><label class="small" style="min-width:150px" for="stdA">Ряд In (А)</label>
             <select id="stdA"><option>6</option><option>10</option><option>13</option><option selected>16</option><option>20</option><option>25</option><option>32</option><option>40</option></select>
           </div>
         </div>
         <div>
           <h3>Лінія</h3>
-          <div class="row"><label class="small" style="min-width:150px">Кабель, мм²</label>
+          <div class="row"><label class="small" style="min-width:150px" for="S">Кабель, мм²</label>
             <select id="S"><option>2.5</option><option selected>4</option><option>6</option><option>10</option></select></div>
-          <div class="row"><label class="small" style="min-width:150px">Довжина L, м</label><input id="L" type="number" value="28"></div>
-          <div class="row"><label class="small" style="min-width:150px">Ліміт ΔU (робота), %</label><input id="runLimit" type="number" step="0.1" value="5"></div>
-          <div class="row"><label class="small" style="min-width:150px">Ліміт ΔU (пуск), %</label><input id="startLimit" type="number" step="0.1" value="10"></div>
-          <div class="row"><label class="small" style="min-width:150px">URL (NFC/QR)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
+          <div class="row"><label class="small" style="min-width:150px" for="L">Довжина L, м</label><input id="L" type="number" value="28"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="runLimit">Ліміт ΔU (робота), %</label><input id="runLimit" type="number" step="0.1" value="5"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="startLimit">Ліміт ΔU (пуск), %</label><input id="startLimit" type="number" step="0.1" value="10"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="url">URL (NFC/QR)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
         </div>
       </div>
       <div class="row" style="margin-top:8px">
-        <button class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
-        <button class="btn" onclick="calcOne()">🧮 Розрахувати</button>
-        <button class="btn" onclick="seedOne()">🔄 Приклад запису</button>
+        <button type="button" class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
+        <button type="button" class="btn" onclick="calcOne()">🧮 Розрахувати</button>
+        <button type="button" class="btn" onclick="seedOne()">🔄 Приклад запису</button>
       </div>
     </div>
 
@@ -152,9 +153,9 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="card printable">
       <h2>🧾 Наклейки 58 мм «ЛІНІЯ ДВИГУНА»</h2>
       <div class="row">
-        <button class="btn" onclick="buildTickets()">🧩 Зібрати для всіх</button>
-        <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
-        <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+        <button type="button" class="btn" onclick="buildTickets()">🧩 Зібрати для всіх</button>
+        <button type="button" class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+        <button type="button" class="btn" onclick="downloadTXT()">📥 TXT</button>
       </div>
       <div id="tickets" class="tickets"></div>
     </div>
@@ -162,8 +163,8 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="card printable">
       <h2>📄 A4-звіт (для друку/PDF)</h2>
       <div class="row">
-        <button class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
-        <button class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
+        <button type="button" class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
+        <button type="button" class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
       </div>
       <div id="printArea"></div>
     </div>
@@ -287,7 +288,7 @@ tbody tr:nth-child(even){background:#0b1324}
         <td>${c.dropStart??'—'}</td>
         <td>${badge}</td>
         <td class="editable" data-k="url" data-id="${m.id}">${esc(m.url||'')}</td>
-        <td class="mono"><button class="btn" data-act="label" data-id="${m.id}">Наклейка</button> <button class="btn" data-act="del" data-id="${m.id}">✖</button></td>`;
+        <td class="mono"><button type="button" class="btn" data-act="label" data-id="${m.id}">Наклейка</button> <button type="button" class="btn" data-act="del" data-id="${m.id}">✖</button></td>`;
       tbody.appendChild(tr);
     });
   }

@@ -19,6 +19,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 9 (механіки) — Планування ТО: інтервали, прогноз, чек-листи, квиток 58 мм, NFC, CSV</title>
+<meta name="description" content="🛠️ Планування ТО: інтервали, прогноз, чек-листи, квиток 58 мм, NFC, CSV">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -64,7 +65,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 9 · аудиторно · механіки</span>
   <h1>🛠️ Планування ТО: інтервали, прогноз, чек-листи, квиток 58 мм, NFC, CSV</h1>
 
@@ -86,31 +87,31 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Загальні</h3>
         <div class="row">
-          <div style="flex:1"><label>Модель</label><input id="model" type="text" value="Трактор MFWD 120hp"></div>
-          <div style="flex:1"><label>Рік</label><input id="year" type="number" value="2019"></div>
+          <div style="flex:1"><label for="model">Модель</label><input id="model" type="text" value="Трактор MFWD 120hp"></div>
+          <div style="flex:1"><label for="year">Рік</label><input id="year" type="number" value="2019"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Інв. №</label><input id="inv" type="text" value="TR-001"></div>
-          <div style="flex:1"><label>Власник/бригада</label><input id="owner" type="text" value="Бригада №2"></div>
+          <div style="flex:1"><label for="inv">Інв. №</label><input id="inv" type="text" value="TR-001"></div>
+          <div style="flex:1"><label for="owner">Власник/бригада</label><input id="owner" type="text" value="Бригада №2"></div>
         </div>
       </div>
       <div class="box">
         <h3>Лічильники</h3>
         <div class="row">
-          <div style="flex:1"><label>Поточні м/г</label><input id="hours" type="number" step="1" value="3240"></div>
-          <div style="flex:1"><label>Сер. м/г за добу</label><input id="hoursPerDay" type="number" step="0.1" value="6.0"></div>
+          <div style="flex:1"><label for="hours">Поточні м/г</label><input id="hours" type="number" step="1" value="3240"></div>
+          <div style="flex:1"><label for="hoursPerDay">Сер. м/г за добу</label><input id="hoursPerDay" type="number" step="0.1" value="6.0"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Сьогодні (дата)</label><input id="today" type="date"></div>
-          <div style="flex:1"><label>Контакт (тел.)</label><input id="phone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="today">Сьогодні (дата)</label><input id="today" type="date"></div>
+          <div style="flex:1"><label for="phone">Контакт (тел.)</label><input id="phone" type="text" value="+380XXXXXXXXX"></div>
         </div>
       </div>
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="preset()">🧪 Приклад</button>
-          <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
-          <button class="btn" onclick="copyCSV('csvCard')">📋 CSV (картка)</button>
+          <button type="button" class="btn" onclick="preset()">🧪 Приклад</button>
+          <button type="button" class="btn" onclick="recalc()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvCard')">📋 CSV (картка)</button>
         </div>
         <div id="csvCard" class="out" style="margin-top:8px">—</div>
       </div>
@@ -121,10 +122,10 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>⏱️ Інтервали ТО та останнє виконання</h2>
     <div class="row">
-      <button class="btn" onclick="addRow()">➕ Додати пункт</button>
-      <button class="btn" onclick="presetRows()">📚 Заповнити базові</button>
-      <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
-      <button class="btn" onclick="copyCSV('csvPlan')">📋 CSV (план)</button>
+      <button type="button" class="btn" onclick="addRow()">➕ Додати пункт</button>
+      <button type="button" class="btn" onclick="presetRows()">📚 Заповнити базові</button>
+      <button type="button" class="btn" onclick="recalc()">🔁 Перерахувати</button>
+      <button type="button" class="btn" onclick="copyCSV('csvPlan')">📋 CSV (план)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tbl">
@@ -156,44 +157,44 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Стандартний перелік</h3>
         <div class="row">
-          <label style="flex:1"><input type="checkbox" class="chk" checked> Заміна масла двигуна (вказати марку)</label>
+          <label style="flex:1"><input type="checkbox" class="chk" checked aria-label="Пункт перевірки"> Заміна масла двигуна (вказати марку)</label>
         </div>
         <div class="row">
-          <label style="flex:1"><input type="checkbox" class="chk" checked> Фільтр масляний</label>
+          <label style="flex:1"><input type="checkbox" class="chk" checked aria-label="Пункт перевірки"> Фільтр масляний</label>
         </div>
         <div class="row">
-          <label style="flex:1"><input type="checkbox" class="chk" checked> Фільтр паливний / відстійник</label>
+          <label style="flex:1"><input type="checkbox" class="chk" checked aria-label="Пункт перевірки"> Фільтр паливний / відстійник</label>
         </div>
         <div class="row">
-          <label style="flex:1"><input type="checkbox" class="chk" checked> Повітряний фільтр (+ очищення попередника)</label>
+          <label style="flex:1"><input type="checkbox" class="chk" checked aria-label="Пункт перевірки"> Повітряний фільтр (+ очищення попередника)</label>
         </div>
         <div class="row">
-          <label style="flex:1"><input type="checkbox" class="chk"> Перевірка ременів/натягу/шківів</label>
+          <label style="flex:1"><input type="checkbox" class="chk" aria-label="Пункт перевірки"> Перевірка ременів/натягу/шківів</label>
         </div>
         <div class="row">
-          <label style="flex:1"><input type="checkbox" class="chk"> Рідина охолодження (щільність, рівень, шланги)</label>
+          <label style="flex:1"><input type="checkbox" class="chk" aria-label="Пункт перевірки"> Рідина охолодження (щільність, рівень, шланги)</label>
         </div>
         <div class="row">
-          <label style="flex:1"><input type="checkbox" class="chk"> Гідравлічне масло/фільтр/витоки</label>
+          <label style="flex:1"><input type="checkbox" class="chk" aria-label="Пункт перевірки"> Гідравлічне масло/фільтр/витоки</label>
         </div>
         <div class="row">
-          <label style="flex:1"><input type="checkbox" class="chk"> Гальма, стоянкове, регулювання</label>
+          <label style="flex:1"><input type="checkbox" class="chk" aria-label="Пункт перевірки"> Гальма, стоянкове, регулювання</label>
         </div>
         <div class="row">
-          <label style="flex:1"><input type="checkbox" class="chk"> Світло, сигнал, електрика, клеми АКБ</label>
+          <label style="flex:1"><input type="checkbox" class="chk" aria-label="Пункт перевірки"> Світло, сигнал, електрика, клеми АКБ</label>
         </div>
         <div class="row">
-          <label style="flex:1"><input type="checkbox" class="chk"> Перевірка кодів/оновлення ПЗ (якщо є)</label>
+          <label style="flex:1"><input type="checkbox" class="chk" aria-label="Пункт перевірки"> Перевірка кодів/оновлення ПЗ (якщо є)</label>
         </div>
       </div>
       <div class="box">
         <h3>Додати власні задачі</h3>
         <div class="row">
-          <input id="customTask" type="text" placeholder="Напр.: Змащення шарнірів навіски">
+          <input id="customTask" type="text" placeholder="Напр.: Змащення шарнірів навіски" aria-label="Напр.: Змащення шарнірів навіски">
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="addTask()">➕ Додати</button>
-          <button class="btn" onclick="buildChecklist()">🧾 Зібрати нотатки</button>
+          <button type="button" class="btn" onclick="addTask()">➕ Додати</button>
+          <button type="button" class="btn" onclick="buildChecklist()">🧾 Зібрати нотатки</button>
         </div>
         <div id="checkOut" class="out" style="margin-top:8px">—</div>
       </div>
@@ -207,12 +208,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>NFC — “SERVICE CARD”</h3>
         <div class="row">
-          <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001" aria-label="nfc Id"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -220,8 +221,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток “ПЛАН ТО”</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>ПЛАН ТО</h4>

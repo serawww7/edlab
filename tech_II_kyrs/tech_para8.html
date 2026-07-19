@@ -15,6 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 8 (технологи) — Рецептура і собівартість: масштабування, ціна/кг, маржа, QR/NFC/CSV</title>
+<meta name="description" content="📘 Рецептура і собівартість: масштабування, ціна/кг, маржа, QR/NFC/CSV">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -61,7 +62,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 8 · аудиторно · технологи переробки</span>
   <h1>📘 Рецептура і собівартість: масштабування, ціна/кг, маржа, QR/NFC/CSV</h1>
 
@@ -82,32 +83,32 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Ідентифікація</h3>
         <div class="row">
-          <div style="flex:1"><label>Виріб</label><input id="prodName" type="text" value="Ковбаса варена “Класична”"></div>
+          <div style="flex:1"><label for="prodName">Виріб</label><input id="prodName" type="text" value="Ковбаса варена “Класична”"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Планова маса партії, кг</label><input id="batchKg" type="number" step="0.1" value="120"></div>
-          <div style="flex:1"><label>Очікуваний вихід (yield), %</label><input id="yieldPct" type="number" step="0.1" value="96.0"></div>
+          <div style="flex:1"><label for="batchKg">Планова маса партії, кг</label><input id="batchKg" type="number" step="0.1" value="120"></div>
+          <div style="flex:1"><label for="yieldPct">Очікуваний вихід (yield), %</label><input id="yieldPct" type="number" step="0.1" value="96.0"></div>
         </div>
       </div>
 
       <div class="box">
         <h3>Ціни і націнка</h3>
         <div class="row">
-          <div style="flex:1"><label>Накладні (постійні), грн/партію</label><input id="ohFix" type="number" step="1" value="1200"></div>
-          <div style="flex:1"><label>Енергія та інше, грн/кг</label><input id="ohPerKg" type="number" step="0.1" value="6.5"></div>
+          <div style="flex:1"><label for="ohFix">Накладні (постійні), грн/партію</label><input id="ohFix" type="number" step="1" value="1200"></div>
+          <div style="flex:1"><label for="ohPerKg">Енергія та інше, грн/кг</label><input id="ohPerKg" type="number" step="0.1" value="6.5"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Цільова маржа, %</label><input id="targetMargin" type="number" step="0.1" value="25.0"></div>
-          <div style="flex:1"><label>ПДВ, %</label><input id="vatPct" type="number" step="0.1" value="20.0"></div>
+          <div style="flex:1"><label for="targetMargin">Цільова маржа, %</label><input id="targetMargin" type="number" step="0.1" value="25.0"></div>
+          <div style="flex:1"><label for="vatPct">ПДВ, %</label><input id="vatPct" type="number" step="0.1" value="20.0"></div>
         </div>
       </div>
 
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="recalc()">🧮 Перерахувати</button>
-          <button class="btn" onclick="presetRecipe()">🧪 Приклад рецептури</button>
-          <button class="btn" onclick="copyCSV('csvHead')">📋 CSV (head)</button>
+          <button type="button" class="btn" onclick="recalc()">🧮 Перерахувати</button>
+          <button type="button" class="btn" onclick="presetRecipe()">🧪 Приклад рецептури</button>
+          <button type="button" class="btn" onclick="copyCSV('csvHead')">📋 CSV (head)</button>
         </div>
         <div id="csvHead" class="out" style="margin-top:8px">—</div>
       </div>
@@ -118,8 +119,8 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>🥣 Рецептура (інгредієнти)</h2>
     <div class="row">
-      <button class="btn" onclick="addIngred()">➕ Додати інгредієнт</button>
-      <button class="btn" onclick="copyCSV('csvIngred')">📋 CSV (recipe)</button>
+      <button type="button" class="btn" onclick="addIngred()">➕ Додати інгредієнт</button>
+      <button type="button" class="btn" onclick="copyCSV('csvIngred')">📋 CSV (recipe)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblIngred">
@@ -162,7 +163,7 @@ html.embedded .box{background:#f8fafc;color:#111}
         <p>Ціна без ПДВ, грн/кг: <b><span id="priceNet">—</span></b></p>
         <p>Ціна з ПДВ, грн/кг: <b><span id="priceVat">—</span></b></p>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="copyCSV('csvSummary')">📋 CSV (summary)</button>
+          <button type="button" class="btn" onclick="copyCSV('csvSummary')">📋 CSV (summary)</button>
         </div>
         <div id="csvSummary" class="out" style="margin-top:8px">—</div>
       </div>
@@ -173,8 +174,8 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>⚠️ Алергени та короткий “Склад”</h2>
     <div class="row">
-      <button class="btn" onclick="buildComposition()">🔁 Зібрати склад</button>
-      <button class="btn" onclick="copyEl('composition')">📋 Копіювати</button>
+      <button type="button" class="btn" onclick="buildComposition()">🔁 Зібрати склад</button>
+      <button type="button" class="btn" onclick="copyEl('composition')">📋 Копіювати</button>
     </div>
     <div id="composition" class="out" style="margin-top:8px">—</div>
   </div>
@@ -183,8 +184,8 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал рецептів / QR / NFC / квиток</h2>
     <div class="row">
-      <button class="btn" onclick="addLog()">➕ Додати в журнал</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+      <button type="button" class="btn" onclick="addLog()">➕ Додати в журнал</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblLog">
@@ -210,19 +211,19 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>QR-payload</h3>
         <div class="row">
-          <button class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
-          <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
+          <button type="button" class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
         </div>
         <div id="qrOut" class="out">—</div>
 
         <h3 style="margin-top:12px">NFC — “RECIPE CARD”</h3>
         <div class="row">
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
-          <div style="flex:1"><label>Розлив/фасування</label><input id="packInfo" type="text" value="батон Ø60, вакуум"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="packInfo">Розлив/фасування</label><input id="packInfo" type="text" value="батон Ø60, вакуум"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -230,8 +231,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток 58 мм (калькуляція)</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>RECIPE COST TICKET</h4>
@@ -311,7 +312,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td><select>${['ні','так'].map(v=>`<option ${ (s.allergen && v==='так')?'selected':'' }>${v}</option>`).join('')}</select></td>
       <td class="kg">—</td>
       <td class="cost">—</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyIngred); recalc();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyIngred); recalc();">✖</button></td>
     `;
     bodyIngred.appendChild(tr); reindex(bodyIngred); recalc();
   }
@@ -438,7 +439,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td>${s.net}</td>
       <td>${s.vat}</td>
       <td>${s.marg}</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindexLog(); buildLogCSV();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindexLog(); buildLogCSV();">✖</button></td>
     `;
     bodyLog.appendChild(tr); reindexLog(); buildLogCSV();
   }

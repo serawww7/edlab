@@ -56,7 +56,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🛡️🔥</span>
@@ -74,18 +74,18 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
     <p>Виконуємо <b>послідовну перевірку</b> автоматики безпеки побутового котла/ВБД: газ-детектор (витік), датчик тяги, термостат перегріву, іонізаційний контроль полум’я, 
       пресостат/датчик низького тиску води, відключення газ-клапана. Для кожного тесту фіксуємо <b>час спрацювання</b> і порівнюємо з <b>KPI</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котельня"/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котельня" aria-label="м. Тальне, вул. ..., котельня"/></label>
       <label style="flex:1">Обладнання
-        <select id="equip" class="input">
+        <select id="equip" class="input" aria-label="equip">
           <option selected>Котел атмосферний</option><option>Котел турбований</option><option>ВБД (водонагрівач)</option><option>Інше</option>
         </select>
       </label>
-      <label style="flex:1">Модель/серійний<input id="model" class="input" placeholder="Напр. AOGV 11, S/N 12345..."/></label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">Модель/серійний<input id="model" class="input" placeholder="Напр. AOGV 11, S/N 12345..." aria-label="Напр. AOGV 11, S/N 12345..."/></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П." aria-label="Прізвище І.П."/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date" aria-label="day"/></label>
     </div>
     <div class="row">
-      <button class="btn good" id="mkCase">🧰 Створити кейс</button>
+      <button type="button" class="btn good" id="mkCase">🧰 Створити кейс</button>
       <span class="badge" id="cid">Кейс: —</span>
     </div>
   </div>
@@ -96,9 +96,9 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2>🧪 Тести автоматики (таймери, KPI)</h2>
       <div class="block">
         <div class="row">
-          <label>Макс. час спрацювання (KPI), сек<input id="kpiTime" class="input" type="number" step="0.1" value="5.0"/></label>
-          <label>Макс. CO для приміщення, ppm<input id="kpiCO" class="input" type="number" step="1" value="50"/></label>
-          <button class="btn secondary" id="applyKPI">⚙️ Застосувати KPI</button>
+          <label>Макс. час спрацювання (KPI), сек<input id="kpiTime" class="input" type="number" step="0.1" value="5.0" aria-label="kpi Time"/></label>
+          <label>Макс. CO для приміщення, ppm<input id="kpiCO" class="input" type="number" step="1" value="50" aria-label="kpi CO"/></label>
+          <button type="button" class="btn secondary" id="applyKPI">⚙️ Застосувати KPI</button>
         </div>
         <div class="kpi" style="margin-top:6px">
           <span class="tag ok">KPI час: <b id="kTime">≤ 5.0 c</b></span>
@@ -119,10 +119,10 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <div class="row">
         <video id="vid" class="photo" autoplay playsinline muted></video>
         <div>
-          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
-          <button class="btn" data-kind="sensor">📷 Датчик (тяги/газу)</button>
-          <button class="btn" data-kind="wiring">📷 Підключення/клеми</button>
-          <button class="btn" data-kind="valve">📷 Газ-клапан</button><br/>
+          <button type="button" class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button type="button" class="btn" data-kind="sensor">📷 Датчик (тяги/газу)</button>
+          <button type="button" class="btn" data-kind="wiring">📷 Підключення/клеми</button>
+          <button type="button" class="btn" data-kind="valve">📷 Газ-клапан</button><br/>
           <small class="muted">Фото зберігаються у «Галереї доказів».</small>
         </div>
       </div>
@@ -131,9 +131,9 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2 style="margin-top:10px">🎙️ Аудіо-коментар (резюме випробувань)</h2>
       <div class="block">
         <div class="row">
-          <button class="btn" id="audStart">⏺️ Запис</button>
-          <button class="btn secondary" id="audStop">⏹️ Стоп</button>
-          <button class="btn" id="audSave">💾 Зберегти</button>
+          <button type="button" class="btn" id="audStart">⏺️ Запис</button>
+          <button type="button" class="btn secondary" id="audStop">⏹️ Стоп</button>
+          <button type="button" class="btn" id="audSave">💾 Зберегти</button>
           <span class="badge" id="audStat">Немає запису</span>
         </div>
         <audio id="audPlay" controls></audio>
@@ -143,8 +143,8 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <div class="sigWrap">
         <canvas id="sig" width="520" height="200"></canvas>
         <div class="row" style="margin-top:6px">
-          <button class="btn" id="sigClear">🧹 Очистити</button>
-          <button class="btn" id="sigSave">💾 Зберегти підпис</button>
+          <button type="button" class="btn" id="sigClear">🧹 Очистити</button>
+          <button type="button" class="btn" id="sigSave">💾 Зберегти підпис</button>
           <span class="badge" id="sigStat">Підпису немає</span>
         </div>
       </div>
@@ -178,10 +178,10 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 
       <h2 style="margin-top:10px">💾 Експорт / друк</h2>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV</button>
-        <button class="btn" id="saveTxt">💾 TXT</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (Case)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (Case)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
@@ -263,10 +263,10 @@ function renderTests(){
         <textarea class="input notes" placeholder="Нотатки/спостереження"></textarea>
       </div>
       <div class="actions">
-        <button class="btn btn-start">▶️ Start</button>
-        <button class="btn secondary btn-stop">⏹️ Stop</button>
-        <button class="btn good btn-pass">✅ Pass</button>
-        <button class="btn secondary btn-fail">❌ Fail</button>
+        <button type="button" class="btn btn-start">▶️ Start</button>
+        <button type="button" class="btn secondary btn-stop">⏹️ Stop</button>
+        <button type="button" class="btn good btn-pass">✅ Pass</button>
+        <button type="button" class="btn secondary btn-fail">❌ Fail</button>
       </div>
     `;
     box.appendChild(el);

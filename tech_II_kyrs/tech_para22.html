@@ -44,7 +44,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧪</span>
@@ -64,15 +64,15 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h2>🧰 Інгредієнти</h2>
       <small class="muted">Додай/редагуй. Вміст — у % від маси інгредієнта; нітрит — ppm у готовому продукті, який дає 1% цього інгредієнта (для спрощення).</small>
       <div class="row">
-        <label>Назва<input id="i_name" class="input" value="М’ясо нежирне"/></label>
-        <label>Ціна, грн/кг<input id="i_price" class="input" type="number" step="0.1" value="140"/></label>
-        <label>Вода, %<input id="i_w" class="input" type="number" step="0.1" value="72"/></label>
-        <label>Жир, %<input id="i_f" class="input" type="number" step="0.1" value="6"/></label>
-        <label>Сіль, %<input id="i_s" class="input" type="number" step="0.1" value="0.3"/></label>
-        <label>Нітрит, ppm<input id="i_n" class="input" type="number" step="1" value="0"/></label>
-        <button class="btn" id="addIng">➕ Додати</button>
-        <button class="btn secondary" id="demo">🎲 Демо-набір</button>
-        <button class="btn secondary" id="clearIng">🧹 Очистити</button>
+        <label>Назва<input id="i_name" class="input" value="М’ясо нежирне" aria-label="i name"/></label>
+        <label>Ціна, грн/кг<input id="i_price" class="input" type="number" step="0.1" value="140" aria-label="i price"/></label>
+        <label>Вода, %<input id="i_w" class="input" type="number" step="0.1" value="72" aria-label="i w"/></label>
+        <label>Жир, %<input id="i_f" class="input" type="number" step="0.1" value="6" aria-label="i f"/></label>
+        <label>Сіль, %<input id="i_s" class="input" type="number" step="0.1" value="0.3" aria-label="i s"/></label>
+        <label>Нітрит, ppm<input id="i_n" class="input" type="number" step="1" value="0" aria-label="i n"/></label>
+        <button type="button" class="btn" id="addIng">➕ Додати</button>
+        <button type="button" class="btn secondary" id="demo">🎲 Демо-набір</button>
+        <button type="button" class="btn secondary" id="clearIng">🧹 Очистити</button>
       </div>
 
       <table class="tbl" id="ingTbl">
@@ -82,26 +82,26 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h2 style="margin-top:10px">🎯 Цілі та обмеження</h2>
       <div class="row">
-        <label>Ціль Волога, %<input id="t_w" class="input" type="number" step="0.1" value="72.0"/></label>
-        <label>Ціль Жир, %<input id="t_f" class="input" type="number" step="0.1" value="18.0"/></label>
-        <label>Ціль Сіль, %<input id="t_s" class="input" type="number" step="0.05" value="1.8"/></label>
-        <label>Макс Нітрит, ppm<input id="c_n_max" class="input" type="number" step="1" value="120"/></label>
+        <label>Ціль Волога, %<input id="t_w" class="input" type="number" step="0.1" value="72.0" aria-label="t w"/></label>
+        <label>Ціль Жир, %<input id="t_f" class="input" type="number" step="0.1" value="18.0" aria-label="t f"/></label>
+        <label>Ціль Сіль, %<input id="t_s" class="input" type="number" step="0.05" value="1.8" aria-label="t s"/></label>
+        <label>Макс Нітрит, ppm<input id="c_n_max" class="input" type="number" step="1" value="120" aria-label="c n max"/></label>
       </div>
       <div class="row">
-        <label>Мін. Вода, %<input id="c_w_min" class="input" type="number" step="0.1" value="68"/></label>
-        <label>Макс. Вода, %<input id="c_w_max" class="input" type="number" step="0.1" value="76"/></label>
-        <label>Макс. Сіль, %<input id="c_s_max" class="input" type="number" step="0.05" value="2.2"/></label>
-        <label>Макс. Жир, %<input id="c_f_max" class="input" type="number" step="0.1" value="22"/></label>
+        <label>Мін. Вода, %<input id="c_w_min" class="input" type="number" step="0.1" value="68" aria-label="c w min"/></label>
+        <label>Макс. Вода, %<input id="c_w_max" class="input" type="number" step="0.1" value="76" aria-label="c w max"/></label>
+        <label>Макс. Сіль, %<input id="c_s_max" class="input" type="number" step="0.05" value="2.2" aria-label="c s max"/></label>
+        <label>Макс. Жир, %<input id="c_f_max" class="input" type="number" step="0.1" value="22" aria-label="c f max"/></label>
       </div>
 
       <h3 style="margin-top:10px">⚖️ Ваги цілей (0…1)</h3>
       <div class="row">
-        <label>w Волога<input id="w_w" class="input" type="number" step="0.05" value="0.35"/></label>
-        <label>w Жир<input id="w_f" class="input" type="number" step="0.05" value="0.25"/></label>
-        <label>w Сіль<input id="w_s" class="input" type="number" step="0.05" value="0.25"/></label>
-        <label>w Собівартість<input id="w_c" class="input" type="number" step="0.05" value="0.15"/></label>
-        <label>Крок %, для мутацій<input id="step" class="input" type="number" step="0.1" value="0.5"/></label>
-        <button class="btn good" id="opt">🚀 Оптимізувати</button>
+        <label>w Волога<input id="w_w" class="input" type="number" step="0.05" value="0.35" aria-label="w w"/></label>
+        <label>w Жир<input id="w_f" class="input" type="number" step="0.05" value="0.25" aria-label="w f"/></label>
+        <label>w Сіль<input id="w_s" class="input" type="number" step="0.05" value="0.25" aria-label="w s"/></label>
+        <label>w Собівартість<input id="w_c" class="input" type="number" step="0.05" value="0.15" aria-label="w c"/></label>
+        <label>Крок %, для мутацій<input id="step" class="input" type="number" step="0.1" value="0.5" aria-label="step"/></label>
+        <button type="button" class="btn good" id="opt">🚀 Оптимізувати</button>
       </div>
 
       <h3 style="margin-top:10px">📈 Візуалізація</h3>
@@ -111,11 +111,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:10px">💾 Експорт/друк</h3>
       <div class="row">
-        <input id="lot" class="input" placeholder="SKU/Лот (напр. Ковбаса варена 2025-10-18)"/>
-        <button class="btn" id="saveCsv">📄 CSV (рецепт)</button>
-        <button class="btn" id="saveTxt">💾 TXT (звіт)</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази/акти)</button>
+        <input id="lot" class="input" placeholder="SKU/Лот (напр. Ковбаса варена 2025-10-18)" aria-label="SKU/Лот (напр. Ковбаса варена 2025-10-18)"/>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (рецепт)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (звіт)</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (посилання на докази/акти)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
@@ -199,7 +199,7 @@ function renderTable(){
     const tr=document.createElement('tr');
     tr.innerHTML=`<td>${i+1}</td><td>${g.name}</td><td>${g.price.toFixed(2)}</td>
       <td>${g.w.toFixed(1)}</td><td>${g.f.toFixed(1)}</td><td>${g.s.toFixed(2)}</td><td>${g.n.toFixed(0)}</td>
-      <td><button class="btn secondary" data-i="${i}">🗑️</button></td>`;
+      <td><button type="button" class="btn secondary" data-i="${i}">🗑️</button></td>`;
     tb.appendChild(tr);
   });
   tb.querySelectorAll('button[data-i]').forEach(b=>b.addEventListener('click', (e)=>{ ING.splice(+b.dataset.i,1); renderTable(); drawStack([]); drawRadar(null); updateKPIs(null,[]); }));

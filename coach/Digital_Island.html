@@ -73,15 +73,15 @@ tr{background:#0b1528;border-radius:12px}
       <h1 class="title">Інтерактив «Цифровий острів» — онлайн-тренінг</h1>
       <p class="subtitle">Команда • розподіл ролей • 5–7 кроків плану • рефлексія • 25–30 хв</p>
       <div class="btn-row">
-        <button class="btn" id="exportTxt">⬇️ Експорт .txt</button>
-        <button class="btn" id="printPage">🖨️ Друк</button>
-        <button class="btn" id="clearAll">🗑️ Очистити</button>
+        <button type="button" class="btn" id="exportTxt">⬇️ Експорт .txt</button>
+        <button type="button" class="btn" id="printPage">🖨️ Друк</button>
+        <button type="button" class="btn" id="clearAll">🗑️ Очистити</button>
         <span class="hint">Автозбереження у localStorage цього пристрою.</span>
       </div>
     </div>
   </header>
 
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <section class="card">
       <div class="grid cols-2">
         <div>
@@ -102,11 +102,11 @@ tr{background:#0b1528;border-radius:12px}
         <div>
           <h2>План і таймінг</h2>
           <div class="agenda">
-            <div class="item"><strong>1. Занурення</strong> <span class="time">3 хв · <span id="t1">00:00</span> <button class="btn" data-timer="t1" data-secs="180">▶</button></span></div>
-            <div class="item"><strong>2. Поділ ролей</strong> <span class="time">2 хв · <span id="t2">00:00</span> <button class="btn" data-timer="t2" data-secs="120">▶</button></span></div>
-            <div class="item"><strong>3. Групове завдання</strong> <span class="time">15 хв · <span id="t3">00:00</span> <button class="btn" data-timer="t3" data-secs="900">▶</button></span></div>
-            <div class="item"><strong>4. Презентація</strong> <span class="time">3–5 хв · <span id="t4">00:00</span> <button class="btn" data-timer="t4" data-secs="300">▶</button></span></div>
-            <div class="item"><strong>5. Рефлексія</strong> <span class="time">5 хв · <span id="t5">00:00</span> <button class="btn" data-timer="t5" data-secs="300">▶</button></span></div>
+            <div class="item"><strong>1. Занурення</strong> <span class="time">3 хв · <span id="t1">00:00</span> <button type="button" class="btn" data-timer="t1" data-secs="180">▶</button></span></div>
+            <div class="item"><strong>2. Поділ ролей</strong> <span class="time">2 хв · <span id="t2">00:00</span> <button type="button" class="btn" data-timer="t2" data-secs="120">▶</button></span></div>
+            <div class="item"><strong>3. Групове завдання</strong> <span class="time">15 хв · <span id="t3">00:00</span> <button type="button" class="btn" data-timer="t3" data-secs="900">▶</button></span></div>
+            <div class="item"><strong>4. Презентація</strong> <span class="time">3–5 хв · <span id="t4">00:00</span> <button type="button" class="btn" data-timer="t4" data-secs="300">▶</button></span></div>
+            <div class="item"><strong>5. Рефлексія</strong> <span class="time">5 хв · <span id="t5">00:00</span> <button type="button" class="btn" data-timer="t5" data-secs="300">▶</button></span></div>
           </div>
         </div>
       </div>
@@ -121,17 +121,17 @@ tr{background:#0b1528;border-radius:12px}
       </div>
       <div class="two" style="margin-top:10px">
         <div>
-          <label class="kbd">Список учасників (по одному в рядку)</label>
+          <label class="kbd" for="names">Список учасників (по одному в рядку)</label>
           <textarea id="names" placeholder="Ім'я 1&#10;Ім'я 2&#10;Ім'я 3"></textarea>
         </div>
         <div>
-          <label class="kbd">Нотатки фасилітатора</label>
+          <label class="kbd" for="notesIntro">Нотатки фасилітатора</label>
           <textarea id="notesIntro"></textarea>
         </div>
       </div>
       <div class="btn-row">
-        <button class="btn" id="assign">🎲 Роздати ролі випадково</button>
-        <button class="btn" id="addEmpty">➕ Додати порожній рядок</button>
+        <button type="button" class="btn" id="assign">🎲 Роздати ролі випадково</button>
+        <button type="button" class="btn" id="addEmpty">➕ Додати порожній рядок</button>
       </div>
       <div class="callout"><strong>Ролі/ресурси:</strong> Знання (Google/YouTube) • Інструменти (Excel/Canva/PowerPoint) • Енергія (мотивація/креатив) • Зв’язки (домовленості) • Аналітика (структурування даних)</div>
       <div class="card" style="margin-top:12px">
@@ -145,8 +145,8 @@ tr{background:#0b1528;border-radius:12px}
       <h2>3) Групове завдання (15 хв)</h2>
       <p class="hint">Завдання: погодити 5–7 кроків розвитку «цифрового селища».</p>
       <div class="btn-row">
-        <button class="btn" id="addStep">➕ Додати крок</button>
-        <button class="btn" id="clearSteps">♻️ Скинути кроки</button>
+        <button type="button" class="btn" id="addStep">➕ Додати крок</button>
+        <button type="button" class="btn" id="clearSteps">♻️ Скинути кроки</button>
       </div>
       <div id="steps" class="steps" style="margin-top:8px"></div>
 
@@ -170,11 +170,11 @@ tr{background:#0b1528;border-radius:12px}
       <div class="kbd">Формула озвучення: «Крок → відповідальний → ресурс → дедлайн».</div>
       <div class="two" style="margin-top:10px">
         <div>
-          <label class="kbd">Ключові рішення</label>
+          <label class="kbd" for="present">Ключові рішення</label>
           <textarea id="present"></textarea>
         </div>
         <div>
-          <label class="kbd">Ризики та як їх зменшити</label>
+          <label class="kbd" for="risks">Ризики та як їх зменшити</label>
           <textarea id="risks"></textarea>
         </div>
       </div>
@@ -185,21 +185,21 @@ tr{background:#0b1528;border-radius:12px}
       <h2>5) Рефлексія (5 хв)</h2>
       <div class="two">
         <div>
-          <label class="kbd">Що було найскладніше домовитись?</label>
+          <label class="kbd" for="refl1">Що було найскладніше домовитись?</label>
           <textarea id="refl1"></textarea>
         </div>
         <div>
-          <label class="kbd">Найцінніший ресурс команди</label>
+          <label class="kbd" for="refl2">Найцінніший ресурс команди</label>
           <textarea id="refl2"></textarea>
         </div>
       </div>
       <div class="two" style="margin-top:10px">
         <div>
-          <label class="kbd">Що схоже на реальну роботу в ІТ/навчанні?</label>
+          <label class="kbd" for="refl3">Що схоже на реальну роботу в ІТ/навчанні?</label>
           <textarea id="refl3"></textarea>
         </div>
         <div>
-          <label class="kbd">Моя роль у наступному проєкті</label>
+          <label class="kbd" for="refl4">Моя роль у наступному проєкті</label>
           <textarea id="refl4"></textarea>
         </div>
       </div>
@@ -222,7 +222,7 @@ tr{background:#0b1528;border-radius:12px}
       <p class="hint">Перетягніть предмети в порядку важливості (1 — найважливіший). Рейтинг збережеться й потрапить в експорт.</p>
       <div id="rank" class="rank"></div>
       <div class="btn-row">
-        <button class="btn" id="resetRank">♻️ Скинути рейтинг</button>
+        <button type="button" class="btn" id="resetRank">♻️ Скинути рейтинг</button>
       </div>
       <details style="margin-top:10px">
         <summary>Список і коментарі</summary>
@@ -327,9 +327,9 @@ tr{background:#0b1528;border-radius:12px}
             <div><small>Дедлайн</small><input type="text" data-k="deadline" data-i="${i}" value="${s.deadline}" placeholder="напр., 15.11"></div>
           </div>
           <div class="btn-row">
-            <button class="btn" data-up="${i}">⬆️</button>
-            <button class="btn" data-down="${i}">⬇️</button>
-            <button class="btn danger" data-del="${i}">🗑️ Видалити</button>
+            <button type="button" class="btn" data-up="${i}">⬆️</button>
+            <button type="button" class="btn" data-down="${i}">⬇️</button>
+            <button type="button" class="btn danger" data-del="${i}">🗑️ Видалити</button>
           </div>`;
         root.appendChild(el);
       });

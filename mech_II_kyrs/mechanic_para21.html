@@ -40,7 +40,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🤖</span>
@@ -60,15 +60,15 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h2>📝 Опис симптомів</h2>
       <div class="row">
         <div style="flex:1">
-          <label>Машина</label>
+          <label for="machine">Машина</label>
           <input id="machine" class="input" placeholder="Трактор / Комбайн / Навісне..."/>
         </div>
         <div style="flex:1">
-          <label>Наробіток, м/г</label>
+          <label for="hours">Наробіток, м/г</label>
           <input id="hours" class="input" type="number" min="0" step="1" value="3500"/>
         </div>
         <div style="flex:1">
-          <label>Критичність</label>
+          <label for="crit">Критичність</label>
           <select id="crit" class="input">
             <option value="low">низька</option>
             <option value="medium" selected>середня</option>
@@ -76,11 +76,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
           </select>
         </div>
       </div>
-      <textarea id="text" class="input" placeholder="Опиши симптоми: «свист ременя при розгоні, запах гуми, температура ОЖ росте, вібрація на 1800 об/хв...»"></textarea>
+      <textarea id="text" class="input" placeholder="Опиши симптоми: «свист ременя при розгоні, запах гуми, температура ОЖ росте, вібрація на 1800 об/хв...»" aria-label="Опиши симптоми: «свист ременя при розгоні, запах гуми, температура ОЖ росте, вібрація на 1800 об/хв...»"></textarea>
       <div class="row" style="margin-top:6px">
-        <button class="btn" id="mic">🎙️ Голосом</button>
-        <button class="btn good" id="analyze">🔍 Проаналізувати</button>
-        <button class="btn secondary" id="clear">🧹 Очистити</button>
+        <button type="button" class="btn" id="mic">🎙️ Голосом</button>
+        <button type="button" class="btn good" id="analyze">🔍 Проаналізувати</button>
+        <button type="button" class="btn secondary" id="clear">🧹 Очистити</button>
         <span id="stat" class="badge">Статус: очікування</span>
       </div>
 
@@ -104,7 +104,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h2>🧠 Навчальні приклади (few-shot k-NN)</h2>
       <p class="small muted">Додай 3–5 прикладів на кожен клас — локальний класифікатор стане точнішим.</p>
       <div class="row">
-        <select id="label" class="input" style="flex:1;max-width:220px">
+        <select id="label" class="input" style="flex:1;max-width:220px" aria-label="label">
           <option value="belt">ремінний привід</option>
           <option value="bearing">підшипник</option>
           <option value="hydraulic">гідравліка</option>
@@ -112,26 +112,26 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
           <option value="cooling">охолодження</option>
           <option value="fuel">паливо</option>
         </select>
-        <input id="shot" class="input" placeholder="Короткий приклад симптому для цього класу"/>
-        <button class="btn" id="addShot">➕ Додати</button>
-        <button class="btn secondary" id="exportShots">💾 Експорт прикладів</button>
+        <input id="shot" class="input" placeholder="Короткий приклад симптому для цього класу" aria-label="Короткий приклад симптому для цього класу"/>
+        <button type="button" class="btn" id="addShot">➕ Додати</button>
+        <button type="button" class="btn secondary" id="exportShots">💾 Експорт прикладів</button>
       </div>
       <pre id="shotsBox" class="code small" style="max-height:180px;overflow:auto">// Поки без прикладів</pre>
 
       <h2 style="margin-top:10px">🧩 Генератор промптів для LLM</h2>
       <div class="row">
-        <button class="btn" id="genUA">🇺🇦 Згенерувати (укр)</button>
-        <button class="btn" id="genEN">🇬🇧 Generate (eng)</button>
-        <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+        <button type="button" class="btn" id="genUA">🇺🇦 Згенерувати (укр)</button>
+        <button type="button" class="btn" id="genEN">🇬🇧 Generate (eng)</button>
+        <button type="button" class="btn secondary" id="copyPrompt">📋 Копіювати</button>
       </div>
       <pre id="promptBox" class="code small">// Натисни кнопку, щоб згенерувати промпт</pre>
 
       <h2 style="margin-top:10px">💾 Експорт / План</h2>
       <div class="row">
-        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
-        <button class="btn" id="saveCsv">📄 CSV (аналіз)</button>
-        <button class="btn" id="saveIcs">🗓️ ICS (план робіт)</button>
-        <button class="btn secondary" id="receipt">🖨️ 58 мм чек</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (аналіз)</button>
+        <button type="button" class="btn" id="saveIcs">🗓️ ICS (план робіт)</button>
+        <button type="button" class="btn secondary" id="receipt">🖨️ 58 мм чек</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
     </div>

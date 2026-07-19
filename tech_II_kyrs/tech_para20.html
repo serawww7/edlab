@@ -44,7 +44,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">❄️</span>
@@ -63,31 +63,31 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>📥 Імпорт/емуляція даних</h2>
       <div class="row">
-        <input id="file" class="input" type="file" accept=".csv"/>
-        <button class="btn" id="load">📄 Імпортувати CSV</button>
-        <button class="btn secondary" id="demo">🎲 Демо-траса</button>
+        <input id="file" class="input" type="file" accept=".csv" aria-label="file"/>
+        <button type="button" class="btn" id="load">📄 Імпортувати CSV</button>
+        <button type="button" class="btn secondary" id="demo">🎲 Демо-траса</button>
         <span id="status" class="badge">Статус: чекаю CSV</span>
       </div>
       <small class="muted">Формати: <span class="mono">iso8601,TempC</span> або <span class="mono">t_sec,TempC</span>. Десяткова крапка, роздільник — кома/крапка з комою/таб.</small>
 
       <h3 style="margin-top:10px">🧰 Параметри контролю</h3>
       <div class="row">
-        <select id="product" class="input" style="max-width:260px">
+        <select id="product" class="input" style="max-width:260px" aria-label="product">
           <option value="dairy" selected>Молочні (0…+4 °C)</option>
           <option value="meat">М’ясо (0…+2 °C)</option>
           <option value="egg">Яйця (+2…+8 °C)</option>
           <option value="cheese">Сири дозрівання (+2…+6 °C)</option>
           <option value="custom">Кастом</option>
         </select>
-        <label>Tmin °C<input id="tmin" class="input" type="number" step="0.1" value="0"/></label>
-        <label>Tmax °C<input id="tmax" class="input" type="number" step="0.1" value="4"/></label>
-        <label>Мін. тривалість інциденту, хв<input id="minDur" class="input" type="number" step="1" value="5"/></label>
+        <label>Tmin °C<input id="tmin" class="input" type="number" step="0.1" value="0" aria-label="tmin"/></label>
+        <label>Tmax °C<input id="tmax" class="input" type="number" step="0.1" value="4" aria-label="tmax"/></label>
+        <label>Мін. тривалість інциденту, хв<input id="minDur" class="input" type="number" step="1" value="5" aria-label="min Dur"/></label>
       </div>
       <div class="row">
-        <label>Поріг «дверей», °C/хв (|dT/dt|) <input id="doorThr" class="input" type="number" step="0.1" value="1.5"/></label>
-        <label>MKT: Ea, кДж/моль<input id="ea" class="input" type="number" step="1" value="83"/></label>
-        <label>Інтервал, с<input id="dt" class="input" type="number" step="1" value="60"/></label>
-        <button class="btn" id="recalc">♻️ Перерахувати</button>
+        <label>Поріг «дверей», °C/хв (|dT/dt|) <input id="doorThr" class="input" type="number" step="0.1" value="1.5" aria-label="door Thr"/></label>
+        <label>MKT: Ea, кДж/моль<input id="ea" class="input" type="number" step="1" value="83" aria-label="ea"/></label>
+        <label>Інтервал, с<input id="dt" class="input" type="number" step="1" value="60" aria-label="dt"/></label>
+        <button type="button" class="btn" id="recalc">♻️ Перерахувати</button>
       </div>
 
       <h3 style="margin-top:10px">📈 Живий графік T(t)</h3>
@@ -99,11 +99,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:10px">💾 Експорт/друк</h3>
       <div class="row">
-        <input id="route" class="input" placeholder="Маршрут/лот (напр. РЦ→Склад #3, 2025-10-18)"/>
-        <button class="btn" id="saveCsv">📄 CSV (інциденти)</button>
-        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
+        <input id="route" class="input" placeholder="Маршрут/лот (напр. РЦ→Склад #3, 2025-10-18)" aria-label="Маршрут/лот (напр. РЦ→Склад #3, 2025-10-18)"/>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (інциденти)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>

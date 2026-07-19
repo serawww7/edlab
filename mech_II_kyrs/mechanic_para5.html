@@ -28,6 +28,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 5 (механіки) — Гідравліка: насос, споживачі, шланги, тепло, чек 58 мм, NFC, CSV</title>
+<meta name="description" content="💧 Гідравліка: насос → споживачі → шланги → тепло → чек 58 мм, NFC, CSV">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -73,7 +74,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 5 · аудиторно · механіки</span>
   <h1>💧 Гідравліка: насос → споживачі → шланги → тепло → чек 58 мм, NFC, CSV</h1>
 
@@ -93,19 +94,19 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Параметри насоса</h3>
         <div class="row">
-          <div style="flex:1"><label>Vg, см³/об</label><input id="Vg" type="number" step="0.1" value="45"></div>
-          <div style="flex:1"><label>n, об/хв</label><input id="n" type="number" step="10" value="1800"></div>
+          <div style="flex:1"><label for="Vg">Vg, см³/об</label><input id="Vg" type="number" step="0.1" value="45"></div>
+          <div style="flex:1"><label for="n">n, об/хв</label><input id="n" type="number" step="10" value="1800"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>ηᵥ (обʼємний)</label><input id="etaV" type="number" step="0.01" value="0.92"></div>
-          <div style="flex:1"><label>ηₘ (мех.)</label><input id="etaM" type="number" step="0.01" value="0.88"></div>
+          <div style="flex:1"><label for="etaV">ηᵥ (обʼємний)</label><input id="etaV" type="number" step="0.01" value="0.92"></div>
+          <div style="flex:1"><label for="etaM">ηₘ (мех.)</label><input id="etaM" type="number" step="0.01" value="0.88"></div>
         </div>
       </div>
       <div class="box">
         <h3>Робочі умови</h3>
         <div class="row">
-          <div style="flex:1"><label>Тиск системи, bar</label><input id="pBar" type="number" step="1" value="180"></div>
-          <div style="flex:1"><label>Частка навантаження, % часу</label><input id="duty" type="number" step="5" value="60"></div>
+          <div style="flex:1"><label for="pBar">Тиск системи, bar</label><input id="pBar" type="number" step="1" value="180"></div>
+          <div style="flex:1"><label for="duty">Частка навантаження, % часу</label><input id="duty" type="number" step="5" value="60"></div>
         </div>
         <p class="small">Для оцінки тепла береться середня потужність за цикл.</p>
       </div>
@@ -122,10 +123,10 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>🧱 Споживачі (циліндри / мотори)</h2>
     <div class="row">
-      <button class="btn" onclick="addCons()">➕ Додати</button>
-      <button class="btn" onclick="presetCons()">🧪 Приклад</button>
-      <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
-      <button class="btn" onclick="copyCSV('csvC')">📋 CSV</button>
+      <button type="button" class="btn" onclick="addCons()">➕ Додати</button>
+      <button type="button" class="btn" onclick="presetCons()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="recalc()">🔁 Перерахувати</button>
+      <button type="button" class="btn" onclick="copyCSV('csvC')">📋 CSV</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblC">
@@ -158,12 +159,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Параметри лінії</h3>
         <div class="row">
-          <div style="flex:1"><label>Q, л/хв</label><input id="hoseQ" type="number" step="0.1" value="60"></div>
-          <div style="flex:1"><label>Довжина L, м</label><input id="hoseL" type="number" step="0.1" value="8"></div>
+          <div style="flex:1"><label for="hoseQ">Q, л/хв</label><input id="hoseQ" type="number" step="0.1" value="60"></div>
+          <div style="flex:1"><label for="hoseL">Довжина L, м</label><input id="hoseL" type="number" step="0.1" value="8"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Dвнутр, мм</label><input id="hoseD" type="number" step="1" value="12"></div>
-          <div style="flex:1"><label>Призначення</label>
+          <div style="flex:1"><label for="hoseD">Dвнутр, мм</label><input id="hoseD" type="number" step="1" value="12"></div>
+          <div style="flex:1"><label for="hoseRole">Призначення</label>
             <select id="hoseRole">
               <option value="suction">всмоктувальна</option>
               <option value="pressure" selected>напірна</option>
@@ -175,7 +176,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Рекомендації діаметра</h3>
         <p>Список діаметрів (мм):</p>
-        <input id="diamList" type="text" value="8,10,12,16,19,25">
+        <input id="diamList" type="text" value="8,10,12,16,19,25" aria-label="diam List">
         <p class="small">Пошук мін. діаметра, що дає v у межах допустимого діапазону.</p>
       </div>
       <div class="box">
@@ -193,8 +194,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Оцінка нагріву за зміну (навчально)</h3>
         <div class="row">
-          <div style="flex:1"><label>Тривалість, год</label><input id="shiftH" type="number" step="0.5" value="6"></div>
-          <div style="flex:1"><label>Обʼєм бака, л</label><input id="tankL" type="number" step="1" value="120"></div>
+          <div style="flex:1"><label for="shiftH">Тривалість, год</label><input id="shiftH" type="number" step="0.5" value="6"></div>
+          <div style="flex:1"><label for="tankL">Обʼєм бака, л</label><input id="tankL" type="number" step="1" value="120"></div>
         </div>
         <p>ΔT≈ <b><span id="dT">—</span></b> °C · Мін. бак ≈ <b><span id="tankMin">—</span></b> л</p>
         <p class="small">Оцінка груба (тепловідвід не враховано): ΔT ≈ (Pвтрат[kW] · 860 · год) / (масу масла[кг]). ρ≈0.87 кг/л.</p>
@@ -214,12 +215,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>NFC — гідрозавдання</h3>
         <div class="row">
-          <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="nfcId">Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -227,8 +228,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток “Гідрозавдання”</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>ГІДРОЗАВДАННЯ</h4>
@@ -258,7 +259,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <li>Згенеруй <b>NFC</b> і <b>квиток 58 мм</b>. Скопіюй <b>CSV</b> у Sheets (<span class="mono">Hydraulics</span>).</li>
     </ol>
     <div class="row">
-      <button class="btn" onclick="copyCSV('csvFull')">📋 CSV (система+шланг)</button>
+      <button type="button" class="btn" onclick="copyCSV('csvFull')">📋 CSV (система+шланг)</button>
     </div>
     <div id="csvFull" class="out" style="margin-top:8px">—</div>
   </div>

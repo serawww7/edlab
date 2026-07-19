@@ -47,7 +47,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:auto}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🖼️</span>
@@ -68,9 +68,9 @@ canvas{display:block;width:100%;height:auto;image-rendering:auto}
     <div class="card">
       <h2>🖼️ Фото + анотації</h2>
       <div class="row">
-        <input id="file" class="input" type="file" accept="image/*" multiple/>
-        <button class="btn secondary" id="demo">🎲 Демокейс</button>
-        <button class="btn secondary" id="clearImg">🧹 Очистити</button>
+        <input id="file" class="input" type="file" accept="image/*" multiple aria-label="file"/>
+        <button type="button" class="btn secondary" id="demo">🎲 Демокейс</button>
+        <button type="button" class="btn secondary" id="clearImg">🧹 Очистити</button>
         <span id="badgeImg" class="badge">Зображень: 0</span>
       </div>
 
@@ -128,8 +128,8 @@ canvas{display:block;width:100%;height:auto;image-rendering:auto}
             <option value="механічне/опік">механічне/опік</option>
           </select>
           <div class="row" style="margin-top:8px">
-            <button class="btn" id="undo">↩️ Скасувати останнє</button>
-            <button class="btn secondary" id="savePng">⬇️ Зберегти PNG</button>
+            <button type="button" class="btn" id="undo">↩️ Скасувати останнє</button>
+            <button type="button" class="btn secondary" id="savePng">⬇️ Зберегти PNG</button>
           </div>
           <h3 style="margin-top:10px">📋 Докази (анотації)</h3>
           <table class="tbl" id="evTbl">
@@ -137,17 +137,17 @@ canvas{display:block;width:100%;height:auto;image-rendering:auto}
             <tbody></tbody>
           </table>
           <div class="row" style="margin-top:8px">
-            <input id="evDesc" class="input" placeholder="Короткий опис виділеного фрагмента"/>
-            <button class="btn" id="attachDesc">➕ Додати опис до останнього</button>
+            <input id="evDesc" class="input" placeholder="Короткий опис виділеного фрагмента" aria-label="Короткий опис виділеного фрагмента"/>
+            <button type="button" class="btn" id="attachDesc">➕ Додати опис до останнього</button>
           </div>
         </div>
       </div>
 
       <h3 style="margin-top:12px">🧩 Генератор промпта для LLM</h3>
       <div class="row">
-        <button class="btn good" id="genPrompt">⚙️ Згенерувати</button>
-        <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
-        <button class="btn secondary" id="dlPrompt">⬇️ TXT</button>
+        <button type="button" class="btn good" id="genPrompt">⚙️ Згенерувати</button>
+        <button type="button" class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+        <button type="button" class="btn secondary" id="dlPrompt">⬇️ TXT</button>
       </div>
       <pre class="code" id="prompt">// Зроби анотації або натисни «🎲 Демокейс»</pre>
     </div>
@@ -156,9 +156,9 @@ canvas{display:block;width:100%;height:auto;image-rendering:auto}
     <div class="card">
       <h2>🧪 Чекер відповіді ШІ (доказовість)</h2>
       <p class="small muted">Встав відповідь LLM нижче — отримаєш оцінку джерел, ризиків і форматування.</p>
-      <textarea id="llm" class="input" rows="12" placeholder="Встав відповідь ШІ тут..."></textarea>
+      <textarea id="llm" class="input" rows="12" placeholder="Встав відповідь ШІ тут..." aria-label="Встав відповідь ШІ тут..."></textarea>
       <div class="row" style="margin-top:6px">
-        <button class="btn" id="checkLLM">🔍 Перевірити</button>
+        <button type="button" class="btn" id="checkLLM">🔍 Перевірити</button>
         <span id="badgeScore" class="badge">Score: —/100</span>
       </div>
       <table class="tbl" style="margin-top:8px">
@@ -206,11 +206,11 @@ canvas{display:block;width:100%;height:auto;image-rendering:auto}
 
       <h3 style="margin-top:12px">💾 Підсумок/журнал</h3>
       <div class="row">
-        <input id="fio" class="input" placeholder="ПІБ студента"/>
-        <input id="decision" class="input" placeholder="Рішення (коротко)"/>
-        <button class="btn" id="addLog">➕ Додати</button>
-        <button class="btn secondary" id="saveTxt">💾 TXT</button>
-        <button class="btn secondary" id="saveCsv">📄 CSV</button>
+        <input id="fio" class="input" placeholder="ПІБ студента" aria-label="ПІБ студента"/>
+        <input id="decision" class="input" placeholder="Рішення (коротко)" aria-label="Рішення (коротко)"/>
+        <button type="button" class="btn" id="addLog">➕ Додати</button>
+        <button type="button" class="btn secondary" id="saveTxt">💾 TXT</button>
+        <button type="button" class="btn secondary" id="saveCsv">📄 CSV</button>
       </div>
       <div id="log" class="log" aria-live="polite"></div>
 

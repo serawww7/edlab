@@ -41,7 +41,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🗺️🚐</span>
@@ -58,27 +58,27 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <p>Місто змодельоване як <b>граф</b> вузлів/доріг. Додавай виклики (адресні вузли), запускай <b>Автопризначення</b>: алгоритм мінімізує <b>очікування</b> з урахуванням <b>пріоритету</b> і вже взятих завдань у черзі бригади. Після — натисни <b>Старт симуляції</b> і слідкуй за ETA, чергами і <b>SLA</b> (P1≤15 хв, P2≤60 хв, P3≤180 хв).</p>
     <div class="row">
       <label>Вузол адреси
-        <select id="node" class="input"></select>
+        <select id="node" class="input" aria-label="node"></select>
       </label>
       <label>Пріоритет
-        <select id="prio" class="input">
+        <select id="prio" class="input" aria-label="prio">
           <option value="P1">P1 (аварія)</option>
           <option value="P2" selected>P2 (терміново)</option>
           <option value="P3">P3 (планово)</option>
         </select>
       </label>
-      <label>Орієнт. тривалість робіт, хв <input id="dur" class="input" type="number" step="5" value="30"></label>
-      <button class="btn" id="addCall">➕ Додати виклик</button>
-      <button class="btn secondary" id="randomCall">🎲 Рандом (×3)</button>
+      <label>Орієнт. тривалість робіт, хв <input id="dur" class="input" type="number" step="5" value="30" aria-label="dur"></label>
+      <button type="button" class="btn" id="addCall">➕ Додати виклик</button>
+      <button type="button" class="btn secondary" id="randomCall">🎲 Рандом (×3)</button>
       <span class="badge">У черзі викликів: <b id="qCalls">0</b></span>
     </div>
     <div class="row">
-      <button class="btn good" id="assign">🤖 Автопризначення</button>
-      <button class="btn" id="start">▶️ Старт симуляції</button>
-      <button class="btn secondary" id="pause">⏸️ Пауза</button>
-      <button class="btn secondary" id="reset">🔄 Скинути</button>
-      <label>Середня швидкість, км/год <input id="speed" class="input" type="number" step="5" value="30"></label>
-      <label>Дод. затримка (0–1) <input id="delay" class="input" type="number" step="0.05" value="0.15"><small class="muted">ймовірність випадкових затримок</small></label>
+      <button type="button" class="btn good" id="assign">🤖 Автопризначення</button>
+      <button type="button" class="btn" id="start">▶️ Старт симуляції</button>
+      <button type="button" class="btn secondary" id="pause">⏸️ Пауза</button>
+      <button type="button" class="btn secondary" id="reset">🔄 Скинути</button>
+      <label>Середня швидкість, км/год <input id="speed" class="input" type="number" step="5" value="30" aria-label="speed"></label>
+      <label>Дод. затримка (0–1) <input id="delay" class="input" type="number" step="0.05" value="0.15" aria-label="delay"><small class="muted">ймовірність випадкових затримок</small></label>
       <span class="badge">SLA: <b id="sla">—</b></span>
     </div>
   </div>
@@ -111,8 +111,8 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:10px">💾 Експорт</h3>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV (таймлайн)</button>
-        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (таймлайн)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (підсумок)</button>
       </div>
     </div>
   </div>

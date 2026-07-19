@@ -56,7 +56,7 @@ audio{width:100%}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🏭✅</span>
@@ -74,18 +74,18 @@ audio{width:100%}
     <p>Проходимо <b>маршрут безпеки</b> для вводу обладнання в роботу: документи → огляд → герметичність → тяга → CO → пуск → контроль режиму. 
        Фіксуємо <b>тягу (Па)</b> і <b>CO (ppm)</b> з живим графіком, робимо <b>фото</b>, додаємо <b>аудіо-коментар</b>, беремо <b>підпис</b>, формуємо <b>чек 58 мм</b>, експортуємо <b>CSV/TXT</b>, генеруємо <b>QR</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котел/ВБД"/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котел/ВБД" aria-label="м. Тальне, вул. ..., котел/ВБД"/></label>
       <label style="flex:1">Тип обладнання
-        <select id="equip" class="input">
+        <select id="equip" class="input" aria-label="equip">
           <option selected>Котел атмосферний</option><option>Котел із закритою камерою</option><option>ВБД (водонагрівач)</option><option>Інший</option>
         </select>
       </label>
-      <label style="flex:1">Модель<input id="model" class="input" placeholder="Напр. AOGV 11, Bosch W11..."/></label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">Модель<input id="model" class="input" placeholder="Напр. AOGV 11, Bosch W11..." aria-label="Напр. AOGV 11, Bosch W11..."/></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П." aria-label="Прізвище І.П."/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date" aria-label="day"/></label>
     </div>
     <div class="row">
-      <button class="btn good" id="mkCase">🧰 Створити кейс</button>
+      <button type="button" class="btn good" id="mkCase">🧰 Створити кейс</button>
       <span class="badge" id="cid">Кейс: —</span>
     </div>
   </div>
@@ -99,20 +99,20 @@ audio{width:100%}
       <h2 style="margin-top:10px">🛰️ Тяга / CO — емулятори та KPI</h2>
       <div class="block">
         <div class="row">
-          <label style="flex:1">Тяга, Па<input id="draft" type="range" class="input" min="-5" max="30" step="0.1" value="9.5"/></label>
+          <label style="flex:1">Тяга, Па<input id="draft" type="range" class="input" min="-5" max="30" step="0.1" value="9.5" aria-label="draft"/></label>
           <span class="badge">Поточна тяга: <b id="draftNum">9.5</b> Па</span>
-          <button class="btn" id="markDraft">📍 Точка тяги</button>
+          <button type="button" class="btn" id="markDraft">📍 Точка тяги</button>
         </div>
         <div class="row">
-          <label style="flex:1">CO, ppm<input id="co" type="range" class="input" min="0" max="300" step="1" value="12"/></label>
+          <label style="flex:1">CO, ppm<input id="co" type="range" class="input" min="0" max="300" step="1" value="12" aria-label="co"/></label>
           <span class="badge">Поточний CO: <b id="coNum">12</b> ppm</span>
-          <button class="btn" id="markCO">📍 Точка CO</button>
-          <button class="btn secondary" id="clearSeries">🧹 Очистити графік</button>
+          <button type="button" class="btn" id="markCO">📍 Точка CO</button>
+          <button type="button" class="btn secondary" id="clearSeries">🧹 Очистити графік</button>
         </div>
         <div class="row">
-          <label>Мін. тяга, Па<input id="draftMin" class="input" type="number" step="0.1" value="5.0"/></label>
-          <label>Макс. CO, ppm<input id="coMax" class="input" type="number" step="1" value="50"/></label>
-          <button class="btn secondary" id="applyKPI">⚙️ Застосувати KPI</button>
+          <label>Мін. тяга, Па<input id="draftMin" class="input" type="number" step="0.1" value="5.0" aria-label="draft Min"/></label>
+          <label>Макс. CO, ppm<input id="coMax" class="input" type="number" step="1" value="50" aria-label="co Max"/></label>
+          <button type="button" class="btn secondary" id="applyKPI">⚙️ Застосувати KPI</button>
         </div>
         <div class="kpi" style="margin-top:6px">
           <span class="tag ok">KPI тяги: <b id="kDraft">—</b></span>
@@ -124,17 +124,17 @@ audio{width:100%}
       <h2 style="margin-top:10px">📈 Графік (Тяга Па / CO ppm)</h2>
       <div class="canvasWrap"><canvas id="chart" class="chart" width="520" height="240"></canvas></div>
       <div class="row">
-        <button class="btn" id="autoRun">🎛️ Імітувати проміри (10 c)</button>
+        <button type="button" class="btn" id="autoRun">🎛️ Імітувати проміри (10 c)</button>
       </div>
 
       <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
       <div class="row">
         <video id="vid" class="photo" autoplay playsinline muted></video>
         <div>
-          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
-          <button class="btn" data-kind="plate">📷 Табличка обладнання</button>
-          <button class="btn" data-kind="flue">📷 Димохід/канал</button>
-          <button class="btn" data-kind="flame">📷 Полум’я/огляд камери</button><br/>
+          <button type="button" class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button type="button" class="btn" data-kind="plate">📷 Табличка обладнання</button>
+          <button type="button" class="btn" data-kind="flue">📷 Димохід/канал</button>
+          <button type="button" class="btn" data-kind="flame">📷 Полум’я/огляд камери</button><br/>
           <small class="muted">Фото зберігаються у «Галереї доказів».</small>
         </div>
       </div>
@@ -143,9 +143,9 @@ audio{width:100%}
       <h2 style="margin-top:10px">🎙️ Аудіо-коментар до акта</h2>
       <div class="block">
         <div class="row">
-          <button class="btn" id="audStart">⏺️ Запис</button>
-          <button class="btn secondary" id="audStop">⏹️ Стоп</button>
-          <button class="btn" id="audSave">💾 Зберегти</button>
+          <button type="button" class="btn" id="audStart">⏺️ Запис</button>
+          <button type="button" class="btn secondary" id="audStop">⏹️ Стоп</button>
+          <button type="button" class="btn" id="audSave">💾 Зберегти</button>
           <span class="badge" id="audStat">Немає запису</span>
         </div>
         <audio id="audPlay" controls></audio>
@@ -155,8 +155,8 @@ audio{width:100%}
       <div class="sigWrap">
         <canvas id="sig" width="520" height="200"></canvas>
         <div class="row" style="margin-top:6px">
-          <button class="btn" id="sigClear">🧹 Очистити</button>
-          <button class="btn" id="sigSave">💾 Зберегти підпис</button>
+          <button type="button" class="btn" id="sigClear">🧹 Очистити</button>
+          <button type="button" class="btn" id="sigSave">💾 Зберегти підпис</button>
           <span class="badge" id="sigStat">Підпису немає</span>
         </div>
       </div>
@@ -190,10 +190,10 @@ audio{width:100%}
 
       <h2 style="margin-top:10px">💾 Експорт / друк</h2>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV</button>
-        <button class="btn" id="saveTxt">💾 TXT</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (Case)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (Case)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
@@ -252,9 +252,9 @@ function renderSteps(){
     div.innerHTML=`
       <span class="num">${i+1}</span><b>${s.name}</b>
       <span class="badge mono">${s.k}</span>
-      <button class="btn btn-start">▶️ Start</button>
-      <button class="btn secondary btn-stop">⏹️ Stop</button>
-      <button class="btn good btn-done">✅ Done</button>
+      <button type="button" class="btn btn-start">▶️ Start</button>
+      <button type="button" class="btn secondary btn-stop">⏹️ Stop</button>
+      <button type="button" class="btn good btn-done">✅ Done</button>
       <span class="badge">Тривалість: <b class="dur">0</b> с</span>`;
     box.appendChild(div);
   });

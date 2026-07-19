@@ -16,6 +16,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 11 (технологи) — Пакування/Маркування: MAP, EAN-13, термін, холодовий ланцюг, квиток/NFC/CSV</title>
+<meta name="description" content="📦 Пакування/Маркування: MAP/вакуум, етикетка EAN-13, термін, холодовий ланцюг, квиток/NFC/CSV">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -64,7 +65,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 11 · аудиторно · технологи переробки</span>
   <h1>📦 Пакування/Маркування: MAP/вакуум, етикетка EAN-13, термін, холодовий ланцюг, квиток/NFC/CSV</h1>
 
@@ -85,36 +86,36 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Виріб/лот</h3>
         <div class="row">
-          <div style="flex:1"><label>Виріб</label><input id="prodName" type="text" value="Шинка варена “Домашня”"></div>
+          <div style="flex:1"><label for="prodName">Виріб</label><input id="prodName" type="text" value="Шинка варена “Домашня”"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>ЛОТ</label><input id="lot" type="text" value="H-25101-A1"></div>
-          <div style="flex:1"><label>Маса нетто, г</label><input id="netto" type="number" step="1" value="400"></div>
+          <div style="flex:1"><label for="lot">ЛОТ</label><input id="lot" type="text" value="H-25101-A1"></div>
+          <div style="flex:1"><label for="netto">Маса нетто, г</label><input id="netto" type="number" step="1" value="400"></div>
         </div>
       </div>
 
       <div class="box">
         <h3>Режим</h3>
         <div class="row">
-          <div style="flex:1"><label>Тип</label>
+          <div style="flex:1"><label for="pkType">Тип</label>
             <select id="pkType">
               <option selected>Вакуум</option>
               <option>MAP</option>
             </select>
           </div>
-          <div style="flex:1"><label>Вакуум, кПа (мін.)</label><input id="vacReq" type="number" step="0.1" value="30.0"></div>
+          <div style="flex:1"><label for="vacReq">Вакуум, кПа (мін.)</label><input id="vacReq" type="number" step="0.1" value="30.0"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>MAP O₂, %</label><input id="o2" type="number" step="0.1" value="2.0"></div>
-          <div style="flex:1"><label>MAP CO₂, %</label><input id="co2" type="number" step="0.1" value="30.0"></div>
+          <div style="flex:1"><label for="o2">MAP O₂, %</label><input id="o2" type="number" step="0.1" value="2.0"></div>
+          <div style="flex:1"><label for="co2">MAP CO₂, %</label><input id="co2" type="number" step="0.1" value="30.0"></div>
         </div>
       </div>
 
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="evalPack()">✅ Оцінити режим</button>
-          <button class="btn" onclick="copyCSV('csvPack')">📋 CSV (pack)</button>
+          <button type="button" class="btn" onclick="evalPack()">✅ Оцінити режим</button>
+          <button type="button" class="btn" onclick="copyCSV('csvPack')">📋 CSV (pack)</button>
         </div>
         <div id="packOut" class="out" style="margin-top:8px">—</div>
         <div id="csvPack" class="out" style="margin-top:8px">—</div>
@@ -129,33 +130,33 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Поля етикетки</h3>
         <div class="row">
-          <div style="flex:1"><label>Назва продукту</label><input id="lblName" type="text" value="Шинка варена “Домашня”"></div>
-          <div style="flex:1"><label>Виробник</label><input id="lblMfg" type="text" value="ТОВ «Харчі-Експерт»"></div>
+          <div style="flex:1"><label for="lblName">Назва продукту</label><input id="lblName" type="text" value="Шинка варена “Домашня”"></div>
+          <div style="flex:1"><label for="lblMfg">Виробник</label><input id="lblMfg" type="text" value="ТОВ «Харчі-Експерт»"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Склад (скорочено)</label><input id="lblComp" type="text" value="Свинина, сіль, спеції, антиоксидант, стабілізатори (Е451, Е407)."></div>
-          <div style="flex:1"><label>Алергени</label><input id="lblAll" type="text" value="—"></div>
+          <div style="flex:1"><label for="lblComp">Склад (скорочено)</label><input id="lblComp" type="text" value="Свинина, сіль, спеції, антиоксидант, стабілізатори (Е451, Е407)."></div>
+          <div style="flex:1"><label for="lblAll">Алергени</label><input id="lblAll" type="text" value="—"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Умови зберігання</label><input id="lblStg" type="text" value="+0…+6°C"></div>
-          <div style="flex:1"><label>Енергетична цінність (ккал/100г)</label><input id="lblKcal" type="number" step="1" value="220"></div>
+          <div style="flex:1"><label for="lblStg">Умови зберігання</label><input id="lblStg" type="text" value="+0…+6°C"></div>
+          <div style="flex:1"><label for="lblKcal">Енергетична цінність (ккал/100г)</label><input id="lblKcal" type="number" step="1" value="220"></div>
         </div>
       </div>
 
       <div class="box">
         <h3>EAN-13 та дати</h3>
         <div class="row">
-          <div style="flex:1"><label>Префікс EAN-12</label><input id="ean12" type="text" value="482123456789"></div>
-          <div style="flex:1"><label>EAN-13 (контрольна)</label><input id="ean13" type="text" value=""></div>
+          <div style="flex:1"><label for="ean12">Префікс EAN-12</label><input id="ean12" type="text" value="482123456789"></div>
+          <div style="flex:1"><label for="ean13">EAN-13 (контрольна)</label><input id="ean13" type="text" value=""></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Дата виробництва</label><input id="mfgDate" type="date"></div>
-          <div style="flex:1"><label>Вжити до (розрах.)</label><input id="expDate" type="date"></div>
+          <div style="flex:1"><label for="mfgDate">Дата виробництва</label><input id="mfgDate" type="date"></div>
+          <div style="flex:1"><label for="expDate">Вжити до (розрах.)</label><input id="expDate" type="date"></div>
         </div>
         <div class="row" style="margin-top:8px">
-          <button class="btn" onclick="makeEAN()">📐 Обчислити EAN-13</button>
-          <button class="btn" onclick="buildLabel()">🧩 Зібрати етикетку</button>
-          <button class="btn" onclick="copyCSV('csvLabel')">📋 CSV (label)</button>
+          <button type="button" class="btn" onclick="makeEAN()">📐 Обчислити EAN-13</button>
+          <button type="button" class="btn" onclick="buildLabel()">🧩 Зібрати етикетку</button>
+          <button type="button" class="btn" onclick="copyCSV('csvLabel')">📋 CSV (label)</button>
         </div>
         <div id="labelOut" class="out" style="margin-top:8px">—</div>
         <div id="csvLabel" class="out" style="margin-top:8px">—</div>
@@ -167,10 +168,10 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>❄️ Холодовий лог і Q10-оцінка терміну</h2>
     <div class="row">
-      <button class="btn" onclick="addTemp()">➕ Додати запис T–t</button>
-      <button class="btn" onclick="presetTemp()">🧪 Приклад</button>
-      <button class="btn" onclick="calcShelf()">🧮 Розрахувати термін</button>
-      <button class="btn" onclick="copyCSV('csvTemp')">📋 CSV (cold chain)</button>
+      <button type="button" class="btn" onclick="addTemp()">➕ Додати запис T–t</button>
+      <button type="button" class="btn" onclick="presetTemp()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="calcShelf()">🧮 Розрахувати термін</button>
+      <button type="button" class="btn" onclick="copyCSV('csvTemp')">📋 CSV (cold chain)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblTemp">
@@ -198,8 +199,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Параметри тесту</h3>
         <div class="row">
-          <div style="flex:1"><label>Вакуум, кПа (факт)</label><input id="vacFact" type="number" step="0.1" value="31.0"></div>
-          <div style="flex:1"><label>Тест “ванна/бульбашки”</label>
+          <div style="flex:1"><label for="vacFact">Вакуум, кПа (факт)</label><input id="vacFact" type="number" step="0.1" value="31.0"></div>
+          <div style="flex:1"><label for="leak">Тест “ванна/бульбашки”</label>
             <select id="leak"><option>Ні</option><option>Так</option></select>
           </div>
         </div>
@@ -210,8 +211,8 @@ html.embedded .box{background:#f8fafc;color:#111}
         <h3>Оцінка</h3>
         <p>Статус: <b><span id="sealStatus">—</span></b></p>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="evalSeal()">✅ Перевірити</button>
-          <button class="btn" onclick="copyCSV('csvSeal')">📋 CSV (seal)</button>
+          <button type="button" class="btn" onclick="evalSeal()">✅ Перевірити</button>
+          <button type="button" class="btn" onclick="copyCSV('csvSeal')">📋 CSV (seal)</button>
         </div>
         <div id="csvSeal" class="out" style="margin-top:8px">—</div>
       </div>
@@ -219,15 +220,15 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>План палетування</h3>
         <div class="row">
-          <div style="flex:1"><label>Упак./ящик</label><input id="perCase" type="number" step="1" value="24"></div>
-          <div style="flex:1"><label>Ящиків/палета</label><input id="perPallet" type="number" step="1" value="48"></div>
+          <div style="flex:1"><label for="perCase">Упак./ящик</label><input id="perCase" type="number" step="1" value="24"></div>
+          <div style="flex:1"><label for="perPallet">Ящиків/палета</label><input id="perPallet" type="number" step="1" value="48"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>План партії, упак.</label><input id="planPacks" type="number" step="1" value="1200"></div>
+          <div style="flex:1"><label for="planPacks">План партії, упак.</label><input id="planPacks" type="number" step="1" value="1200"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="planPallets()">📦 Розрахувати</button>
-          <button class="btn" onclick="copyCSV('csvPal')">📋 CSV (pallets)</button>
+          <button type="button" class="btn" onclick="planPallets()">📦 Розрахувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvPal')">📋 CSV (pallets)</button>
         </div>
         <div id="palOut" class="out" style="margin-top:8px">—</div>
         <div id="csvPal" class="out" style="margin-top:8px">—</div>
@@ -239,8 +240,8 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал / Квиток 58 мм / QR / NFC</h2>
     <div class="row">
-      <button class="btn" onclick="addLog()">➕ Додати у журнал</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+      <button type="button" class="btn" onclick="addLog()">➕ Додати у журнал</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblLog">
@@ -265,19 +266,19 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>QR-payload</h3>
         <div class="row">
-          <button class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
-          <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
+          <button type="button" class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
         </div>
         <div id="qrOut" class="out">—</div>
 
         <h3 style="margin-top:12px">NFC — “PACK LABEL CARD”</h3>
         <div class="row">
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
-          <div style="flex:1"><label>Оператор</label><input id="nfcOper" type="text" value="Студент ТПТ"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="nfcOper">Оператор</label><input id="nfcOper" type="text" value="Студент ТПТ"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -285,8 +286,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток 58 мм — “PACK & LABEL”</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>PACK & LABEL</h4>
@@ -425,7 +426,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark"><input type="number" step="0.1" value="${s.T}"></td>
       <td class="dark"><input type="number" step="0.1" value="${s.h}"></td>
       <td class="chi">—</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyTemp); calcShelf();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyTemp); calcShelf();">✖</button></td>
     `;
     bodyTemp.appendChild(tr); reindex(bodyTemp); calcShelf();
   }
@@ -512,7 +513,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td>${byId('expDate').value||'—'}</td>
       <td>${chi.replace(/\s+/g,' ')}</td>
       <td>${seal}</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindexLog(); buildLogCSV();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindexLog(); buildLogCSV();">✖</button></td>
     `;
     bodyLog.appendChild(tr); reindexLog(); buildLogCSV();
     updateTicket();

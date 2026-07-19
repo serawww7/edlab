@@ -13,6 +13,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 10 (механіки) — Гідравліка: тиск/витрата, циліндри, клапан, рукава, теплонавантаження, ISO 4406</title>
+<meta name="description" content="💧 Гідравліка: тиск/витрата, циліндри, клапан, рукава, теплонавантаження, ISO 4406">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -58,7 +59,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 10 · аудиторно · механіки</span>
   <h1>💧 Гідравліка: тиск/витрата, циліндри, клапан, рукава, теплонавантаження, ISO 4406</h1>
 
@@ -79,12 +80,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Вихідні</h3>
         <div class="row">
-          <div style="flex:1"><label>Витрата Q, л/хв</label><input id="Q" type="number" step="0.1" value="60"></div>
-          <div style="flex:1"><label>Робочий тиск p, бар</label><input id="Pbar" type="number" step="1" value="180"></div>
+          <div style="flex:1"><label for="Q">Витрата Q, л/хв</label><input id="Q" type="number" step="0.1" value="60"></div>
+          <div style="flex:1"><label for="Pbar">Робочий тиск p, бар</label><input id="Pbar" type="number" step="1" value="180"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Перепад на клапані Δp, бар</label><input id="dP" type="number" step="1" value="10"></div>
-          <div style="flex:1"><label>ККД загальний η</label><input id="eta" type="number" step="0.01" value="0.85"></div>
+          <div style="flex:1"><label for="dP">Перепад на клапані Δp, бар</label><input id="dP" type="number" step="1" value="10"></div>
+          <div style="flex:1"><label for="eta">ККД загальний η</label><input id="eta" type="number" step="0.01" value="0.85"></div>
         </div>
       </div>
       <div class="box">
@@ -96,9 +97,9 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="calcPump()">🔁 Перерахувати</button>
-          <button class="btn" onclick="presetPump()">🧪 Приклад</button>
-          <button class="btn" onclick="copyCSV('csvPump')">📋 CSV (насос)</button>
+          <button type="button" class="btn" onclick="calcPump()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="presetPump()">🧪 Приклад</button>
+          <button type="button" class="btn" onclick="copyCSV('csvPump')">📋 CSV (насос)</button>
         </div>
         <div id="csvPump" class="out" style="margin-top:8px">—</div>
       </div>
@@ -113,12 +114,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Геометрія</h3>
         <div class="row">
-          <div style="flex:1"><label>Ø гільзи D, мм</label><input id="cylD" type="number" step="1" value="80"></div>
-          <div style="flex:1"><label>Ø штока d, мм</label><input id="rodD" type="number" step="1" value="45"></div>
+          <div style="flex:1"><label for="cylD">Ø гільзи D, мм</label><input id="cylD" type="number" step="1" value="80"></div>
+          <div style="flex:1"><label for="rodD">Ø штока d, мм</label><input id="rodD" type="number" step="1" value="45"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Хід L, мм</label><input id="stroke" type="number" step="1" value="500"></div>
-          <div style="flex:1"><label>Тиск p, бар</label><input id="cylP" type="number" step="1" value="180"></div>
+          <div style="flex:1"><label for="stroke">Хід L, мм</label><input id="stroke" type="number" step="1" value="500"></div>
+          <div style="flex:1"><label for="cylP">Тиск p, бар</label><input id="cylP" type="number" step="1" value="180"></div>
         </div>
       </div>
       <div class="box">
@@ -131,9 +132,9 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="calcCyl()">🔁 Перерахувати</button>
-          <button class="btn" onclick="presetCyl()">🧪 Приклад</button>
-          <button class="btn" onclick="copyCSV('csvCyl')">📋 CSV (циліндр)</button>
+          <button type="button" class="btn" onclick="calcCyl()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="presetCyl()">🧪 Приклад</button>
+          <button type="button" class="btn" onclick="copyCSV('csvCyl')">📋 CSV (циліндр)</button>
         </div>
         <div id="csvCyl" class="out" style="margin-top:8px">—</div>
       </div>
@@ -148,12 +149,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Вихідні</h3>
         <div class="row">
-          <div style="flex:1"><label>Бажане p(клап.), бар</label><input id="reliefSet" type="number" step="1" value="190"></div>
-          <div style="flex:1"><label>Вимір під навантаженням, бар</label><input id="reliefMeas" type="number" step="1" value="184"></div>
+          <div style="flex:1"><label for="reliefSet">Бажане p(клап.), бар</label><input id="reliefSet" type="number" step="1" value="190"></div>
+          <div style="flex:1"><label for="reliefMeas">Вимір під навантаженням, бар</label><input id="reliefMeas" type="number" step="1" value="184"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Допуск, ±бар</label><input id="reliefTol" type="number" step="1" value="10"></div>
-          <div style="flex:1"><label>Падіння до клапана, бар</label><input id="preDrop" type="number" step="1" value="6"></div>
+          <div style="flex:1"><label for="reliefTol">Допуск, ±бар</label><input id="reliefTol" type="number" step="1" value="10"></div>
+          <div style="flex:1"><label for="preDrop">Падіння до клапана, бар</label><input id="preDrop" type="number" step="1" value="6"></div>
         </div>
       </div>
       <div class="box">
@@ -165,8 +166,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="calcRelief()">🔁 Перерахувати</button>
-          <button class="btn" onclick="copyCSV('csvRelief')">📋 CSV (клапан)</button>
+          <button type="button" class="btn" onclick="calcRelief()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvRelief')">📋 CSV (клапан)</button>
         </div>
         <div id="csvRelief" class="out" style="margin-top:8px">—</div>
       </div>
@@ -180,12 +181,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Вихідні</h3>
         <div class="row">
-          <div style="flex:1"><label>Витрата Q, л/хв</label><input id="hoseQ" type="number" step="0.1" value="60"></div>
-          <div style="flex:1"><label>Внутр. діаметр D, мм</label><input id="hoseD" type="number" step="0.1" value="12"></div>
+          <div style="flex:1"><label for="hoseQ">Витрата Q, л/хв</label><input id="hoseQ" type="number" step="0.1" value="60"></div>
+          <div style="flex:1"><label for="hoseD">Внутр. діаметр D, мм</label><input id="hoseD" type="number" step="0.1" value="12"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Гранична швидк., м/с</label><input id="vLim" type="number" step="0.1" value="5.0"></div>
-          <div style="flex:1"><label>Режим</label>
+          <div style="flex:1"><label for="vLim">Гранична швидк., м/с</label><input id="vLim" type="number" step="0.1" value="5.0"></div>
+          <div style="flex:1"><label for="hoseMode">Режим</label>
             <select id="hoseMode">
               <option value="pressure" selected>Напірна лінія (рекоменд. 3–5 м/с)</option>
               <option value="return">Злив (рекоменд. 2–3 м/с)</option>
@@ -203,8 +204,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="calcHose()">🔁 Перерахувати</button>
-          <button class="btn" onclick="copyCSV('csvHose')">📋 CSV (рукав)</button>
+          <button type="button" class="btn" onclick="calcHose()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvHose')">📋 CSV (рукав)</button>
         </div>
         <div id="csvHose" class="out" style="margin-top:8px">—</div>
       </div>
@@ -219,12 +220,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Лічильник частинок</h3>
         <div class="row">
-          <div style="flex:1"><label>≥4 μm, кількість/мл</label><input id="c4" type="number" step="1" value="8000"></div>
-          <div style="flex:1"><label>≥6 μm, кількість/мл</label><input id="c6" type="number" step="1" value="1600"></div>
+          <div style="flex:1"><label for="c4">≥4 μm, кількість/мл</label><input id="c4" type="number" step="1" value="8000"></div>
+          <div style="flex:1"><label for="c6">≥6 μm, кількість/мл</label><input id="c6" type="number" step="1" value="1600"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>≥14 μm, кількість/мл</label><input id="c14" type="number" step="1" value="200"></div>
-          <div style="flex:1"><label>Цільовий код (напр. 18/16/13)</label><input id="isoTarget" type="text" value="18/16/13"></div>
+          <div style="flex:1"><label for="c14">≥14 μm, кількість/мл</label><input id="c14" type="number" step="1" value="200"></div>
+          <div style="flex:1"><label for="isoTarget">Цільовий код (напр. 18/16/13)</label><input id="isoTarget" type="text" value="18/16/13"></div>
         </div>
       </div>
       <div class="box">
@@ -236,8 +237,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="calcISO()">🔁 Перерахувати</button>
-          <button class="btn" onclick="copyCSV('csvISO')">📋 CSV (ISO)</button>
+          <button type="button" class="btn" onclick="calcISO()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvISO')">📋 CSV (ISO)</button>
         </div>
         <div id="csvISO" class="out" style="margin-top:8px">—</div>
       </div>
@@ -249,9 +250,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал вимірів</h2>
     <div class="row">
-      <button class="btn" onclick="addRow()">➕ Додати запис</button>
-      <button class="btn" onclick="presetRows()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
+      <button type="button" class="btn" onclick="addRow()">➕ Додати запис</button>
+      <button type="button" class="btn" onclick="presetRows()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tbl">
@@ -283,12 +284,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>NFC — “HYDRO CHECK”</h3>
         <div class="row">
-          <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="nfcId">Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -296,8 +297,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток “HYDRO CHECK”</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>HYDRO CHECK</h4>

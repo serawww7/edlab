@@ -11,6 +11,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Електрики · Пара 19 — LOTO та Дозвіл на роботи (PTW)</title>
+<meta name="description" content="🔒 LOTO та «Дозвіл на роботи» (PTW): чек-листи → точки ізоляції → 58 мм → A4 → .csv → .ics">
 <meta name="color-scheme" content="light dark"/>
 <style>
 :root{
@@ -70,7 +71,7 @@ tbody tr:nth-child(even){background:#0b1324}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Електрики · Пара 19 · аудиторно</span>
   <h1>🔒 LOTO та «Дозвіл на роботи» (PTW): чек-листи → точки ізоляції → 58 мм → A4 → .csv → .ics</h1>
 
@@ -79,11 +80,11 @@ tbody tr:nth-child(even){background:#0b1324}
     <p>Змоделювати процес <b>LOTO</b>: створити дозвіл на роботи (PTW), зафіксувати <b>точки ізоляції</b>, сформувати <b>чек-листи</b>, 
       згенерувати <b>наклейки 58 мм</b> для бірок/замків, <b>A4-документ</b> для друку/підписів, експорт <b>CSV</b> та <b>.ics</b> події.</p>
     <div class="row">
-      <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
-      <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-      <input id="file" class="btn" type="file" accept=".csv,text/csv"/>
-      <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
-      <button class="btn" onclick="downloadICS()">📅 .ics для календаря</button>
+      <button type="button" class="btn" onclick="seedDemo()">🔄 Приклад</button>
+      <button type="button" class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+      <input id="file" class="btn" type="file" accept=".csv,text/csv" aria-label="file"/>
+      <button type="button" class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+      <button type="button" class="btn" onclick="downloadICS()">📅 .ics для календаря</button>
     </div>
     <p class="small">CSV: <span class="mono">ptw_id,job_title,location,requester,issuer,team,window_start,window_end,risk_level,work_type,notes,url,iso_points,precheck,postcheck</span></p>
   </div>
@@ -93,25 +94,25 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="grid g3">
       <div>
         <h3>Основне</h3>
-        <div class="row"><label class="small" style="min-width:140px">PTW ID</label><input id="ptw_id" value="PTW-001"></div>
-        <div class="row"><label class="small" style="min-width:140px">Робота</label><input id="job_title" value="Заміна автомата C16"></div>
-        <div class="row"><label class="small" style="min-width:140px">Локація</label><input id="location" value="ЩО-1 · Корпус А"></div>
-        <div class="row"><label class="small" style="min-width:140px">Тип робіт</label><select id="work_type">
+        <div class="row"><label class="small" style="min-width:140px" for="ptw_id">PTW ID</label><input id="ptw_id" value="PTW-001"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="job_title">Робота</label><input id="job_title" value="Заміна автомата C16"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="location">Локація</label><input id="location" value="ЩО-1 · Корпус А"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="work_type">Тип робіт</label><select id="work_type">
           <option selected>Електромонтаж</option><option>Огляд/ТО</option><option>Вимірювання</option><option>Прибирання зони</option></select></div>
       </div>
       <div>
         <h3>Відповідальні</h3>
-        <div class="row"><label class="small" style="min-width:140px">Замовник</label><input id="requester" value="Викл. Сергій"></div>
-        <div class="row"><label class="small" style="min-width:140px">Дозвіл видав</label><input id="issuer" value="Староста групи"></div>
-        <div class="row"><label class="small" style="min-width:140px">Команда</label><input id="team" value="Студенти гр. ЕЛ-21 (2 ос.)"></div>
-        <div class="row"><label class="small" style="min-width:140px">Ризик</label><select id="risk_level"><option>Низький</option><option selected>Середній</option><option>Високий</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px" for="requester">Замовник</label><input id="requester" value="Викл. Сергій"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="issuer">Дозвіл видав</label><input id="issuer" value="Староста групи"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="team">Команда</label><input id="team" value="Студенти гр. ЕЛ-21 (2 ос.)"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="risk_level">Ризик</label><select id="risk_level"><option>Низький</option><option selected>Середній</option><option>Високий</option></select></div>
       </div>
       <div>
         <h3>Вікно виконання</h3>
-        <div class="row"><label class="small" style="min-width:140px">Старт</label><input id="window_start" value="2025-10-20 09:00"></div>
-        <div class="row"><label class="small" style="min-width:140px">Кінець</label><input id="window_end" value="2025-10-20 11:00"></div>
-        <div class="row"><label class="small" style="min-width:140px">URL/QR (інструкція)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
-        <div class="row"><label class="small" style="min-width:140px">Примітка</label><input id="notes" placeholder="ЗІЗ, зона, сторонні"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="window_start">Старт</label><input id="window_start" value="2025-10-20 09:00"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="window_end">Кінець</label><input id="window_end" value="2025-10-20 11:00"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="url">URL/QR (інструкція)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
+        <div class="row"><label class="small" style="min-width:140px" for="notes">Примітка</label><input id="notes" placeholder="ЗІЗ, зона, сторонні"></div>
       </div>
     </div>
   </div>
@@ -121,11 +122,11 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="grid g2">
       <div>
         <h3>Додати точку</h3>
-        <div class="row"><label class="small" style="min-width:140px">ID точки</label><input id="iso_id" value="ISO-01"></div>
-        <div class="row"><label class="small" style="min-width:140px">Опис</label><input id="iso_desc" value="Автомат C16, комірка 4"></div>
-        <div class="row"><label class="small" style="min-width:140px">Дія</label><select id="iso_action"><option selected>Вимкнути</option><option>Витягти плавку вставку</option><option>Роз'єднати штепсель</option><option>Закоротити/заземлити</option></select></div>
-        <div class="row"><label class="small" style="min-width:140px">Замок/Бірка</label><input id="iso_tag" value="Замок LOTO #12"></div>
-        <div class="row"><button class="btn" onclick="addIso()">➕ Додати</button></div>
+        <div class="row"><label class="small" style="min-width:140px" for="iso_id">ID точки</label><input id="iso_id" value="ISO-01"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="iso_desc">Опис</label><input id="iso_desc" value="Автомат C16, комірка 4"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="iso_action">Дія</label><select id="iso_action"><option selected>Вимкнути</option><option>Витягти плавку вставку</option><option>Роз'єднати штепсель</option><option>Закоротити/заземлити</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px" for="iso_tag">Замок/Бірка</label><input id="iso_tag" value="Замок LOTO #12"></div>
+        <div class="row"><button type="button" class="btn" onclick="addIso()">➕ Додати</button></div>
       </div>
       <div>
         <h3>Список</h3>
@@ -143,13 +144,13 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="grid g2">
       <div>
         <h3>Перед початком</h3>
-        <textarea id="precheck"></textarea>
-        <div class="row"><button class="btn" onclick="loadTemplate('pre')">📥 Шаблон</button></div>
+        <textarea id="precheck" aria-label="precheck"></textarea>
+        <div class="row"><button type="button" class="btn" onclick="loadTemplate('pre')">📥 Шаблон</button></div>
       </div>
       <div>
         <h3>Після завершення</h3>
-        <textarea id="postcheck"></textarea>
-        <div class="row"><button class="btn" onclick="loadTemplate('post')">📥 Шаблон</button></div>
+        <textarea id="postcheck" aria-label="postcheck"></textarea>
+        <div class="row"><button type="button" class="btn" onclick="loadTemplate('post')">📥 Шаблон</button></div>
       </div>
     </div>
   </div>
@@ -157,9 +158,9 @@ tbody tr:nth-child(even){background:#0b1324}
   <div class="card printable">
     <h2>🧾 Наклейки 58 мм «LOTO / PTW»</h2>
     <div class="row">
-      <button class="btn" onclick="buildTickets()">🧩 Згенерувати</button>
-      <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
-      <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+      <button type="button" class="btn" onclick="buildTickets()">🧩 Згенерувати</button>
+      <button type="button" class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+      <button type="button" class="btn" onclick="downloadTXT()">📥 TXT</button>
     </div>
     <div id="tickets" class="tickets"></div>
   </div>
@@ -167,8 +168,8 @@ tbody tr:nth-child(even){background:#0b1324}
   <div class="card printable">
     <h2>📄 A4 «Дозвіл на роботи»</h2>
     <div class="row">
-      <button class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
-      <button class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
+      <button type="button" class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
+      <button type="button" class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
     </div>
     <div id="printArea"></div>
   </div>
@@ -231,7 +232,7 @@ tbody tr:nth-child(even){background:#0b1324}
         <td class="editable" data-k="desc" data-id="${p.id}">${esc(p.desc)}</td>
         <td class="editable" data-k="action" data-id="${p.id}">${esc(p.action)}</td>
         <td class="editable" data-k="tag" data-id="${p.id}">${esc(p.tag)}</td>
-        <td class="mono"><button class="btn" data-act="del" data-id="${p.id}">✖</button></td>`;
+        <td class="mono"><button type="button" class="btn" data-act="del" data-id="${p.id}">✖</button></td>`;
       isoBody.appendChild(tr);
     });
   }

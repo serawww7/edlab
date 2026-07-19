@@ -62,7 +62,7 @@ textarea{width:100%;min-height:64px;resize:vertical;background:#0b1528;color:#e6
     </div>
   </header>
 
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <section class="card">
       <div class="row">
         <div>
@@ -77,10 +77,10 @@ textarea{width:100%;min-height:64px;resize:vertical;background:#0b1528;color:#e6
         <div class="controls">
           <h3>Експорт / Друк</h3>
           <div class="btn-row">
-            <button class="btn" id="exportTxt">⬇️ Експорт .txt</button>
-            <button class="btn" id="printPage">🖨️ Друк</button>
-            <button class="btn" id="copyAll">📋 Копіювати все</button>
-            <button class="btn" id="clearAll">🗑️ Очистити</button>
+            <button type="button" class="btn" id="exportTxt">⬇️ Експорт .txt</button>
+            <button type="button" class="btn" id="printPage">🖨️ Друк</button>
+            <button type="button" class="btn" id="copyAll">📋 Копіювати все</button>
+            <button type="button" class="btn" id="clearAll">🗑️ Очистити</button>
           </div>
           <div style="margin-top:8px" class="timer"><span class="dot"></span><span id="timerNote">Таймери блоків: 1–2 хв кожен</span></div>
         </div>
@@ -99,22 +99,22 @@ textarea{width:100%;min-height:64px;resize:vertical;background:#0b1528;color:#e6
             <span class="timer">⏱ <span class="t" id="t-env">00:00</span></span>
           </div>
           <div class="q">Коли я був дитиною, моя родина …</div>
-          <textarea id="env1" placeholder="Продовж фразу…"></textarea>
+          <textarea id="env1" placeholder="Продовж фразу…" aria-label="Продовж фразу…"></textarea>
           <div class="q">Моя родина поводиться зі мною як з …</div>
-          <textarea id="env2" placeholder="Продовж фразу…"></textarea>
+          <textarea id="env2" placeholder="Продовж фразу…" aria-label="Продовж фразу…"></textarea>
           <div class="q">Люблю вчитися (працювати) з людьми, які …</div>
-          <textarea id="env3" placeholder="Продовж фразу…"></textarea>
+          <textarea id="env3" placeholder="Продовж фразу…" aria-label="Продовж фразу…"></textarea>
           <div class="q">Не люблю людей, які …</div>
-          <textarea id="env4" placeholder="Продовж фразу…"></textarea>
+          <textarea id="env4" placeholder="Продовж фразу…" aria-label="Продовж фразу…"></textarea>
           <div class="q">Коли мені не таланить, я …</div>
-          <textarea id="env5" placeholder="Продовж фразу…"></textarea>
+          <textarea id="env5" placeholder="Продовж фразу…" aria-label="Продовж фразу…"></textarea>
           <div class="q">Якщо всі проти мене, то …</div>
-          <textarea id="env6" placeholder="Продовж фразу…"></textarea>
+          <textarea id="env6" placeholder="Продовж фразу…" aria-label="Продовж фразу…"></textarea>
           <div class="q">Найбільший вплив на мене зараз має … <span class="badge">додаткове</span></div>
-          <textarea id="env7" placeholder="Коротко…"></textarea>
+          <textarea id="env7" placeholder="Коротко…" aria-label="Коротко…"></textarea>
           <div class="btn-row">
-            <button class="btn" data-timer="t-env">▶️ Старт 2 хв</button>
-            <button class="btn" data-next="#beh">Далі → Поведінка</button>
+            <button type="button" class="btn" data-timer="t-env">▶️ Старт 2 хв</button>
+            <button type="button" class="btn" data-next="#beh">Далі → Поведінка</button>
           </div>
         </div>
 
@@ -125,14 +125,14 @@ textarea{width:100%;min-height:64px;resize:vertical;background:#0b1528;color:#e6
             <span class="timer">⏱ <span class="t" id="t-beh">00:00</span></span>
           </div>
           <div class="q">Саме гірше, що мені траплялося робити, це …</div>
-          <textarea id="beh1" placeholder="Продовж фразу…"></textarea>
+          <textarea id="beh1" placeholder="Продовж фразу…" aria-label="Продовж фразу…"></textarea>
           <div class="q">Коли я був дитиною, то відчував … (і діяв так: …)</div>
-          <textarea id="beh2" placeholder="Продовж фразу…"></textarea>
+          <textarea id="beh2" placeholder="Продовж фразу…" aria-label="Продовж фразу…"></textarea>
           <div class="q">Те, що я роблю регулярно і чим пишаюсь — це … <span class="badge">додаткове</span></div>
-          <textarea id="beh3" placeholder="Коротко…"></textarea>
+          <textarea id="beh3" placeholder="Коротко…" aria-label="Коротко…"></textarea>
           <div class="btn-row">
-            <button class="btn" data-timer="t-beh">▶️ Старт 2 хв</button>
-            <button class="btn" data-next="#cap">Далі → Здібності/Стратегії</button>
+            <button type="button" class="btn" data-timer="t-beh">▶️ Старт 2 хв</button>
+            <button type="button" class="btn" data-next="#cap">Далі → Здібності/Стратегії</button>
           </div>
         </div>
 
@@ -143,14 +143,14 @@ textarea{width:100%;min-height:64px;resize:vertical;background:#0b1528;color:#e6
             <span class="timer">⏱ <span class="t" id="t-cap">00:00</span></span>
           </div>
           <div class="q">Щоб туди дійти, мені потрібно в першу чергу …</div>
-          <textarea id="cap1" placeholder="Продовж фразу…"></textarea>
+          <textarea id="cap1" placeholder="Продовж фразу…" aria-label="Продовж фразу…"></textarea>
           <div class="q">Якщо хтось із колег/керівників помічає мене, то він/вона скаже, що я …</div>
-          <textarea id="cap2" placeholder="Продовж фразу…"></textarea>
+          <textarea id="cap2" placeholder="Продовж фразу…" aria-label="Продовж фразу…"></textarea>
           <div class="q">Моє сильне вміння, яке допомагає іншим — це … <span class="badge">додаткове</span></div>
-          <textarea id="cap3" placeholder="Коротко…"></textarea>
+          <textarea id="cap3" placeholder="Коротко…" aria-label="Коротко…"></textarea>
           <div class="btn-row">
-            <button class="btn" data-timer="t-cap">▶️ Старт 2 хв</button>
-            <button class="btn" data-next="#val">Далі → Переконання і Цінності</button>
+            <button type="button" class="btn" data-timer="t-cap">▶️ Старт 2 хв</button>
+            <button type="button" class="btn" data-next="#val">Далі → Переконання і Цінності</button>
           </div>
         </div>
 
@@ -161,14 +161,14 @@ textarea{width:100%;min-height:64px;resize:vertical;background:#0b1528;color:#e6
             <span class="timer">⏱ <span class="t" id="t-val">00:00</span></span>
           </div>
           <div class="q">Думаю, що мій батько … (навчив мене важливому: …)</div>
-          <textarea id="val1" placeholder="Продовж фразу…"></textarea>
+          <textarea id="val1" placeholder="Продовж фразу…" aria-label="Продовж фразу…"></textarea>
           <div class="q">Я міг би бути дуже щасливим, якби …</div>
-          <textarea id="val2" placeholder="Продовж фразу…"></textarea>
+          <textarea id="val2" placeholder="Продовж фразу…" aria-label="Продовж фразу…"></textarea>
           <div class="q">Найважливіше, що я хочу передати іншим через свою роботу — це … <span class="badge">додаткове</span></div>
-          <textarea id="val3" placeholder="Коротко…"></textarea>
+          <textarea id="val3" placeholder="Коротко…" aria-label="Коротко…"></textarea>
           <div class="btn-row">
-            <button class="btn" data-timer="t-val">▶️ Старт 2 хв</button>
-            <button class="btn" data-next="#idn">Далі → Ідентичність</button>
+            <button type="button" class="btn" data-timer="t-val">▶️ Старт 2 хв</button>
+            <button type="button" class="btn" data-next="#idn">Далі → Ідентичність</button>
           </div>
         </div>
 
@@ -179,12 +179,12 @@ textarea{width:100%;min-height:64px;resize:vertical;background:#0b1528;color:#e6
             <span class="timer">⏱ <span class="t" id="t-idn">00:00</span></span>
           </div>
           <div class="q">Через 5 років я бачу себе …</div>
-          <textarea id="idn1" placeholder="Продовж фразу…"></textarea>
+          <textarea id="idn1" placeholder="Продовж фразу…" aria-label="Продовж фразу…"></textarea>
           <div class="q">Я вважаю себе людиною, яка … <span class="badge">додаткове</span></div>
-          <textarea id="idn2" placeholder="Коротко…"></textarea>
+          <textarea id="idn2" placeholder="Коротко…" aria-label="Коротко…"></textarea>
           <div class="btn-row">
-            <button class="btn" data-timer="t-idn">▶️ Старт 2 хв</button>
-            <button class="btn" data-next="#mis">Далі → Місія / Покликання</button>
+            <button type="button" class="btn" data-timer="t-idn">▶️ Старт 2 хв</button>
+            <button type="button" class="btn" data-next="#mis">Далі → Місія / Покликання</button>
           </div>
         </div>
 
@@ -195,14 +195,14 @@ textarea{width:100%;min-height:64px;resize:vertical;background:#0b1528;color:#e6
             <span class="timer">⏱ <span class="t" id="t-mis">00:00</span></span>
           </div>
           <div class="q">Якби я мав необмежений ресурс (час, кошти, знання), я б зробив …</div>
-          <textarea id="mis1" placeholder="Продовж фразу…"></textarea>
+          <textarea id="mis1" placeholder="Продовж фразу…" aria-label="Продовж фразу…"></textarea>
           <div class="q">Більше за все я хотів би в житті …</div>
-          <textarea id="mis2" placeholder="Продовж фразу…"></textarea>
+          <textarea id="mis2" placeholder="Продовж фразу…" aria-label="Продовж фразу…"></textarea>
           <div class="q">Я роблю це, щоб … (для кого / для чого) <span class="badge">додаткове</span></div>
-          <textarea id="mis3" placeholder="Коротко…"></textarea>
+          <textarea id="mis3" placeholder="Коротко…" aria-label="Коротко…"></textarea>
           <div class="btn-row">
-            <button class="btn" data-timer="t-mis">▶️ Старт 2 хв</button>
-            <button class="btn" id="toTop">⏫ До початку</button>
+            <button type="button" class="btn" data-timer="t-mis">▶️ Старт 2 хв</button>
+            <button type="button" class="btn" id="toTop">⏫ До початку</button>
           </div>
         </div>
 
@@ -218,8 +218,8 @@ textarea{width:100%;min-height:64px;resize:vertical;background:#0b1528;color:#e6
         <li>У фіналі підкресли: «Від зовнішнього — до внутрішнього і далі — до сенсу».</li>
       </ul>
       <div class="btn-row">
-        <button class="btn" id="makeSummary">🧾 Згенерувати підсумок</button>
-        <button class="btn" id="exportTxt2">⬇️ Експорт підсумку</button>
+        <button type="button" class="btn" id="makeSummary">🧾 Згенерувати підсумок</button>
+        <button type="button" class="btn" id="exportTxt2">⬇️ Експорт підсумку</button>
       </div>
       <div id="summary" class="kbd" style="margin-top:10px;display:none;white-space:pre-wrap"></div>
     </section>

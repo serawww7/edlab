@@ -50,7 +50,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🫧</span>
@@ -69,13 +69,13 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       за допомогою емулятора (слайдер → легко замінити на значення з <b>Arduino/MQ-4</b>), фіксуємо <b>графік</b> і час вище порогів, 
       робимо <b>SOAP-тест</b> (бульбашки/немає), додаємо <b>фото</b> і <b>аудіо-коментар</b>, формуємо <b>чек 58 мм</b>, <b>CSV/TXT</b>, <b>QR</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., під’їзд/квартира"/></label>
-      <label style="flex:1">Зона/вузол<input id="zone" class="input" placeholder="Кран перед плитою / різьбове з’єднання"/></label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., під’їзд/квартира" aria-label="м. Тальне, вул. ..., під’їзд/квартира"/></label>
+      <label style="flex:1">Зона/вузол<input id="zone" class="input" placeholder="Кран перед плитою / різьбове з’єднання" aria-label="Кран перед плитою / різьбове з’єднання"/></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П." aria-label="Прізвище І.П."/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date" aria-label="day"/></label>
     </div>
     <div class="row">
-      <button class="btn good" id="mkCase">🧰 Створити кейс</button>
+      <button type="button" class="btn good" id="mkCase">🧰 Створити кейс</button>
       <span class="badge" id="cid">Кейс: —</span>
     </div>
   </div>
@@ -85,16 +85,16 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
     <div class="card">
       <h2>🛰️ Сенсор CH₄ (емулятор)</h2>
       <div class="row">
-        <input type="range" id="ppm" class="input" min="0" max="1000" step="5" value="25" style="flex:1"/>
+        <input type="range" id="ppm" class="input" min="0" max="1000" step="5" value="25" style="flex:1" aria-label="ppm"/>
         <span class="badge">Поточне: <b id="ppmNum">25</b> ppm</span>
-        <button class="btn" id="ppmMark">📍 Додати точку</button>
-        <button class="btn secondary" id="ppmClear">🧹 Очистити графік</button>
+        <button type="button" class="btn" id="ppmMark">📍 Додати точку</button>
+        <button type="button" class="btn secondary" id="ppmClear">🧹 Очистити графік</button>
       </div>
       <div class="row">
-        <label>Info (ppm)<input id="thInfo" type="number" class="input" min="0" step="5" value="50"/></label>
-        <label>Warning (ppm)<input id="thWarn" type="number" class="input" min="0" step="5" value="200"/></label>
-        <label>Alarm (ppm)<input id="thAlarm" type="number" class="input" min="0" step="5" value="500"/></label>
-        <button class="btn secondary" id="applyTh">⚙️ Застосувати пороги</button>
+        <label>Info (ppm)<input id="thInfo" type="number" class="input" min="0" step="5" value="50" aria-label="th Info"/></label>
+        <label>Warning (ppm)<input id="thWarn" type="number" class="input" min="0" step="5" value="200" aria-label="th Warn"/></label>
+        <label>Alarm (ppm)<input id="thAlarm" type="number" class="input" min="0" step="5" value="500" aria-label="th Alarm"/></label>
+        <button type="button" class="btn secondary" id="applyTh">⚙️ Застосувати пороги</button>
       </div>
       <div class="kpi" style="margin-top:6px">
         <span class="tag ok">⏱️ Час >Info: <b id="tInfo">0</b> с</span>
@@ -105,12 +105,12 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 
       <h2 style="margin-top:10px">🫧 SOAP-тест (піна)</h2>
       <div class="row">
-        <select id="soap" class="input" style="max-width:260px">
+        <select id="soap" class="input" style="max-width:260px" aria-label="soap">
           <option value="none" selected>— Обери результат —</option>
           <option value="bubbles">Видимі бульбашки</option>
           <option value="no-bubbles">Бульбашок немає</option>
         </select>
-        <button class="btn" id="soapMark">✅ Підтвердити</button>
+        <button type="button" class="btn" id="soapMark">✅ Підтвердити</button>
         <span class="badge" id="soapState">—</span>
       </div>
 
@@ -118,9 +118,9 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <div class="row">
         <video id="vid" class="photo" autoplay playsinline muted></video>
         <div>
-          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
-          <button class="btn" data-kind="area">📷 Місце перевірки</button>
-          <button class="btn" data-kind="manometer">📷 Прилад/манометр</button><br/>
+          <button type="button" class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button type="button" class="btn" data-kind="area">📷 Місце перевірки</button>
+          <button type="button" class="btn" data-kind="manometer">📷 Прилад/манометр</button><br/>
           <small class="muted">Фото зберігаються в «Галереї доказів».</small>
         </div>
       </div>
@@ -128,8 +128,8 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 
       <h2 style="margin-top:10px">🎙️ Аудіо-коментар</h2>
       <div class="row">
-        <button class="btn" id="recStart">⏺️ Запис</button>
-        <button class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
+        <button type="button" class="btn" id="recStart">⏺️ Запис</button>
+        <button type="button" class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
         <span class="badge" id="rstat">Немає запису</span>
       </div>
       <audio id="player" controls style="margin-top:8px;max-width:100%"></audio>
@@ -137,9 +137,9 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2 style="margin-top:10px">📶 NFC / ID об’єкта</h2>
       <div class="block">
         <div class="row">
-          <button class="btn" id="nfcBtn">📶 NFC</button>
-          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)"/>
-          <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
+          <button type="button" class="btn" id="nfcBtn">📶 NFC</button>
+          <input id="asset" class="input" placeholder="ID об’єкта (якщо NFC недоступний)" aria-label="ID об’єкта (якщо NFC недоступний)"/>
+          <button type="button" class="btn secondary" id="saveAsset">💾 Застосувати</button>
           <span class="badge" id="nfcs">Статус NFC: очікується</span>
         </div>
       </div>
@@ -173,10 +173,10 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 
       <h2 style="margin-top:10px">💾 Експорт / друк</h2>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV (серія вимірів + події)</button>
-        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (серія вимірів + події)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>

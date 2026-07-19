@@ -45,7 +45,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧼</span>
@@ -102,18 +102,19 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>🧾 Ввід текстів SSOP/журналів</h2>
       <div class="row">
-        <button class="btn" id="ex1">🧪 Приклади (3 кейси)</button>
-        <button class="btn secondary" id="clr">🧹 Очистити</button>
+        <button type="button" class="btn" id="ex1">🧪 Приклади (3 кейси)</button>
+        <button type="button" class="btn secondary" id="clr">🧹 Очистити</button>
         <span class="badge" id="count">Записів: 0</span>
       </div>
       <textarea id="txt" placeholder="Встав сюди кілька записів (по одному в рядок або розділяй пустим рядком). Приклад: 
 2025-10-18 06:40 · Зона фасування (йогурт): CIP лінії С. Лужний 2.0 %, 55 °C, 12 хв, валідація ОК. Оператор: Пилипчук.
-"></textarea>
+" aria-label="Встав сюди кілька записів (по одному в рядок або розділяй пустим рядком). Приклад: 
+2025-10-18 06:40 · Зона фасування (йогурт): CIP лінії С. Лужний 2.0 %, 55 °C, 12 хв, валідація ОК. Оператор: Пилипчук."></textarea>
       <div class="row">
-        <label>Ліміт концентрації, % (лужні/кислотні)<input id="limConc" class="input" type="number" step="0.1" value="1.5"></label>
-        <label>Ліміт температури, °C<input id="limT" class="input" type="number" step="0.1" value="50"></label>
-        <label>Ліміт часу контакту, хв<input id="limMin" class="input" type="number" step="0.5" value="10"></label>
-        <button class="btn good" id="an">🔎 Проаналізувати NLP</button>
+        <label>Ліміт концентрації, % (лужні/кислотні)<input id="limConc" class="input" type="number" step="0.1" value="1.5" aria-label="lim Conc"></label>
+        <label>Ліміт температури, °C<input id="limT" class="input" type="number" step="0.1" value="50" aria-label="lim T"></label>
+        <label>Ліміт часу контакту, хв<input id="limMin" class="input" type="number" step="0.5" value="10" aria-label="lim Min"></label>
+        <button type="button" class="btn good" id="an">🔎 Проаналізувати NLP</button>
       </div>
 
       <h3 style="margin-top:10px">🔬 Витягнуті сутності</h3>
@@ -137,10 +138,14 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:10px">🧠 CAPA-план (авто/ручний)</h3>
       <div class="row">
-        <button class="btn" id="genCapa">🤖 AI-CAPA з невідповідностей</button>
-        <input id="lot" class="input" placeholder="Лот/лінія (напр. SSOP_йогурт_2025-10-18_B)"/>
+        <button type="button" class="btn" id="genCapa">🤖 AI-CAPA з невідповідностей</button>
+        <input id="lot" class="input" placeholder="Лот/лінія (напр. SSOP_йогурт_2025-10-18_B)" aria-label="Лот/лінія (напр. SSOP_йогурт_2025-10-18_B)"/>
       </div>
       <textarea id="capa" placeholder="1) Утримання/containment: ...
+2) Корінна причина (5 чому): ...
+3) Коригуючі дії (що і до коли): ...
+4) Запобіжні дії (стандарти/навчання/контроль): ...
+5) Верифікація (аналізи/ATP/алергени) + Перевірка ефективності (через N днів): ..." aria-label="1) Утримання/containment: ...
 2) Корінна причина (5 чому): ...
 3) Коригуючі дії (що і до коли): ...
 4) Запобіжні дії (стандарти/навчання/контроль): ...
@@ -151,10 +156,10 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:10px">💾 Експорт / друк</h3>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV (сутності + невідповідності)</button>
-        <button class="btn" id="saveTxt">💾 TXT (звіт + CAPA)</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (сутності + невідповідності)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (звіт + CAPA)</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>

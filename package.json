@@ -9,7 +9,9 @@
     "apply-core": "node scripts/apply-core.js",
     "dedup-css": "node scripts/dedup-vs-core.js --apply",
     "build-manifest": "node scripts/build-manifest.js",
-    "build": "npm run apply-core && npm run fix-meta && npm run dedup-css && npm run build-manifest && npm run generate-sitemap"
+    "wcag-labels": "node scripts/fix-wcag-labels.js",
+    "wcag-meta": "node scripts/ensure-meta-desc.js",
+    "build": "npm run apply-core && npm run fix-meta && npm run dedup-css && npm run build-manifest && npm run generate-sitemap && npm run wcag-meta"
   },
   "dependencies": {
     "cheerio": "1.0.0-rc.12",

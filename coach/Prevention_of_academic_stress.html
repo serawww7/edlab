@@ -72,15 +72,15 @@ textarea{min-height:64px;resize:vertical}
       <h1 class="title">Профілактика навчального стресу — онлайн-тренінг</h1>
       <p class="subtitle">Google Meet • формат: індивідуальна робота + короткі виступи + релаксація • тривалість ≈ 50 хв</p>
       <div class="toolbar">
-        <button class="btn" id="exportTxt">⬇️ Експорт .txt</button>
-        <button class="btn" id="printPage">🖨️ Друк</button>
-        <button class="btn" id="clearAll">🗑️ Очистити</button>
+        <button type="button" class="btn" id="exportTxt">⬇️ Експорт .txt</button>
+        <button type="button" class="btn" id="printPage">🖨️ Друк</button>
+        <button type="button" class="btn" id="clearAll">🗑️ Очистити</button>
         <span class="hint">Дані зберігаються локально на цьому пристрої (localStorage).</span>
       </div>
     </div>
   </header>
 
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <section class="card">
       <div class="grid cols-2">
         <div>
@@ -101,14 +101,14 @@ textarea{min-height:64px;resize:vertical}
         <div>
           <h2>План і таймінг</h2>
           <div class="agenda">
-            <div class="item"><strong>1. Привітання</strong> <span class="time">5 хв · <span id="t1">00:00</span> <button class="btn" data-timer="t1" data-secs="300">▶</button></span></div>
-            <div class="item"><strong>2. Вступ</strong> <span class="time">3 хв · <span id="t2">00:00</span> <button class="btn" data-timer="t2" data-secs="180">▶</button></span></div>
-            <div class="item"><strong>3. Мозковий штурм</strong> <span class="time">7 хв · <span id="t3">00:00</span> <button class="btn" data-timer="t3" data-secs="420">▶</button></span></div>
-            <div class="item"><strong>4. Переконання</strong> <span class="time">7 хв · <span id="t4">00:00</span> <button class="btn" data-timer="t4" data-secs="420">▶</button></span></div>
-            <div class="item"><strong>5. Я-вислови</strong> <span class="time">10 хв · <span id="t5">00:00</span> <button class="btn" data-timer="t5" data-secs="600">▶</button></span></div>
-            <div class="item"><strong>6. «Скляне фото»</strong> <span class="time">7 хв · <span id="t6">00:00</span> <button class="btn" data-timer="t6" data-secs="420">▶</button></span></div>
-            <div class="item"><strong>7. Релаксація</strong> <span class="time">8 хв · <span id="t7">00:00</span> <button class="btn" data-timer="t7" data-secs="480">▶</button></span></div>
-            <div class="item"><strong>8. Рефлексія</strong> <span class="time">3 хв · <span id="t8">00:00</span> <button class="btn" data-timer="t8" data-secs="180">▶</button></span></div>
+            <div class="item"><strong>1. Привітання</strong> <span class="time">5 хв · <span id="t1">00:00</span> <button type="button" class="btn" data-timer="t1" data-secs="300">▶</button></span></div>
+            <div class="item"><strong>2. Вступ</strong> <span class="time">3 хв · <span id="t2">00:00</span> <button type="button" class="btn" data-timer="t2" data-secs="180">▶</button></span></div>
+            <div class="item"><strong>3. Мозковий штурм</strong> <span class="time">7 хв · <span id="t3">00:00</span> <button type="button" class="btn" data-timer="t3" data-secs="420">▶</button></span></div>
+            <div class="item"><strong>4. Переконання</strong> <span class="time">7 хв · <span id="t4">00:00</span> <button type="button" class="btn" data-timer="t4" data-secs="420">▶</button></span></div>
+            <div class="item"><strong>5. Я-вислови</strong> <span class="time">10 хв · <span id="t5">00:00</span> <button type="button" class="btn" data-timer="t5" data-secs="600">▶</button></span></div>
+            <div class="item"><strong>6. «Скляне фото»</strong> <span class="time">7 хв · <span id="t6">00:00</span> <button type="button" class="btn" data-timer="t6" data-secs="420">▶</button></span></div>
+            <div class="item"><strong>7. Релаксація</strong> <span class="time">8 хв · <span id="t7">00:00</span> <button type="button" class="btn" data-timer="t7" data-secs="480">▶</button></span></div>
+            <div class="item"><strong>8. Рефлексія</strong> <span class="time">3 хв · <span id="t8">00:00</span> <button type="button" class="btn" data-timer="t8" data-secs="180">▶</button></span></div>
           </div>
         </div>
       </div>
@@ -125,11 +125,11 @@ textarea{min-height:64px;resize:vertical}
       </div>
       <div class="two" style="margin-top:10px">
         <div>
-          <label class="kbd">Мій варіант привітання</label>
+          <label class="kbd" for="greet">Мій варіант привітання</label>
           <textarea id="greet"></textarea>
         </div>
         <div>
-          <label class="kbd">Хто зреагував / нотатки</label>
+          <label class="kbd" for="greetNotes">Хто зреагував / нотатки</label>
           <textarea id="greetNotes"></textarea>
         </div>
       </div>
@@ -144,11 +144,11 @@ textarea{min-height:64px;resize:vertical}
       </div>
       <div class="two" style="margin-top:10px">
         <div>
-          <label class="kbd">Мої очікування від заняття</label>
+          <label class="kbd" for="expect">Мої очікування від заняття</label>
           <textarea id="expect"></textarea>
         </div>
         <div>
-          <label class="kbd">Мій нинішній стан (1–2 слова)</label>
+          <label class="kbd" for="stateStart">Мій нинішній стан (1–2 слова)</label>
           <input id="stateStart" type="text" placeholder="напр., «напружений», «спокійний»">
         </div>
       </div>
@@ -172,10 +172,10 @@ textarea{min-height:64px;resize:vertical}
         </div>
       </div>
       <div class="btn-row">
-        <input id="chipInput" type="text" placeholder="додати свій пункт…">
-        <button class="btn" id="addNeg">➕ як Стресор</button>
-        <button class="btn" id="addPos">➕ як Ресурс</button>
-        <button class="btn" id="clearChips">♻️ Скинути</button>
+        <input id="chipInput" type="text" placeholder="додати свій пункт…" aria-label="додати свій пункт…">
+        <button type="button" class="btn" id="addNeg">➕ як Стресор</button>
+        <button type="button" class="btn" id="addPos">➕ як Ресурс</button>
+        <button type="button" class="btn" id="clearChips">♻️ Скинути</button>
       </div>
       <details>
         <summary>Міні-довідка (коротко)</summary>
@@ -201,16 +201,16 @@ textarea{min-height:64px;resize:vertical}
       </ol>
       <div class="two">
         <div>
-          <textarea id="b1" placeholder="…"></textarea>
-          <textarea id="b2" placeholder="…"></textarea>
+          <textarea id="b1" placeholder="…" aria-label="…"></textarea>
+          <textarea id="b2" placeholder="…" aria-label="…"></textarea>
         </div>
         <div>
-          <textarea id="b3" placeholder="…"></textarea>
-          <textarea id="b4" placeholder="…"></textarea>
+          <textarea id="b3" placeholder="…" aria-label="…"></textarea>
+          <textarea id="b4" placeholder="…" aria-label="…"></textarea>
         </div>
       </div>
       <div class="btn-row">
-        <button class="btn" id="makeAff">✨ Згенерувати мою підтримуючу формулу</button>
+        <button type="button" class="btn" id="makeAff">✨ Згенерувати мою підтримуючу формулу</button>
       </div>
       <div class="kbd" id="affOut" style="margin-top:8px"></div>
       <div class="script">
@@ -228,20 +228,20 @@ textarea{min-height:64px;resize:vertical}
       </ol>
       <div class="two">
         <div>
-          <label class="kbd">Я відчуваю… (емоція)</label>
+          <label class="kbd" for="iFeel">Я відчуваю… (емоція)</label>
           <input id="iFeel" type="text" placeholder="напр., «образу»">
-          <label class="kbd">Коли відбувається… (подія)</label>
+          <label class="kbd" for="when">Коли відбувається… (подія)</label>
           <input id="when" type="text" placeholder="«жартують про мене»">
         </div>
         <div>
-          <label class="kbd">Мені важливо… (потреба)</label>
+          <label class="kbd" for="need">Мені важливо… (потреба)</label>
           <input id="need" type="text" placeholder="«повагу»">
-          <label class="kbd">Прошу… (конкретний запит)</label>
+          <label class="kbd" for="ask">Прошу… (конкретний запит)</label>
           <input id="ask" type="text" placeholder="«говорити без сарказму»">
         </div>
       </div>
       <div class="btn-row">
-        <button class="btn" id="makeIStmt">🗣️ Згенерувати «я-вислів»</button>
+        <button type="button" class="btn" id="makeIStmt">🗣️ Згенерувати «я-вислів»</button>
       </div>
       <div class="kbd" id="iOut"></div>
     </section>
@@ -255,11 +255,11 @@ textarea{min-height:64px;resize:vertical}
       </div>
       <div class="two">
         <div>
-          <label class="kbd">Що було легко?</label>
+          <label class="kbd" for="glassEasy">Що було легко?</label>
           <textarea id="glassEasy"></textarea>
         </div>
         <div>
-          <label class="kbd">Що було складно? Як змінився стан?</label>
+          <label class="kbd" for="glassHard">Що було складно? Як змінився стан?</label>
           <textarea id="glassHard"></textarea>
         </div>
       </div>
@@ -276,10 +276,10 @@ textarea{min-height:64px;resize:vertical}
         <div style="text-align:center">
           <div class="breath"><div class="dot"></div></div>
           <div class="hint">Синхронізуйся з колом: 4с вдих → 4с видих.</div>
-          <div class="timer">⏱ <span class="t" id="tBreath">00:00</span> <button class="btn" id="startBreath">▶ 2 хв</button></div>
+          <div class="timer">⏱ <span class="t" id="tBreath">00:00</span> <button type="button" class="btn" id="startBreath">▶ 2 хв</button></div>
         </div>
         <div>
-          <label class="kbd">Нотатки після релаксації</label>
+          <label class="kbd" for="relaxNotes">Нотатки після релаксації</label>
           <textarea id="relaxNotes"></textarea>
         </div>
       </div>
@@ -291,15 +291,15 @@ textarea{min-height:64px;resize:vertical}
       <h2>8) Рефлексія та завершення</h2>
       <div class="two">
         <div>
-          <label class="kbd">Чи здійснилися очікування?</label>
+          <label class="kbd" for="ref1">Чи здійснилися очікування?</label>
           <textarea id="ref1"></textarea>
-          <label class="kbd">Техніка, яку застосую цього тижня</label>
+          <label class="kbd" for="ref2">Техніка, яку застосую цього тижня</label>
           <textarea id="ref2"></textarea>
         </div>
         <div>
-          <label class="kbd">Мій стан зараз (1–2 слова)</label>
+          <label class="kbd" for="stateEnd">Мій стан зараз (1–2 слова)</label>
           <input id="stateEnd" type="text" placeholder="напр., «спокійніший»">
-          <label class="kbd">Міні-домашка (1 дія: дієслово + коли + як довго)</label>
+          <label class="kbd" for="home">Міні-домашка (1 дія: дієслово + коли + як довго)</label>
           <textarea id="home"></textarea>
         </div>
       </div>

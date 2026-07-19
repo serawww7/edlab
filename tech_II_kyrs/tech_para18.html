@@ -44,7 +44,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🏷️</span>
@@ -63,26 +63,26 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>🔧 Конструктор EAN-13</h2>
       <div class="row">
-        <label style="flex:1">Префікс країни (3)<input id="pfx" class="input" maxlength="3" value="482"/></label>
-        <label style="flex:1">Код виробника (4–5)<input id="man" class="input" maxlength="5" value="1234"/></label>
-        <label style="flex:1">Код товару (3–5)<input id="item" class="input" maxlength="5" value="5678"/></label>
-        <label style="flex:1">Автоконтрольна<input id="autoChk" type="checkbox" checked/></label>
+        <label style="flex:1">Префікс країни (3)<input id="pfx" class="input" maxlength="3" value="482" aria-label="pfx"/></label>
+        <label style="flex:1">Код виробника (4–5)<input id="man" class="input" maxlength="5" value="1234" aria-label="man"/></label>
+        <label style="flex:1">Код товару (3–5)<input id="item" class="input" maxlength="5" value="5678" aria-label="item"/></label>
+        <label style="flex:1">Автоконтрольна<input id="autoChk" type="checkbox" checked/ aria-label="autoChk"></label>
       </div>
       <div class="row">
-        <label style="flex:2">Повний код (13 цифр, якщо вручну)<input id="full" class="input" placeholder="482123456789?"/></label>
-        <button class="btn good" id="gen">⚙️ Згенерувати</button>
-        <button class="btn secondary" id="val">✅ Перевірити</button>
+        <label style="flex:2">Повний код (13 цифр, якщо вручну)<input id="full" class="input" placeholder="482123456789?" aria-label="482123456789?"/></label>
+        <button type="button" class="btn good" id="gen">⚙️ Згенерувати</button>
+        <button type="button" class="btn secondary" id="val">✅ Перевірити</button>
         <span id="res" class="badge">Готовність: —</span>
       </div>
 
       <h3 style="margin-top:10px">🖨️ Параметри друку/рендера</h3>
       <div class="row">
-        <label>Масштаб (magnification, ×)<input id="mag" class="input" type="number" min="0.8" step="0.05" value="1.00"/></label>
-        <label>Модуль (X, мм)<input id="mod" class="input" type="number" step="0.01" value="0.33"/></label>
-        <label>DPI принтера<input id="dpi" class="input" type="number" step="1" value="203"/></label>
-        <label>Темрява (симуляція)%<input id="dark" class="input" type="range" min="0" max="100" value="85"/></label>
-        <label>Тиха зона (мм)<input id="quiet" class="input" type="number" step="0.5" value="3.0"/></label>
-        <button class="btn" id="draw">🎨 Намалювати</button>
+        <label>Масштаб (magnification, ×)<input id="mag" class="input" type="number" min="0.8" step="0.05" value="1.00" aria-label="mag"/></label>
+        <label>Модуль (X, мм)<input id="mod" class="input" type="number" step="0.01" value="0.33" aria-label="mod"/></label>
+        <label>DPI принтера<input id="dpi" class="input" type="number" step="1" value="203" aria-label="dpi"/></label>
+        <label>Темрява (симуляція)%<input id="dark" class="input" type="range" min="0" max="100" value="85" aria-label="dark"/></label>
+        <label>Тиха зона (мм)<input id="quiet" class="input" type="number" step="0.5" value="3.0" aria-label="quiet"/></label>
+        <button type="button" class="btn" id="draw">🎨 Намалювати</button>
       </div>
 
       <div class="canvasWrap"><canvas id="barcode" width="980" height="180"></canvas></div>
@@ -94,19 +94,19 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:10px">🧪 Верифікатор/сканер</h3>
       <div class="row">
-        <input id="scan" class="input" placeholder="Фокусуйся тут і скануй EAN-13 (або введи з клавіатури)"/>
-        <button class="btn secondary" id="clearScan">🧹 Очистити журнал</button>
+        <input id="scan" class="input" placeholder="Фокусуйся тут і скануй EAN-13 (або введи з клавіатури)" aria-label="Фокусуйся тут і скануй EAN-13 (або введи з клавіатури)"/>
+        <button type="button" class="btn secondary" id="clearScan">🧹 Очистити журнал</button>
         <span id="scanStat" class="badge">Сканів: 0 | Успішність: 0%</span>
       </div>
       <pre id="alog" class="note" style="max-height:200px;overflow:auto">// Поки без подій</pre>
 
       <h3 style="margin-top:10px">💾 Експорт/друк</h3>
       <div class="row">
-        <input id="lot" class="input" placeholder="Лот/партія або назва SKU"/>
-        <button class="btn" id="saveCsv">📄 CSV (журнал сканів)</button>
-        <button class="btn" id="saveTxt">💾 TXT (зведення)</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="printPage">🖨️ Тест-сторінка принтера</button>
+        <input id="lot" class="input" placeholder="Лот/партія або назва SKU" aria-label="Лот/партія або назва SKU"/>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (журнал сканів)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (зведення)</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="printPage">🖨️ Тест-сторінка принтера</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
     </div>

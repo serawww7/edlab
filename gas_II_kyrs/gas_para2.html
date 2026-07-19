@@ -48,7 +48,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧭</span>
@@ -65,21 +65,21 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
     <h2>📚 Сценарій заняття</h2>
     <p>Створюємо <b>маршрутний лист</b> на день: додаємо <b>зупинки</b> (адреси/типи робіт), ідентифікуємо кожен об’єкт через <b>NFC</b> або код, робимо <b>фото «до/після»</b> і <b>голосові нотатки</b>, фіксуємо <b>тривалість</b> робіт і отримуємо <b>таймлайн</b>. Наприкінці — <b>чек 58 мм</b>, <b>CSV/TXT</b>, <b>QR</b>.</p>
     <div class="row">
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
-      <label style="flex:1">Бригада (ПІБ)<input id="crew" class="input" placeholder="Славінський В., Кошута В."/></label>
-      <label style="flex:1">Диспетчер<input id="disp" class="input" placeholder="Баланчук О."/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date" aria-label="day"/></label>
+      <label style="flex:1">Бригада (ПІБ)<input id="crew" class="input" placeholder="Славінський В., Кошута В." aria-label="Славінський В., Кошута В."/></label>
+      <label style="flex:1">Диспетчер<input id="disp" class="input" placeholder="Баланчук О." aria-label="Баланчук О."/></label>
     </div>
     <div class="row">
-      <button class="btn good" id="mkRoute">🧰 Створити маршрут</button>
-      <button class="btn" id="addStop">➕ Додати зупинку</button>
-      <button class="btn secondary" id="addExamples">🧪 Приклади зупинок (3)</button>
+      <button type="button" class="btn good" id="mkRoute">🧰 Створити маршрут</button>
+      <button type="button" class="btn" id="addStop">➕ Додати зупинку</button>
+      <button type="button" class="btn secondary" id="addExamples">🧪 Приклади зупинок (3)</button>
       <span class="badge" id="rid">Маршрут: —</span>
       <span class="badge" id="sCount">Зупинок: 0</span>
     </div>
     <div class="row">
       <div class="badge">Активна зупинка:</div>
-      <select id="activeSel" class="input" style="max-width:260px"></select>
-      <button class="btn secondary" id="delStop">🗑️ Видалити активну</button>
+      <select id="activeSel" class="input" style="max-width:260px" aria-label="active Sel"></select>
+      <button type="button" class="btn secondary" id="delStop">🗑️ Видалити активну</button>
     </div>
   </div>
 
@@ -95,9 +95,9 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <div class="row">
         <video id="vid" class="photo" autoplay playsinline muted></video>
         <div>
-          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
-          <button class="btn" id="shotBefore">📷 Фото «до»</button>
-          <button class="btn" id="shotAfter">📷 Фото «після»</button><br/>
+          <button type="button" class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button type="button" class="btn" id="shotBefore">📷 Фото «до»</button>
+          <button type="button" class="btn" id="shotAfter">📷 Фото «після»</button><br/>
           <small class="muted">Фото прив’язуються до <b>активної</b> зупинки.</small>
         </div>
       </div>
@@ -105,8 +105,8 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 
       <h2 style="margin-top:10px">🎙️ Голосова нотатка (для активної зупинки)</h2>
       <div class="row">
-        <button class="btn" id="recStart">⏺️ Запис</button>
-        <button class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
+        <button type="button" class="btn" id="recStart">⏺️ Запис</button>
+        <button type="button" class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
         <span class="badge" id="rstat">Немає запису</span>
       </div>
       <audio id="player" controls style="margin-top:8px;max-width:100%"></audio>
@@ -138,10 +138,10 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 
       <h2 style="margin-top:10px">💾 Експорт / друк</h2>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV (маршрут+зупинки)</button>
-        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (Route ID/посилання)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (маршрут+зупинки)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (Route ID/посилання)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
@@ -195,9 +195,9 @@ function refreshStopsUI(){
         <label style="flex:1">Контакт<input class="input in-contact" value="${s.contact||''}" placeholder="+380..."/></label>
       </div>
       <div class="minirow" style="margin-top:6px">
-        <button class="btn btn-nfc">📶 NFC</button>
+        <button type="button" class="btn btn-nfc">📶 NFC</button>
         <input class="input in-asset" placeholder="ID об’єкта (якщо NFC недоступний)" value="${s.asset||''}"/>
-        <button class="btn secondary btn-asset">💾 Застосувати</button>
+        <button type="button" class="btn secondary btn-asset">💾 Застосувати</button>
         <span class="badge">Фото: <b class="phc">${s.beforeImg?1:0} / ${s.afterImg?1:0}</b></span>
         <span class="badge">Аудіо: <b class="audc">${s.audioUrl?'є':'немає'}</b></span>
       </div>

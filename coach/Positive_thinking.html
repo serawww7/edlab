@@ -61,7 +61,7 @@ canvas{background:#0a1020;border:1px solid var(--border);border-radius:10px;widt
   </div>
 </header>
 
-<main class="wrap">
+<main id="main-content" class="wrap">
 
   <!-- Мета, очікувані результати, обладнання -->
   <section class="card">
@@ -86,9 +86,9 @@ canvas{background:#0a1020;border:1px solid var(--border);border-radius:10px;widt
           <tr><th>Цифрові інструменти</th><td>Таймери, автозбереження (localStorage), експорт у .txt, друк, драг-енд-дроп, canvas-діаграма, завантаження зображень.</td></tr>
           <tr><th>Кнопки керування</th><td class="no-print">
             <div class="btn-row">
-              <button class="btn" id="exportAll">⬇️ Експорт усіх відповідей (.txt)</button>
-              <button class="btn" id="printPage">🖨️ Друк</button>
-              <button class="btn" id="clearAll">🗑️ Очистити все</button>
+              <button type="button" class="btn" id="exportAll">⬇️ Експорт усіх відповідей (.txt)</button>
+              <button type="button" class="btn" id="printPage">🖨️ Друк</button>
+              <button type="button" class="btn" id="clearAll">🗑️ Очистити все</button>
             </div>
           </td></tr>
         </table>
@@ -101,38 +101,38 @@ canvas{background:#0a1020;border:1px solid var(--border);border-radius:10px;widt
     <h2>І. Організаційно-мотиваційний етап (≈15 хв)</h2>
 
     <h3>1) Самопрезентація (10 хв)</h3>
-    <div class="timer">⏱ <span class="t" id="t-pres">00:00</span> <button class="btn no-print" data-timer="t-pres">▶️ Старт 10 хв</button></div>
+    <div class="timer">⏱ <span class="t" id="t-pres">00:00</span> <button type="button" class="btn no-print" data-timer="t-pres">▶️ Старт 10 хв</button></div>
     <div class="two">
       <div>
-        <label class="kbd">Чого я чекаю від цього заняття?</label>
+        <label class="kbd" for="pres1">Чого я чекаю від цього заняття?</label>
         <textarea id="pres1"></textarea>
-        <label class="kbd">Що я ціную в собі?</label>
+        <label class="kbd" for="pres2">Що я ціную в собі?</label>
         <textarea id="pres2"></textarea>
       </div>
       <div>
-        <label class="kbd">Чим я пишаюся?</label>
+        <label class="kbd" for="pres3">Чим я пишаюся?</label>
         <textarea id="pres3"></textarea>
-        <label class="kbd">Що вмію найкраще?</label>
+        <label class="kbd" for="pres4">Що вмію найкраще?</label>
         <textarea id="pres4"></textarea>
       </div>
     </div>
 
     <h3>2) Вибір правил (3 хв)</h3>
-    <div class="timer">⏱ <span class="t" id="t-rules">00:00</span> <button class="btn no-print" data-timer="t-rules">▶️ Старт 3 хв</button></div>
+    <div class="timer">⏱ <span class="t" id="t-rules">00:00</span> <button type="button" class="btn no-print" data-timer="t-rules">▶️ Старт 3 хв</button></div>
     <div class="two">
       <div>
         <ul class="list">
-          <li><label><input type="checkbox" class="rule" value="Позитивність"> Позитивність</label></li>
-          <li><label><input type="checkbox" class="rule" value="Активна добровільність"> Активна добровільність</label></li>
-          <li><label><input type="checkbox" class="rule" value="Конфіденційність"> Конфіденційність</label></li>
-          <li><label><input type="checkbox" class="rule" value="Правило правої руки"> Правило правої руки</label></li>
-          <li><label><input type="checkbox" class="rule" value="Я-висловлювання"> Принцип «Я»</label></li>
-          <li><label><input type="checkbox" class="rule" value="Вікторія!"> «Вікторія!»</label></li>
+          <li><label><input type="checkbox" class="rule" value="Позитивність" aria-label="Позитивність"> Позитивність</label></li>
+          <li><label><input type="checkbox" class="rule" value="Активна добровільність" aria-label="Активна добровільність"> Активна добровільність</label></li>
+          <li><label><input type="checkbox" class="rule" value="Конфіденційність" aria-label="Конфіденційність"> Конфіденційність</label></li>
+          <li><label><input type="checkbox" class="rule" value="Правило правої руки" aria-label="Правило правої руки"> Правило правої руки</label></li>
+          <li><label><input type="checkbox" class="rule" value="Я-висловлювання" aria-label="Я-висловлювання"> Принцип «Я»</label></li>
+          <li><label><input type="checkbox" class="rule" value="Вікторія!" aria-label="Вікторія!"> «Вікторія!»</label></li>
         </ul>
       </div>
       <div>
         <label class="kbd">Зведена угода групи</label>
-        <textarea id="rulesText" placeholder="Обрані правила з’являться тут автоматично."></textarea>
+        <textarea id="rulesText" placeholder="Обрані правила з’являться тут автоматично." aria-label="Обрані правила з’являться тут автоматично."></textarea>
       </div>
     </div>
 
@@ -146,28 +146,28 @@ canvas{background:#0a1020;border:1px solid var(--border);border-radius:10px;widt
 
     <!-- Дерево з чоловічками -->
     <h3>1) Вправа-тест «ЗНАЙДИ СЕБЕ НА ДЕРЕВІ» (10 хв)</h3>
-    <div class="timer">⏱ <span class="t" id="t-tree">00:00</span> <button class="btn no-print" data-timer="t-tree">▶️ Старт 10 хв</button></div>
+    <div class="timer">⏱ <span class="t" id="t-tree">00:00</span> <button type="button" class="btn no-print" data-timer="t-tree">▶️ Старт 10 хв</button></div>
     <div class="imgbox">
       <div class="hint">Завантаж своє зображення «дерево з чоловічками» (PNG/JPG). Або просто обери номер нижче.</div>
-      <input class="no-print" type="file" id="treeFile" accept="image/*">
+      <input class="no-print" type="file" id="treeFile" accept="image/*" aria-label="tree File">
       <img id="treeImg" alt="Схема «дерево з чоловічками»" style="max-width:100%;border:1px solid var(--border);border-radius:10px;display:none">
     </div>
     <div class="two" style="margin-top:10px">
       <div>
-        <label class="kbd">Який номер схожий на мене зараз?</label>
+        <label class="kbd" for="treeNow">Який номер схожий на мене зараз?</label>
         <input id="treeNow" type="text" placeholder="Напр.: 10">
-        <label class="kbd">На кого хочу бути схожим?</label>
+        <label class="kbd" for="treeGoal">На кого хочу бути схожим?</label>
         <input id="treeGoal" type="text" placeholder="Напр.: 17">
       </div>
       <div>
-        <label class="kbd">Інтерпретація</label>
+        <label class="kbd" for="treeOut">Інтерпретація</label>
         <textarea id="treeOut" readonly></textarea>
       </div>
     </div>
 
     <!-- Мозковий штурм -->
     <h3>2) Мозковий штурм «Позитивне vs Негативне мислення» (10 хв)</h3>
-    <div class="timer">⏱ <span class="t" id="t-brain">00:00</span> <button class="btn no-print" data-timer="t-brain">▶️ Старт 10 хв</button></div>
+    <div class="timer">⏱ <span class="t" id="t-brain">00:00</span> <button type="button" class="btn no-print" data-timer="t-brain">▶️ Старт 10 хв</button></div>
     <div class="two">
       <div>
         <div class="pill">Негативний цикл</div>
@@ -180,24 +180,24 @@ canvas{background:#0a1020;border:1px solid var(--border);border-radius:10px;widt
     </div>
     <div class="hint">Перетягуй «факти/думки» як чипси між циклами. Додай свій чипс: </div>
     <div class="btn-row no-print">
-      <input id="chipInput" type="text" placeholder="напр., «самокритика без дії»">
-      <button class="btn" id="addChip">➕ Додати чипс</button>
-      <button class="btn" id="clearChips">♻️ Скинути</button>
+      <input id="chipInput" type="text" placeholder="напр., «самокритика без дії»" aria-label="напр., «самокритика без дії»">
+      <button type="button" class="btn" id="addChip">➕ Додати чипс</button>
+      <button type="button" class="btn" id="clearChips">♻️ Скинути</button>
     </div>
 
     <!-- Мої чудові якості -->
     <h3>3) «Мої чудові якості» (5 хв)</h3>
     <div class="two">
       <div>
-        <label class="kbd">Я пишаюся собою, коли…</label>
+        <label class="kbd" for="q1">Я пишаюся собою, коли…</label>
         <textarea id="q1"></textarea>
-        <label class="kbd">Я симпатична людина, тому що…</label>
+        <label class="kbd" for="q2">Я симпатична людина, тому що…</label>
         <textarea id="q2"></textarea>
       </div>
       <div>
-        <label class="kbd">Мої чудові якості…</label>
+        <label class="kbd" for="q3">Мої чудові якості…</label>
         <textarea id="q3"></textarea>
-        <label class="kbd">Одна з найкращих справ у моєму житті…</label>
+        <label class="kbd" for="q4">Одна з найкращих справ у моєму житті…</label>
         <textarea id="q4"></textarea>
       </div>
     </div>
@@ -208,11 +208,11 @@ canvas{background:#0a1020;border:1px solid var(--border);border-radius:10px;widt
       <div>
         <label class="kbd">Сектори пирога (сума = 100%)</label>
         <div class="list" style="margin-left:0">
-          <div>Здоров’я: <input type="range" id="p1" min="0" max="100" value="20"> <span id="p1v">20</span>%</div>
-          <div>Стосунки/Родина: <input type="range" id="p2" min="0" max="100" value="20"> <span id="p2v">20</span>%</div>
-          <div>Навчання/Робота: <input type="range" id="p3" min="0" max="100" value="25"> <span id="p3v">25</span>%</div>
-          <div>Відпочинок/Хобі: <input type="range" id="p4" min="0" max="100" value="15"> <span id="p4v">15</span>%</div>
-          <div>Творчість/Внесок: <input type="range" id="p5" min="0" max="100" value="20"> <span id="p5v">20</span>%</div>
+          <div>Здоров’я: <input type="range" id="p1" min="0" max="100" value="20" aria-label="p1"> <span id="p1v">20</span>%</div>
+          <div>Стосунки/Родина: <input type="range" id="p2" min="0" max="100" value="20" aria-label="p2"> <span id="p2v">20</span>%</div>
+          <div>Навчання/Робота: <input type="range" id="p3" min="0" max="100" value="25" aria-label="p3"> <span id="p3v">25</span>%</div>
+          <div>Відпочинок/Хобі: <input type="range" id="p4" min="0" max="100" value="15" aria-label="p4"> <span id="p4v">15</span>%</div>
+          <div>Творчість/Внесок: <input type="range" id="p5" min="0" max="100" value="20" aria-label="p5"> <span id="p5v">20</span>%</div>
         </div>
         <div class="hint">Порада: під час презентації називайте 1 крок для покращення кожного сектора.</div>
       </div>
@@ -229,8 +229,8 @@ canvas{background:#0a1020;border:1px solid var(--border);border-radius:10px;widt
     <h3>6) Притча «Про мужність ризикнути, спробувати» (5 хв)</h3>
     <div class="kbd" style="white-space:pre-wrap">Король випробував підданих: величезні двері здавалися замкненими. Більші навіть не спробували. Один підійшов, дослідив і рішуче смикнув — двері були НЕ замкнені. Висновок: результат приходить там, де є готовність дослідити і зробити крок.</div>
     <div class="two">
-      <textarea id="parQ1" placeholder="Чому інші не відчинили двері?"></textarea>
-      <textarea id="parQ2" placeholder="Мій особистий висновок із притчі"></textarea>
+      <textarea id="parQ1" placeholder="Чому інші не відчинили двері?" aria-label="Чому інші не відчинили двері?"></textarea>
+      <textarea id="parQ2" placeholder="Мій особистий висновок із притчі" aria-label="Мій особистий висновок із притчі"></textarea>
     </div>
 
     <!-- Магічне коло бажань -->
@@ -238,20 +238,20 @@ canvas{background:#0a1020;border:1px solid var(--border);border-radius:10px;widt
     <div class="two">
       <div>
         <label class="kbd">Моє бажання (1–2 речення)</label>
-        <textarea id="wish"></textarea>
+        <textarea id="wish" aria-label="wish"></textarea>
         <div class="list" style="margin-left:0">
-          <div>Дерево (зростання): <input id="eWood" type="text" placeholder="напр., «наставник/план»"></div>
-          <div>Вогонь (енергія): <input id="eFire" type="text" placeholder="«ранкова зарядка»"></div>
-          <div>Земля (опора): <input id="eEarth" type="text" placeholder="«розклад/режим»"></div>
-          <div>Метал (дисципліна): <input id="eMetal" type="text" placeholder="«чек-лист»"></div>
-          <div>Вода (підживлення): <input id="eWater" type="text" placeholder="«сон/відновлення»"></div>
+          <div>Дерево (зростання): <input id="eWood" type="text" placeholder="напр., «наставник/план»" aria-label="напр., «наставник/план»"></div>
+          <div>Вогонь (енергія): <input id="eFire" type="text" placeholder="«ранкова зарядка»" aria-label="«ранкова зарядка»"></div>
+          <div>Земля (опора): <input id="eEarth" type="text" placeholder="«розклад/режим»" aria-label="«розклад/режим»"></div>
+          <div>Метал (дисципліна): <input id="eMetal" type="text" placeholder="«чек-лист»" aria-label="«чек-лист»"></div>
+          <div>Вода (підживлення): <input id="eWater" type="text" placeholder="«сон/відновлення»" aria-label="«сон/відновлення»"></div>
         </div>
       </div>
       <div>
-        <label class="kbd">Аффірмація</label>
+        <label class="kbd" for="wishAff">Аффірмація</label>
         <textarea id="wishAff" readonly></textarea>
         <div class="btn-row no-print">
-          <button class="btn" id="makeAff">✨ Згенерувати аффірмацію</button>
+          <button type="button" class="btn" id="makeAff">✨ Згенерувати аффірмацію</button>
         </div>
       </div>
     </div>
@@ -263,15 +263,15 @@ canvas{background:#0a1020;border:1px solid var(--border);border-radius:10px;widt
     <h3>Рефлексія за методом ДРІД</h3>
     <div class="two">
       <div>
-        <label class="kbd">Д — дії (що робили? що пам’ятаю?)</label>
+        <label class="kbd" for="d1">Д — дії (що робили? що пам’ятаю?)</label>
         <textarea id="d1"></textarea>
-        <label class="kbd">Р — рефлексія (відчуття, реакції)</label>
+        <label class="kbd" for="d2">Р — рефлексія (відчуття, реакції)</label>
         <textarea id="d2"></textarea>
       </div>
       <div>
-        <label class="kbd">І — інформація (які висновки?)</label>
+        <label class="kbd" for="d3">І — інформація (які висновки?)</label>
         <textarea id="d3"></textarea>
-        <label class="kbd">Д — дії (що зроблю інакше?)</label>
+        <label class="kbd" for="d4">Д — дії (що зроблю інакше?)</label>
         <textarea id="d4"></textarea>
       </div>
     </div>
@@ -279,10 +279,10 @@ canvas{background:#0a1020;border:1px solid var(--border);border-radius:10px;widt
     <h3>Вправа-побажання «Зірка удачі»</h3>
     <div class="two">
       <div>
-        <input id="starTo" type="text" placeholder="Кому дарую зірку (ім’я)">
-        <input id="starMsg" type="text" placeholder="Коротке побажання">
+        <input id="starTo" type="text" placeholder="Кому дарую зірку (ім’я)" aria-label="Кому дарую зірку (ім’я)">
+        <input id="starMsg" type="text" placeholder="Коротке побажання" aria-label="Коротке побажання">
         <div class="btn-row no-print">
-          <button class="btn" id="printStar">⭐ Надрукувати зірку</button>
+          <button type="button" class="btn" id="printStar">⭐ Надрукувати зірку</button>
         </div>
       </div>
       <div class="kbd" id="starPreview" style="min-height:120px">Прев’ю зірки з’явиться тут перед друком.</div>

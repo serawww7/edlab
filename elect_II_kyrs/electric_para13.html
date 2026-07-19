@@ -11,6 +11,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Електрики · Пара 13 — Електрощит: панельний журнал, баланс фаз, RCD, наклейки</title>
+<meta name="description" content="🛠️ Електрощит: панельний журнал → баланс фаз → RCD/RCBO → 🧾 наклейки 58 мм → A4">
 <meta name="color-scheme" content="light dark" />
 <style>
 :root{
@@ -73,7 +74,7 @@ tbody tr:nth-child(even){background:#0b1324}
 </style>
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Електрики · Пара 13 · аудиторно</span>
     <h1>🛠️ Електрощит: панельний журнал → баланс фаз → RCD/RCBO → 🧾 наклейки 58 мм → A4</h1>
 
@@ -81,10 +82,10 @@ tbody tr:nth-child(even){background:#0b1324}
       <h2>🎯 Мета</h2>
       <p>Скласти відомість щита: створити кола з параметрами навантаження, фазами, автоматами та ПЗВ; перевірити <b>баланс фаз</b>, просту <b>селективність</b> по номіналах; згенерувати наклейки 58 мм і A4-звіт. Працюємо з 1-ф та 3-ф колами.</p>
       <div class="row">
-        <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
-        <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
-        <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+        <button type="button" class="btn" onclick="seedDemo()">🔄 Приклад</button>
+        <button type="button" class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+        <input id="file" type="file" accept=".csv,text/csv" class="btn"  aria-label="file"/>
+        <button type="button" class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
       </div>
       <p class="small">CSV: <span class="mono">id,name,type,phase,phases,kw,U,PF,eta,curve,mcbA,rcdType,rcd_mA,rcdA,rcdGroup,wire_mm2,length_m,url,notes,duty_pct,diversity_pct</span></p>
     </div>
@@ -93,21 +94,21 @@ tbody tr:nth-child(even){background:#0b1324}
       <h2>🧩 Параметри щита</h2>
       <div class="grid g3">
         <div>
-          <div class="row"><label class="small" style="min-width:150px">Назва щита</label><input id="panelName" value="ЩО-1 · Майстерня"></div>
-          <div class="row"><label class="small" style="min-width:150px">Головний автомат, А</label>
+          <div class="row"><label class="small" style="min-width:150px" for="panelName">Назва щита</label><input id="panelName" value="ЩО-1 · Майстерня"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="mainMCB">Головний автомат, А</label>
             <select id="mainMCB"><option>25</option><option selected>40</option><option>50</option><option>63</option></select></div>
-          <div class="row"><label class="small" style="min-width:150px">Крива головного</label>
+          <div class="row"><label class="small" style="min-width:150px" for="mainCurve">Крива головного</label>
             <select id="mainCurve"><option selected>C</option><option>B</option><option>D</option></select></div>
         </div>
         <div>
-          <div class="row"><label class="small" style="min-width:150px">U фаз-фаза, В</label><input id="Ull" type="number" value="400"></div>
-          <div class="row"><label class="small" style="min-width:150px">U фаза-нуль, В</label><input id="Uln" type="number" value="230"></div>
-          <div class="row"><label class="small" style="min-width:150px">Відповідальний</label><input id="resp" value="Студент ПІБ / група"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="Ull">U фаз-фаза, В</label><input id="Ull" type="number" value="400"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="Uln">U фаза-нуль, В</label><input id="Uln" type="number" value="230"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="resp">Відповідальний</label><input id="resp" value="Студент ПІБ / група"></div>
         </div>
         <div>
-          <div class="row"><label class="small" style="min-width:150px">Загальний коеф. попиту (diversity)</label><input id="diversity" type="number" step="1" value="80"></div>
-          <div class="row"><label class="small" style="min-width:150px">Ліміт дисбалансу фаз, %</label><input id="imbLimit" type="number" step="1" value="20"></div>
-          <div class="row"><button class="btn" onclick="calcTotals()">🧮 Перерахувати</button></div>
+          <div class="row"><label class="small" style="min-width:150px" for="diversity">Загальний коеф. попиту (diversity)</label><input id="diversity" type="number" step="1" value="80"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="imbLimit">Ліміт дисбалансу фаз, %</label><input id="imbLimit" type="number" step="1" value="20"></div>
+          <div class="row"><button type="button" class="btn" onclick="calcTotals()">🧮 Перерахувати</button></div>
         </div>
       </div>
     </div>
@@ -117,53 +118,53 @@ tbody tr:nth-child(even){background:#0b1324}
       <div class="grid g3">
         <div>
           <h3>Навантаження</h3>
-          <div class="row"><label class="small" style="min-width:140px">ID</label><input id="id" value="L-01"></div>
-          <div class="row"><label class="small" style="min-width:140px">Назва</label><input id="name" value="Освітлення аудиторії"></div>
-          <div class="row"><label class="small" style="min-width:140px">Тип</label>
+          <div class="row"><label class="small" style="min-width:140px" for="id">ID</label><input id="id" value="L-01"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="name">Назва</label><input id="name" value="Освітлення аудиторії"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="type">Тип</label>
             <select id="type"><option>Освітлення</option><option>Розетки</option><option>Двигун</option><option>Інше</option></select></div>
-          <div class="row"><label class="small" style="min-width:140px">Потужність, кВт</label><input id="kw" type="number" step="0.1" value="1.2"></div>
-          <div class="row"><label class="small" style="min-width:140px">PF (cosφ)</label><input id="pf" type="number" step="0.01" value="0.95"></div>
-          <div class="row"><label class="small" style="min-width:140px">η (за потреби)</label><input id="eta" type="number" step="0.01" value="0.95"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="kw">Потужність, кВт</label><input id="kw" type="number" step="0.1" value="1.2"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="pf">PF (cosφ)</label><input id="pf" type="number" step="0.01" value="0.95"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="eta">η (за потреби)</label><input id="eta" type="number" step="0.01" value="0.95"></div>
         </div>
         <div>
           <h3>Фази / Захист</h3>
-          <div class="row"><label class="small" style="min-width:140px">Фази</label>
+          <div class="row"><label class="small" style="min-width:140px" for="phases">Фази</label>
             <select id="phases"><option selected>1Ф</option><option>3Ф</option></select></div>
-          <div class="row" id="phaseRow"><label class="small" style="min-width:140px">Фаза (1Ф)</label>
+          <div class="row" id="phaseRow"><label class="small" style="min-width:140px" for="phase">Фаза (1Ф)</label>
             <select id="phase"><option>A</option><option>B</option><option>C</option></select></div>
-          <div class="row"><label class="small" style="min-width:140px">MCB крива</label>
+          <div class="row"><label class="small" style="min-width:140px" for="curve">MCB крива</label>
             <select id="curve"><option>B</option><option selected>C</option><option>D</option></select></div>
-          <div class="row"><label class="small" style="min-width:140px">MCB, А</label>
+          <div class="row"><label class="small" style="min-width:140px" for="mcbA">MCB, А</label>
             <select id="mcbA"><option>6</option><option>10</option><option selected>16</option><option>20</option><option>25</option><option>32</option></select></div>
         </div>
         <div>
           <h3>RCD / Лінія</h3>
-          <div class="row"><label class="small" style="min-width:140px">RCD тип</label>
+          <div class="row"><label class="small" style="min-width:140px" for="rcdType">RCD тип</label>
             <select id="rcdType"><option>—</option><option selected>AC</option><option>A</option><option>F</option></select></div>
-          <div class="row"><label class="small" style="min-width:140px">RCD IΔn, мА</label>
+          <div class="row"><label class="small" style="min-width:140px" for="rcd_mA">RCD IΔn, мА</label>
             <select id="rcd_mA"><option>—</option><option>30</option><option selected>100</option><option>300</option></select></div>
-          <div class="row"><label class="small" style="min-width:140px">RCD, А</label>
+          <div class="row"><label class="small" style="min-width:140px" for="rcdA">RCD, А</label>
             <select id="rcdA"><option>—</option><option>25</option><option selected>40</option><option>63</option></select></div>
-          <div class="row"><label class="small" style="min-width:140px">Група RCD</label><input id="rcdGroup" value="RCD-1"></div>
-          <div class="row"><label class="small" style="min-width:140px">Провід, мм²</label><select id="wire"><option>1.5</option><option selected>2.5</option><option>4</option><option>6</option></select></div>
-          <div class="row"><label class="small" style="min-width:140px">Довжина, м</label><input id="len" type="number" value="25"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="rcdGroup">Група RCD</label><input id="rcdGroup" value="RCD-1"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="wire">Провід, мм²</label><select id="wire"><option>1.5</option><option selected>2.5</option><option>4</option><option>6</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px" for="len">Довжина, м</label><input id="len" type="number" value="25"></div>
         </div>
       </div>
       <div class="grid g3" style="margin-top:8px">
         <div>
-          <div class="row"><label class="small" style="min-width:140px">URL (NFC/QR)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
+          <div class="row"><label class="small" style="min-width:140px" for="url">URL (NFC/QR)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
         </div>
         <div>
-          <div class="row"><label class="small" style="min-width:140px">Нотатка</label><input id="notes" placeholder="Примітка"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="notes">Нотатка</label><input id="notes" placeholder="Примітка"></div>
         </div>
         <div>
-          <div class="row"><label class="small" style="min-width:140px">Duty, % (корист.)</label><input id="duty" type="number" value="70"></div>
-          <div class="row"><label class="small" style="min-width:140px">Diversity, % (кола)</label><input id="div" type="number" value="100"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="duty">Duty, % (корист.)</label><input id="duty" type="number" value="70"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="div">Diversity, % (кола)</label><input id="div" type="number" value="100"></div>
         </div>
       </div>
       <div class="row" style="margin-top:8px">
-        <button class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
-        <button class="btn" onclick="seedOne()">🔄 Приклад кола</button>
+        <button type="button" class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
+        <button type="button" class="btn" onclick="seedOne()">🔄 Приклад кола</button>
       </div>
       <p class="small">Розрахунок I: 1Ф → <span class="mono">I = P / (Uln·PF·η)</span>, 3Ф → <span class="mono">I = P / (√3·Ull·PF·η)</span>. P = кВт·1000.</p>
     </div>
@@ -185,9 +186,9 @@ tbody tr:nth-child(even){background:#0b1324}
       <h2>📊 Підсумки / Баланс фаз</h2>
       <div id="sum" class="grid g3"></div>
       <div class="row" style="margin-top:8px">
-        <button class="btn" onclick="buildTickets()">🧾 Наклейки 58 мм (всі)</button>
-        <button class="btn" onclick="buildReport()">📄 A4-звіт</button>
-        <button class="btn" onclick="window.print()">🖨️ Друк</button>
+        <button type="button" class="btn" onclick="buildTickets()">🧾 Наклейки 58 мм (всі)</button>
+        <button type="button" class="btn" onclick="buildReport()">📄 A4-звіт</button>
+        <button type="button" class="btn" onclick="window.print()">🖨️ Друк</button>
       </div>
     </div>
 
@@ -331,8 +332,8 @@ tbody tr:nth-child(even){background:#0b1324}
         <td>${badge}</td>
         <td class="editable" data-k="url" data-id="${c.id}">${esc(c.url||'')}</td>
         <td class="mono">
-          <button class="btn" data-act="label" data-id="${c.id}">Наклейка</button>
-          <button class="btn" data-act="del" data-id="${c.id}">✖</button>
+          <button type="button" class="btn" data-act="label" data-id="${c.id}">Наклейка</button>
+          <button type="button" class="btn" data-act="del" data-id="${c.id}">✖</button>
         </td>`;
       tbody.appendChild(tr);
     });

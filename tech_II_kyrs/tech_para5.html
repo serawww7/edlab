@@ -14,6 +14,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 5 (технологи) — Приймання сировини: T-контроль, FEFO, локації, акт, квиток 58 мм, NFC, CSV</title>
+<meta name="description" content="🚚 Приймання сировини: T-контроль, FEFO, локації, акт, квиток 58 мм, NFC, CSV">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -60,7 +61,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 5 · аудиторно · технологи переробки</span>
   <h1>🚚 Приймання сировини: T-контроль, FEFO, локації, акт, квиток 58 мм, NFC, CSV</h1>
 
@@ -80,10 +81,10 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Постачальник / товар</h3>
         <div class="row">
-          <div style="flex:1"><label>Постачальник</label><input id="supplier" type="text" value="ТОВ “МʼясТрейд”"></div>
+          <div style="flex:1"><label for="supplier">Постачальник</label><input id="supplier" type="text" value="ТОВ “МʼясТрейд”"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Категорія</label>
+          <div style="flex:1"><label for="category">Категорія</label>
             <select id="category">
               <option value="chilled" selected>Охолоджене мʼясо</option>
               <option value="frozen">Заморожене мʼясо</option>
@@ -92,27 +93,27 @@ html.embedded .box{background:#f8fafc;color:#111}
               <option value="pack">Пакувальні матеріали</option>
             </select>
           </div>
-          <div style="flex:1"><label>Найменування</label><input id="item" type="text" value="Свинина охолоджена, півтуша"></div>
+          <div style="flex:1"><label for="item">Найменування</label><input id="item" type="text" value="Свинина охолоджена, півтуша"></div>
         </div>
       </div>
 
       <div class="box">
         <h3>Партія і строки</h3>
         <div class="row">
-          <div style="flex:1"><label>Лот</label><input id="lot" type="text" value="S-25041-AC"></div>
-          <div style="flex:1"><label>Дата виробн.</label><input id="prodDate" type="date"></div>
+          <div style="flex:1"><label for="lot">Лот</label><input id="lot" type="text" value="S-25041-AC"></div>
+          <div style="flex:1"><label for="prodDate">Дата виробн.</label><input id="prodDate" type="date"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>“Вжити до”</label><input id="expDate" type="date"></div>
-          <div style="flex:1"><label>Кількість, кг</label><input id="qtyKg" type="number" step="0.1" value="800"></div>
+          <div style="flex:1"><label for="expDate">“Вжити до”</label><input id="expDate" type="date"></div>
+          <div style="flex:1"><label for="qtyKg">Кількість, кг</label><input id="qtyKg" type="number" step="0.1" value="800"></div>
         </div>
       </div>
 
       <div class="box">
         <h3>Температура / документи</h3>
         <div class="row">
-          <div style="flex:1"><label>Температура при прийманні, °C</label><input id="temp" type="number" step="0.1" value="3.0"></div>
-          <div style="flex:1"><label>Упакування</label>
+          <div style="flex:1"><label for="temp">Температура при прийманні, °C</label><input id="temp" type="number" step="0.1" value="3.0"></div>
+          <div style="flex:1"><label for="pack">Упакування</label>
             <select id="pack">
               <option value="bulk">Навал</option>
               <option value="vac" selected>Вакуум</option>
@@ -122,23 +123,23 @@ html.embedded .box{background:#f8fafc;color:#111}
         </div>
         <div class="row" style="margin-top:6px">
           <div style="flex:1">
-            <label>Документи</label>
+            <label for="docs">Документи</label>
             <select id="docs">
               <option value="ok" selected>Повні (ветдовідка/CoA/накладна)</option>
               <option value="partial">Н неповні</option>
               <option value="missing">Відсутні</option>
             </select>
           </div>
-          <div style="flex:1"><label>Видима чистота тари</label>
+          <div style="flex:1"><label for="packClean">Видима чистота тари</label>
             <select id="packClean">
               <option>Так</option><option>Ні</option>
             </select>
           </div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="calcAll()">🔁 Перерахувати</button>
-          <button class="btn" onclick="preset()">🧪 Приклад</button>
-          <button class="btn" onclick="copyCSV('csvCore')">📋 CSV</button>
+          <button type="button" class="btn" onclick="calcAll()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="preset()">🧪 Приклад</button>
+          <button type="button" class="btn" onclick="copyCSV('csvCore')">📋 CSV</button>
         </div>
         <div id="csvCore" class="out" style="margin-top:8px">—</div>
       </div>
@@ -167,8 +168,8 @@ html.embedded .box{background:#f8fafc;color:#111}
         <p>Температура/документи: <b><span id="status">—</span></b></p>
         <p>Пояснення: <b><span id="reason">—</span></b></p>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildDeviation()">📝 Акт невідповідності</button>
-          <button class="btn" onclick="copyEl('devOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildDeviation()">📝 Акт невідповідності</button>
+          <button type="button" class="btn" onclick="copyEl('devOut')">📋 Копіювати</button>
         </div>
         <div id="devOut" class="out">—</div>
       </div>
@@ -179,9 +180,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал приймання</h2>
     <div class="row">
-      <button class="btn" onclick="addRow()">➕ Додати рядок</button>
-      <button class="btn" onclick="presetRows()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+      <button type="button" class="btn" onclick="addRow()">➕ Додати рядок</button>
+      <button type="button" class="btn" onclick="presetRows()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblLog">
@@ -211,18 +212,18 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>NFC — “RAW INBOUND CARD”</h3>
         <div class="row">
-          <div style="flex:1"><label>Контакт/техн.</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
-          <div style="flex:1"><label>К-ть палет</label><input id="pallets" type="number" step="1" value="2"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт/техн.</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="pallets">К-ть палет</label><input id="pallets" type="number" step="1" value="2"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
         <h3 style="margin-top:12px">QR-payload</h3>
         <div class="row">
-          <button class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
-          <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
+          <button type="button" class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
         </div>
         <div id="qrOut" class="out">—</div>
       </div>
@@ -230,8 +231,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток для принтера 58 мм</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>RAW MATERIAL PALLET</h4>

@@ -42,7 +42,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧰</span>
@@ -65,21 +65,21 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div style="flex:1">
         <label>Піни HX711</label>
         <div class="row">
-          <label>DT <input id="dt" class="input" type="number" min="2" max="13" value="3"/></label>
-          <label>SCK <input id="sck" class="input" type="number" min="2" max="13" value="2"/></label>
-          <label>Канал <select id="chan" class="input"><option value="128" selected>A (gain128)</option><option value="64">A (gain64)</option><option value="32">B (gain32)</option></select></label>
+          <label>DT <input id="dt" class="input" type="number" min="2" max="13" value="3" aria-label="dt"/></label>
+          <label>SCK <input id="sck" class="input" type="number" min="2" max="13" value="2" aria-label="sck"/></label>
+          <label>Канал <select id="chan" class="input" aria-label="chan"><option value="128" selected>A (gain128)</option><option value="64">A (gain64)</option><option value="32">B (gain32)</option></select></label>
         </div>
       </div>
       <div style="flex:1">
         <label>Одиниці</label>
-        <select id="units" class="input"><option value="N" selected>Н (Ньютони)</option><option value="kgf">кгс</option></select>
+        <select id="units" class="input" aria-label="units"><option value="N" selected>Н (Ньютони)</option><option value="kgf">кгс</option></select>
       </div>
       <div style="flex:1">
-        <label>EMA згладжування α (0..1)</label>
+        <label for="alpha">EMA згладжування α (0..1)</label>
         <input id="alpha" class="input" type="number" min="0" max="1" step="0.05" value="0.25"/>
       </div>
       <div style="flex:1">
-        <label>Період зчитування, мс</label>
+        <label for="period">Період зчитування, мс</label>
         <input id="period" class="input" type="number" min="50" step="10" value="100"/>
       </div>
     </div>
@@ -88,24 +88,24 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div style="flex:1">
         <label>Калібрування</label>
         <div class="row">
-          <button class="btn" id="calZero">⚖️ Записати «нуль»</button>
+          <button type="button" class="btn" id="calZero">⚖️ Записати «нуль»</button>
           <input id="calMass" class="input" type="number" step="0.1" value="10" title="Маса еталону в кг"/>
-          <button class="btn secondary" id="calRef">🏋️ Записати «еталон»</button>
+          <button type="button" class="btn secondary" id="calRef">🏋️ Записати «еталон»</button>
         </div>
         <small class="muted">Алгоритм: <span class="mono">scale = (Fref)/(rawRef - rawZero)</span>, де <span class="mono">Fref = m*g</span> (для кгс — <span class="mono">Fref = m</span>).</small>
       </div>
       <div style="flex:1">
         <label>Діапазон робочого натягу, Н</label>
         <div class="row">
-          <label>Min <input id="tmin" class="input" type="number" step="1" value="120"/></label>
-          <label>Max <input id="tmax" class="input" type="number" step="1" value="250"/></label>
+          <label>Min <input id="tmin" class="input" type="number" step="1" value="120" aria-label="tmin"/></label>
+          <label>Max <input id="tmax" class="input" type="number" step="1" value="250" aria-label="tmax"/></label>
         </div>
       </div>
       <div style="flex:1">
         <label>SLIP% з Пара-16 (необов.)</label>
         <div class="row">
           <input id="slip" class="input" type="number" step="0.1" value="0" title="Встав тут миттєве SLIP% із тахометра"/>
-          <label>Поріг SLIP% <input id="slipThr" class="input" type="number" step="0.5" value="3.0"/></label>
+          <label>Поріг SLIP% <input id="slipThr" class="input" type="number" step="0.5" value="3.0" aria-label="slip Thr"/></label>
         </div>
       </div>
     </div>
@@ -114,10 +114,10 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🧪 Емулятор (без «заліза»)</h2>
     <div class="row">
-      <label><input id="emu" type="checkbox"/> Увімкнути емулятор</label>
-      <label style="flex:1">Натяг (Н) <input id="emuF" class="input" type="range" min="50" max="400" step="1" value="180" disabled/></label>
-      <button class="btn" id="tick">➕ Додати точку</button>
-      <button class="btn secondary" id="clear">🧹 Очистити</button>
+      <label><input id="emu" type="checkbox"/ aria-label="emu"> Увімкнути емулятор</label>
+      <label style="flex:1">Натяг (Н) <input id="emuF" class="input" type="range" min="50" max="400" step="1" value="180" disabled aria-label="emu F"/></label>
+      <button type="button" class="btn" id="tick">➕ Додати точку</button>
+      <button type="button" class="btn secondary" id="clear">🧹 Очистити</button>
       <span id="badge" class="badge">Калібровано: ні</span>
     </div>
   </div>
@@ -134,9 +134,9 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🧩 Згенерований код (Arduino .ino)</h2>
     <div class="row">
-      <button class="btn good" id="gen">⚙️ Згенерувати прошивку</button>
-      <button class="btn secondary" id="copy">📋 Копіювати</button>
-      <button class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
+      <button type="button" class="btn good" id="gen">⚙️ Згенерувати прошивку</button>
+      <button type="button" class="btn secondary" id="copy">📋 Копіювати</button>
+      <button type="button" class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
     </div>
     <pre class="code" id="code">// Натисни «Згенерувати прошивку» ↑</pre>
   </div>
@@ -144,11 +144,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>💾 Протокол і експорт</h2>
     <div class="row">
-      <input id="fio" class="input" placeholder="ПІБ механіка"/>
-      <input id="job" class="input" placeholder="Робота (ремінний привід жатки, секція Х)"/>
-      <button class="btn" id="saveTxt">💾 TXT</button>
-      <button class="btn" id="saveCsv">📄 CSV</button>
-      <button class="btn" id="receipt">🖨️ 58 мм чек</button>
+      <input id="fio" class="input" placeholder="ПІБ механіка" aria-label="ПІБ механіка"/>
+      <input id="job" class="input" placeholder="Робота (ремінний привід жатки, секція Х)" aria-label="Робота (ремінний привід жатки, секція Х)"/>
+      <button type="button" class="btn" id="saveTxt">💾 TXT</button>
+      <button type="button" class="btn" id="saveCsv">📄 CSV</button>
+      <button type="button" class="btn" id="receipt">🖨️ 58 мм чек</button>
     </div>
     <div id="rc" class="receipt" hidden></div>
   </div>

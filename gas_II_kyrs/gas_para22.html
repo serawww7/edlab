@@ -42,7 +42,7 @@ pre.log{max-height:220px;overflow:auto;background:#0c182a;border-radius:12px;pad
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">📷🔢</span>
@@ -58,17 +58,17 @@ pre.log{max-height:220px;overflow:auto;background:#0c182a;border-radius:12px;pad
     <h2>📚 Контекст</h2>
     <p>Зніми кадр із <b>вебкамери</b> або завантаж <b>фото лічильника</b>, обведи область цифр (<b>ROI</b>), натисни <b>OCR</b>. Система витягне <b>показ</b>, перевірить <b>аномалії</b> (відкат/стрибок/довжина), побудує <b>графік історії</b> і згенерує <b>квитанцію 58 мм</b>, <b>CSV/TXT</b> та <b>QR</b> на докази.</p>
     <div class="row">
-      <button class="btn" id="camOn">🎥 Камера</button>
-      <button class="btn secondary" id="camShot">📸 Знімок</button>
-      <input id="file" type="file" accept="image/*" class="input" style="max-width:320px"/>
-      <button class="btn good" id="runOcr">🔎 OCR (цифри)</button>
+      <button type="button" class="btn" id="camOn">🎥 Камера</button>
+      <button type="button" class="btn secondary" id="camShot">📸 Знімок</button>
+      <input id="file" type="file" accept="image/*" class="input" style="max-width:320px" aria-label="file"/>
+      <button type="button" class="btn good" id="runOcr">🔎 OCR (цифри)</button>
       <span class="badge">Статус: <b id="st">готово</b></span>
     </div>
     <div class="row">
-      <label>№ вузла/абонента <input id="acc" class="input" placeholder="MTR-0001 / Особовий №"></label>
-      <label>Попередній показ (м³) <input id="prev" class="input" type="number" step="0.001" value="1234.000"></label>
-      <label>Довжина лічильника (цілi цифри) <input id="digits" class="input" type="number" step="1" value="7"></label>
-      <label>Макс. добове споживання, м³ <input id="maxDay" class="input" type="number" step="1" value="80"></label>
+      <label>№ вузла/абонента <input id="acc" class="input" placeholder="MTR-0001 / Особовий №" aria-label="MTR-0001 / Особовий №"></label>
+      <label>Попередній показ (м³) <input id="prev" class="input" type="number" step="0.001" value="1234.000" aria-label="prev"></label>
+      <label>Довжина лічильника (цілi цифри) <input id="digits" class="input" type="number" step="1" value="7" aria-label="digits"></label>
+      <label>Макс. добове споживання, м³ <input id="maxDay" class="input" type="number" step="1" value="80" aria-label="max Day"></label>
     </div>
   </div>
 
@@ -82,10 +82,10 @@ pre.log{max-height:220px;overflow:auto;background:#0c182a;border-radius:12px;pad
       <h3 style="margin-top:10px">✂️ Рамка ROI (перетягни/розтягни)</h3>
       <canvas id="roi" class="view" width="960" height="180"></canvas>
       <div class="row">
-        <button class="btn" id="roiFromFull">↘️ ROI із кадру</button>
-        <button class="btn secondary" id="roiClear">🧹 Очистити ROI</button>
-        <label>Бінаризація, поріг (0–255) <input id="thr" class="input" type="number" step="1" value="160"></label>
-        <button class="btn" id="prep">🧪 Передобробка</button>
+        <button type="button" class="btn" id="roiFromFull">↘️ ROI із кадру</button>
+        <button type="button" class="btn secondary" id="roiClear">🧹 Очистити ROI</button>
+        <label>Бінаризація, поріг (0–255) <input id="thr" class="input" type="number" step="1" value="160" aria-label="thr"></label>
+        <button type="button" class="btn" id="prep">🧪 Передобробка</button>
       </div>
     </div>
 
@@ -104,10 +104,10 @@ pre.log{max-height:220px;overflow:auto;background:#0c182a;border-radius:12px;pad
 
       <h3 style="margin-top:10px">💾 Експорт / чек / QR</h3>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV</button>
-        <button class="btn" id="saveTxt">💾 TXT</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (папка доказів)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (папка доказів)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div style="margin-top:8px"><canvas id="qr" width="220" height="220" style="background:#0b1220;border:1px solid var(--line);border-radius:12px"></canvas></div>

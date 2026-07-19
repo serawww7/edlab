@@ -15,6 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 12 (технологи) — Склад/FEFO: приймання, адресація, пікінг, відвантаження, квиток/QR/NFC/CSV</title>
+<meta name="description" content="🏬 Склад/FEFO: приймання, адресація, пікінг, відвантаження, квиток/QR/NFC/CSV">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -62,7 +63,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 12 · аудиторно · технологи переробки</span>
   <h1>🏬 Склад/FEFO: приймання, адресація, пікінг, відвантаження, квиток/QR/NFC/CSV</h1>
 
@@ -83,8 +84,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Зони</h3>
         <div class="row">
-          <div style="flex:1"><label>Холод. зона (°C)</label><input id="tCold" type="number" step="0.1" value="4.0"></div>
-          <div style="flex:1"><label>Заморозка (°C)</label><input id="tFrz" type="number" step="0.1" value="-18.0"></div>
+          <div style="flex:1"><label for="tCold">Холод. зона (°C)</label><input id="tCold" type="number" step="0.1" value="4.0"></div>
+          <div style="flex:1"><label for="tFrz">Заморозка (°C)</label><input id="tFrz" type="number" step="0.1" value="-18.0"></div>
         </div>
         <p class="small muted">Контроль температур у журналі; відвантаження — тільки з холод. зони (для охолодженої продукції).</p>
       </div>
@@ -93,16 +94,16 @@ html.embedded .box{background:#f8fafc;color:#111}
         <h3>Адресні формати</h3>
         <p class="small muted">Формат адреси: <span class="mono">ЗОНА-РЯД-ПОЛИЦЯ-МІСЦЕ</span> (напр. <span class="mono">C1-A-02-03</span>).</p>
         <div class="row">
-          <div style="flex:1"><label>Префікс холод. зони</label><input id="prefCold" type="text" value="C1"></div>
-          <div style="flex:1"><label>Префікс заморозки</label><input id="prefFrz" type="text" value="F1"></div>
+          <div style="flex:1"><label for="prefCold">Префікс холод. зони</label><input id="prefCold" type="text" value="C1"></div>
+          <div style="flex:1"><label for="prefFrz">Префікс заморозки</label><input id="prefFrz" type="text" value="F1"></div>
         </div>
       </div>
 
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="presetInbound()">🧪 Приклад приймання</button>
-          <button class="btn" onclick="copyCSV('csvInbound')">📋 CSV (inbound)</button>
+          <button type="button" class="btn" onclick="presetInbound()">🧪 Приклад приймання</button>
+          <button type="button" class="btn" onclick="copyCSV('csvInbound')">📋 CSV (inbound)</button>
         </div>
         <div id="csvInbound" class="out" style="margin-top:8px">—</div>
       </div>
@@ -113,9 +114,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>🚚 Приймання палет (Inbound)</h2>
     <div class="row">
-      <button class="btn" onclick="addInbound()">➕ Додати палету</button>
-      <button class="btn" onclick="assignLocation()">📦 Присвоїти адресу</button>
-      <button class="btn" onclick="copyCSV('csvStock')">📋 CSV (stock)</button>
+      <button type="button" class="btn" onclick="addInbound()">➕ Додати палету</button>
+      <button type="button" class="btn" onclick="assignLocation()">📦 Присвоїти адресу</button>
+      <button type="button" class="btn" onclick="copyCSV('csvStock')">📋 CSV (stock)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblInbound">
@@ -141,9 +142,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>🧾 Замовлення клієнта</h2>
     <div class="row">
-      <button class="btn" onclick="addOrder()">➕ Додати позицію</button>
-      <button class="btn" onclick="presetOrder()">🧪 Приклад замовлення</button>
-      <button class="btn" onclick="copyCSV('csvOrder')">📋 CSV (order)</button>
+      <button type="button" class="btn" onclick="addOrder()">➕ Додати позицію</button>
+      <button type="button" class="btn" onclick="presetOrder()">🧪 Приклад замовлення</button>
+      <button type="button" class="btn" onclick="copyCSV('csvOrder')">📋 CSV (order)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblOrder">
@@ -167,8 +168,8 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📋 FEFO пікінг-лист</h2>
     <div class="row">
-      <button class="btn" onclick="runFEFO()">🧮 Згенерувати відбір</button>
-      <button class="btn" onclick="copyCSV('csvPick')">📋 CSV (picking)</button>
+      <button type="button" class="btn" onclick="runFEFO()">🧮 Згенерувати відбір</button>
+      <button type="button" class="btn" onclick="copyCSV('csvPick')">📋 CSV (picking)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblPick">
@@ -196,16 +197,16 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Параметри рейсу</h3>
         <div class="row">
-          <div style="flex:1"><label>Номер рейсу</label><input id="tripNo" type="text" value="R-251017-01"></div>
-          <div style="flex:1"><label>Перевізник</label><input id="carrier" type="text" value="ТОВ «Холод-Транс»"></div>
+          <div style="flex:1"><label for="tripNo">Номер рейсу</label><input id="tripNo" type="text" value="R-251017-01"></div>
+          <div style="flex:1"><label for="carrier">Перевізник</label><input id="carrier" type="text" value="ТОВ «Холод-Транс»"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>t° кузова (поч.)</label><input id="tStart" type="number" step="0.1" value="3.5"></div>
-          <div style="flex:1"><label>t° кузова (кін.)</label><input id="tEnd" type="number" step="0.1" value="4.1"></div>
+          <div style="flex:1"><label for="tStart">t° кузова (поч.)</label><input id="tStart" type="number" step="0.1" value="3.5"></div>
+          <div style="flex:1"><label for="tEnd">t° кузова (кін.)</label><input id="tEnd" type="number" step="0.1" value="4.1"></div>
         </div>
         <div class="row" style="margin-top:8px">
-          <button class="btn" onclick="buildLoadPlan()">📦 Побудувати план</button>
-          <button class="btn" onclick="copyCSV('csvLoad')">📋 CSV (load)</button>
+          <button type="button" class="btn" onclick="buildLoadPlan()">📦 Побудувати план</button>
+          <button type="button" class="btn" onclick="copyCSV('csvLoad')">📋 CSV (load)</button>
         </div>
         <div id="loadOut" class="out" style="margin-top:8px">—</div>
         <div id="csvLoad" class="out" style="margin-top:8px">—</div>
@@ -214,8 +215,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток 58 мм — “LOAD & SHIP”</h3>
         <div class="row">
-          <button class="btn" onclick="printTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="printTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>LOAD & SHIP</h4>
@@ -236,8 +237,8 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал відвантажень / QR / NFC</h2>
     <div class="row">
-      <button class="btn" onclick="addLog()">➕ Додати запис</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+      <button type="button" class="btn" onclick="addLog()">➕ Додати запис</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblLog">
@@ -262,20 +263,20 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>QR-payload</h3>
         <div class="row">
-          <button class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
-          <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
+          <button type="button" class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
         </div>
         <div id="qrOut" class="out">—</div>
       </div>
       <div class="box">
         <h3>NFC — “LOAD CARD”</h3>
         <div class="row">
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
-          <div style="flex:1"><label>Водій</label><input id="nfcDriver" type="text" value="Студент ТПТ"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="nfcDriver">Водій</label><input id="nfcDriver" type="text" value="Студент ТПТ"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -339,7 +340,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark"><input type="number" step="1" value="${s.cases}"></td>
       <td><input type="text" value="${s.addr}"></td>
       <td>${s.st}</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyInbound); buildCSV_Stock();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyInbound); buildCSV_Stock();">✖</button></td>
     `;
     bodyInbound.appendChild(tr); reindex(bodyInbound); buildCSV_Inbound(); buildCSV_Stock();
   }
@@ -402,7 +403,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark"><input type="text" value="${s.prod}"></td>
       <td class="dark"><input type="number" step="1" value="${s.need}"></td>
       <td class="pick">—</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyOrder); buildCSV_Order();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyOrder); buildCSV_Order();">✖</button></td>
     `;
     bodyOrder.appendChild(tr); reindex(bodyOrder); buildCSV_Order();
   }
@@ -479,7 +480,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark">${s.exp}</td>
       <td class="dark">${s.addr||'—'}</td>
       <td>${s.take}</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyPick); buildCSV_Pick();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyPick); buildCSV_Pick();">✖</button></td>
     `;
     bodyPick.appendChild(tr); reindex(bodyPick);
   }
@@ -557,7 +558,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td>${cases}</td>
       <td>${expMin}</td>
       <td>${byId('tStart').value}→${byId('tEnd').value}</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
     `;
     bodyLog.appendChild(tr); reindex(bodyLog); buildCSV_Log();
   }

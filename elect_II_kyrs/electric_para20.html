@@ -11,6 +11,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Електрики · Пара 20 — Фінальний мікропроєкт і захист</title>
+<meta name="description" content="🏁 Фінальний мікропроєкт: «Електробезпека та енергоефективність майстерні» — імпорт CSV → KPI → оцінка → 🧾 58 мм → 📄 A4">
 <meta name="color-scheme" content="light dark"/>
 <style>
 :root{
@@ -72,7 +73,7 @@ textarea{min-height:72px}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Електрики · Пара 20 · аудиторно</span>
   <h1>🏁 Фінальний мікропроєкт: «Електробезпека та енергоефективність майстерні» — імпорт CSV → KPI → оцінка → 🧾 58 мм → 📄 A4</h1>
 
@@ -85,12 +86,12 @@ textarea{min-height:72px}
       <li>Експортувати <b>.csv/.json/.ics</b> з підсумками (для архіву).</li>
     </ol>
     <div class="row">
-      <button class="btn" onclick="seedDemo()">🔄 Приклад даних</button>
-      <button class="btn" onclick="calcAll()">🧮 Перерахувати</button>
-      <button class="btn" onclick="buildTicket()">🧾 Наклейка 58 мм</button>
-      <button class="btn" onclick="buildReport()">📄 A4-звіт</button>
-      <button class="btn" onclick="exportAll()">📤 Експорт .csv/.json</button>
-      <button class="btn" onclick="downloadICS()">📅 .ics дедлайни</button>
+      <button type="button" class="btn" onclick="seedDemo()">🔄 Приклад даних</button>
+      <button type="button" class="btn" onclick="calcAll()">🧮 Перерахувати</button>
+      <button type="button" class="btn" onclick="buildTicket()">🧾 Наклейка 58 мм</button>
+      <button type="button" class="btn" onclick="buildReport()">📄 A4-звіт</button>
+      <button type="button" class="btn" onclick="exportAll()">📤 Експорт .csv/.json</button>
+      <button type="button" class="btn" onclick="downloadICS()">📅 .ics дедлайни</button>
     </div>
     <p class="small">Підтримувані CSV: <span class="mono">energy_profile_registry.csv</span> (заняття 16), <span class="mono">equipment_registry.csv</span> (17), <span class="mono">panel_balance_registry.csv</span> (18), <span class="mono">ptw_loto.csv</span> (19).</p>
   </div>
@@ -100,22 +101,22 @@ textarea{min-height:72px}
     <div class="grid g3">
       <div>
         <h3>Команда</h3>
-        <div class="row"><label class="small" style="min-width:140px">Група</label><input id="group" value="ЕЛ-21"></div>
-        <div class="row"><label class="small" style="min-width:140px">Учасники</label><input id="students" value="ПІБ1; ПІБ2"></div>
-        <div class="row"><label class="small" style="min-width:140px">Керівник</label><input id="mentor" value="Поліщук Сергій"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="group">Група</label><input id="group" value="ЕЛ-21"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="students">Учасники</label><input id="students" value="ПІБ1; ПІБ2"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="mentor">Керівник</label><input id="mentor" value="Поліщук Сергій"></div>
       </div>
       <div>
         <h3>Об’єкт</h3>
-        <div class="row"><label class="small" style="min-width:140px">Локація</label><input id="site" value="Майстерня · Корпус А"></div>
-        <div class="row"><label class="small" style="min-width:140px">URL/QR (портфоліо)</label><input id="projUrl" value="https://serawww7.github.io/edlab/"></div>
-        <div class="row"><label class="small" style="min-width:140px">Дата захисту</label><input id="defense" value="2025-10-23 12:00"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="site">Локація</label><input id="site" value="Майстерня · Корпус А"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="projUrl">URL/QR (портфоліо)</label><input id="projUrl" value="https://serawww7.github.io/edlab/"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="defense">Дата захисту</label><input id="defense" value="2025-10-23 12:00"></div>
       </div>
       <div>
         <h3>Завантаження CSV</h3>
-        <div class="row"><label class="small" style="min-width:160px">Energy (16)</label><input id="file16" class="btn" type="file" accept=".csv,text/csv"></div>
-        <div class="row"><label class="small" style="min-width:160px">Equipment (17)</label><input id="file17" class="btn" type="file" accept=".csv,text/csv"></div>
-        <div class="row"><label class="small" style="min-width:160px">Panel (18)</label><input id="file18" class="btn" type="file" accept=".csv,text/csv"></div>
-        <div class="row"><label class="small" style="min-width:160px">PTW (19)</label><input id="file19" class="btn" type="file" accept=".csv,text/csv"></div>
+        <div class="row"><label class="small" style="min-width:160px" for="file16">Energy (16)</label><input id="file16" class="btn" type="file" accept=".csv,text/csv"></div>
+        <div class="row"><label class="small" style="min-width:160px" for="file17">Equipment (17)</label><input id="file17" class="btn" type="file" accept=".csv,text/csv"></div>
+        <div class="row"><label class="small" style="min-width:160px" for="file18">Panel (18)</label><input id="file18" class="btn" type="file" accept=".csv,text/csv"></div>
+        <div class="row"><label class="small" style="min-width:160px" for="file19">PTW (19)</label><input id="file19" class="btn" type="file" accept=".csv,text/csv"></div>
       </div>
     </div>
   </div>
@@ -132,9 +133,9 @@ textarea{min-height:72px}
   <div class="card printable">
     <h2>🧾 Наклейка 58 мм «PROJECT TICKET»</h2>
     <div class="row">
-      <button class="btn" onclick="buildTicket()">🧩 Згенерувати</button>
-      <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
-      <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+      <button type="button" class="btn" onclick="buildTicket()">🧩 Згенерувати</button>
+      <button type="button" class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+      <button type="button" class="btn" onclick="downloadTXT()">📥 TXT</button>
     </div>
     <div id="tickets" class="tickets"></div>
   </div>
@@ -142,8 +143,8 @@ textarea{min-height:72px}
   <div class="card printable">
     <h2>📄 A4 — Звіт на захист</h2>
     <div class="row">
-      <button class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
-      <button class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
+      <button type="button" class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
+      <button type="button" class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
     </div>
     <div id="printArea"></div>
   </div>

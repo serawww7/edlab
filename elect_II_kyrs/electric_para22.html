@@ -42,7 +42,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧠</span>
@@ -63,11 +63,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🗂️ Дані для навчання/тесту (CSV)</h2>
     <p class="small muted">Формат: <span class="mono">Vrms,Irms,PF,THD,Temp,label</span> (label ∈ {normal, overload, low_pf, high_thd, overtemp}).</p>
-    <textarea id="csv" class="input" rows="7" placeholder="Vrms,Irms,PF,THD,Temp,label"></textarea>
+    <textarea id="csv" class="input" rows="7" placeholder="Vrms,Irms,PF,THD,Temp,label" aria-label="Vrms,Irms,PF,THD,Temp,label"></textarea>
     <div class="row">
-      <button class="btn good" id="load">📥 Імпорт</button>
-      <button class="btn secondary" id="demo">🎲 Демодані</button>
-      <button class="btn secondary" id="clear">🧹 Очистити</button>
+      <button type="button" class="btn good" id="load">📥 Імпорт</button>
+      <button type="button" class="btn secondary" id="demo">🎲 Демодані</button>
+      <button type="button" class="btn secondary" id="clear">🧹 Очистити</button>
       <span id="badgeN" class="badge">Записів: 0</span>
     </div>
 
@@ -87,9 +87,9 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       </div>
     </div>
     <div class="row" style="margin-top:6px">
-      <button class="btn good" id="train">🏋️ Тренувати</button>
-      <button class="btn secondary" id="test">🧪 Тест</button>
-      <button class="btn secondary" id="exportModel">⬇️ Експорт model.json</button>
+      <button type="button" class="btn good" id="train">🏋️ Тренувати</button>
+      <button type="button" class="btn secondary" id="test">🧪 Тест</button>
+      <button type="button" class="btn secondary" id="exportModel">⬇️ Експорт model.json</button>
       <span id="badgeRes" class="badge">Acc: — | F1: —</span>
     </div>
 
@@ -109,16 +109,16 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>⚡ Емулятор і живий монітор</h2>
     <div class="row">
-      <label style="flex:1">Vrms, В <input id="ev" class="input" type="range" min="180" max="260" step="1" value="230"/></label>
-      <label style="flex:1">Irms, А <input id="ei" class="input" type="range" min="0" max="30" step="0.1" value="3.0"/></label>
-      <label style="flex:1">PF (cos φ) <input id="epf" class="input" type="range" min="0" max="1" step="0.01" value="0.95"/></label>
-      <label style="flex:1">THD, % <input id="ethd" class="input" type="range" min="0" max="40" step="0.5" value="4.0"/></label>
-      <label style="flex:1">Temp, °C <input id="et" class="input" type="range" min="15" max="90" step="0.5" value="32.0"/></label>
+      <label style="flex:1">Vrms, В <input id="ev" class="input" type="range" min="180" max="260" step="1" value="230" aria-label="ev"/></label>
+      <label style="flex:1">Irms, А <input id="ei" class="input" type="range" min="0" max="30" step="0.1" value="3.0" aria-label="ei"/></label>
+      <label style="flex:1">PF (cos φ) <input id="epf" class="input" type="range" min="0" max="1" step="0.01" value="0.95" aria-label="epf"/></label>
+      <label style="flex:1">THD, % <input id="ethd" class="input" type="range" min="0" max="40" step="0.5" value="4.0" aria-label="ethd"/></label>
+      <label style="flex:1">Temp, °C <input id="et" class="input" type="range" min="15" max="90" step="0.5" value="32.0" aria-label="et"/></label>
     </div>
     <div class="row" style="margin-top:6px">
-      <button class="btn" id="tick">➕ Додати точку</button>
-      <button class="btn secondary" id="auto">▶️ Автогенерація 30 с</button>
-      <button class="btn secondary" id="clearLive">🧹 Очистити</button>
+      <button type="button" class="btn" id="tick">➕ Додати точку</button>
+      <button type="button" class="btn secondary" id="auto">▶️ Автогенерація 30 с</button>
+      <button type="button" class="btn secondary" id="clearLive">🧹 Очистити</button>
       <span id="last" class="badge">Pred=— | Anom=—</span>
     </div>
     <div class="canvasWrap" style="margin-top:6px"><canvas id="chart" width="1000" height="260"></canvas></div>
@@ -129,9 +129,9 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🧩 Генератор скетча Arduino (.ino) для збору ознак</h2>
     <div class="row">
-      <button class="btn good" id="gen">⚙️ Згенерувати .ino</button>
-      <button class="btn secondary" id="copy">📋 Копіювати</button>
-      <button class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
+      <button type="button" class="btn good" id="gen">⚙️ Згенерувати .ino</button>
+      <button type="button" class="btn secondary" id="copy">📋 Копіювати</button>
+      <button type="button" class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
     </div>
     <pre class="code" id="code">// Натисни «⚙️ Згенерувати .ino»</pre>
   </div>
@@ -139,9 +139,9 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🤖 Промпт до LLM для пояснень/служби підтримки</h2>
     <div class="row">
-      <button class="btn" id="genPrompt">📝 Згенерувати</button>
-      <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
-      <button class="btn secondary" id="savePrompt">⬇️ TXT</button>
+      <button type="button" class="btn" id="genPrompt">📝 Згенерувати</button>
+      <button type="button" class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+      <button type="button" class="btn secondary" id="savePrompt">⬇️ TXT</button>
     </div>
     <pre class="code" id="prompt">// Спершу натренуй модель або використай демодані</pre>
   </div>

@@ -11,6 +11,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Електрики · Пара 16 — Енергооблік: добовий профіль, кВт·год, тарифи, 58 мм</title>
+<meta name="description" content="📈 Енергооблік: добовий профіль (15 хв) → кВт·год → пікова потужність → тарифи → 🧾 58 мм">
 <meta name="color-scheme" content="light dark" />
 <style>
 :root{
@@ -75,7 +76,7 @@ tbody tr:nth-child(even){background:#0b1324}
 </style>
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Електрики · Пара 16 · аудиторно</span>
     <h1>📈 Енергооблік: добовий профіль (15 хв) → кВт·год → пікова потужність → тарифи → 🧾 58 мм</h1>
 
@@ -83,10 +84,10 @@ tbody tr:nth-child(even){background:#0b1324}
       <h2>🎯 Мета</h2>
       <p>Створити <b>добовий профіль навантаження</b> (96 інтервалів по 15 хв), порахувати <b>кВт·год</b>, <b>пікову потужність</b>, вартість за <b>одно/двозонним тарифом</b>; згенерувати наклейки 58 мм «Енергопаспорт точки» та A4-звіт.</p>
       <div class="row">
-        <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
-        <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
-        <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+        <button type="button" class="btn" onclick="seedDemo()">🔄 Приклад</button>
+        <button type="button" class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+        <input id="file" type="file" accept=".csv,text/csv" class="btn"  aria-label="file"/>
+        <button type="button" class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
       </div>
       <p class="small">CSV: <span class="mono">id,name,phase,p_w,qty,mode,start,end,hours,duty_pct,url,notes</span> (mode: BLOCK або HOURS; BLOCK = інтервал [start,end] у форматі HH:MM, HOURS = години/добу рівномірно).</p>
     </div>
@@ -96,25 +97,25 @@ tbody tr:nth-child(even){background:#0b1324}
       <div class="grid g3">
         <div>
           <h3>Тариф</h3>
-          <div class="row"><label class="small" style="min-width:140px">Тип</label>
+          <div class="row"><label class="small" style="min-width:140px" for="tariffType">Тип</label>
             <select id="tariffType"><option selected>Однозонний</option><option>Двозонний (ніч/день)</option></select></div>
-          <div class="row"><label class="small" style="min-width:140px">Ціна день, грн/кВт·год</label><input id="priceDay" type="number" step="0.01" value="3.00"></div>
-          <div class="row"><label class="small" style="min-width:140px">Ціна ніч, грн/кВт·год</label><input id="priceNight" type="number" step="0.01" value="1.80"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="priceDay">Ціна день, грн/кВт·год</label><input id="priceDay" type="number" step="0.01" value="3.00"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="priceNight">Ціна ніч, грн/кВт·год</label><input id="priceNight" type="number" step="0.01" value="1.80"></div>
           <div class="row"><label class="small" style="min-width:140px">Нічний період</label>
-            <div class="row" style="gap:6px"><input id="nightStart" value="22:00" style="width:120px"><input id="nightEnd" value="06:00" style="width:120px"></div></div>
+            <div class="row" style="gap:6px"><input id="nightStart" value="22:00" style="width:120px" aria-label="night Start"><input id="nightEnd" value="06:00" style="width:120px" aria-label="night End"></div></div>
         </div>
         <div>
           <h3>Відомості</h3>
-          <div class="row"><label class="small" style="min-width:140px">Об'єкт</label><input id="site" value="Майстерня · Корпус А"></div>
-          <div class="row"><label class="small" style="min-width:140px">Відповідальний</label><input id="resp" value="Студент ПІБ / група"></div>
-          <div class="row"><label class="small" style="min-width:140px">Ліміт піку, кВт</label><input id="peakLimit" type="number" step="0.1" value="10"></div>
-          <div class="row"><button class="btn" onclick="recalcAll()">🧮 Перерахувати</button></div>
+          <div class="row"><label class="small" style="min-width:140px">Об'єкт</label><input id="site" value="Майстерня · Корпус А" aria-label="site"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="resp">Відповідальний</label><input id="resp" value="Студент ПІБ / група"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="peakLimit">Ліміт піку, кВт</label><input id="peakLimit" type="number" step="0.1" value="10"></div>
+          <div class="row"><button type="button" class="btn" onclick="recalcAll()">🧮 Перерахувати</button></div>
         </div>
         <div>
           <h3>Дії</h3>
-          <div class="row"><button class="btn" onclick="buildTickets()">🧾 Наклейки 58 мм</button></div>
-          <div class="row"><button class="btn" onclick="buildReport()">📄 A4-звіт</button></div>
-          <div class="row"><button class="btn" onclick="window.print()">🖨️ Друк</button></div>
+          <div class="row"><button type="button" class="btn" onclick="buildTickets()">🧾 Наклейки 58 мм</button></div>
+          <div class="row"><button type="button" class="btn" onclick="buildReport()">📄 A4-звіт</button></div>
+          <div class="row"><button type="button" class="btn" onclick="window.print()">🖨️ Друк</button></div>
         </div>
       </div>
     </div>
@@ -124,26 +125,26 @@ tbody tr:nth-child(even){background:#0b1324}
       <div class="grid g3">
         <div>
           <h3>Паспорт</h3>
-          <div class="row"><label class="small" style="min-width:140px">ID</label><input id="id" value="E-01"></div>
-          <div class="row"><label class="small" style="min-width:140px">Назва</label><input id="name" value="Освітлення ауд.101"></div>
-          <div class="row"><label class="small" style="min-width:140px">Фаза</label><select id="phase"><option>A</option><option selected>B</option><option>C</option></select></div>
-          <div class="row"><label class="small" style="min-width:140px">Потужність, Вт</label><input id="p_w" type="number" step="10" value="600"></div>
-          <div class="row"><label class="small" style="min-width:140px">К-ть</label><input id="qty" type="number" value="1"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="id">ID</label><input id="id" value="E-01"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="name">Назва</label><input id="name" value="Освітлення ауд.101"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="phase">Фаза</label><select id="phase"><option>A</option><option selected>B</option><option>C</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px" for="p_w">Потужність, Вт</label><input id="p_w" type="number" step="10" value="600"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="qty">К-ть</label><input id="qty" type="number" value="1"></div>
         </div>
         <div>
           <h3>Графік</h3>
-          <div class="row"><label class="small" style="min-width:140px">Режим</label><select id="mode"><option selected>BLOCK</option><option>HOURS</option></select></div>
-          <div class="row"><label class="small" style="min-width:140px">Початок</label><input id="start" value="08:00"></div>
-          <div class="row"><label class="small" style="min-width:140px">Кінець</label><input id="end" value="18:00"></div>
-          <div class="row"><label class="small" style="min-width:140px">Годин/добу (HOURS)</label><input id="hours" type="number" step="0.25" value="4"></div>
-          <div class="row"><label class="small" style="min-width:140px">Duty, %</label><input id="duty" type="number" value="80"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="mode">Режим</label><select id="mode"><option selected>BLOCK</option><option>HOURS</option></select></div>
+          <div class="row"><label class="small" style="min-width:140px" for="start">Початок</label><input id="start" value="08:00"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="end">Кінець</label><input id="end" value="18:00"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="hours">Годин/добу (HOURS)</label><input id="hours" type="number" step="0.25" value="4"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="duty">Duty, %</label><input id="duty" type="number" value="80"></div>
         </div>
         <div>
           <h3>Службове</h3>
-          <div class="row"><label class="small" style="min-width:140px">URL (NFC/QR)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
-          <div class="row"><label class="small" style="min-width:140px">Примітка</label><input id="notes" placeholder="Примітка"></div>
-          <div class="row"><button class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button></div>
-          <div class="row"><button class="btn" onclick="seedOne()">🔄 Приклад запису</button></div>
+          <div class="row"><label class="small" style="min-width:140px" for="url">URL (NFC/QR)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
+          <div class="row"><label class="small" style="min-width:140px" for="notes">Примітка</label><input id="notes" placeholder="Примітка"></div>
+          <div class="row"><button type="button" class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button></div>
+          <div class="row"><button type="button" class="btn" onclick="seedOne()">🔄 Приклад запису</button></div>
         </div>
       </div>
     </div>
@@ -165,9 +166,9 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="card printable">
       <h2>🧾 Наклейки 58 мм «Енергопаспорт точки»</h2>
       <div class="row">
-        <button class="btn" onclick="buildTickets()">🧩 Зібрати для всіх</button>
-        <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
-        <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+        <button type="button" class="btn" onclick="buildTickets()">🧩 Зібрати для всіх</button>
+        <button type="button" class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+        <button type="button" class="btn" onclick="downloadTXT()">📥 TXT</button>
       </div>
       <div id="tickets" class="tickets"></div>
     </div>
@@ -175,8 +176,8 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="card printable">
       <h2>📄 A4-звіт (для друку/PDF)</h2>
       <div class="row">
-        <button class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
-        <button class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
+        <button type="button" class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
+        <button type="button" class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
       </div>
       <div id="printArea"></div>
     </div>
@@ -305,7 +306,7 @@ tbody tr:nth-child(even){background:#0b1324}
         <td>${Math.round(peakW)}</td>
         <td>${cost.toFixed(2)}</td>
         <td class="editable" data-k="url" data-id="${L.id}">${esc(L.url||'')}</td>
-        <td class="mono"><button class="btn" data-act="label" data-id="${L.id}">Наклейка</button> <button class="btn" data-act="del" data-id="${L.id}">✖</button></td>`;
+        <td class="mono"><button type="button" class="btn" data-act="label" data-id="${L.id}">Наклейка</button> <button type="button" class="btn" data-act="del" data-id="${L.id}">✖</button></td>`;
       tbody.appendChild(tr);
     });
 

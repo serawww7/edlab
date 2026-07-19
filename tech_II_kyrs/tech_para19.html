@@ -52,7 +52,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧼</span>
@@ -71,18 +71,18 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>🗓️ План-календар SSOP</h2>
       <div class="row">
-        <select id="area" class="input" style="max-width:220px">
+        <select id="area" class="input" style="max-width:220px" aria-label="area">
           <option value="milk" selected>Цех пастеризації</option>
           <option value="cut">Коптильне/нарізка</option>
           <option value="pack">Пакування (MAP)</option>
           <option value="brine">Розсільне відділення</option>
           <option value="egg">Яєчний відділ</option>
         </select>
-        <label>Зміни/добу<input id="shifts" class="input" type="number" min="1" max="4" value="2"/></label>
-        <label>ATP поріг (RLU)<input id="rluThr" class="input" type="number" min="10" step="10" value="150"/></label>
-        <label>CFU поріг (напр., 10/см²)<input id="cfuThr" class="input" type="number" min="1" step="1" value="10"/></label>
-        <label>Алерген (порог., ppm)<input id="algThr" class="input" type="number" min="1" step="1" value="2"/></label>
-        <button class="btn good" id="mkPlan">⚙️ Згенерувати план</button>
+        <label>Зміни/добу<input id="shifts" class="input" type="number" min="1" max="4" value="2" aria-label="shifts"/></label>
+        <label>ATP поріг (RLU)<input id="rluThr" class="input" type="number" min="10" step="10" value="150" aria-label="rlu Thr"/></label>
+        <label>CFU поріг (напр., 10/см²)<input id="cfuThr" class="input" type="number" min="1" step="1" value="10" aria-label="cfu Thr"/></label>
+        <label>Алерген (порог., ppm)<input id="algThr" class="input" type="number" min="1" step="1" value="2" aria-label="alg Thr"/></label>
+        <button type="button" class="btn good" id="mkPlan">⚙️ Згенерувати план</button>
       </div>
 
       <div id="cal" class="cal" style="margin-top:8px"></div>
@@ -90,18 +90,18 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:12px">📝 Журнал чистоти (ATP/змиви/алергени)</h3>
       <div class="row">
-        <select id="station" class="input" style="max-width:220px">
+        <select id="station" class="input" style="max-width:220px" aria-label="station">
           <option>Ніж/стіл</option><option>Транспортер</option><option>Фасувальник</option><option>Пастеризатор</option><option>Шприц/шприц-насадка</option>
         </select>
-        <label>ATP, RLU<input id="rlu" class="input" type="number" step="1" value="120"/></label>
-        <label>Змив, CFU/см²<input id="cfu" class="input" type="number" step="1" value="6"/></label>
-        <label>Алерген, ppm<input id="alg" class="input" type="number" step="1" value="0"/></label>
+        <label>ATP, RLU<input id="rlu" class="input" type="number" step="1" value="120" aria-label="rlu"/></label>
+        <label>Змив, CFU/см²<input id="cfu" class="input" type="number" step="1" value="6" aria-label="cfu"/></label>
+        <label>Алерген, ppm<input id="alg" class="input" type="number" step="1" value="0" aria-label="alg"/></label>
       </div>
       <div class="row">
-        <input id="operator" class="input" placeholder="Оператор/зміна (ПІБ)"/>
-        <input id="lot" class="input" placeholder="Лот/партія (необов.)"/>
-        <button class="btn" id="addRec">➕ Додати запис</button>
-        <button class="btn secondary" id="clearRec">🧹 Очистити журнал</button>
+        <input id="operator" class="input" placeholder="Оператор/зміна (ПІБ)" aria-label="Оператор/зміна (ПІБ)"/>
+        <input id="lot" class="input" placeholder="Лот/партія (необов.)" aria-label="Лот/партія (необов.)"/>
+        <button type="button" class="btn" id="addRec">➕ Додати запис</button>
+        <button type="button" class="btn secondary" id="clearRec">🧹 Очистити журнал</button>
         <span id="kpi" class="badge">PASS: — % | Всього: 0</span>
       </div>
       <pre id="alog" class="note" style="max-height:160px;overflow:auto">// Поки без подій</pre>
@@ -112,10 +112,10 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:12px">💾 Експорт / друк</h3>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV журнал</button>
-        <button class="btn" id="saveTxt">💾 TXT підсумок</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (папка з актами/фото)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV журнал</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT підсумок</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (папка з актами/фото)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>

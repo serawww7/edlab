@@ -15,6 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 1 (технологи) — Лот, термін придатності, простежуваність: чек 58 мм, NFC, CSV</title>
+<meta name="description" content="🏷️ Лот, термін придатності та простежуваність: чек 58 мм, NFC, CSV">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -60,7 +61,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 1 · аудиторно · технологи переробки</span>
   <h1>🏷️ Лот, термін придатності та простежуваність: чек 58 мм, NFC, CSV</h1>
 
@@ -82,7 +83,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Продукт та випуск</h3>
         <div class="row">
-          <div style="flex:1"><label>Категорія</label>
+          <div style="flex:1"><label for="category">Категорія</label>
             <select id="category">
               <option value="milk" selected>Молоко пастеризоване</option>
               <option value="yogurt">Йогурт (термостатний)</option>
@@ -92,7 +93,7 @@ html.embedded .box{background:#f8fafc;color:#111}
               <option value="cheese">Сир твердий</option>
             </select>
           </div>
-          <div style="flex:1"><label>Тип пакування</label>
+          <div style="flex:1"><label for="pack">Тип пакування</label>
             <select id="pack">
               <option value="std" selected>Звичайне</option>
               <option value="vac">Вакуум</option>
@@ -101,16 +102,16 @@ html.embedded .box{background:#f8fafc;color:#111}
           </div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Дата виробн.</label><input id="prodDate" type="date"></div>
-          <div style="flex:1"><label>Час виробн.</label><input id="prodTime" type="time"></div>
+          <div style="flex:1"><label for="prodDate">Дата виробн.</label><input id="prodDate" type="date"></div>
+          <div style="flex:1"><label for="prodTime">Час виробн.</label><input id="prodTime" type="time"></div>
         </div>
       </div>
 
       <div class="box">
         <h3>Лінія / зміна / умови</h3>
         <div class="row">
-          <div style="flex:1"><label>ID лінії</label><input id="lineId" type="text" value="L1"></div>
-          <div style="flex:1"><label>Зміна</label>
+          <div style="flex:1"><label for="lineId">ID лінії</label><input id="lineId" type="text" value="L1"></div>
+          <div style="flex:1"><label for="shift">Зміна</label>
             <select id="shift">
               <option value="A" selected>A (06:00–14:00)</option>
               <option value="B">B (14:00–22:00)</option>
@@ -119,8 +120,8 @@ html.embedded .box{background:#f8fafc;color:#111}
           </div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Температура збер., °C</label><input id="temp" type="number" step="0.1" value="4"></div>
-          <div style="flex:1"><label>Запас на логістику, дні</label><input id="logReserve" type="number" step="1" value="1"></div>
+          <div style="flex:1"><label for="temp">Температура збер., °C</label><input id="temp" type="number" step="0.1" value="4"></div>
+          <div style="flex:1"><label for="logReserve">Запас на логістику, дні</label><input id="logReserve" type="number" step="1" value="1"></div>
         </div>
       </div>
 
@@ -130,9 +131,9 @@ html.embedded .box{background:#f8fafc;color:#111}
         <p>“Вжити до” / “Кінц. споживати до”: <b><span id="expiry">—</span></b></p>
         <p>Умови: <b><span id="cond">—</span></b></p>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="calcAll()">🔁 Перерахувати</button>
-          <button class="btn" onclick="preset()">🧪 Приклад</button>
-          <button class="btn" onclick="copyCSV('csvCore')">📋 CSV</button>
+          <button type="button" class="btn" onclick="calcAll()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="preset()">🧪 Приклад</button>
+          <button type="button" class="btn" onclick="copyCSV('csvCore')">📋 CSV</button>
         </div>
         <div id="csvCore" class="out" style="margin-top:8px">—</div>
       </div>
@@ -144,9 +145,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал партій</h2>
     <div class="row">
-      <button class="btn" onclick="addRow()">➕ Додати рядок</button>
-      <button class="btn" onclick="presetRows()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+      <button type="button" class="btn" onclick="addRow()">➕ Додати рядок</button>
+      <button type="button" class="btn" onclick="presetRows()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tbl">
@@ -175,12 +176,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>NFC — “FOOD LOT CARD”</h3>
         <div class="row">
-          <div style="flex:1"><label>Контакт/техн.</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
-          <div style="flex:1"><label>Об’єм партії, кг</label><input id="batchKg" type="number" step="0.1" value="500"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт/техн.</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="batchKg">Об’єм партії, кг</label><input id="batchKg" type="number" step="0.1" value="500"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -188,8 +189,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток для принтера 58 мм</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>LOT LABEL</h4>

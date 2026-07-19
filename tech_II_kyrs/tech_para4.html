@@ -15,6 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 4 (технологи) — Етикетка: склад/алергени, харчова цінність, EAN-13, QR, чек 58 мм, NFC, CSV</title>
+<meta name="description" content="🏷️ Етикетка: склад/алергени, харчова цінність, EAN-13 (GTIN), QR, чек 58 мм, NFC">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -63,7 +64,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 4 · аудиторно · технологи переробки</span>
   <h1>🏷️ Етикетка: склад/алергени, харчова цінність, EAN-13 (GTIN), QR, чек 58 мм, NFC</h1>
 
@@ -84,40 +85,40 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Продукт</h3>
         <div class="row">
-          <div style="flex:1"><label>Назва виробу</label><input id="prodName" type="text" value="Ковбаса варена “Класична”"></div>
+          <div style="flex:1"><label for="prodName">Назва виробу</label><input id="prodName" type="text" value="Ковбаса варена “Класична”"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Торгова марка</label><input id="brand" type="text" value="AgroTech Foods"></div>
-          <div style="flex:1"><label>Маса нетто, г</label><input id="netto" type="number" step="1" value="500"></div>
+          <div style="flex:1"><label for="brand">Торгова марка</label><input id="brand" type="text" value="AgroTech Foods"></div>
+          <div style="flex:1"><label for="netto">Маса нетто, г</label><input id="netto" type="number" step="1" value="500"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Дата виробн.</label><input id="prodDate" type="date"></div>
-          <div style="flex:1"><label>“Вжити до”</label><input id="expDate" type="date"></div>
+          <div style="flex:1"><label for="prodDate">Дата виробн.</label><input id="prodDate" type="date"></div>
+          <div style="flex:1"><label for="expDate">“Вжити до”</label><input id="expDate" type="date"></div>
         </div>
       </div>
 
       <div class="box">
         <h3>Ідентифікація</h3>
         <div class="row">
-          <div style="flex:1"><label>GTIN-12 (без ч/ц)</label><input id="gtin12" type="text" value="482000123456"></div>
-          <div style="flex:1"><label>Згенерований EAN-13</label><input id="ean13" type="text" readonly placeholder="—"></div>
+          <div style="flex:1"><label for="gtin12">GTIN-12 (без ч/ц)</label><input id="gtin12" type="text" value="482000123456"></div>
+          <div style="flex:1"><label for="ean13">Згенерований EAN-13</label><input id="ean13" type="text" readonly placeholder="—"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>ЛОТ (партія)</label><input id="lot" type="text" value="25041-L1-A-1030"></div>
-          <div style="flex:1"><label>URL продукту</label><input id="url" type="text" value="https://example.com/p/klassic"></div>
+          <div style="flex:1"><label for="lot">ЛОТ (партія)</label><input id="lot" type="text" value="25041-L1-A-1030"></div>
+          <div style="flex:1"><label for="url">URL продукту</label><input id="url" type="text" value="https://example.com/p/klassic"></div>
         </div>
       </div>
 
       <div class="box">
         <h3>Зберігання / Виробник</h3>
         <div class="row">
-          <div style="flex:1"><label>Умови зберігання</label><input id="storage" type="text" value="Зберігати при 0…+6°C"></div>
-          <div style="flex:1"><label>Країна/виробник</label><input id="maker" type="text" value="Виробник: ТОВ “АгроТех”, Україна"></div>
+          <div style="flex:1"><label for="storage">Умови зберігання</label><input id="storage" type="text" value="Зберігати при 0…+6°C"></div>
+          <div style="flex:1"><label for="maker">Країна/виробник</label><input id="maker" type="text" value="Виробник: ТОВ “АгроТех”, Україна"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="autoDates()">🕒 Автодата</button>
-          <button class="btn" onclick="genEAN()">🔢 Згенерувати EAN-13</button>
-          <button class="btn" onclick="copyCSV('csvCore')">📋 CSV (core)</button>
+          <button type="button" class="btn" onclick="autoDates()">🕒 Автодата</button>
+          <button type="button" class="btn" onclick="genEAN()">🔢 Згенерувати EAN-13</button>
+          <button type="button" class="btn" onclick="copyCSV('csvCore')">📋 CSV (core)</button>
         </div>
         <div id="csvCore" class="out" style="margin-top:8px">—</div>
       </div>
@@ -128,9 +129,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>🥗 Склад та виділення алергенів</h2>
     <div class="row">
-      <button class="btn" onclick="addIngred()">➕ Додати інгредієнт</button>
-      <button class="btn" onclick="presetIngred()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvIngred')">📋 CSV (ingredients)</button>
+      <button type="button" class="btn" onclick="addIngred()">➕ Додати інгредієнт</button>
+      <button type="button" class="btn" onclick="presetIngred()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvIngred')">📋 CSV (ingredients)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblIngred">
@@ -162,16 +163,16 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Показники</h3>
         <div class="row">
-          <div style="flex:1"><label>Енергія, ккал</label><input id="kcal" type="number" step="1" value="260"></div>
-          <div style="flex:1"><label>Білки, г</label><input id="prot" type="number" step="0.1" value="15.0"></div>
+          <div style="flex:1"><label for="kcal">Енергія, ккал</label><input id="kcal" type="number" step="1" value="260"></div>
+          <div style="flex:1"><label for="prot">Білки, г</label><input id="prot" type="number" step="0.1" value="15.0"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Жири, г</label><input id="fat" type="number" step="0.1" value="20.0"></div>
-          <div style="flex:1"><label>Вуглеводи, г</label><input id="carb" type="number" step="0.1" value="1.5"></div>
+          <div style="flex:1"><label for="fat">Жири, г</label><input id="fat" type="number" step="0.1" value="20.0"></div>
+          <div style="flex:1"><label for="carb">Вуглеводи, г</label><input id="carb" type="number" step="0.1" value="1.5"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Сіль, г</label><input id="salt100" type="number" step="0.01" value="2.0"></div>
-          <div style="flex:1"><label>Натрій, мг (опц.)</label><input id="na_mg" type="number" step="1" value="—"></div>
+          <div style="flex:1"><label for="salt100">Сіль, г</label><input id="salt100" type="number" step="0.01" value="2.0"></div>
+          <div style="flex:1"><label for="na_mg">Натрій, мг (опц.)</label><input id="na_mg" type="number" step="1" value="—"></div>
         </div>
       </div>
       <div class="box">
@@ -181,8 +182,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="buildNutri()">🔁 Зібрати</button>
-          <button class="btn" onclick="copyCSV('csvNutri')">📋 CSV (nutrition)</button>
+          <button type="button" class="btn" onclick="buildNutri()">🔁 Зібрати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvNutri')">📋 CSV (nutrition)</button>
         </div>
         <div id="csvNutri" class="out" style="margin-top:8px">—</div>
       </div>
@@ -196,9 +197,9 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Псевдо-штрихкод (ASCII) та номер</h3>
         <div class="row">
-          <button class="btn" onclick="genEAN()">🔢 Перерахувати EAN-13</button>
-          <button class="btn" onclick="randomGTIN()">🎲 Випадковий GTIN-12 (482…)</button>
-          <button class="btn" onclick="copyEl('eanOut')">📋 Копіювати EAN</button>
+          <button type="button" class="btn" onclick="genEAN()">🔢 Перерахувати EAN-13</button>
+          <button type="button" class="btn" onclick="randomGTIN()">🎲 Випадковий GTIN-12 (482…)</button>
+          <button type="button" class="btn" onclick="copyEl('eanOut')">📋 Копіювати EAN</button>
         </div>
         <div id="eanOut" class="out" style="margin-top:8px">—</div>
         <div id="asciiBars" class="bars" style="margin-top:8px">[штрихкод]</div>
@@ -206,8 +207,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>QR-дані партії (payload)</h3>
         <div class="row">
-          <button class="btn" onclick="buildQR()">🧩 Зібрати QR-payload</button>
-          <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildQR()">🧩 Зібрати QR-payload</button>
+          <button type="button" class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
         </div>
         <div id="qrOut" class="out" style="margin-top:8px">—</div>
         <p class="small muted">QR не рендериться тут, це вміст для генерування QR у зовнішніх системах.</p>
@@ -219,9 +220,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал етикеток</h2>
     <div class="row">
-      <button class="btn" onclick="addRow()">➕ Додати рядок</button>
-      <button class="btn" onclick="presetRows()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+      <button type="button" class="btn" onclick="addRow()">➕ Додати рядок</button>
+      <button type="button" class="btn" onclick="presetRows()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblLog">
@@ -250,12 +251,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>NFC — “FOOD LABEL CARD”</h3>
         <div class="row">
-          <div style="flex:1"><label>Контакт/техн.</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
-          <div style="flex:1"><label>Партія, кг</label><input id="batchKg" type="number" step="0.1" value="300"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт/техн.</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="batchKg">Партія, кг</label><input id="batchKg" type="number" step="0.1" value="300"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -263,8 +264,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток для принтера 58 мм</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>PRODUCT LABEL TICKET</h4>
@@ -394,7 +395,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td><input type="number" step="0.1" value="${s.pct}"></td>
       <td><select>${['ні','так'].map(v=>`<option ${ (s.allergen && v==='так')?'selected':'' }>${v}</option>`).join('')}</select></td>
       <td><input type="text" value="${s.note}"></td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyIngred); buildComposition();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyIngred); buildComposition();">✖</button></td>
     `;
     bodyIngred.appendChild(tr); reindex(bodyIngred); buildComposition();
   }

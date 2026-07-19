@@ -42,7 +42,7 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">📈⛽</span>
@@ -60,25 +60,29 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
       <b>V<sub>day</sub></b> (добовий обсяг, тис. м³) та <b>P<sub>max</sub></b> (погодинний пік, м³/год). При порушеннях — <b>алерти</b>. Задача: навчитися читати профілі, 
       прогнозувати піки та пояснювати перевищення.</p>
     <div class="row">
-      <label>Дата профілю <input id="day" class="input" type="date"></label>
-      <label>Група/фідер <input id="group" class="input" placeholder="Feeder-A / Район-1"></label>
-      <label>Вузол (ID) <input id="node" class="input" placeholder="MTR-0001"></label>
-      <label>Базове навантаження, м³/год <input id="base" class="input" type="number" step="1" value="400"></label>
-      <label>Ампл. піків, % <input id="amp" class="input" type="number" step="1" value="45"></label>
-      <button class="btn" id="gen">🧪 Згенерувати 24 точки</button>
-      <button class="btn secondary" id="add">➕ Додати профіль</button>
-      <button class="btn" id="clr">🧹 Очистити все</button>
+      <label>Дата профілю <input id="day" class="input" type="date" aria-label="day"></label>
+      <label>Група/фідер <input id="group" class="input" placeholder="Feeder-A / Район-1" aria-label="Feeder-A / Район-1"></label>
+      <label>Вузол (ID) <input id="node" class="input" placeholder="MTR-0001" aria-label="MTR-0001"></label>
+      <label>Базове навантаження, м³/год <input id="base" class="input" type="number" step="1" value="400" aria-label="base"></label>
+      <label>Ампл. піків, % <input id="amp" class="input" type="number" step="1" value="45" aria-label="amp"></label>
+      <button type="button" class="btn" id="gen">🧪 Згенерувати 24 точки</button>
+      <button type="button" class="btn secondary" id="add">➕ Додати профіль</button>
+      <button type="button" class="btn" id="clr">🧹 Очистити все</button>
     </div>
     <textarea id="txt" placeholder="Формат рядка: HH; m3_per_hour (наприклад 00; 320)
+00; 320
+01; 300
+...
+23; 410" aria-label="Формат рядка: HH; m3_per_hour (наприклад 00; 320)
 00; 320
 01; 300
 ...
 23; 410"></textarea>
 
     <div class="row" style="margin-top:6px">
-      <label>Ліміт добовий Vday, тис. м³ <input id="limDay" class="input" type="number" step="0.1" value="9.5"></label>
-      <label>Ліміт погодинний Pmax, м³/год <input id="limMax" class="input" type="number" step="10" value="580"></label>
-      <button class="btn good" id="applyLim">⚙️ Застосувати ліміти</button>
+      <label>Ліміт добовий Vday, тис. м³ <input id="limDay" class="input" type="number" step="0.1" value="9.5" aria-label="lim Day"></label>
+      <label>Ліміт погодинний Pmax, м³/год <input id="limMax" class="input" type="number" step="10" value="580" aria-label="lim Max"></label>
+      <button type="button" class="btn good" id="applyLim">⚙️ Застосувати ліміти</button>
       <span class="badge">Σвузлів: <b id="nNodes">0</b></span>
       <span class="badge">Σгруп: <b id="nGroups">0</b></span>
     </div>
@@ -89,12 +93,12 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
       <h2>📈 Графік 1 — Сукупний профіль (м³/год)</h2>
       <div class="row">
         <label>Показати групу
-          <select id="selGroup" class="input"></select>
+          <select id="selGroup" class="input" aria-label="sel Group"></select>
         </label>
-        <label>Лінія Pmax (вкл) <input id="shPmax" type="checkbox" checked></label>
-        <label>Лінія середнього <input id="shAvg" type="checkbox" checked></label>
-        <button class="btn" id="mark">📍 Зняти точку</button>
-        <button class="btn secondary" id="clear">🧹 Очистити графік</button>
+        <label>Лінія Pmax (вкл) <input id="shPmax" type="checkbox" checked aria-label="shPmax"></label>
+        <label>Лінія середнього <input id="shAvg" type="checkbox" checked aria-label="shAvg"></label>
+        <button type="button" class="btn" id="mark">📍 Зняти точку</button>
+        <button type="button" class="btn secondary" id="clear">🧹 Очистити графік</button>
       </div>
       <canvas id="cMain" class="chart" width="560" height="240"></canvas>
 
@@ -126,8 +130,8 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
 
       <h3 style="margin-top:10px">💾 Експорт</h3>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV (вузли + сумарний профіль)</button>
-        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (вузли + сумарний профіль)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (підсумок)</button>
       </div>
     </div>
   </div>

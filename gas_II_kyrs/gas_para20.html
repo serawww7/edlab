@@ -41,7 +41,7 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧮❄️🌤️</span>
@@ -59,32 +59,32 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
       Враховуємо <b>цінову еластичність попиту</b> ε (наскільки попит змінюється від тарифу), застосовуємо <b>тарифні сценарії</b> і підбираємо <b>ліміти V<sub>day</sub>, P<sub>max</sub></b>, що мінімізують сумарну <b>вартість</b> (закупівля − дохід + штрафи за перевищення).</p>
     <div class="row">
       <label>Сезон
-        <select id="season" class="input">
+        <select id="season" class="input" aria-label="season">
           <option value="winter" selected>Зима</option>
           <option value="shoulder">Міжсезоння</option>
         </select>
       </label>
-      <label>Базовий тариф, грн/м³ <input id="tariffBase" class="input" type="number" step="0.01" value="10.00"></label>
+      <label>Базовий тариф, грн/м³ <input id="tariffBase" class="input" type="number" step="0.01" value="10.00" aria-label="tariff Base"></label>
       <label>Сценарій тарифу
-        <select id="tariffMode" class="input">
+        <select id="tariffMode" class="input" aria-label="tariff Mode">
           <option value="flat" selected>Плоский (без змін)</option>
           <option value="raise10">Підвищення +10%</option>
           <option value="timeOfUse">Time-of-Use (день/ніч)</option>
         </select>
       </label>
-      <label>Еластичність ε (від’ємна) <input id="elas" class="input" type="number" step="0.05" value="-0.20"><small class="muted">ΔQ/Q ≈ ε · ΔP/P</small></label>
+      <label>Еластичність ε (від’ємна) <input id="elas" class="input" type="number" step="0.05" value="-0.20" aria-label="elas"><small class="muted">ΔQ/Q ≈ ε · ΔP/P</small></label>
     </div>
     <div class="row">
-      <label>Собівартість закупівлі, грн/м³ <input id="cost" class="input" type="number" step="0.01" value="8.00"></label>
-      <label>Ліміт Vday, тис. м³ <input id="Vday" class="input" type="number" step="0.1" value="12.0"></label>
-      <label>Ліміт Pmax, м³/год <input id="Pmax" class="input" type="number" step="10" value="1100"></label>
-      <label>Штраф за перевищення Vday, грн/тис.м³ <input id="penDay" class="input" type="number" step="100" value="70000"></label>
-      <label>Штраф за перевищення Pmax, грн/м³/год <input id="penP" class="input" type="number" step="10" value="200"></label>
+      <label>Собівартість закупівлі, грн/м³ <input id="cost" class="input" type="number" step="0.01" value="8.00" aria-label="cost"></label>
+      <label>Ліміт Vday, тис. м³ <input id="Vday" class="input" type="number" step="0.1" value="12.0" aria-label="Vday"></label>
+      <label>Ліміт Pmax, м³/год <input id="Pmax" class="input" type="number" step="10" value="1100" aria-label="Pmax"></label>
+      <label>Штраф за перевищення Vday, грн/тис.м³ <input id="penDay" class="input" type="number" step="100" value="70000" aria-label="pen Day"></label>
+      <label>Штраф за перевищення Pmax, грн/м³/год <input id="penP" class="input" type="number" step="10" value="200" aria-label="pen P"></label>
     </div>
     <div class="row">
-      <button class="btn good" id="run">▶️ Перерахувати</button>
-      <button class="btn" id="opt">🧠 Оптимізувати ліміти</button>
-      <button class="btn secondary" id="reset">🔄 Скинути</button>
+      <button type="button" class="btn good" id="run">▶️ Перерахувати</button>
+      <button type="button" class="btn" id="opt">🧠 Оптимізувати ліміти</button>
+      <button type="button" class="btn secondary" id="reset">🔄 Скинути</button>
       <span class="badge">ΣVday: <b id="mDay">—</b> тис.м³</span>
       <span class="badge">Pmax факт: <b id="mPmax">—</b> м³/год</span>
       <span class="badge">Вартість (чиста): <b id="mNet">—</b> грн</span>
@@ -95,11 +95,11 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
     <div class="card">
       <h2>📈 Графік 1 — Профіль навантаження (м³/год)</h2>
       <div class="row">
-        <label>Показати базовий <input id="shBase" type="checkbox" checked></label>
-        <label>Показати скоригований <input id="shAdj" type="checkbox" checked></label>
-        <label>Лінія Pmax <input id="shPmax" type="checkbox" checked></label>
-        <button class="btn" id="mark">📍 Зняти точку</button>
-        <button class="btn secondary" id="clear">🧹 Очистити графік</button>
+        <label>Показати базовий <input id="shBase" type="checkbox" checked aria-label="shBase"></label>
+        <label>Показати скоригований <input id="shAdj" type="checkbox" checked aria-label="shAdj"></label>
+        <label>Лінія Pmax <input id="shPmax" type="checkbox" checked aria-label="shPmax"></label>
+        <button type="button" class="btn" id="mark">📍 Зняти точку</button>
+        <button type="button" class="btn secondary" id="clear">🧹 Очистити графік</button>
       </div>
       <canvas id="cProfile" class="chart" width="560" height="240"></canvas>
 
@@ -131,8 +131,8 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
 
       <h3 style="margin-top:10px">💾 Експорт</h3>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV (профілі та фінанси)</button>
-        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (профілі та фінанси)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (підсумок)</button>
       </div>
     </div>
   </div>

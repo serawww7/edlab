@@ -44,7 +44,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">👁️</span>
@@ -72,10 +72,10 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>📥 Камера та анотації</h2>
       <div class="row">
-        <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
-        <button class="btn secondary" id="snap">📸 Зняти кадр</button>
+        <button type="button" class="btn" id="camOn">🎥 Увімкнути камеру</button>
+        <button type="button" class="btn secondary" id="snap">📸 Зняти кадр</button>
         <label>Клас
-          <select id="label" class="input">
+          <select id="label" class="input" aria-label="label">
             <option value="OK" selected>OK (придатно)</option>
             <option value="NO_LABEL">Немає/з'їхала етикетка</option>
             <option value="DENT">Вм'ятина/зморшка</option>
@@ -83,7 +83,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
             <option value="SEAL">Проблема герметичності</option>
           </select>
         </label>
-        <button class="btn" id="clear">🧹 Очистити датасет</button>
+        <button type="button" class="btn" id="clear">🧹 Очистити датасет</button>
         <span id="stat" class="badge">Кадрів: 0 | OK: 0 | DEF: 0</span>
       </div>
       <div class="canvasWrap"><video id="v" playsinline muted></video></div>
@@ -93,31 +93,31 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <h2 style="margin-top:10px">🧠 Навчання</h2>
       <div class="row">
         <label>Модель
-          <select id="modelType" class="input">
+          <select id="modelType" class="input" aria-label="model Type">
             <option value="knn" selected>k-NN (k=5)</option>
             <option value="logreg">Логістична регресія (1-vs-rest)</option>
           </select>
         </label>
-        <label>Train/Test, %<input id="split" class="input" type="number" min="50" max="90" step="5" value="70"/></label>
-        <label>Seed<input id="seed" class="input" type="number" step="1" value="24"/></label>
-        <button class="btn good" id="train">🚀 Навчити</button>
+        <label>Train/Test, %<input id="split" class="input" type="number" min="50" max="90" step="5" value="70" aria-label="split"/></label>
+        <label>Seed<input id="seed" class="input" type="number" step="1" value="24" aria-label="seed"/></label>
+        <button type="button" class="btn good" id="train">🚀 Навчити</button>
       </div>
 
       <h3 style="margin-top:8px">🧪 Прогноз (живий)</h3>
       <div class="row">
-        <button class="btn" id="predictLive">🔮 Прогноз з камери</button>
+        <button type="button" class="btn" id="predictLive">🔮 Прогноз з камери</button>
         <span id="predStat" class="badge">P(OK)=— | Рішення: —</span>
       </div>
 
       <h3 style="margin-top:10px">📈 Скатерплот (2 фічі)</h3>
       <div class="row">
         <label>X
-          <select id="fx" class="input"></select>
+          <select id="fx" class="input" aria-label="fx"></select>
         </label>
         <label>Y
-          <select id="fy" class="input"></select>
+          <select id="fy" class="input" aria-label="fy"></select>
         </label>
-        <button class="btn secondary" id="redraw">🔁 Перемалювати</button>
+        <button type="button" class="btn secondary" id="redraw">🔁 Перемалювати</button>
       </div>
       <div class="canvasWrap"><canvas id="plot" width="980" height="300"></canvas></div>
 
@@ -126,11 +126,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:10px">💾 Експорт / друк</h3>
       <div class="row">
-        <input id="lot" class="input" placeholder="Лот/лінія (напр. MAP_йогурт_2025-10-18_B)"/>
-        <button class="btn" id="saveCsv">📄 CSV (фічі + клас)</button>
-        <button class="btn" id="saveTxt">💾 TXT (звіт/метрики)</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
+        <input id="lot" class="input" placeholder="Лот/лінія (напр. MAP_йогурт_2025-10-18_B)" aria-label="Лот/лінія (напр. MAP_йогурт_2025-10-18_B)"/>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (фічі + клас)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (звіт/метрики)</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>

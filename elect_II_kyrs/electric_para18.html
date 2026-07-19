@@ -11,6 +11,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Електрики · Пара 18 — Балансування фаз і план-щиток</title>
+<meta name="description" content="⚖️ Балансування фаз: A/B/C → %дисбалансу → IN → пропозиції перестановок → 🧾 58 мм → 📄 план-щиток">
 <meta name="color-scheme" content="light dark"/>
 <style>
 :root{
@@ -71,7 +72,7 @@ tbody tr:nth-child(even){background:#0b1324}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Електрики · Пара 18 · аудиторно</span>
   <h1>⚖️ Балансування фаз: A/B/C → %дисбалансу → I<sub>N</sub> → пропозиції перестановок → 🧾 58 мм → 📄 план-щиток</h1>
 
@@ -80,11 +81,11 @@ tbody tr:nth-child(even){background:#0b1324}
     <p>Заповнити реєстр кіл щитка (1Ф/3Ф), обчислити струми по фазах, оцінити <b>% дисбалансу</b> та <b>I<sub>N</sub></b> (нейтраль),
       отримати <b>пропозиції перестановок</b> для балансування, сформувати наклейки 58 мм і A4 «план-щиток», обмінюватись CSV.</p>
     <div class="row">
-      <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
-      <button class="btn" onclick="recalc()">🧮 Перерахувати</button>
-      <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-      <input id="file" class="btn" type="file" accept=".csv,text/csv"/>
-      <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+      <button type="button" class="btn" onclick="seedDemo()">🔄 Приклад</button>
+      <button type="button" class="btn" onclick="recalc()">🧮 Перерахувати</button>
+      <button type="button" class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+      <input id="file" class="btn" type="file" accept=".csv,text/csv" aria-label="file"/>
+      <button type="button" class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
     </div>
     <p class="small">CSV: <span class="mono">way,id,name,phase,poles,mode,p_or_I,value,PF,eta,duty_pct,diversity_pct,curve,In_A,location,notes,url,nonlinear</span> (mode=p або i; value=кВт або А; poles=1P/3P; phase=A/B/C/3F; nonlinear=Так/Ні).</p>
   </div>
@@ -94,33 +95,33 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="grid g3">
       <div>
         <h3>Ідентифікація</h3>
-        <div class="row"><label class="small" style="min-width:140px">№ комірки (way)</label><input id="way" type="number" value="1"></div>
-        <div class="row"><label class="small" style="min-width:140px">ID</label><input id="id" value="C-01"></div>
-        <div class="row"><label class="small" style="min-width:140px">Назва</label><input id="name" value="Освітлення ауд.101"></div>
-        <div class="row"><label class="small" style="min-width:140px">Локація</label><input id="location" value="Корпус А · 1 пов."></div>
+        <div class="row"><label class="small" style="min-width:140px" for="way">№ комірки (way)</label><input id="way" type="number" value="1"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="id">ID</label><input id="id" value="C-01"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="name">Назва</label><input id="name" value="Освітлення ауд.101"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="location">Локація</label><input id="location" value="Корпус А · 1 пов."></div>
       </div>
       <div>
         <h3>Електрика</h3>
-        <div class="row"><label class="small" style="min-width:140px">Фаза</label><select id="phase"><option selected>A</option><option>B</option><option>C</option><option>3F</option></select></div>
-        <div class="row"><label class="small" style="min-width:140px">Полюсів</label><select id="poles"><option selected>1P</option><option>3P</option></select></div>
-        <div class="row"><label class="small" style="min-width:140px">Режим навантаження</label><select id="mode"><option selected>p (кВт)</option><option>i (А)</option></select></div>
-        <div class="row"><label class="small" style="min-width:140px">Значення</label><input id="value" type="number" step="0.1" value="0.6"></div>
-        <div class="row"><label class="small" style="min-width:140px">PF</label><input id="pf" type="number" step="0.01" value="0.95"></div>
-        <div class="row"><label class="small" style="min-width:140px">η</label><input id="eta" type="number" step="0.01" value="0.98"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="phase">Фаза</label><select id="phase"><option selected>A</option><option>B</option><option>C</option><option>3F</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px" for="poles">Полюсів</label><select id="poles"><option selected>1P</option><option>3P</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px" for="mode">Режим навантаження</label><select id="mode"><option selected>p (кВт)</option><option>i (А)</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px" for="value">Значення</label><input id="value" type="number" step="0.1" value="0.6"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="pf">PF</label><input id="pf" type="number" step="0.01" value="0.95"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="eta">η</label><input id="eta" type="number" step="0.01" value="0.98"></div>
       </div>
       <div>
         <h3>Захист/режим</h3>
-        <div class="row"><label class="small" style="min-width:140px">Duty, %</label><input id="duty" type="number" value="80"></div>
-        <div class="row"><label class="small" style="min-width:140px">Диверсиф., %</label><input id="divers" type="number" value="100"></div>
-        <div class="row"><label class="small" style="min-width:140px">Крива</label><select id="curve"><option>B</option><option selected>C</option><option>D</option></select></div>
-        <div class="row"><label class="small" style="min-width:140px">Номінал MCB, А</label><select id="InA"><option>6</option><option selected>10</option><option>16</option><option>20</option><option>25</option><option>32</option></select></div>
-        <div class="row"><label class="small" style="min-width:140px">Нелінійне?</label><select id="nonlin"><option>Ні</option><option>Так</option></select></div>
-        <div class="row"><label class="small" style="min-width:140px">URL</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
+        <div class="row"><label class="small" style="min-width:140px" for="duty">Duty, %</label><input id="duty" type="number" value="80"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="divers">Диверсиф., %</label><input id="divers" type="number" value="100"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="curve">Крива</label><select id="curve"><option>B</option><option selected>C</option><option>D</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px" for="InA">Номінал MCB, А</label><select id="InA"><option>6</option><option selected>10</option><option>16</option><option>20</option><option>25</option><option>32</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px" for="nonlin">Нелінійне?</label><select id="nonlin"><option>Ні</option><option>Так</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px" for="url">URL</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
       </div>
     </div>
     <div class="row" style="margin-top:8px">
-      <button class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
-      <button class="btn" onclick="seedOne()">🔄 Приклад запису</button>
+      <button type="button" class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
+      <button type="button" class="btn" onclick="seedOne()">🔄 Приклад запису</button>
     </div>
     <p class="small">Розрахунки: 1Ф I≈P/(U·PF·η) при U=230В; 3Ф Iф≈P/(√3·U<sub>LL</sub>·PF·η) при U<sub>LL</sub>=400В; застосовується duty·diversity.</p>
   </div>
@@ -139,10 +140,10 @@ tbody tr:nth-child(even){background:#0b1324}
     </table>
     <p class="small">Ліміти: <span class="chip">PASS &lt; 10%</span> · <span class="chip">WARN 10–20%</span> · <span class="chip">FAIL &gt; 20%</span> дисбалансу фаз.</p>
     <div class="row" style="margin-top:8px">
-      <button class="btn" onclick="suggest()">🧭 Запропонувати перестановки</button>
-      <button class="btn" onclick="buildTickets()">🧾 Наклейки 58 мм</button>
-      <button class="btn" onclick="buildReport()">📄 A4 План-щиток</button>
-      <button class="btn" onclick="window.print()">🖨️ Друк</button>
+      <button type="button" class="btn" onclick="suggest()">🧭 Запропонувати перестановки</button>
+      <button type="button" class="btn" onclick="buildTickets()">🧾 Наклейки 58 мм</button>
+      <button type="button" class="btn" onclick="buildReport()">📄 A4 План-щиток</button>
+      <button type="button" class="btn" onclick="window.print()">🖨️ Друк</button>
     </div>
   </div>
 
@@ -291,8 +292,8 @@ tbody tr:nth-child(even){background:#0b1324}
         <td class="editable" data-k="nonlinear" data-id="${r.id}">${esc(r.nonlinear)}</td>
         <td class="editable" data-k="url" data-id="${r.id}">${esc(r.url||'')}</td>
         <td class="mono">
-          <button class="btn" data-act="label" data-id="${r.id}">Наклейка</button>
-          <button class="btn" data-act="del" data-id="${r.id}">✖</button>
+          <button type="button" class="btn" data-act="label" data-id="${r.id}">Наклейка</button>
+          <button type="button" class="btn" data-act="del" data-id="${r.id}">✖</button>
         </td>`;
       tbody.appendChild(tr);
     });

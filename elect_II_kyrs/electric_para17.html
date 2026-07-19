@@ -11,6 +11,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Електрики · Пара 17 — NFC-паспорти обладнання, журнал ТО, 58 мм, A4, ICS</title>
+<meta name="description" content="🏷️ NFC-паспорт обладнання → журнал ТО → 🧾 наклейки 58 мм → 📄 A4 → 📅 .ics">
 <meta name="color-scheme" content="light dark"/>
 <style>
 :root{
@@ -74,7 +75,7 @@ tbody tr:nth-child(even){background:#0b1324}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Електрики · Пара 17 · аудиторно</span>
   <h1>🏷️ NFC-паспорт обладнання → журнал ТО → 🧾 наклейки 58 мм → 📄 A4 → 📅 .ics</h1>
 
@@ -83,11 +84,11 @@ tbody tr:nth-child(even){background:#0b1324}
     <p>Сформувати реєстр обладнання (ID, місце, живлення, серійний №, вартість, інтервал ТО), згенерувати NFC/QR-паспорт, 
       обчислити <b>Наступне ТО</b>, друкувати етикетки 58 мм та A4-звіт, експортувати/імпортувати CSV та завантажити події <b>.ics</b> для календаря.</p>
     <div class="row">
-      <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
-      <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-      <input id="file" class="btn" type="file" accept=".csv,text/csv"/>
-      <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
-      <button class="btn" onclick="downloadICS()">📅 Експорт .ics (всі ТО)</button>
+      <button type="button" class="btn" onclick="seedDemo()">🔄 Приклад</button>
+      <button type="button" class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+      <input id="file" class="btn" type="file" accept=".csv,text/csv" aria-label="file"/>
+      <button type="button" class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+      <button type="button" class="btn" onclick="downloadICS()">📅 Експорт .ics (всі ТО)</button>
     </div>
     <p class="small">CSV поля: <span class="mono">id,name,location,circuit,phase,voltage_V,power_W,serial,installed_yyyy_mm_dd,last_yyyy_mm_dd,interval_months,responsible,url,notes</span></p>
   </div>
@@ -97,32 +98,32 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="grid g3">
       <div>
         <h3>Паспорт</h3>
-        <div class="row"><label class="small" style="min-width:140px">ID</label><input id="id" value="EQ-001"></div>
-        <div class="row"><label class="small" style="min-width:140px">Назва</label><input id="name" value="Витяжний вентилятор 3Ф"></div>
-        <div class="row"><label class="small" style="min-width:140px">Місце</label><input id="location" value="Майстерня А-101"></div>
-        <div class="row"><label class="small" style="min-width:140px">Лінія/щит</label><input id="circuit" value="ЩО-1 · M-01"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="id">ID</label><input id="id" value="EQ-001"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="name">Назва</label><input id="name" value="Витяжний вентилятор 3Ф"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="location">Місце</label><input id="location" value="Майстерня А-101"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="circuit">Лінія/щит</label><input id="circuit" value="ЩО-1 · M-01"></div>
       </div>
       <div>
         <h3>Електрика</h3>
-        <div class="row"><label class="small" style="min-width:140px">Фаза</label><select id="phase"><option>A</option><option>B</option><option>C</option><option selected>3Ф</option></select></div>
-        <div class="row"><label class="small" style="min-width:140px">U, В</label><input id="voltage" type="number" value="400"></div>
-        <div class="row"><label class="small" style="min-width:140px">P, Вт</label><input id="power" type="number" value="1500"></div>
-        <div class="row"><label class="small" style="min-width:140px">Серійний №</label><input id="serial" value="SN-2309-001"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="phase">Фаза</label><select id="phase"><option>A</option><option>B</option><option>C</option><option selected>3Ф</option></select></div>
+        <div class="row"><label class="small" style="min-width:140px" for="voltage">U, В</label><input id="voltage" type="number" value="400"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="power">P, Вт</label><input id="power" type="number" value="1500"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="serial">Серійний №</label><input id="serial" value="SN-2309-001"></div>
       </div>
       <div>
         <h3>ТО / посилання</h3>
-        <div class="row"><label class="small" style="min-width:140px">Встановлено</label><input id="installed" value="2025-09-10"></div>
-        <div class="row"><label class="small" style="min-width:140px">Останнє ТО</label><input id="last" value="2025-10-01"></div>
-        <div class="row"><label class="small" style="min-width:140px">Інтервал, міс</label><input id="interval" type="number" value="6"></div>
-        <div class="row"><label class="small" style="min-width:140px">Відповідальний</label><input id="resp" value="Студент ПІБ / група"></div>
-        <div class="row"><label class="small" style="min-width:140px">URL (інструкція)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
-        <div class="row"><label class="small" style="min-width:140px">Нотатка</label><input id="notes" placeholder="Особливості, ЗІЗ тощо"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="installed">Встановлено</label><input id="installed" value="2025-09-10"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="last">Останнє ТО</label><input id="last" value="2025-10-01"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="interval">Інтервал, міс</label><input id="interval" type="number" value="6"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="resp">Відповідальний</label><input id="resp" value="Студент ПІБ / група"></div>
+        <div class="row"><label class="small" style="min-width:140px" for="url">URL (інструкція)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
+        <div class="row"><label class="small" style="min-width:140px" for="notes">Нотатка</label><input id="notes" placeholder="Особливості, ЗІЗ тощо"></div>
       </div>
     </div>
     <div class="row" style="margin-top:8px">
-      <button class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
-      <button class="btn" onclick="previewNFC()">📶 Зібрати NFC/QR</button>
-      <button class="btn" onclick="seedOne()">🔄 Приклад запису</button>
+      <button type="button" class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
+      <button type="button" class="btn" onclick="previewNFC()">📶 Зібрати NFC/QR</button>
+      <button type="button" class="btn" onclick="seedOne()">🔄 Приклад запису</button>
     </div>
     <p class="small">NFC порадник: тип NDEF URI або TEXT. Ми генеруємо рядок для запису (ви використаєте свою NFC-програму на телефоні).</p>
   </div>
@@ -146,12 +147,12 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="grid g2">
       <div>
         <h3>Зміст NDEF TEXT</h3>
-        <textarea id="ndefText" readonly></textarea>
+        <textarea id="ndefText" readonly aria-label="ndef Text"></textarea>
         <p class="small">Скопіюй у NFC-записувач як TEXT (або URI з поля праворуч).</p>
       </div>
       <div>
         <h3>URI для NDEF/QR</h3>
-        <textarea id="ndefURI" readonly></textarea>
+        <textarea id="ndefURI" readonly aria-label="ndef URI"></textarea>
         <p class="small">Цей URI відкриватиме паспорт/інструкцію. Його ж виводимо на наклейку 58 мм.</p>
       </div>
     </div>
@@ -160,9 +161,9 @@ tbody tr:nth-child(even){background:#0b1324}
   <div class="card printable">
     <h2>🧾 Наклейки 58 мм «Паспорт обладнання»</h2>
     <div class="row">
-      <button class="btn" onclick="buildTickets()">🧩 Для всіх записів</button>
-      <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
-      <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+      <button type="button" class="btn" onclick="buildTickets()">🧩 Для всіх записів</button>
+      <button type="button" class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+      <button type="button" class="btn" onclick="downloadTXT()">📥 TXT</button>
     </div>
     <div id="tickets" class="tickets"></div>
   </div>
@@ -170,8 +171,8 @@ tbody tr:nth-child(even){background:#0b1324}
   <div class="card printable">
     <h2>📄 A4-звіт (для друку/PDF)</h2>
     <div class="row">
-      <button class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
-      <button class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
+      <button type="button" class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
+      <button type="button" class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
     </div>
     <div id="printArea"></div>
   </div>
@@ -258,9 +259,9 @@ tbody tr:nth-child(even){background:#0b1324}
         <td>${esc(r.next)} <span class="chip ${st.cls}">${st.txt}</span></td>
         <td class="editable" data-k="url" data-id="${r.id}">${esc(r.url||'')}</td>
         <td class="mono">
-          <button class="btn" data-act="nfc" data-id="${r.id}">NFC/QR</button>
-          <button class="btn" data-act="label" data-id="${r.id}">Наклейка</button>
-          <button class="btn" data-act="del" data-id="${r.id}">✖</button>
+          <button type="button" class="btn" data-act="nfc" data-id="${r.id}">NFC/QR</button>
+          <button type="button" class="btn" data-act="label" data-id="${r.id}">Наклейка</button>
+          <button type="button" class="btn" data-act="del" data-id="${r.id}">✖</button>
         </td>`;
       tbody.appendChild(tr);
     });

@@ -13,6 +13,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 11 (механіки) — Електрика 12/24В: падіння напруги, провід, запобіжник/реле, генератор, журнал, квиток 58 мм, NFC</title>
+<meta name="description" content="🔌 Електрика 12/24В: падіння напруги, провід/запобіжник/реле, генератор, журнал, квиток 58 мм, NFC">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -58,7 +59,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 11 · аудиторно · механіки</span>
   <h1>🔌 Електрика 12/24В: падіння напруги, провід/запобіжник/реле, генератор, журнал, квиток 58 мм, NFC</h1>
 
@@ -80,14 +81,14 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Мережа та генератор</h3>
         <div class="row">
-          <div style="flex:1"><label>Номінал мережі, В</label>
+          <div style="flex:1"><label for="U">Номінал мережі, В</label>
             <select id="U" onchange="syncU()"><option value="12" selected>12</option><option value="24">24</option></select>
           </div>
-          <div style="flex:1"><label>Генератор, А</label><input id="AltA" type="number" step="1" value="120"></div>
+          <div style="flex:1"><label for="AltA">Генератор, А</label><input id="AltA" type="number" step="1" value="120"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Резерв на заряд АКБ, А</label><input id="AltReserve" type="number" step="1" value="15"></div>
-          <div style="flex:1"><label>Матеріал проводу</label>
+          <div style="flex:1"><label for="AltReserve">Резерв на заряд АКБ, А</label><input id="AltReserve" type="number" step="1" value="15"></div>
+          <div style="flex:1"><label for="mat">Матеріал проводу</label>
             <select id="mat"><option value="cu" selected>мідь</option><option value="al">алюміній</option></select>
           </div>
         </div>
@@ -95,17 +96,17 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Стан АКБ (оцінка)</h3>
         <div class="row">
-          <div style="flex:1"><label>Ємність, Ah</label><input id="Ah" type="number" step="1" value="100"></div>
-          <div style="flex:1"><label>CCA, А (пуск)</label><input id="CCA" type="number" step="10" value="750"></div>
+          <div style="flex:1"><label for="Ah">Ємність, Ah</label><input id="Ah" type="number" step="1" value="100"></div>
+          <div style="flex:1"><label for="CCA">CCA, А (пуск)</label><input id="CCA" type="number" step="10" value="750"></div>
         </div>
         <p class="small">CCA дає уявлення про <b>пусковий струм стартера</b> і просідання напруги в мороз.</p>
       </div>
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
-          <button class="btn" onclick="preset()">🧪 Приклад</button>
-          <button class="btn" onclick="copyCSV('csvSys')">📋 CSV (система)</button>
+          <button type="button" class="btn" onclick="recalc()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="preset()">🧪 Приклад</button>
+          <button type="button" class="btn" onclick="copyCSV('csvSys')">📋 CSV (система)</button>
         </div>
         <div id="csvSys" class="out" style="margin-top:8px">—</div>
       </div>
@@ -119,16 +120,16 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Лінія живлення</h3>
         <div class="row">
-          <div style="flex:1"><label>Струм I, А</label><input id="I" type="number" step="0.1" value="8.5"></div>
-          <div style="flex:1"><label>Довжина шляху L, м (туди+назад)</label><input id="L" type="number" step="0.1" value="6"></div>
+          <div style="flex:1"><label for="I">Струм I, А</label><input id="I" type="number" step="0.1" value="8.5"></div>
+          <div style="flex:1"><label for="L">Довжина шляху L, м (туди+назад)</label><input id="L" type="number" step="0.1" value="6"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Переріз S, мм²</label><input id="S" type="number" step="0.5" value="2.5"></div>
-          <div style="flex:1"><label>Граничне падіння, %</label><input id="dropPctLim" type="number" step="0.1" value="3"></div>
+          <div style="flex:1"><label for="S">Переріз S, мм²</label><input id="S" type="number" step="0.5" value="2.5"></div>
+          <div style="flex:1"><label for="dropPctLim">Граничне падіння, %</label><input id="dropPctLim" type="number" step="0.1" value="3"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Запобіжник, А</label><input id="fuse" type="number" step="1" value="15"></div>
-          <div style="flex:1"><label>Реле (котушка), Ω</label><input id="relayR" type="number" step="1" value="90"></div>
+          <div style="flex:1"><label for="fuse">Запобіжник, А</label><input id="fuse" type="number" step="1" value="15"></div>
+          <div style="flex:1"><label for="relayR">Реле (котушка), Ω</label><input id="relayR" type="number" step="1" value="90"></div>
         </div>
       </div>
       <div class="box">
@@ -142,8 +143,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="calcDrop()">🔁 Перерахувати</button>
-          <button class="btn" onclick="copyCSV('csvDrop')">📋 CSV (лінія)</button>
+          <button type="button" class="btn" onclick="calcDrop()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvDrop')">📋 CSV (лінія)</button>
         </div>
         <div id="csvDrop" class="out" style="margin-top:8px">—</div>
       </div>
@@ -156,10 +157,10 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>⚡ Баланс генератора та споживачі</h2>
     <div class="row">
-      <button class="btn" onclick="addLoad()">➕ Додати споживача</button>
-      <button class="btn" onclick="presetLoads()">🧪 Приклад</button>
-      <button class="btn" onclick="recalc()">🔁 Перерахувати</button>
-      <button class="btn" onclick="copyCSV('csvLoads')">📋 CSV (навантаження)</button>
+      <button type="button" class="btn" onclick="addLoad()">➕ Додати споживача</button>
+      <button type="button" class="btn" onclick="presetLoads()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="recalc()">🔁 Перерахувати</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLoads')">📋 CSV (навантаження)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tbl">
@@ -197,12 +198,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Вхідні</h3>
         <div class="row">
-          <div style="flex:1"><label>U без навантаження, В</label><input id="Uopen" type="number" step="0.01" value="12.6"></div>
-          <div style="flex:1"><label>U під навантаженням, В</label><input id="Uload" type="number" step="0.01" value="11.8"></div>
+          <div style="flex:1"><label for="Uopen">U без навантаження, В</label><input id="Uopen" type="number" step="0.01" value="12.6"></div>
+          <div style="flex:1"><label for="Uload">U під навантаженням, В</label><input id="Uload" type="number" step="0.01" value="11.8"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>I навантаження, А</label><input id="Iload" type="number" step="0.1" value="20"></div>
-          <div style="flex:1"><label>Допустиме падіння, В</label><input id="Udok" type="number" step="0.01" value="0.5"></div>
+          <div style="flex:1"><label for="Iload">I навантаження, А</label><input id="Iload" type="number" step="0.1" value="20"></div>
+          <div style="flex:1"><label for="Udok">Допустиме падіння, В</label><input id="Udok" type="number" step="0.01" value="0.5"></div>
         </div>
       </div>
       <div class="box">
@@ -214,8 +215,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="calcGnd()">🔁 Перерахувати</button>
-          <button class="btn" onclick="copyCSV('csvGnd')">📋 CSV (маса)</button>
+          <button type="button" class="btn" onclick="calcGnd()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvGnd')">📋 CSV (маса)</button>
         </div>
         <div id="csvGnd" class="out" style="margin-top:8px">—</div>
       </div>
@@ -227,9 +228,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал перевірок</h2>
     <div class="row">
-      <button class="btn" onclick="addLog()">➕ Додати запис</button>
-      <button class="btn" onclick="presetLog()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
+      <button type="button" class="btn" onclick="addLog()">➕ Додати запис</button>
+      <button type="button" class="btn" onclick="presetLog()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblLog">
@@ -260,12 +261,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>NFC — “ELEC CHECK”</h3>
         <div class="row">
-          <div style="flex:1"><label>Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="nfcId">Машина ID</label><input id="nfcId" type="text" value="TR-001"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -273,8 +274,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток “ELEC CHECK”</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>ELEC CHECK</h4>

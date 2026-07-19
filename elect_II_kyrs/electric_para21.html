@@ -42,7 +42,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🔌</span>
@@ -131,31 +131,31 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
         <input id="emu" type="checkbox"/><label for="emu">Увімкнути емуль</label>
       </div>
       <div class="row">
-        <label style="flex:1">Струм, A<sub>rms</sub> <input id="emuI" class="input" type="range" min="0" max="25" step="0.1" value="4" disabled/></label>
-        <label style="flex:1">PF (cos φ) <input id="emuPF" class="input" type="range" min="0" max="1" step="0.01" value="0.90" disabled/></label>
+        <label style="flex:1">Струм, A<sub>rms</sub> <input id="emuI" class="input" type="range" min="0" max="25" step="0.1" value="4" disabled aria-label="emu I"/></label>
+        <label style="flex:1">PF (cos φ) <input id="emuPF" class="input" type="range" min="0" max="1" step="0.01" value="0.90" disabled aria-label="emu PF"/></label>
       </div>
 
       <h3 style="margin-top:12px">📈 Живий графік</h3>
       <div class="canvasWrap"><canvas id="chart" width="900" height="260"></canvas></div>
       <div class="row" style="margin-top:8px">
-        <button class="btn" id="tick">➕ Зчитати</button>
-        <button class="btn secondary" id="clear">🧹 Очистити</button>
+        <button type="button" class="btn" id="tick">➕ Зчитати</button>
+        <button type="button" class="btn secondary" id="clear">🧹 Очистити</button>
         <span id="last" class="badge">I=— A | U=— V | P=— W | S=— VA | PF=— | ΣE=0.000 кВт·год</span>
       </div>
 
       <h3 style="margin-top:12px">🧩 Згенерований код (.ino)</h3>
       <div class="row">
-        <button class="btn good" id="gen">⚙️ Згенерувати</button>
-        <button class="btn secondary" id="copy">📋 Копіювати</button>
-        <button class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
+        <button type="button" class="btn good" id="gen">⚙️ Згенерувати</button>
+        <button type="button" class="btn secondary" id="copy">📋 Копіювати</button>
+        <button type="button" class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
       </div>
       <pre class="code" id="code">// Натисни «Згенерувати» ↑</pre>
 
       <h3 style="margin-top:12px">💾 Протокол/експорт</h3>
       <div class="row">
-        <input id="fio" class="input" placeholder="ПІБ студента"/>
-        <button class="btn" id="saveTxt">💾 TXT</button>
-        <button class="btn" id="saveCsv">📄 CSV</button>
+        <input id="fio" class="input" placeholder="ПІБ студента" aria-label="ПІБ студента"/>
+        <button type="button" class="btn" id="saveTxt">💾 TXT</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV</button>
       </div>
       <div id="log" class="log" aria-live="polite"></div>
     </div>

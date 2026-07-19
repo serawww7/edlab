@@ -36,7 +36,7 @@ svg{max-width:100%;height:auto;display:block}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🤖</span>
@@ -139,10 +139,10 @@ svg{max-width:100%;height:auto;display:block}
       </div>
 
       <div class="row">
-        <button class="btn good" id="gen">⚙️ Згенерувати промпт</button>
-        <button class="btn secondary" id="emu">🎲 Емулятор кейсу</button>
-        <button class="btn secondary" id="copy">📋 Копіювати</button>
-        <button class="btn secondary" id="dlTxt">⬇️ Завантажити .txt</button>
+        <button type="button" class="btn good" id="gen">⚙️ Згенерувати промпт</button>
+        <button type="button" class="btn secondary" id="emu">🎲 Емулятор кейсу</button>
+        <button type="button" class="btn secondary" id="copy">📋 Копіювати</button>
+        <button type="button" class="btn secondary" id="dlTxt">⬇️ Завантажити .txt</button>
         <span id="status" class="badge">Готовність: очікує дані</span>
       </div>
 
@@ -151,21 +151,21 @@ svg{max-width:100%;height:auto;display:block}
 
       <h3 style="margin-top:12px">🧪 Чек-лист оцінювання відповіді ШІ</h3>
       <div class="small">
-        <label><input type="checkbox" class="crit" value="sources"/> Є посилання на джерела/етикетки засобів</label><br/>
-        <label><input type="checkbox" class="crit" value="local"/> Ураховано локальні умови (погода, ґрунт, BBCH)</label><br/>
-        <label><input type="checkbox" class="crit" value="thresholds"/> Зіставлено з ЕПШ/ПД і вказано розрахунок</label><br/>
-        <label><input type="checkbox" class="crit" value="ops"/> Є операційні обмеження (вікно погоди, техніка, бюджет)</label><br/>
-        <label><input type="checkbox" class="crit" value="safety"/> Є техніка безпеки та ЗІЗ</label><br/>
-        <label><input type="checkbox" class="crit" value="alt"/> Є альтернативи: хімія/агротехніка/біо та «нічого не робити» з ризиками</label><br/>
-        <label><input type="checkbox" class="crit" value="format"/> Формат відповіді збігається з обраним</label>
+        <label><input type="checkbox" class="crit" value="sources"/ aria-label="sources"> Є посилання на джерела/етикетки засобів</label><br/>
+        <label><input type="checkbox" class="crit" value="local"/ aria-label="local"> Ураховано локальні умови (погода, ґрунт, BBCH)</label><br/>
+        <label><input type="checkbox" class="crit" value="thresholds"/ aria-label="thresholds"> Зіставлено з ЕПШ/ПД і вказано розрахунок</label><br/>
+        <label><input type="checkbox" class="crit" value="ops"/ aria-label="ops"> Є операційні обмеження (вікно погоди, техніка, бюджет)</label><br/>
+        <label><input type="checkbox" class="crit" value="safety"/ aria-label="safety"> Є техніка безпеки та ЗІЗ</label><br/>
+        <label><input type="checkbox" class="crit" value="alt"/ aria-label="alt"> Є альтернативи: хімія/агротехніка/біо та «нічого не робити» з ризиками</label><br/>
+        <label><input type="checkbox" class="crit" value="format"/ aria-label="format"> Формат відповіді збігається з обраним</label>
       </div>
 
       <h3 style="margin-top:12px">💾 Журнал рішення</h3>
       <div class="row">
-        <input id="fio" class="input" placeholder="ПІБ студента"/>
-        <input id="decision" class="input" placeholder="Прийняте рішення (коротко)"/>
-        <button class="btn" id="addLog">➕ Додати в журнал</button>
-        <button class="btn secondary" id="exportCsv">📄 Експорт CSV</button>
+        <input id="fio" class="input" placeholder="ПІБ студента" aria-label="ПІБ студента"/>
+        <input id="decision" class="input" placeholder="Прийняте рішення (коротко)" aria-label="Прийняте рішення (коротко)"/>
+        <button type="button" class="btn" id="addLog">➕ Додати в журнал</button>
+        <button type="button" class="btn secondary" id="exportCsv">📄 Експорт CSV</button>
       </div>
       <div id="log" class="log" aria-live="polite"></div>
     </div>

@@ -11,6 +11,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Електрики · Пара 14 — Кабелі: переріз, коеф. корекції, ΔU, автомат, 58 мм</title>
+<meta name="description" content="🧵 Кабелі: переріз за струмом → коеф. корекції → ΔU → підбір MCB → 🧾 58 мм">
 <meta name="color-scheme" content="light dark" />
 <style>
 :root{
@@ -72,7 +73,7 @@ tbody tr:nth-child(even){background:#0b1324}
 </style>
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Електрики · Пара 14 · аудиторно</span>
     <h1>🧵 Кабелі: переріз за струмом → коеф. корекції → ΔU → підбір MCB → 🧾 58 мм</h1>
 
@@ -81,10 +82,10 @@ tbody tr:nth-child(even){background:#0b1324}
       <p>Для кожної лінії визначити робочий струм, обрати переріз кабелю з урахуванням <b>коефіцієнтів корекції</b> (температура, спосіб прокладки, групування), перевірити <b>падіння напруги ΔU</b> на довжині, підібрати <b>автомат</b> та сформувати наклейки 58 мм і A4-звіт.</p>
       <p class="small">Формули: <span class="mono">I = P / (U·PF·η)</span> (1Ф: U=230; 3Ф: <span class="mono">I = P / (√3·U<sub>L-L</sub>·PF·η)</span>), <span class="mono">I<sub>corr</sub> = I / (k<sub>T</sub>·k<sub>inst</sub>·k<sub>grp</sub>)</span>, вибір S: <span class="mono">Iz(S) ≥ 1.25·I</span> та <span class="mono">ΔU%</span> в межах ліміту.</p>
       <div class="row">
-        <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
-        <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
-        <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+        <button type="button" class="btn" onclick="seedDemo()">🔄 Приклад</button>
+        <button type="button" class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+        <input id="file" type="file" accept=".csv,text/csv" class="btn"  aria-label="file"/>
+        <button type="button" class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
       </div>
       <p class="small">CSV: <span class="mono">id,name,phases,kW,PF,eta,material,install,tempC,groupCount,length_m,drop_limit_pct,curve,stdA,url,notes</span></p>
     </div>
@@ -94,36 +95,36 @@ tbody tr:nth-child(even){background:#0b1324}
       <div class="grid g3">
         <div>
           <h3>Навантаження</h3>
-          <div class="row"><label class="small" style="min-width:150px">ID</label><input id="id" value="CL-01"></div>
-          <div class="row"><label class="small" style="min-width:150px">Назва</label><input id="name" value="Живлення лабораторії"></div>
-          <div class="row"><label class="small" style="min-width:150px">Фази</label><select id="phases"><option selected>1Ф</option><option>3Ф</option></select></div>
-          <div class="row"><label class="small" style="min-width:150px">Потужність, кВт</label><input id="kW" type="number" step="0.1" value="3.5"></div>
-          <div class="row"><label class="small" style="min-width:150px">PF (cosφ)</label><input id="pf" type="number" step="0.01" value="0.95"></div>
-          <div class="row"><label class="small" style="min-width:150px">η</label><input id="eta" type="number" step="0.01" value="0.98"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="id">ID</label><input id="id" value="CL-01"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="name">Назва</label><input id="name" value="Живлення лабораторії"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="phases">Фази</label><select id="phases"><option selected>1Ф</option><option>3Ф</option></select></div>
+          <div class="row"><label class="small" style="min-width:150px" for="kW">Потужність, кВт</label><input id="kW" type="number" step="0.1" value="3.5"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="pf">PF (cosφ)</label><input id="pf" type="number" step="0.01" value="0.95"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="eta">η</label><input id="eta" type="number" step="0.01" value="0.98"></div>
         </div>
         <div>
           <h3>Кабель / умови</h3>
-          <div class="row"><label class="small" style="min-width:150px">Матеріал</label><select id="material"><option selected>Cu</option><option>Al</option></select></div>
-          <div class="row"><label class="small" style="min-width:150px">Прокладка</label>
+          <div class="row"><label class="small" style="min-width:150px" for="material">Матеріал</label><select id="material"><option selected>Cu</option><option>Al</option></select></div>
+          <div class="row"><label class="small" style="min-width:150px" for="install">Прокладка</label>
             <select id="install"><option selected>Повітря/лоток</option><option>Труба/канал</option><option>Земля</option></select></div>
-          <div class="row"><label class="small" style="min-width:150px">Температура, °C</label><input id="tempC" type="number" value="30"></div>
-          <div class="row"><label class="small" style="min-width:150px">К-ть паралельних/згруп.</label><input id="groupCount" type="number" value="1"></div>
-          <div class="row"><label class="small" style="min-width:150px">Довжина L, м</label><input id="L" type="number" value="35"></div>
-          <div class="row"><label class="small" style="min-width:150px">Ліміт ΔU, %</label><input id="dropLim" type="number" step="0.1" value="5"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="tempC">Температура, °C</label><input id="tempC" type="number" value="30"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="groupCount">К-ть паралельних/згруп.</label><input id="groupCount" type="number" value="1"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="L">Довжина L, м</label><input id="L" type="number" value="35"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="dropLim">Ліміт ΔU, %</label><input id="dropLim" type="number" step="0.1" value="5"></div>
         </div>
         <div>
           <h3>Захист / службове</h3>
-          <div class="row"><label class="small" style="min-width:150px">Крива MCB</label><select id="curve"><option>B</option><option selected>C</option><option>D</option></select></div>
-          <div class="row"><label class="small" style="min-width:150px">Ряд, А</label>
+          <div class="row"><label class="small" style="min-width:150px" for="curve">Крива MCB</label><select id="curve"><option>B</option><option selected>C</option><option>D</option></select></div>
+          <div class="row"><label class="small" style="min-width:150px" for="stdA">Ряд, А</label>
             <select id="stdA"><option>6</option><option>10</option><option selected>16</option><option>20</option><option>25</option><option>32</option><option>40</option><option>50</option><option>63</option></select></div>
-          <div class="row"><label class="small" style="min-width:150px">URL (NFC/QR)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
-          <div class="row"><label class="small" style="min-width:150px">Нотатка</label><input id="notes" placeholder="Примітка"></div>
+          <div class="row"><label class="small" style="min-width:150px" for="url">URL (NFC/QR)</label><input id="url" placeholder="https://serawww7.github.io/edlab/..."></div>
+          <div class="row"><label class="small" style="min-width:150px" for="notes">Нотатка</label><input id="notes" placeholder="Примітка"></div>
         </div>
       </div>
       <div class="row" style="margin-top:8px">
-        <button class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
-        <button class="btn" onclick="calcOne()">🧮 Розрахувати</button>
-        <button class="btn" onclick="seedOne()">🔄 Приклад запису</button>
+        <button type="button" class="btn" onclick="addOrUpdate()">💾 Додати/Оновити</button>
+        <button type="button" class="btn" onclick="calcOne()">🧮 Розрахувати</button>
+        <button type="button" class="btn" onclick="seedOne()">🔄 Приклад запису</button>
       </div>
     </div>
 
@@ -143,9 +144,9 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="card printable">
       <h2>🧾 Наклейки 58 мм «КАБЕЛЬНА ЛІНІЯ»</h2>
       <div class="row">
-        <button class="btn" onclick="buildTickets()">🧩 Зібрати для всіх</button>
-        <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
-        <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+        <button type="button" class="btn" onclick="buildTickets()">🧩 Зібрати для всіх</button>
+        <button type="button" class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+        <button type="button" class="btn" onclick="downloadTXT()">📥 TXT</button>
       </div>
       <div id="tickets" class="tickets"></div>
     </div>
@@ -153,8 +154,8 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="card printable">
       <h2>📄 A4-звіт (для друку/PDF)</h2>
       <div class="row">
-        <button class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
-        <button class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
+        <button type="button" class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
+        <button type="button" class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
       </div>
       <div id="printArea"></div>
     </div>
@@ -322,7 +323,7 @@ tbody tr:nth-child(even){background:#0b1324}
         <td>${c.drop??'—'}</td>
         <td>${badge}</td>
         <td class="editable" data-k="url" data-id="${r.id}">${esc(r.url||'')}</td>
-        <td class="mono"><button class="btn" data-act="label" data-id="${r.id}">Наклейка</button> <button class="btn" data-act="del" data-id="${r.id}">✖</button></td>`;
+        <td class="mono"><button type="button" class="btn" data-act="label" data-id="${r.id}">Наклейка</button> <button type="button" class="btn" data-act="del" data-id="${r.id}">✖</button></td>`;
       tbody.appendChild(tr);
     });
   }

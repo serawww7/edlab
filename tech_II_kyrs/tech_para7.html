@@ -13,6 +13,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 7 (технологи) — QC: металодетекція, маса, pH/aw, герметичність, етикетка, квиток/NFC/CSV</title>
+<meta name="description" content="🧪 QC: металодетекція, маса, pH/aw, герметичність, етикетка, квиток/NFC/CSV">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -60,7 +61,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 7 · аудиторно · технологи переробки</span>
   <h1>🧪 QC: металодетекція, маса, pH/aw, герметичність, етикетка, квиток/NFC/CSV</h1>
 
@@ -81,20 +82,20 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Ідентифікація</h3>
         <div class="row">
-          <div style="flex:1"><label>Виріб</label><input id="prodName" type="text" value="Сосиски молочні"></div>
-          <div style="flex:1"><label>ЛОТ</label><input id="lot" type="text" value="S-25047-M1"></div>
+          <div style="flex:1"><label for="prodName">Виріб</label><input id="prodName" type="text" value="Сосиски молочні"></div>
+          <div style="flex:1"><label for="lot">ЛОТ</label><input id="lot" type="text" value="S-25047-M1"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>EAN-13</label><input id="ean13" type="text" value="4820001234567"></div>
-          <div style="flex:1"><label>К-ть упаковок</label><input id="packs" type="number" step="1" value="50"></div>
+          <div style="flex:1"><label for="ean13">EAN-13</label><input id="ean13" type="text" value="4820001234567"></div>
+          <div style="flex:1"><label for="packs">К-ть упаковок</label><input id="packs" type="number" step="1" value="50"></div>
         </div>
       </div>
 
       <div class="box">
         <h3>Маса нетто</h3>
         <div class="row">
-          <div style="flex:1"><label>Номінал, г</label><input id="netNom" type="number" step="1" value="400"></div>
-          <div style="flex:1"><label>Допуск, % (±)</label><input id="tolPct" type="number" step="0.1" value="2.5"></div>
+          <div style="flex:1"><label for="netNom">Номінал, г</label><input id="netNom" type="number" step="1" value="400"></div>
+          <div style="flex:1"><label for="tolPct">Допуск, % (±)</label><input id="tolPct" type="number" step="0.1" value="2.5"></div>
         </div>
         <p class="small muted">Кожна упаковка повинна бути в межах номіналу ± допуск; також перевіряємо середнє.</p>
       </div>
@@ -102,18 +103,18 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>pH / aw / герметичність</h3>
         <div class="row">
-          <div style="flex:1"><label>Ціль pH (діапазон)</label><input id="phMin" type="number" step="0.01" value="5.8"></div>
-          <div style="flex:1"><label>··</label><input id="phMax" type="number" step="0.01" value="6.4"></div>
+          <div style="flex:1"><label for="phMin">Ціль pH (діапазон)</label><input id="phMin" type="number" step="0.01" value="5.8"></div>
+          <div style="flex:1"><label for="phMax">··</label><input id="phMax" type="number" step="0.01" value="6.4"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Макс. aw</label><input id="awMax" type="number" step="0.001" value="0.970"></div>
-          <div style="flex:1"><label>Мін. вакуум, кПа</label><input id="vacMin" type="number" step="0.1" value="30.0"></div>
+          <div style="flex:1"><label for="awMax">Макс. aw</label><input id="awMax" type="number" step="0.001" value="0.970"></div>
+          <div style="flex:1"><label for="vacMin">Мін. вакуум, кПа</label><input id="vacMin" type="number" step="0.1" value="30.0"></div>
         </div>
       </div>
     </div>
     <div class="row" style="margin-top:6px">
-      <button class="btn" onclick="calcLimits()">📏 Розрахувати межі</button>
-      <button class="btn" onclick="copyCSV('csvBatch')">📋 CSV (batch)</button>
+      <button type="button" class="btn" onclick="calcLimits()">📏 Розрахувати межі</button>
+      <button type="button" class="btn" onclick="copyCSV('csvBatch')">📋 CSV (batch)</button>
     </div>
     <div id="csvBatch" class="out" style="margin-top:8px">—</div>
   </div>
@@ -125,8 +126,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Налаштування</h3>
         <div class="row">
-          <div style="flex:1"><label>Отвір (апертура), мм</label><input id="aperture" type="number" step="1" value="120"></div>
-          <div style="flex:1"><label>Чутливість (реф.)</label>
+          <div style="flex:1"><label for="aperture">Отвір (апертура), мм</label><input id="aperture" type="number" step="1" value="120"></div>
+          <div style="flex:1"><label for="sens">Чутливість (реф.)</label>
             <select id="sens">
               <option>Стандарт</option>
               <option>Підвищена</option>
@@ -140,12 +141,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Результати тесту</h3>
         <div class="row">
-          <div style="flex:1"><label>Fe, мм (виявлено ≤)</label><input id="fe_mm" type="number" step="0.1" value="2.0"></div>
-          <div style="flex:1"><label>Non-Fe, мм (виявлено ≤)</label><input id="nfe_mm" type="number" step="0.1" value="2.5"></div>
+          <div style="flex:1"><label for="fe_mm">Fe, мм (виявлено ≤)</label><input id="fe_mm" type="number" step="0.1" value="2.0"></div>
+          <div style="flex:1"><label for="nfe_mm">Non-Fe, мм (виявлено ≤)</label><input id="nfe_mm" type="number" step="0.1" value="2.5"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>SS, мм (виявлено ≤)</label><input id="ss_mm" type="number" step="0.1" value="3.0"></div>
-          <div style="flex:1"><label>Фальш-спрацьовування</label>
+          <div style="flex:1"><label for="ss_mm">SS, мм (виявлено ≤)</label><input id="ss_mm" type="number" step="0.1" value="3.0"></div>
+          <div style="flex:1"><label for="falseTrig">Фальш-спрацьовування</label>
             <select id="falseTrig"><option>Ні</option><option>Так</option></select>
           </div>
         </div>
@@ -156,8 +157,8 @@ html.embedded .box{background:#f8fafc;color:#111}
         <p>Статус: <b><span id="mdStatus">—</span></b></p>
         <p>Порогові кульки (реф.): <b><span id="mdRef">—</span></b></p>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="evalMetal()">✅ Оцінити</button>
-          <button class="btn" onclick="copyCSV('csvMD')">📋 CSV (MD)</button>
+          <button type="button" class="btn" onclick="evalMetal()">✅ Оцінити</button>
+          <button type="button" class="btn" onclick="copyCSV('csvMD')">📋 CSV (MD)</button>
         </div>
         <div id="csvMD" class="out" style="margin-top:8px">—</div>
       </div>
@@ -168,10 +169,10 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>⚖️ Контроль маси</h2>
     <div class="row">
-      <button class="btn" onclick="addWeight()">➕ Додати зважування</button>
-      <button class="btn" onclick="presetWeights()">🧪 Приклад</button>
-      <button class="btn" onclick="evaluateWeights()">✅ Перевірити</button>
-      <button class="btn" onclick="copyCSV('csvWeights')">📋 CSV (weights)</button>
+      <button type="button" class="btn" onclick="addWeight()">➕ Додати зважування</button>
+      <button type="button" class="btn" onclick="presetWeights()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="evaluateWeights()">✅ Перевірити</button>
+      <button type="button" class="btn" onclick="copyCSV('csvWeights')">📋 CSV (weights)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblW">
@@ -198,12 +199,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Вимірювання</h3>
         <div class="row">
-          <div style="flex:1"><label>pH</label><input id="phVal" type="number" step="0.01" value="6.10"></div>
-          <div style="flex:1"><label>aw</label><input id="awVal" type="number" step="0.001" value="0.965"></div>
+          <div style="flex:1"><label for="phVal">pH</label><input id="phVal" type="number" step="0.01" value="6.10"></div>
+          <div style="flex:1"><label for="awVal">aw</label><input id="awVal" type="number" step="0.001" value="0.965"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Вакуум, кПа</label><input id="vacVal" type="number" step="0.1" value="32.0"></div>
-          <div style="flex:1"><label>Тест герметичн.</label>
+          <div style="flex:1"><label for="vacVal">Вакуум, кПа</label><input id="vacVal" type="number" step="0.1" value="32.0"></div>
+          <div style="flex:1"><label for="sealOk">Тест герметичн.</label>
             <select id="sealOk"><option>Ок</option><option>Проблема</option></select>
           </div>
         </div>
@@ -212,14 +213,14 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Етикетка/штрихкод</h3>
         <div class="row">
-          <div style="flex:1"><label>Дата “вжити до”</label><input id="expDate" type="date"></div>
-          <div style="flex:1"><label>Розбірливість друку</label>
+          <div style="flex:1"><label for="expDate">Дата “вжити до”</label><input id="expDate" type="date"></div>
+          <div style="flex:1"><label for="printQual">Розбірливість друку</label>
             <select id="printQual"><option>Добра</option><option>Посередня</option><option>Погана</option></select>
           </div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="evalLab()">✅ Перевірити</button>
-          <button class="btn" onclick="copyCSV('csvLab')">📋 CSV (lab)</button>
+          <button type="button" class="btn" onclick="evalLab()">✅ Перевірити</button>
+          <button type="button" class="btn" onclick="copyCSV('csvLab')">📋 CSV (lab)</button>
         </div>
         <div id="labOut" class="out" style="margin-top:8px">—</div>
         <div id="csvLab" class="out" style="margin-top:8px">—</div>
@@ -231,9 +232,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал / Квиток / NFC</h2>
     <div class="row">
-      <button class="btn" onclick="addLog()">➕ Додати у журнал</button>
-      <button class="btn" onclick="presetLog()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+      <button type="button" class="btn" onclick="addLog()">➕ Додати у журнал</button>
+      <button type="button" class="btn" onclick="presetLog()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblLog">
@@ -261,12 +262,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>NFC — “QC BATCH CARD”</h3>
         <div class="row">
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
-          <div style="flex:1"><label>Оператор</label><input id="operator" type="text" value="Студент ТПТ"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="operator">Оператор</label><input id="operator" type="text" value="Студент ТПТ"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -274,8 +275,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток 58 мм</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>QC CHECK TICKET</h4>
@@ -392,7 +393,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td><input type="time" value="${s.time}"></td>
       <td class="dark"><input type="number" step="0.1" value="${s.g}"></td>
       <td class="wok">—</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyW); buildWCSV();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyW); buildWCSV();">✖</button></td>
     `;
     bodyW.appendChild(tr); reindex(bodyW); buildWCSV();
   }
@@ -492,7 +493,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td>${s.seal}</td>
       <td>${s.labS}</td>
       <td>${s.verdict}</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyL); buildLogCSV();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyL); buildLogCSV();">✖</button></td>
     `;
     bodyL.appendChild(tr); reindex(bodyL); buildLogCSV();
     // Оновити квиток

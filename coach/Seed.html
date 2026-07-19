@@ -59,17 +59,17 @@ textarea{min-height:64px;resize:vertical}
     <h1 class="title">Вправа «Насіння мого розвитку» — для агрономів</h1>
     <p class="subtitle">Редагована схема 🌱 • 10 хв на заповнення • автозбереження • експорт .txt/.png • друк</p>
     <div class="btn-row">
-      <button class="btn" id="exportTxt">⬇️ Експорт .txt</button>
-      <button class="btn" id="savePng">🖼️ Експорт схеми .png</button>
-      <button class="btn" id="printPage">🖨️ Друк</button>
-      <button class="btn" id="clearAll">🗑️ Очистити</button>
-      <span class="timer">Таймер: <span id="t1">00:00</span> <button class="btn" id="startTimer">▶ 10:00</button></span>
+      <button type="button" class="btn" id="exportTxt">⬇️ Експорт .txt</button>
+      <button type="button" class="btn" id="savePng">🖼️ Експорт схеми .png</button>
+      <button type="button" class="btn" id="printPage">🖨️ Друк</button>
+      <button type="button" class="btn" id="clearAll">🗑️ Очистити</button>
+      <span class="timer">Таймер: <span id="t1">00:00</span> <button type="button" class="btn" id="startTimer">▶ 10:00</button></span>
       <span class="hint">Дані зберігаються локально на цьому пристрої.</span>
     </div>
   </div>
 </header>
 
-<main class="wrap">
+<main id="main-content" class="wrap">
   <section class="card">
     <div class="grid cols-2">
       <div>
@@ -114,34 +114,34 @@ textarea{min-height:64px;resize:vertical}
 
     <div class="two">
       <div>
-        <label class="kbd">Насіння — мої здібності, що вже є</label>
+        <label class="kbd" for="seed">Насіння — мої здібності, що вже є</label>
         <textarea id="seed"></textarea>
 
-        <label class="kbd">Ґрунт — що допомагає розвиватись (люди, умови, підтримка)</label>
+        <label class="kbd" for="soil">Ґрунт — що допомагає розвиватись (люди, умови, підтримка)</label>
         <textarea id="soil"></textarea>
 
-        <label class="kbd">Сонце — що надихає, дає енергію</label>
+        <label class="kbd" for="sun">Сонце — що надихає, дає енергію</label>
         <textarea id="sun"></textarea>
 
-        <label class="kbd">Вода — які знання або навички хочу отримати</label>
+        <label class="kbd" for="water">Вода — які знання або навички хочу отримати</label>
         <textarea id="water"></textarea>
 
-        <label class="kbd">Плоди — ким хочу стати через 3–4 роки</label>
+        <label class="kbd" for="fruits">Плоди — ким хочу стати через 3–4 роки</label>
         <textarea id="fruits"></textarea>
       </div>
 
       <!-- Редагована схема -->
       <div>
         <div class="toolbar" style="margin-bottom:8px">
-          <span class="chip">Перо <input type="range" id="penSize" min="1" max="10" value="3"><input type="color" id="penColor" value="#60a5fa"></span>
-          <span class="chip">Ластик <input type="range" id="eraserSize" min="5" max="30" value="14"></span>
-          <button class="btn" id="modePen">✏️ Перо</button>
-          <button class="btn" id="modeEraser">🧽 Ластик</button>
-          <button class="btn" id="clearSketch">♻️ Очистити штрих</button>
+          <span class="chip">Перо <input type="range" id="penSize" min="1" max="10" value="3" aria-label="pen Size"><input type="color" id="penColor" value="#60a5fa" aria-label="pen Color"></span>
+          <span class="chip">Ластик <input type="range" id="eraserSize" min="5" max="30" value="14" aria-label="eraser Size"></span>
+          <button type="button" class="btn" id="modePen">✏️ Перо</button>
+          <button type="button" class="btn" id="modeEraser">🧽 Ластик</button>
+          <button type="button" class="btn" id="clearSketch">♻️ Очистити штрих</button>
         </div>
 
         <!-- SVG-схема з підписами -->
-        <svg id="seedSvg" viewBox="0 0 600 420" style="width:100%;background:#081322;border:1px solid var(--border);border-radius:12px">
+        <svg id="seedSvg" viewBox="0 0 600 420" style="width:100%;background:#081322;border:1px solid var(--border);border-radius:12px" aria-hidden="true" focusable="false">
           <!-- небо і сонце -->
           <rect x="0" y="0" width="600" height="220" fill="#0b1f3a"/>
           <circle cx="520" cy="60" r="30" fill="#fbbf24"/>
@@ -192,9 +192,9 @@ textarea{min-height:64px;resize:vertical}
   <section class="card">
     <h2>3) Обмін у групі (5–7 хв)</h2>
     <div class="btn-row">
-      <button class="btn" id="shareSoil">Показати «ґрунт»</button>
-      <button class="btn" id="shareWater">Назвати «воду»</button>
-      <button class="btn" id="shareFruits">Озвучити «плоди»</button>
+      <button type="button" class="btn" id="shareSoil">Показати «ґрунт»</button>
+      <button type="button" class="btn" id="shareWater">Назвати «воду»</button>
+      <button type="button" class="btn" id="shareFruits">Озвучити «плоди»</button>
       <span class="badge" id="shareOut">—</span>
     </div>
     <div class="hint">Клікни на кнопку — отримаєш короткий текст для озвучення/чату.</div>
@@ -205,21 +205,21 @@ textarea{min-height:64px;resize:vertical}
     <h2>4) Рефлексія (5 хв)</h2>
     <div class="two">
       <div>
-        <label class="kbd">Що було найцікавіше усвідомити?</label>
+        <label class="kbd" for="ref1">Що було найцікавіше усвідомити?</label>
         <textarea id="ref1"></textarea>
       </div>
       <div>
-        <label class="kbd">Що спільного ми маємо як група агрономів?</label>
+        <label class="kbd" for="ref2">Що спільного ми маємо як група агрономів?</label>
         <textarea id="ref2"></textarea>
       </div>
     </div>
     <div class="two" style="margin-top:10px">
       <div>
-        <label class="kbd">Як сьогоднішній малюнок допоможе тримати фокус?</label>
+        <label class="kbd" for="ref3">Як сьогоднішній малюнок допоможе тримати фокус?</label>
         <textarea id="ref3"></textarea>
       </div>
       <div>
-        <label class="kbd">Перший крок (дієслово + коли + як довго)</label>
+        <label class="kbd" for="ref4">Перший крок (дієслово + коли + як довго)</label>
         <textarea id="ref4"></textarea>
       </div>
     </div>

@@ -15,6 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 14 (механіки) — Двигун і теплові режими: витрата, BSFC, антифриз, тиск, термостат, квиток 58 мм, NFC</title>
+<meta name="description" content="🔥 Двигун і теплові режими: витрата, BSFC, охолодження, антифриз, тиск, термостат, квиток 58 мм, NFC">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -60,7 +61,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 14 · аудиторно · механіки</span>
   <h1>🔥 Двигун і теплові режими: витрата, BSFC, охолодження, антифриз, тиск, термостат, квиток 58 мм, NFC</h1>
 
@@ -83,22 +84,22 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Вимір / умови</h3>
         <div class="row">
-          <div style="flex:1"><label>Метод</label>
+          <div style="flex:1"><label for="fuelMode">Метод</label>
             <select id="fuelMode">
               <option value="mass" selected>маса/час (кг/год)</option>
               <option value="vol">об'єм/час (л/год)</option>
               <option value="volTime">об'єм і час (л за t)</option>
             </select>
           </div>
-          <div style="flex:1"><label>Маса, кг/год · об'єм, л/год · л</label><input id="fuelA" type="number" step="0.01" value="20"></div>
+          <div style="flex:1"><label for="fuelA">Маса, кг/год · об'єм, л/год · л</label><input id="fuelA" type="number" step="0.01" value="20"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Час t, хв (для методу “л за t”)</label><input id="fuelT" type="number" step="0.1" value="10"></div>
-          <div style="flex:1"><label>Густина ρ, кг/л</label><input id="rho" type="number" step="0.01" value="0.84"></div>
+          <div style="flex:1"><label for="fuelT">Час t, хв (для методу “л за t”)</label><input id="fuelT" type="number" step="0.1" value="10"></div>
+          <div style="flex:1"><label for="rho">Густина ρ, кг/л</label><input id="rho" type="number" step="0.01" value="0.84"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Ефективна потужність, кВт</label><input id="Pout" type="number" step="0.1" value="120"></div>
-          <div style="flex:1"><label>Нижча теплота LHV, МДж/кг</label><input id="LHV" type="number" step="0.1" value="42.6"></div>
+          <div style="flex:1"><label for="Pout">Ефективна потужність, кВт</label><input id="Pout" type="number" step="0.1" value="120"></div>
+          <div style="flex:1"><label for="LHV">Нижча теплота LHV, МДж/кг</label><input id="LHV" type="number" step="0.1" value="42.6"></div>
         </div>
       </div>
       <div class="box">
@@ -110,9 +111,9 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="calcFuel()">🔁 Перерахувати</button>
-          <button class="btn" onclick="presetFuel()">🧪 Приклад</button>
-          <button class="btn" onclick="copyCSV('csvFuel')">📋 CSV (fuel)</button>
+          <button type="button" class="btn" onclick="calcFuel()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="presetFuel()">🧪 Приклад</button>
+          <button type="button" class="btn" onclick="copyCSV('csvFuel')">📋 CSV (fuel)</button>
         </div>
         <div id="csvFuel" class="out" style="margin-top:8px">—</div>
       </div>
@@ -127,12 +128,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Вихідні</h3>
         <div class="row">
-          <div style="flex:1"><label>Частка втрат на охолодження, %</label><input id="coolFrac" type="number" step="1" value="25"></div>
-          <div style="flex:1"><label>Дебіт ОЖ, л/хв</label><input id="coolFlow" type="number" step="1" value="120"></div>
+          <div style="flex:1"><label for="coolFrac">Частка втрат на охолодження, %</label><input id="coolFrac" type="number" step="1" value="25"></div>
+          <div style="flex:1"><label for="coolFlow">Дебіт ОЖ, л/хв</label><input id="coolFlow" type="number" step="1" value="120"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Вхід ОЖ, °C</label><input id="Tin" type="number" step="0.1" value="85"></div>
-          <div style="flex:1"><label>Вихід ОЖ, °C</label><input id="Tout" type="number" step="0.1" value="95"></div>
+          <div style="flex:1"><label for="Tin">Вхід ОЖ, °C</label><input id="Tin" type="number" step="0.1" value="85"></div>
+          <div style="flex:1"><label for="Tout">Вихід ОЖ, °C</label><input id="Tout" type="number" step="0.1" value="95"></div>
         </div>
       </div>
       <div class="box">
@@ -144,8 +145,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="calcCool()">🔁 Перерахувати</button>
-          <button class="btn" onclick="copyCSV('csvCool')">📋 CSV (cooling)</button>
+          <button type="button" class="btn" onclick="calcCool()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvCool')">📋 CSV (cooling)</button>
         </div>
         <div id="csvCool" class="out" style="margin-top:8px">—</div>
       </div>
@@ -161,12 +162,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Параметри</h3>
         <div class="row">
-          <div style="flex:1"><label>% етиленгліколю</label><input id="eg" type="number" step="1" value="50"></div>
-          <div style="flex:1"><label>Тиск кришки, бар</label><input id="cap" type="number" step="0.05" value="1.2"></div>
+          <div style="flex:1"><label for="eg">% етиленгліколю</label><input id="eg" type="number" step="1" value="50"></div>
+          <div style="flex:1"><label for="cap">Тиск кришки, бар</label><input id="cap" type="number" step="0.05" value="1.2"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Атмосф. тиск, бар</label><input id="atm" type="number" step="0.01" value="1.0"></div>
-          <div style="flex:1"><label>Мета мін. T, °C</label><input id="TminTarget" type="number" step="1" value="-30"></div>
+          <div style="flex:1"><label for="atm">Атмосф. тиск, бар</label><input id="atm" type="number" step="0.01" value="1.0"></div>
+          <div style="flex:1"><label for="TminTarget">Мета мін. T, °C</label><input id="TminTarget" type="number" step="1" value="-30"></div>
         </div>
       </div>
       <div class="box">
@@ -178,8 +179,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="calcAF()">🔁 Перерахувати</button>
-          <button class="btn" onclick="copyCSV('csvAF')">📋 CSV (antifreeze)</button>
+          <button type="button" class="btn" onclick="calcAF()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvAF')">📋 CSV (antifreeze)</button>
         </div>
         <div id="csvAF" class="out" style="margin-top:8px">—</div>
       </div>
@@ -194,12 +195,12 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Виміри</h3>
         <div class="row">
-          <div style="flex:1"><label>T початку відкриття (паспорт), °C</label><input id="TopenSpec" type="number" step="0.1" value="82"></div>
-          <div style="flex:1"><label>T стабілізації під навантаж., °C</label><input id="Tstab" type="number" step="0.1" value="92"></div>
+          <div style="flex:1"><label for="TopenSpec">T початку відкриття (паспорт), °C</label><input id="TopenSpec" type="number" step="0.1" value="82"></div>
+          <div style="flex:1"><label for="Tstab">T стабілізації під навантаж., °C</label><input id="Tstab" type="number" step="0.1" value="92"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>Темп. навкол., °C</label><input id="Tamb" type="number" step="0.1" value="15"></div>
-          <div style="flex:1"><label>Навантаження, %</label><input id="loadPct" type="number" step="1" value="70"></div>
+          <div style="flex:1"><label for="Tamb">Темп. навкол., °C</label><input id="Tamb" type="number" step="0.1" value="15"></div>
+          <div style="flex:1"><label for="loadPct">Навантаження, %</label><input id="loadPct" type="number" step="1" value="70"></div>
         </div>
       </div>
       <div class="box">
@@ -211,8 +212,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Керування</h3>
         <div class="row">
-          <button class="btn" onclick="calcTherm()">🔁 Перерахувати</button>
-          <button class="btn" onclick="copyCSV('csvTherm')">📋 CSV (thermostat)</button>
+          <button type="button" class="btn" onclick="calcTherm()">🔁 Перерахувати</button>
+          <button type="button" class="btn" onclick="copyCSV('csvTherm')">📋 CSV (thermostat)</button>
         </div>
         <div id="csvTherm" class="out" style="margin-top:8px">—</div>
       </div>
@@ -223,9 +224,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал вимірів</h2>
     <div class="row">
-      <button class="btn" onclick="addRow()">➕ Додати запис</button>
-      <button class="btn" onclick="presetRows()">🧪 Приклад</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
+      <button type="button" class="btn" onclick="addRow()">➕ Додати запис</button>
+      <button type="button" class="btn" onclick="presetRows()">🧪 Приклад</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (журнал)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tbl">
@@ -254,20 +255,20 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>NFC — “ENGINE HEAT CARD”</h3>
         <div class="row">
-          <div style="flex:1"><label>Машина/двигун</label><input id="nfcId" type="text" value="TR-001/Engine-A"></div>
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="nfcId">Машина/двигун</label><input id="nfcId" type="text" value="TR-001/Engine-A"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
       <div class="box">
         <h3>Квиток “ENGINE HEAT CHECK”</h3>
         <div class="row">
-          <button class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="buildTicket()">🧾 Згенерувати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>ENGINE HEAT CHECK</h4>

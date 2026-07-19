@@ -44,7 +44,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🤖</span>
@@ -63,60 +63,60 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>📥 Дані QC (вводи/імпорт)</h2>
       <div class="row">
-        <label>Δмаси, г<input id="f_mass" class="input" type="number" step="0.1" value="-0.8"/></label>
-        <label>pH<input id="f_ph" class="input" type="number" step="0.01" value="6.35"/></label>
-        <label>aw<input id="f_aw" class="input" type="number" step="0.001" value="0.972"/></label>
-        <label>L* (колір)<input id="f_L" class="input" type="number" step="0.1" value="78.2"/></label>
-        <label>T ядра, °C<input id="f_T" class="input" type="number" step="0.1" value="3.1"/></label>
-        <label>Вакуум, кПа<input id="f_vac" class="input" type="number" step="0.1" value="68.0"/></label>
+        <label>Δмаси, г<input id="f_mass" class="input" type="number" step="0.1" value="-0.8" aria-label="f mass"/></label>
+        <label>pH<input id="f_ph" class="input" type="number" step="0.01" value="6.35" aria-label="f ph"/></label>
+        <label>aw<input id="f_aw" class="input" type="number" step="0.001" value="0.972" aria-label="f aw"/></label>
+        <label>L* (колір)<input id="f_L" class="input" type="number" step="0.1" value="78.2" aria-label="f L"/></label>
+        <label>T ядра, °C<input id="f_T" class="input" type="number" step="0.1" value="3.1" aria-label="f T"/></label>
+        <label>Вакуум, кПа<input id="f_vac" class="input" type="number" step="0.1" value="68.0" aria-label="f vac"/></label>
         <label>Мітка
-          <select id="f_y" class="input">
+          <select id="f_y" class="input" aria-label="f y">
             <option value="1">OK</option>
             <option value="0">NCR</option>
           </select>
         </label>
       </div>
       <div class="row">
-        <button class="btn" id="add">➕ Додати зразок</button>
-        <input id="file" class="input" type="file" accept=".csv"/>
-        <button class="btn secondary" id="import">📄 Імпорт CSV</button>
-        <button class="btn secondary" id="demo">🎲 Демо-набір</button>
-        <button class="btn secondary" id="clear">🧹 Очистити</button>
+        <button type="button" class="btn" id="add">➕ Додати зразок</button>
+        <input id="file" class="input" type="file" accept=".csv" aria-label="file"/>
+        <button type="button" class="btn secondary" id="import">📄 Імпорт CSV</button>
+        <button type="button" class="btn secondary" id="demo">🎲 Демо-набір</button>
+        <button type="button" class="btn secondary" id="clear">🧹 Очистити</button>
         <span id="stat" class="badge">Зразків: 0 | OK: 0 | NCR: 0</span>
       </div>
 
       <h2 style="margin-top:10px">🧠 Модель</h2>
       <div class="row">
         <label>Тип
-          <select id="modelType" class="input">
+          <select id="modelType" class="input" aria-label="model Type">
             <option value="logreg" selected>Логістична регресія</option>
             <option value="knn">k-NN (швидка базова)</option>
           </select>
         </label>
-        <label>Train/Test, % <input id="split" class="input" type="number" min="50" max="90" step="5" value="70"/></label>
-        <label>Seed<input id="seed" class="input" type="number" step="1" value="42"/></label>
+        <label>Train/Test, % <input id="split" class="input" type="number" min="50" max="90" step="5" value="70" aria-label="split"/></label>
+        <label>Seed<input id="seed" class="input" type="number" step="1" value="42" aria-label="seed"/></label>
 
         <div id="logregParams" class="row" style="flex-basis:100%">
-          <label>Крок (η)<input id="lr" class="input" type="number" step="0.001" value="0.05"/></label>
-          <label>Епох<input id="epochs" class="input" type="number" step="10" value="400"/></label>
-          <label>L2-регул.<input id="l2" class="input" type="number" step="0.001" value="0.001"/></label>
+          <label>Крок (η)<input id="lr" class="input" type="number" step="0.001" value="0.05" aria-label="lr"/></label>
+          <label>Епох<input id="epochs" class="input" type="number" step="10" value="400" aria-label="epochs"/></label>
+          <label>L2-регул.<input id="l2" class="input" type="number" step="0.001" value="0.001" aria-label="l2"/></label>
         </div>
         <div id="knnParams" class="row" style="flex-basis:100%;display:none">
-          <label>k сусідів<input id="k" class="input" type="number" step="1" value="5"/></label>
+          <label>k сусідів<input id="k" class="input" type="number" step="1" value="5" aria-label="k"/></label>
         </div>
 
         <label>Ознаки X/Y для графіка
-          <select id="featX" class="input">
+          <select id="featX" class="input" aria-label="feat X">
             <option value="0" selected>Δмаси, г</option><option value="1">pH</option><option value="2">aw</option><option value="3">L*</option><option value="4">T ядра, °C</option><option value="5">Вакуум, кПа</option>
           </select>
         </label>
         <label>
-          <select id="featY" class="input">
+          <select id="featY" class="input" aria-label="feat Y">
             <option value="1" selected>pH</option><option value="0">Δмаси, г</option><option value="2">aw</option><option value="3">L*</option><option value="4">T ядра, °C</option><option value="5">Вакуум, кПа</option>
           </select>
         </label>
 
-        <button class="btn good" id="train">🚀 Навчити</button>
+        <button type="button" class="btn good" id="train">🚀 Навчити</button>
       </div>
 
       <h3 style="margin-top:10px">📈 Візуалізація (межа рішення)</h3>
@@ -125,23 +125,23 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:10px">🧪 Прогноз для нової партії</h3>
       <div class="row">
-        <label>Δмаси, г<input id="p_mass" class="input" type="number" step="0.1" value="-0.3"/></label>
-        <label>pH<input id="p_ph" class="input" type="number" step="0.01" value="6.42"/></label>
-        <label>aw<input id="p_aw" class="input" type="number" step="0.001" value="0.975"/></label>
-        <label>L*<input id="p_L" class="input" type="number" step="0.1" value="79.1"/></label>
-        <label>T ядра, °C<input id="p_T" class="input" type="number" step="0.1" value="3.5"/></label>
-        <label>Вакуум, кПа<input id="p_vac" class="input" type="number" step="0.1" value="67.0"/></label>
-        <button class="btn" id="predict">🔮 Прогноз</button>
+        <label>Δмаси, г<input id="p_mass" class="input" type="number" step="0.1" value="-0.3" aria-label="p mass"/></label>
+        <label>pH<input id="p_ph" class="input" type="number" step="0.01" value="6.42" aria-label="p ph"/></label>
+        <label>aw<input id="p_aw" class="input" type="number" step="0.001" value="0.975" aria-label="p aw"/></label>
+        <label>L*<input id="p_L" class="input" type="number" step="0.1" value="79.1" aria-label="p L"/></label>
+        <label>T ядра, °C<input id="p_T" class="input" type="number" step="0.1" value="3.5" aria-label="p T"/></label>
+        <label>Вакуум, кПа<input id="p_vac" class="input" type="number" step="0.1" value="67.0" aria-label="p vac"/></label>
+        <button type="button" class="btn" id="predict">🔮 Прогноз</button>
         <span id="predStat" class="badge">P(OK)=— | Рішення: —</span>
       </div>
 
       <h3 style="margin-top:10px">💾 Експорт / друк</h3>
       <div class="row">
-        <input id="lot" class="input" placeholder="SKU/Лот (напр. Сир 45% 2025-10-18)"/>
-        <button class="btn" id="saveCsv">📄 CSV (дані + мітки)</button>
-        <button class="btn" id="saveTxt">💾 TXT (звіт/метрики)</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
+        <input id="lot" class="input" placeholder="SKU/Лот (напр. Сир 45% 2025-10-18)" aria-label="SKU/Лот (напр. Сир 45% 2025-10-18)"/>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (дані + мітки)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (звіт/метрики)</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (посилання на докази)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>

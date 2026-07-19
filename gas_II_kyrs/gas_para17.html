@@ -41,7 +41,7 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🚨🗺️</span>
@@ -59,16 +59,16 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
       Система тримає <b>чергу</b>, <b>призначає бригади</b> за принципом «найближча вільна до найвищого пріоритету», рахує <b>ETA</b>, імітує рух і <b>усунення</b>. 
       На графіку — частка <b>заяв у SLA</b>. Пробуй сценарії — і експортуй результат.</p>
     <div class="row">
-      <label style="flex:1">SLA P1, хв<input id="slaP1" class="input" type="number" step="1" value="30"></label>
-      <label style="flex:1">SLA P2, хв<input id="slaP2" class="input" type="number" step="1" value="60"></label>
-      <label style="flex:1">SLA P3, хв<input id="slaP3" class="input" type="number" step="1" value="180"></label>
-      <label style="flex:1">Швидкість бригади, км/год<input id="spd" class="input" type="number" step="1" value="30"><small class="muted" style="display:block;margin-top:-4px">1 клітинка ≈ 100 м</small></label>
+      <label style="flex:1">SLA P1, хв<input id="slaP1" class="input" type="number" step="1" value="30" aria-label="sla P1"></label>
+      <label style="flex:1">SLA P2, хв<input id="slaP2" class="input" type="number" step="1" value="60" aria-label="sla P2"></label>
+      <label style="flex:1">SLA P3, хв<input id="slaP3" class="input" type="number" step="1" value="180" aria-label="sla P3"></label>
+      <label style="flex:1">Швидкість бригади, км/год<input id="spd" class="input" type="number" step="1" value="30" aria-label="spd"><small class="muted" style="display:block;margin-top:-4px">1 клітинка ≈ 100 м</small></label>
     </div>
     <div class="row">
-      <button class="btn good" id="run">▶️ Старт</button>
-      <button class="btn secondary" id="stop">⏹️ Стоп</button>
-      <button class="btn" id="reset">🔄 Скинути</button>
-      <button class="btn" id="autogen">🧪 Згенерувати 5 інцидентів</button>
+      <button type="button" class="btn good" id="run">▶️ Старт</button>
+      <button type="button" class="btn secondary" id="stop">⏹️ Стоп</button>
+      <button type="button" class="btn" id="reset">🔄 Скинути</button>
+      <button type="button" class="btn" id="autogen">🧪 Згенерувати 5 інцидентів</button>
       <span class="badge">t = <b id="tSim">0</b> хв</span>
       <span class="badge">Активні: <b id="actCnt">0</b>, В черзі: <b id="qCnt">0</b></span>
     </div>
@@ -80,22 +80,22 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
       <canvas id="map" class="map" width="860" height="520"></canvas>
       <div class="row" style="margin-top:8px">
         <label>Пріоритет
-          <select id="prio" class="input">
+          <select id="prio" class="input" aria-label="prio">
             <option value="P1">P1 (критичний)</option>
             <option value="P2" selected>P2 (високий)</option>
             <option value="P3">P3 (звичайний)</option>
           </select>
         </label>
         <label>Тип
-          <select id="itype" class="input">
+          <select id="itype" class="input" aria-label="itype">
             <option>Запах газу</option>
             <option>Підтверджений витік</option>
             <option>Відсутність газу</option>
             <option>Роботи поруч (ризик)</option>
           </select>
         </label>
-        <label style="flex:1">Нотатка<input id="inote" class="input" placeholder="Деталі інциденту"/></label>
-        <button class="btn" id="assign">🤖 Перепризначити вручну (опц.)</button>
+        <label style="flex:1">Нотатка<input id="inote" class="input" placeholder="Деталі інциденту" aria-label="Деталі інциденту"/></label>
+        <button type="button" class="btn" id="assign">🤖 Перепризначити вручну (опц.)</button>
       </div>
 
       <h2 style="margin-top:10px">📈 SLA-графік (виконано в нормативі, %)</h2>
@@ -125,8 +125,8 @@ pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;pad
 
       <h3 style="margin-top:10px">💾 Експорт</h3>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV (інциденти + таймлайн SLA)</button>
-        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (інциденти + таймлайн SLA)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (підсумок)</button>
       </div>
     </div>
   </div>

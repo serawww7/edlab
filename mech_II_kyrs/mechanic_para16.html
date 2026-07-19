@@ -42,7 +42,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">⚙️</span>
@@ -60,57 +60,57 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <h2>🔧 Налаштування</h2>
     <div class="row">
       <div style="flex:1">
-        <label>Сенсор 1 (привід)</label>
+        <label for="s1">Сенсор 1 (привід)</label>
         <select id="s1" class="input"><option>Оптичний (білий маркер)</option><option selected>Холла (магніт)</option></select>
       </div>
       <div style="flex:1">
-        <label>Сенсор 2 (ведений)</label>
+        <label for="s2">Сенсор 2 (ведений)</label>
         <select id="s2" class="input"><option>Немає</option><option selected>Оптичний (білий маркер)</option><option>Холла (магніт)</option></select>
       </div>
       <div style="flex:1">
-        <label>Піни переривань (UNO):</label>
+        <label for="pin1">Піни переривань (UNO):</label>
         <select id="pin1" class="input"><option value="2" selected>D2</option><option value="3">D3</option></select>
       </div>
       <div style="flex:1">
-        <label>Другий пін:</label>
+        <label for="pin2">Другий пін:</label>
         <select id="pin2" class="input"><option value="-1" selected>—</option><option value="3">D3</option><option value="2">D2</option></select>
       </div>
     </div>
 
     <div class="row">
       <div style="flex:1">
-        <label>Імпульсів/оберт (вал 1)</label>
+        <label for="ppr1">Імпульсів/оберт (вал 1)</label>
         <input id="ppr1" class="input" type="number" min="1" step="1" value="1"/>
       </div>
       <div style="flex:1">
-        <label>Імпульсів/оберт (вал 2)</label>
+        <label for="ppr2">Імпульсів/оберт (вал 2)</label>
         <input id="ppr2" class="input" type="number" min="1" step="1" value="1"/>
       </div>
       <div style="flex:1">
-        <label>Діаметр шківа привідного, мм (D1)</label>
+        <label for="d1">Діаметр шківа привідного, мм (D1)</label>
         <input id="d1" class="input" type="number" min="10" step="1" value="150"/>
       </div>
       <div style="flex:1">
-        <label>Діаметр шківа веденого, мм (D2)</label>
+        <label for="d2">Діаметр шківа веденого, мм (D2)</label>
         <input id="d2" class="input" type="number" min="10" step="1" value="300"/>
       </div>
     </div>
 
     <div class="row">
       <div style="flex:1">
-        <label>Вікно усереднення, мс</label>
+        <label for="win">Вікно усереднення, мс</label>
         <input id="win" class="input" type="number" min="100" step="100" value="500"/>
       </div>
       <div style="flex:1">
-        <label>Дебаунс, мкс</label>
+        <label for="deb">Дебаунс, мкс</label>
         <input id="deb" class="input" type="number" min="0" step="50" value="200"/>
       </div>
       <div style="flex:1">
-        <label>Поріг тривоги (SLIP %)</label>
+        <label for="thr">Поріг тривоги (SLIP %)</label>
         <input id="thr" class="input" type="number" step="0.5" value="3.0"/>
       </div>
       <div style="flex:1">
-        <label>Мітка роботи</label>
+        <label for="job">Мітка роботи</label>
         <input id="job" class="input" placeholder="ТО приводу жатки / ВВП 540 об/хв"/>
       </div>
     </div>
@@ -119,11 +119,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🧪 Емулятор (без «заліза»)</h2>
     <div class="row">
-      <label><input id="emu" type="checkbox"/> Увімкнути емулятор</label>
-      <label style="flex:1">RPM вал 1 <input id="rpm1s" class="input" type="range" min="100" max="2500" step="10" value="540" disabled/></label>
-      <label style="flex:1">RPM вал 2 <input id="rpm2s" class="input" type="range" min="50" max="2000" step="10" value="270" disabled/></label>
-      <button class="btn" id="tick">➕ Додати точку</button>
-      <button class="btn secondary" id="clear">🧹 Очистити</button>
+      <label><input id="emu" type="checkbox"/ aria-label="emu"> Увімкнути емулятор</label>
+      <label style="flex:1">RPM вал 1 <input id="rpm1s" class="input" type="range" min="100" max="2500" step="10" value="540" disabled aria-label="rpm1s"/></label>
+      <label style="flex:1">RPM вал 2 <input id="rpm2s" class="input" type="range" min="50" max="2000" step="10" value="270" disabled aria-label="rpm2s"/></label>
+      <button type="button" class="btn" id="tick">➕ Додати точку</button>
+      <button type="button" class="btn secondary" id="clear">🧹 Очистити</button>
       <span id="stat" class="badge">Статус: —</span>
     </div>
   </div>
@@ -140,9 +140,9 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🧩 Згенерований код (Arduino .ino)</h2>
     <div class="row">
-      <button class="btn good" id="gen">⚙️ Згенерувати прошивку</button>
-      <button class="btn secondary" id="copy">📋 Копіювати</button>
-      <button class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
+      <button type="button" class="btn good" id="gen">⚙️ Згенерувати прошивку</button>
+      <button type="button" class="btn secondary" id="copy">📋 Копіювати</button>
+      <button type="button" class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
     </div>
     <pre class="code" id="code">// Натисни «Згенерувати прошивку» ↑</pre>
   </div>
@@ -150,10 +150,10 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>💾 Протокол і експорт</h2>
     <div class="row">
-      <input id="fio" class="input" placeholder="ПІБ механіка"/>
-      <button class="btn" id="saveTxt">💾 TXT</button>
-      <button class="btn" id="saveCsv">📄 CSV</button>
-      <button class="btn" id="receipt">🖨️ 58 мм чек</button>
+      <input id="fio" class="input" placeholder="ПІБ механіка" aria-label="ПІБ механіка"/>
+      <button type="button" class="btn" id="saveTxt">💾 TXT</button>
+      <button type="button" class="btn" id="saveCsv">📄 CSV</button>
+      <button type="button" class="btn" id="receipt">🖨️ 58 мм чек</button>
     </div>
     <div id="rc" class="receipt" hidden></div>
   </div>

@@ -59,7 +59,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧰⚙️</span>
@@ -77,19 +77,19 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
     <p>Відпрацьовуємо безпечний пуск і налаштування регулятора тиску. Є <b>карта положень кранів</b> із міжзамками безпеки, <b>тренажер обертів</b> (кроки/оберти, % відкриття), 
       <b>живий графік тиску</b> (до/після регулятора), автоматичні <b>KPI</b>: сетпойнт, відхилення, <i>droop</i>, стабільність. Додаємо <b>фото</b>, <b>NFC/ID</b>, <b>підпис</b>, друкуємо <b>чек 58 мм</b>, експортуємо <b>CSV/TXT</b>, генеруємо <b>QR</b>.</p>
     <div class="row">
-      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котельня/квартира"/></label>
+      <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. ..., котельня/квартира" aria-label="м. Тальне, вул. ..., котельня/квартира"/></label>
       <label style="flex:1">Регулятор
-        <select id="regType" class="input">
+        <select id="regType" class="input" aria-label="reg Type">
           <option selected>RG/2M</option><option>Fisher</option><option>Elster</option><option>Інший</option>
         </select>
       </label>
-      <label style="flex:1">DN<input id="dn" class="input" type="number" step="1" value="25"/></label>
-      <label style="flex:1">Сетпойнт P_out, мбар<input id="sp" class="input" type="number" step="0.1" value="20.0"/></label>
-      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П."/></label>
-      <label style="flex:1">Дата<input id="day" class="input" type="date"/></label>
+      <label style="flex:1">DN<input id="dn" class="input" type="number" step="1" value="25" aria-label="dn"/></label>
+      <label style="flex:1">Сетпойнт P_out, мбар<input id="sp" class="input" type="number" step="0.1" value="20.0" aria-label="sp"/></label>
+      <label style="flex:1">Виконавець<input id="tech" class="input" placeholder="Прізвище І.П." aria-label="Прізвище І.П."/></label>
+      <label style="flex:1">Дата<input id="day" class="input" type="date" aria-label="day"/></label>
     </div>
     <div class="row">
-      <button class="btn good" id="mkCase">🧰 Створити кейс</button>
+      <button type="button" class="btn good" id="mkCase">🧰 Створити кейс</button>
       <span class="badge" id="cid">Кейс: —</span>
     </div>
   </div>
@@ -109,15 +109,15 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
           <div class="dial"><div id="hand" class="hand"></div></div>
           <div>
             <div class="row">
-              <button class="btn" id="turnMinus10">⟲ −10°</button>
-              <button class="btn" id="turnMinus">⟲ −1 крок</button>
-              <button class="btn" id="turnPlus">⟳ +1 крок</button>
-              <button class="btn" id="turnPlus10">⟳ +10°</button>
+              <button type="button" class="btn" id="turnMinus10">⟲ −10°</button>
+              <button type="button" class="btn" id="turnMinus">⟲ −1 крок</button>
+              <button type="button" class="btn" id="turnPlus">⟳ +1 крок</button>
+              <button type="button" class="btn" id="turnPlus10">⟳ +10°</button>
             </div>
             <div class="row">
-              <label>Крок, °<input id="stepDeg" class="input" type="number" step="0.1" value="6.0"/></label>
-              <label>Макс. хід, обертів<input id="maxRev" class="input" type="number" step="0.1" value="10.0"/></label>
-              <button class="btn secondary" id="resetDial">🧹 Скинути</button>
+              <label>Крок, °<input id="stepDeg" class="input" type="number" step="0.1" value="6.0" aria-label="step Deg"/></label>
+              <label>Макс. хід, обертів<input id="maxRev" class="input" type="number" step="0.1" value="10.0" aria-label="max Rev"/></label>
+              <button type="button" class="btn secondary" id="resetDial">🧹 Скинути</button>
             </div>
             <div class="kpi" style="margin-top:6px">
               <span class="tag ok">Кроків: <b id="stepsCnt">0</b></span>
@@ -131,20 +131,20 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2 style="margin-top:10px">🛰️ Емулятори тиску та записи</h2>
       <div class="block">
         <div class="row">
-          <label style="flex:1">P_in, мбар<input id="pin" type="range" class="input" min="0" max="100" step="0.5" value="30.0"/></label>
+          <label style="flex:1">P_in, мбар<input id="pin" type="range" class="input" min="0" max="100" step="0.5" value="30.0" aria-label="pin"/></label>
           <span class="badge">Поточний P_in: <b id="pinNum">30.0</b></span>
-          <button class="btn" id="markPin">📍 Точка P_in</button>
+          <button type="button" class="btn" id="markPin">📍 Точка P_in</button>
         </div>
         <div class="row">
-          <label style="flex:1">P_out, мбар<input id="pout" type="range" class="input" min="0" max="60" step="0.1" value="18.5"/></label>
+          <label style="flex:1">P_out, мбар<input id="pout" type="range" class="input" min="0" max="60" step="0.1" value="18.5" aria-label="pout"/></label>
           <span class="badge">Поточний P_out: <b id="poutNum">18.5</b></span>
-          <button class="btn" id="markPout">📍 Точка P_out</button>
-          <button class="btn secondary" id="clearSeries">🧹 Очистити графік</button>
+          <button type="button" class="btn" id="markPout">📍 Точка P_out</button>
+          <button type="button" class="btn secondary" id="clearSeries">🧹 Очистити графік</button>
         </div>
         <div class="row">
-          <label>Поріг стабільності, мбар<input id="stab" type="number" class="input" step="0.1" value="0.5"/></label>
-          <label>Довжина вікна стабільн., с<input id="win" type="number" class="input" step="1" value="15"/></label>
-          <button class="btn secondary" id="applyKPI">⚙️ Застосувати KPI</button>
+          <label>Поріг стабільності, мбар<input id="stab" type="number" class="input" step="0.1" value="0.5" aria-label="stab"/></label>
+          <label>Довжина вікна стабільн., с<input id="win" type="number" class="input" step="1" value="15" aria-label="win"/></label>
+          <button type="button" class="btn secondary" id="applyKPI">⚙️ Застосувати KPI</button>
         </div>
         <div class="kpi" style="margin-top:6px">
           <span class="tag ok">Сетпойнт: <b id="spVal">20.0</b> мбар</span>
@@ -157,17 +157,17 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2 style="margin-top:10px">📈 Графік (P_in / P_out)</h2>
       <div class="canvasWrap"><canvas id="chart" class="chart" width="520" height="240"></canvas></div>
       <div class="row">
-        <button class="btn" id="autoTune">🎛️ Імітувати налаштування (10 c)</button>
+        <button type="button" class="btn" id="autoTune">🎛️ Імітувати налаштування (10 c)</button>
       </div>
 
       <h2 style="margin-top:10px">🎥 Фото (3 шт.)</h2>
       <div class="row">
         <video id="vid" class="photo" autoplay playsinline muted></video>
         <div>
-          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
-          <button class="btn" data-kind="overview">📷 Загальний вигляд</button>
-          <button class="btn" data-kind="nameplate">📷 Табличка регулятора</button>
-          <button class="btn" data-kind="gauge">📷 Манометр</button><br/>
+          <button type="button" class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button type="button" class="btn" data-kind="overview">📷 Загальний вигляд</button>
+          <button type="button" class="btn" data-kind="nameplate">📷 Табличка регулятора</button>
+          <button type="button" class="btn" data-kind="gauge">📷 Манометр</button><br/>
           <small class="muted">Фото зберігаються у «Галереї доказів».</small>
         </div>
       </div>
@@ -177,8 +177,8 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <div class="sigWrap">
         <canvas id="sig" width="520" height="200"></canvas>
         <div class="row" style="margin-top:6px">
-          <button class="btn" id="sigClear">🧹 Очистити</button>
-          <button class="btn" id="sigSave">💾 Зберегти підпис</button>
+          <button type="button" class="btn" id="sigClear">🧹 Очистити</button>
+          <button type="button" class="btn" id="sigSave">💾 Зберегти підпис</button>
           <span class="badge" id="sigStat">Підпису немає</span>
         </div>
       </div>
@@ -186,9 +186,9 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
       <h2 style="margin-top:10px">📶 NFC / ID вузла</h2>
       <div class="block">
         <div class="row">
-          <button class="btn" id="nfcBtn">📶 NFC</button>
-          <input id="asset" class="input" placeholder="ID регулятора/вузла (якщо NFC недоступний)"/>
-          <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
+          <button type="button" class="btn" id="nfcBtn">📶 NFC</button>
+          <input id="asset" class="input" placeholder="ID регулятора/вузла (якщо NFC недоступний)" aria-label="ID регулятора/вузла (якщо NFC недоступний)"/>
+          <button type="button" class="btn secondary" id="saveAsset">💾 Застосувати</button>
           <span class="badge" id="nfcs">Статус NFC: очікується</span>
         </div>
       </div>
@@ -226,10 +226,10 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:10px 0}
 
       <h2 style="margin-top:10px">💾 Експорт / друк</h2>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV</button>
-        <button class="btn" id="saveTxt">💾 TXT</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (Case/Asset)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
@@ -281,7 +281,7 @@ function renderValves(){
   VALVES.forEach(v=>{
     const el=document.createElement('div');
     el.className='valve'; el.dataset.key=v.k; el.dataset.state=v.state;
-    el.innerHTML=`<b>${v.name}</b><span class="badge mono">${v.state==='open'?'OPEN':'CLOSED'}</span><button class="btn secondary">🔁 Перемкнути</button>`;
+    el.innerHTML=`<b>${v.name}</b><span class="badge mono">${v.state==='open'?'OPEN':'CLOSED'}</span><button type="button" class="btn secondary">🔁 Перемкнути</button>`;
     box.appendChild(el);
   });
 }

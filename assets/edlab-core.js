@@ -88,6 +88,26 @@
   // Застосувати одразу (навіть до DOMContentLoaded), щоб зменшити FOUC
   applyTheme(getTheme());
 
+  function ensureSkipLink() {
+    if (!document.getElementById("main-content")) {
+      var main = document.querySelector("main");
+      if (main && !main.id) main.id = "main-content";
+    }
+    var existing = document.querySelector(".skip-link");
+    if (existing) {
+      if (document.body.firstChild !== existing) {
+        document.body.insertBefore(existing, document.body.firstChild);
+      }
+      return;
+    }
+    if (!document.getElementById("main-content")) return;
+    var a = document.createElement("a");
+    a.className = "skip-link";
+    a.href = "#main-content";
+    a.textContent = "Перейти до основного вмісту";
+    document.body.insertBefore(a, document.body.firstChild);
+  }
+
   // --- Header ------------------------------------------------------------
   function buildHeader() {
     var nav = CONFIG.nav.map(function (i) {
@@ -97,14 +117,15 @@
 
     var el = document.createElement("header");
     el.className = "site-header";
+    el.setAttribute("role", "banner");
     el.innerHTML =
       '<div class="site-header__inner">' +
         '<a class="site-header__brand" href="/index.html">' +
-          '<span class="emoji">' + CONFIG.brandEmoji + "</span>" +
+          '<span class="emoji" aria-hidden="true">' + CONFIG.brandEmoji + "</span>" +
           "<b>" + CONFIG.brandName + "</b>" +
           '<span class="badge">' + CONFIG.brandBadge + "</span>" +
         "</a>" +
-        '<nav class="site-header__nav">' + nav + themeButton() + "</nav>" +
+        '<nav class="site-header__nav" aria-label="Основна навігація">' + nav + themeButton() + "</nav>" +
       "</div>";
     return el;
   }
@@ -113,23 +134,24 @@
   function buildFooter() {
     var el = document.createElement("footer");
     el.className = "site-footer";
+    el.setAttribute("role", "contentinfo");
     el.innerHTML =
       '<div class="footer-inner">' +
         '<div class="col brand">' +
-          '<div class="brand-line"><span class="emoji">🌾</span><strong>' + CONFIG.brandName + "</strong></div>" +
+          '<div class="brand-line"><span class="emoji" aria-hidden="true">🌾</span><strong>' + CONFIG.brandName + "</strong></div>" +
           "<p>Інтерактивні лабораторні роботи та цифрові освітні інструменти для коледжів.</p>" +
         "</div>" +
         '<div class="col legal">' +
-          "<h3>Правова інформація</h3>" +
+          '<p class="footer-heading">Правова інформація</p>' +
           "<p>© " + YEAR + " <b>Сергій ПОЛІЩУК</b>. Матеріали захищені авторським правом.</p>" +
           '<ul><li><a href="/legal.html">Умови використання</a></li></ul>' +
         "</div>" +
         '<div class="col links">' +
-          "<h3>Офіційні ресурси</h3>" +
+          '<p class="footer-heading">Офіційні ресурси</p>' +
           "<ul>" +
             '<li><a href="/about.html">Про EDLab</a></li>' +
-            '<li><a href="' + CONFIG.infoSite + '" target="_blank" rel="noopener">Сторінка інформатика</a></li>' +
-            '<li><a href="' + CONFIG.facebook + '" target="_blank" rel="noopener">Facebook</a></li>' +
+            '<li><a href="' + CONFIG.infoSite + '" target="_blank" rel="noopener noreferrer">Сторінка інформатика<span class="sr-only"> (відкривається у новій вкладці)</span></a></li>' +
+            '<li><a href="' + CONFIG.facebook + '" target="_blank" rel="noopener noreferrer">Facebook<span class="sr-only"> (відкривається у новій вкладці)</span></a></li>' +
           "</ul>" +
         "</div>" +
       "</div>" +
@@ -212,8 +234,15 @@
   function mountChrome() {
     var script = currentScript();
     var mode = (script && script.getAttribute("data-chrome")) || "minimal";
-    if (mode === "none") return;
-    if (document.documentElement.classList.contains("embedded")) return;
+    if (mode === "none") {
+      ensureSkipLink();
+      applyTheme(getTheme());
+      return;
+    }
+    if (document.documentElement.classList.contains("embedded")) {
+      applyTheme(getTheme());
+      return;
+    }
 
     var hasHeader = document.querySelector(".site-header");
     var hasFooter = document.querySelector(".site-footer");
@@ -227,6 +256,7 @@
       }
       loadLessonNav();
     }
+    ensureSkipLink();
     applyTheme(getTheme());
   }
 

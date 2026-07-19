@@ -16,6 +16,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Пара 14 (технологи) — Простежуваність & Mock Recall: RM→WIP/FG→Клієнт, звіт/квиток/QR/NFC/CSV</title>
+<meta name="description" content="🧭 Простежуваність & Mock Recall: RM→WIP/FG→Клієнт, звіт/квиток/QR/NFC/CSV">
 <meta name="color-scheme" content="light dark">
 <style>
 :root{
@@ -62,7 +63,7 @@ html.embedded .box{background:#f8fafc;color:#111}
 
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <span class="badge">Пара 14 · аудиторно · технологи переробки</span>
   <h1>🧭 Простежуваність & Mock Recall: RM→WIP/FG→Клієнт, звіт/квиток/QR/NFC/CSV</h1>
 
@@ -81,9 +82,9 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>🥩 Сировина (RM inbound)</h2>
     <div class="row">
-      <button class="btn" onclick="addRM()">➕ Додати RM</button>
-      <button class="btn" onclick="presetRM()">🧪 Приклад RM</button>
-      <button class="btn" onclick="copyCSV('csvRM')">📋 CSV (rm)</button>
+      <button type="button" class="btn" onclick="addRM()">➕ Додати RM</button>
+      <button type="button" class="btn" onclick="presetRM()">🧪 Приклад RM</button>
+      <button type="button" class="btn" onclick="copyCSV('csvRM')">📋 CSV (rm)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblRM">
@@ -111,30 +112,30 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Параметри партії</h3>
         <div class="row">
-          <div style="flex:1"><label>ID партії</label><input id="bId" type="text" value="B-251017-01"></div>
-          <div style="flex:1"><label>Дата</label><input id="bDate" type="date"></div>
+          <div style="flex:1"><label for="bId">ID партії</label><input id="bId" type="text" value="B-251017-01"></div>
+          <div style="flex:1"><label for="bDate">Дата</label><input id="bDate" type="date"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <div style="flex:1"><label>ЛОТ FG</label><input id="fgLot" type="text" value="FG-251017-A"></div>
-          <div style="flex:1"><label>Вихід FG, кг</label><input id="fgKg" type="number" step="0.1" value="380"></div>
+          <div style="flex:1"><label for="fgLot">ЛОТ FG</label><input id="fgLot" type="text" value="FG-251017-A"></div>
+          <div style="flex:1"><label for="fgKg">Вихід FG, кг</label><input id="fgKg" type="number" step="0.1" value="380"></div>
         </div>
       </div>
       <div class="box">
         <h3>Склад партії (RM → кг)</h3>
         <div class="row">
-          <div style="flex:1"><label>RM лот</label><select id="rmSel"></select></div>
-          <div style="flex:1"><label>Кількість, кг</label><input id="rmKg" type="number" step="0.1" value="100"></div>
+          <div style="flex:1"><label for="rmSel">RM лот</label><select id="rmSel"></select></div>
+          <div style="flex:1"><label for="rmKg">Кількість, кг</label><input id="rmKg" type="number" step="0.1" value="100"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="addUse()">➕ Додати у склад</button>
-          <button class="btn" onclick="copyCSV('csvUse')">📋 CSV (batch.RM)</button>
+          <button type="button" class="btn" onclick="addUse()">➕ Додати у склад</button>
+          <button type="button" class="btn" onclick="copyCSV('csvUse')">📋 CSV (batch.RM)</button>
         </div>
       </div>
       <div class="box">
         <h3>Дії</h3>
         <div class="row">
-          <button class="btn" onclick="saveBatch()">💾 Зберегти партію</button>
-          <button class="btn" onclick="presetBatch()">🧪 Приклад партії</button>
+          <button type="button" class="btn" onclick="saveBatch()">💾 Зберегти партію</button>
+          <button type="button" class="btn" onclick="presetBatch()">🧪 Приклад партії</button>
         </div>
         <div id="massOut" class="out" style="margin-top:8px">—</div>
       </div>
@@ -181,13 +182,13 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>🚚 Відвантаження клієнтам</h2>
     <div class="row">
-      <div style="flex:1"><label>Клієнт</label><input id="shClient" type="text" value="ТОВ «Рітейл-Маркет»"></div>
-      <div style="flex:1"><label>FG лот</label><select id="shFg"></select></div>
-      <div style="flex:1"><label>Кількість, кг</label><input id="shKg" type="number" step="0.1" value="120"></div>
+      <div style="flex:1"><label for="shClient">Клієнт</label><input id="shClient" type="text" value="ТОВ «Рітейл-Маркет»"></div>
+      <div style="flex:1"><label for="shFg">FG лот</label><select id="shFg"></select></div>
+      <div style="flex:1"><label for="shKg">Кількість, кг</label><input id="shKg" type="number" step="0.1" value="120"></div>
     </div>
     <div class="row" style="margin-top:6px">
-      <button class="btn" onclick="addShip()">➕ Додати відвантаження</button>
-      <button class="btn" onclick="copyCSV('csvShip')">📋 CSV (ship)</button>
+      <button type="button" class="btn" onclick="addShip()">➕ Додати відвантаження</button>
+      <button type="button" class="btn" onclick="copyCSV('csvShip')">📋 CSV (ship)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblShip">
@@ -211,12 +212,12 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>🚨 Mock Recall (від RM лота)</h2>
     <div class="row">
-      <div style="flex:1"><label>RM лот для відкликання</label><select id="recRM"></select></div>
-      <div style="flex:1"><label>Причина</label><input id="recReason" type="text" value="Підозра на мікробне забруднення"></div>
+      <div style="flex:1"><label for="recRM">RM лот для відкликання</label><select id="recRM"></select></div>
+      <div style="flex:1"><label for="recReason">Причина</label><input id="recReason" type="text" value="Підозра на мікробне забруднення"></div>
     </div>
     <div class="row" style="margin-top:6px">
-      <button class="btn" onclick="runRecall()">🧮 Побудувати зв’язки</button>
-      <button class="btn" onclick="copyCSV('csvRecall')">📋 CSV (recall)</button>
+      <button type="button" class="btn" onclick="runRecall()">🧮 Побудувати зв’язки</button>
+      <button type="button" class="btn" onclick="copyCSV('csvRecall')">📋 CSV (recall)</button>
     </div>
 
     <div class="grid g3" style="margin-top:8px">
@@ -240,8 +241,8 @@ html.embedded .box{background:#f8fafc;color:#111}
   <div class="card">
     <h2>📒 Журнал & Квиток 58 мм / QR / NFC</h2>
     <div class="row">
-      <button class="btn" onclick="addLog()">➕ Додати у журнал</button>
-      <button class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
+      <button type="button" class="btn" onclick="addLog()">➕ Додати у журнал</button>
+      <button type="button" class="btn" onclick="copyCSV('csvLog')">📋 CSV (journal)</button>
     </div>
     <div style="overflow:auto;margin-top:8px">
       <table class="table" id="tblLog">
@@ -265,19 +266,19 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>QR-payload</h3>
         <div class="row">
-          <button class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
-          <button class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildQR()">🧩 Зібрати QR</button>
+          <button type="button" class="btn" onclick="copyEl('qrOut')">📋 Копіювати</button>
         </div>
         <div id="qrOut" class="out">—</div>
 
         <h3 style="margin-top:12px">NFC — “RECALL CARD”</h3>
         <div class="row">
-          <div style="flex:1"><label>Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
-          <div style="flex:1"><label>Відповідальний</label><input id="nfcOper" type="text" value="Студент ТПТ"></div>
+          <div style="flex:1"><label for="nfcPhone">Контакт</label><input id="nfcPhone" type="text" value="+380XXXXXXXXX"></div>
+          <div style="flex:1"><label for="nfcOper">Відповідальний</label><input id="nfcOper" type="text" value="Студент ТПТ"></div>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="btn" onclick="buildNFC()">🧩 Зібрати</button>
-          <button class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
+          <button type="button" class="btn" onclick="buildNFC()">🧩 Зібрати</button>
+          <button type="button" class="btn" onclick="copyEl('nfcOut')">📋 Копіювати</button>
         </div>
         <div id="nfcOut" class="out">—</div>
       </div>
@@ -285,8 +286,8 @@ html.embedded .box{background:#f8fafc;color:#111}
       <div class="box">
         <h3>Квиток 58 мм — “RECALL NOTICE”</h3>
         <div class="row">
-          <button class="btn" onclick="scrollTicket()">🧾 Показати</button>
-          <button class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
+          <button type="button" class="btn" onclick="scrollTicket()">🧾 Показати</button>
+          <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк</button>
         </div>
         <div class="ticket" id="ticket" style="margin-top:8px">
           <h4>RECALL NOTICE</h4>
@@ -349,7 +350,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark"><input type="text" value="${s.supp}"></td>
       <td class="dark"><input type="date" value="${s.exp}"></td>
       <td><input type="number" step="0.1" value="${s.left}"></td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyRM); buildCSV_RM(); refreshSelectors();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyRM); buildCSV_RM(); refreshSelectors();">✖</button></td>
     `;
     bodyRM.appendChild(tr); reindex(bodyRM); buildCSV_RM(); refreshSelectors();
   }
@@ -402,7 +403,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td>${lot}</td>
       <td class="dark">${name}</td>
       <td class="dark">${rnd(kg,2)}</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyUse); buildCSV_Use(); massBalance();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyUse); buildCSV_Use(); massBalance();">✖</button></td>
     `;
     bodyUse.appendChild(tr); reindex(bodyUse); buildCSV_Use(); massBalance();
   }
@@ -449,7 +450,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td>${rnd(kg,2)}</td>
       <td>${uses.map(u=>`${u.lot}:${u.kg}кг`).join('; ')}</td>
       <td>${rnd(mb.loss,2)}%</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyBatch); buildCSV_Batch(); refreshFGSelector();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyBatch); buildCSV_Batch(); refreshFGSelector();">✖</button></td>
     `;
     bodyBatch.appendChild(tr); reindex(bodyBatch); buildCSV_Batch(); refreshFGSelector();
     // очистити склад
@@ -495,7 +496,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark">${fg}</td>
       <td class="dark">${d}</td>
       <td>${rnd(kg,2)}</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyShip); buildCSV_Ship();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyShip); buildCSV_Ship();">✖</button></td>
     `;
     bodyShip.appendChild(tr); reindex(bodyShip); buildCSV_Ship();
   }
@@ -571,7 +572,7 @@ html.embedded .box{background:#f8fafc;color:#111}
       <td class="dark">${fg.length? fg.slice(0,60)+'…' : '—'}</td>
       <td>${cl==='—'?'0':cl.split('\n').length}</td>
       <td>Звіт зібрано</td>
-      <td><button class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
+      <td><button type="button" class="btn" onclick="this.closest('tr').remove(); reindex(bodyLog); buildCSV_Log();">✖</button></td>
     `;
     bodyLog.appendChild(tr); reindex(bodyLog); buildCSV_Log();
   }

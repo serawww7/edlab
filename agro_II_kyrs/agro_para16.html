@@ -43,7 +43,7 @@ label>span.hint{color:var(--muted);font-size:.9rem}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🌱</span>
@@ -107,13 +107,13 @@ label>span.hint{color:var(--muted);font-size:.9rem}
           <input id="emu" type="checkbox"/>
           <label for="emu">Емулятор без Arduino (повзунок нижче)</label>
         </div>
-        <input id="emuSlider" class="input" type="range" min="400" max="3400" value="2100" disabled/>
+        <input id="emuSlider" class="input" type="range" min="400" max="3400" value="2100" disabled aria-label="emu Slider"/>
       </div>
 
       <div class="row" style="margin-top:8px">
-        <button class="btn good" id="gen">⚙️ Згенерувати скетч</button>
-        <button class="btn secondary" id="copy">📋 Копіювати код</button>
-        <button class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
+        <button type="button" class="btn good" id="gen">⚙️ Згенерувати скетч</button>
+        <button type="button" class="btn secondary" id="copy">📋 Копіювати код</button>
+        <button type="button" class="btn secondary" id="dl">⬇️ Завантажити .ino</button>
       </div>
 
       <h3 style="margin-top:12px">📈 Живий графік (емульований або зчитаний вручну)</h3>
@@ -121,8 +121,8 @@ label>span.hint{color:var(--muted);font-size:.9rem}
         <canvas id="chart" width="900" height="260"></canvas>
       </div>
       <div class="row" style="margin-top:8px">
-        <button class="btn" id="addPoint">➕ Додати точку (зчитати ADC/емулятор)</button>
-        <button class="btn secondary" id="clearChart">🧹 Очистити графік</button>
+        <button type="button" class="btn" id="addPoint">➕ Додати точку (зчитати ADC/емулятор)</button>
+        <button type="button" class="btn secondary" id="clearChart">🧹 Очистити графік</button>
         <span class="muted mono" id="lastVal">ADC=— →  — %</span>
       </div>
 
@@ -131,9 +131,9 @@ label>span.hint{color:var(--muted);font-size:.9rem}
 
       <h3 style="margin-top:12px">💾 Збереження протоколу калібрування</h3>
       <div class="row">
-        <input id="fio" class="input" placeholder="ПІБ студента"/>
-        <button class="btn" id="saveTxt">💾 TXT</button>
-        <button class="btn" id="saveCsv">📄 CSV</button>
+        <input id="fio" class="input" placeholder="ПІБ студента" aria-label="ПІБ студента"/>
+        <button type="button" class="btn" id="saveTxt">💾 TXT</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV</button>
       </div>
     </div>
 

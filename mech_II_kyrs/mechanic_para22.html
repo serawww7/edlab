@@ -44,7 +44,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🪛</span>
@@ -63,26 +63,26 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>🎥 Джерело зображення</h2>
       <div class="row">
-        <select id="src" class="input" style="max-width:220px">
+        <select id="src" class="input" style="max-width:220px" aria-label="src">
           <option value="cam" selected>Вебкамера</option>
           <option value="img">Фото (завантажити)</option>
         </select>
-        <select id="camSel" class="input" style="max-width:260px"></select>
-        <select id="res" class="input" style="max-width:160px">
+        <select id="camSel" class="input" style="max-width:260px" aria-label="cam Sel"></select>
+        <select id="res" class="input" style="max-width:160px" aria-label="res">
           <option>640x480</option><option selected>1280x720</option><option>1920x1080</option>
         </select>
-        <input id="file" class="input" type="file" accept="image/*" style="display:none"/>
-        <button class="btn good" id="start">▶️ Старт</button>
-        <button class="btn secondary" id="shot">📸 Знімок</button>
-        <button class="btn secondary" id="stop">⏹️ Стоп</button>
+        <input id="file" class="input" type="file" accept="image/*" style="display:none" aria-label="file"/>
+        <button type="button" class="btn good" id="start">▶️ Старт</button>
+        <button type="button" class="btn secondary" id="shot">📸 Знімок</button>
+        <button type="button" class="btn secondary" id="stop">⏹️ Стоп</button>
         <span id="stat" class="badge">Статус: idle</span>
       </div>
 
       <div class="row" style="margin-top:6px">
-        <label>Порог edge<input id="thrE" class="input" type="range" min="8" max="80" step="1" value="24"/></label>
-        <label>Порог «масло» (V%)<input id="thrV" class="input" type="range" min="30" max="95" step="1" value="70"/></label>
-        <label>Порог насиченості (S%)<input id="thrS" class="input" type="range" min="5" max="60" step="1" value="18"/></label>
-        <label>Товщина лінії вирівн., px<input id="aline" class="input" type="number" min="1" max="8" value="3"/></label>
+        <label>Порог edge<input id="thrE" class="input" type="range" min="8" max="80" step="1" value="24" aria-label="thr E"/></label>
+        <label>Порог «масло» (V%)<input id="thrV" class="input" type="range" min="30" max="95" step="1" value="70" aria-label="thr V"/></label>
+        <label>Порог насиченості (S%)<input id="thrS" class="input" type="range" min="5" max="60" step="1" value="18" aria-label="thr S"/></label>
+        <label>Товщина лінії вирівн., px<input id="aline" class="input" type="number" min="1" max="8" value="3" aria-label="aline"/></label>
       </div>
 
       <div class="canvasWrap" style="margin-top:8px">
@@ -101,10 +101,10 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       </table>
 
       <div class="row" style="margin-top:6px">
-        <button class="btn" id="analyze">🔍 Проаналізувати кадр</button>
-        <button class="btn secondary" id="overlay">🧩 Увімк./вимк. накладення</button>
-        <button class="btn secondary" id="savePng">🖼️ PNG (оригінал+маски)</button>
-        <button class="btn secondary" id="saveCsv">📄 CSV (метрики)</button>
+        <button type="button" class="btn" id="analyze">🔍 Проаналізувати кадр</button>
+        <button type="button" class="btn secondary" id="overlay">🧩 Увімк./вимк. накладення</button>
+        <button type="button" class="btn secondary" id="savePng">🖼️ PNG (оригінал+маски)</button>
+        <button type="button" class="btn secondary" id="saveCsv">📄 CSV (метрики)</button>
       </div>
     </div>
 
@@ -112,25 +112,25 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>✅ Чек-лист дій</h2>
       <div id="checklist" class="note small">
-        <label><input type="checkbox"/> Очистити зону вузла від пилу/масла, зробити повторний кадр.</label><br/>
-        <label><input type="checkbox"/> Перевірити натяг ременя та паралельність шківів (Пара 19).</label><br/>
-        <label><input type="checkbox"/> Оглянути шланги на мікротріщини, «мокрі місця», підтік на з’єднаннях.</label><br/>
-        <label><input type="checkbox"/> Протерти посадки підшипників, перевірити вібрацію/шум (Пара 20).</label><br/>
-        <label><input type="checkbox"/> Усунути підтік (хомут/фітинг/шланг), промити вузол, повторний контроль.</label>
+        <label><input type="checkbox"/ aria-label="Прапорець"> Очистити зону вузла від пилу/масла, зробити повторний кадр.</label><br/>
+        <label><input type="checkbox"/ aria-label="Прапорець"> Перевірити натяг ременя та паралельність шківів (Пара 19).</label><br/>
+        <label><input type="checkbox"/ aria-label="Прапорець"> Оглянути шланги на мікротріщини, «мокрі місця», підтік на з’єднаннях.</label><br/>
+        <label><input type="checkbox"/ aria-label="Прапорець"> Протерти посадки підшипників, перевірити вібрацію/шум (Пара 20).</label><br/>
+        <label><input type="checkbox"/ aria-label="Прапорець"> Усунути підтік (хомут/фітинг/шланг), промити вузол, повторний контроль.</label>
       </div>
 
       <h2 style="margin-top:10px">🧠 Промпт до LLM</h2>
       <div class="row">
-        <button class="btn" id="genUA">🇺🇦 Згенерувати (укр)</button>
-        <button class="btn" id="genEN">🇬🇧 Generate (eng)</button>
-        <button class="btn secondary" id="copyPrompt">📋 Копіювати</button>
+        <button type="button" class="btn" id="genUA">🇺🇦 Згенерувати (укр)</button>
+        <button type="button" class="btn" id="genEN">🇬🇧 Generate (eng)</button>
+        <button type="button" class="btn secondary" id="copyPrompt">📋 Копіювати</button>
       </div>
       <pre id="promptBox" class="code small">// Спершу проаналізуй кадр</pre>
 
       <h2 style="margin-top:10px">📜 Журнал та експорт</h2>
       <div class="row">
-        <button class="btn" id="mark">📌 Позначити подію</button>
-        <select id="label" class="input" style="max-width:240px">
+        <button type="button" class="btn" id="mark">📌 Позначити подію</button>
+        <select id="label" class="input" style="max-width:240px" aria-label="label">
           <option value="ok" selected>ok</option>
           <option value="crack">тріщини</option>
           <option value="oil">масло</option>
@@ -140,9 +140,9 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <pre id="alog" class="code small" style="max-height:180px;overflow:auto">// Поки без записів</pre>
 
       <div class="row">
-        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
-        <button class="btn" id="saveTasks">📝 TXT (завдання студента)</button>
-        <button class="btn" id="receipt">🖨️ 58 мм чек</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button type="button" class="btn" id="saveTasks">📝 TXT (завдання студента)</button>
+        <button type="button" class="btn" id="receipt">🖨️ 58 мм чек</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
     </div>

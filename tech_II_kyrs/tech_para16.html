@@ -44,7 +44,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🥛</span>
@@ -63,31 +63,31 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>🔧 Налаштування процесу</h2>
       <div class="row">
-        <select id="product" class="input" style="max-width:220px">
+        <select id="product" class="input" style="max-width:220px" aria-label="product">
           <option value="milk" selected>Молоко HTST (≈72°C/15 с)</option>
           <option value="batch">Молоко batch (≈63°C/30 хв)</option>
           <option value="egg">Яєчна маса (≈60°C/3,5 хв)</option>
           <option value="juice">Сік (налаштовується)</option>
         </select>
-        <label>Об’єм, л<input id="vol" class="input" type="number" min="10" step="10" value="500"/></label>
-        <label>Темп. старту °C<input id="t0" class="input" type="number" step="1" value="6"/></label>
+        <label>Об’єм, л<input id="vol" class="input" type="number" min="10" step="10" value="500" aria-label="vol"/></label>
+        <label>Темп. старту °C<input id="t0" class="input" type="number" step="1" value="6" aria-label="t0"/></label>
       </div>
       <div class="row">
-        <label>Tref °C<input id="tref" class="input" type="number" step="0.1" value="60"/></label>
-        <label>z °C<input id="z" class="input" type="number" step="0.1" value="7"/></label>
-        <label>Ціль PU<input id="puTarget" class="input" type="number" step="1" value="15"/></label>
-        <label>Δt симуляції, с<input id="dt" class="input" type="number" min="1" step="1" value="1"/></label>
+        <label>Tref °C<input id="tref" class="input" type="number" step="0.1" value="60" aria-label="tref"/></label>
+        <label>z °C<input id="z" class="input" type="number" step="0.1" value="7" aria-label="z"/></label>
+        <label>Ціль PU<input id="puTarget" class="input" type="number" step="1" value="15" aria-label="pu Target"/></label>
+        <label>Δt симуляції, с<input id="dt" class="input" type="number" min="1" step="1" value="1" aria-label="dt"/></label>
       </div>
       <div class="row">
-        <label>Потужність нагріву %<input id="heat" class="input" type="range" min="0" max="100" value="75"/></label>
-        <label>Охолодження %<input id="cool" class="input" type="range" min="0" max="100" value="60"/></label>
-        <label>Утримувати ≥Thold °C<input id="thold" class="input" type="number" step="0.5" value="72"/></label>
-        <label>Тривалість hold, с<input id="holdSec" class="input" type="number" step="1" value="15"/></label>
+        <label>Потужність нагріву %<input id="heat" class="input" type="range" min="0" max="100" value="75" aria-label="heat"/></label>
+        <label>Охолодження %<input id="cool" class="input" type="range" min="0" max="100" value="60" aria-label="cool"/></label>
+        <label>Утримувати ≥Thold °C<input id="thold" class="input" type="number" step="0.5" value="72" aria-label="thold"/></label>
+        <label>Тривалість hold, с<input id="holdSec" class="input" type="number" step="1" value="15" aria-label="hold Sec"/></label>
       </div>
       <div class="row">
-        <button class="btn good" id="start">▶️ Старт симуляції</button>
-        <button class="btn" id="pause">⏸️ Пауза</button>
-        <button class="btn secondary" id="reset">🧹 Скинути</button>
+        <button type="button" class="btn good" id="start">▶️ Старт симуляції</button>
+        <button type="button" class="btn" id="pause">⏸️ Пауза</button>
+        <button type="button" class="btn secondary" id="reset">🧹 Скинути</button>
         <span class="badge" id="status">Статус: idle</span>
       </div>
 
@@ -100,11 +100,11 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h3 style="margin-top:10px">💾 Експорт/друк</h3>
       <div class="row">
-        <input id="lot" class="input" placeholder="Лот/партія (напр. 2025-10-18-01)"/>
-        <button class="btn" id="saveCsv">📄 CSV</button>
-        <button class="btn" id="saveTxt">💾 TXT-звіт</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR</button>
+        <input id="lot" class="input" placeholder="Лот/партія (напр. 2025-10-18-01)" aria-label="Лот/партія (напр. 2025-10-18-01)"/>
+        <button type="button" class="btn" id="saveCsv">📄 CSV</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT-звіт</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR</button>
       </div>
       <div class="receipt" id="rc" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>

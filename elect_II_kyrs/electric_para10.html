@@ -11,6 +11,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Електрики · Пара 10 — Освітлення: люкс-метод, групи, автомати, ΔU, друк 58 мм</title>
+<meta name="description" content="💡 Освітлення: люкс-метод → кількість світильників → групи/автомати → ΔU → 🧾 наклейки 58 мм">
 <meta name="color-scheme" content="light dark" />
 <style>
 :root{
@@ -71,7 +72,7 @@ tbody tr:nth-child(even){background:#0b1324}
 </style>
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Електрики · Пара 10 · аудиторно</span>
     <h1>💡 Освітлення: люкс-метод → кількість світильників → групи/автомати → ΔU → 🧾 наклейки 58 мм</h1>
 
@@ -85,27 +86,27 @@ tbody tr:nth-child(even){background:#0b1324}
       <h2>🏢 Вхідні дані приміщення</h2>
       <div class="grid g3">
         <div>
-          <div class="row"><label class="small" style="min-width:140px">Назва/адреса</label><input id="room" value="Майстерня · 101"></div>
-          <div class="row"><label class="small" style="min-width:140px">Довжина, м</label><input id="len" type="number" step="0.1" value="12"></div>
-          <div class="row"><label class="small" style="min-width:140px">Ширина, м</label><input id="wid" type="number" step="0.1" value="8"></div>
-          <div class="row"><label class="small" style="min-width:140px">Висота, м</label><input id="h" type="number" step="0.1" value="3.2"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="room">Назва/адреса</label><input id="room" value="Майстерня · 101"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="len">Довжина, м</label><input id="len" type="number" step="0.1" value="12"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="wid">Ширина, м</label><input id="wid" type="number" step="0.1" value="8"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="h">Висота, м</label><input id="h" type="number" step="0.1" value="3.2"></div>
         </div>
         <div>
-          <div class="row"><label class="small" style="min-width:140px">Нормований люкс Eн</label><input id="lux" type="number" value="300"></div>
-          <div class="row"><label class="small" style="min-width:140px">Світловий потік Φ, лм/світ.</label><input id="phi" type="number" value="4000"></div>
-          <div class="row"><label class="small" style="min-width:140px">UF (викор.фактор)</label><input id="uf" type="number" step="0.05" value="0.7"></div>
-          <div class="row"><label class="small" style="min-width:140px">MF (коеф.запасу)</label><input id="mf" type="number" step="0.05" value="0.8"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="lux">Нормований люкс Eн</label><input id="lux" type="number" value="300"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="phi">Світловий потік Φ, лм/світ.</label><input id="phi" type="number" value="4000"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="uf">UF (викор.фактор)</label><input id="uf" type="number" step="0.05" value="0.7"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="mf">MF (коеф.запасу)</label><input id="mf" type="number" step="0.05" value="0.8"></div>
         </div>
         <div>
-          <div class="row"><label class="small" style="min-width:140px">P на світильник, Вт</label><input id="pLamp" type="number" value="36"></div>
-          <div class="row"><label class="small" style="min-width:140px">PF (cosφ)</label><input id="pf" type="number" step="0.05" value="0.95"></div>
-          <div class="row"><label class="small" style="min-width:140px">Напруга, В</label><input id="U" type="number" value="230"></div>
-          <div class="row"><label class="small" style="min-width:140px">Відповідальний</label><input id="resp" value="Студент ПІБ / група"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="pLamp">P на світильник, Вт</label><input id="pLamp" type="number" value="36"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="pf">PF (cosφ)</label><input id="pf" type="number" step="0.05" value="0.95"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="U">Напруга, В</label><input id="U" type="number" value="230"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="resp">Відповідальний</label><input id="resp" value="Студент ПІБ / група"></div>
         </div>
       </div>
       <div class="row" style="margin-top:8px">
-        <button class="btn" onclick="calcLumen()">🧩 Розрахунок люменів/кількості</button>
-        <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
+        <button type="button" class="btn" onclick="calcLumen()">🧩 Розрахунок люменів/кількості</button>
+        <button type="button" class="btn" onclick="seedDemo()">🔄 Приклад</button>
       </div>
       <p id="lumenOut" class="small"></p>
     </div>
@@ -115,29 +116,29 @@ tbody tr:nth-child(even){background:#0b1324}
       <div class="grid g3">
         <div>
           <h3>Групування</h3>
-          <div class="row"><label class="small" style="min-width:140px">Світильників всього</label><input id="N" type="number" value="0"></div>
-          <div class="row"><label class="small" style="min-width:140px">Макс. у групі</label><input id="perGroup" type="number" value="8"></div>
-          <div class="row"><label class="small" style="min-width:140px">К-ть груп (авто)</label><input id="groups" type="number" value="0" readonly></div>
-          <div class="row"><button class="btn" onclick="makeGroups()">🧩 Розбити на групи</button></div>
+          <div class="row"><label class="small" style="min-width:140px" for="N">Світильників всього</label><input id="N" type="number" value="0"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="perGroup">Макс. у групі</label><input id="perGroup" type="number" value="8"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="groups">К-ть груп (авто)</label><input id="groups" type="number" value="0" readonly></div>
+          <div class="row"><button type="button" class="btn" onclick="makeGroups()">🧩 Розбити на групи</button></div>
           <p class="small">Рівномірно розподіляємо світильники між групами.</p>
         </div>
         <div>
           <h3>Лінія (1ф, Cu)</h3>
-          <div class="row"><label class="small" style="min-width:140px">Довжина лінії L, м</label><input id="L" type="number" value="35"></div>
-          <div class="row"><label class="small" style="min-width:140px">Секція провідника, мм²</label>
+          <div class="row"><label class="small" style="min-width:140px" for="L">Довжина лінії L, м</label><input id="L" type="number" value="35"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="S">Секція провідника, мм²</label>
             <select id="S"><option>1.5</option><option selected>2.5</option><option>4</option><option>6</option></select></div>
-          <div class="row"><label class="small" style="min-width:140px">Груповий PF</label><input id="pfG" type="number" step="0.05" value="0.95"></div>
-          <div class="row"><label class="small" style="min-width:140px">Допустима ΔU, %</label><input id="dropLimit" type="number" step="0.1" value="3"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="pfG">Груповий PF</label><input id="pfG" type="number" step="0.05" value="0.95"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="dropLimit">Допустима ΔU, %</label><input id="dropLimit" type="number" step="0.1" value="3"></div>
         </div>
         <div>
           <h3>Автомат (MCB)</h3>
-          <div class="row"><label class="small" style="min-width:140px">Крива</label>
+          <div class="row"><label class="small" style="min-width:140px" for="curve">Крива</label>
             <select id="curve"><option>B</option><option selected>C</option><option>D</option></select></div>
-          <div class="row"><label class="small" style="min-width:140px">Стандарти In, А</label>
+          <div class="row"><label class="small" style="min-width:140px" for="standard">Стандарти In, А</label>
             <select id="standard">
               <option>6</option><option selected>10</option><option>13</option><option>16</option><option>20</option>
             </select></div>
-          <div class="row"><button class="btn" onclick="calcLines()">🧮 Обчислити струми/ΔU/MCB</button></div>
+          <div class="row"><button type="button" class="btn" onclick="calcLines()">🧮 Обчислити струми/ΔU/MCB</button></div>
         </div>
       </div>
     </div>
@@ -154,18 +155,18 @@ tbody tr:nth-child(even){background:#0b1324}
       </table>
       <p class="small">Подвійне клацання по клітинці — редагування. Статус: <span class="chip ok">PASS</span> — ΔU ≤ ліміт; <span class="chip bad">FAIL</span> — перевищення.</p>
       <div class="row" style="margin-top:8px">
-        <button class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
-        <input id="file" type="file" accept=".csv,text/csv" class="btn" />
-        <button class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
+        <button type="button" class="btn" onclick="exportCSV()">📤 Експорт CSV</button>
+        <input id="file" type="file" accept=".csv,text/csv" class="btn"  aria-label="file"/>
+        <button type="button" class="btn" onclick="importCSV()">⬆️ Імпорт CSV</button>
       </div>
     </div>
 
     <div class="card printable">
       <h2>🧾 Наклейки 58 мм (групи освітлення)</h2>
       <div class="row">
-        <button class="btn" onclick="buildTickets()">🧩 Зібрати для всіх</button>
-        <button class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
-        <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+        <button type="button" class="btn" onclick="buildTickets()">🧩 Зібрати для всіх</button>
+        <button type="button" class="btn" onclick="window.print()">🖨️ Друк 58 мм</button>
+        <button type="button" class="btn" onclick="downloadTXT()">📥 TXT</button>
       </div>
       <div id="tickets" class="tickets"></div>
     </div>
@@ -173,8 +174,8 @@ tbody tr:nth-child(even){background:#0b1324}
     <div class="card printable">
       <h2>📄 A4-звіт (для друку/PDF)</h2>
       <div class="row">
-        <button class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
-        <button class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
+        <button type="button" class="btn" onclick="buildReport()">🧩 Згенерувати A4</button>
+        <button type="button" class="btn" onclick="window.print()">🖨️ Друк/PDF</button>
       </div>
       <div id="printArea"></div>
     </div>
@@ -285,8 +286,8 @@ tbody tr:nth-child(even){background:#0b1324}
         <td>${badge}</td>
         <td class="editable" data-k="url" data-id="${g.id}">${esc(g.url||'')}</td>
         <td class="mono">
-          <button class="btn" data-act="label" data-id="${g.id}">Наклейка</button>
-          <button class="btn" data-act="del" data-id="${g.id}">✖</button>
+          <button type="button" class="btn" data-act="label" data-id="${g.id}">Наклейка</button>
+          <button type="button" class="btn" data-act="del" data-id="${g.id}">✖</button>
         </td>`;
       tbody.appendChild(tr);
     });

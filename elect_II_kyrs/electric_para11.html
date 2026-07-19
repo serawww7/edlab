@@ -11,6 +11,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Електрики · Пара 11 — Електробезпека: інструктажі, наряд-допуск, LOTO, 58 мм, A4</title>
+<meta name="description" content="⚡ Електробезпека: інструктажі · наряд-допуск · LOTO · 🧾 етикетки 58 мм · A4-звіти">
 <meta name="color-scheme" content="light dark" />
 <style>
 :root{
@@ -75,7 +76,7 @@ tbody tr:nth-child(even){background:#0b1324}
 
 </head>
 <body>
-  <main class="wrap">
+  <main id="main-content" class="wrap">
     <span class="badge">Електрики · Пара 11 · аудиторно</span>
     <h1>⚡ Електробезпека: інструктажі · наряд-допуск · LOTO · 🧾 етикетки 58 мм · A4-звіти</h1>
 
@@ -83,10 +84,10 @@ tbody tr:nth-child(even){background:#0b1324}
       <h2>🎯 Мета</h2>
       <p>Відпрацювати оформлення інструктажів з ОП, створення наряду-допуску з чек-листами <b>LOTO</b>, генерацію етикеток-допусків 58 мм та A4-звітів, а також експортувати/імпортувати CSV.</p>
       <div class="row">
-        <button class="btn" onclick="seedDemo()">🔄 Приклад</button>
-        <button class="btn" onclick="exportAll()">📤 Експорт CSV (3 файли)</button>
-        <input id="fileInstr" type="file" accept=".csv,text/csv" class="btn"/>
-        <button class="btn" onclick="importInstr()">⬆️ Імпорт CSV (інструктажі)</button>
+        <button type="button" class="btn" onclick="seedDemo()">🔄 Приклад</button>
+        <button type="button" class="btn" onclick="exportAll()">📤 Експорт CSV (3 файли)</button>
+        <input id="fileInstr" type="file" accept=".csv,text/csv" class="btn" aria-label="file Instr"/>
+        <button type="button" class="btn" onclick="importInstr()">⬆️ Імпорт CSV (інструктажі)</button>
       </div>
       <p class="small">CSV (інструктажі): <span class="mono">date,type,student,group,topic,result,notes</span></p>
     </div>
@@ -96,44 +97,44 @@ tbody tr:nth-child(even){background:#0b1324}
       <div class="grid g3">
         <div>
           <h3>Додати запис</h3>
-          <div class="row"><label class="small" style="min-width:140px">Дата</label><input id="iDate" type="date"></div>
-          <div class="row"><label class="small" style="min-width:140px">Тип</label>
+          <div class="row"><label class="small" style="min-width:140px" for="iDate">Дата</label><input id="iDate" type="date"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="iType">Тип</label>
             <select id="iType"><option>Первинний</option><option selected>Повторний</option><option>Цільовий</option><option>Позаплановий</option></select>
           </div>
-          <div class="row"><label class="small" style="min-width:140px">Студент</label><input id="iStudent" placeholder="Прізвище І.П."></div>
-          <div class="row"><label class="small" style="min-width:140px">Група</label><input id="iGroup" placeholder="Е-21"></div>
-          <div class="row"><label class="small" style="min-width:140px">Тема</label><input id="iTopic" value="Роботи в електроустановках до 1000В"></div>
-          <div class="row"><label class="small" style="min-width:140px">Результат</label>
+          <div class="row"><label class="small" style="min-width:140px" for="iStudent">Студент</label><input id="iStudent" placeholder="Прізвище І.П."></div>
+          <div class="row"><label class="small" style="min-width:140px" for="iGroup">Група</label><input id="iGroup" placeholder="Е-21"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="iTopic">Тема</label><input id="iTopic" value="Роботи в електроустановках до 1000В"></div>
+          <div class="row"><label class="small" style="min-width:140px" for="iResult">Результат</label>
             <select id="iResult"><option class="ok">PASS</option><option class="bad">FAIL</option></select>
           </div>
-          <div class="row"><label class="small" style="min-width:140px">Нотатка</label><input id="iNote" placeholder="Завдання на повторне ознайомлення (якщо FAIL)"></div>
-          <div class="row"><button class="btn" onclick="addInstr()">➕ Додати</button></div>
+          <div class="row"><label class="small" style="min-width:140px" for="iNote">Нотатка</label><input id="iNote" placeholder="Завдання на повторне ознайомлення (якщо FAIL)"></div>
+          <div class="row"><button type="button" class="btn" onclick="addInstr()">➕ Додати</button></div>
         </div>
 
         <div>
           <h3>Фільтр/службове</h3>
           <div class="row">
-            <select id="iFilter">
+            <select id="iFilter" aria-label="i Filter">
               <option selected>Всі</option><option>Лише PASS</option><option>Лише FAIL</option><option>Первинний</option><option>Повторний</option><option>Цільовий</option><option>Позаплановий</option>
             </select>
-            <button class="btn" onclick="renderInstr()">🔎 Фільтр</button>
+            <button type="button" class="btn" onclick="renderInstr()">🔎 Фільтр</button>
           </div>
           <div class="row" style="margin-top:8px">
-            <button class="btn" onclick="clearInstr()">🧹 Очистити</button>
-            <button class="btn" onclick="buildA4Instr()">📄 A4-відомість</button>
+            <button type="button" class="btn" onclick="clearInstr()">🧹 Очистити</button>
+            <button type="button" class="btn" onclick="buildA4Instr()">📄 A4-відомість</button>
           </div>
           <p class="small">Відомість містить підсумки PASS/FAIL і місце для підписів.</p>
         </div>
 
         <div>
           <h3>Етикетка-допуск 58 мм</h3>
-          <div class="row"><label class="small" style="min-width:140px">Обрана особа</label>
+          <div class="row"><label class="small" style="min-width:140px" for="iSelect">Обрана особа</label>
             <select id="iSelect"></select>
           </div>
           <div class="row">
-            <button class="btn" onclick="buildTicket()">🧾 Зібрати</button>
-            <button class="btn" onclick="printTicketNewTab()">🖨️ Друк 58 мм</button>
-            <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+            <button type="button" class="btn" onclick="buildTicket()">🧾 Зібрати</button>
+            <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк 58 мм</button>
+            <button type="button" class="btn" onclick="downloadTXT()">📥 TXT</button>
           </div>
         </div>
       </div>
@@ -151,20 +152,20 @@ tbody tr:nth-child(even){background:#0b1324}
       <div class="grid g2">
         <div>
           <h3>Загальне</h3>
-          <div class="row"><label class="small" style="min-width:160px">Номер наряду</label><input id="wId" value="ND-001"></div>
-          <div class="row"><label class="small" style="min-width:160px">Місце/об’єкт</label><input id="wSite" value="Майстерня · щит ЩО-1"></div>
-          <div class="row"><label class="small" style="min-width:160px">Керівник робіт</label><input id="wLead" value="Викладач / Майстер"></div>
-          <div class="row"><label class="small" style="min-width:160px">Бригада</label><input id="wCrew" value="2 особи (студент1, студент2)"></div>
-          <div class="row"><label class="small" style="min-width:160px">Опис робіт</label><textarea id="wDesc">Заміна MCB у лінії освітлення.</textarea></div>
+          <div class="row"><label class="small" style="min-width:160px" for="wId">Номер наряду</label><input id="wId" value="ND-001"></div>
+          <div class="row"><label class="small" style="min-width:160px" for="wSite">Місце/об’єкт</label><input id="wSite" value="Майстерня · щит ЩО-1"></div>
+          <div class="row"><label class="small" style="min-width:160px" for="wLead">Керівник робіт</label><input id="wLead" value="Викладач / Майстер"></div>
+          <div class="row"><label class="small" style="min-width:160px" for="wCrew">Бригада</label><input id="wCrew" value="2 особи (студент1, студент2)"></div>
+          <div class="row"><label class="small" style="min-width:160px" for="wDesc">Опис робіт</label><textarea id="wDesc">Заміна MCB у лінії освітлення.</textarea></div>
         </div>
         <div>
           <h3>LOTO / Безпечна підготовка</h3>
-          <div class="row"><label class="small" style="min-width:160px">Вимкнення джерела</label><select id="wIso"><option selected>Виконано</option><option>Н/З</option></select></div>
-          <div class="row"><label class="small" style="min-width:160px">Замок (Lock)</label><select id="wLock"><option selected>Встановлено</option><option>Н/З</option></select></div>
-          <div class="row"><label class="small" style="min-width:160px">Бирка (Tag)</label><select id="wTag"><option selected>Встановлено</option><option>Н/З</option></select></div>
-          <div class="row"><label class="small" style="min-width:160px">Перевірка відсутності напруги</label><select id="wTest"><option selected>Виконано</option><option>Н/З</option></select></div>
-          <div class="row"><label class="small" style="min-width:160px">ЗІЗ (PPE) перевірено</label><select id="wPPE"><option selected>Так</option><option>Ні</option></select></div>
-          <div class="row"><button class="btn" onclick="buildA4Permit()">📄 A4 наряд-допуск</button></div>
+          <div class="row"><label class="small" style="min-width:160px" for="wIso">Вимкнення джерела</label><select id="wIso"><option selected>Виконано</option><option>Н/З</option></select></div>
+          <div class="row"><label class="small" style="min-width:160px" for="wLock">Замок (Lock)</label><select id="wLock"><option selected>Встановлено</option><option>Н/З</option></select></div>
+          <div class="row"><label class="small" style="min-width:160px" for="wTag">Бирка (Tag)</label><select id="wTag"><option selected>Встановлено</option><option>Н/З</option></select></div>
+          <div class="row"><label class="small" style="min-width:160px" for="wTest">Перевірка відсутності напруги</label><select id="wTest"><option selected>Виконано</option><option>Н/З</option></select></div>
+          <div class="row"><label class="small" style="min-width:160px" for="wPPE">ЗІЗ (PPE) перевірено</label><select id="wPPE"><option selected>Так</option><option>Ні</option></select></div>
+          <div class="row"><button type="button" class="btn" onclick="buildA4Permit()">📄 A4 наряд-допуск</button></div>
           <p class="small">Після відновлення — <b>зняти lock/tag</b>, записати час завершення робіт.</p>
         </div>
       </div>
@@ -186,17 +187,17 @@ tbody tr:nth-child(even){background:#0b1324}
         </div>
       </div>
       <div class="row">
-        <button class="btn" onclick="printTicketNewTab()">🖨️ Друк 58 мм</button>
-        <button class="btn" onclick="downloadTXT()">📥 TXT</button>
+        <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк 58 мм</button>
+        <button type="button" class="btn" onclick="downloadTXT()">📥 TXT</button>
       </div>
     </div>
 
     <div class="card printable">
       <h2>📄 A4-документи</h2>
       <div class="row">
-        <button class="btn" onclick="buildA4Instr()">🧩 Відомість інструктажу (A4)</button>
-        <button class="btn" onclick="buildA4Permit()">🧩 Наряд-допуск (A4)</button>
-        <button class="btn" onclick="printTicketNewTab()">🖨️ Друк/PDF</button>
+        <button type="button" class="btn" onclick="buildA4Instr()">🧩 Відомість інструктажу (A4)</button>
+        <button type="button" class="btn" onclick="buildA4Permit()">🧩 Наряд-допуск (A4)</button>
+        <button type="button" class="btn" onclick="printTicketNewTab()">🖨️ Друк/PDF</button>
       </div>
       <div id="printArea"></div>
     </div>
@@ -250,7 +251,7 @@ tbody tr:nth-child(even){background:#0b1324}
         <td class="editable" data-k="topic" data-id="${r.id}">${esc(r.topic)}</td>
         <td>${badge}</td>
         <td class="editable" data-k="notes" data-id="${r.id}">${esc(r.notes||'')}</td>
-        <td class="mono"><button class="btn" data-act="label" data-id="${r.id}">Етикетка</button> <button class="btn" data-act="del" data-id="${r.id}">✖</button></td>`;
+        <td class="mono"><button type="button" class="btn" data-act="label" data-id="${r.id}">Етикетка</button> <button type="button" class="btn" data-act="del" data-id="${r.id}">✖</button></td>`;
       iBody.appendChild(tr);
     });
   }

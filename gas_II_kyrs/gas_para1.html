@@ -47,7 +47,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🛠️</span>
@@ -74,9 +74,9 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>🧾 Міні-наряд</h2>
       <div class="row">
-        <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. Шевченка, 10, кв. 12"/></label>
+        <label style="flex:1">Адреса/об’єкт<input id="addr" class="input" placeholder="м. Тальне, вул. Шевченка, 10, кв. 12" aria-label="м. Тальне, вул. Шевченка, 10, кв. 12"/></label>
         <label style="flex:1">Тип робіт
-          <select id="job" class="input">
+          <select id="job" class="input" aria-label="job">
             <option value="Огляд лічильника">Огляд лічильника</option>
             <option value="Усунення витоку">Усунення витоку</option>
             <option value="Заміна крана/шланга">Заміна крана/шланга</option>
@@ -84,18 +84,18 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
             <option value="Пуск газу після сервісу">Пуск газу після сервісу</option>
           </select>
         </label>
-        <label style="flex:1">Контакт абонента<input id="phone" class="input" placeholder="+380680094244"/></label>
+        <label style="flex:1">Контакт абонента<input id="phone" class="input" placeholder="+380680094244" aria-label="+380680094244"/></label>
       </div>
       <div class="row">
-        <button class="btn good" id="mkOrder">🧰 Створити наряд</button>
+        <button type="button" class="btn good" id="mkOrder">🧰 Створити наряд</button>
         <span class="badge" id="oid">Наряд: —</span>
       </div>
 
       <h2 style="margin-top:10px">📍 Ідентифікація об’єкта (NFC/код)</h2>
       <div class="row">
-        <button class="btn" id="nfcBtn">📶 Сканувати NFC</button>
-        <input id="asset" class="input" placeholder="Введи код/ID об’єкта, якщо NFC недоступний"/>
-        <button class="btn secondary" id="saveAsset">💾 Застосувати</button>
+        <button type="button" class="btn" id="nfcBtn">📶 Сканувати NFC</button>
+        <input id="asset" class="input" placeholder="Введи код/ID об’єкта, якщо NFC недоступний" aria-label="Введи код/ID об’єкта, якщо NFC недоступний"/>
+        <button type="button" class="btn secondary" id="saveAsset">💾 Застосувати</button>
         <span class="badge" id="nfcs">Статус: очікується</span>
       </div>
 
@@ -103,9 +103,9 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       <div class="row">
         <video id="vid" class="photo" autoplay playsinline muted></video>
         <div>
-          <button class="btn" id="camOn">🎥 Увімкнути камеру</button>
-          <button class="btn" id="shotBefore">📷 Фото «до»</button>
-          <button class="btn" id="shotAfter">📷 Фото «після»</button><br/>
+          <button type="button" class="btn" id="camOn">🎥 Увімкнути камеру</button>
+          <button type="button" class="btn" id="shotBefore">📷 Фото «до»</button>
+          <button type="button" class="btn" id="shotAfter">📷 Фото «після»</button><br/>
           <small class="muted">Камера працює локально в браузері; фото збережуться у «Галереї доказів».</small>
         </div>
       </div>
@@ -113,27 +113,27 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 
       <h2 style="margin-top:10px">🎙️ Голосова нотатка</h2>
       <div class="row">
-        <button class="btn" id="recStart">⏺️ Запис</button>
-        <button class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
+        <button type="button" class="btn" id="recStart">⏺️ Запис</button>
+        <button type="button" class="btn secondary" id="recStop" disabled>⏹️ Стоп</button>
         <span class="badge" id="rstat">Немає запису</span>
       </div>
       <audio id="player" controls style="margin-top:8px;max-width:100%"></audio>
 
       <h2 style="margin-top:10px">🧪 «Датчик тиску» (емулятор)</h2>
       <div class="row">
-        <input type="range" id="pVal" min="0" max="6" step="0.1" value="2.5" style="width:260px"/>
+        <input type="range" id="pVal" min="0" max="6" step="0.1" value="2.5" style="width:260px" aria-label="p Val"/>
         <span class="badge">Тиск: <b id="pNum">2.5</b> кПа</span>
-        <button class="btn" id="pMark">📍 Позначити точку</button>
-        <button class="btn secondary" id="pClear">🧹 Очистити графік</button>
+        <button type="button" class="btn" id="pMark">📍 Позначити точку</button>
+        <button type="button" class="btn secondary" id="pClear">🧹 Очистити графік</button>
       </div>
       <div class="canvasWrap"><canvas id="pChart" class="chart" width="520" height="220"></canvas></div>
 
       <h2 style="margin-top:10px">💾 Експорт / друк</h2>
       <div class="row">
-        <button class="btn" id="saveCsv">📄 CSV (журнал)</button>
-        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
-        <button class="btn" id="print58">🖨️ Чек 58 мм</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (посилання/ID)</button>
+        <button type="button" class="btn" id="saveCsv">📄 CSV (журнал)</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button type="button" class="btn" id="print58">🖨️ Чек 58 мм</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (посилання/ID)</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>

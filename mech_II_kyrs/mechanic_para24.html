@@ -44,7 +44,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧠</span>
@@ -63,26 +63,26 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>🎥 Джерело зображення</h2>
       <div class="row">
-        <select id="src" class="input" style="max-width:220px">
+        <select id="src" class="input" style="max-width:220px" aria-label="src">
           <option value="cam" selected>Вебкамера</option>
           <option value="img">Фото (завантажити)</option>
         </select>
-        <select id="camSel" class="input" style="max-width:260px"></select>
-        <select id="res" class="input" style="max-width:160px">
+        <select id="camSel" class="input" style="max-width:260px" aria-label="cam Sel"></select>
+        <select id="res" class="input" style="max-width:160px" aria-label="res">
           <option>640x480</option><option selected>1280x720</option><option>1920x1080</option>
         </select>
-        <input id="file" class="input" type="file" accept="image/*" style="display:none"/>
-        <button class="btn good" id="start">▶️ Старт</button>
-        <button class="btn secondary" id="shot">📸 Знімок</button>
-        <button class="btn secondary" id="stop">⏹️ Стоп</button>
+        <input id="file" class="input" type="file" accept="image/*" style="display:none" aria-label="file"/>
+        <button type="button" class="btn good" id="start">▶️ Старт</button>
+        <button type="button" class="btn secondary" id="shot">📸 Знімок</button>
+        <button type="button" class="btn secondary" id="stop">⏹️ Стоп</button>
         <span id="stat" class="badge">Статус: idle</span>
       </div>
 
       <div class="row" style="margin-top:6px">
-        <label>Heatmap<span class="mono"> α</span><input id="alpha" class="input" type="range" min="0" max="1" step="0.05" value="0.6"/></label>
-        <label>Edge thr<input id="thrE" class="input" type="range" min="8" max="80" step="1" value="26"/></label>
-        <label>Shiny V%<input id="thrV" class="input" type="range" min="40" max="95" step="1" value="75"/></label>
-        <label>Low-Sat S%<input id="thrS" class="input" type="range" min="5" max="60" step="1" value="18"/></label>
+        <label>Heatmap<span class="mono"> α</span><input id="alpha" class="input" type="range" min="0" max="1" step="0.05" value="0.6" aria-label="alpha"/></label>
+        <label>Edge thr<input id="thrE" class="input" type="range" min="8" max="80" step="1" value="26" aria-label="thr E"/></label>
+        <label>Shiny V%<input id="thrV" class="input" type="range" min="40" max="95" step="1" value="75" aria-label="thr V"/></label>
+        <label>Low-Sat S%<input id="thrS" class="input" type="range" min="5" max="60" step="1" value="18" aria-label="thr S"/></label>
       </div>
 
       <div class="canvasWrap" style="margin-top:8px">
@@ -103,10 +103,10 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       </table>
 
       <div class="row" style="margin-top:6px">
-        <button class="btn" id="analyze">🔍 Проаналізувати ROI</button>
-        <button class="btn secondary" id="overlay">🧩 Heatmap on/off</button>
-        <button class="btn secondary" id="savePng">🖼️ PNG (кадр+heatmap)</button>
-        <button class="btn secondary" id="saveCsv">📄 CSV (метрики+клас)</button>
+        <button type="button" class="btn" id="analyze">🔍 Проаналізувати ROI</button>
+        <button type="button" class="btn secondary" id="overlay">🧩 Heatmap on/off</button>
+        <button type="button" class="btn secondary" id="savePng">🖼️ PNG (кадр+heatmap)</button>
+        <button type="button" class="btn secondary" id="saveCsv">📄 CSV (метрики+клас)</button>
       </div>
     </div>
 
@@ -114,7 +114,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>🧠 Навчання на своїх прикладах (k-NN)</h2>
       <div class="row">
-        <select id="label" class="input" style="max-width:200px">
+        <select id="label" class="input" style="max-width:200px" aria-label="label">
           <option value="oil">oil</option>
           <option value="rust">rust</option>
           <option value="crack">crack</option>
@@ -122,36 +122,36 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
           <option value="misalign">misalign</option>
           <option value="loose">loose</option>
         </select>
-        <button class="btn" id="addShot">➕ Додати приклад з поточного ROI</button>
-        <button class="btn secondary" id="exportShots">💾 Експорт JSON</button>
-        <button class="btn secondary" id="importShots">📥 Імпорт JSON</button>
+        <button type="button" class="btn" id="addShot">➕ Додати приклад з поточного ROI</button>
+        <button type="button" class="btn secondary" id="exportShots">💾 Експорт JSON</button>
+        <button type="button" class="btn secondary" id="importShots">📥 Імпорт JSON</button>
       </div>
       <pre id="shotsBox" class="code small" style="max-height:160px;overflow:auto">// Поки без прикладів (додай 3–5 на кожен клас)</pre>
 
       <h2 style="margin-top:10px">📋 ISO-чек-лист огляду вузла</h2>
       <div id="checklist" class="note small">
-        <label><input type="checkbox"/> Очистити вузол (безпека: LOTO, ЗІЗ), повторити фото.</label><br/>
-        <label><input type="checkbox"/> Перевірити витоки/масло навколо прокладок/швів (ISO 4406 контамін.).</label><br/>
-        <label><input type="checkbox"/> Оцінити корозію (ступінь покриття, лусочки/іржа, підфарбувати/заміна).</label><br/>
-        <label><input type="checkbox"/> Перевірити тріщини/сколи (збільшення, барвник-проникник, NDT за потреби).</label><br/>
-        <label><input type="checkbox"/> Знос/піттінг на зубах/роликах (шорсткість, підвищений люфт).</label><br/>
-        <label><input type="checkbox"/> Перекіс/невирівняння (кут &lt; 2° від контрольної лінії).</label><br/>
-        <label><input type="checkbox"/> Кріплення: момент затягування за мануалом, маркер-фарба.</label>
+        <label><input type="checkbox"/ aria-label="Прапорець"> Очистити вузол (безпека: LOTO, ЗІЗ), повторити фото.</label><br/>
+        <label><input type="checkbox"/ aria-label="Прапорець"> Перевірити витоки/масло навколо прокладок/швів (ISO 4406 контамін.).</label><br/>
+        <label><input type="checkbox"/ aria-label="Прапорець"> Оцінити корозію (ступінь покриття, лусочки/іржа, підфарбувати/заміна).</label><br/>
+        <label><input type="checkbox"/ aria-label="Прапорець"> Перевірити тріщини/сколи (збільшення, барвник-проникник, NDT за потреби).</label><br/>
+        <label><input type="checkbox"/ aria-label="Прапорець"> Знос/піттінг на зубах/роликах (шорсткість, підвищений люфт).</label><br/>
+        <label><input type="checkbox"/ aria-label="Прапорець"> Перекіс/невирівняння (кут &lt; 2° від контрольної лінії).</label><br/>
+        <label><input type="checkbox"/ aria-label="Прапорець"> Кріплення: момент затягування за мануалом, маркер-фарба.</label>
       </div>
 
       <h2 style="margin-top:10px">📜 Журнал та експорт</h2>
       <div class="row">
-        <button class="btn" id="mark">📌 Позначити подію</button>
-        <select id="lab2" class="input" style="max-width:200px">
+        <button type="button" class="btn" id="mark">📌 Позначити подію</button>
+        <select id="lab2" class="input" style="max-width:200px" aria-label="lab2">
           <option>ok</option><option>oil</option><option>rust</option><option>crack</option><option>wear</option><option>misalign</option><option>loose</option>
         </select>
       </div>
       <pre id="alog" class="code small" style="max-height:160px;overflow:auto">// Поки без записів</pre>
 
       <div class="row">
-        <button class="btn" id="saveTxt">💾 TXT (підсумок)</button>
-        <button class="btn" id="saveTasks">📝 TXT (завдання студента)</button>
-        <button class="btn" id="receipt">🖨️ 58 мм чек</button>
+        <button type="button" class="btn" id="saveTxt">💾 TXT (підсумок)</button>
+        <button type="button" class="btn" id="saveTasks">📝 TXT (завдання студента)</button>
+        <button type="button" class="btn" id="receipt">🖨️ 58 мм чек</button>
       </div>
       <div id="rc" class="receipt" hidden></div>
     </div>

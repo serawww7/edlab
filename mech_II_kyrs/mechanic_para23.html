@@ -41,7 +41,7 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
 </style>
 </head>
 <body>
-<main class="wrap">
+<main id="main-content" class="wrap">
   <header>
     <div class="logo">
       <span class="emoji">🧾</span>
@@ -60,23 +60,23 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
     <div class="card">
       <h2>📝 Ввід тексту акта ТО</h2>
       <div class="row">
-        <input id="title" class="input" placeholder="Назва роботи: ТО редуктора жатки, змащення, заміна ременя" style="flex:2"/>
-        <input id="ord" class="input" placeholder="№ заявки / наряд" style="max-width:180px"/>
-        <input id="date" class="input" type="date" />
+        <input id="title" class="input" placeholder="Назва роботи: ТО редуктора жатки, змащення, заміна ременя" style="flex:2" aria-label="Назва роботи: ТО редуктора жатки, змащення, заміна ременя"/>
+        <input id="ord" class="input" placeholder="№ заявки / наряд" style="max-width:180px" aria-label="№ заявки / наряд"/>
+        <input id="date" class="input" type="date"  aria-label="date"/>
       </div>
-      <textarea id="src" class="input" placeholder="Встав приклад акта ТО. Напр.:&#10;Замінили підшипник 6204 (2 шт), затягнули M10 болти головки 45 Н·м, встановили ремінь A42 (1 шт), підтягнули хомут шланга Ø25, долили масло HLP-46 — 0,7 л. Виконано вирівнювання шківів."></textarea>
+      <textarea id="src" class="input" placeholder="Встав приклад акта ТО. Напр.:&#10;Замінили підшипник 6204 (2 шт), затягнули M10 болти головки 45 Н·м, встановили ремінь A42 (1 шт), підтягнули хомут шланга Ø25, долили масло HLP-46 — 0,7 л. Виконано вирівнювання шківів." aria-label="Встав приклад акта ТО. Напр.:&#10;Замінили підшипник 6204 (2 шт), затягнули M10 болти головки 45 Н·м, встановили ремінь A42 (1 шт), підтягнули хомут шланга Ø25, долили масло HLP-46 — 0,7 л. Виконано вирівнювання шківів."></textarea>
       <div class="row" style="margin-top:6px">
-        <input id="file" class="input" type="file" accept=".txt" style="max-width:320px"/>
-        <button class="btn" id="loadFile">📥 Завантажити TXT</button>
-        <button class="btn good" id="extract">🔍 Витягнути сутності</button>
-        <button class="btn secondary" id="clear">🧹 Очистити</button>
+        <input id="file" class="input" type="file" accept=".txt" style="max-width:320px" aria-label="file"/>
+        <button type="button" class="btn" id="loadFile">📥 Завантажити TXT</button>
+        <button type="button" class="btn good" id="extract">🔍 Витягнути сутності</button>
+        <button type="button" class="btn secondary" id="clear">🧹 Очистити</button>
         <span id="stat" class="badge">Статус: очікування</span>
       </div>
 
       <h3 style="margin-top:10px">🧠 Налаштування правил</h3>
       <div class="row">
-        <textarea id="dict" class="input" style="min-height:90px" placeholder="Словничок деталей (через кому): підшипник, ремінь, шланг, хомут, болт, гайка, радіатор, фільтр, масло, сальник"></textarea>
-        <textarea id="tools" class="input" style="min-height:90px" placeholder="Словничок інструментів/матеріалів: ключ, насадка, вороток, фіксатор різьби, мастило, масло, герметик, гальм.очищувач"></textarea>
+        <textarea id="dict" class="input" style="min-height:90px" placeholder="Словничок деталей (через кому): підшипник, ремінь, шланг, хомут, болт, гайка, радіатор, фільтр, масло, сальник" aria-label="Словничок деталей (через кому): підшипник, ремінь, шланг, хомут, болт, гайка, радіатор, фільтр, масло, сальник"></textarea>
+        <textarea id="tools" class="input" style="min-height:90px" placeholder="Словничок інструментів/матеріалів: ключ, насадка, вороток, фіксатор різьби, мастило, масло, герметик, гальм.очищувач" aria-label="Словничок інструментів/матеріалів: ключ, насадка, вороток, фіксатор різьби, мастило, масло, герметик, гальм.очищувач"></textarea>
       </div>
       <small class="muted">Підтримуються одиниці: шт, л, мл, кг, г, м, мм, Н·м (Nm), lb·ft (конвертується у Н·м).</small>
     </div>
@@ -96,10 +96,10 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
       </table>
 
       <div class="row" style="margin-top:8px">
-        <button class="btn" id="expCsv">📄 CSV (специфікація)</button>
-        <button class="btn" id="expTxt">💾 TXT (звіт)</button>
-        <button class="btn" id="print58">🖨️ 58 мм квиток</button>
-        <button class="btn secondary" id="qrGen">🔗 QR (посилання/номер)</button>
+        <button type="button" class="btn" id="expCsv">📄 CSV (специфікація)</button>
+        <button type="button" class="btn" id="expTxt">💾 TXT (звіт)</button>
+        <button type="button" class="btn" id="print58">🖨️ 58 мм квиток</button>
+        <button type="button" class="btn secondary" id="qrGen">🔗 QR (посилання/номер)</button>
       </div>
       <div class="receipt" id="rc" hidden></div>
       <div class="canvasWrap" style="margin-top:8px"><canvas id="qr" width="220" height="220"></canvas></div>
@@ -110,9 +110,9 @@ kbd{background:#111827;border:1px solid #334155;border-radius:6px;padding:2px 6p
   <div class="card">
     <h2>🧪 Приклади/швидкі вставки</h2>
     <div class="row">
-      <button class="btn" data-snip="a">📌 Приклад A</button>
-      <button class="btn" data-snip="b">📌 Приклад B</button>
-      <button class="btn" data-snip="c">📌 Приклад C</button>
+      <button type="button" class="btn" data-snip="a">📌 Приклад A</button>
+      <button type="button" class="btn" data-snip="b">📌 Приклад B</button>
+      <button type="button" class="btn" data-snip="c">📌 Приклад C</button>
       <span class="badge">Порада: виділяємо моделі типу «6204», «A42», «M10», моменти «45 Н·м», об’єми «0,7 л».</span>
     </div>
   </div>
