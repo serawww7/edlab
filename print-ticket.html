@@ -21,25 +21,27 @@
 </style>
 </head>
 <body>
+<main id="print-root"></main>
 <script>
 (function(){
+  var root = document.getElementById('print-root');
   var params = new URLSearchParams(location.search);
   var id = params.get('id');
-  if(!id){ document.body.innerHTML = '<p>Немає id друку.</p>'; return; }
+  if(!id){ root.innerHTML = '<p>Немає id друку.</p>'; return; }
 
   var key = 'print_job_' + id;
   var raw = localStorage.getItem(key);
-  if(!raw){ document.body.innerHTML = '<p>Дані для друку не знайдено.</p>'; return; }
+  if(!raw){ root.innerHTML = '<p>Дані для друку не знайдено.</p>'; return; }
 
   try{
     var data = JSON.parse(raw);
     var html = (data && data.html) || '';
-    if(!html){ document.body.innerHTML = '<p>Порожній чек.</p>'; return; }
+    if(!html){ root.innerHTML = '<p>Порожній чек.</p>'; return; }
 
     if(html.indexOf('class="ticket"') === -1 && html.indexOf("class='ticket'") === -1){
       html = '<div class="ticket">' + html + '</div>';
     }
-    document.body.innerHTML = html;
+    root.innerHTML = html;
 
     window.addEventListener('load', function(){
       try{ window.focus(); window.print(); }catch(e){}
@@ -49,7 +51,7 @@
       }, 300);
     });
   }catch(e){
-    document.body.innerHTML = '<p>Помилка читання даних для друку.</p>';
+    root.innerHTML = '<p>Помилка читання даних для друку.</p>';
   }
 })();
 </script>

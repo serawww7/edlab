@@ -66,6 +66,7 @@ a:hover{text-decoration:underline}
 
 /* ------------------------------ Layout ---------------------------------- */
 .wrap{max-width:var(--container); margin:0 auto; padding:28px 16px 40px}
+main.wrap{display:block}
 .grid{display:grid; gap:16px}
 .g2{grid-template-columns:1.2fr .8fr}
 .row{display:flex; gap:10px; flex-wrap:wrap}
