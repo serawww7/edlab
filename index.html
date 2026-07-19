@@ -1,35 +1,99 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<link rel="icon" href="assets/favicon.png" type="image/png">
 <meta charset="utf-8"/>
+<script type="application/ld+json" id="edlab-ld-primary">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://edlab.pp.ua/#organization",
+      "name": "EDLab",
+      "url": "https://edlab.pp.ua/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://edlab.pp.ua/assets/icon-512.png"
+      },
+      "founder": {
+        "@type": "Person",
+        "name": "Сергій Поліщук"
+      }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://edlab.pp.ua/#author",
+      "name": "Сергій Поліщук",
+      "url": "https://www.facebook.com/sergiy.polishchuk.ua"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://edlab.pp.ua/#website",
+      "name": "EDLab",
+      "url": "https://edlab.pp.ua/",
+      "description": "EDLab — платформа інтерактивних лабораторних робіт, цифрових журналів, тренажерів та освітніх інструментів для коледжів. Підтримка Moodle, QR-кодів, NFC…",
+      "inLanguage": "uk",
+      "publisher": {
+        "@id": "https://edlab.pp.ua/#organization"
+      },
+      "author": {
+        "@id": "https://edlab.pp.ua/#author"
+      }
+    },
+    {
+      "@type": "EducationalApplication",
+      "@id": "https://edlab.pp.ua/#app",
+      "name": "EDLab",
+      "url": "https://edlab.pp.ua/",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "description": "EDLab — платформа інтерактивних лабораторних робіт, цифрових журналів, тренажерів та освітніх інструментів для коледжів. Підтримка Moodle, QR-кодів, NFC…",
+      "inLanguage": "uk",
+      "image": "https://edlab.pp.ua/preview.jpg",
+      "publisher": {
+        "@id": "https://edlab.pp.ua/#organization"
+      },
+      "author": {
+        "@id": "https://edlab.pp.ua/#author"
+      }
+    }
+  ]
+}</script>
+<meta name="theme-color" content="#f4f7fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
+<meta name="twitter:image" content="https://edlab.pp.ua/preview.jpg">
+<meta name="twitter:description" content="EDLab — платформа інтерактивних лабораторних робіт, цифрових журналів, тренажерів та освітніх інструментів для коледжів. Підтримка Moodle, QR-кодів, NFC…">
+<meta name="twitter:title" content="EDLab – інтерактивні лабораторні роботи та цифрові заняття для коледжів">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:site_name" content="EDLab">
+<meta property="og:locale" content="uk_UA">
+<meta property="og:image:alt" content="EDLab — цифрові лабораторні роботи">
+<link rel="alternate" hreflang="x-default" href="https://edlab.pp.ua/">
+<link rel="alternate" hreflang="uk" href="https://edlab.pp.ua/">
+<meta name="publisher" content="EDLab">
+<meta name="robots" content="index, follow">
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>EDLab – інтерактивні лабораторні роботи та цифрові заняття для коледжів</title>
-<meta name="description"
-content="EDLab — платформа інтерактивних лабораторних робіт, цифрових журналів, тренажерів та освітніх інструментів для коледжів. Підтримка Moodle, QR-кодів, NFC та сучасних цифрових технологій навчання.">
-<meta name="color-scheme" content="light dark"/>
+<meta name="description" content="EDLab — платформа інтерактивних лабораторних робіт, цифрових журналів, тренажерів та освітніх інструментів для коледжів. Підтримка Moodle, QR-кодів, NFC…">
+<meta name="color-scheme" content="light dark">
 <link rel="preload" href="/assets/edlab-core.css" as="style">
 <link rel="stylesheet" href="/assets/edlab-core.css"/>
 <script>
 (function(){try{var t=localStorage.getItem('edlab-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
 </script>
-<link rel="canonical" href="https://edlab.pp.ua/">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="EDLab">
-<meta property="og:description" content="Інтерактивні лабораторні роботи та цифрові освітні інструменти для коледжів.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="EDLab – інтерактивні лабораторні роботи та цифрові заняття для коледжів">
+<meta property="og:description" content="EDLab — платформа інтерактивних лабораторних робіт, цифрових журналів, тренажерів та освітніх інструментів для коледжів. Підтримка Moodle, QR-кодів, NFC…">
 <meta property="og:url" content="https://edlab.pp.ua/">
 <meta property="og:image" content="https://edlab.pp.ua/preview.jpg">
   <meta name="author" content="Сергій Поліщук">
-  <script type="application/ld+json">
-{
-  "@context":"https://schema.org",
-  "@type":"EducationalApplication",
-  "name":"EDLab",
-  "url":"https://edlab.pp.ua/",
-  "applicationCategory":"EducationApplication",
-  "description":"Інтерактивні лабораторні роботи та цифрові освітні інструменти для коледжів."
-}
-</script>
+  
+<link rel="canonical" href="https://edlab.pp.ua/">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/favicon.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="manifest" href="/assets/site.webmanifest">
+<link rel="image_src" href="https://edlab.pp.ua/preview.jpg">
 </head>
 <body>
 <main id="main-content" class="wrap">

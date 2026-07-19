@@ -2,17 +2,66 @@
 <html lang="uk">
 <head>
 <meta charset="utf-8"/>
+<script type="application/ld+json" id="edlab-ld-breadcrumb">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "EDLab",
+      "item": "https://edlab.pp.ua/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Про EDLab — інформатика як практика",
+      "item": "https://edlab.pp.ua/about.html"
+    }
+  ]
+}</script>
+<script type="application/ld+json" id="edlab-ld-primary">{
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "name": "Про EDLab — інформатика як практика",
+  "description": "EDLab — інтерактивні заняття у форматі HTML+JS. Працює в Moodle, Google Classroom, Teams, Notion, WordPress, SharePoint/Confluence, через QR/NFC, у бота…",
+  "url": "https://edlab.pp.ua/about.html",
+  "inLanguage": "uk",
+  "publisher": {
+    "@type": "Organization",
+    "name": "EDLab",
+    "url": "https://edlab.pp.ua/",
+    "logo": "https://edlab.pp.ua/assets/icon-512.png"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Сергій Поліщук"
+  }
+}</script>
+<meta name="theme-color" content="#f4f7fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
+<meta name="twitter:image" content="https://edlab.pp.ua/preview.jpg">
+<meta name="twitter:description" content="EDLab — інтерактивні заняття у форматі HTML+JS. Працює в Moodle, Google Classroom, Teams, Notion, WordPress, SharePoint/Confluence, через QR/NFC, у бота…">
+<meta name="twitter:title" content="Про EDLab — інформатика як практика">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:site_name" content="EDLab">
+<meta property="og:locale" content="uk_UA">
+<meta property="og:image:alt" content="EDLab — цифрові лабораторні роботи">
+<meta property="og:image" content="https://edlab.pp.ua/preview.jpg">
+<link rel="alternate" hreflang="x-default" href="https://edlab.pp.ua/about.html">
+<link rel="alternate" hreflang="uk" href="https://edlab.pp.ua/about.html">
+<meta name="publisher" content="EDLab">
+<meta name="robots" content="index, follow">
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Про EDLab — інформатика як практика</title>
-<meta name="description" content="EDLab — інтерактивні заняття у форматі HTML+JS. Працює в Moodle, Google Classroom, Teams, Notion, WordPress, SharePoint/Confluence, через QR/NFC, у ботах та як PWA."/>
-<meta name="color-scheme" content="light dark"/>
-<meta property="og:title" content="Про EDLab — інформатика як практика"/>
-<meta property="og:description" content="EDLab — універсальні інтерактивні HTML+JS-сторінки. Запускається будь-де: LMS, сайти, боти, QR/NFC, навіть офлайн як PWA."/>
-<meta property="og:type" content="website"/>
-<meta property="og:url" content="https://edlab.pp.ua/about.html"/>
+<meta name="description" content="EDLab — інтерактивні заняття у форматі HTML+JS. Працює в Moodle, Google Classroom, Teams, Notion, WordPress, SharePoint/Confluence, через QR/NFC, у бота…">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Про EDLab — інформатика як практика">
+<meta property="og:description" content="EDLab — інтерактивні заняття у форматі HTML+JS. Працює в Moodle, Google Classroom, Teams, Notion, WordPress, SharePoint/Confluence, через QR/NFC, у бота…">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://edlab.pp.ua/about.html">
   <meta name="author" content="Сергій Поліщук">
-  <link rel="canonical" href="https://edlab.pp.ua/about.html">
-<link rel="preload" href="/assets/edlab-core.css" as="style">
+  <link rel="preload" href="/assets/edlab-core.css" as="style">
 <link rel="stylesheet" href="/assets/edlab-core.css"/>
 <script>
 (function(){try{var t=localStorage.getItem('edlab-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
@@ -36,6 +85,13 @@ hr.sep{border:none;border-top:1px solid #223049;margin:18px 0}
 pre.code{background:#0b1220;border:1px solid #223049;border-radius:12px;padding:12px;overflow:auto}
 pre.code code{font-family:ui-monospace, Menlo, Consolas, monospace;white-space:pre}
 </style>
+<link rel="canonical" href="https://edlab.pp.ua/about.html">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/favicon.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="manifest" href="/assets/site.webmanifest">
+<link rel="image_src" href="https://edlab.pp.ua/preview.jpg">
 </head>
 <body>
 <main id="main-content" class="wrap">
@@ -78,7 +134,7 @@ pre.code code{font-family:ui-monospace, Menlo, Consolas, monospace;white-space:p
 
     <h3>Універсальний iFrame-вставник</h3>
     <pre class="code"><code>&lt;iframe
-  src="https://edlab.pp.ua/gas_para7.html#form"
+  src="https://edlab.pp.ua/gas_II_kyrs/gas_para7.html#form"
   width="100%" height="800"
   style="border:1px solid #223049;border-radius:12px"
   loading="lazy"

@@ -5,6 +5,9 @@
   "description": "Автовиправлення SEO-тегів для EDLab (GitHub Pages)",
   "scripts": {
     "fix-meta": "node scripts/fix-meta.js",
+    "seo-optimize": "node scripts/seo-optimize.js",
+    "audit-links": "node scripts/audit-links.js",
+    "verify-seo": "node scripts/verify-seo.js",
     "generate-sitemap": "node scripts/generate-sitemap.js",
     "apply-core": "node scripts/apply-core.js",
     "dedup-css": "node scripts/dedup-vs-core.js --apply",
