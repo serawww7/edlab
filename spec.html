@@ -7,6 +7,9 @@
 <meta name="color-scheme" content="light dark"/>
 <link rel="preload" href="/assets/edlab-core.css" as="style">
 <link rel="stylesheet" href="/assets/edlab-core.css"/>
+<script>
+(function(){try{var t=localStorage.getItem('edlab-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+</script>
 </head>
 <body>
 <div class="wrap">

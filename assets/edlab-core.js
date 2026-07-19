@@ -1,19 +1,19 @@
 /* ==========================================================================
-   EDLab core — єдиний рантайм: Header, Footer, embedded-режим, утиліти.
+   EDLab core — єдиний рантайм: Header, Footer, тема, навігація пар, утиліти.
    Підключення:
      <link rel="stylesheet" href="/assets/edlab-core.css">
      <script src="/assets/edlab-core.js" data-chrome="full|minimal|none" defer></script>
    data-chrome:
      full    — повний site Header + Footer (оболонкові сторінки).
-     minimal — лише рядок атрибуції «© EDLab» (сторінки-заняття). За замовч.
+     minimal — атрибуція + prev/next (сторінки-заняття). За замовч.
      none    — нічого не рендерити (лише утиліти/embedded).
    ========================================================================== */
 (function () {
   "use strict";
 
   var YEAR = new Date().getFullYear();
+  var THEME_KEY = "edlab-theme";
 
-  // Єдине джерело істини для навігації та контактів.
   var CONFIG = {
     brandEmoji: "🎓",
     brandName: "EDLab",
@@ -46,6 +46,47 @@
     var there = normalize(href);
     return here === there || here === there.replace(/\.html$/, "");
   }
+  function escapeHtml(s) {
+    return String(s || "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  // --- Theme -------------------------------------------------------------
+  function systemTheme() {
+    try {
+      return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    } catch (e) { return "dark"; }
+  }
+  function getTheme() {
+    try {
+      var t = localStorage.getItem(THEME_KEY);
+      if (t === "light" || t === "dark") return t;
+    } catch (e) {}
+    return systemTheme();
+  }
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    var btns = document.querySelectorAll(".theme-toggle");
+    for (var i = 0; i < btns.length; i++) {
+      var isLight = theme === "light";
+      btns[i].textContent = isLight ? "☾" : "☀";
+      btns[i].setAttribute("aria-label", isLight ? "Увімкнути темну тему" : "Увімкнути світлу тему");
+      btns[i].title = isLight ? "Темна тема" : "Світла тема";
+    }
+  }
+  function setTheme(theme) {
+    try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+    applyTheme(theme);
+  }
+  function toggleTheme() {
+    setTheme(getTheme() === "light" ? "dark" : "light");
+  }
+  function themeButton() {
+    return '<button type="button" class="theme-toggle" aria-label="Перемкнути тему">☀</button>';
+  }
+  // Застосувати одразу (навіть до DOMContentLoaded), щоб зменшити FOUC
+  applyTheme(getTheme());
 
   // --- Header ------------------------------------------------------------
   function buildHeader() {
@@ -63,7 +104,7 @@
           "<b>" + CONFIG.brandName + "</b>" +
           '<span class="badge">' + CONFIG.brandBadge + "</span>" +
         "</a>" +
-        '<nav class="site-header__nav">' + nav + "</nav>" +
+        '<nav class="site-header__nav">' + nav + themeButton() + "</nav>" +
       "</div>";
     return el;
   }
@@ -96,12 +137,75 @@
     return el;
   }
 
-  // Мінімальна атрибуція для сторінок-занять.
   function buildAttribution() {
     var el = document.createElement("div");
     el.className = "edlab-attribution";
-    el.innerHTML = "© " + YEAR + ' Сергій Поліщук · <a href="https://edlab.pp.ua">EDLab</a>';
+    el.innerHTML =
+      '<span>© ' + YEAR + ' Сергій Поліщук · <a href="https://edlab.pp.ua">EDLab</a></span>' +
+      ' · ' + themeButton();
     return el;
+  }
+
+  // --- Prev / Next lesson ------------------------------------------------
+  function sectionDirFromPath() {
+    var parts = (location.pathname || "").split("/").filter(Boolean);
+    if (parts.length < 2) return null;
+    var dir = parts[parts.length - 2];
+    var known = {
+      coach: 1, agro_II_kyrs: 1, elect_II_kyrs: 1,
+      mech_II_kyrs: 1, gas_II_kyrs: 1, tech_II_kyrs: 1
+    };
+    return known[dir] ? dir : null;
+  }
+  function shortTitle(item) {
+    var t = (item && (item.title || item.url)) || "";
+    t = t.replace(/\s*[—–-]\s*.*$/, "").trim();
+    if (t.length > 48) t = t.slice(0, 46) + "…";
+    return t || "Пара";
+  }
+  function mountLessonNav(items) {
+    if (!items || !items.length || document.querySelector(".edlab-lesson-nav")) return;
+    var here = location.pathname.replace(/\/+$/, "");
+    var idx = -1;
+    for (var i = 0; i < items.length; i++) {
+      var u = (items[i].url || "").replace(/\/+$/, "");
+      if (u === here || here.endsWith(u) || u.endsWith(here)) { idx = i; break; }
+    }
+    if (idx < 0) return;
+
+    var prev = idx > 0 ? items[idx - 1] : null;
+    var next = idx < items.length - 1 ? items[idx + 1] : null;
+    var nav = document.createElement("nav");
+    nav.className = "edlab-lesson-nav";
+    nav.setAttribute("aria-label", "Навігація між парами");
+
+    var prevHtml = prev
+      ? '<a class="prev" href="' + escapeHtml(prev.url) + '">' +
+          '<span class="lbl">← Попередня</span>' +
+          '<span class="ttl">' + escapeHtml(shortTitle(prev)) + "</span></a>"
+      : '<a class="prev" aria-disabled="true"><span class="lbl">← Попередня</span><span class="ttl">—</span></a>';
+
+    var nextHtml = next
+      ? '<a class="next" href="' + escapeHtml(next.url) + '">' +
+          '<span class="lbl">Наступна →</span>' +
+          '<span class="ttl">' + escapeHtml(shortTitle(next)) + "</span></a>"
+      : '<a class="next" aria-disabled="true"><span class="lbl">Наступна →</span><span class="ttl">—</span></a>';
+
+    nav.innerHTML = prevHtml + nextHtml;
+
+    var attr = document.querySelector(".edlab-attribution");
+    if (attr) document.body.insertBefore(nav, attr);
+    else document.body.appendChild(nav);
+  }
+  function loadLessonNav() {
+    var dir = sectionDirFromPath();
+    if (!dir) return;
+    fetch("/" + dir + "/manifest.json", { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (Array.isArray(data)) mountLessonNav(data);
+      })
+      .catch(function () {});
   }
 
   // --- Chrome mount ------------------------------------------------------
@@ -111,19 +215,25 @@
     if (mode === "none") return;
     if (document.documentElement.classList.contains("embedded")) return;
 
-    // Не дублюємо, якщо на сторінці вже є розмітка (перехідний період).
     var hasHeader = document.querySelector(".site-header");
     var hasFooter = document.querySelector(".site-footer");
 
     if (mode === "full") {
       if (!hasHeader) document.body.insertBefore(buildHeader(), document.body.firstChild);
       if (!hasFooter) document.body.appendChild(buildFooter());
-    } else { // minimal
+    } else {
       if (!document.querySelector(".edlab-attribution")) {
         document.body.appendChild(buildAttribution());
       }
+      loadLessonNav();
     }
+    applyTheme(getTheme());
   }
+
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest && e.target.closest(".theme-toggle");
+    if (btn) { e.preventDefault(); toggleTheme(); }
+  });
 
   // --- Toast -------------------------------------------------------------
   function toast(message) {
@@ -146,7 +256,7 @@
     }, 1800);
   }
 
-  // --- Clipboard (сучасний API + fallback) -------------------------------
+  // --- Clipboard ---------------------------------------------------------
   function copyText(text) {
     if (navigator.clipboard && window.isSecureContext) {
       return navigator.clipboard.writeText(text);
@@ -166,7 +276,7 @@
     });
   }
 
-  // --- Друк через прихований iframe (єдиний механізм) --------------------
+  // --- Друк через прихований iframe --------------------------------------
   function safePrintHtml(html) {
     var frame = document.getElementById("edlab-print-frame");
     if (!frame) {
@@ -207,7 +317,6 @@
     );
   }
 
-  // --- CSV / дата --------------------------------------------------------
   function toCSV(rows) {
     return rows.map(function (r) {
       return r.map(function (c) {
@@ -226,7 +335,6 @@
   }
   function fmtDate(d) { return new Date(d || Date.now()).toISOString().slice(0, 10); }
 
-  // --- Public API --------------------------------------------------------
   window.EDLab = {
     config: CONFIG,
     inIframe: inIframe,
@@ -237,6 +345,9 @@
     toCSV: toCSV,
     download: download,
     fmtDate: fmtDate,
+    getTheme: getTheme,
+    setTheme: setTheme,
+    toggleTheme: toggleTheme,
     buildHeader: buildHeader,
     buildFooter: buildFooter
   };

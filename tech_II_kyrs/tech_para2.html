@@ -627,7 +627,6 @@ ${css}
   window.addEventListener('load',()=>{ try{ window.focus(); window.print(); }catch(e){} });
   window.addEventListener('afterprint',()=>{ try{ if(window.opener) window.opener.postMessage({type:'ticketPrintDone'},'*'); }catch(_){}})
 <\/script>
-<script src="/assets/edlab-core.js" data-chrome="minimal" defer></script>
 </body></html>`;
 
   var blob = new Blob([html], {type:'text/html'});
@@ -638,5 +637,6 @@ ${css}
 }
 </script>
 
+<script src="/assets/edlab-core.js" data-chrome="minimal" defer></script>
 </body>
 </html>

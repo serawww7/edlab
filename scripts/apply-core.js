@@ -38,9 +38,10 @@ function processFile(file) {
     html = `${CSS_TAG}\n` + html;
   }
 
-  // 2) JS перед </body> (або в кінці файлу)
-  if (/<\/body>/i.test(html)) {
-    html = html.replace(/<\/body>/i, `${JS_TAG}\n</body>`);
+  // 2) JS перед ОСТАННІМ </body> документа (не всередині JS-рядків друку чека)
+  const lastBody = html.toLowerCase().lastIndexOf('</body>');
+  if (lastBody >= 0) {
+    html = html.slice(0, lastBody) + JS_TAG + '\n' + html.slice(lastBody);
   } else {
     html = html + `\n${JS_TAG}\n`;
   }

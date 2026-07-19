@@ -452,7 +452,7 @@ body{margin:20px;font-family:ui-monospace;background:white;color:black}
   x.strokeRect(40,300,700,160); x.fillText('Поле для EAN-13 (врахуй quiet zone ≥4 мм)', 40,295);
   x.fillText('Підпис/Лот: ___________________________', 40, 500);
   window.print();
-  <\/script><script src="/assets/edlab-core.js" data-chrome="minimal" defer></script>
+  <\/script>
 </body></html>`;
   w.document.write(html); w.document.close();
 });
@@ -463,5 +463,6 @@ window.addEventListener('load', ()=>{
   drawBarcode();
 });
 </script>
+<script src="/assets/edlab-core.js" data-chrome="minimal" defer></script>
 </body>
 </html>
