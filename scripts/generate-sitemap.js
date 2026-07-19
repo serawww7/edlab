@@ -15,7 +15,7 @@ const SITE = 'https://edlab.pp.ua';
 const ROOT = path.resolve(__dirname, '..');
 
 const IGNORE_DIR = new Set(['node_modules', '.git', '.github', 'tools', 'scripts']);
-const IGNORE_FILE = new Set(['print-ticket.html']);
+const IGNORE_FILE = new Set(['print-ticket.html', '404.html']);
 
 function walkHtml(dir, out = []) {
   for (const name of fs.readdirSync(dir)) {

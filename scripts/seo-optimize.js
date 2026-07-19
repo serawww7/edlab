@@ -187,7 +187,7 @@ function upsertJsonLd(html, id, obj) {
 }
 
 function pageKind(relPosix) {
-  if (relPosix === 'print-ticket.html' || relPosix.startsWith('tools/')) return 'noindex';
+  if (relPosix === 'print-ticket.html' || relPosix === '404.html' || relPosix.startsWith('tools/')) return 'noindex';
   if (relPosix === 'index.html') return 'home';
   if (relPosix === 'about.html') return 'about';
   if (relPosix === 'legal.html') return 'legal';

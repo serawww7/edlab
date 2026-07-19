@@ -464,8 +464,41 @@ html[data-theme="light"] body .table thead th{
 }
 
 /* ==========================================================================
-   Ticket 58 мм (екран) + правила друку — єдине джерело
+   Сторінка 404
    ========================================================================== */
+.error-page{
+  display:flex; align-items:center; justify-content:center;
+  min-height:calc(100vh - 220px); padding-top:48px; padding-bottom:64px;
+}
+.error-page__panel{
+  width:100%; max-width:36rem;
+  padding:28px 24px 32px;
+  border:1px solid var(--surface-line); border-radius:var(--r-lg);
+  background:var(--soft); text-align:center;
+}
+.error-page__code{
+  margin:0; font-size:clamp(4.5rem, 14vw, 7rem); font-weight:700;
+  line-height:1; letter-spacing:.02em; color:var(--accent2);
+  opacity:.85; background:none; -webkit-text-fill-color:unset;
+}
+html body h1.error-page__code,
+html[data-theme="light"] body h1.error-page__code{
+  color:var(--accent2); background:none; -webkit-text-fill-color:unset;
+}
+.error-page__title{
+  margin:8px 0 12px; font-size:clamp(1.25rem, 3vw, 1.5rem); font-weight:600;
+  color:var(--text);
+}
+.error-page__text{
+  margin:0 auto 22px; max-width:40ch;
+  color:var(--muted); font-size:15px; line-height:1.55;
+}
+.error-page__actions{
+  display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
+}
+.error-page__actions .btn{justify-content:center}
+html[data-theme="light"] .error-page__panel{background:var(--card)}
+
 .ticket{
   width:58mm; background:#fff; color:#000; padding:6mm 4mm; border-radius:6px;
   box-shadow:0 0 0 1px #e5e7eb inset; font-family:"Courier New",ui-monospace,monospace;
