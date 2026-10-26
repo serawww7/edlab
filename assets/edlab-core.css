@@ -39,7 +39,9 @@ html[data-theme="dark"]{
 
 html[data-theme="dark"]{ color-scheme:dark; }
 
-/* Світла тема */
+/* Світла тема
+   Специфічність html[data-theme="light"] вища за :root у inline-стилях занять,
+   тож токени нижче перебивають локальні «темні» --bg/--text/--fg тощо. */
 html[data-theme="light"]{
   --bg:#f4f7fb; --bg2:#e8eef6; --card:#ffffff; --soft:#f0f4fa;
   --text:#0f172a; --muted:#475569; --line:#d8e0ea;
@@ -51,7 +53,16 @@ html[data-theme="light"]{
   --header-bg:rgba(255,255,255,.92);
   --shadow-card:0 6px 24px rgba(15,23,42,.08);
   --shadow-pop:0 10px 30px rgba(15,23,42,.12);
-  --ink:#0a1020;
+  /* Аліаси зі сторінок-занять / coach */
+  --fg:var(--text);
+  --border:var(--line);
+  --danger:var(--bad);
+  --ok:var(--good);
+  --panel:var(--card);
+  --brand:var(--accent);
+  --info:var(--accent2);
+  --accent-2:var(--accent2);
+  --ink:var(--soft);
   /* Таблиці занять — світлий фон смуг і .dark (інакше темний текст на --darkcell) */
   --darkcell:#e8eef6; --darkink:#0f172a; --darkink2:#0f172a;
   color-scheme:light;
@@ -384,14 +395,39 @@ html[data-theme="light"] body{
   background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg));
   color:var(--text);
 }
+html[data-theme="light"] body a{color:var(--link)}
 html[data-theme="light"] body .card,
 html[data-theme="light"] body .panel,
-html[data-theme="light"] body .box{
+html[data-theme="light"] body .box,
+html[data-theme="light"] body .level,
+html[data-theme="light"] body .out,
+html[data-theme="light"] body .tile,
+html[data-theme="light"] body .legal-card,
+html[data-theme="light"] body .legal-box,
+html[data-theme="light"] body .donate,
+html[data-theme="light"] body .callout,
+html[data-theme="light"] body .hero{
   background:linear-gradient(180deg,var(--card),var(--soft));
   border-color:var(--line);
   color:var(--text);
   box-shadow:var(--shadow-card);
 }
+/* Локальні sticky-хедери занять (не .site-header) */
+html[data-theme="light"] body header:not(.site-header){
+  background:var(--header-bg);
+  border-bottom-color:var(--line);
+  color:var(--text);
+}
+html[data-theme="light"] body .title,
+html[data-theme="light"] body .q,
+html[data-theme="light"] body .head,
+html[data-theme="light"] body .subtitle{color:inherit}
+html[data-theme="light"] body .subtitle,
+html[data-theme="light"] body .hint,
+html[data-theme="light"] body .muted,
+html[data-theme="light"] body .small,
+html[data-theme="light"] body .timer{color:var(--muted)}
+html[data-theme="light"] body .divider{background:var(--line)}
 html[data-theme="light"] body h1{color:#1d4ed8; background:none; -webkit-text-fill-color:unset}
 html[data-theme="light"] body h2,html[data-theme="light"] body h3{color:var(--text)}
 html[data-theme="light"] body .kpi{border-color:var(--line); color:var(--text)}
@@ -407,11 +443,29 @@ html[data-theme="light"] body textarea{
 html[data-theme="light"] body .kbd,
 html[data-theme="light"] body .chip,
 html[data-theme="light"] body .tag,
-html[data-theme="light"] body .table td .tag{
+html[data-theme="light"] body .table td .tag,
+html[data-theme="light"] body pre.code,
+html[data-theme="light"] body .mono.note{
   background:var(--soft); color:var(--chip-fg); border-color:var(--line);
 }
-html[data-theme="light"] body .badge{
+html[data-theme="light"] body .badge,
+html[data-theme="light"] body .pill,
+html[data-theme="light"] body .badge-pill,
+html[data-theme="light"] body .badge-soft{
   background:var(--soft); color:var(--muted); border-color:var(--line);
+}
+html[data-theme="light"] body .btn{
+  background:var(--surface); color:var(--btn-fg); border-color:var(--surface-line);
+}
+html[data-theme="light"] body .btn:hover{background:var(--surface-hover)}
+html[data-theme="light"] body .good{
+  background:#ecfdf5; border-color:#a7f3d0; color:var(--text);
+}
+html[data-theme="light"] body .badbox{
+  background:#fef2f2; border-color:#fecaca; color:var(--text);
+}
+html[data-theme="light"] body .note{
+  background:var(--soft); color:var(--text); border-color:var(--line);
 }
 html[data-theme="light"] body .table,
 html[data-theme="light"] body .table th,

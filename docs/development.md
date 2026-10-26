@@ -72,3 +72,19 @@ Inline-стилі `legal.html` переведені на CSS-змінні `edlab
 
 ### Modified files
 - `assets/edlab-core.js`
+
+## 2026-10-26 — Світла тема для всіх занять (через core)
+
+### Summary
+Підсилено `edlab-core.css`: аліаси токенів занять (`--fg`, `--border`, `--ok`/`--danger`…) і overrides для типових блоків (card/box/level/header/btn/input/textarea/good/badbox). Локальні HTML не чіпались.
+
+### Аудит стилів
+- `137/138` HTML мають `/assets/edlab-core.css` (без `print-ticket.html`)
+- `132` сторінок мають власний темний `:root` — саме його перебиває light-блок core
+- Скрипт: `scripts/audit-light-theme.js`
+
+### Modified files
+- `assets/edlab-core.css`
+- `README.md`
+- `scripts/audit-light-theme.js` (новий)
+- `docs/development.md`
