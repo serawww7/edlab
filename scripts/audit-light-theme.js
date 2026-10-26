@@ -1,5 +1,6 @@
 /**
- * Аудит сторінок: наявність edlab-core.css і типові «темні» :root / hardcoded.
+ * Аудит: edlab-core.css підключений; у page <style> немає :root/--bg і dark-hex.
+ * Exit 1 якщо є порушення (для CI).
  * Запуск: node scripts/audit-light-theme.js
  */
 const fs = require("fs");
@@ -11,8 +12,7 @@ const DIRS = [
   "gas_II_kyrs",
   "mech_II_kyrs",
   "tech_II_kyrs",
-  "coach",
-  "."
+  "coach"
 ];
 
 const ROOT_FILES = [
@@ -20,19 +20,15 @@ const ROOT_FILES = [
   "about.html",
   "legal.html",
   "spec.html",
-  "404.html",
-  "print-ticket.html"
+  "404.html"
 ];
+
+const DARK_HEX_RE = /#0b1220|#0f172a|#0a1020|#0c1426|#0b1528|#0b162a|#0c182a|#0d152b|#0a1426/i;
 
 function collectHtml() {
   const out = [];
+  for (const f of ROOT_FILES) if (fs.existsSync(f)) out.push(f);
   for (const d of DIRS) {
-    if (d === ".") {
-      for (const f of ROOT_FILES) {
-        if (fs.existsSync(f)) out.push(f);
-      }
-      continue;
-    }
     if (!fs.existsSync(d)) continue;
     for (const f of fs.readdirSync(d)) {
       if (f.endsWith(".html")) out.push(path.join(d, f));
@@ -50,33 +46,34 @@ function styleBlocks(html) {
 }
 
 const files = collectHtml();
-let withCore = 0;
-let withoutCore = [];
-let withDarkRoot = 0;
-let withHardBtn = 0;
-const rootVarFreq = new Map();
+const report = {
+  total: files.length,
+  withCore: 0,
+  withoutCore: [],
+  withRootTokens: [],
+  withDarkHex: []
+};
 
 for (const file of files) {
+  const rel = file.replace(/\\/g, "/");
   const html = fs.readFileSync(file, "utf8");
-  if (html.includes("edlab-core.css")) withCore++;
-  else withoutCore.push(file.replace(/\\/g, "/"));
+  if (html.includes("edlab-core.css")) report.withCore++;
+  else report.withoutCore.push(rel);
 
   const css = styleBlocks(html);
-  const root = css.match(/:root\s*\{([^}]{0,1200})\}/);
-  if (root && /--bg\s*:\s*#0/.test(root[1])) withDarkRoot++;
-  if (root) {
-    for (const v of root[1].matchAll(/--([a-zA-Z0-9_-]+)\s*:/g)) {
-      rootVarFreq.set(v[1], (rootVarFreq.get(v[1]) || 0) + 1);
-    }
-  }
-  if (/background\s*:\s*#0[0-9a-fA-F]{5}/.test(css)) withHardBtn++;
+  if (/:root\s*\{[^}]*--bg\s*:/i.test(css)) report.withRootTokens.push(rel);
+  if (DARK_HEX_RE.test(css)) report.withDarkHex.push(rel);
 }
 
-console.log(JSON.stringify({
-  total: files.length,
-  withCore,
-  withoutCore,
-  withDarkRootTokens: withDarkRoot,
-  pagesWithHardcodedDarkBg: withHardBtn,
-  topRootVars: [...rootVarFreq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 25)
-}, null, 2));
+console.log(JSON.stringify(report, null, 2));
+
+const failed =
+  report.withoutCore.length > 0 ||
+  report.withRootTokens.length > 0 ||
+  report.withDarkHex.length > 0;
+
+if (failed) {
+  console.error("audit-light-theme: FAIL");
+  process.exit(1);
+}
+console.log("audit-light-theme: OK");

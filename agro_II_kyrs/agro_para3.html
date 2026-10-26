@@ -86,55 +86,16 @@
 <meta name="description" content="🗺️ Польові треки: запис GPX на смартфоні → аналіз → план/факт">
 <meta name="color-scheme" content="light dark">
 <style>
-:root{
-    --bg:#0b1220; --card:#0f172a; --muted:#b0bcc9; --text:#e2e8f0;
-    --accent:#22c55e; --accent-2:#60a5fa; --warn:#f59e0b; --good:#10b981; --line:#1f2937;
-  }
-body{
-    margin:0; background:linear-gradient(180deg,var(--bg),var(--bg2) 30%,var(--bg));
-    color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; line-height:1.55
-  }
-.wrap{max-width:980px; margin:0 auto; padding:24px 16px 64px}
-.badge{display:inline-block; padding:6px 10px; border:1px solid var(--line); background:var(--bg); border-radius:999px; font-size:12px; color:var(--muted); letter-spacing:.3px}
-h1{font-size:34px; margin:6px 0 12px; line-height:1.15;
-       color:#93c5fd;}
-h2{font-size:22px; margin:28px 0 12px}
-p{margin:10px 0}
 ul,ol{margin:8px 0 12px 22px}
-.card{background:linear-gradient(180deg,var(--card),var(--bg)); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:0 6px 24px rgba(0,0,0,.25)}
-.grid{display:grid; gap:12px}
-.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media (max-width:900px){.g3{grid-template-columns:1fr}}
-.kpi{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px dashed #263042; border-radius:12px}
 .kpi b{font-size:14px}
 .mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
-.table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px; border:1px solid #223049}
-.table th,.table td{padding:10px 12px; border-bottom:1px solid #1f2937; font-size:14px; vertical-align:top}
-.table thead th{background:var(--soft); color:var(--chip-fg,#c7d2fe); text-align:left}
-.table tbody tr:nth-child(even){background:#0b1324}
-.step{display:flex; gap:12px; align-items:flex-start; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:var(--soft); margin:8px 0}
 .step .n{min-width:30px; height:30px; border-radius:8px; background:var(--surface); display:grid; place-items:center; color:var(--chip-fg,#c7d2fe); font-weight:700}
-.pill{display:inline-block; padding:4px 10px; border:1px solid #223049; border-radius:999px; font-size:12px; color:var(--chip-fg,#c7d2fe); background:var(--surface); margin-right:6px}
-.btn{display:inline-block; padding:10px 14px; border-radius:10px; border:1px solid var(--surface-line); background:var(--surface); color:var(--btn-fg,#e2e8f0); text-decoration:none; cursor:pointer}
-.btn:hover{background:var(--surface-hover)}
-.muted{color:var(--muted)}
-.ok{color:var(--good)}
-.warn{color:var(--warn)}
-.bad{color:#ef4444}
-.field{display:flex; gap:8px; margin:6px 0; align-items:center}
 .field label{min-width:160px; color:var(--muted)}
 .field input, .field select{
-    flex:1; padding:8px 10px; border-radius:10px; border:1px solid #223049; background:var(--surface); color:var(--text)
+    flex:1; padding:8px 10px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--text)
   }
-.out{background:#0b1324; border:1px dashed #263042; padding:10px 12px; border-radius:10px; word-break:break-all}
-.box{border:1px solid #223049; border-radius:12px; padding:12px; background:#0b1324}
-.success{border-color:#1f5135; background:#0f2a1c}
-.danger{border-color:#5b2020; background:#2a0f0f}
-html.embedded .btn{background:#111827; color:#fff; border-color:#111827}
-@media print{
-    @page{ margin:12mm }
-    .no-print{ display:none !important }
-  }
+.success{border-color:var(--line); background:var(--surface)}
 </style>
 <link rel="canonical" href="https://edlab.pp.ua/agro_II_kyrs/agro_para3.html">
 <link rel="icon" href="/favicon.ico" sizes="any">

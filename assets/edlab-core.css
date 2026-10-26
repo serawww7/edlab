@@ -32,7 +32,8 @@ html[data-theme="dark"]{
 
   /* Синоніми токенів, що трапляються в старих inline-стилях занять */
   --fg:var(--text); --border:var(--line); --danger:var(--bad); --ok:var(--good);
-  --accent-2:var(--accent2); --ink:#0a1020;
+  --accent-2:var(--accent2); --ink:var(--soft); --panel:var(--card);
+  --brand:var(--accent); --info:var(--accent2);
   /* Таблиці занять (.dark / even rows) — AA у темній темі */
   --darkcell:#0b1324; --darkink:#e6eef9; --darkink2:#e5e7eb;
 }
@@ -135,8 +136,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .wrap{max-width:var(--container); margin:0 auto; padding:28px 16px 40px}
 main.wrap{display:block}
 .grid{display:grid; gap:16px}
-.g2{grid-template-columns:1.2fr .8fr}
-.row{display:flex; gap:10px; flex-wrap:wrap}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
 @media (max-width:1000px){ .g2{grid-template-columns:1fr} }
 
 h1{
@@ -147,8 +147,7 @@ h1{
 }
 html[data-theme="light"] h1{ color:#1d4ed8; }
 h2{font-size:clamp(20px,3vw,22px); margin:6px 0 8px}
-h3{font-size:18px; margin:20px 0 8px; color:#cbd5e1}
-html[data-theme="light"] h3{ color:#334155; }
+h3{font-size:18px; margin:20px 0 8px; color:var(--text)}
 p{margin:8px 0}
 .muted{color:var(--muted); font-size:14px}
 .small{font-size:12px; color:var(--muted)}
@@ -182,6 +181,11 @@ p{margin:8px 0}
 .btn.ghost:hover{background:var(--surface-hover)}
 .btn.primary{background:linear-gradient(180deg,#16a34a,#15803d); border-color:#15803d; color:#eafff2}
 .btn.primary:hover{filter:brightness(1.06)}
+.btn.good{
+  border-color:color-mix(in srgb, var(--good) 50%, var(--line));
+  background:color-mix(in srgb, var(--good) 18%, var(--surface));
+  color:var(--text);
+}
 
 /* ------------------------------ Cards ----------------------------------- */
 .card{
@@ -199,35 +203,191 @@ input[type="text"],input[type="number"],input[type="date"],input[type="email"],i
   font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace;
   font-size:16px; /* ≥16px — без автозуму iOS, зручніше при 200% */
 }
-textarea{min-height:140px; resize:vertical}
+textarea{min-height:64px; resize:vertical}
 .inline{display:grid; grid-template-columns:1fr 180px; gap:10px}
 @media (max-width:720px){ .inline{grid-template-columns:1fr} }
 
 /* ------------------------------ Tables ---------------------------------- */
 img,video{max-width:100%; height:auto}
 .table-wrap{overflow-x:auto; border-radius:var(--r-md); border:1px solid var(--surface-line)}
-.table{width:100%; border-collapse:separate; border-spacing:0}
-.table th,.table td{
+.table,.tbl{width:100%; border-collapse:separate; border-spacing:0}
+.table th,.table td,.tbl th,.tbl td{
   padding:8px 10px; border-bottom:1px solid var(--line); font-size:14px; vertical-align:top;
   color:var(--text);
 }
-.table thead th{background:var(--soft); color:var(--chip-fg); text-align:left; position:sticky; top:0}
+.tbl th,.tbl td{border:1px solid var(--line); border-bottom:1px solid var(--line)}
+.table thead th,.tbl th{background:var(--soft); color:var(--chip-fg); text-align:left}
+.table thead th{position:sticky; top:0}
 .table tbody tr:nth-child(even){background:var(--soft); color:var(--text)}
 .table td.dark,.table th.dark{background:var(--darkcell)!important; color:var(--darkink2)!important}
 
 /* ------------------------------ Notes / toast --------------------------- */
-.note{background:#0c182a; color:#cde1ff; border:1px dashed #274364; padding:10px 12px; border-radius:var(--r-md); margin-top:8px}
-.note.error,.note.warn{background:#230b0b; color:#ffd4d4; border-color:#8a2b2b}
-.note.ok{background:var(--surface-hover); color:#cde1ff; border-color:var(--surface-line)}
+.note{
+  background:var(--soft); color:var(--text);
+  border:1px dashed var(--surface-line); padding:10px 12px;
+  border-radius:var(--r-md); margin-top:8px;
+}
+.note.error,.note.warn{
+  background:color-mix(in srgb, var(--bad) 14%, var(--card));
+  color:var(--text); border-color:color-mix(in srgb, var(--bad) 45%, var(--line));
+}
+.note.ok{
+  background:color-mix(in srgb, var(--good) 12%, var(--card));
+  color:var(--text); border-color:color-mix(in srgb, var(--good) 40%, var(--line));
+}
 
 #edlab-toast{position:fixed; right:16px; bottom:16px; display:grid; gap:8px; z-index:9999}
 .toast-item{
-  background:rgba(17,24,39,.96); color:var(--text); border:1px solid #334155;
+  background:var(--card); color:var(--text); border:1px solid var(--surface-line);
   padding:10px 12px; border-radius:var(--r-md); box-shadow:var(--shadow-pop);
   font-size:14px; opacity:0; transform:translateY(10px);
   transition:opacity .2s ease, transform .2s ease;
 }
 .toast-item.show{opacity:1; transform:translateY(0)}
+
+/* ==========================================================================
+   Lesson UI — спільні компоненти занять / coach (замість inline <style>)
+   Кольори лише через токени → dark/light без дублів на сторінках.
+   ========================================================================== */
+.card{margin:12px 0}
+.head{max-width:var(--container); margin:0 auto; padding:16px 20px}
+.title{margin:0; font-size:clamp(22px,4vw,28px); letter-spacing:.2px; color:var(--text)}
+.subtitle{margin:6px 0 0; color:var(--muted); font-size:15px}
+.btn-row,.topbar,.toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:8px}
+.hint{color:var(--muted); font-size:14px}
+.list{margin:8px 0 0 18px; padding:0}
+.list li{margin:6px 0}
+.grid.cols-2{gap:12px}
+@media (min-width:840px){ .grid.cols-2{grid-template-columns:1fr 1fr} }
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:900px){ .g2,.g3{grid-template-columns:1fr} }
+.two{display:grid; gap:10px}
+@media (min-width:760px){ .two{grid-template-columns:1fr 1fr} }
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.card > .row{display:grid; gap:12px; align-items:start}
+@media (min-width:840px){ .card > .row{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)} }
+.stack{display:grid; gap:8px}
+.divider{height:1px; background:var(--line); margin:12px 0; border:0}
+.pill{
+  display:inline-block; padding:4px 10px; border:1px solid var(--surface-line);
+  border-radius:var(--r-pill); font-size:12px; color:var(--muted);
+  background:var(--surface); margin-right:6px;
+}
+.kbd{
+  font-family:ui-monospace,Menlo,Consolas,monospace;
+  background:var(--soft); border:1px solid var(--surface-line); color:var(--text);
+  border-radius:var(--r-sm); padding:10px 12px; display:block;
+}
+.script,.out,.callout{
+  background:var(--soft); border:1px dashed var(--surface-line); color:var(--text);
+  border-radius:var(--r-md); padding:12px; margin-top:10px;
+}
+.callout{border-style:solid; border-left-width:3px; border-left-color:var(--accent2)}
+.agenda,.beacons,.rank,.steps{display:grid; gap:8px}
+.agenda .item,.rank .item{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  border:1px solid var(--surface-line); border-radius:var(--r-md);
+  padding:10px 12px; background:var(--surface); color:var(--text);
+}
+.agenda .item span,.rank .item span{font-size:14px; color:var(--muted)}
+.rank .item{cursor:grab}
+.dragging{opacity:.6; outline:1px dashed var(--accent2)}
+.lvl{display:flex; align-items:center; gap:8px}
+.lvl .dot,.timer .dot{
+  width:10px; height:10px; border-radius:50%; background:var(--accent2); flex:0 0 auto;
+}
+.timer .dot{width:8px; height:8px; background:var(--warn)}
+.timer{display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--muted)}
+.time{color:var(--warn); font-weight:600}
+.b-row{display:flex; gap:8px; align-items:center}
+.level,.box,.step,.panel{
+  border:1px solid var(--surface-line); border-radius:var(--r-md);
+  padding:12px; background:var(--soft); color:var(--text);
+}
+.step .n{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:28px; height:28px; border-radius:var(--r-sm);
+  background:var(--surface); color:var(--chip-fg); font-weight:700; margin-right:8px;
+}
+.field{display:flex; gap:8px; margin:6px 0; align-items:center; flex-wrap:wrap}
+.field label{min-width:140px; margin:0; color:var(--muted)}
+.field input,.field select,.field textarea{flex:1; min-width:0}
+.q{font-weight:600; margin:10px 0 6px; color:var(--text)}
+.ok,.good-text{color:var(--good)}
+.warn{color:var(--warn)}
+.bad,.danger{color:var(--bad)}
+.box.good,.good{
+  border-color:color-mix(in srgb, var(--good) 45%, var(--line));
+  background:color-mix(in srgb, var(--good) 12%, var(--card));
+  color:var(--text);
+}
+.badbox,.box.bad{
+  border-color:color-mix(in srgb, var(--bad) 45%, var(--line));
+  background:color-mix(in srgb, var(--bad) 12%, var(--card));
+  color:var(--text);
+}
+.kpi{
+  display:flex; gap:10px; align-items:flex-start;
+  border:1px solid var(--surface-line); border-radius:var(--r-md);
+  padding:12px; background:var(--surface); color:var(--text);
+}
+.logo{display:flex; align-items:center; gap:10px}
+.logo .badge{font-size:.9rem}
+.input,input.input{
+  width:100%; padding:8px 10px; border-radius:var(--r-sm);
+  border:1px solid var(--surface-line); background:var(--surface); color:var(--text);
+}
+.chips{
+  display:flex; flex-wrap:wrap; gap:8px; min-height:60px;
+  border:1px dashed var(--surface-line); border-radius:var(--r-md);
+  padding:10px; background:var(--soft);
+}
+.chip{
+  padding:6px 10px; border:1px solid var(--surface-line); border-radius:var(--r-pill);
+  background:var(--surface); color:var(--text); cursor:grab;
+}
+.drop{min-height:92px}
+.breath{
+  width:180px; height:180px; border:2px solid var(--surface-line); border-radius:50%;
+  display:grid; place-items:center; margin:8px auto;
+}
+.breath .dot{
+  width:30px; height:30px; border-radius:50%; background:var(--accent2); opacity:.9;
+  animation:edlab-breath 8s linear infinite;
+}
+@keyframes edlab-breath{
+  0%{transform:scale(.6)} 50%{transform:scale(1.25)} 100%{transform:scale(.6)}
+}
+.sketch,.imgbox{display:grid; gap:10px}
+canvas{
+  background:var(--soft); border:1px solid var(--surface-line); border-radius:var(--r-md);
+  max-width:100%;
+}
+canvas.chart{display:block; width:100%; height:220px}
+.canvasWrap{overflow:hidden; border-radius:var(--r-md)}
+.receipt{
+  background:var(--soft); border:1px dashed var(--surface-line); border-radius:var(--r-md);
+  padding:10px; font-family:ui-monospace,Menlo,Consolas,monospace; white-space:pre;
+  min-height:140px; color:var(--text);
+}
+details{
+  background:var(--soft); border:1px solid var(--surface-line);
+  border-radius:var(--r-md); padding:10px 12px; color:var(--text);
+}
+summary{cursor:pointer; font-weight:600}
+/* Локальний sticky-хедер заняття (під site-header) */
+body > header:not(.site-header){
+  background:var(--header-bg); border-bottom:1px solid var(--line);
+  position:sticky; top:0; z-index:40; color:var(--text);
+}
+@media print{
+  body > header:not(.site-header),
+  .btn,.btn-row,.toolbar,.topbar,.hint,.badge,.timer,.controls,.no-print{display:none !important}
+  body{background:#fff; color:#000}
+  .card,.level,.box,.script,.agenda .item{border:0; background:#fff; box-shadow:none}
+  textarea,input,select{border:0}
+}
 
 /* ==========================================================================
    Site Header (рендериться edlab-core.js)

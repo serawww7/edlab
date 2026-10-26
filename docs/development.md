@@ -88,3 +88,20 @@ Inline-стилі `legal.html` переведені на CSS-змінні `edlab
 - `README.md`
 - `scripts/audit-light-theme.js` (новий)
 - `docs/development.md`
+
+## 2026-10-26 — Універсальні стилі занять (edlab-core.css)
+
+### Summary
+Стилі занять зведені в `assets/edlab-core.css` (Lesson UI + токени). Локальні темні `:root`/hex прибрані: coach без `<style>`, спецкурси — лише мінімальний layout CSS.
+
+### Modified files
+- `assets/edlab-core.css` — Lesson UI, token aliases, note/toast без dark hex
+- `coach/*.html` (7) — видалено локальні `<style>`
+- `agro|elect|gas|mech|tech_II_kyrs/*.html` (125) — strip :root/дублі/hex
+- `scripts/strip-page-theme-css.js` — міграція
+- `scripts/audit-light-theme.js` — аудит OK
+- `README.md`
+
+### Notes
+- gas: відновлено `.grid{1.2fr 1fr}` у залишковому style (було дропнуто як дубль `.grid`)
+- Унікальний layout (`.receipt`, media queries) лишився в page style, але на токенах

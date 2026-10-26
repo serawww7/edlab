@@ -81,42 +81,29 @@
 <meta name="description" content="Інтерактивна анімаційна схема ГРМ: вузли/ділянки, регулятор тиску, насос, витоки, засувки, попит, графік P/Q, тривоги, журнал, експорт CSV/TXT.">
 <meta name="color-scheme" content="light dark">
 <style>
-:root{--bg:#0b1220;--panel:#0f172a;--muted:#b0bcc9;--text:#e6eef9;--line:#223049;--brand:#38bdf8;--ok:#22c55e;--warn:#fbbf24;--bad:#f87171}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial,sans-serif}
-.wrap{max-width:1300px;margin:0 auto;padding:16px}
+.grid{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}
+
 header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
-.logo{display:flex;align-items:center;gap:10px}
 .logo .emoji{font-size:28px}
 .logo .badge{font-size:.9rem;color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
-.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:14px;margin-top:14px}
-.grid{display:grid;gap:14px;grid-template-columns:1.2fr 1fr}
 @media(max-width:1140px){.grid{grid-template-columns:1fr}}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:#e6eef9}
-.btn{border:1px solid var(--line);background:#0f1f39;color:#e6eef9;padding:8px 12px;border-radius:10px;cursor:pointer}
-.btn.secondary{background:transparent}
-.btn.good{border-color:#204b2a;background:#12341b}
+.input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
 small.mono,.mono{font-family:ui-monospace,monospace}
-h2{margin:.2em 0 .4em}
-.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--text);margin-right:6px;margin-top:6px}
-.muted{color:var(--muted)}
 svg{width:100%;height:auto;display:block;background:var(--bg);border:1px solid var(--line);border-radius:12px}
-.node{stroke:#94a3b8;fill:#0f172a}
-.edge{stroke:#334155;stroke-width:8;stroke-linecap:round;opacity:.9}
-.valve{stroke:#a3a3a3;fill:#0f172a}
-.grp{stroke:#22c55e;fill:#0b1a2f}
-.pump{stroke:#38bdf8;fill:#0b1220}
+.node{stroke:#94a3b8;fill:var(--surface)}
+.edge{stroke:var(--line);stroke-width:8;stroke-linecap:round;opacity:.9}
+.valve{stroke:#a3a3a3;fill:var(--surface)}
+.grp{stroke:#22c55e;fill:var(--surface)}
+.pump{stroke:#38bdf8;fill:var(--surface)}
 label>small{display:block;color:var(--muted);margin-top:-2px}
 canvas.chart{display:block;width:100%;height:240px;background:var(--bg);border:1px solid var(--line);border-radius:12px}
-.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
 .tbl th,.tbl td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
-.tbl th{background:#0b1a2f}
-.kpi{display:flex;gap:8px;flex-wrap:wrap}
+.tbl th{background:var(--surface)}
 .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 10px;color:var(--text)}
 .tag.ok{border-color:#1d3e2a;background:#0f2f1e}
 .tag.warn{border-color:#4a3b13;background:#2b2310}
 .tag.bad{border-color:#5a1f1f;background:#2a1212}
-pre.log{max-height:240px;overflow:auto;background:#0c182a;border-radius:12px;padding:10px}
+pre.log{max-height:240px;overflow:auto;background:var(--surface);border-radius:12px;padding:10px}
 .footer{margin-top:20px;color:var(--muted);font-size:.9rem}
 </style>
 <link rel="canonical" href="https://edlab.pp.ua/gas_II_kyrs/gas_para16.html">
