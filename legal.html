@@ -73,18 +73,38 @@
 
   <style>
     .legal-wrap{max-width:980px;margin:0 auto}
-    .lead{font-size:18px;color:#cbd5e1}
+    .lead{font-size:18px;color:var(--muted)}
     .legal-grid{display:grid;gap:16px;grid-template-columns:1fr}
-    .legal-card{border:1px solid #223049;border-radius:12px;background:#0b1220;padding:16px}
+    .legal-card{
+      border:1px solid var(--surface-line); border-radius:var(--r-md);
+      background:var(--card); padding:16px;
+    }
     .legal-card h2{margin:0 0 8px 0}
-    .badge-pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid #274364;color:#cde1ff;background:#0c182a;font-size:12px}
+    .badge-pill{
+      display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px;
+      border:1px solid var(--surface-line); color:var(--chip-fg); background:var(--surface);
+    }
     .muted small code{font-size:12px}
     .legal-list{margin:8px 0 0 0;padding-left:18px}
     .legal-list li{margin:6px 0}
     .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace}
-    .note{background:#0c182a;color:#cde1ff;border:1px dashed #274364;padding:10px 12px;border-radius:12px;margin-top:8px}
-    .warn{background:#230b0b;color:#ffd4d4;border-color:#8a2b2b}
-    .ok{background:#0f1f39;color:#cde1ff;border-color:#223049}
+    .note{
+      background:var(--soft); color:var(--text);
+      border:1px dashed var(--surface-line);
+      padding:10px 12px; border-radius:var(--r-md); margin-top:8px;
+    }
+    .note.ok{
+      background:#0f1f39; color:#cde1ff; border-color:#223049;
+    }
+    .note.warn{
+      background:#230b0b; color:#ffd4d4; border-color:#8a2b2b;
+    }
+    html[data-theme="light"] .note.ok{
+      background:#ecfdf5; color:#065f46; border-color:#a7f3d0;
+    }
+    html[data-theme="light"] .note.warn{
+      background:#fef2f2; color:#7f1d1d; border-color:#fecaca;
+    }
   </style>
 <link rel="canonical" href="https://edlab.pp.ua/legal.html">
 <link rel="icon" href="/favicon.ico" sizes="any">

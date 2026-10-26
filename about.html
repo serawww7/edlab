@@ -67,23 +67,42 @@
 (function(){try{var t=localStorage.getItem('edlab-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
 </script>
 <style>
-.hero{padding:24px;border:1px solid #223049;background:linear-gradient(180deg,#0f172a,#0b1220);border-radius:16px}
+.hero{
+  padding:24px; border:1px solid var(--surface-line);
+  background:linear-gradient(180deg,var(--card),var(--bg));
+  border-radius:var(--r-lg);
+}
 .hero h1{margin:0 0 6px}
-.kbd{padding:2px 6px;border:1px solid #334155;border-radius:6px;background:#111827;color:#e5e7eb;font-family:ui-monospace, Menlo, Consolas, monospace}
+.kbd{
+  padding:2px 6px; border:1px solid var(--surface-line); border-radius:6px;
+  background:var(--surface); color:var(--text);
+  font-family:ui-monospace, Menlo, Consolas, monospace;
+}
 .card p:last-child{margin-bottom:0}
-.callout{border:1px dashed #2a4465;background:#0c182a;color:#cde1ff;border-radius:12px;padding:12px}
-.badge-soft{display:inline-block;border:1px solid #334155;color:#cbd5e1;padding:2px 8px;border-radius:999px}
-hr.sep{border:none;border-top:1px solid #223049;margin:18px 0}
+.callout{
+  border:1px dashed var(--surface-line); background:var(--soft); color:var(--text);
+  border-radius:var(--r-md); padding:12px;
+}
+.badge-soft{
+  display:inline-block; border:1px solid var(--surface-line); color:var(--muted);
+  padding:2px 8px; border-radius:999px;
+}
+hr.sep{border:none; border-top:1px solid var(--line); margin:18px 0}
 .small{font-size:.92rem}
-.legal-box{border:1px solid #223049;background:#0b1220;border-radius:16px;padding:16px}
+.legal-box,.donate{
+  border:1px solid var(--surface-line); background:var(--soft);
+  border-radius:var(--r-lg); padding:16px;
+}
 .legal-box h3{margin-top:0}
-.donate{border:1px solid #2a4465;background:#0c182a;border-radius:16px;padding:16px}
-.list{margin:8px 0 0 0;padding-left:18px}
+.list{margin:8px 0 0 0; padding-left:18px}
 .list li{margin:6px 0}
-.nav{display:flex;gap:8px;flex-wrap:wrap}
+.nav{display:flex; gap:8px; flex-wrap:wrap}
 .nav a.btn{white-space:nowrap}
-pre.code{background:#0b1220;border:1px solid #223049;border-radius:12px;padding:12px;overflow:auto}
-pre.code code{font-family:ui-monospace, Menlo, Consolas, monospace;white-space:pre}
+pre.code{
+  background:var(--bg); border:1px solid var(--surface-line); color:var(--text);
+  border-radius:var(--r-md); padding:12px; overflow:auto;
+}
+pre.code code{font-family:ui-monospace, Menlo, Consolas, monospace; white-space:pre}
 </style>
 <link rel="canonical" href="https://edlab.pp.ua/about.html">
 <link rel="icon" href="/favicon.ico" sizes="any">

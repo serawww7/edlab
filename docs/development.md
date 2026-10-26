@@ -31,3 +31,44 @@
 - Функціональні `.badge` (статуси NFC, кейсів тощо) не чіпались.
 - HTML-коментарі на кшталт `<!-- ПАРА N (аудиторно) … -->` залишені.
 - gas/coach таких підказок не мали.
+
+## 2026-10-26 — Прибрано рядок `footer-bottom`
+
+### Summary
+Видалено текст «Зроблено з турботою про зручність викладача і студента» з універсального футера.
+
+### Modified files
+- `assets/edlab-core.js` — прибрано `.footer-bottom` з `buildFooter()`
+- `assets/edlab-core.css` — видалено невикористаний стиль `.footer-bottom`
+
+## 2026-10-26 — Текст у футері (brand)
+
+### Summary
+Опис у футері: прибрано «для коледжів.»
+
+### Modified files
+- `assets/edlab-core.js`
+
+## 2026-10-26 — about.html: світла тема
+
+### Summary
+Inline-стилі `about.html` переведені на CSS-змінні `edlab-core` (`--card`, `--soft`, `--surface-line` тощо), тож світла/темна теми працюють без дубльованих правил.
+
+### Modified files
+- `about.html`
+
+## 2026-10-26 — legal.html: світла тема
+
+### Summary
+Inline-стилі `legal.html` переведені на CSS-змінні `edlab-core`; для `.note.ok` / `.note.warn` додано світлі варіанти.
+
+### Modified files
+- `legal.html`
+
+## 2026-10-26 — Badge у хедері
+
+### Summary
+`brandBadge`: «цифрові пари для коледжу» (прибрано «ОПП»).
+
+### Modified files
+- `assets/edlab-core.js`

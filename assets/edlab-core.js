@@ -18,7 +18,7 @@
   var CONFIG = {
     brandEmoji: "🎓",
     brandName: "EDLab",
-    brandBadge: "цифрові пари для ОПП коледжу",
+    brandBadge: "цифрові пари для коледжу",
     facebook: "https://www.facebook.com/sergiy.polishchuk.ua",
     infoSite: "https://www.serawww.pp.ua",
     nav: [
@@ -150,7 +150,7 @@
       '<div class="footer-inner">' +
         '<div class="col brand">' +
           '<div class="brand-line"><span class="emoji" aria-hidden="true">🌾</span><strong>' + CONFIG.brandName + "</strong></div>" +
-          "<p>Інтерактивні лабораторні роботи та цифрові освітні інструменти для коледжів.</p>" +
+          "<p>Інтерактивні лабораторні роботи та цифрові освітні інструменти.</p>" +
         "</div>" +
         '<div class="col legal">' +
           '<p class="footer-heading">Правова інформація</p>' +
@@ -165,8 +165,7 @@
             '<li><a href="' + CONFIG.facebook + '" target="_blank" rel="noopener noreferrer">Facebook<span class="sr-only"> (відкривається у новій вкладці)</span></a></li>' +
           "</ul>" +
         "</div>" +
-      "</div>" +
-      '<div class="footer-bottom"><span>Зроблено з турботою про зручність викладача і студента</span></div>';
+      "</div>";
     return el;
   }
 
