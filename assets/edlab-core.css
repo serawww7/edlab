@@ -246,6 +246,30 @@ img,video{max-width:100%; height:auto}
   .site-header__nav a{padding:6px 10px}
 }
 
+/* Компактний хедер занять: розділ + швидкий вибір пари */
+.site-header--lesson .site-header__inner{flex-wrap:nowrap; gap:10px}
+.site-header__nav--lesson{
+  flex:1 1 auto; justify-content:flex-end; min-width:0; gap:8px;
+}
+.site-header__nav--lesson .lesson-spec{
+  white-space:nowrap; flex:0 0 auto;
+}
+.lesson-jump{display:flex; min-width:0; flex:1 1 180px; max-width:420px}
+.lesson-jump__select{
+  width:100%; min-width:0; max-width:100%;
+  padding:8px 10px; border-radius:var(--r-sm);
+  border:1px solid var(--surface-line); background:var(--surface); color:var(--text);
+  font:inherit; font-size:14px; line-height:1.2; cursor:pointer;
+}
+.lesson-jump__select:hover{background:var(--surface-hover)}
+.lesson-jump__select:focus-visible{outline:2px solid var(--accent2); outline-offset:2px}
+@media (max-width:640px){
+  .site-header--lesson .site-header__inner{flex-wrap:wrap}
+  .site-header__nav--lesson{width:100%; justify-content:stretch}
+  .site-header__nav--lesson .lesson-spec{padding:6px 10px; font-size:13px}
+  .lesson-jump{flex:1 1 auto; max-width:none}
+}
+
 /* ==========================================================================
    Site Footer (рендериться edlab-core.js)
    ========================================================================== */

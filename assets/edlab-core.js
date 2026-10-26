@@ -5,7 +5,7 @@
      <script src="/assets/edlab-core.js" data-chrome="full|minimal|none" defer></script>
    data-chrome:
      full    — повний site Header + Footer (оболонкові сторінки).
-     minimal — атрибуція + prev/next (сторінки-заняття). За замовч.
+     minimal — lesson Header (меню пар) + Footer + prev/next. За замовч.
      none    — нічого не рендерити (лише утиліти/embedded).
    ========================================================================== */
 (function () {
@@ -13,6 +13,7 @@
 
   var YEAR = new Date().getFullYear();
   var THEME_KEY = "edlab-theme";
+  var MANIFEST_MEMO = Object.create(null);
 
   var CONFIG = {
     brandEmoji: "🎓",
@@ -25,6 +26,16 @@
       { href: "/about.html", label: "Про EDLab" },
       { href: "/legal.html", label: "Правова інформація" }
     ]
+  };
+
+  /* Каталог розділів: dir → spec.html?spec=… */
+  var SECTIONS = {
+    coach:         { key: "coach",    label: "Коучинг",            emoji: "🧠" },
+    agro_II_kyrs:  { key: "agro",     label: "Агрономія",          emoji: "🌾" },
+    elect_II_kyrs: { key: "electric", label: "Електроенергетика",  emoji: "⚡" },
+    mech_II_kyrs:  { key: "mech",     label: "Агроінженерія",      emoji: "🚜" },
+    gas_II_kyrs:   { key: "gas",      label: "Газовики",           emoji: "🔥" },
+    tech_II_kyrs:  { key: "tech",     label: "Технологи",          emoji: "🐄" }
   };
 
   // --- embedded (iframe) -------------------------------------------------
@@ -168,16 +179,12 @@
     return el;
   }
 
-  // --- Prev / Next lesson ------------------------------------------------
+  // --- Prev / Next lesson + lesson menu ---------------------------------
   function sectionDirFromPath() {
     var parts = (location.pathname || "").split("/").filter(Boolean);
     if (parts.length < 2) return null;
     var dir = parts[parts.length - 2];
-    var known = {
-      coach: 1, agro_II_kyrs: 1, elect_II_kyrs: 1,
-      mech_II_kyrs: 1, gas_II_kyrs: 1, tech_II_kyrs: 1
-    };
-    return known[dir] ? dir : null;
+    return SECTIONS[dir] ? dir : null;
   }
   function shortTitle(item) {
     var t = (item && (item.title || item.url)) || "";
@@ -185,14 +192,57 @@
     if (t.length > 48) t = t.slice(0, 46) + "…";
     return t || "Пара";
   }
-  function mountLessonNav(items) {
-    if (!items || !items.length || document.querySelector(".edlab-lesson-nav")) return;
+  function findLessonIndex(items) {
     var here = location.pathname.replace(/\/+$/, "");
-    var idx = -1;
     for (var i = 0; i < items.length; i++) {
       var u = (items[i].url || "").replace(/\/+$/, "");
-      if (u === here || here.endsWith(u) || u.endsWith(here)) { idx = i; break; }
+      if (u === here || here.endsWith(u) || u.endsWith(here)) return i;
     }
+    return -1;
+  }
+  function buildLessonHeader(dir, items) {
+    var meta = SECTIONS[dir];
+    var idx = findLessonIndex(items);
+    var options = items.map(function (item, i) {
+      var sel = i === idx ? " selected" : "";
+      return '<option value="' + escapeHtml(item.url) + '"' + sel + ">" +
+        escapeHtml(item.title || item.url) + "</option>";
+    }).join("");
+
+    var el = document.createElement("header");
+    el.className = "site-header site-header--lesson";
+    el.setAttribute("role", "banner");
+    el.innerHTML =
+      '<div class="site-header__inner">' +
+        '<a class="site-header__brand" href="/index.html">' +
+          '<span class="emoji" aria-hidden="true">' + CONFIG.brandEmoji + "</span>" +
+          "<b>" + CONFIG.brandName + "</b>" +
+        "</a>" +
+        '<nav class="site-header__nav site-header__nav--lesson" aria-label="Навігація заняття">' +
+          '<a class="lesson-spec" href="/spec.html?spec=' + meta.key + '">' +
+            '<span aria-hidden="true">' + meta.emoji + "</span> " + escapeHtml(meta.label) +
+          "</a>" +
+          '<label class="lesson-jump">' +
+            '<span class="sr-only">Перейти до пари</span>' +
+            '<select class="lesson-jump__select" aria-label="Список пар розділу">' +
+              options +
+            "</select>" +
+          "</label>" +
+          themeButton() +
+        "</nav>" +
+      "</div>";
+
+    var sel = el.querySelector(".lesson-jump__select");
+    if (sel) {
+      sel.addEventListener("change", function () {
+        if (sel.value) location.href = sel.value;
+      });
+    }
+    return el;
+  }
+  function mountLessonNav(items) {
+    if (!items || !items.length || document.querySelector(".edlab-lesson-nav")) return;
+    var idx = findLessonIndex(items);
     if (idx < 0) return;
 
     var prev = idx > 0 ? items[idx - 1] : null;
@@ -215,19 +265,49 @@
 
     nav.innerHTML = prevHtml + nextHtml;
 
-    var attr = document.querySelector(".edlab-attribution");
-    if (attr) document.body.insertBefore(nav, attr);
-    else document.body.appendChild(nav);
+    var foot = document.querySelector(".site-footer");
+    if (foot) document.body.insertBefore(nav, foot);
+    else {
+      var attr = document.querySelector(".edlab-attribution");
+      if (attr) document.body.insertBefore(nav, attr);
+      else document.body.appendChild(nav);
+    }
   }
-  function loadLessonNav() {
-    var dir = sectionDirFromPath();
-    if (!dir) return;
-    fetch("/" + dir + "/manifest.json", { cache: "no-store" })
+  function loadManifest(dir) {
+    if (MANIFEST_MEMO[dir]) return MANIFEST_MEMO[dir];
+    var key = "edlab-m:" + dir;
+    try {
+      var cached = sessionStorage.getItem(key);
+      if (cached) {
+        var parsed = JSON.parse(cached);
+        if (Array.isArray(parsed)) {
+          MANIFEST_MEMO[dir] = Promise.resolve(parsed);
+          return MANIFEST_MEMO[dir];
+        }
+      }
+    } catch (e) {}
+
+    MANIFEST_MEMO[dir] = fetch("/" + dir + "/manifest.json", { cache: "force-cache" })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) {
-        if (Array.isArray(data)) mountLessonNav(data);
+        if (!Array.isArray(data)) return null;
+        try { sessionStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
+        return data;
       })
-      .catch(function () {});
+      .catch(function () { return null; });
+    return MANIFEST_MEMO[dir];
+  }
+  function loadLessonChrome() {
+    var dir = sectionDirFromPath();
+    if (!dir) return;
+    loadManifest(dir).then(function (items) {
+      if (!items || !items.length) return;
+      if (!document.querySelector(".site-header")) {
+        document.body.insertBefore(buildLessonHeader(dir, items), document.body.firstChild);
+        applyTheme(getTheme());
+      }
+      mountLessonNav(items);
+    });
   }
 
   // --- Chrome mount ------------------------------------------------------
@@ -251,10 +331,9 @@
       if (!hasHeader) document.body.insertBefore(buildHeader(), document.body.firstChild);
       if (!hasFooter) document.body.appendChild(buildFooter());
     } else {
-      if (!document.querySelector(".edlab-attribution")) {
-        document.body.appendChild(buildAttribution());
-      }
-      loadLessonNav();
+      /* Заняття: компактний хедер з меню пар + повний футер */
+      if (!hasFooter) document.body.appendChild(buildFooter());
+      loadLessonChrome();
     }
     ensureSkipLink();
     applyTheme(getTheme());
@@ -367,6 +446,7 @@
 
   window.EDLab = {
     config: CONFIG,
+    sections: SECTIONS,
     inIframe: inIframe,
     toast: toast,
     copy: copyText,
@@ -379,7 +459,8 @@
     setTheme: setTheme,
     toggleTheme: toggleTheme,
     buildHeader: buildHeader,
-    buildFooter: buildFooter
+    buildFooter: buildFooter,
+    buildLessonHeader: buildLessonHeader
   };
 
   if (document.readyState === "loading") {
