@@ -1,0 +1,15 @@
+---
+description: Після змін завжди комітити і пушити на GitHub
+alwaysApply: true
+---
+
+# Always push after changes
+
+Після завершення будь-якого завдання зі змінами в репозиторії:
+
+1. Оновити `docs/development.md` (append, не overwrite).
+2. Зробити git commit зі стислим повідомленням (чому, не лише що).
+3. Одразу зробити `git push` на GitHub (tracked remote / поточну гілку).
+
+Не чекати окремого прохання «запуш» — це стандартний фінал роботи над проєктом EDLab.
+Не пушити force і не змінювати git config.

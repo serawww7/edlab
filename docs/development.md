@@ -105,3 +105,17 @@ Inline-стилі `legal.html` переведені на CSS-змінні `edlab
 ### Notes
 - gas: відновлено `.grid{1.2fr 1fr}` у залишковому style (було дропнуто як дубль `.grid`)
 - Унікальний layout (`.receipt`, media queries) лишився в page style, але на токенах
+
+## 2026-10-29 — Мобільний хедер занять в один рядок
+
+### Summary
+На екранах ≤640px у .site-header--lesson логотип EDLab, назва спеціальності і перемикач теми тепер в одному рядку; select пар — під ними.
+
+### Modified files
+- ssets/edlab-core.css — mobile layout через display:contents + order
+- .cursor/rules/always-push.mdc — правило: після змін завжди commit + push
+- docs/development.md — цей запис
+
+### Notes
+- Desktop-розкладка без змін.
+- Select пар лишається другим рядком на мобільному, щоб не тіснити лого/спец/тему.

@@ -435,10 +435,17 @@ body > header:not(.site-header){
 .lesson-jump__select:hover{background:var(--surface-hover)}
 .lesson-jump__select:focus-visible{outline:2px solid var(--accent2); outline-offset:2px}
 @media (max-width:640px){
-  .site-header--lesson .site-header__inner{flex-wrap:wrap}
-  .site-header__nav--lesson{width:100%; justify-content:stretch}
-  .site-header__nav--lesson .lesson-spec{padding:6px 10px; font-size:13px}
-  .lesson-jump{flex:1 1 auto; max-width:none}
+  /* Один рядок: лого · спеціальність · тема; select — другим рядком */
+  .site-header--lesson .site-header__inner{flex-wrap:wrap; gap:8px}
+  .site-header__nav--lesson{display:contents}
+  .site-header--lesson .site-header__brand{order:1; flex:0 0 auto}
+  .site-header__nav--lesson .lesson-spec{
+    order:2; flex:1 1 auto; min-width:0;
+    padding:6px 8px; font-size:13px;
+    overflow:hidden; text-overflow:ellipsis;
+  }
+  .site-header--lesson .theme-toggle{order:3; flex:0 0 auto}
+  .lesson-jump{order:4; flex:1 1 100%; max-width:none}
 }
 
 /* ==========================================================================
